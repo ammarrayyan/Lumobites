@@ -105,7 +105,7 @@ export default function ResultsPage() {
         </Link>
         <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
           <img 
-            src="/logo.png" 
+            src="/Logo.png" 
             alt="Lumo Bites" 
             style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', margin: '-15px 0', transformOrigin: 'left center' }}
           />

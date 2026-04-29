@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Lumo Bites — Find the Best Food for Your Pet",
   description: "Lumo Bites helps you find the perfect pet food based on your pet's age, breed, and health needs. Free, honest, no fluff.",
   icons: {
-    icon: "/logo.png",
+    icon: "/Logo.png",
   },
 };
 

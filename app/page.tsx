@@ -15,7 +15,7 @@ export default function Home() {
       <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center" style={{ height: '72px' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
           <img
-            src="/logo.png"
+            src="/Logo.png"
             alt="Lumo Bites"
             style={{ 
               height: '70px', 
@@ -175,7 +175,7 @@ export default function Home() {
           <div style={{ flex: '2 1 300px' }}>
             <Link href="/" className="mb-4 inline-block">
               <img
-                src="/logo.png"
+                src="/Logo.png"
                 alt="Lumo Bites"
                 style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }}
               />

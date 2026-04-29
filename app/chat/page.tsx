@@ -279,7 +279,7 @@ export default function ChatPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Link href="/">
               <img 
-                src="/logo.png" 
+                src="/Logo.png" 
                 alt="Lumo Bites" 
                 style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', margin: '-15px 0', transform: 'scale(1.4)', transformOrigin: 'left center' }}
               />
