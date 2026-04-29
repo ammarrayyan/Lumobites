@@ -148,8 +148,10 @@ export function parsePetInfo(text: string): ParsedPetInfo {
   else if (CAT_KEYWORDS.some(k => lower.includes(k))) result.pet_type = 'cat';
 
   // Age
-  const age = extractAge(text);
-  if (age !== undefined) result.age_years = age;
+  const ageRes = extractAge(text);
+  if (ageRes !== undefined) {
+    result.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
+  }
 
   // Weight
   const weight = extractWeight(text);
