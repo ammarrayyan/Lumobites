@@ -1,15 +1,31 @@
+'use client';
+
 import Link from 'next/link';
+import { useState } from 'react';
 import { ScoredProduct } from '@/lib/types';
 
 export default function ProductCard({ product, profile }: { product: ScoredProduct, profile?: any }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   let whyText = product.why_recommended;
   if (profile) {
-    const agePrefix = profile.age_years >= 7 ? 'senior ' : (profile.age_years < 1 ? (profile.pet_type === 'cat' ? 'kittens ' : 'puppies ') : '');
-    const healthStr = profile.health_issues?.length ? ` with ${profile.health_issues.join(' and ').replace(/_/g, ' ')}` : '';
-    const budgetStr = profile.budget_monthly_max ? ` under $${profile.budget_monthly_max}/mo` : '';
-    const petNoun = agePrefix.includes('kittens') || agePrefix.includes('puppies') ? '' : `${profile.pet_type}s`;
-    whyText = `Perfect for ${agePrefix}${petNoun}${healthStr}${budgetStr}`;
+    const age = profile.age_years >= 7 ? 'senior' : (profile.age_years < 1 ? (profile.pet_type === 'cat' ? 'kitten' : 'puppy') : 'adult');
+    const petNoun = profile.pet_type === 'cat' ? 'cats' : 'dogs';
+    const health = profile.health_issues?.length ? profile.health_issues[0].replace(/_/g, ' ') : '';
+    const budget = profile.budget_monthly_max ? ` under $${profile.budget_monthly_max}/mo` : '';
+    const foodType = profile.food_type === 'wet' ? ' wet food' : (profile.food_type === 'dry' ? ' dry food' : ' food');
+    
+    if (health) {
+        whyText = `Great${foodType} for ${age} ${petNoun} with ${health}${budget}`;
+    } else {
+        whyText = `Ideal${foodType} for ${age} ${petNoun}${budget}`;
+    }
   }
+
+  // Determine badge color
+  let badgeColor = '#9CA3AF'; // gray
+  if (product.match_pct >= 90) badgeColor = '#10B981'; // green
+  else if (product.match_pct >= 70) badgeColor = '#F59E0B'; // yellow
   return (
     <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #E8DDD4' }}>
       {product.match_pct >= 90 && (
@@ -20,20 +36,22 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
       
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
         <div style={{ width: '80px', height: '80px', backgroundColor: '#F5ECD7', borderRadius: '12px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', position: 'relative', overflow: 'hidden' }}>
-           <span style={{ position: 'absolute', fontSize: '36px', opacity: 1 }}>{product.pet_type === 'cat' ? '🐱' : '🐶'}</span>
-           <img 
-             src={product.image_url} 
-             alt={product.product_name} 
-             style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply', opacity: 0.8, position: 'relative', zIndex: 2 }} 
-             onError={(e) => e.currentTarget.style.display = 'none'}
-           />
+           {imgFailed && <span style={{ position: 'absolute', fontSize: '36px', opacity: 1 }}>{product.pet_type === 'cat' ? '🐱' : '🐶'}</span>}
+           {!imgFailed && (
+             <img 
+               src={product.image_url} 
+               alt={product.product_name} 
+               style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply', opacity: 0.8, position: 'relative', zIndex: 2 }} 
+               onError={() => setImgFailed(true)}
+             />
+           )}
         </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: '12px', fontWeight: 600, color: '#8B5E3C', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '4px', margin: 0 }}>{product.brand}</p>
           <h3 style={{ fontWeight: 800, letterSpacing: '-0.02em', fontSize: '18px', color: '#191919', lineHeight: 1.2, marginBottom: '8px', marginTop: '4px' }}>{product.product_name}</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5EDE4', color: '#8B5E3C', fontSize: '12px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '100px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: badgeColor, color: '#FFFFFF', fontSize: '12px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '100px' }}>
               {product.match_pct}% Match
             </span>
           </div>
