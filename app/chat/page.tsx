@@ -71,7 +71,11 @@ export default function ChatPage() {
       }
       setSelectedChips(newSelected);
     } else if (step === 4) {
-      setSelectedFoodType(id);
+      if (selectedFoodType === id) {
+        setSelectedFoodType('');
+      } else {
+        setSelectedFoodType(id);
+      }
     }
   };
 
@@ -377,7 +381,7 @@ export default function ChatPage() {
           {/* Interactive Health Chips UI */}
           {step === 3 && !isTyping && (
              <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                    {healthOptions.map(opt => {
                      const isSelected = selectedChips.includes(opt.id);
                      return (
@@ -385,9 +389,10 @@ export default function ChatPage() {
                          key={opt.id}
                          onClick={() => toggleChip(opt.id)}
                          style={{
-                           flexShrink: 0,
-                           padding: '8px 16px',
-                           borderRadius: '50px',
+                           width: '100%',
+                           textAlign: 'left',
+                           padding: '12px 16px',
+                           borderRadius: '12px',
                            fontSize: '14px',
                            fontWeight: 600,
                            cursor: 'pointer',
@@ -405,7 +410,7 @@ export default function ChatPage() {
                 {selectedChips.length > 0 && (
                   <button 
                     onClick={() => submitInput('', true)}
-                    style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '12px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', alignSelf: 'flex-end', paddingLeft: '24px', paddingRight: '24px', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)' }}
+                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)' }}
                   >
                     Continue →
                   </button>
@@ -416,16 +421,18 @@ export default function ChatPage() {
           {/* Interactive Food Type Chips UI */}
           {step === 4 && !isTyping && (
              <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                    {foodOptions.map(opt => {
                      const isSelected = selectedFoodType === opt.id;
                      return (
                        <button
                          key={opt.id}
-                         onClick={() => { toggleChip(opt.id); setTimeout(() => submitInput('', true), 300); }}
+                         onClick={() => toggleChip(opt.id)}
                          style={{
-                           padding: '8px 16px',
-                           borderRadius: '50px',
+                           width: '100%',
+                           textAlign: 'left',
+                           padding: '12px 16px',
+                           borderRadius: '12px',
                            fontSize: '14px',
                            fontWeight: 600,
                            cursor: 'pointer',
@@ -440,6 +447,14 @@ export default function ChatPage() {
                      );
                    })}
                 </div>
+                {selectedFoodType !== '' && (
+                  <button 
+                    onClick={() => submitInput('', true)}
+                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)' }}
+                  >
+                    Continue →
+                  </button>
+                )}
              </div>
           )}
           
