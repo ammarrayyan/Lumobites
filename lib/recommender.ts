@@ -1,8 +1,9 @@
 import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
 
-function getProductFoodType(product: Product): 'dry' | 'wet' | 'both' {
+function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   const text = (product.product_name + ' ' + product.pros + ' ' + product.cons).toLowerCase();
+  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone')) return 'treats';
   if (text.includes('canned') || text.includes('wet')) return 'wet';
   if (text.includes('kibble') || text.includes('dry')) return 'dry';
   return 'dry'; // default

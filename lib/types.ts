@@ -1,7 +1,7 @@
 export type PetType = 'cat' | 'dog';
 export type LifeStage = 'kitten' | 'puppy' | 'adult' | 'senior';
 export type ActivityLevel = 'low' | 'medium' | 'high';
-export type FoodType = 'dry' | 'wet' | 'both';
+export type FoodType = 'dry' | 'wet' | 'treats' | 'both';
 export type HealthTag =
   | 'anxiety'
   | 'sensitive_stomach'

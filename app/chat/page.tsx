@@ -38,7 +38,8 @@ export default function ChatPage() {
   const foodOptions = [
     { id: 'dry', label: '🥩 Dry food (kibble)' },
     { id: 'wet', label: '🍖 Wet food (canned)' },
-    { id: 'both', label: '🔀 Both / No preference' }
+    { id: 'treats', label: '🦴 Treats & snacks' },
+    { id: 'both', label: '🔀 All / No preference' }
   ];
 
   const scrollToBottom = () => {
@@ -232,12 +233,12 @@ export default function ChatPage() {
         if (isValid) {
           nextStep = 4;
           setRetries(0);
-          botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🔀 Both / No preference";
+          botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference";
         } else {
           handleRetry("I didn't recognize those health issues. Could you pick from the list or say 'none'?");
           if (skipToNext) {
             nextStep = 4;
-            botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🔀 Both / No preference";
+            botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference";
           }
         }
       } else if (step === 4) {
@@ -251,7 +252,10 @@ export default function ChatPage() {
           } else if (lowerInput.includes('wet') || lowerInput.includes('canned')) {
             currentInfo.food_type = 'wet';
             isValid = true;
-          } else if (lowerInput.includes('both') || lowerInput.includes('no pref')) {
+          } else if (lowerInput.includes('treats') || lowerInput.includes('snacks') || lowerInput.includes('chews') || lowerInput.includes('bones')) {
+            currentInfo.food_type = 'treats';
+            isValid = true;
+          } else if (lowerInput.includes('both') || lowerInput.includes('no pref') || lowerInput.includes('all')) {
             currentInfo.food_type = 'both';
             isValid = true;
           }
@@ -262,7 +266,7 @@ export default function ChatPage() {
           setRetries(0);
           botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
         } else {
-          handleRetry("I didn't quite catch that. Do they prefer dry food, wet food, or both?");
+          handleRetry("I didn't quite catch that. Do they prefer dry food, wet food, treats, or all of them?");
           if (skipToNext) {
             currentInfo.food_type = 'both';
             nextStep = 5;
