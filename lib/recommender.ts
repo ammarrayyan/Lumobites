@@ -1,6 +1,13 @@
 import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
 
+function getProductFoodType(product: Product): 'dry' | 'wet' | 'both' {
+  const text = (product.product_name + ' ' + product.pros + ' ' + product.cons).toLowerCase();
+  if (text.includes('canned') || text.includes('wet')) return 'wet';
+  if (text.includes('kibble') || text.includes('dry')) return 'dry';
+  return 'dry'; // default
+}
+
 // ─── Score a single product against a pet profile ─────────────────────────────
 function scoreProduct(product: Product, profile: PetProfile): number {
   let score = 0;
@@ -8,6 +15,14 @@ function scoreProduct(product: Product, profile: PetProfile): number {
   // +20 per matching health tag
   for (const tag of profile.health_issues) {
     if (product.health_tags.includes(tag as HealthTag)) score += 20;
+  }
+
+  // +30 if food type matches (or if user selected both)
+  if (profile.food_type && profile.food_type !== 'both') {
+    const productFoodType = getProductFoodType(product);
+    if (productFoodType === profile.food_type) {
+      score += 30;
+    }
   }
 
   // +10 if protein > 28%
@@ -73,7 +88,8 @@ export function recommendProducts(
   // Step 5: Score remaining
   const scored: ScoredProduct[] = budgetFiltered.map(p => {
     const score = scoreProduct(p, profile);
-    const maxScore = profile.health_issues.length * 20 + 20; // max possible
+    let maxScore = profile.health_issues.length * 20 + 20; // max possible
+    if (profile.food_type && profile.food_type !== 'both') maxScore += 30;
     const normalizedMax = Math.max(maxScore, 30);
     const match_pct = Math.min(99, Math.round(50 + (score / normalizedMax) * 49));
     return {
@@ -103,7 +119,9 @@ export function recommendProducts(
     .filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients))
     .map(p => {
       const score = scoreProduct(p, profile);
-      const maxScore = Math.max(profile.health_issues.length * 20 + 20, 30);
+      let maxScoreCalc = profile.health_issues.length * 20 + 20;
+      if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
+      const maxScore = Math.max(maxScoreCalc, 30);
       const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
       return {
         ...p,

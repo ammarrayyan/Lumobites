@@ -1,6 +1,7 @@
 export type PetType = 'cat' | 'dog';
 export type LifeStage = 'kitten' | 'puppy' | 'adult' | 'senior';
 export type ActivityLevel = 'low' | 'medium' | 'high';
+export type FoodType = 'dry' | 'wet' | 'both';
 export type HealthTag =
   | 'anxiety'
   | 'sensitive_stomach'
@@ -22,6 +23,7 @@ export interface PetProfile {
   activity_level: ActivityLevel;
   budget_monthly_max: number;
   avoid_ingredients?: string;
+  food_type?: FoodType;
   created_at?: string;
 }
 
@@ -71,6 +73,7 @@ export interface ParsedPetInfo {
   activity_level?: ActivityLevel;
   budget_monthly_max?: number;
   avoid_ingredients?: string;
+  food_type?: FoodType;
 }
 
 export interface ChatMessage {

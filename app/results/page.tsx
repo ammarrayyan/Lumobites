@@ -34,7 +34,8 @@ export default function ResultsPage() {
           health_issues: params.get('issues') ? params.get('issues')?.split(',') as any : [],
           breed: undefined,
           activity_level: 'medium',
-          avoid_ingredients: undefined
+          avoid_ingredients: undefined,
+          food_type: params.get('food_type') as any
         };
         
         setProfile(parsedProfile);

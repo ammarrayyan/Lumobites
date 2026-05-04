@@ -33,6 +33,14 @@ export default function ChatPage() {
     { id: 'none', label: '✅ None of the above' }
   ];
 
+  // Food Type Chips State
+  const [selectedFoodType, setSelectedFoodType] = useState<string>('');
+  const foodOptions = [
+    { id: 'dry', label: '🥩 Dry food (kibble)' },
+    { id: 'wet', label: '🍖 Wet food (canned)' },
+    { id: 'both', label: '🔀 Both / No preference' }
+  ];
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -49,27 +57,34 @@ export default function ChatPage() {
   }, [messages, isTyping, step]);
 
   const toggleChip = (id: string) => {
-    if (id === 'none') {
-      setSelectedChips(['none']);
-      return;
+    if (step === 3) {
+      if (id === 'none') {
+        setSelectedChips(['none']);
+        return;
+      }
+      let newSelected = selectedChips.filter(c => c !== 'none');
+      if (newSelected.includes(id)) {
+        newSelected = newSelected.filter(c => c !== id);
+      } else {
+        newSelected.push(id);
+      }
+      setSelectedChips(newSelected);
+    } else if (step === 4) {
+      setSelectedFoodType(id);
     }
-    let newSelected = selectedChips.filter(c => c !== 'none');
-    if (newSelected.includes(id)) {
-      newSelected = newSelected.filter(c => c !== id);
-    } else {
-      newSelected.push(id);
-    }
-    setSelectedChips(newSelected);
   };
 
   const submitInput = async (userMessage: string, forceChipsSubmit: boolean = false) => {
     if (!userMessage.trim() && !forceChipsSubmit) return;
-    if (step === 5) return;
+    if (step === 6) return;
 
     if (!forceChipsSubmit) setInput('');
     
     // Display user message if they typed one, or if they clicked continue on chips
-    const displayMsg = forceChipsSubmit && !userMessage ? 'Selected health issues' : userMessage;
+    let displayMsg = forceChipsSubmit && !userMessage ? 'Selected options' : userMessage;
+    if (forceChipsSubmit && step === 4 && selectedFoodType) {
+      displayMsg = foodOptions.find(o => o.id === selectedFoodType)?.label || displayMsg;
+    }
     setMessages(prev => [...prev, { role: 'user', content: displayMsg }]);
     setIsTyping(true);
 
@@ -94,18 +109,27 @@ export default function ChatPage() {
       };
 
       if (step === 0) {
-        if (lowerInput.includes('cat') || lowerInput.includes('kitten')) {
+        const greetings = ['hi', 'hey', 'hello', 'sup', 'good morning', 'greetings'];
+        const isGreeting = greetings.some(g => lowerInput === g || lowerInput.startsWith(g + ' '));
+        
+        if (isGreeting) {
+          isValid = true;
+          nextStep = 0; // Stay on step 0
+          setRetries(0);
+          botResponse = "Hey there! 😊 So let's find the perfect food for your pet — is your pet a 🐱 cat or 🐶 dog?";
+        } else if (lowerInput.includes('cat') || lowerInput.includes('kitten')) {
           currentInfo.pet_type = 'cat';
           isValid = true;
         } else if (lowerInput.includes('dog') || lowerInput.includes('pup')) {
           currentInfo.pet_type = 'dog';
           isValid = true;
         }
-        if (isValid) {
+        
+        if (isValid && !isGreeting) {
           nextStep = 1;
           setRetries(0);
           botResponse = "Cute! How old are they?\n(e.g. '2 years', '6 months', '8 years')";
-        } else {
+        } else if (!isValid) {
           handleRetry("I didn't quite catch that. Is your pet a cat or a dog?");
           if (skipToNext) {
             currentInfo.pet_type = 'dog'; // default fallback
@@ -208,27 +232,56 @@ export default function ChatPage() {
         if (isValid) {
           nextStep = 4;
           setRetries(0);
-          botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+          botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🔀 Both / No preference";
         } else {
           handleRetry("I didn't recognize those health issues. Could you pick from the list or say 'none'?");
           if (skipToNext) {
             nextStep = 4;
-            botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+            botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🔀 Both / No preference";
           }
         }
       } else if (step === 4) {
+        if (forceChipsSubmit && selectedFoodType) {
+          currentInfo.food_type = selectedFoodType as any;
+          isValid = true;
+        } else {
+          if (lowerInput.includes('dry') || lowerInput.includes('kibble')) {
+            currentInfo.food_type = 'dry';
+            isValid = true;
+          } else if (lowerInput.includes('wet') || lowerInput.includes('canned')) {
+            currentInfo.food_type = 'wet';
+            isValid = true;
+          } else if (lowerInput.includes('both') || lowerInput.includes('no pref')) {
+            currentInfo.food_type = 'both';
+            isValid = true;
+          }
+        }
+
+        if (isValid) {
+          nextStep = 5;
+          setRetries(0);
+          botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+        } else {
+          handleRetry("I didn't quite catch that. Do they prefer dry food, wet food, or both?");
+          if (skipToNext) {
+            currentInfo.food_type = 'both';
+            nextStep = 5;
+            botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+          }
+        }
+      } else if (step === 5) {
         const budget = extractBudget(userMessage);
         if (budget !== undefined) {
           currentInfo.budget_monthly_max = budget;
           isValid = true;
-          nextStep = 5;
+          nextStep = 6;
           setRetries(0);
           botResponse = "Perfect! 🐾 Finding the best matches for your pet...";
         } else {
           handleRetry("I didn't quite catch the budget. Could you give a dollar amount like '$50'?");
           if (skipToNext) {
              currentInfo.budget_monthly_max = 60; // Default fallback as requested
-             nextStep = 5;
+             nextStep = 6;
              botResponse = "Perfect! 🐾 Finding the best matches for your pet...";
           }
         }
@@ -238,16 +291,19 @@ export default function ChatPage() {
 
       setTimeout(() => {
         setIsTyping(false);
+        // Don't append bot response if we stayed on step 0 due to greeting and botResponse is the same as the first msg
+        // Wait, botResponse is different for greetings so it's fine to append.
         setMessages(prev => [...prev, { role: 'assistant', content: botResponse }]);
         setStep(nextStep);
 
-        if (nextStep === 5) {
+        if (nextStep === 6) {
           setTimeout(() => {
              const params = new URLSearchParams();
              if (currentInfo.pet_type) params.append('pet_type', currentInfo.pet_type);
              if (currentInfo.age_years !== undefined) params.append('age_years', currentInfo.age_years.toString());
              if (currentInfo.weight_lbs !== undefined) params.append('weight_lbs', currentInfo.weight_lbs.toString());
              if (currentInfo.budget_monthly_max !== undefined) params.append('budget', currentInfo.budget_monthly_max.toString());
+             if (currentInfo.food_type !== undefined) params.append('food_type', currentInfo.food_type);
              if (currentInfo.health_issues && currentInfo.health_issues.length > 0) {
                params.append('issues', currentInfo.health_issues.join(','));
              }
@@ -267,7 +323,7 @@ export default function ChatPage() {
     submitInput(input);
   };
 
-  const totalFields = 5;
+  const totalFields = 6;
   const progress = Math.round((Math.floor(step) / totalFields) * 100);
 
   return (
@@ -342,6 +398,36 @@ export default function ChatPage() {
                 )}
              </div>
           )}
+
+          {/* Interactive Food Type Chips UI */}
+          {step === 4 && !isTyping && (
+             <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                   {foodOptions.map(opt => {
+                     const isSelected = selectedFoodType === opt.id;
+                     return (
+                       <button
+                         key={opt.id}
+                         onClick={() => { toggleChip(opt.id); setTimeout(() => submitInput('', true), 300); }}
+                         style={{
+                           padding: '8px 16px',
+                           borderRadius: '50px',
+                           fontSize: '14px',
+                           fontWeight: 600,
+                           cursor: 'pointer',
+                           transition: 'all 0.2s ease',
+                           border: `1px solid #8B5E3C`,
+                           backgroundColor: isSelected ? '#8B5E3C' : '#FFFFFF',
+                           color: isSelected ? '#FFFFFF' : '#8B5E3C',
+                         }}
+                       >
+                         {opt.label}
+                       </button>
+                     );
+                   })}
+                </div>
+             </div>
+          )}
           
           <div ref={messagesEndRef} />
         </div>
@@ -356,11 +442,11 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type here..."
               style={{ flex: 1, backgroundColor: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '50px', padding: '14px 20px', fontSize: '15px', color: '#191919', outline: 'none' }}
-              disabled={step === 5 || isTyping}
+              disabled={step === 6 || isTyping}
             />
             <button
               type="submit"
-              disabled={!input.trim() || step === 5 || isTyping}
+              disabled={!input.trim() || step === 6 || isTyping}
               style={{ width: '48px', height: '48px', backgroundColor: input.trim() ? '#8B5E3C' : '#D4C1B1', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', cursor: input.trim() ? 'pointer' : 'not-allowed', transition: 'background-color 0.2s', flexShrink: 0 }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', transform: 'translateX(2px)' }}>
