@@ -83,6 +83,16 @@ export default function ChatPage() {
     
     // Display user message if they typed one, or if they clicked continue on chips
     let displayMsg = forceChipsSubmit && !userMessage ? 'Selected options' : userMessage;
+    if (forceChipsSubmit && step === 3 && selectedChips.length > 0) {
+      if (selectedChips.includes('none')) {
+        displayMsg = "No health issues";
+      } else {
+        displayMsg = healthOptions
+          .filter(o => selectedChips.includes(o.id))
+          .map(o => o.label.replace(/^[^\sA-Za-z]+/, '').trim())
+          .join(', ');
+      }
+    }
     if (forceChipsSubmit && step === 4 && selectedFoodType) {
       displayMsg = foodOptions.find(o => o.id === selectedFoodType)?.label || displayMsg;
     }
