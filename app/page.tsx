@@ -83,7 +83,7 @@ export default function Home() {
             </span>
             <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
             <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in 60 seconds
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
             </span>
           </div>
         </div>
