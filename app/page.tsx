@@ -41,22 +41,22 @@ export default function Home() {
           <div className="relative w-full max-w-[900px] mx-auto flex flex-col items-center">
             
             {/* Left Floating Cat */}
-            <div className="hidden md:flex absolute left-[-60px] top-[20px] bg-white w-20 h-20 rounded-full shadow-lg items-center justify-center text-4xl" style={{ animation: 'float 5s ease-in-out infinite' }}>
+            <div className="absolute left-[5%] md:left-[-60px] top-[10px] md:top-[20px] bg-white w-12 h-12 md:w-20 md:h-20 rounded-full shadow-lg flex items-center justify-center text-2xl md:text-4xl" style={{ animation: 'float 5s ease-in-out infinite' }}>
               🐱
             </div>
             
             {/* Right Floating Dog */}
-            <div className="hidden md:flex absolute right-[-40px] top-[0px] bg-[#F5EDE4] w-24 h-24 rounded-full shadow-lg items-center justify-center text-5xl border-4 border-white" style={{ animation: 'float-reverse 6s ease-in-out infinite' }}>
+            <div className="absolute right-[5%] md:right-[-40px] top-[-10px] md:top-[0px] bg-[#F5EDE4] w-16 h-16 md:w-24 md:h-24 rounded-full shadow-lg flex items-center justify-center text-3xl md:text-5xl border-2 md:border-4 border-white" style={{ animation: 'float-reverse 6s ease-in-out infinite' }}>
               🐶
             </div>
             
             {/* Bottom Right Floating Bone */}
-            <div className="hidden md:flex absolute right-[20px] bottom-[-20px] bg-white w-14 h-14 rounded-full shadow-md items-center justify-center text-2xl" style={{ animation: 'float 4.5s ease-in-out infinite 1s' }}>
+            <div className="absolute right-[15%] md:right-[20px] bottom-[-10px] md:bottom-[-20px] bg-white w-10 h-10 md:w-14 md:h-14 rounded-full shadow-md flex items-center justify-center text-xl md:text-2xl" style={{ animation: 'float 4.5s ease-in-out infinite 1s' }}>
               🦴
             </div>
             
             {/* Bottom Left Floating Fish */}
-            <div className="hidden md:flex absolute left-[0px] bottom-[10px] bg-[#FEF3C7] w-16 h-16 rounded-full shadow-md items-center justify-center text-3xl" style={{ animation: 'float-reverse 5.5s ease-in-out infinite 0.5s' }}>
+            <div className="absolute left-[15%] md:left-[0px] bottom-[0px] md:bottom-[10px] bg-[#FEF3C7] w-12 h-12 md:w-16 md:h-16 rounded-full shadow-md flex items-center justify-center text-xl md:text-3xl" style={{ animation: 'float-reverse 5.5s ease-in-out infinite 0.5s' }}>
               🐟
             </div>
 
