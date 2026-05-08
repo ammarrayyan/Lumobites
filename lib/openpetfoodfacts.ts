@@ -101,11 +101,24 @@ function buildProsCons(raw: any): { pros: string; cons: string } {
 function transformProduct(raw: any, petType: PetType, index: number): Product | null {
   const name = raw.product_name_en || raw.product_name || '';
   const brand = (raw.brands || '').split(',')[0].trim();
-  const ingredients = raw.ingredients_text_en || raw.ingredients_text || '';
+
+  // Try every possible ingredient field — some products only have regional language versions
+  const ingredients: string =
+    raw.ingredients_text_en ||
+    raw.ingredients_text_with_allergens_en ||
+    raw.ingredients_text ||
+    raw.ingredients_text_with_allergens ||
+    // Try language-specific fallbacks from the ingredients object
+    (raw.ingredients_text_fr && raw.ingredients_text_fr.length > 0
+      ? `(Translated from French) ${raw.ingredients_text_fr}`
+      : '') ||
+    '';
 
   // Filter out poor quality entries
   if (!name || name.length < 3) return null;
   if (!brand || brand.length < 2) return null;
+  // Skip products with zero ingredients — they'd show 'Ingredients not listed'
+  if (!ingredients || ingredients.trim().length < 5) return null;
 
   const nutriments = raw.nutriments || {};
   const proteinPct = Math.round((parseFloat(nutriments['proteins_100g'] || nutriments['proteins'] || '0') || 0) * 10) / 10;
@@ -132,7 +145,7 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
     brand: brand.length > 40 ? brand.slice(0, 40) : brand,
     pet_type: petType,
     life_stage: lifeStage,
-    ingredients: ingredients.slice(0, 300) || 'Ingredients not listed.',
+    ingredients: ingredients.slice(0, 300),
     protein_pct: proteinPct,
     fat_pct: fatPct,
     fiber_pct: fiberPct,
@@ -152,7 +165,7 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
 
 // ─── Fetch from multiple search terms for better coverage ─────────────────────
 async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
-  const fields = 'id,code,product_name,product_name_en,brands,ingredients_text,ingredients_text_en,nutriments,image_front_url,image_url,selected_images';
+  const fields = 'id,code,product_name,product_name_en,brands,ingredients_text,ingredients_text_en,ingredients_text_with_allergens,ingredients_text_with_allergens_en,ingredients_text_fr,nutriments,image_front_url,image_url,selected_images';
   const url = `${BASE_URL}?search_terms=${encodeURIComponent(searchTerm)}&search_simple=1&action=process&json=1&page_size=${pageSize}&fields=${fields}`;
 
   const res = await fetch(url, {
