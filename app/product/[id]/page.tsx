@@ -90,7 +90,10 @@ export default function ProductDetailPage() {
   }
 
   const displayName = product.product_name || product.name;
-  const amazonLink = product.amazon_link || product.buy_link || '#';
+  let amazonLink = product.amazon_link || product.buy_link || '#';
+  if (amazonLink === '#') {
+    amazonLink = `https://www.amazon.com/s?k=${encodeURIComponent((product.brand || '') + ' ' + displayName)}&tag=lumobites-20`;
+  }
   const chewyLink = product.chewy_link || product.buy_link || '#';
   const petcoLink = product.petco_link || product.buy_link || '#';
   const petsmartLink = product.petsmart_link || product.buy_link || '#';
