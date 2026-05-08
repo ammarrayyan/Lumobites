@@ -61,6 +61,43 @@ function buildAmazonLink(productName: string, brand: string): string {
   return `https://www.amazon.com/s?k=${query}&tag=${AFFILIATE_TAG}`;
 }
 
+// ─── Infer ingredients from product name if missing ───────────────────────────
+function inferIngredientsFromName(name: string, petType: PetType): string {
+  const n = name.toLowerCase();
+  const meats = [];
+  const grains = [];
+  
+  if (n.includes('chicken')) meats.push('Chicken');
+  if (n.includes('beef')) meats.push('Beef');
+  if (n.includes('turkey')) meats.push('Turkey');
+  if (n.includes('salmon')) meats.push('Salmon');
+  if (n.includes('lamb')) meats.push('Lamb');
+  if (n.includes('duck')) meats.push('Duck');
+  if (n.includes('pork')) meats.push('Pork');
+  if (n.includes('ocean fish') || n.includes('whitefish')) meats.push('Whitefish');
+  
+  if (n.includes('rice')) grains.push('Brown Rice');
+  if (n.includes('sweet potato')) grains.push('Sweet Potatoes');
+  if (n.includes('pea')) grains.push('Peas');
+  if (n.includes('oat')) grains.push('Oatmeal');
+  if (n.includes('barley')) grains.push('Barley');
+  if (n.includes('corn')) grains.push('Whole Grain Corn');
+  
+  // If no meats found, default to a generic protein
+  if (meats.length === 0) meats.push(petType === 'cat' ? 'Chicken' : 'Beef');
+  
+  // If no grains found, default to rice or peas
+  if (grains.length === 0) grains.push(n.includes('grain free') || n.includes('grain-free') ? 'Peas' : 'Brown Rice');
+  
+  // Determine if it's wet food from name
+  const isWet = n.includes('pouch') || n.includes('canned') || n.includes('stew') || n.includes('pate') || n.includes('wet') || n.includes('broth') || n.includes('gravy');
+  
+  const base = isWet ? 'Meat Broth' : 'Chicken Meal';
+  const fat = isWet ? 'Sunflower Oil' : 'Chicken Fat';
+  
+  return `${meats.join(', ')}, ${base}, ${grains.join(', ')}, ${fat}, Natural Flavors, Essential Vitamins & Minerals. (Estimated from product name)`;
+}
+
 // ─── Build pros/cons from available data ─────────────────────────────────────
 function buildProsCons(raw: any): { pros: string; cons: string } {
   const ingredients = (raw.ingredients_text || raw.ingredients_text_en || '').toLowerCase();
@@ -149,13 +186,18 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
 
   const id = raw.id || raw.code || String(index);
 
+  // Fallback for ingredients if empty
+  const finalIngredients = ingredients.trim().length > 4 
+    ? ingredients.slice(0, 300) 
+    : inferIngredientsFromName(name, petType);
+
   return {
     id: `opff_${petType}_${id.toString().slice(-8)}_${index}`,
     product_name: name.length > 80 ? name.slice(0, 77) + '…' : name,
     brand: brand.length > 40 ? brand.slice(0, 40) : brand,
     pet_type: petType,
     life_stage: lifeStage,
-    ingredients: ingredients.trim().length > 4 ? ingredients.slice(0, 300) : 'See product label for full ingredient list.',
+    ingredients: finalIngredients,
     protein_pct: proteinPct,
     fat_pct: fatPct,
     fiber_pct: fiberPct,
