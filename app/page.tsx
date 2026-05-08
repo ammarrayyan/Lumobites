@@ -32,7 +32,26 @@ export default function Home() {
           <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] mx-auto">
             Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
           </p>
-          <Link href="/chat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+          <style>{`
+            @keyframes heartbeat {
+              0% { transform: scale(1); }
+              14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+              28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+              42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+              70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+            }
+            .btn-heartbeat {
+              animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+              box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
+              transition: all 0.3s ease;
+            }
+            .btn-heartbeat:hover {
+              animation: none;
+              transform: scale(1.03) translateY(-2px);
+              box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
+            }
+          `}</style>
+          <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
             Find Your Pet&apos;s Food &rarr;
           </Link>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
