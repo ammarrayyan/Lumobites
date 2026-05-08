@@ -13,6 +13,7 @@ export default function ResultsPage() {
   const [budget, setBudget] = useState(50);
   const [budgetRelaxed, setBudgetRelaxed] = useState(false);
   const [fallback, setFallback] = useState(false);
+  const [isBudgetUpdating, setIsBudgetUpdating] = useState(false);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -80,9 +81,9 @@ export default function ResultsPage() {
     if (!profile) return;
     
     const updatedProfile = { ...profile, budget_monthly_max: newBudget };
-    localStorage.setItem('petProfile', JSON.stringify(updatedProfile));
-    
-    setLoading(true);
+    setProfile(updatedProfile);
+    setIsBudgetUpdating(true);
+
     try {
       const res = await fetch('/api/recommend', {
         method: 'POST',
@@ -98,10 +99,17 @@ export default function ResultsPage() {
       setResults(fixedResults);
       setBudgetRelaxed(data.budgetRelaxed);
       setFallback(data.fallback);
+
+      // Update sessionStorage with new results
+      try {
+        const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
+        for (const p of fixedResults) { existing[p.id] = p; }
+        sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
+      } catch (_) {}
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setIsBudgetUpdating(false);
     }
   };
 
@@ -142,8 +150,14 @@ export default function ResultsPage() {
           </div>
         )}
 
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ marginBottom: '24px', position: 'relative' }}>
           <BudgetSlider value={budget} onChange={handleBudgetChange} />
+          {isBudgetUpdating && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', color: '#8B5E3C', fontSize: '13px' }}>
+              <div style={{ width: '14px', height: '14px', border: '2px solid #E8DDD4', borderTopColor: '#8B5E3C', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+              Updating results for ${budget}/mo...
+            </div>
+          )}
         </div>
 
         {/* Notices */}

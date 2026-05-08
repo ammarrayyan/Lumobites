@@ -32,6 +32,14 @@ function scoreProduct(product: Product, profile: PetProfile): number {
   // +10 if no recall history
   if (!product.recall_history) score += 10;
 
+  // Budget-based Quality Boost: Prioritize premium items if user has a high budget
+  if (profile.budget_monthly_max >= 80) {
+    if (product.price_monthly_low >= 70) score += 20;
+    else if (product.price_monthly_low >= 40) score += 10;
+  } else if (profile.budget_monthly_max >= 50) {
+    if (product.price_monthly_low >= 40) score += 15;
+  }
+
   return score;
 }
 
@@ -89,8 +97,11 @@ export function recommendProducts(
   // Step 5: Score remaining
   const scored: ScoredProduct[] = budgetFiltered.map(p => {
     const score = scoreProduct(p, profile);
-    let maxScore = profile.health_issues.length * 20 + 20; // max possible
+    let maxScore = profile.health_issues.length * 20 + 20; // base max
     if (profile.food_type && profile.food_type !== 'both') maxScore += 30;
+    if (profile.budget_monthly_max >= 80) maxScore += 20;
+    else if (profile.budget_monthly_max >= 50) maxScore += 15;
+    
     const normalizedMax = Math.max(maxScore, 30);
     const match_pct = Math.min(99, Math.round(50 + (score / normalizedMax) * 49));
     return {
@@ -122,6 +133,9 @@ export function recommendProducts(
       const score = scoreProduct(p, profile);
       let maxScoreCalc = profile.health_issues.length * 20 + 20;
       if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
+      if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
+      else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
+
       const maxScore = Math.max(maxScoreCalc, 30);
       const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
       return {
