@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px' }}>4. Third Party Links</h2>
         <p>We link to Amazon, Chewy, Petco, and PetSmart. We may earn a commission on purchases at no extra cost to you.</p>
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px' }}>5. Contact</h2>
-        <p>Questions? Email us at <a href="mailto:hello@lumobites.net" style={{ color: '#8B5E3C' }}>hello@lumobites.net</a></p>
+        <p>Questions? Email us at <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C' }}>info@lumobitespet.com</a></p>
       </div>
     );
   }
