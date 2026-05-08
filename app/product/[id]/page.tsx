@@ -90,13 +90,19 @@ export default function ProductDetailPage() {
   }
 
   const displayName = product.product_name || product.name;
+  const searchTerm = encodeURIComponent((product.brand || '') + ' ' + displayName);
+  
   let amazonLink = product.amazon_link || product.buy_link || '#';
-  if (amazonLink === '#') {
-    amazonLink = `https://www.amazon.com/s?k=${encodeURIComponent((product.brand || '') + ' ' + displayName)}&tag=lumobites-20`;
-  }
-  const chewyLink = product.chewy_link || product.buy_link || '#';
-  const petcoLink = product.petco_link || product.buy_link || '#';
-  const petsmartLink = product.petsmart_link || product.buy_link || '#';
+  if (amazonLink === '#') amazonLink = `https://www.amazon.com/s?k=${searchTerm}&tag=lumobites-20`;
+
+  let chewyLink = product.chewy_link || product.buy_link || '#';
+  if (chewyLink === '#') chewyLink = `https://www.chewy.com/s?query=${searchTerm}`;
+
+  let petcoLink = product.petco_link || product.buy_link || '#';
+  if (petcoLink === '#') petcoLink = `https://www.petco.com/shop/SearchDisplay?searchTerm=${searchTerm}`;
+
+  let petsmartLink = product.petsmart_link || product.buy_link || '#';
+  if (petsmartLink === '#') petsmartLink = `https://www.petsmart.com/search/?q=${searchTerm}`;
   const tags = Array.isArray(product.health_tags) ? product.health_tags : [];
 
   return (
