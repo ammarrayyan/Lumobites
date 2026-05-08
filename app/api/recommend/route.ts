@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // Try to fetch from Open Pet Food Facts API
     try {
       products = await fetchPetFoodProducts(profile.pet_type, 80);
-      if (products.length < 5) {
+      if (products.length < 10) {
         // Not enough results from API — blend with seed data
         const seedForPetType = seedProducts.filter(p => p.pet_type === profile.pet_type);
         products = [...products, ...seedForPetType];

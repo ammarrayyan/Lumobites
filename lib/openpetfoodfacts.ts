@@ -117,8 +117,6 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
   // Filter out poor quality entries
   if (!name || name.length < 3) return null;
   if (!brand || brand.length < 2) return null;
-  // Skip products with zero ingredients — they'd show 'Ingredients not listed'
-  if (!ingredients || ingredients.trim().length < 5) return null;
 
   const nutriments = raw.nutriments || {};
   const proteinPct = Math.round((parseFloat(nutriments['proteins_100g'] || nutriments['proteins'] || '0') || 0) * 10) / 10;
@@ -145,7 +143,7 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
     brand: brand.length > 40 ? brand.slice(0, 40) : brand,
     pet_type: petType,
     life_stage: lifeStage,
-    ingredients: ingredients.slice(0, 300),
+    ingredients: ingredients.trim().length > 4 ? ingredients.slice(0, 300) : 'See product label for full ingredient list.',
     protein_pct: proteinPct,
     fat_pct: fatPct,
     fiber_pct: fiberPct,
