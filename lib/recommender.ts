@@ -3,8 +3,8 @@ import { deriveLifeStage } from './parser';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   const text = (product.product_name + ' ' + product.pros + ' ' + product.cons).toLowerCase();
-  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone')) return 'treats';
-  if (text.includes('canned') || text.includes('wet')) return 'wet';
+  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable')) return 'treats';
+  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy')) return 'wet';
   if (text.includes('kibble') || text.includes('dry')) return 'dry';
   return 'dry'; // default
 }
@@ -82,11 +82,17 @@ export function recommendProducts(
     ? Math.round(profile.budget_monthly_max * 1.2)
     : profile.budget_monthly_max;
 
-  // Step 1: Filter by pet type
-  let filtered = products.filter(p => p.pet_type === profile.pet_type);
+  // Step 1 & 2: Filter by pet type and life stage
+  let filtered = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
 
-  // Step 2: Filter by life stage
-  filtered = filtered.filter(p => p.life_stage === lifeStage);
+  // Step 2.5: Strictly filter by food type if requested
+  if (profile.food_type && profile.food_type !== 'both') {
+    const typeFiltered = filtered.filter(p => getProductFoodType(p) === profile.food_type);
+    // Only apply strict filter if it leaves us with at least 3 products to show
+    if (typeFiltered.length >= 3) {
+      filtered = typeFiltered;
+    }
+  }
 
   // Step 3: Filter by budget
   let budgetFiltered = filtered.filter(p => p.price_monthly_low <= budget);
