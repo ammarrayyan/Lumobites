@@ -102,21 +102,33 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
   const name = raw.product_name_en || raw.product_name || '';
   const brand = (raw.brands || '').split(',')[0].trim();
 
-  // Try every possible ingredient field — some products only have regional language versions
+  // Try only English ingredients — drop French fallback now that we filter to US products
   const ingredients: string =
     raw.ingredients_text_en ||
     raw.ingredients_text_with_allergens_en ||
     raw.ingredients_text ||
     raw.ingredients_text_with_allergens ||
-    // Try language-specific fallbacks from the ingredients object
-    (raw.ingredients_text_fr && raw.ingredients_text_fr.length > 0
-      ? `(Translated from French) ${raw.ingredients_text_fr}`
-      : '') ||
     '';
 
   // Filter out poor quality entries
   if (!name || name.length < 3) return null;
   if (!brand || brand.length < 2) return null;
+
+  // ── US & English filters ────────────────────────────────────────────────────
+  // Reject non-English product names (contain accented/non-Latin characters typical of French/Spanish)
+  const nonEnglishPattern = /[\u00C0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\u0600-\u06FF]/;
+  if (nonEnglishPattern.test(name)) return null;
+
+  // Reject names that look like French or German (common non-English words)
+  const foreignWordPattern = /\b(pour|chien|chat|chats|chiens|avec|sans|nourriture|adulte|junior|croquettes|pâtée|patée|für|hund|katze|hundefutter|katzenfutter|perro|gato|para|para|alimento|comida|pienso|hundefoder|kattmat)\b/i;
+  if (foreignWordPattern.test(name)) return null;
+
+  // Require product to be sold in the US
+  const countries: string[] = raw.countries_tags || [];
+  const soldInUS = countries.length === 0 || countries.some((c: string) =>
+    c === 'en:united-states' || c === 'en:us' || c === 'united-states'
+  );
+  if (!soldInUS) return null;
 
   const nutriments = raw.nutriments || {};
   const proteinPct = Math.round((parseFloat(nutriments['proteins_100g'] || nutriments['proteins'] || '0') || 0) * 10) / 10;
@@ -163,8 +175,9 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
 
 // ─── Fetch from multiple search terms for better coverage ─────────────────────
 async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
-  const fields = 'id,code,product_name,product_name_en,brands,ingredients_text,ingredients_text_en,ingredients_text_with_allergens,ingredients_text_with_allergens_en,ingredients_text_fr,nutriments,image_front_url,image_url,selected_images';
-  const url = `${BASE_URL}?search_terms=${encodeURIComponent(searchTerm)}&search_simple=1&action=process&json=1&page_size=${pageSize}&fields=${fields}`;
+  const fields = 'id,code,product_name,product_name_en,brands,ingredients_text,ingredients_text_en,ingredients_text_with_allergens,ingredients_text_with_allergens_en,countries_tags,nutriments,image_front_url,image_url,selected_images';
+  // Filter to US products with English language
+  const url = `${BASE_URL}?search_terms=${encodeURIComponent(searchTerm)}&search_simple=1&action=process&json=1&page_size=${pageSize}&fields=${fields}&countries_tags=en:united-states&lc=en`;
 
   const res = await fetch(url, {
     headers: {
