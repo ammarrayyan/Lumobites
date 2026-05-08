@@ -21,15 +21,55 @@ export default function Home() {
       {/* HERO SECTION */}
       <section className="w-full flex flex-col items-center text-center px-6 bg-[#FDFAF7] pt-[48px] pb-16">
         <div className="max-w-[680px] mx-auto flex flex-col items-center">
-          <div className="border border-[#C17D3C] text-[#8B5E3C] bg-transparent text-[12px] font-bold tracking-[0.1em] uppercase px-[18px] py-[7px] rounded-[100px] mb-8">
-            Free &middot; No Sign-up Required
+          {/* Floating Animated Pets Background */}
+          <style>{`
+            @keyframes float {
+              0% { transform: translateY(0px) rotate(0deg); }
+              50% { transform: translateY(-15px) rotate(3deg); }
+              100% { transform: translateY(0px) rotate(0deg); }
+            }
+            @keyframes float-reverse {
+              0% { transform: translateY(0px) rotate(0deg); }
+              50% { transform: translateY(15px) rotate(-3deg); }
+              100% { transform: translateY(0px) rotate(0deg); }
+            }
+            @keyframes wiggle {
+              0%, 100% { transform: rotate(-5deg); }
+              50% { transform: rotate(5deg); }
+            }
+          `}</style>
+          <div className="relative w-full max-w-[900px] mx-auto flex flex-col items-center">
+            
+            {/* Left Floating Cat */}
+            <div className="hidden md:flex absolute left-[-60px] top-[20px] bg-white w-20 h-20 rounded-full shadow-lg items-center justify-center text-4xl" style={{ animation: 'float 5s ease-in-out infinite' }}>
+              🐱
+            </div>
+            
+            {/* Right Floating Dog */}
+            <div className="hidden md:flex absolute right-[-40px] top-[0px] bg-[#F5EDE4] w-24 h-24 rounded-full shadow-lg items-center justify-center text-5xl border-4 border-white" style={{ animation: 'float-reverse 6s ease-in-out infinite' }}>
+              🐶
+            </div>
+            
+            {/* Bottom Right Floating Bone */}
+            <div className="hidden md:flex absolute right-[20px] bottom-[-20px] bg-white w-14 h-14 rounded-full shadow-md items-center justify-center text-2xl" style={{ animation: 'float 4.5s ease-in-out infinite 1s' }}>
+              🦴
+            </div>
+            
+            {/* Bottom Left Floating Fish */}
+            <div className="hidden md:flex absolute left-[0px] bottom-[10px] bg-[#FEF3C7] w-16 h-16 rounded-full shadow-md items-center justify-center text-3xl" style={{ animation: 'float-reverse 5.5s ease-in-out infinite 0.5s' }}>
+              🐟
+            </div>
+
+            <div className="border border-[#C17D3C] text-[#8B5E3C] bg-transparent text-[12px] font-bold tracking-[0.1em] uppercase px-[18px] py-[7px] rounded-[100px] mb-8 relative z-10">
+              Free &middot; No Sign-up Required
+            </div>
+            <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] w-full relative z-10" style={{ fontSize: 'clamp(44px, 6.5vw, 76px)' }}>
+              <span className="text-[#191919]">Find the best food</span>
+              <br />
+              <span className="text-[#C17D3C]">for your pet.</span>
+            </h1>
           </div>
-          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] w-full" style={{ fontSize: 'clamp(44px, 6.5vw, 76px)' }}>
-            <span className="text-[#191919]">Find the best food</span>
-            <br />
-            <span className="text-[#C17D3C]">for your pet.</span>
-          </h1>
-          <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] mx-auto">
+          <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] mx-auto relative z-10">
             Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
           </p>
           <style>{`
