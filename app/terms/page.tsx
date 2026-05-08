@@ -14,7 +14,7 @@ export default function TermsPage() {
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px' }}>5. Limitation of Liability</h2>
         <p>Lumo Bites is not liable for any damages arising from the use of our recommendations.</p>
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px' }}>6. Contact</h2>
-        <p>Questions? Email us at <a href="mailto:hello@lumobites.net" style={{ color: '#8B5E3C' }}>hello@lumobites.net</a></p>
+        <p>Questions? Email us at <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C' }}>info@lumobitespet.com</a></p>
       </div>
     );
   }
