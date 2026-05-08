@@ -1,27 +1,37 @@
 import { NextResponse } from 'next/server';
 import { recommendProducts } from '@/lib/recommender';
-import { PetProfile } from '@/lib/types';
+import { PetProfile, Product } from '@/lib/types';
 import { seedProducts } from '@/lib/seed-data';
-import { supabase } from '@/lib/supabase';
+import { fetchPetFoodProducts } from '@/lib/openpetfoodfacts';
+import { cacheProducts } from '@/lib/product-cache';
 
 export async function POST(request: Request) {
   try {
     const profile: PetProfile = await request.json();
     
-    // In MVP, we use seed data if Supabase isn't configured or as fallback
-    let products = seedProducts;
-    
-    // Try to fetch from Supabase if configured
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_supabase_project_url') {
-      const { data, error } = await supabase.from('products').select('*');
-      if (!error && data && data.length > 0) {
-        products = data as any;
+    let products: Product[] = [];
+    let usedFallback = false;
+
+    // Try to fetch from Open Pet Food Facts API
+    try {
+      products = await fetchPetFoodProducts(profile.pet_type, 80);
+      if (products.length < 5) {
+        // Not enough results from API — blend with seed data
+        const seedForPetType = seedProducts.filter(p => p.pet_type === profile.pet_type);
+        products = [...products, ...seedForPetType];
       }
+    } catch (apiErr) {
+      console.warn('Open Pet Food Facts API unavailable, falling back to seed data:', apiErr);
+      products = seedProducts;
+      usedFallback = true;
     }
+
+    // Cache products so /api/products/[id] can look them up
+    cacheProducts(products);
     
     const recommendations = recommendProducts(products, profile);
     
-    return NextResponse.json(recommendations);
+    return NextResponse.json({ ...recommendations, usedFallback });
   } catch (error) {
     console.error('Recommendation error:', error);
     return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 });
