@@ -83,7 +83,9 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
           Details
         </Link>
         <Link 
-          href={`/product/${product.id}#buy`}
+          href={product.buy_links?.amazon || `/product/${product.id}`}
+          target={product.buy_links?.amazon ? "_blank" : undefined}
+          rel={product.buy_links?.amazon ? "noopener noreferrer" : undefined}
           style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
         >
           Buy Now
