@@ -82,23 +82,14 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
         >
           Details
         </Link>
-        {product.buy_links?.amazon ? (
-          <a 
-            href={product.buy_links.amazon}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
-          >
-            Buy Now
-          </a>
-        ) : (
-          <Link 
-            href={`/product/${product.id}`}
-            style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
-          >
-            Buy Now
-          </Link>
-        )}
+        <a 
+          href={(product.buy_links?.amazon && product.buy_links.amazon !== '#') ? product.buy_links.amazon : `https://www.amazon.com/s?k=${encodeURIComponent(product.brand + ' ' + product.product_name)}&tag=lumobites-20`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
+        >
+          Buy Now
+        </a>
       </div>
     </div>
   );
