@@ -38,6 +38,26 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        // 1. Try sessionStorage first (populated by results page, works on Vercel serverless)
+        try {
+          const cached = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
+          if (cached[id]) {
+            const p = cached[id];
+            setProduct({
+              ...p,
+              name: p.product_name,
+              description: p.pros,
+              amazon_link: p.buy_links?.amazon,
+              chewy_link: p.buy_links?.chewy,
+              petco_link: p.buy_links?.petco,
+              petsmart_link: p.buy_links?.petsmart,
+            });
+            setLoading(false);
+            return;
+          }
+        } catch (_) {}
+
+        // 2. Fallback to API (works for seed products)
         const res = await fetch(`/api/products/${id}`);
         if (res.ok) {
           const data = await res.json();

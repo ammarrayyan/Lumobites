@@ -56,6 +56,15 @@ export default function ResultsPage() {
         setResults(fixedResults);
         setBudgetRelaxed(data.budgetRelaxed);
         setFallback(data.fallback);
+
+        // Cache products in sessionStorage so the detail page can look them up
+        try {
+          const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
+          for (const p of fixedResults) {
+            existing[p.id] = p;
+          }
+          sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
+        } catch (_) {}
       } catch (err) {
         console.error(err);
       } finally {
