@@ -56,8 +56,8 @@ function inferLifeStage(petType: PetType, name: string): LifeStage {
 }
 
 // ─── Build Amazon affiliate buy link ──────────────────────────────────────────
-function buildAmazonLink(productName: string, brand: string): string {
-  const query = encodeURIComponent(`${brand} ${productName}`);
+function buildAmazonLink(productName: string, brand: string, petType: PetType): string {
+  const query = encodeURIComponent(`${brand} ${productName} ${petType} food`);
   return `https://www.amazon.com/s?k=${query}&tag=${AFFILIATE_TAG}`;
 }
 
@@ -208,7 +208,7 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
     price_monthly_high: price.high,
     image_url: imageUrl,
     buy_links: {
-      amazon: buildAmazonLink(name, brand),
+      amazon: buildAmazonLink(name, brand, petType),
     },
     available_at: ['Amazon'],
     recall_history: false,

@@ -90,7 +90,7 @@ export default function ProductDetailPage() {
   }
 
   const displayName = product.product_name || product.name;
-  const searchTerm = encodeURIComponent((product.brand || '') + ' ' + displayName);
+  const searchTerm = encodeURIComponent(`${product.brand || ''} ${displayName} ${product.pet_type || ''} food`.trim());
   
   let amazonLink = product.amazon_link || product.buy_link || '#';
   if (amazonLink === '#') amazonLink = `https://www.amazon.com/s?k=${searchTerm}&tag=lumobites-20`;
