@@ -15,11 +15,10 @@ export async function POST(request: Request) {
     // Try to fetch from Open Pet Food Facts API
     try {
       products = await fetchPetFoodProducts(profile.pet_type, 150);
-      if (products.length < 10) {
-        // Not enough results from API — blend with seed data
-        const seedForPetType = seedProducts.filter(p => p.pet_type === profile.pet_type);
-        products = [...products, ...seedForPetType];
-      }
+      
+      // Always blend with seed data to guarantee high-quality fallbacks for niche queries (like senior + specific food type)
+      const seedForPetType = seedProducts.filter(p => p.pet_type === profile.pet_type);
+      products = [...products, ...seedForPetType];
     } catch (apiErr) {
       console.warn('Open Pet Food Facts API unavailable, falling back to seed data:', apiErr);
       products = seedProducts;

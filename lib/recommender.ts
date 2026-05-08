@@ -84,6 +84,12 @@ export function recommendProducts(
 
   // Step 1 & 2: Filter by pet type and life stage
   let filtered = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
+  
+  // If we have very few results for a specific life stage (like senior), include 'adult' foods as a fallback
+  if (filtered.length < 5 && lifeStage !== 'adult') {
+    const adultFoods = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult');
+    filtered = [...filtered, ...adultFoods];
+  }
 
   // Step 2.5: Strictly filter by food type if requested
   if (profile.food_type && profile.food_type !== 'both') {
