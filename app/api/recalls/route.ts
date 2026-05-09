@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const url =
-      'https://api.fda.gov/food/enforcement.json?search=animal+food&limit=20&sort=recall_initiation_date:desc';
+    const search = encodeURIComponent(
+      'product_description:"pet food" OR product_description:"dog food" OR product_description:"cat food" OR product_description:"animal food" OR product_description:"puppy food" OR product_description:"kitten food" OR product_description:"dog treat" OR product_description:"cat treat"'
+    );
+    const url = `https://api.fda.gov/food/enforcement.json?search=${search}&limit=20&sort=recall_initiation_date:desc`;
 
     const res = await fetch(url, {
       next: { revalidate: 3600 }, // cache for 1 hour
