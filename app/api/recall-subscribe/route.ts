@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Failed to save subscription', details: error }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to save subscription. Ensure table and RLS policies are set up correctly.' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Successfully subscribed to recall alerts!' });
