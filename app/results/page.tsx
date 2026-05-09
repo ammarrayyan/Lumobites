@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import React from 'react';
 import { PetProfile, ScoredProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import BudgetSlider from '@/components/BudgetSlider';
@@ -200,7 +201,89 @@ export default function ResultsPage() {
             </div>
           )}
         </div>
+
+        {/* RECALL ALERT SUBSCRIPTION */}
+        <RecallSubscribeWidget profile={profile} results={results} />
+
       </main>
+    </div>
+  );
+}
+
+function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | null; results: ScoredProduct[] }) {
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setErr('');
+    try {
+      const res = await fetch('/api/recall-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          pet_type: profile?.pet_type || 'all',
+          product_names: results.map(r => r.product_name),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) setDone(true);
+      else setErr(data.error || 'Something went wrong.');
+    } catch {
+      setErr('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="mt-10 rounded-[24px] overflow-hidden border border-[#E8D5C0]" style={{ background: 'linear-gradient(135deg, #FDF6EE 0%, #F5EDE4 100%)' }}>
+      <div className="p-8 flex flex-col md:flex-row gap-6 items-center">
+        <div className="flex-1 text-center md:text-left">
+          <div className="inline-flex items-center gap-2 bg-[#FEE2E2] text-[#991B1B] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full mb-3">
+            <span className="w-1.5 h-1.5 bg-[#EF4444] rounded-full animate-pulse"></span>
+            FDA Recall Alerts
+          </div>
+          <h3 className="font-[800] text-[#191919] text-xl mb-2 leading-tight">
+            Get notified if your pet&apos;s food is recalled
+          </h3>
+          <p className="text-[#7A6050] text-sm leading-relaxed max-w-[380px]">
+            We&apos;ll monitor the FDA database and email you instantly if any of the foods above get recalled. Free, no spam.
+          </p>
+        </div>
+        <div className="w-full md:w-auto md:min-w-[300px]">
+          {done ? (
+            <div className="flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-5 py-4 rounded-[16px] font-[600] text-sm">
+              ✅ You&apos;re subscribed! We&apos;ll alert you if recalls happen.
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="w-full px-5 py-3.5 rounded-[14px] border border-[#DDD] bg-white text-[#191919] text-sm outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3.5 rounded-[14px] font-[700] text-white text-sm transition-all hover:opacity-90"
+                style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1 }}
+              >
+                {submitting ? 'Saving…' : '🔔 Save & Get Alerts'}
+              </button>
+              {err && <p className="text-[#EF4444] text-xs text-center">{err}</p>}
+              <p className="text-[#BBB] text-[11px] text-center">No spam. Unsubscribe anytime. <a href="/recalls" className="underline hover:text-[#8B5E3C]">View current recalls →</a></p>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
