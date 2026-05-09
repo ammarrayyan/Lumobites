@@ -128,9 +128,27 @@ export function recommendProducts(
   // Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
-  // Return top 5
-  if (scored.length >= 3) {
-    return { results: scored.slice(0, 5), budgetRelaxed: relaxBudget, fallback: false };
+  // Step 6: Brand diversity — max 2 results per brand in the top 5
+  const diversified: ScoredProduct[] = [];
+  const brandCounts: Record<string, number> = {};
+  for (const p of scored) {
+    const brand = (p.brand || 'unknown').toLowerCase().trim();
+    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+    if (brandCounts[brand] <= 2) {
+      diversified.push(p);
+    }
+    if (diversified.length >= 5) break;
+  }
+  // Fill remaining slots if diversification left us short
+  if (diversified.length < Math.min(5, scored.length)) {
+    for (const p of scored) {
+      if (!diversified.includes(p)) diversified.push(p);
+      if (diversified.length >= 5) break;
+    }
+  }
+
+  if (diversified.length >= 3) {
+    return { results: diversified.slice(0, 5), budgetRelaxed: relaxBudget, fallback: false };
   }
 
   // Step 7: Fewer than 3 — relax budget by 20% and retry

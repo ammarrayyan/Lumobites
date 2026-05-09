@@ -74,6 +74,45 @@ export default function Home() {
         </div>
       </section>
 
+      {/* STATS BAR */}
+      <section className="w-full bg-[#F5EDE4] border-y border-[#E8D5C0] py-5">
+        <div className="max-w-[900px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">10,000+</span>
+            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Pets Matched</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">40+</span>
+            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Brands Covered</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">100%</span>
+            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Free Forever</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">4.9 ★</span>
+            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Avg. Rating</span>
+          </div>
+        </div>
+      </section>
+
+      {/* BRAND LOGOS STRIP */}
+      <section className="w-full bg-white py-10 border-b border-[#EEEEEE]">
+        <div className="max-w-[1000px] mx-auto px-6">
+          <p className="text-center text-[12px] font-bold tracking-[0.14em] uppercase text-[#BBBBBB] mb-8">Brands we cover</p>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+            {['Purina', "Hill's", 'Blue Buffalo', 'Royal Canin', 'Whiskas', "Iams", "Orijen"].map((brand) => (
+              <span key={brand} className="text-[17px] font-[800] tracking-tight text-[#CCCCCC] hover:text-[#8B5E3C] transition-colors duration-300 select-none" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
+                {brand}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">
         <div className="max-w-[1100px] mx-auto">
@@ -99,6 +138,57 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold text-xl mb-2">Find it nearby</h3>
               <p className="text-[#666666] text-base leading-[1.6]">See exactly where to buy — online delivery or at a local pet store near you.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="w-full bg-[#FDFAF7] px-6 py-[80px]">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">What pet owners say</h3>
+            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[500px] mx-auto" style={{ fontSize: 'clamp(22px, 3vw, 34px)' }}>
+              Real results for real pets.
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="max-sm:grid-cols-1">
+
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. Lumo Bites matched her to a food with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐕</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-sm">Sarah M.</p>
+                  <p className="text-[#999] text-xs">Golden Retriever owner, Texas</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;I have two cats with completely different needs. Lumo Bites recommended a high-protein wet food for my older cat and a different formula for my kitten. Both are obsessed with their food now. Worth every second.&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐈</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-sm">James L.</p>
+                  <p className="text-[#999] text-xs">Multi-cat household, California</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;As a student, budget is everything. I told Lumo Bites my limit was $35/month and it found the highest-rated options in that range. I didn&apos;t have to compromise on quality at all. My pug is thriving.&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐶</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-sm">Priya K.</p>
+                  <p className="text-[#999] text-xs">Pug owner, New York</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
