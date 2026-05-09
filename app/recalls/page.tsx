@@ -33,6 +33,7 @@ export default function RecallsPage() {
   const [recalls, setRecalls] = useState<Recall[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [source, setSource] = useState<'live' | 'historical'>('live');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -43,6 +44,7 @@ export default function RecallsPage() {
       .then(r => r.json())
       .then(data => {
         setRecalls(data.results || []);
+        setSource(data.source || 'live');
         setLoading(false);
       })
       .catch(() => {
@@ -131,6 +133,23 @@ export default function RecallsPage() {
 
       {/* RECALLS LIST */}
       <main className="max-w-[900px] mx-auto px-6 py-12">
+
+        {/* Source Banner */}
+        {!loading && !error && recalls.length > 0 && source === 'historical' && (
+          <div className="mb-8 flex items-start gap-3 bg-[#FEF9C3] border border-[#FCD34D] rounded-[16px] px-5 py-4">
+            <span className="text-xl">📋</span>
+            <div>
+              <p className="font-bold text-[#854D0E] text-sm mb-0.5">Showing notable historical pet food recalls</p>
+              <p className="text-[#92400E] text-xs leading-relaxed">The FDA enforcement database has no new pet food recalls at this time. These are real, past recalls for reference. We check the FDA live and will update this page when new recalls are issued.</p>
+            </div>
+          </div>
+        )}
+        {!loading && !error && recalls.length > 0 && source === 'live' && (
+          <div className="mb-8 flex items-center gap-2 bg-[#DCFCE7] border border-[#86EFAC] rounded-[16px] px-5 py-3">
+            <span className="w-2 h-2 bg-[#22C55E] rounded-full" style={{ animation: 'pulse 2s infinite' }}></span>
+            <p className="text-[#166534] text-sm font-medium">Live data — sourced directly from the FDA enforcement database right now.</p>
+          </div>
+        )}
 
         {loading && (
           <div className="flex flex-col items-center gap-4 py-20">
