@@ -47,18 +47,14 @@ function scoreProduct(product: Product, profile: PetProfile): number {
 function buildWhyTag(product: Product, profile: PetProfile): string {
   const name = profile.pet_name || (profile.pet_type === 'dog' ? 'your pup' : 'your cat');
   const matchingTags = profile.health_issues.filter(t => product.health_tags.includes(t as HealthTag));
+  const benefit = product.pros?.split('.')[0] || (product.protein_pct > 32 ? 'High protein' : 'Balanced nutrition');
 
   if (matchingTags.length > 0) {
     const tagLabel = matchingTags[0].replace('_', ' ');
-    return `Great for ${tagLabel} under $${product.price_monthly_high}/mo`;
+    return `${product.brand} ${product.product_name} — ${benefit.toLowerCase()}, great for ${tagLabel}`;
   }
-  if (product.protein_pct > 32) {
-    return `High protein formula for ${name}`;
-  }
-  if (product.price_monthly_low <= 30) {
-    return `Budget-friendly pick under $${product.price_monthly_high}/mo`;
-  }
-  return `Well-rounded nutrition for ${name}`;
+  
+  return `${product.brand} ${product.product_name} — ${benefit.toLowerCase()} for ${name}`;
 }
 
 // ─── Check if product has avoided ingredients ────────────────────────────────

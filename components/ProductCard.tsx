@@ -12,20 +12,18 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
     const age = profile.age_years >= 7 ? 'senior' : (profile.age_years < 1 ? (profile.pet_type === 'cat' ? 'kitten' : 'puppy') : 'adult');
     const petNoun = profile.pet_type === 'cat' ? 'cats' : 'dogs';
     const health = profile.health_issues?.length ? profile.health_issues[0].replace(/_/g, ' ') : '';
-    const budget = profile.budget_monthly_max ? ` under $${profile.budget_monthly_max}/mo` : '';
     
     // Determine the product's actual food type to avoid labeling a wet treat as "dry food"
     const actualText = (product.product_name + ' ' + (product.pros || '') + ' ' + (product.cons || '')).toLowerCase();
-    let foodTypeStr = ' food';
-    if (actualText.includes('treat') || actualText.includes('snack') || actualText.includes('chew') || actualText.includes('lickable')) foodTypeStr = ' treats';
-    else if (actualText.includes('canned') || actualText.includes('wet') || actualText.includes('stew') || actualText.includes('pâté') || actualText.includes('pate') || actualText.includes('broth') || actualText.includes('pouch') || actualText.includes('gravy')) foodTypeStr = ' wet food';
-    else if (actualText.includes('kibble') || actualText.includes('dry')) foodTypeStr = ' dry food';
+    let foodTypeStr = 'food';
+    if (actualText.includes('treat') || actualText.includes('snack') || actualText.includes('chew') || actualText.includes('lickable')) foodTypeStr = 'treats';
+    else if (actualText.includes('canned') || actualText.includes('wet') || actualText.includes('stew') || actualText.includes('pâté') || actualText.includes('pate') || actualText.includes('broth') || actualText.includes('pouch') || actualText.includes('gravy')) foodTypeStr = 'wet food';
+    else if (actualText.includes('kibble') || actualText.includes('dry')) foodTypeStr = 'dry food';
+
+    // Generate a more specific benefit statement
+    const benefit = product.pros?.split('.')[0] || (product.protein_pct > 30 ? 'High protein formula' : 'Balanced nutrition');
     
-    if (health) {
-        whyText = `Great${foodTypeStr} for ${age} ${petNoun} with ${health}${budget}`;
-    } else {
-        whyText = `Ideal${foodTypeStr} for ${age} ${petNoun}${budget}`;
-    }
+    whyText = `${product.product_name} — ${benefit.toLowerCase()}, ideal for ${age} ${petNoun}${health ? ' with ' + health : ''}`;
   }
 
   // Determine badge color
@@ -42,8 +40,11 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
       
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
         <div style={{ width: '80px', height: '80px', backgroundColor: '#F5ECD7', borderRadius: '12px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', position: 'relative', overflow: 'hidden' }}>
-           {imgFailed && <span style={{ position: 'absolute', fontSize: '36px', opacity: 1 }}>{product.pet_type === 'cat' ? '🐱' : '🐶'}</span>}
-           {!imgFailed && (
+           {(imgFailed || !product.image_url || product.image_url.includes('placeholder.svg')) ? (
+             <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#8B5E3C', zIndex: 1 }}>
+               {product.brand ? product.brand.charAt(0).toUpperCase() : (product.pet_type === 'cat' ? 'C' : 'D')}
+             </span>
+           ) : (
              <img 
                src={product.image_url} 
                alt={product.product_name} 

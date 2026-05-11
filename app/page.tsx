@@ -84,7 +84,7 @@ export default function Home() {
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">40+</span>
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">50+</span>
             <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Brands Covered</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
