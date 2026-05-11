@@ -168,8 +168,14 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
   if (!soldInUS) return null;
 
   const nutriments = raw.nutriments || {};
-  const proteinPct = Math.round((parseFloat(nutriments['proteins_100g'] || nutriments['proteins'] || '0') || 0) * 10) / 10;
-  const fatPct = Math.round((parseFloat(nutriments['fat_100g'] || nutriments['fat'] || '0') || 0) * 10) / 10;
+  const proteinVal = nutriments['proteins_100g'] || nutriments['proteins'];
+  const fatVal = nutriments['fat_100g'] || nutriments['fat'];
+  
+  // Stricter requirement: Must have at least protein OR fat to be considered a valid product record
+  if (!proteinVal && !fatVal) return null;
+
+  const proteinPct = Math.round((parseFloat(proteinVal || '0') || 0) * 10) / 10;
+  const fatPct = Math.round((parseFloat(fatVal || '0') || 0) * 10) / 10;
   const fiberPct = Math.round((parseFloat(nutriments['fiber_100g'] || nutriments['fiber'] || '0') || 0) * 10) / 10;
 
   const price = estimatePrice(brand);
@@ -235,10 +241,17 @@ async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
 
 // ─── Main fetch function ───────────────────────────────────────────────────────
 export async function fetchPetFoodProducts(petType: PetType, pageSize = 50): Promise<Product[]> {
-  // Use multiple search terms to maximize data richness
-  const queries = petType === 'cat'
-    ? ['cat food chicken', 'cat food salmon', 'kitten food', 'cat treats', 'wet cat food']
-    : ['dog food chicken', 'dog food beef', 'puppy food', 'senior dog food', 'dog treats'];
+  // We use specific, diverse brand searches instead of generic "dog food chicken" to guarantee variety
+  const topDogBrands = ['Purina', "Hill's", 'Blue Buffalo', 'Wellness', 'Orijen', 'Taste of the Wild', 'Merrick', 'Canidae', 'Nutro', 'Iams', 'Pedigree', 'Victor', 'Diamond'];
+  const topCatBrands = ['Purina', "Hill's", 'Fancy Feast', 'Friskies', 'Wellness', 'Tiki Cat', 'Orijen', 'Weruva', 'Blue Buffalo', 'Iams', 'Meow Mix', '9Lives'];
+  
+  const pool = petType === 'cat' ? topCatBrands : topDogBrands;
+  
+  // Randomly pick 4-5 brands to fetch for this specific request to ensure varied results every time
+  const shuffled = pool.sort(() => 0.5 - Math.random());
+  const selectedBrands = shuffled.slice(0, 5);
+  
+  const queries = selectedBrands.map(brand => `${brand} ${petType} food`);
 
   const perQuery = Math.ceil(pageSize / queries.length);
 

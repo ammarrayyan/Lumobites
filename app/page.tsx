@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
+import BrandMarquee from '@/components/BrandMarquee';
 
 export default function Home() {
   return (
@@ -100,18 +101,7 @@ export default function Home() {
       </section>
 
       {/* BRAND LOGOS STRIP */}
-      <section className="w-full bg-white py-10 border-b border-[#EEEEEE]">
-        <div className="max-w-[1000px] mx-auto px-6">
-          <p className="text-center text-[12px] font-bold tracking-[0.14em] uppercase text-[#BBBBBB] mb-8">Brands we cover</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-            {['Purina', "Hill's", 'Blue Buffalo', 'Royal Canin', 'Whiskas', "Iams", "Orijen"].map((brand) => (
-              <span key={brand} className="text-[17px] font-[800] tracking-tight text-[#CCCCCC] hover:text-[#8B5E3C] transition-colors duration-300 select-none" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
-                {brand}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BrandMarquee />
 
       {/* HOW IT WORKS */}
       <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">

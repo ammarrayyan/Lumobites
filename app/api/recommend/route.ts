@@ -16,12 +16,15 @@ export async function POST(request: Request) {
     try {
       products = await fetchPetFoodProducts(profile.pet_type, 150);
       
-      // Always blend with seed data to guarantee high-quality fallbacks for niche queries (like senior + specific food type)
-      const seedForPetType = seedProducts.filter(p => p.pet_type === profile.pet_type);
-      products = [...products, ...seedForPetType];
+      // Fallback ONLY if OPFF returns exactly 0 results
+      if (products.length === 0) {
+        console.warn('OPFF returned 0 results, using fallback seed data.');
+        products = seedProducts.filter(p => p.pet_type === profile.pet_type);
+        usedFallback = true;
+      }
     } catch (apiErr) {
       console.warn('Open Pet Food Facts API unavailable, falling back to seed data:', apiErr);
-      products = seedProducts;
+      products = seedProducts.filter(p => p.pet_type === profile.pet_type);
       usedFallback = true;
     }
 

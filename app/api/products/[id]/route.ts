@@ -22,7 +22,39 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       });
     }
     
-    // 2. Fallback to seed data
+    // 2. If it's an OPFF product, fetch it directly from their API
+    if (id.startsWith('opff_')) {
+      const code = id.split('_')[2]; // e.g., opff_dog_12345678_0 -> 12345678
+      if (code) {
+        try {
+          const apiRes = await fetch(`https://world.openpetfoodfacts.org/api/v0/product/${code}.json`);
+          if (apiRes.ok) {
+            const data = await apiRes.json();
+            if (data.product) {
+              const raw = data.product;
+              const name = raw.product_name_en || raw.product_name || 'Unknown Product';
+              const brand = (raw.brands || '').split(',')[0].trim() || 'Unknown Brand';
+              const ingredients = raw.ingredients_text_en || raw.ingredients_text || 'Ingredients not listed.';
+              
+              // We do a minimal transform just for the detail page
+              return NextResponse.json({
+                id,
+                name,
+                brand,
+                description: 'A quality product from ' + brand,
+                ingredients,
+                image_url: raw.image_front_url || raw.image_url || '/images/placeholder.svg',
+                amazon_link: `https://www.amazon.com/s?k=${encodeURIComponent(brand + ' ' + name)}`,
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch from OPFF directly', e);
+        }
+      }
+    }
+    
+    // 3. Fallback to seed data (only for the new 12 real fallbacks)
     const product = seedProducts.find(p => p.id === id);
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });

@@ -196,8 +196,8 @@ export default function ResultsPage() {
           ) : (
             <div className="text-center py-10 bg-white rounded-2xl p-6 shadow-sm">
               <span className="text-4xl mb-4 block">😔</span>
-              <h3 className="font-bold text-gray-900 mb-2">No matches found</h3>
-              <p className="text-gray-500 text-sm">Try increasing your budget or removing some constraints.</p>
+              <h3 className="font-bold text-gray-900 mb-2">No results found, try different filters</h3>
+              <p className="text-gray-500 text-sm">We couldn't find any real US pet foods matching all your exact constraints.</p>
             </div>
           )}
         </div>
