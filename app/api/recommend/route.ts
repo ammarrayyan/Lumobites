@@ -8,13 +8,14 @@ import { cacheProducts } from '@/lib/product-cache';
 export async function POST(request: Request) {
   try {
     const profile: PetProfile = await request.json();
+    console.log('Generating recommendations for:', { pet: profile.pet_type, food: profile.food_type, budget: profile.budget_monthly_max });
     
     let products: Product[] = [];
     let usedFallback = false;
 
     // Try to fetch from Open Pet Food Facts API
     try {
-      products = await fetchPetFoodProducts(profile.pet_type, 150, profile.food_type);
+      products = await fetchPetFoodProducts(profile.pet_type, 300, profile.food_type);
       
       // Fallback ONLY if OPFF returns exactly 0 results
       if (products.length === 0) {

@@ -227,6 +227,7 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
     },
     available_at: ['Amazon'],
     recall_history: false,
+    categories: raw.categories || '',
   };
 }
 

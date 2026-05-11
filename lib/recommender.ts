@@ -2,7 +2,7 @@ import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
-  const text = (product.product_name + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
+  const text = (product.product_name + ' ' + (product.categories || '') + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
   
   if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky')) return 'treats';
   

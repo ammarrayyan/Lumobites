@@ -53,6 +53,7 @@ export interface Product {
   buy_links: BuyLinks;
   available_at: string[];
   recall_history: boolean;
+  categories?: string;
   created_at?: string;
 }
 
