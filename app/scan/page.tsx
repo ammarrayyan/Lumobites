@@ -304,8 +304,9 @@ export default function ScanPage() {
                       product_names: [product.brand].filter(Boolean)
                     })
                   });
+                  const data = await res.json();
                   if (res.ok) alert("You're subscribed to recall alerts!");
-                  else alert("Something went wrong. Please try again.");
+                  else alert(data.error || "Something went wrong. Please try again.");
                 }}
                 className="flex gap-2"
               >

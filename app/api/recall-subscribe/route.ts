@@ -18,52 +18,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const { error: dbError } = await supabase
       .from('recall_subscriptions')
       .upsert(
         {
           email: email.toLowerCase().trim(),
-          pet_type,
+          pet_type: pet_type || 'both',
           product_names: product_names || [],
           created_at: new Date().toISOString(),
         },
         { onConflict: 'email' }
       );
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Failed to save subscription.' }, { status: 500 });
+    if (dbError) {
+      console.error('Supabase error:', dbError);
+      return NextResponse.json({ error: dbError.message || 'Database error' }, { status: 500 });
     }
 
-    // Send confirmation email
+    // Send confirmation email - Don't block the response on email failure
     try {
-      const emailResult = await resend.emails.send({
-        from: 'Lumo Bites <alerts@lumobites.net>',
+      // Use a safer fallback if the domain isn't verified yet
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <onboarding@resend.dev>';
+      
+      await resend.emails.send({
+        from: fromEmail,
         to: email,
         subject: "🐾 You're subscribed to pet food recall alerts!",
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #8B6914;">You're subscribed to Lumo Bites Recall Alerts</h2>
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #191919;">
+            <h2 style="color: #8B5E3C;">You're subscribed!</h2>
             <p>We'll notify you whenever there's a new pet food recall from the FDA.</p>
-            <p><strong>Pet type:</strong> ${pet_type}</p>
+            <p><strong>Status:</strong> Monitoring for ${pet_type || 'all'} pet food recalls.</p>
             ${product_names?.length ? `<p><strong>Watching:</strong> ${product_names.join(', ')}</p>` : ''}
             <p>Stay safe,<br/>The Lumo Bites Team</p>
-            <hr/>
-            <p style="font-size: 12px; color: #999;">
-              To unsubscribe, reply to this email with "unsubscribe".
-            </p>
           </div>
         `,
       });
-      console.log('Email result:', JSON.stringify(emailResult));
     } catch (emailErr) {
       console.error('Email send error:', emailErr);
     }
 
     return NextResponse.json({ success: true, message: 'Successfully subscribed to recall alerts!' });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Subscription error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
 
