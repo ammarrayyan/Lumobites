@@ -277,7 +277,7 @@ export default function ScanPage() {
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
               <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Product Details</p>
-              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name || 'Generic Product'}</h4>
+              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name}</h4>
               <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>
               
               {product.ingredients && (
@@ -290,7 +290,9 @@ export default function ScanPage() {
 
             <div className="bg-[#191919] rounded-2xl p-6 text-white">
               <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
-              <p className="text-xs text-gray-400 mb-4">We&apos;ll email you instantly if {product.brand || 'this brand'} has a new FDA recall. Free service.</p>
+              <p className="text-xs text-gray-400 mb-4">
+                We&apos;ll email you instantly if {product.product_name !== 'Unknown Product' ? product.product_name : product.brand} has a new FDA recall. Free service.
+              </p>
               <form 
                 onSubmit={async (e) => {
                   e.preventDefault();

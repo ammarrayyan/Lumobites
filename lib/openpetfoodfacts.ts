@@ -149,7 +149,7 @@ export function isEnglishProduct(name: string): boolean {
 
 // ─── Transform raw API product → our Product interface ────────────────────────
 function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLookup = false): Product | null {
-  const name = raw.product_name_en || raw.product_name || '';
+  const name = raw.product_name_en || raw.product_name || 'Unknown Product';
   const brand = (raw.brands || '').split(',')[0].trim();
 
   // Try only English ingredients
