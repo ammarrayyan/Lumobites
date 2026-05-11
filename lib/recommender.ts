@@ -4,7 +4,7 @@ import { deriveLifeStage } from './parser';
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   const text = (product.product_name + ' ' + (product.categories || '') + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
   
-  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky')) return 'treats';
+  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky') || text.includes('marrow')) return 'treats';
   
   if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy') || text.includes('moist') || text.includes('shredded') || text.includes('morsel')) return 'wet';
   
@@ -139,21 +139,10 @@ export function recommendProducts(
     }
   }
 
-  // 5b. Slightly over budget (up to 20%)
+  // 5b. Relax budget if we don't have 5 results (Keep Food Type strict)
   if (selected.length < 5) {
-    const slightlyOver = allScored.filter(p => p.price_monthly_low > budget && p.price_monthly_low <= budget * 1.2);
-    for (const p of slightlyOver) {
-      if (!selected.find(s => s.id === p.id)) {
-        if (tryAdd(p)) {
-          if (selected.length >= 5) break;
-        }
-      }
-    }
-  }
-
-  // 5c. Anything else (fallback) if we still don't have 5
-  if (selected.length < 5) {
-    for (const p of allScored) {
+    const overBudget = allScored.filter(p => p.price_monthly_low > budget);
+    for (const p of overBudget) {
       if (!selected.find(s => s.id === p.id)) {
         if (tryAdd(p)) {
           if (selected.length >= 5) break;

@@ -261,12 +261,17 @@ export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, food
   const shuffled = pool.sort(() => 0.5 - Math.random());
   const selectedBrands = shuffled.slice(0, 5);
   
-  // Refine query based on food type
-  const typeStr = foodType === 'treats' ? 'treats' : 
-                 foodType === 'wet' ? 'wet food' :
-                 foodType === 'dry' ? 'dry food' : 'food';
+  // Refine query based on food type - Use specific OPFF categories
+  let typeStr = 'pet food';
+  if (foodType === 'treats') {
+    typeStr = `${petType} treats OR pet treats`;
+  } else if (foodType === 'wet') {
+    typeStr = `wet ${petType} food OR canned ${petType} food`;
+  } else if (foodType === 'dry') {
+    typeStr = `dry ${petType} food`;
+  }
 
-  const queries = selectedBrands.map(brand => `${brand} ${petType} ${typeStr}`);
+  const queries = selectedBrands.map(brand => `${brand} ${typeStr}`);
 
   const perQuery = Math.ceil(pageSize / queries.length);
 
