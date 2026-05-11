@@ -56,9 +56,14 @@ export default function Home() {
               box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
             }
           `}</style>
-          <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
-            Find Your Pet&apos;s Food &rarr;
-          </Link>
+          <div className="flex flex-col items-center gap-4">
+            <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+              Find Your Pet&apos;s Food &rarr;
+            </Link>
+            <Link href="/scan" className="hover:bg-gray-50 transition-colors" style={{ fontSize: '14px', padding: '10px 24px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #E8DDD4', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '600' }}>
+              <span style={{ marginRight: '8px' }}>📷</span> Scan Food Label
+            </Link>
+          </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up

@@ -143,11 +143,19 @@ export default function ResultsPage() {
       
       <main style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
         {profile && (
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#191919', marginBottom: '8px', lineHeight: 1.2 }}>
-              Best food for your {profile.pet_type || 'pet'}
-            </h2>
-            <p style={{ color: '#555555', margin: 0, fontSize: '14px' }}>Showing {results.length} results for your pet</p>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+            <div>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#191919', marginBottom: '8px', lineHeight: 1.2 }}>
+                Best food for your {profile.pet_type || 'pet'}
+              </h2>
+              <p style={{ color: '#555555', margin: 0, fontSize: '14px' }}>Showing {results.length} results for your pet</p>
+            </div>
+            <Link 
+              href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
+              style={{ fontSize: '13px', padding: '8px 16px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #E8DDD4', display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '600', flexShrink: 0 }}
+            >
+              📷 Scan
+            </Link>
           </div>
         )}
 

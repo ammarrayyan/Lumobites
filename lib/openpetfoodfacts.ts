@@ -281,3 +281,24 @@ export async function fetchPetFoodProducts(petType: PetType, pageSize = 50): Pro
 
   return products;
 }
+
+// ─── Fetch by Barcode ──────────────────────────────────────────────────────────
+export async function fetchProductByBarcode(barcode: string): Promise<Product | null> {
+  try {
+    const res = await fetch(`https://world.openpetfoodfacts.org/api/v0/product/${barcode}.json`);
+    if (!res.ok) return null;
+    
+    const data = await res.json();
+    if (!data.product) return null;
+
+    // Infer pet type from product data
+    const raw = data.product;
+    const searchStr = (raw.product_name + ' ' + (raw.categories || '')).toLowerCase();
+    const petType: PetType = searchStr.includes('cat') ? 'cat' : 'dog';
+    
+    return transformProduct(raw, petType, 0);
+  } catch (err) {
+    console.error('Barcode fetch error:', err);
+    return null;
+  }
+}
