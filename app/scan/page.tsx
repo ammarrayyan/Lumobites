@@ -288,6 +288,34 @@ export default function ScanPage() {
               )}
             </div>
 
+            <div className="bg-[#191919] rounded-2xl p-6 text-white">
+              <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
+              <p className="text-xs text-gray-400 mb-4">We&apos;ll email you instantly if {product.brand || 'this brand'} has a new FDA recall. Free service.</p>
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const email = (e.target as any).email.value;
+                  const res = await fetch('/api/recall-subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, brand: product.brand })
+                  });
+                  if (res.ok) alert("You're subscribed to recall alerts!");
+                  else alert("Something went wrong. Please try again.");
+                }}
+                className="flex gap-2"
+              >
+                <input 
+                  name="email"
+                  type="email" 
+                  placeholder="your@email.com" 
+                  required
+                  className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-sm outline-none focus:border-white/40"
+                />
+                <button type="submit" className="bg-[#8B5E3C] text-white px-4 py-2 rounded-lg text-sm font-bold">Alert Me</button>
+              </form>
+            </div>
+
             <div className="flex gap-4">
               <button onClick={resetScanner} className="flex-1 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-4 rounded-full font-bold">Scan Another</button>
               <Link href="/recalls" className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-center">View All Recalls</Link>
