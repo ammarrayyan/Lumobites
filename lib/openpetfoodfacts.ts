@@ -134,12 +134,25 @@ function buildProsCons(raw: any): { pros: string; cons: string } {
   };
 }
 
+// ─── Language & Region Helpers ───────────────────────────────────────────────
+export function isEnglishProduct(name: string): boolean {
+  // Reject non-English product names (contain accented/non-Latin characters)
+  const nonEnglishPattern = /[\u00C0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\u0600-\u06FF]/;
+  if (nonEnglishPattern.test(name)) return false;
+
+  // Reject common non-English pet food terms
+  const foreignWordPattern = /\b(pour|chien|chat|chats|chiens|avec|sans|nourriture|adulte|junior|croquettes|pâtée|patée|für|hund|katze|hundefutter|katzenfutter|perro|gato|para|alimento|comida|pienso|hundefoder|kattmat)\b/i;
+  if (foreignWordPattern.test(name)) return false;
+
+  return true;
+}
+
 // ─── Transform raw API product → our Product interface ────────────────────────
 function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLookup = false): Product | null {
   const name = raw.product_name_en || raw.product_name || '';
   const brand = (raw.brands || '').split(',')[0].trim();
 
-  // Try only English ingredients — drop French fallback now that we filter to US products
+  // Try only English ingredients
   const ingredients: string =
     raw.ingredients_text_en ||
     raw.ingredients_text_with_allergens_en ||
@@ -153,13 +166,7 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
 
   // ── US & English filters ────────────────────────────────────────────────────
   if (!isBarcodeLookup) {
-    // Reject non-English product names (contain accented/non-Latin characters typical of French/Spanish)
-    const nonEnglishPattern = /[\u00C0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\u0600-\u06FF]/;
-    if (nonEnglishPattern.test(name)) return null;
-
-    // Reject names that look like French or German (common non-English words)
-    const foreignWordPattern = /\b(pour|chien|chat|chats|chiens|avec|sans|nourriture|adulte|junior|croquettes|pâtée|patée|für|hund|katze|hundefutter|katzenfutter|perro|gato|para|para|alimento|comida|pienso|hundefoder|kattmat)\b/i;
-    if (foreignWordPattern.test(name)) return null;
+    if (!isEnglishProduct(name)) return null;
 
     // Require product to be sold in the US
     const countries: string[] = raw.countries_tags || [];

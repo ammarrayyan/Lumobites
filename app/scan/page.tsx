@@ -137,21 +137,28 @@ export default function ScanPage() {
     if (manualBrand.trim()) checkRecallByBrand(manualBrand.trim());
   };
 
-  const resetScanner = () => {
+  const resetScanner = async () => {
     setProduct(null);
     setScannedResult(null);
     setError(null);
     setShowBrandInput(false);
     
-    if (scannerRef.current) {
-      scannerRef.current.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        onScanSuccess,
-        onScanFailure
-      ).then(() => setIsCameraStarted(true))
-      .catch(err => console.error("Failed to restart scanner", err));
-    }
+    // Small delay to ensure UI has transitioned
+    setTimeout(async () => {
+      if (scannerRef.current && !scannerRef.current.isScanning) {
+        try {
+          await scannerRef.current.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            onScanSuccess,
+            onScanFailure
+          );
+          setIsCameraStarted(true);
+        } catch (err) {
+          console.error("Failed to restart scanner", err);
+        }
+      }
+    }, 100);
   };
 
   return (
@@ -171,41 +178,40 @@ export default function ScanPage() {
             <p className="text-gray-600">Scan your pet&apos;s food barcode to instantly check for FDA recalls</p>
         </div>
 
-        {!product && !error && !showBrandInput && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
-              <div id="reader" className="w-full"></div>
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 font-medium">Position the barcode within the frame</p>
-                <div className="mt-2 h-1 w-32 bg-[#E8DDD4] mx-auto rounded-full overflow-hidden">
-                    <div className="h-full bg-[#8B5E3C] w-1/2 animate-shimmer"></div>
-                </div>
+        {/* Camera UI - Always mounted but hidden when not needed to avoid re-init bugs */}
+        <div className={(!product && !error && !showBrandInput && !loading) ? 'block space-y-6' : 'hidden'}>
+          <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
+            <div id="reader" className="w-full"></div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-500 font-medium">Position the barcode within the frame</p>
+              <div className="mt-2 h-1 w-32 bg-[#E8DDD4] mx-auto rounded-full overflow-hidden">
+                  <div className="h-full bg-[#8B5E3C] w-1/2 animate-shimmer"></div>
               </div>
-            </div>
-
-            <div className="text-center">
-              <div className="relative flex py-5 items-center">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="flex-shrink mx-4 text-gray-400 text-sm font-medium">OR</span>
-                <div className="flex-grow border-t border-gray-300"></div>
-              </div>
-
-              <form onSubmit={handleBarcodeSubmit} className="mt-4">
-                <label className="block text-sm font-semibold text-[#191919] mb-2 text-left">Enter Barcode Manually</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={manualBarcode}
-                    onChange={(e) => setManualBarcode(e.target.value)}
-                    placeholder="e.g. 052742012345"
-                    className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
-                  />
-                  <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold">Go</button>
-                </div>
-              </form>
             </div>
           </div>
-        )}
+
+          <div className="text-center">
+            <div className="relative flex py-5 items-center">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="flex-shrink mx-4 text-gray-400 text-sm font-medium">OR</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <form onSubmit={handleBarcodeSubmit} className="mt-4">
+              <label className="block text-sm font-semibold text-[#191919] mb-2 text-left">Enter Barcode Manually</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualBarcode}
+                  onChange={(e) => setManualBarcode(e.target.value)}
+                  placeholder="e.g. 052742012345"
+                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                />
+                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold">Go</button>
+              </div>
+            </form>
+          </div>
+        </div>
 
         {showBrandInput && (
            <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] animate-fade-in">

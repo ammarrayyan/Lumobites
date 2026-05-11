@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchProductByBarcode } from '@/lib/openpetfoodfacts';
+import { fetchProductByBarcode, isEnglishProduct } from '@/lib/openpetfoodfacts';
 
 export async function GET(
   request: NextRequest,
@@ -11,6 +11,10 @@ export async function GET(
     const product = await fetchProductByBarcode(barcode);
     if (!product) {
       return NextResponse.json({ error: 'Product not found — try searching by name instead' }, { status: 404 });
+    }
+
+    if (!isEnglishProduct(product.product_name)) {
+      return NextResponse.json({ error: 'Product not available in the US — try scanning a different product' }, { status: 400 });
     }
 
     // Check for recalls by brand and product name
