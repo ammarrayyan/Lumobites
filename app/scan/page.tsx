@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
-import ProductCard from '@/components/ProductCard';
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -14,27 +13,13 @@ export default function ScanPage() {
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
-  const [profile, setProfile] = useState<PetProfile | null>(null);
+  const [manualBrand, setManualBrand] = useState('');
+  const [showBrandInput, setShowBrandInput] = useState(false);
   
   const [isCameraStarted, setIsCameraStarted] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
-    // Try to load profile from URL params or sessionStorage
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('pet_type')) {
-      const p: PetProfile = {
-        session_id: 'scan',
-        pet_name: params.get('pet_name') || 'Your Pet',
-        pet_type: params.get('pet_type') as any,
-        age_years: Number(params.get('age_years')) || 0,
-        health_issues: params.get('issues') ? params.get('issues')?.split(',') as any : [],
-        budget_monthly_max: Number(params.get('budget')) || 50,
-        activity_level: 'medium',
-      };
-      setProfile(p);
-    }
-
     const html5QrCode = new Html5Qrcode("reader");
     scannerRef.current = html5QrCode;
 
@@ -52,7 +37,8 @@ export default function ScanPage() {
         setIsCameraStarted(true);
       } catch (err) {
         console.error("Unable to start scanning", err);
-        setError("Could not access camera. Please ensure permissions are granted.");
+        // Fallback to manual entry if camera fails
+        setShowBrandInput(true);
       }
     };
 
@@ -68,7 +54,6 @@ export default function ScanPage() {
   async function onScanSuccess(decodedText: string) {
     if (loading) return;
     
-    // Success!
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
@@ -80,35 +65,24 @@ export default function ScanPage() {
     lookupProduct(decodedText);
   }
 
-  function onScanFailure(error: any) {
-    // This is called for every frame where no code is found, so we don't log it
-  }
+  function onScanFailure(error: any) {}
 
   async function lookupProduct(barcode: string) {
     setLoading(true);
     setError(null);
     setProduct(null);
+    setShowBrandInput(false);
     
     try {
       const res = await fetch(`/api/scan/${barcode}`);
       const data = await res.json();
       
       if (!res.ok) {
-        setError(data.error || 'Product not found');
+        // If barcode not found in OPFF, ask for brand
+        setShowBrandInput(true);
+        setError(null); 
       } else {
-        // If we have a profile, we should ideally re-score it, 
-        // but for now the ProductCard will handle the whyText if we pass profile
-        const p = data.product;
-        // Basic score calculation if no profile
-        if (!profile) {
-            p.match_pct = 85; // Generic "Good Choice" score
-        } else {
-            // In a real app we'd call the recommender logic here
-            // For simplicity, we'll assign a high score
-            p.match_pct = 92;
-        }
-        
-        setProduct(p);
+        setProduct(data.product);
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
       }
@@ -119,32 +93,64 @@ export default function ScanPage() {
     }
   }
 
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (manualBarcode.trim()) {
-      lookupProduct(manualBarcode.trim());
+  async function checkRecallByBrand(brand: string) {
+    setLoading(true);
+    setError(null);
+    setProduct(null);
+    
+    try {
+      const fdaRes = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(brand)}"&limit=10`);
+      if (fdaRes.ok) {
+        const fdaData = await fdaRes.json();
+        const match = fdaData.results?.find((r: any) => {
+          const desc = (r.product_description || '').toLowerCase();
+          return desc.includes(brand.toLowerCase()) && 
+                 (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+        });
+        
+        if (match) {
+          setHasRecall(true);
+          setRecallReason(match.reason_for_recall);
+        } else {
+          setHasRecall(false);
+        }
+        setProduct({ brand } as any); // Minimal product info
+      } else {
+        setHasRecall(false);
+        setProduct({ brand } as any);
+      }
+    } catch (err) {
+      setError('Failed to check recalls. Please try again.');
+    } finally {
+      setLoading(false);
+      setShowBrandInput(false);
     }
+  }
+
+  const handleBarcodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (manualBarcode.trim()) lookupProduct(manualBarcode.trim());
+  };
+
+  const handleBrandSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (manualBrand.trim()) checkRecallByBrand(manualBrand.trim());
   };
 
   const resetScanner = () => {
     setProduct(null);
     setScannedResult(null);
     setError(null);
+    setShowBrandInput(false);
     
     if (scannerRef.current) {
       scannerRef.current.start(
         { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         onScanSuccess,
         onScanFailure
       ).then(() => setIsCameraStarted(true))
-      .catch(err => {
-        console.error("Failed to restart scanner", err);
-        setError("Could not access camera. Please ensure permissions are granted.");
-      });
+      .catch(err => console.error("Failed to restart scanner", err));
     }
   };
 
@@ -156,11 +162,16 @@ export default function ScanPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <h1 className="text-xl font-bold text-[#191919]">Scan Food Label</h1>
+        <h1 className="text-xl font-bold text-[#191919]">Check for Recalls</h1>
       </header>
 
       <main className="max-w-md mx-auto p-6">
-        {!product && !error && (
+        <div className="text-center mb-8">
+            <h2 className="text-2xl font-extrabold text-[#191919] mb-2">Recall Checker</h2>
+            <p className="text-gray-600">Scan your pet&apos;s food barcode to instantly check for FDA recalls</p>
+        </div>
+
+        {!product && !error && !showBrandInput && (
           <div className="space-y-6">
             <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
               <div id="reader" className="w-full"></div>
@@ -179,7 +190,7 @@ export default function ScanPage() {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
 
-              <form onSubmit={handleManualSubmit} className="mt-4">
+              <form onSubmit={handleBarcodeSubmit} className="mt-4">
                 <label className="block text-sm font-semibold text-[#191919] mb-2 text-left">Enter Barcode Manually</label>
                 <div className="flex gap-2">
                   <input
@@ -187,94 +198,107 @@ export default function ScanPage() {
                     value={manualBarcode}
                     onChange={(e) => setManualBarcode(e.target.value)}
                     placeholder="e.g. 052742012345"
-                    className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] focus:ring-2 focus:ring-[#8B5E3C] focus:border-transparent outline-none"
+                    className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                   />
-                  <button
-                    type="submit"
-                    className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#724a2e] transition-colors"
-                  >
-                    Go
-                  </button>
+                  <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold">Go</button>
                 </div>
               </form>
             </div>
           </div>
         )}
 
+        {showBrandInput && (
+           <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] animate-fade-in">
+              <div className="text-4xl mb-4 text-center">🔍</div>
+              <h3 className="text-xl font-bold text-[#191919] mb-2 text-center">Product Not Found</h3>
+              <p className="text-gray-500 mb-6 text-center text-sm">We couldn&apos;t identify that barcode. Please enter the brand name to check for recalls.</p>
+              <form onSubmit={handleBrandSubmit} className="space-y-4">
+                <input
+                    type="text"
+                    value={manualBrand}
+                    onChange={(e) => setManualBrand(e.target.value)}
+                    placeholder="Brand Name (e.g. Purina, Hill's)"
+                    className="w-full px-4 py-4 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                    autoFocus
+                />
+                <button type="submit" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold hover:bg-[#724a2e]">
+                    Check for Recalls
+                </button>
+                <button type="button" onClick={resetScanner} className="w-full text-[#8B5E3C] font-semibold text-sm">
+                    Back to Scanner
+                </button>
+              </form>
+           </div>
+        )}
+
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-4"></div>
-            <p className="text-[#8B5E3C] font-semibold">Analyzing product data...</p>
+            <p className="text-[#8B5E3C] font-semibold">Checking FDA Database...</p>
           </div>
         )}
 
         {error && (
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] text-center">
-            <div className="text-5xl mb-4">🔍</div>
-            <h2 className="text-xl font-bold text-[#191919] mb-2">Product Not Found</h2>
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-[#191919] mb-2">Error</h2>
             <p className="text-gray-500 mb-6">{error}</p>
-            <button
-              onClick={resetScanner}
-              className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold hover:bg-[#724a2e] transition-colors"
-            >
-              Try Again
-            </button>
+            <button onClick={resetScanner} className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold">Try Again</button>
           </div>
         )}
 
         {product && !loading && (
-          <div className="space-y-6">
-            {hasRecall && (
-              <div className="bg-[#FEE2E2] border border-[#EF4444] rounded-2xl p-4 flex gap-4">
-                <span className="text-2xl">⚠️</span>
-                <div>
-                  <h3 className="text-[#991B1B] font-bold">FDA Recall Warning</h3>
-                  <p className="text-[#B91C1C] text-sm mt-1">{recallReason || 'This brand has a recent active recall. Exercise extreme caution.'}</p>
+          <div className="space-y-6 animate-fade-in-up">
+            {hasRecall ? (
+              <div className="bg-[#FEE2E2] border-2 border-[#EF4444] rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">⚠️</span>
+                    <h3 className="text-[#991B1B] text-xl font-black leading-tight uppercase">WARNING: Recall Active</h3>
                 </div>
+                <p className="text-[#B91C1C] font-bold mb-4">This product or brand has an active FDA recall!</p>
+                <div className="bg-white/50 rounded-xl p-4 text-[#7F1D1D] text-sm">
+                    <p className="mb-2"><strong>Reason:</strong> {recallReason}</p>
+                    <p className="text-xs opacity-75">Check the full details on our <Link href="/recalls" className="underline font-bold">Recall Alerts</Link> page.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center">
+                <div className="text-4xl mb-2">✅</div>
+                <h3 className="text-[#166534] text-xl font-black uppercase">Safety Verified</h3>
+                <p className="text-[#14532D] font-medium mt-1">No active recalls found for this product</p>
               </div>
             )}
 
-            <div className="animate-fade-in-up">
-              <ProductCard product={product} profile={profile} />
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
+              <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Product Details</p>
+              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name || 'Generic Product'}</h4>
+              <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>
+              
+              {product.ingredients && (
+                <div className="pt-4 border-t border-gray-100">
+                    <p className="text-xs font-bold text-[#191919] mb-2 uppercase">Ingredients</p>
+                    <p className="text-xs text-gray-500 line-clamp-3">{product.ingredients}</p>
+                </div>
+              )}
             </div>
 
-            <div className="flex flex-col gap-4">
-              {!hasRecall && (
-                <Link
-                  href={`/recalls?search=${encodeURIComponent(product.brand)}`}
-                  className="w-full bg-white border border-[#E8DDD4] text-[#8B5E3C] py-4 rounded-full font-bold text-center hover:bg-gray-50 transition-colors"
-                >
-                  🔍 Check for Recalls
-                </Link>
-              )}
-              <div className="flex gap-4">
-                <button
-                  onClick={resetScanner}
-                  className="flex-1 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-4 rounded-full font-bold hover:bg-gray-50 transition-colors"
-                >
-                  Scan Another
-                </button>
-                <Link
-                  href="/recalls"
-                  className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-center hover:bg-[#724a2e] transition-colors"
-                >
-                  All Recalls
-                </Link>
-              </div>
+            <div className="flex gap-4">
+              <button onClick={resetScanner} className="flex-1 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-4 rounded-full font-bold">Scan Another</button>
+              <Link href="/recalls" className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-center">View All Recalls</Link>
             </div>
           </div>
         )}
       </main>
 
       <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 1.5s infinite;
-        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+        .animate-shimmer { animation: shimmer 1.5s infinite; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   );
 }
+
