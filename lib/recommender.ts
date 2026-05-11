@@ -70,114 +70,113 @@ function hasAvoidedIngredients(product: Product, avoidText?: string): boolean {
 // ─── Main recommendation engine ───────────────────────────────────────────────
 export function recommendProducts(
   products: Product[],
-  profile: PetProfile,
-  relaxBudget = false
+  profile: PetProfile
 ): { results: ScoredProduct[]; budgetRelaxed: boolean; fallback: boolean } {
   const lifeStage = deriveLifeStage(profile.pet_type, profile.age_years);
-  const budget = relaxBudget
-    ? Math.round(profile.budget_monthly_max * 1.2)
-    : profile.budget_monthly_max;
+  const budget = profile.budget_monthly_max;
 
-  // Step 1 & 2: Filter by pet type and life stage
+  // Step 1: Filter by pet type and life stage (include adult if senior/puppy/kitten pool is small)
   let filtered = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
-  
-  // If we have very few results for a specific life stage (like senior), include 'adult' foods as a fallback
-  if (filtered.length < 5 && lifeStage !== 'adult') {
+  if (filtered.length < 10 && lifeStage !== 'adult') {
     const adultFoods = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult');
     filtered = [...filtered, ...adultFoods];
   }
 
-  // Step 2.5: Strictly filter by food type if requested
+  // Step 2: Filter out avoided ingredients
+  filtered = filtered.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
+
+  // Step 3: Filter by food type if requested (but keep as option if pool is small)
+  let pool = filtered;
   if (profile.food_type && profile.food_type !== 'both') {
     const typeFiltered = filtered.filter(p => getProductFoodType(p) === profile.food_type);
-    // Only apply strict filter if it leaves us with at least 3 products to show
-    if (typeFiltered.length >= 3) {
-      filtered = typeFiltered;
+    if (typeFiltered.length >= 5) {
+      pool = typeFiltered;
     }
   }
 
-  // Step 3: Filter by budget
-  let budgetFiltered = filtered.filter(p => p.price_monthly_low <= budget);
-
-  // Step 4: Filter out avoided ingredients
-  budgetFiltered = budgetFiltered.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
-
-  // Step 5: Score remaining
-  const scored: ScoredProduct[] = budgetFiltered.map(p => {
+  // Step 4: Score all products in the pool
+  const allScored: ScoredProduct[] = pool.map(p => {
     const score = scoreProduct(p, profile);
-    let maxScore = profile.health_issues.length * 20 + 20; // base max
-    if (profile.food_type && profile.food_type !== 'both') maxScore += 30;
-    if (profile.budget_monthly_max >= 80) maxScore += 20;
-    else if (profile.budget_monthly_max >= 50) maxScore += 15;
-    
-    const normalizedMax = Math.max(maxScore, 30);
-    const match_pct = Math.min(99, Math.round(50 + (score / normalizedMax) * 49));
+    let maxScoreCalc = profile.health_issues.length * 20 + 20;
+    if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
+    if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
+    else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
+
+    const maxScore = Math.max(maxScoreCalc, 30);
+    const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
     return {
       ...p,
       score,
       match_pct,
       why_recommended: buildWhyTag(p, profile),
-      budget_relaxed: relaxBudget,
+      budget_relaxed: p.price_monthly_low > budget,
     };
   });
 
   // Sort by score descending
-  scored.sort((a, b) => b.score - a.score);
-
-  // Step 6: Brand diversity — max 2 results per brand in the top 5
-  const diversified: ScoredProduct[] = [];
-  const brandCounts: Record<string, number> = {};
-  for (const p of scored) {
-    const brand = (p.brand || 'unknown').toLowerCase().trim();
-    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
-    if (brandCounts[brand] <= 2) {
-      diversified.push(p);
-    }
-    if (diversified.length >= 5) break;
-  }
-  // Fill remaining slots if diversification left us short
-  if (diversified.length < Math.min(5, scored.length)) {
-    for (const p of scored) {
-      if (!diversified.includes(p)) diversified.push(p);
-      if (diversified.length >= 5) break;
-    }
-  }
-
-  if (diversified.length >= 3) {
-    return { results: diversified.slice(0, 5), budgetRelaxed: relaxBudget, fallback: false };
-  }
-
-  // Step 7: Fewer than 3 — relax budget by 20% and retry
-  if (!relaxBudget) {
-    return recommendProducts(products, profile, true);
-  }
-
-  // Step 8: Still 0 — return top 3 highest scored ignoring budget
-  const allScored: ScoredProduct[] = filtered
-    .filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients))
-    .map(p => {
-      const score = scoreProduct(p, profile);
-      let maxScoreCalc = profile.health_issues.length * 20 + 20;
-      if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
-      if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
-      else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
-
-      const maxScore = Math.max(maxScoreCalc, 30);
-      const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
-      return {
-        ...p,
-        score,
-        match_pct,
-        why_recommended: buildWhyTag(p, profile),
-        budget_relaxed: true,
-      };
-    });
-
   allScored.sort((a, b) => b.score - a.score);
 
+  // Step 5: Selection with Budget Priority and Diversity
+  const selected: ScoredProduct[] = [];
+  const brandCounts: Record<string, number> = {};
+
+  function tryAdd(p: ScoredProduct) {
+    const brand = (p.brand || 'unknown').toLowerCase().trim();
+    if ((brandCounts[brand] || 0) < 2) {
+      selected.push(p);
+      brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+      return true;
+    }
+    return false;
+  }
+
+  // 5a. Within budget (strict)
+  const withinBudget = allScored.filter(p => p.price_monthly_low <= budget);
+  for (const p of withinBudget) {
+    if (tryAdd(p)) {
+      if (selected.length >= 5) break;
+    }
+  }
+
+  // 5b. Slightly over budget (up to 20%)
+  if (selected.length < 5) {
+    const slightlyOver = allScored.filter(p => p.price_monthly_low > budget && p.price_monthly_low <= budget * 1.2);
+    for (const p of slightlyOver) {
+      if (!selected.find(s => s.id === p.id)) {
+        if (tryAdd(p)) {
+          if (selected.length >= 5) break;
+        }
+      }
+    }
+  }
+
+  // 5c. Anything else (fallback) if we still don't have 5
+  if (selected.length < 5) {
+    for (const p of allScored) {
+      if (!selected.find(s => s.id === p.id)) {
+        if (tryAdd(p)) {
+          if (selected.length >= 5) break;
+        }
+      }
+    }
+  }
+
+  // Final check: if still under 5, just add whatever is left ignoring diversity
+  if (selected.length < 5) {
+    for (const p of allScored) {
+      if (!selected.find(s => s.id === p.id)) {
+        selected.push(p);
+        if (selected.length >= 5) break;
+      }
+    }
+  }
+
+  const anyRelaxed = selected.some(p => p.price_monthly_low > budget);
+  const anyFallback = selected.some(p => p.price_monthly_low > budget * 1.2);
+
   return {
-    results: allScored.slice(0, 3),
-    budgetRelaxed: true,
-    fallback: true,
+    results: selected.slice(0, 5),
+    budgetRelaxed: anyRelaxed,
+    fallback: anyFallback,
   };
 }

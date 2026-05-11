@@ -68,6 +68,11 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
       <div style={{ marginBottom: '16px' }}>
          <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
              <p style={{ fontSize: '14px', color: '#78350F', fontWeight: 500, margin: 0, lineHeight: 1.4 }}>✨ {whyText}</p>
+             {product.budget_relaxed && (
+               <p style={{ fontSize: '12px', color: '#92400E', fontWeight: 700, margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                 <span style={{ fontSize: '14px' }}>💰</span> Slightly above your budget
+               </p>
+             )}
          </div>
         
         <div style={{ fontSize: '14px', color: '#555555' }}>
