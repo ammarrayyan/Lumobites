@@ -135,7 +135,7 @@ function buildProsCons(raw: any): { pros: string; cons: string } {
 }
 
 // ─── Transform raw API product → our Product interface ────────────────────────
-function transformProduct(raw: any, petType: PetType, index: number): Product | null {
+function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLookup = false): Product | null {
   const name = raw.product_name_en || raw.product_name || '';
   const brand = (raw.brands || '').split(',')[0].trim();
 
@@ -152,33 +152,35 @@ function transformProduct(raw: any, petType: PetType, index: number): Product | 
   if (!brand || brand.length < 2) return null;
 
   // ── US & English filters ────────────────────────────────────────────────────
-  // Reject non-English product names (contain accented/non-Latin characters typical of French/Spanish)
-  const nonEnglishPattern = /[\u00C0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\u0600-\u06FF]/;
-  if (nonEnglishPattern.test(name)) return null;
+  if (!isBarcodeLookup) {
+    // Reject non-English product names (contain accented/non-Latin characters typical of French/Spanish)
+    const nonEnglishPattern = /[\u00C0-\u024F\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\u0600-\u06FF]/;
+    if (nonEnglishPattern.test(name)) return null;
 
-  // Reject names that look like French or German (common non-English words)
-  const foreignWordPattern = /\b(pour|chien|chat|chats|chiens|avec|sans|nourriture|adulte|junior|croquettes|pâtée|patée|für|hund|katze|hundefutter|katzenfutter|perro|gato|para|para|alimento|comida|pienso|hundefoder|kattmat)\b/i;
-  if (foreignWordPattern.test(name)) return null;
+    // Reject names that look like French or German (common non-English words)
+    const foreignWordPattern = /\b(pour|chien|chat|chats|chiens|avec|sans|nourriture|adulte|junior|croquettes|pâtée|patée|für|hund|katze|hundefutter|katzenfutter|perro|gato|para|para|alimento|comida|pienso|hundefoder|kattmat)\b/i;
+    if (foreignWordPattern.test(name)) return null;
 
-  // Require product to be sold in the US
-  const countries: string[] = raw.countries_tags || [];
-  const soldInUS = countries.length === 0 || countries.some((c: string) =>
-    c === 'en:united-states' || c === 'en:us' || c === 'united-states'
-  );
-  if (!soldInUS) return null;
+    // Require product to be sold in the US
+    const countries: string[] = raw.countries_tags || [];
+    const soldInUS = countries.length === 0 || countries.some((c: string) =>
+      c === 'en:united-states' || c === 'en:us' || c === 'united-states'
+    );
+    if (!soldInUS) return null;
+  }
 
   const nutriments = raw.nutriments || {};
   const proteinVal = nutriments['proteins_100g'] || nutriments['proteins'];
   const fatVal = nutriments['fat_100g'] || nutriments['fat'];
   
   // Stricter requirement: Must have at least protein OR fat to be considered a valid product record
-  if (!proteinVal && !fatVal) return null;
+  if (!proteinVal && !fatVal && !isBarcodeLookup) return null;
 
   const proteinPct = Math.round((parseFloat(proteinVal || '0') || 0) * 10) / 10;
   const fatPct = Math.round((parseFloat(fatVal || '0') || 0) * 10) / 10;
   const fiberPct = Math.round((parseFloat(nutriments['fiber_100g'] || nutriments['fiber'] || '0') || 0) * 10) / 10;
 
-  const price = estimatePrice(brand);
+  const price = isBarcodeLookup ? { low: 0, high: 0 } : estimatePrice(brand);
   const lifeStage = inferLifeStage(petType, name);
   const healthTags = inferHealthTags(ingredients, name);
   const { pros, cons } = buildProsCons(raw);
@@ -296,7 +298,7 @@ export async function fetchProductByBarcode(barcode: string): Promise<Product | 
     const searchStr = (raw.product_name + ' ' + (raw.categories || '')).toLowerCase();
     const petType: PetType = searchStr.includes('cat') ? 'cat' : 'dog';
     
-    return transformProduct(raw, petType, 0);
+    return transformProduct(raw, petType, 0, true);
   } catch (err) {
     console.error('Barcode fetch error:', err);
     return null;
