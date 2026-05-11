@@ -298,7 +298,11 @@ export default function ScanPage() {
                   const res = await fetch('/api/recall-subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, brand: product.brand })
+                    body: JSON.stringify({ 
+                      email, 
+                      pet_type: product.pet_type || 'dog', 
+                      product_names: [product.brand].filter(Boolean)
+                    })
                   });
                   if (res.ok) alert("You're subscribed to recall alerts!");
                   else alert("Something went wrong. Please try again.");
