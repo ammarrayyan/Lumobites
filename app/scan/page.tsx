@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
@@ -16,7 +16,8 @@ export default function ScanPage() {
   const [manualBarcode, setManualBarcode] = useState('');
   const [profile, setProfile] = useState<PetProfile | null>(null);
   
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const [isCameraStarted, setIsCameraStarted] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
     // Try to load profile from URL params or sessionStorage
@@ -34,33 +35,49 @@ export default function ScanPage() {
       setProfile(p);
     }
 
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      /* verbose= */ false
-    );
+    const html5QrCode = new Html5Qrcode("reader");
+    scannerRef.current = html5QrCode;
 
-    scanner.render(onScanSuccess, onScanFailure);
-    scannerRef.current = scanner;
+    const startScanner = async () => {
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          onScanSuccess,
+          onScanFailure
+        );
+        setIsCameraStarted(true);
+      } catch (err) {
+        console.error("Unable to start scanning", err);
+        setError("Could not access camera. Please ensure permissions are granted.");
+      }
+    };
+
+    startScanner();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(err => console.error("Failed to clear scanner", err));
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(err => console.error("Failed to stop scanner", err));
       }
     };
   }, []);
 
   async function onScanSuccess(decodedText: string) {
     if (loading) return;
-    setScannedResult(decodedText);
-    lookupProduct(decodedText);
     
-    // Stop scanner after success to focus on result
+    // Success!
     if (scannerRef.current) {
       try {
-        await scannerRef.current.clear();
+        await scannerRef.current.stop();
+        setIsCameraStarted(false);
       } catch (e) {}
     }
+
+    setScannedResult(decodedText);
+    lookupProduct(decodedText);
   }
 
   function onScanFailure(error: any) {
@@ -114,14 +131,21 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     
-    // Re-initialize scanner
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      false
-    );
-    scanner.render(onScanSuccess, onScanFailure);
-    scannerRef.current = scanner;
+    if (scannerRef.current) {
+      scannerRef.current.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        onScanSuccess,
+        onScanFailure
+      ).then(() => setIsCameraStarted(true))
+      .catch(err => {
+        console.error("Failed to restart scanner", err);
+        setError("Could not access camera. Please ensure permissions are granted.");
+      });
+    }
   };
 
   return (
