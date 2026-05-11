@@ -60,7 +60,7 @@ export default function Home() {
             <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
             </Link>
-            <Link href="/scan" className="hover:underline transition-all" style={{ fontSize: '13px', color: '#7A6050', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+            <Link href="/scan" className="hover:underline transition-all" style={{ fontSize: '15px', color: '#8B5E3C', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', marginTop: '8px' }}>
               <span>⚠️</span> Check if Your Pet&apos;s Food is Recalled
             </Link>
           </div>
