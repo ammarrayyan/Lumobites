@@ -2,10 +2,14 @@ import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
-  const text = (product.product_name + ' ' + product.pros + ' ' + product.cons).toLowerCase();
-  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable')) return 'treats';
-  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy')) return 'wet';
-  if (text.includes('kibble') || text.includes('dry')) return 'dry';
+  const text = (product.product_name + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
+  
+  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky')) return 'treats';
+  
+  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy') || text.includes('moist') || text.includes('shredded') || text.includes('morsel')) return 'wet';
+  
+  if (text.includes('kibble') || text.includes('dry') || text.includes('crunchy') || text.includes('baked')) return 'dry';
+  
   return 'dry'; // default
 }
 
@@ -85,13 +89,10 @@ export function recommendProducts(
   // Step 2: Filter out avoided ingredients
   filtered = filtered.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
 
-  // Step 3: Filter by food type if requested (but keep as option if pool is small)
+  // Step 3: Filter by food type if requested (STRICT)
   let pool = filtered;
   if (profile.food_type && profile.food_type !== 'both') {
-    const typeFiltered = filtered.filter(p => getProductFoodType(p) === profile.food_type);
-    if (typeFiltered.length >= 5) {
-      pool = typeFiltered;
-    }
+    pool = filtered.filter(p => getProductFoodType(p) === profile.food_type);
   }
 
   // Step 4: Score all products in the pool

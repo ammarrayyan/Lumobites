@@ -1,4 +1,4 @@
-import { Product, HealthTag, LifeStage, PetType } from './types';
+import { Product, HealthTag, LifeStage, PetType, FoodType } from './types';
 
 const BASE_URL = 'https://world.openpetfoodfacts.org/cgi/search.pl';
 const AFFILIATE_TAG = 'lumobites-20';
@@ -249,7 +249,7 @@ async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
 }
 
 // ─── Main fetch function ───────────────────────────────────────────────────────
-export async function fetchPetFoodProducts(petType: PetType, pageSize = 50): Promise<Product[]> {
+export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, foodType?: FoodType): Promise<Product[]> {
   // We use specific, diverse brand searches instead of generic "dog food chicken" to guarantee variety
   const topDogBrands = ['Purina', "Hill's", 'Blue Buffalo', 'Wellness', 'Orijen', 'Taste of the Wild', 'Merrick', 'Canidae', 'Nutro', 'Iams', 'Pedigree', 'Victor', 'Diamond'];
   const topCatBrands = ['Purina', "Hill's", 'Fancy Feast', 'Friskies', 'Wellness', 'Tiki Cat', 'Orijen', 'Weruva', 'Blue Buffalo', 'Iams', 'Meow Mix', '9Lives'];
@@ -260,7 +260,12 @@ export async function fetchPetFoodProducts(petType: PetType, pageSize = 50): Pro
   const shuffled = pool.sort(() => 0.5 - Math.random());
   const selectedBrands = shuffled.slice(0, 5);
   
-  const queries = selectedBrands.map(brand => `${brand} ${petType} food`);
+  // Refine query based on food type
+  const typeStr = foodType === 'treats' ? 'treats' : 
+                 foodType === 'wet' ? 'wet food' :
+                 foodType === 'dry' ? 'dry food' : 'food';
+
+  const queries = selectedBrands.map(brand => `${brand} ${petType} ${typeStr}`);
 
   const perQuery = Math.ceil(pageSize / queries.length);
 
