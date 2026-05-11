@@ -154,7 +154,7 @@ export default function ResultsPage() {
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
               style={{ fontSize: '13px', padding: '8px 16px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #E8DDD4', display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '600', flexShrink: 0 }}
             >
-              📷 Scan
+              ⚠️ Recall Check
             </Link>
           </div>
         )}
