@@ -216,14 +216,13 @@ export default function ScanPage() {
         {showBrandInput && (
            <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] animate-fade-in">
               <div className="text-4xl mb-4 text-center">🔍</div>
-              <h3 className="text-xl font-bold text-[#191919] mb-2 text-center">Product Not Found</h3>
-              <p className="text-gray-500 mb-6 text-center text-sm">We couldn&apos;t identify that barcode. Please enter the brand name to check for recalls.</p>
+              <h3 className="text-xl font-bold text-[#191919] mb-6 text-center">Enter brand name to check FDA recalls</h3>
               <form onSubmit={handleBrandSubmit} className="space-y-4">
                 <input
                     type="text"
                     value={manualBrand}
                     onChange={(e) => setManualBrand(e.target.value)}
-                    placeholder="Brand Name (e.g. Purina, Hill's)"
+                    placeholder="e.g. Purina, Hill's, Blue Buffalo"
                     className="w-full px-4 py-4 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                     autoFocus
                 />
@@ -277,11 +276,11 @@ export default function ScanPage() {
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
               <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Product Details</p>
-              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name}</h4>
-              <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>
+              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name || product.brand}</h4>
+              {product.product_name && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
               
               {product.ingredients && (
-                <div className="pt-4 border-t border-gray-100">
+                <div className="pt-4 border-t border-gray-100 mt-4">
                     <p className="text-xs font-bold text-[#191919] mb-2 uppercase">Ingredients</p>
                     <p className="text-xs text-gray-500 line-clamp-3">{product.ingredients}</p>
                 </div>
