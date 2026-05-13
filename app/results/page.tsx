@@ -42,7 +42,8 @@ export default function ResultsPage() {
           breed: undefined,
           activity_level: 'medium',
           avoid_ingredients: undefined,
-          food_type: params.get('food_type') as any
+          food_type: params.get('food_type') as any,
+          brand: brandParam || undefined
         };
         
         setProfile(parsedProfile);
@@ -63,17 +64,11 @@ export default function ResultsPage() {
 
         let finalResults = fixedResults;
         if (brandParam) {
-           const filtered = fixedResults.filter((r: any) => 
+           finalResults = fixedResults.filter((r: any) => 
              r.brand?.toLowerCase().includes(brandParam.toLowerCase()) || 
              brandParam.toLowerCase().includes(r.brand?.toLowerCase())
            );
-           if (filtered.length >= 3) {
-             finalResults = filtered;
-             setBrandFallback(false);
-           } else {
-             finalResults = fixedResults;
-             setBrandFallback(true);
-           }
+           setBrandFallback(finalResults.length === 0);
         }
 
         setResults(finalResults);
@@ -194,9 +189,9 @@ export default function ResultsPage() {
             </div>
             <Link 
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
-              style={{ fontSize: '13px', padding: '8px 16px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #E8DDD4', display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '600', flexShrink: 0 }}
+              style={{ fontSize: '13px', padding: '8px 18px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
             >
-              ⚠️ Recall Check
+              <span className="text-[#8B5E3C] opacity-70">🔍</span> Recall Check
             </Link>
           </div>
         )}

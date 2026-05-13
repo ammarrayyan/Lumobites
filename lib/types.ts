@@ -24,6 +24,7 @@ export interface PetProfile {
   budget_monthly_max: number;
   avoid_ingredients?: string;
   food_type?: FoodType;
+  brand?: string;
   created_at?: string;
 }
 

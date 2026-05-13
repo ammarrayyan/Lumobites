@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     // Try to fetch from Open Pet Food Facts API
     try {
-      products = await fetchPetFoodProducts(profile.pet_type, 300, profile.food_type);
+      products = await fetchPetFoodProducts(profile.pet_type, 300, profile.food_type, profile.brand);
       
       // Fallback ONLY if OPFF returns exactly 0 results
       if (products.length === 0) {

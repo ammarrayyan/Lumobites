@@ -250,16 +250,21 @@ async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
 }
 
 // ─── Main fetch function ───────────────────────────────────────────────────────
-export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, foodType?: FoodType): Promise<Product[]> {
-  // We use specific, diverse brand searches instead of generic "dog food chicken" to guarantee variety
+export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, foodType?: FoodType, brand?: string): Promise<Product[]> {
+  // If a specific brand is requested, we only fetch that brand
+  // Otherwise we use a diverse set of top brands
   const topDogBrands = ['Purina', "Hill's", 'Blue Buffalo', 'Wellness', 'Orijen', 'Taste of the Wild', 'Merrick', 'Canidae', 'Nutro', 'Iams', 'Pedigree', 'Victor', 'Diamond'];
   const topCatBrands = ['Purina', "Hill's", 'Fancy Feast', 'Friskies', 'Wellness', 'Tiki Cat', 'Orijen', 'Weruva', 'Blue Buffalo', 'Iams', 'Meow Mix', '9Lives'];
   
-  const pool = petType === 'cat' ? topCatBrands : topDogBrands;
+  let selectedBrands: string[] = [];
   
-  // Randomly pick 4-5 brands to fetch for this specific request to ensure varied results every time
-  const shuffled = pool.sort(() => 0.5 - Math.random());
-  const selectedBrands = shuffled.slice(0, 5);
+  if (brand) {
+    selectedBrands = [brand];
+  } else {
+    const pool = petType === 'cat' ? topCatBrands : topDogBrands;
+    const shuffled = pool.sort(() => 0.5 - Math.random());
+    selectedBrands = shuffled.slice(0, 5);
+  }
   
   // Refine query based on food type - Use specific OPFF categories
   let typeStr = 'pet food';
