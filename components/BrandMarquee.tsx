@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import Link from 'next/link';
 
 const brandsRow1 = [
   "Purina", "Hill's", "Royal Canin", "Iams", "Pedigree", "Whiskas", "Friskies", "Fancy Feast", "9Lives", "Kibbles 'n Bits",
@@ -14,6 +14,8 @@ const brandsRow2 = [
   "Fromm", "Halo", "Castor & Pollux", "Organix", "Victor"
 ];
 
+const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 export default function BrandMarquee() {
   return (
     <section className="w-full bg-white py-12 border-b border-[#EEEEEE] overflow-hidden">
@@ -25,11 +27,15 @@ export default function BrandMarquee() {
         {/* Row 1 - Left to Right */}
         <div className="marquee-container relative w-full overflow-hidden flex">
           <div className="marquee-content-right flex items-center whitespace-nowrap">
-            {/* Double the content to create a seamless loop */}
             {[...brandsRow1, ...brandsRow1].map((brand, i) => (
-              <span key={`r1-${i}`} className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] select-none" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
+              <Link 
+                key={`r1-${i}`} 
+                href={`/chat?brand=${slugify(brand)}`}
+                className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] hover:text-[#8B5E3C] transition-colors cursor-pointer no-underline select-none"
+                style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+              >
                 {brand}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -37,11 +43,15 @@ export default function BrandMarquee() {
         {/* Row 2 - Right to Left */}
         <div className="marquee-container relative w-full overflow-hidden flex">
           <div className="marquee-content-left flex items-center whitespace-nowrap">
-            {/* Double the content to create a seamless loop */}
             {[...brandsRow2, ...brandsRow2].map((brand, i) => (
-              <span key={`r2-${i}`} className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] select-none" style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
+              <Link 
+                key={`r2-${i}`} 
+                href={`/chat?brand=${slugify(brand)}`}
+                className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] hover:text-[#8B5E3C] transition-colors cursor-pointer no-underline select-none"
+                style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+              >
                 {brand}
-              </span>
+              </Link>
             ))}
           </div>
         </div>

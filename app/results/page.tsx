@@ -14,6 +14,8 @@ export default function ResultsPage() {
   const [budget, setBudget] = useState(50);
   const [budgetRelaxed, setBudgetRelaxed] = useState(false);
   const [fallback, setFallback] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [brandFallback, setBrandFallback] = useState(false);
   const [isBudgetUpdating, setIsBudgetUpdating] = useState(false);
 
   useEffect(() => {
@@ -21,6 +23,9 @@ export default function ResultsPage() {
       try {
         const params = new URLSearchParams(window.location.search);
         const petType = params.get('pet_type');
+        const brandParam = params.get('brand');
+        setSelectedBrand(brandParam);
+
         if (!petType) {
           window.location.href = '/chat';
           return;
@@ -55,14 +60,30 @@ export default function ResultsPage() {
           ...r,
           match_pct: overrideScores[i] || r.match_pct
         }));
-        setResults(fixedResults);
+
+        let finalResults = fixedResults;
+        if (brandParam) {
+           const filtered = fixedResults.filter((r: any) => 
+             r.brand?.toLowerCase().includes(brandParam.toLowerCase()) || 
+             brandParam.toLowerCase().includes(r.brand?.toLowerCase())
+           );
+           if (filtered.length >= 3) {
+             finalResults = filtered;
+             setBrandFallback(false);
+           } else {
+             finalResults = fixedResults;
+             setBrandFallback(true);
+           }
+        }
+
+        setResults(finalResults);
         setBudgetRelaxed(data.budgetRelaxed);
         setFallback(data.fallback);
 
         // Cache products in sessionStorage so the detail page can look them up
         try {
           const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
-          for (const p of fixedResults) {
+          for (const p of finalResults) {
             existing[p.id] = p;
           }
           sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
@@ -76,6 +97,14 @@ export default function ResultsPage() {
     
     fetchResults();
   }, []);
+
+  const clearBrandFilter = () => {
+    setSelectedBrand(null);
+    setBrandFallback(false);
+    const params = new URLSearchParams(window.location.search);
+    params.delete('brand');
+    window.location.href = `/results?${params.toString()}`;
+  };
 
   const handleBudgetChange = async (newBudget: number) => {
     setBudget(newBudget);
@@ -148,6 +177,19 @@ export default function ResultsPage() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#191919', marginBottom: '8px', lineHeight: 1.2 }}>
                 Best food for your {profile.pet_type || 'pet'}
               </h2>
+              {selectedBrand && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                  <div className="bg-[#8B5E3C] text-white px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-2 shadow-sm">
+                    Showing {selectedBrand} products only
+                    <button onClick={clearBrandFilter} className="hover:opacity-70 transition-opacity border-l border-white/30 pl-2 ml-1">✕</button>
+                  </div>
+                  {brandFallback && (
+                    <p className="text-[11px] text-[#8B5E3C] font-medium italic">
+                      Not enough {selectedBrand} products found — showing similar alternatives
+                    </p>
+                  )}
+                </div>
+              )}
               <p style={{ color: '#555555', margin: 0, fontSize: '14px' }}>Showing {results.length} results for your pet</p>
             </div>
             <Link 

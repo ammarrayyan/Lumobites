@@ -18,8 +18,18 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [parsedInfo, setParsedInfo] = useState<ParsedPetInfo>({});
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const brand = params.get('brand');
+    if (brand) {
+      const displayBrand = brand.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      setSelectedBrand(displayBrand);
+    }
+  }, []);
 
   // Health Chips State
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
@@ -325,6 +335,7 @@ export default function ChatPage() {
              if (currentInfo.health_issues && currentInfo.health_issues.length > 0) {
                params.append('issues', currentInfo.health_issues.join(','));
              }
+             if (selectedBrand) params.append('brand', selectedBrand);
              router.push(`/results?${params.toString()}`);
           }, 1500);
         }
@@ -358,8 +369,13 @@ export default function ChatPage() {
                 style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', margin: '-15px 0', transform: 'scale(1.4)', transformOrigin: 'left center' }}
               />
             </Link>
-            <p className="text-xs text-[#8B5E3C] font-semibold">Your Pet Advisor</p>
+            <p className="text-xs text-[#8B5E3C] font-semibold">Question {Math.min(6, Math.floor(step) + 1)} of 6</p>
           </div>
+          {selectedBrand && (
+            <div className="bg-[#8B5E3C] text-white py-1.5 px-4 text-[11px] font-bold text-center uppercase tracking-wider">
+               Finding the best {selectedBrand} products for your pet 🐾
+            </div>
+          )}
           <div style={{ width: '100%', height: '4px', backgroundColor: '#F5EDE4', borderRadius: '100px', overflow: 'hidden' }}>
             <div style={{ height: '100%', backgroundColor: '#8B5E3C', borderRadius: '100px', transition: 'width 0.4s ease', width: `${progress}%` }}></div>
           </div>
@@ -463,6 +479,19 @@ export default function ChatPage() {
 
         {/* Input */}
         <div style={{ padding: '20px', borderTop: '1px solid #E8DDD4', backgroundColor: '#FFFFFF' }}>
+          {step < 6 && (
+            <div className="mb-4 text-center px-4 py-2 bg-[#FDFAF7] rounded-xl border border-[#F5EDE4]">
+               <p className="text-[11px] text-[#8B5E3C] font-bold uppercase tracking-wider mb-1">Why this matters</p>
+               <p className="text-xs text-[#666666] leading-snug">
+                  {Math.floor(step) === 0 && "Helps us filter for species-specific nutritional needs"}
+                  {Math.floor(step) === 1 && "Helps us find food for the right life stage"}
+                  {Math.floor(step) === 2 && "Helps calculate the right portion and calorie needs"}
+                  {Math.floor(step) === 3 && "We'll prioritize ingredients that help with these conditions"}
+                  {Math.floor(step) === 4 && "We'll focus on your pet's preferred texture and type"}
+                  {Math.floor(step) === 5 && "We only show options within your monthly budget"}
+               </p>
+            </div>
+          )}
           <form onSubmit={handleFormSubmit} style={{ display: 'flex', gap: '12px', position: 'relative' }}>
             <input
               ref={inputRef}

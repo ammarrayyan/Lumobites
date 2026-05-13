@@ -60,8 +60,8 @@ export default function Home() {
             <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
             </Link>
-            <Link href="/scan" className="hover:opacity-90 transition-all shadow-sm" style={{ fontSize: '14px', padding: '12px 32px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#B91C1C', borderRadius: '100px', fontWeight: '700' }}>
-              <span>⚠️</span> Check for FDA Recalls
+            <Link href="/scan" className="hover:opacity-80 transition-all" style={{ fontSize: '14px', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', marginTop: '4px', fontWeight: '600' }}>
+              <span>🔍</span> Check if your pet&apos;s food is recalled
             </Link>
           </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
