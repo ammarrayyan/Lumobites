@@ -61,7 +61,7 @@ export default function Home() {
               Find Your Pet&apos;s Food &rarr;
             </Link>
             <Link href="/scan" className="hover:underline transition-all mt-4 opacity-80" style={{ fontSize: '14px', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontWeight: '600' }}>
-              <span>⚠️</span> Check if your pet&apos;s food is recalled
+              <span>🐾</span> Is your pet&apos;s food safe? Scan to find out &rarr;
             </Link>
           </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -113,7 +113,7 @@ export default function Home() {
         <div className="max-w-[1000px] mx-auto bg-[#F5EDE4] rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-4">Safety First</h3>
-            <h2 className="text-3xl md:text-4xl font-black text-[#191919] mb-6 leading-tight tracking-tight">Check Your Pet&apos;s Food Ingredients</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-[#191919] mb-6 leading-tight tracking-tight">Is Your Pet&apos;s Food Safe?</h2>
             <p className="text-gray-600 mb-0 leading-relaxed">
               Not sure if your pet&apos;s current food is safe? Paste the ingredients to check for hidden toxins, artificial colors, and low-quality fillers.
             </p>
@@ -124,8 +124,8 @@ export default function Home() {
                    <p className="text-sm text-gray-400 italic font-medium">Chicken, Corn Syrup, BHA, Red 40...</p>
                 </div>
              </div>
-             <Link href="/ingredients" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                Check My Ingredients &rarr;
+             <Link href="/scan" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                Is My Pet&apos;s Food Safe? &rarr;
              </Link>
           </div>
         </div>
@@ -242,8 +242,7 @@ export default function Home() {
             <ul className="space-y-3 text-sm" style={{ color: '#AAAAAA', listStyle: 'none', padding: 0, margin: 0 }}>
               <li><a href="#how" style={{ color: '#AAAAAA', textDecoration: 'none' }}>How it works</a></li>
               <li><Link href="/chat" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Compare Foods</Link></li>
-              <li><Link href="/ingredients" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Ingredient Checker</Link></li>
-              <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Recall Checker</Link></li>
+              <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Is My Pet&apos;s Food Safe?</Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
           </div>

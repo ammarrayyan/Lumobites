@@ -189,9 +189,9 @@ export default function ResultsPage() {
             </div>
             <Link 
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
-              style={{ fontSize: '13px', padding: '8px 18px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
+              style={{ fontSize: '13px', padding: '8px 20px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
             >
-              <span className="text-[#8B5E3C] opacity-70">🔍</span> Recall Check
+              <span>🐾</span> Is this food safe?
             </Link>
           </div>
         )}

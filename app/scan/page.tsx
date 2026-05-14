@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
+import { ingredientDatabase, IngredientInfo } from '@/lib/ingredients';
+
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -14,7 +16,14 @@ export default function ScanPage() {
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
   const [manualBrand, setManualBrand] = useState('');
+  const [manualIngredients, setManualIngredients] = useState('');
   const [showBrandInput, setShowBrandInput] = useState(false);
+  const [safetyResults, setSafetyResults] = useState<{
+    score: string;
+    scoreColor: string;
+    flagged: { info: IngredientInfo; match: string }[];
+    counts: { dangerous: number; questionable: number; good: number; neutral: number };
+  } | null>(null);
   
   const [isCameraStarted, setIsCameraStarted] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -71,6 +80,7 @@ export default function ScanPage() {
     setLoading(true);
     setError(null);
     setProduct(null);
+    setSafetyResults(null);
     setShowBrandInput(false);
     
     try {
@@ -89,6 +99,11 @@ export default function ScanPage() {
         setProduct(data.product);
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
+        
+        // Run ingredient safety check if ingredients exist
+        if (data.product.ingredients) {
+          analyzeIngredients(data.product.ingredients);
+        }
       }
     } catch (err) {
       setError('Failed to lookup product. Please check your connection.');
@@ -131,6 +146,52 @@ export default function ScanPage() {
     }
   }
 
+  function analyzeIngredients(text: string) {
+    if (!text) return;
+
+    const list = text
+      .split(/[,\n;]/)
+      .map(i => i.trim())
+      .filter(i => i.length > 0);
+
+    const flagged: { info: IngredientInfo; match: string }[] = [];
+    const counts = { dangerous: 0, questionable: 0, good: 0, neutral: 0 };
+    const seen = new Set<string>();
+
+    list.forEach(item => {
+      const lowerItem = item.toLowerCase();
+      const match = ingredientDatabase.find(dbItem => 
+        lowerItem.includes(dbItem.name.toLowerCase()) || 
+        dbItem.name.toLowerCase().includes(lowerItem)
+      );
+
+      if (match && !seen.has(match.name)) {
+        flagged.push({ info: match, match: item });
+        counts[match.category]++;
+        seen.add(match.name);
+      }
+    });
+
+    let score = 'A';
+    let scoreColor = '#10B981';
+    if (counts.dangerous >= 2) { score = 'F'; scoreColor = '#EF4444'; }
+    else if (counts.dangerous === 1) { score = 'D'; scoreColor = '#F97316'; }
+    else if (counts.questionable >= 4) { score = 'C'; scoreColor = '#F59E0B'; }
+    else if (counts.questionable >= 1) { score = 'B'; scoreColor = '#84CC16'; }
+
+    setSafetyResults({ score, scoreColor, flagged, counts: { ...counts, neutral: list.length - flagged.length } });
+  }
+
+  const handleManualIngredientSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualIngredients.trim()) return;
+    
+    setLoading(true);
+    setProduct({ product_name: 'Custom Entry', brand: 'User Input', ingredients: manualIngredients } as any);
+    analyzeIngredients(manualIngredients);
+    setLoading(false);
+  };
+
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (manualBarcode.trim()) lookupProduct(manualBarcode.trim());
@@ -143,6 +204,7 @@ export default function ScanPage() {
 
   const resetScanner = async () => {
     setProduct(null);
+    setSafetyResults(null);
     setScannedResult(null);
     setError(null);
     setShowBrandInput(false);
@@ -183,8 +245,8 @@ export default function ScanPage() {
 
       <main className="max-w-md mx-auto p-6">
         <div className="text-center mb-8">
-            <h2 className="text-2xl font-extrabold text-[#191919] mb-2">Recall Checker</h2>
-            <p className="text-gray-600">Scan your pet&apos;s food barcode to instantly check for FDA recalls</p>
+            <h2 className="text-3xl font-black text-[#191919] mb-3">Is This Food Safe?</h2>
+            <p className="text-gray-600 leading-relaxed text-sm">Scan any pet food label for instant ingredient safety analysis + live FDA recall check</p>
         </div>
 
         {/* Camera UI - Always mounted but hidden when not needed to avoid re-init bugs */}
@@ -207,17 +269,28 @@ export default function ScanPage() {
             </div>
 
             <form onSubmit={handleBarcodeSubmit} className="mt-4">
-              <label className="block text-sm font-semibold text-[#191919] mb-2 text-left">Enter Barcode Manually</label>
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Scan Food Label</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={manualBarcode}
                   onChange={(e) => setManualBarcode(e.target.value)}
-                  placeholder="e.g. 052742012345"
-                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                  placeholder="Enter barcode..."
+                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm"
                 />
-                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold">Go</button>
+                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold text-sm">Go</button>
               </div>
+            </form>
+
+            <form onSubmit={handleManualIngredientSubmit} className="mt-6">
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Or paste ingredient list below</label>
+              <textarea
+                value={manualIngredients}
+                onChange={(e) => setManualIngredients(e.target.value)}
+                placeholder="Chicken, Rice, Corn Syrup..."
+                className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm h-24 resize-none"
+              />
+              <button type="submit" className="w-full mt-2 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-3 rounded-xl font-bold text-sm hover:bg-[#FDFAF7]">Analyze Ingredients</button>
             </form>
           </div>
         </div>
@@ -284,9 +357,30 @@ export default function ScanPage() {
             )}
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
-              <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Product Details</p>
-              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name || product.brand}</h4>
-              {product.product_name && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
+              <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Safety Report for</p>
+              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name && product.product_name !== 'Custom Entry' ? product.product_name : (product.brand !== 'User Input' ? product.brand : 'Pasted Ingredients')}</h4>
+              {product.product_name && product.product_name !== 'Custom Entry' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
+              
+              {safetyResults && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-bold text-[#191919]">Ingredient Grade</span>
+                    <span className="text-3xl font-black" style={{ color: safetyResults.scoreColor }}>{safetyResults.score}</span>
+                  </div>
+                  <div className="space-y-3">
+                    {safetyResults.flagged.length > 0 ? (
+                      safetyResults.flagged.slice(0, 3).map((f, i) => (
+                        <div key={i} className={`p-3 rounded-xl border text-xs ${f.info.category === 'dangerous' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'}`}>
+                          <span className="font-bold uppercase block mb-1">{f.info.name} — {f.info.category}</span>
+                          <p className="text-gray-600 leading-tight">{f.info.reason}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-green-600 font-medium">No dangerous ingredients found in our database.</p>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {product.ingredients && (
                 <div className="pt-4 border-t border-gray-100 mt-4">
@@ -331,9 +425,19 @@ export default function ScanPage() {
               </form>
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={resetScanner} className="flex-1 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-4 rounded-full font-bold">Scan Another</button>
-              <Link href="/recalls" className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-center">View All Recalls</Link>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => {
+                  const text = `My pet's food scored ${safetyResults?.score || 'N/A'} — is yours safe? lumobites.net`;
+                  if (navigator.share) navigator.share({ title: 'Lumo Bites Safety Report', text, url: 'https://lumobites.net' });
+                  else { navigator.clipboard.writeText(text); alert('Result copied!'); }
+                }}
+                className="w-full bg-white border border-[#E8DDD4] text-[#191919] py-4 rounded-full font-bold text-sm"
+              >
+                Share Safety Report
+              </button>
+              <button onClick={resetScanner} className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-sm">Scan Another</button>
+              <Link href="/recalls" className="text-[#8B5E3C] font-bold text-xs text-center">View All FDA Recalls &rarr;</Link>
             </div>
           </div>
         )}

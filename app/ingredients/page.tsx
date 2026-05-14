@@ -236,8 +236,8 @@ export default function IngredientsPage() {
         </Link>
         <p className="text-gray-500 text-sm mb-4">&copy; {new Date().getFullYear()} Lumo Bites. Every pet deserves safe food.</p>
         <div className="flex justify-center gap-6 text-sm font-bold text-gray-400">
-          <Link href="/ingredients" className="hover:text-white transition-colors">Ingredient Checker</Link>
-          <Link href="/scan" className="hover:text-white transition-colors">Recall Checker</Link>
+          <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
+          <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>
           <Link href="/chat" className="hover:text-white transition-colors">Find Food</Link>
         </div>
       </footer>
