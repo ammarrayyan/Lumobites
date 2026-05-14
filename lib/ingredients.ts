@@ -111,6 +111,12 @@ export const ingredientDatabase: IngredientInfo[] = [
     reason: 'Synthetic vitamin (Menadione)',
     effects: 'Linked to liver toxicity and immune system issues.'
   },
+  {
+    name: 'Menadione Sodium Bisulfite',
+    category: 'dangerous',
+    reason: 'Synthetic version of Vitamin K',
+    effects: 'Toxic to liver and kidneys; causes red blood cell breakdown.'
+  },
 
   // 🟡 QUESTIONABLE
   {

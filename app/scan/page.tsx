@@ -159,11 +159,19 @@ export default function ScanPage() {
     const seen = new Set<string>();
 
     list.forEach(item => {
-      const lowerItem = item.toLowerCase();
-      const match = ingredientDatabase.find(dbItem => 
-        lowerItem.includes(dbItem.name.toLowerCase()) || 
-        dbItem.name.toLowerCase().includes(lowerItem)
-      );
+      // Normalize item: remove extra whitespace and punctuation
+      const normalizedItem = item.toLowerCase().trim().replace(/[().]/g, ' ');
+      
+      const match = ingredientDatabase.find(dbItem => {
+        const dbName = dbItem.name.toLowerCase();
+        // Check if normalized item contains db name OR vice versa
+        // Use word boundaries for very short strings like "BHA" or "BHT"
+        if (dbName.length <= 3) {
+          const regex = new RegExp(`\\b${dbName}\\b`, 'i');
+          return regex.test(normalizedItem);
+        }
+        return normalizedItem.includes(dbName) || dbName.includes(normalizedItem);
+      });
 
       if (match && !seen.has(match.name)) {
         flagged.push({ info: match, match: item });
@@ -240,7 +248,7 @@ export default function ScanPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <h1 className="text-xl font-bold text-[#191919]">Check for Recalls</h1>
+        <h1 className="text-xl font-bold text-[#191919]">Is This Food Safe?</h1>
       </header>
 
       <main className="max-w-md mx-auto p-6">
@@ -358,8 +366,14 @@ export default function ScanPage() {
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
               <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Safety Report for</p>
-              <h4 className="text-xl font-extrabold text-[#191919] mb-1">{product.product_name && product.product_name !== 'Custom Entry' ? product.product_name : (product.brand !== 'User Input' ? product.brand : 'Pasted Ingredients')}</h4>
-              {product.product_name && product.product_name !== 'Custom Entry' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
+              <h4 className="text-xl font-extrabold text-[#191919] mb-1">
+                {product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' 
+                  ? product.product_name 
+                  : (product.brand && product.brand !== 'User Input' && product.brand !== 'Unknown Brand' 
+                      ? product.brand 
+                      : 'Safety Report')}
+              </h4>
+              {product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
               
               {safetyResults && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
@@ -369,7 +383,7 @@ export default function ScanPage() {
                   </div>
                   <div className="space-y-3">
                     {safetyResults.flagged.length > 0 ? (
-                      safetyResults.flagged.slice(0, 3).map((f, i) => (
+                      safetyResults.flagged.map((f, i) => (
                         <div key={i} className={`p-3 rounded-xl border text-xs ${f.info.category === 'dangerous' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'}`}>
                           <span className="font-bold uppercase block mb-1">{f.info.name} — {f.info.category}</span>
                           <p className="text-gray-600 leading-tight">{f.info.reason}</p>
