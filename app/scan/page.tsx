@@ -407,7 +407,7 @@ export default function ScanPage() {
             <div className="bg-[#191919] rounded-2xl p-6 text-white">
               <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
               <p className="text-xs text-gray-400 mb-4">
-                We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : product.brand} has a new FDA recall. Free service.
+                We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'this product')} has a new FDA recall. Free service.
               </p>
               <form 
                 onSubmit={async (e) => {
@@ -419,7 +419,7 @@ export default function ScanPage() {
                     body: JSON.stringify({ 
                       email, 
                       pet_type: product.pet_type || 'both', 
-                      product_names: [product.product_name !== 'Unknown Product' ? product.product_name : product.brand].filter(Boolean)
+                      product_names: [product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'Unknown Product')].filter(Boolean)
                     })
                   });
                   const data = await res.json();
@@ -442,8 +442,9 @@ export default function ScanPage() {
             <div className="flex flex-col gap-3">
               <button 
                 onClick={() => {
-                  const text = `My pet's food scored ${safetyResults?.score || 'N/A'} — is yours safe? lumobites.net`;
-                  if (navigator.share) navigator.share({ title: 'Lumo Bites Safety Report', text, url: 'https://lumobites.net' });
+                  const productName = product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' ? product.product_name : product.brand;
+                  const text = `${productName} scored ${safetyResults?.score || 'N/A'} for safety on Lumo Bites — is your pet's food safe? lumobites.net`;
+                  if (navigator.share) navigator.share({ title: 'Lumo Bites Safety Report', text, url: 'https://lumobites.net/scan' });
                   else { navigator.clipboard.writeText(text); alert('Result copied!'); }
                 }}
                 className="w-full bg-white border border-[#E8DDD4] text-[#191919] py-4 rounded-full font-bold text-sm"

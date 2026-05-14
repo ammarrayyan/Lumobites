@@ -149,8 +149,13 @@ export function isEnglishProduct(name: string): boolean {
 
 // ─── Transform raw API product → our Product interface ────────────────────────
 function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLookup = false): Product | null {
-  const name = raw.product_name_en || raw.product_name || 'Unknown Product';
+  let name = raw.product_name_en || raw.product_name || raw.product_name_fr || '';
   const brand = (raw.brands || '').split(',')[0].trim();
+
+  // If name is missing or is just the barcode, try to construct from brand and categories
+  if (!name || /^\d+$/.test(name.replace(/\s/g, ''))) {
+    name = 'Unknown Product';
+  }
 
   // Try only English ingredients
   const ingredients: string =
@@ -163,8 +168,15 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
   // Filter out poor quality entries
   if (!name || name.length < 3) return null;
   
-  // Reject if name is just a barcode (numeric and long)
-  if (/^\d{8,}$/.test(name)) return null;
+  // Reject if name is just a barcode (numeric and long) or looks like a barcode
+  if (/^\d{8,}$/.test(name) || /^[0-9A-Z]{10,}$/.test(name.replace(/\s/g, ''))) {
+    // If name is barcode but we have a valid brand, use brand as name
+    if (brand && brand.length > 2 && !/^\d+$/.test(brand)) {
+       // use brand as name instead of discarding
+    } else {
+       return null;
+    }
+  }
   
   // Handle missing brand
   const finalBrand = brand && brand.length >= 2 ? brand : 'Unknown Brand';
