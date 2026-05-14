@@ -5,12 +5,14 @@ import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import { ingredientDatabase, IngredientInfo } from '@/lib/ingredients';
+import Tesseract from 'tesseract.js';
 
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [product, setProduct] = useState<ScoredProduct | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
@@ -25,6 +27,7 @@ export default function ScanPage() {
   
   const [isCameraStarted, setIsCameraStarted] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const html5QrCode = new Html5Qrcode("reader");
@@ -57,7 +60,7 @@ export default function ScanPage() {
   }, []);
 
   async function onScanSuccess(decodedText: string) {
-    if (loading) return;
+    if (loading || ocrLoading) return;
     
     if (scannerRef.current) {
       try {
@@ -72,6 +75,100 @@ export default function ScanPage() {
 
   function onScanFailure(error: any) {}
 
+  const captureAndOCR = async () => {
+    if (!scannerRef.current || ocrLoading) return;
+
+    setOcrLoading(true);
+    setError(null);
+
+    try {
+      // Find the video element created by html5-qrcode
+      const video = document.querySelector('#reader video') as HTMLVideoElement;
+      if (!video) throw new Error("Camera not active");
+
+      // Draw current frame to hidden canvas
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/png');
+
+      // Stop scanner to show loading state
+      if (scannerRef.current.isScanning) {
+        await scannerRef.current.stop();
+        setIsCameraStarted(false);
+      }
+
+      // Perform OCR
+      const { data: { text } } = await Tesseract.recognize(imageData, 'eng', {
+        logger: m => console.log(m)
+      });
+
+      processOCRResult(text);
+    } catch (err) {
+      console.error("OCR Error:", err);
+      setError("Could not read text. Please try again or paste manually.");
+      setOcrLoading(false);
+    }
+  };
+
+  const processOCRResult = async (text: string) => {
+    const normalized = text.toLowerCase().replace(/\n/g, ' ');
+    
+    // Logic to determine if it's ingredients or brand
+    // 1. Ingredients usually have many commas or the word "ingredients"
+    const hasIngredientsWord = normalized.includes('ingredients');
+    const commaCount = (normalized.match(/,/g) || []).length;
+    const knownIngredientMatch = ingredientDatabase.some(db => normalized.includes(db.name.toLowerCase()));
+
+    if (hasIngredientsWord || commaCount > 5 || (knownIngredientMatch && normalized.length > 50)) {
+      // It's an ingredient list
+      setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
+      analyzeIngredients(text, false);
+      setOcrLoading(false);
+    } else {
+      // It might be a brand name (front of package)
+      // Take the first few lines or words that look like a brand
+      const lines = text.split('\n').filter(l => l.trim().length > 2);
+      const potentialBrand = lines[0]?.trim() || text.split(' ').slice(0, 3).join(' ');
+      
+      if (potentialBrand) {
+        setProduct({ product_name: potentialBrand, brand: potentialBrand } as any);
+        checkBrandRecall(potentialBrand);
+      } else {
+        setError("Could not identify product or ingredients. Try a clearer photo.");
+        setOcrLoading(false);
+      }
+    }
+  };
+
+  const checkBrandRecall = async (brand: string) => {
+    setLoading(true);
+    setOcrLoading(false);
+    try {
+      const res = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(brand)}"&limit=10`);
+      const data = await res.json();
+      const match = data.results?.find((r: any) => {
+        const desc = (r.product_description || '').toLowerCase();
+        return desc.includes(brand.toLowerCase()) && (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+      });
+      
+      if (match) {
+        setHasRecall(true);
+        setRecallReason(match.reason_for_recall);
+      }
+      setProduct({ product_name: brand, brand: brand } as any);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   async function lookupProduct(barcode: string) {
     setLoading(true);
     setError(null);
@@ -85,14 +182,11 @@ export default function ScanPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        // If product not found in OPFF, set to Unknown and show results page with inline brand search
         setProduct({ product_name: 'Unknown Product', brand: 'Unknown Brand' } as any);
       } else {
         setProduct(data.product);
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
-        
-        // Run ingredient safety check if ingredients exist
         if (data.product.ingredients) {
           analyzeIngredients(data.product.ingredients, data.hasRecall);
         }
@@ -134,13 +228,6 @@ export default function ScanPage() {
       }
     });
 
-    // Grading Logic:
-    // A = 0 dangerous, 0-2 questionable
-    // B = 0 dangerous, 3-5 questionable
-    // C = 0 dangerous, 6+ questionable OR 1 dangerous
-    // D = 2-3 dangerous
-    // F = 4+ dangerous OR active FDA recall
-    
     let score = 'A';
     let scoreColor = '#10B981';
 
@@ -182,6 +269,7 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     setLoading(false);
+    setOcrLoading(false);
     
     setTimeout(async () => {
       if (scannerRef.current) {
@@ -221,14 +309,30 @@ export default function ScanPage() {
         </div>
 
         {/* Search / Scan UI */}
-        <div className={(!product && !loading) ? 'block space-y-6' : 'hidden'}>
-          <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
-            <div id="reader" className="w-full"></div>
+        <div className={(!product && !loading && !ocrLoading) ? 'block space-y-6' : 'hidden'}>
+          <div className="relative">
+            <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
+              <div id="reader" className="w-full"></div>
+            </div>
+            
+            {isCameraStarted && (
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-6 z-10">
+                <button 
+                  onClick={captureAndOCR}
+                  className="bg-[#8B5E3C] text-white px-8 py-4 rounded-full font-bold shadow-xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+                >
+                  <span className="text-xl">📸</span>
+                  Capture & Analyze
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="text-center">
+            <p className="text-xs text-gray-400 mb-4 font-medium italic">Point at ingredients list OR product name for instant check</p>
+            
             <form onSubmit={handleBarcodeSubmit} className="mt-4">
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Scan Food Label</label>
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Manual Barcode Entry</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -254,14 +358,24 @@ export default function ScanPage() {
           </div>
         </div>
 
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-4"></div>
-            <p className="text-[#8B5E3C] font-semibold">Analyzing Safety...</p>
+        {(loading || ocrLoading) && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
+            <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? "Reading Label..." : "Analyzing Safety..."}</h3>
+            <p className="text-gray-500 text-sm max-w-[200px] mx-auto">
+              {ocrLoading ? "Optical Character Recognition in progress. Hold tight!" : "Checking ingredients and live FDA databases."}
+            </p>
           </div>
         )}
 
-        {product && !loading && (
+        {error && (
+          <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm mb-6 text-center">
+            {error}
+            <button onClick={resetScanner} className="block w-full mt-2 font-bold underline">Try Again</button>
+          </div>
+        )}
+
+        {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
             {/* Inline Brand Search if Product Not Found */}
             {product.product_name === 'Unknown Product' && (
@@ -328,7 +442,7 @@ export default function ScanPage() {
                       ? product.brand 
                       : 'Safety Report')}
               </h4>
-              {product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
+              {product.brand && product.brand !== 'User Input' && product.brand !== 'Camera Scan' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
               
               {safetyResults && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
@@ -417,12 +531,12 @@ export default function ScanPage() {
         )}
       </main>
 
+      {/* Hidden canvas for OCR capture */}
+      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+
       <style jsx>{`
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
-        .animate-shimmer { animation: shimmer 1.5s infinite; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
