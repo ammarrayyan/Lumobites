@@ -154,7 +154,11 @@ export default function ScanPage() {
       const data = await res.json();
       const match = data.results?.find((r: any) => {
         const desc = (r.product_description || '').toLowerCase();
-        return desc.includes(brand.toLowerCase()) && (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+        const reason = (r.reason_for_recall || '').toLowerCase();
+        const brandMatch = desc.includes(brand.toLowerCase());
+        const isPetRelated = desc.includes('pet food') || desc.includes('dog food') || desc.includes('cat food') || desc.includes('animal feed') ||
+                           reason.includes('pet food') || reason.includes('dog food') || reason.includes('cat food') || reason.includes('animal feed');
+        return brandMatch && isPetRelated;
       });
       
       if (match) {
@@ -393,7 +397,11 @@ export default function ScanPage() {
                         .then(data => {
                           const match = data.results?.find((r: any) => {
                             const desc = (r.product_description || '').toLowerCase();
-                            return desc.includes(b.toLowerCase()) && (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+                            const reason = (r.reason_for_recall || '').toLowerCase();
+                            const brandMatch = desc.includes(b.toLowerCase());
+                            const isPetRelated = desc.includes('pet food') || desc.includes('dog food') || desc.includes('cat food') || desc.includes('animal feed') ||
+                                               reason.includes('pet food') || reason.includes('dog food') || reason.includes('cat food') || reason.includes('animal feed');
+                            return brandMatch && isPetRelated;
                           });
                           if (match) {
                             setHasRecall(true);
