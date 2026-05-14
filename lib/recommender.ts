@@ -79,81 +79,90 @@ export function recommendProducts(
   const lifeStage = deriveLifeStage(profile.pet_type, profile.age_years);
   const budget = profile.budget_monthly_max;
 
-  // Step 1: Filter by pet type and life stage (include adult if senior/puppy/kitten pool is small)
-  let filtered = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
-  if (filtered.length < 10 && lifeStage !== 'adult') {
-    const adultFoods = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult');
-    filtered = [...filtered, ...adultFoods];
+  // Base Pet Type and Life Stage pool
+  let basePool = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
+  if (basePool.length < 10 && lifeStage !== 'adult') {
+    basePool = [...basePool, ...products.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult')];
   }
+  basePool = basePool.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
 
-  // Step 2: Filter out avoided ingredients
-  filtered = filtered.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
+  const getResults = (pool: Product[], currentBudget: number, strictHealth: boolean, strictFoodType: boolean) => {
+    let filtered = pool;
+    
+    if (strictFoodType && profile.food_type && profile.food_type !== 'both') {
+      filtered = filtered.filter(p => getProductFoodType(p) === profile.food_type);
+    }
+    
+    if (strictHealth && profile.health_issues.length > 0) {
+      filtered = filtered.filter(p => profile.health_issues.some(tag => p.health_tags.includes(tag as HealthTag)));
+    }
 
-  // Step 3: Filter by food type if requested (STRICT)
-  let pool = filtered;
-  if (profile.food_type && profile.food_type !== 'both') {
-    pool = filtered.filter(p => getProductFoodType(p) === profile.food_type);
-  }
+    const scored: ScoredProduct[] = filtered.map(p => {
+      const score = scoreProduct(p, profile);
+      let maxScoreCalc = profile.health_issues.length * 20 + 20;
+      if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
+      if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
+      else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
 
-  // Step 4: Score all products in the pool
-  const allScored: ScoredProduct[] = pool.map(p => {
-    const score = scoreProduct(p, profile);
-    let maxScoreCalc = profile.health_issues.length * 20 + 20;
-    if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
-    if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
-    else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
+      const maxScore = Math.max(maxScoreCalc, 30);
+      const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
+      return {
+        ...p,
+        score,
+        match_pct,
+        why_recommended: buildWhyTag(p, profile),
+        budget_relaxed: p.price_monthly_low > budget,
+      };
+    });
 
-    const maxScore = Math.max(maxScoreCalc, 30);
-    const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
-    return {
-      ...p,
-      score,
-      match_pct,
-      why_recommended: buildWhyTag(p, profile),
-      budget_relaxed: p.price_monthly_low > budget,
-    };
-  });
+    return scored
+      .filter(p => p.price_monthly_low <= currentBudget)
+      .sort((a, b) => b.score - a.score);
+  };
 
-  // Sort by score descending
-  allScored.sort((a, b) => b.score - a.score);
-
-  // Step 5: Selection with Budget Priority and Diversity
   const selected: ScoredProduct[] = [];
   const brandCounts: Record<string, number> = {};
 
-  function tryAdd(p: ScoredProduct) {
-    const brand = (p.brand || 'unknown').toLowerCase().trim();
-    if ((brandCounts[brand] || 0) < 2) {
-      selected.push(p);
-      brandCounts[brand] = (brandCounts[brand] || 0) + 1;
-      return true;
+  function tryAddFrom(pool: ScoredProduct[]) {
+    for (const p of pool) {
+      if (selected.find(s => s.id === p.id)) continue;
+      const brand = (p.brand || 'unknown').toLowerCase().trim();
+      if ((brandCounts[brand] || 0) < 2) {
+        selected.push(p);
+        brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+        if (selected.length >= 5) return true;
+      }
     }
     return false;
   }
 
-  // 5a. Within budget (strict)
-  const withinBudget = allScored.filter(p => p.price_monthly_low <= budget);
-  for (const p of withinBudget) {
-    if (tryAdd(p)) {
-      if (selected.length >= 5) break;
-    }
+  // TIER 1: Exact match (pet type + food type + budget + health issues)
+  tryAddFrom(getResults(basePool, budget, true, true));
+  
+  // TIER 2: Relax budget by 20%
+  if (selected.length < 5) {
+    tryAddFrom(getResults(basePool, budget * 1.2, true, true));
+  }
+  
+  // TIER 3: Relax health issues filter
+  if (selected.length < 5) {
+    tryAddFrom(getResults(basePool, budget * 1.2, false, true));
+  }
+  
+  // TIER 4: Keep pet type and food type only (remove budget/health constraints)
+  if (selected.length < 5) {
+    tryAddFrom(getResults(basePool, 9999, false, true));
   }
 
-  // 5b. Relax budget if we don't have 5 results (Keep Food Type strict)
+  // TIER 5: Relax everything except pet type
   if (selected.length < 5) {
-    const overBudget = allScored.filter(p => p.price_monthly_low > budget);
-    for (const p of overBudget) {
-      if (!selected.find(s => s.id === p.id)) {
-        if (tryAdd(p)) {
-          if (selected.length >= 5) break;
-        }
-      }
-    }
+    tryAddFrom(getResults(basePool, 9999, false, false));
   }
 
-  // Final check: if still under 5, just add whatever is left ignoring diversity
+  // TIER 6: Final fallback - ignore diversity
   if (selected.length < 5) {
-    for (const p of allScored) {
+    const allRemaining = getResults(basePool, 9999, false, false);
+    for (const p of allRemaining) {
       if (!selected.find(s => s.id === p.id)) {
         selected.push(p);
         if (selected.length >= 5) break;

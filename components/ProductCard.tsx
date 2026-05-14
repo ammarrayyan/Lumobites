@@ -78,6 +78,7 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
         <div style={{ fontSize: '14px', color: '#555555' }}>
           <p style={{ margin: '0 0 4px 0' }}><span style={{ fontWeight: 600, color: '#191919' }}>Key Ingredients:</span> <span>{product.ingredients.split(',').slice(0,3).join(', ')}</span></p>
           <p style={{ margin: 0 }}><span style={{ fontWeight: 600, color: '#191919' }}>Est. Cost:</span> ${product.price_monthly_low} - ${product.price_monthly_high} / mo</p>
+          <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#999999' }}>Prices are estimates — check retailer for current price</p>
         </div>
       </div>
       

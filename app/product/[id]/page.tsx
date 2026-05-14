@@ -211,6 +211,7 @@ export default function ProductDetailPage() {
           <div style={{ marginBottom: '12px', padding: '0 8px' }}>
             <div style={{ fontWeight: 'bold', color: '#191919' }}>Where to buy</div>
             <div style={{ fontSize: '13px', color: '#888' }}>Est. ${product.price_monthly_low} - ${product.price_monthly_high}/mo</div>
+            <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>Prices are estimates — check retailer for current price</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
