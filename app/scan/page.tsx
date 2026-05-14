@@ -15,7 +15,6 @@ export default function ScanPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rawOcrText, setRawOcrText] = useState<string | null>(null);
-  const [detectedBrand, setDetectedBrand] = useState<string | null>(null);
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
@@ -84,7 +83,6 @@ export default function ScanPage() {
     setOcrLoading(true);
     setError(null);
     setRawOcrText(null);
-    setDetectedBrand(null);
 
     try {
       const video = document.querySelector('#reader video') as HTMLVideoElement;
@@ -121,38 +119,21 @@ export default function ScanPage() {
   };
 
   const processOCRResult = async (text: string) => {
-    // 1. Clean text: keep only alphanumeric and spaces
-    const cleaned = text.replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    if (!cleaned || cleaned.length < 3) {
-      setError("Could not detect brand name. Please try again in better lighting or enter brand manually.");
-      setOcrLoading(false);
-      return;
-    }
-
+    const cleaned = text.replace(/[^a-zA-Z0-9\s,.]/g, ' ').replace(/\s+/g, ' ').trim();
     const normalized = cleaned.toLowerCase();
     
-    // Categorization logic
+    // Categorization logic - focus on ingredients
     const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb', 'protein', 'fat', 'fiber', 'ingredients'];
     const hasIngredientKeywords = ingredientKeywords.some(word => normalized.includes(word));
     const commaCount = (normalized.match(/,/g) || []).length;
 
-    if (hasIngredientKeywords || commaCount > 4) {
+    if (hasIngredientKeywords || commaCount > 3 || cleaned.length > 30) {
       setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
       analyzeIngredients(text, false);
       setOcrLoading(false);
     } else {
-      // It's likely a brand name
-      // Take first 1-3 words
-      const words = cleaned.split(' ').filter(w => w.length > 1).slice(0, 3).join(' ');
-      if (words.length >= 3) {
-        setDetectedBrand(words);
-        setProduct({ product_name: words, brand: words } as any);
-        checkBrandRecall(words);
-      } else {
-        setError("Could not detect brand name. Please try again in better lighting or enter brand manually.");
-        setOcrLoading(false);
-      }
+      setError("Could not clearly identify ingredient list. Please point at the back of the package or paste manually below.");
+      setOcrLoading(false);
     }
   };
 
@@ -283,7 +264,6 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     setRawOcrText(null);
-    setDetectedBrand(null);
     setLoading(false);
     setOcrLoading(false);
     
@@ -321,7 +301,7 @@ export default function ScanPage() {
       <main className="max-w-md mx-auto p-6">
         <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-[#191919] mb-3">Is This Food Safe?</h2>
-            <p className="text-gray-600 leading-relaxed text-sm">Scan any pet food label for instant ingredient safety analysis + live FDA recall check</p>
+            <p className="text-gray-600 leading-relaxed text-sm">Scan barcode or ingredient list for instant safety analysis + live FDA recall check</p>
         </div>
 
         {/* Search / Scan UI */}
@@ -345,7 +325,7 @@ export default function ScanPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-gray-400 mb-6 font-medium italic">Point at ingredients list OR product name for instant check</p>
+            <p className="text-xs text-gray-400 mb-6 font-medium italic">Point at barcode OR ingredient list on back of package</p>
             
             <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm mb-6">
               <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-left">Or enter brand name manually</label>
@@ -408,38 +388,12 @@ export default function ScanPage() {
           <div className="bg-red-50 border border-red-100 text-red-600 p-6 rounded-2xl text-sm mb-6 text-center">
             <p className="font-bold mb-2 uppercase text-xs tracking-widest">Analysis Failed</p>
             <p className="mb-4 opacity-80">{error}</p>
-            {error.includes('brand') && (
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (manualBrand.trim()) checkBrandRecall(manualBrand.trim());
-                }}
-                className="flex gap-2 mb-4"
-              >
-                <input
-                  type="text"
-                  value={manualBrand}
-                  onChange={(e) => setManualBrand(e.target.value)}
-                  placeholder="Type brand name..."
-                  className="flex-1 px-4 py-2 rounded-xl border border-red-100 outline-none text-sm"
-                />
-                <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Check</button>
-              </form>
-            )}
             <button onClick={resetScanner} className="bg-white border border-red-200 text-red-600 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">Restart Camera</button>
           </div>
         )}
 
         {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
-            {/* Detected Status */}
-            {detectedBrand && (
-              <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
-                <p className="text-xs font-bold text-green-700 uppercase tracking-widest mb-1">Brand Detected</p>
-                <p className="text-lg font-black text-green-900">{detectedBrand}</p>
-              </div>
-            )}
-
             {/* Inline Brand Search if Product Not Found */}
             {product.product_name === 'Unknown Product' && (
               <div className="bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-6">
