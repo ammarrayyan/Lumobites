@@ -15,10 +15,12 @@ export default function ScanPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rawOcrText, setRawOcrText] = useState<string | null>(null);
+  const [detectedBrand, setDetectedBrand] = useState<string | null>(null);
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
   const [manualIngredients, setManualIngredients] = useState('');
+  const [manualBrand, setManualBrand] = useState('');
   const [safetyResults, setSafetyResults] = useState<{
     score: string;
     scoreColor: string;
@@ -82,6 +84,7 @@ export default function ScanPage() {
     setOcrLoading(true);
     setError(null);
     setRawOcrText(null);
+    setDetectedBrand(null);
 
     try {
       const video = document.querySelector('#reader video') as HTMLVideoElement;
@@ -92,12 +95,10 @@ export default function ScanPage() {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Increase resolution (e.g. 2x)
       const scale = 2;
       canvas.width = video.videoWidth * scale;
       canvas.height = video.videoHeight * scale;
       
-      // Preprocessing: High Contrast and Grayscale
       ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
@@ -108,9 +109,7 @@ export default function ScanPage() {
         setIsCameraStarted(false);
       }
 
-      const { data: { text } } = await Tesseract.recognize(imageData, 'eng', {
-        logger: m => console.log(m)
-      });
+      const { data: { text } } = await Tesseract.recognize(imageData, 'eng');
 
       setRawOcrText(text);
       processOCRResult(text);
@@ -122,33 +121,38 @@ export default function ScanPage() {
   };
 
   const processOCRResult = async (text: string) => {
-    if (!text || text.trim().length < 10) {
-      setError("Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
+    // 1. Clean text: keep only alphanumeric and spaces
+    const cleaned = text.replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    if (!cleaned || cleaned.length < 3) {
+      setError("Could not detect brand name. Please try again in better lighting or enter brand manually.");
       setOcrLoading(false);
       return;
     }
 
-    const normalized = text.toLowerCase().replace(/\n/g, ' ');
+    const normalized = cleaned.toLowerCase();
     
-    // Improved categorization logic
+    // Categorization logic
     const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb', 'protein', 'fat', 'fiber', 'ingredients'];
     const hasIngredientKeywords = ingredientKeywords.some(word => normalized.includes(word));
     const commaCount = (normalized.match(/,/g) || []).length;
 
     if (hasIngredientKeywords || commaCount > 4) {
-      // It's an ingredient list
       setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
       analyzeIngredients(text, false);
       setOcrLoading(false);
-    } else if (text.trim().length < 50) {
-      // It's likely a brand name
-      const brand = text.trim().split('\n')[0];
-      setProduct({ product_name: brand, brand: brand } as any);
-      checkBrandRecall(brand);
     } else {
-      // Fallback
-      setError("Could not clearly identify ingredients or product name. Showing raw text below.");
-      setOcrLoading(false);
+      // It's likely a brand name
+      // Take first 1-3 words
+      const words = cleaned.split(' ').filter(w => w.length > 1).slice(0, 3).join(' ');
+      if (words.length >= 3) {
+        setDetectedBrand(words);
+        setProduct({ product_name: words, brand: words } as any);
+        checkBrandRecall(words);
+      } else {
+        setError("Could not detect brand name. Please try again in better lighting or enter brand manually.");
+        setOcrLoading(false);
+      }
     }
   };
 
@@ -279,6 +283,7 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     setRawOcrText(null);
+    setDetectedBrand(null);
     setLoading(false);
     setOcrLoading(false);
     
@@ -340,8 +345,28 @@ export default function ScanPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-gray-400 mb-4 font-medium italic">Point at ingredients list OR product name for instant check</p>
+            <p className="text-xs text-gray-400 mb-6 font-medium italic">Point at ingredients list OR product name for instant check</p>
             
+            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm mb-6">
+              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-left">Or enter brand name manually</label>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (manualBrand.trim()) checkBrandRecall(manualBrand.trim());
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  type="text"
+                  value={manualBrand}
+                  onChange={(e) => setManualBrand(e.target.value)}
+                  placeholder="e.g. Wellness, Purina..."
+                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm"
+                />
+                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold text-sm">Check Recalls</button>
+              </form>
+            </div>
+
             <form onSubmit={handleBarcodeSubmit} className="mt-4">
               <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Manual Barcode Entry</label>
               <div className="flex gap-2">
@@ -381,23 +406,37 @@ export default function ScanPage() {
 
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 p-6 rounded-2xl text-sm mb-6 text-center">
-            <p className="font-bold mb-2 uppercase">Analysis Failed</p>
+            <p className="font-bold mb-2 uppercase text-xs tracking-widest">Analysis Failed</p>
             <p className="mb-4 opacity-80">{error}</p>
-            {rawOcrText && (
-              <div className="bg-white/50 p-3 rounded-xl mb-4 text-left font-mono text-[10px] overflow-auto max-h-32">
-                <strong>Extracted Text:</strong><br/>{rawOcrText}
-              </div>
+            {error.includes('brand') && (
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (manualBrand.trim()) checkBrandRecall(manualBrand.trim());
+                }}
+                className="flex gap-2 mb-4"
+              >
+                <input
+                  type="text"
+                  value={manualBrand}
+                  onChange={(e) => setManualBrand(e.target.value)}
+                  placeholder="Type brand name..."
+                  className="flex-1 px-4 py-2 rounded-xl border border-red-100 outline-none text-sm"
+                />
+                <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Check</button>
+              </form>
             )}
-            <button onClick={resetScanner} className="bg-red-600 text-white px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">Try Again</button>
+            <button onClick={resetScanner} className="bg-white border border-red-200 text-red-600 px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">Restart Camera</button>
           </div>
         )}
 
         {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
-            {/* Show Debug Text for Scanned Items */}
-            {(product.brand === 'Camera Scan' || product.product_name === 'Scanned Ingredients') && rawOcrText && (
-              <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-[10px] text-blue-600 font-mono">
-                <strong>Raw OCR Text:</strong><br/>{rawOcrText}
+            {/* Detected Status */}
+            {detectedBrand && (
+              <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
+                <p className="text-xs font-bold text-green-700 uppercase tracking-widest mb-1">Brand Detected</p>
+                <p className="text-lg font-black text-green-900">{detectedBrand}</p>
               </div>
             )}
 
@@ -410,28 +449,7 @@ export default function ScanPage() {
                   onSubmit={(e) => {
                     e.preventDefault();
                     const b = (e.target as any).brand.value;
-                    if (b) {
-                      setLoading(true);
-                      fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(b)}"&limit=10`)
-                        .then(r => r.json())
-                        .then(data => {
-                          const match = data.results?.find((r: any) => {
-                            const desc = (r.product_description || '').toLowerCase();
-                            const reason = (r.reason_for_recall || '').toLowerCase();
-                            const brandMatch = desc.includes(b.toLowerCase());
-                            const isPetRelated = desc.includes('pet food') || desc.includes('dog food') || desc.includes('cat food') || desc.includes('animal feed') ||
-                                               reason.includes('pet food') || reason.includes('dog food') || reason.includes('cat food') || reason.includes('animal feed');
-                            return brandMatch && isPetRelated;
-                          });
-                          if (match) {
-                            setHasRecall(true);
-                            setRecallReason(match.reason_for_recall);
-                            analyzeIngredients(product.ingredients || '', true);
-                          }
-                          setProduct({ ...product, brand: b });
-                          setLoading(false);
-                        });
-                    }
+                    if (b) checkBrandRecall(b);
                   }}
                   className="flex gap-2"
                 >
@@ -559,7 +577,6 @@ export default function ScanPage() {
         )}
       </main>
 
-      {/* Hidden canvas for OCR capture */}
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
       <style jsx>{`
