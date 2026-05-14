@@ -108,6 +108,29 @@ export default function Home() {
       {/* BRAND LOGOS STRIP */}
       <BrandMarquee />
 
+      {/* INGREDIENT CHECKER MINI CTA */}
+      <section className="w-full bg-[#FFFFFF] px-6 py-20 border-b border-[#EEEEEE]">
+        <div className="max-w-[1000px] mx-auto bg-[#F5EDE4] rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-4">Safety First</h3>
+            <h2 className="text-3xl md:text-4xl font-black text-[#191919] mb-6 leading-tight tracking-tight">Check Your Pet&apos;s Food Ingredients</h2>
+            <p className="text-gray-600 mb-0 leading-relaxed">
+              Not sure if your pet&apos;s current food is safe? Paste the ingredients to check for hidden toxins, artificial colors, and low-quality fillers.
+            </p>
+          </div>
+          <div className="w-full md:w-[380px] bg-white rounded-2xl p-6 shadow-xl shadow-[#8B5E3C]/5 border border-[#E8D5C0]">
+             <div className="mb-4">
+                <div className="w-full h-24 bg-[#F9F9F9] rounded-xl border border-gray-100 flex items-center justify-center p-4 text-center">
+                   <p className="text-sm text-gray-400 italic font-medium">Chicken, Corn Syrup, BHA, Red 40...</p>
+                </div>
+             </div>
+             <Link href="/ingredients" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                Check My Ingredients &rarr;
+             </Link>
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">
         <div className="max-w-[1100px] mx-auto">
@@ -219,6 +242,7 @@ export default function Home() {
             <ul className="space-y-3 text-sm" style={{ color: '#AAAAAA', listStyle: 'none', padding: 0, margin: 0 }}>
               <li><a href="#how" style={{ color: '#AAAAAA', textDecoration: 'none' }}>How it works</a></li>
               <li><Link href="/chat" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Compare Foods</Link></li>
+              <li><Link href="/ingredients" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Ingredient Checker</Link></li>
               <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Recall Checker</Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
