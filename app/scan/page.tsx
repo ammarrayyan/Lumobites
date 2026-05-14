@@ -78,9 +78,13 @@ export default function ScanPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        // If barcode not found in OPFF, ask for brand
-        setShowBrandInput(true);
-        setError(null); 
+        if (res.status === 400) {
+          setError('This product is not available in the US or is listed in a different language.');
+        } else {
+          // If barcode not found in OPFF, ask for brand
+          setShowBrandInput(true);
+          setError(null);
+        }
       } else {
         setProduct(data.product);
         setHasRecall(data.hasRecall);
@@ -142,11 +146,15 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     setShowBrandInput(false);
+    setLoading(false);
     
-    // Small delay to ensure UI has transitioned
+    // Small delay to ensure UI has transitioned and div is visible
     setTimeout(async () => {
-      if (scannerRef.current && !scannerRef.current.isScanning) {
+      if (scannerRef.current) {
         try {
+          if (scannerRef.current.isScanning) {
+            await scannerRef.current.stop();
+          }
           await scannerRef.current.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: { width: 250, height: 250 } },
@@ -156,9 +164,10 @@ export default function ScanPage() {
           setIsCameraStarted(true);
         } catch (err) {
           console.error("Failed to restart scanner", err);
+          setError("Could not restart camera. Please refresh the page.");
         }
       }
-    }, 100);
+    }, 300);
   };
 
   return (
@@ -290,7 +299,7 @@ export default function ScanPage() {
             <div className="bg-[#191919] rounded-2xl p-6 text-white">
               <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
               <p className="text-xs text-gray-400 mb-4">
-                We&apos;ll email you instantly if {product.product_name !== 'Unknown Product' ? product.product_name : product.brand} has a new FDA recall. Free service.
+                We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : product.brand} has a new FDA recall. Free service.
               </p>
               <form 
                 onSubmit={async (e) => {
@@ -301,8 +310,8 @@ export default function ScanPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                       email, 
-                      pet_type: product.pet_type || 'dog', 
-                      product_names: [product.brand].filter(Boolean)
+                      pet_type: product.pet_type || 'both', 
+                      product_names: [product.product_name !== 'Unknown Product' ? product.product_name : product.brand].filter(Boolean)
                     })
                   });
                   const data = await res.json();

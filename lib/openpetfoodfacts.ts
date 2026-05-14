@@ -162,7 +162,12 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
 
   // Filter out poor quality entries
   if (!name || name.length < 3) return null;
-  if (!brand || brand.length < 2) return null;
+  
+  // Reject if name is just a barcode (numeric and long)
+  if (/^\d{8,}$/.test(name)) return null;
+  
+  // Handle missing brand
+  const finalBrand = brand && brand.length >= 2 ? brand : 'Unknown Brand';
 
   // ── US & English filters ────────────────────────────────────────────────────
   if (!isBarcodeLookup) {
@@ -208,8 +213,8 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
 
   return {
     id: `opff_${petType}_${id.toString().slice(-8)}_${index}`,
-    product_name: name.length > 80 ? name.slice(0, 77) + '…' : name,
-    brand: brand.length > 40 ? brand.slice(0, 40) : brand,
+    product_name: name === 'Unknown Product' ? (finalBrand !== 'Unknown Brand' ? `${finalBrand} Product` : 'Unknown Product') : (name.length > 80 ? name.slice(0, 77) + '…' : name),
+    brand: finalBrand.length > 40 ? finalBrand.slice(0, 40) : finalBrand,
     pet_type: petType,
     life_stage: lifeStage,
     ingredients: finalIngredients,
@@ -269,7 +274,7 @@ export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, food
   // Refine query based on food type - Use specific OPFF categories
   let typeStr = 'pet food';
   if (foodType === 'treats') {
-    typeStr = `${petType} treats OR pet treats`;
+    typeStr = `${petType} treats OR pet snacks OR dog treats OR cat treats`;
   } else if (foodType === 'wet') {
     typeStr = `wet ${petType} food OR canned ${petType} food`;
   } else if (foodType === 'dry') {

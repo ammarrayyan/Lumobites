@@ -4,11 +4,11 @@ import { deriveLifeStage } from './parser';
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   const text = (product.product_name + ' ' + (product.categories || '') + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
   
-  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky') || text.includes('marrow')) return 'treats';
+  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky') || text.includes('marrow') || text.includes('rewards')) return 'treats';
   
-  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy') || text.includes('moist') || text.includes('shredded') || text.includes('morsel')) return 'wet';
+  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pâté') || text.includes('broth') || text.includes('gravy') || text.includes('moist') || text.includes('shredded') || text.includes('morsel') || text.includes('can ')) return 'wet';
   
-  if (text.includes('kibble') || text.includes('dry') || text.includes('crunchy') || text.includes('baked')) return 'dry';
+  if (text.includes('kibble') || text.includes('dry') || text.includes('crunchy') || text.includes('baked') || text.includes('mixer')) return 'dry';
   
   return 'dry'; // default
 }
@@ -159,10 +159,18 @@ export function recommendProducts(
     tryAddFrom(getResults(basePool, 9999, false, false));
   }
 
-  // TIER 6: Final fallback - ignore diversity
+  // TIER 6: Final fallback - ignore diversity and life stage if needed
   if (selected.length < 5) {
-    const allRemaining = getResults(basePool, 9999, false, false);
-    for (const p of allRemaining) {
+    const allRemaining = products.filter(p => p.pet_type === profile.pet_type);
+    const scoredRemaining = allRemaining.map(p => ({
+      ...p,
+      score: scoreProduct(p, profile),
+      match_pct: 50,
+      why_recommended: buildWhyTag(p, profile),
+      budget_relaxed: p.price_monthly_low > budget,
+    }));
+    
+    for (const p of scoredRemaining) {
       if (!selected.find(s => s.id === p.id)) {
         selected.push(p);
         if (selected.length >= 5) break;
