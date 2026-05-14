@@ -14,6 +14,7 @@ export default function ScanPage() {
   const [loading, setLoading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rawOcrText, setRawOcrText] = useState<string | null>(null);
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
@@ -80,69 +81,74 @@ export default function ScanPage() {
 
     setOcrLoading(true);
     setError(null);
+    setRawOcrText(null);
 
     try {
-      // Find the video element created by html5-qrcode
       const video = document.querySelector('#reader video') as HTMLVideoElement;
       if (!video) throw new Error("Camera not active");
 
-      // Draw current frame to hidden canvas
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Increase resolution (e.g. 2x)
+      const scale = 2;
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
+      
+      // Preprocessing: High Contrast and Grayscale
+      ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
       const imageData = canvas.toDataURL('image/png');
 
-      // Stop scanner to show loading state
       if (scannerRef.current.isScanning) {
         await scannerRef.current.stop();
         setIsCameraStarted(false);
       }
 
-      // Perform OCR
       const { data: { text } } = await Tesseract.recognize(imageData, 'eng', {
         logger: m => console.log(m)
       });
 
+      setRawOcrText(text);
       processOCRResult(text);
     } catch (err) {
       console.error("OCR Error:", err);
-      setError("Could not read text. Please try again or paste manually.");
+      setError("Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
       setOcrLoading(false);
     }
   };
 
   const processOCRResult = async (text: string) => {
+    if (!text || text.trim().length < 10) {
+      setError("Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
+      setOcrLoading(false);
+      return;
+    }
+
     const normalized = text.toLowerCase().replace(/\n/g, ' ');
     
-    // Logic to determine if it's ingredients or brand
-    // 1. Ingredients usually have many commas or the word "ingredients"
-    const hasIngredientsWord = normalized.includes('ingredients');
+    // Improved categorization logic
+    const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb', 'protein', 'fat', 'fiber', 'ingredients'];
+    const hasIngredientKeywords = ingredientKeywords.some(word => normalized.includes(word));
     const commaCount = (normalized.match(/,/g) || []).length;
-    const knownIngredientMatch = ingredientDatabase.some(db => normalized.includes(db.name.toLowerCase()));
 
-    if (hasIngredientsWord || commaCount > 5 || (knownIngredientMatch && normalized.length > 50)) {
+    if (hasIngredientKeywords || commaCount > 4) {
       // It's an ingredient list
       setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
       analyzeIngredients(text, false);
       setOcrLoading(false);
+    } else if (text.trim().length < 50) {
+      // It's likely a brand name
+      const brand = text.trim().split('\n')[0];
+      setProduct({ product_name: brand, brand: brand } as any);
+      checkBrandRecall(brand);
     } else {
-      // It might be a brand name (front of package)
-      // Take the first few lines or words that look like a brand
-      const lines = text.split('\n').filter(l => l.trim().length > 2);
-      const potentialBrand = lines[0]?.trim() || text.split(' ').slice(0, 3).join(' ');
-      
-      if (potentialBrand) {
-        setProduct({ product_name: potentialBrand, brand: potentialBrand } as any);
-        checkBrandRecall(potentialBrand);
-      } else {
-        setError("Could not identify product or ingredients. Try a clearer photo.");
-        setOcrLoading(false);
-      }
+      // Fallback
+      setError("Could not clearly identify ingredients or product name. Showing raw text below.");
+      setOcrLoading(false);
     }
   };
 
@@ -272,6 +278,7 @@ export default function ScanPage() {
     setSafetyResults(null);
     setScannedResult(null);
     setError(null);
+    setRawOcrText(null);
     setLoading(false);
     setOcrLoading(false);
     
@@ -373,14 +380,27 @@ export default function ScanPage() {
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm mb-6 text-center">
-            {error}
-            <button onClick={resetScanner} className="block w-full mt-2 font-bold underline">Try Again</button>
+          <div className="bg-red-50 border border-red-100 text-red-600 p-6 rounded-2xl text-sm mb-6 text-center">
+            <p className="font-bold mb-2 uppercase">Analysis Failed</p>
+            <p className="mb-4 opacity-80">{error}</p>
+            {rawOcrText && (
+              <div className="bg-white/50 p-3 rounded-xl mb-4 text-left font-mono text-[10px] overflow-auto max-h-32">
+                <strong>Extracted Text:</strong><br/>{rawOcrText}
+              </div>
+            )}
+            <button onClick={resetScanner} className="bg-red-600 text-white px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest">Try Again</button>
           </div>
         )}
 
         {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
+            {/* Show Debug Text for Scanned Items */}
+            {(product.brand === 'Camera Scan' || product.product_name === 'Scanned Ingredients') && rawOcrText && (
+              <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-[10px] text-blue-600 font-mono">
+                <strong>Raw OCR Text:</strong><br/>{rawOcrText}
+              </div>
+            )}
+
             {/* Inline Brand Search if Product Not Found */}
             {product.product_name === 'Unknown Product' && (
               <div className="bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-6">
