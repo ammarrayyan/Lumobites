@@ -8,285 +8,119 @@ export interface IngredientInfo {
 }
 
 export const ingredientDatabase: IngredientInfo[] = [
-  // 🔴 DANGEROUS
-  {
-    name: 'Xylitol',
-    category: 'dangerous',
-    reason: 'Artificial sweetener extremely toxic to dogs',
-    effects: 'Causes rapid insulin release, leading to liver failure and dangerous blood sugar drops.'
-  },
-  {
-    name: 'BHA',
-    category: 'dangerous',
-    reason: 'Synthetic chemical preservative (Butylated Hydroxyanisole)',
-    effects: 'Classified as a potential carcinogen by the WHO and California.'
-  },
-  {
-    name: 'Butylated Hydroxyanisole',
-    category: 'dangerous',
-    reason: 'Synthetic chemical preservative (BHA)',
-    effects: 'Potential carcinogen and known endocrine disruptor.'
-  },
-  {
-    name: 'BHT',
-    category: 'dangerous',
-    reason: 'Synthetic chemical preservative (Butylated Hydroxytoluene)',
-    effects: 'Linked to organ system toxicity and potential cancer risk.'
-  },
-  {
-    name: 'Butylated Hydroxytoluene',
-    category: 'dangerous',
-    reason: 'Synthetic chemical preservative (BHT)',
-    effects: 'Potential carcinogen; banned in some countries.'
-  },
-  {
-    name: 'Ethoxyquin',
-    category: 'dangerous',
-    reason: 'Chemical preservative banned in human food in the EU',
-    effects: 'Linked to liver damage and kidney issues.'
-  },
-  {
-    name: 'Propylene Glycol',
-    category: 'dangerous',
-    reason: 'Chemical used to maintain moisture',
-    effects: 'Causes Heinz body anemia in cats by damaging red blood cells.'
-  },
-  {
-    name: 'Onion Powder',
-    category: 'dangerous',
-    reason: 'Highly concentrated toxic plant compound',
-    effects: 'Destroys red blood cells, causing severe anemia.'
-  },
-  {
-    name: 'Garlic Powder',
-    category: 'dangerous',
-    reason: 'Toxic in concentrated amounts',
-    effects: 'Damages red blood cells and can cause oxidative damage.'
-  },
-  {
-    name: 'Sodium Nitrite',
-    category: 'dangerous',
-    reason: 'Preservative for color and stability',
-    effects: 'Linked to the formation of cancer-causing nitrosamines.'
-  },
-  {
-    name: 'Red 40',
-    category: 'dangerous',
-    reason: 'Artificial food dye',
-    effects: 'Linked to hyperactivity and potential carcinogenicity.'
-  },
-  {
-    name: 'Yellow 5',
-    category: 'dangerous',
-    reason: 'Artificial food dye',
-    effects: 'May cause allergic reactions and linked to behavioral issues.'
-  },
-  {
-    name: 'Yellow 6',
-    category: 'dangerous',
-    reason: 'Artificial food dye',
-    effects: 'Linked to adrenal tumors and hyperactivity.'
-  },
-  {
-    name: 'Blue 2',
-    category: 'dangerous',
-    reason: 'Artificial food dye',
-    effects: 'Linked to brain tumors in animal studies.'
-  },
-  {
-    name: 'Carrageenan',
-    category: 'dangerous',
-    reason: 'Thickener derived from seaweed',
-    effects: 'Linked to intestinal inflammation and cancer in studies.'
-  },
-  {
-    name: 'Menadione',
-    category: 'dangerous',
-    reason: 'Synthetic Vitamin K3',
-    effects: 'Banned from human use due to liver damage and red blood cell breakdown.'
-  },
-  {
-    name: 'Vitamin K3',
-    category: 'dangerous',
-    reason: 'Synthetic vitamin (Menadione)',
-    effects: 'Linked to liver toxicity and immune system issues.'
-  },
-  {
-    name: 'Menadione Sodium Bisulfite',
-    category: 'dangerous',
-    reason: 'Synthetic version of Vitamin K',
-    effects: 'Toxic to liver and kidneys; causes red blood cell breakdown.'
-  },
+  // 🔴 DANGEROUS (flag red always)
+  { name: 'Xylitol', category: 'dangerous', reason: 'Causes liver failure and dangerous blood sugar drop in dogs', effects: 'Highly toxic artificial sweetener.' },
+  { name: 'BHA', category: 'dangerous', reason: 'Synthetic preservative, potential carcinogen', effects: 'Butylated Hydroxyanisole.' },
+  { name: 'BHT', category: 'dangerous', reason: 'Synthetic preservative, potential carcinogen', effects: 'Butylated Hydroxytoluene.' },
+  { name: 'Ethoxyquin', category: 'dangerous', reason: 'Chemical preservative, banned in human food in EU', effects: 'Pesticide-based preservative.' },
+  { name: 'Propylene Glycol', category: 'dangerous', reason: 'Causes Heinz body anemia especially in cats', effects: 'Used to maintain moisture, toxic to red blood cells.' },
+  { name: 'Onion Powder', category: 'dangerous', reason: 'Destroys red blood cells causes anemia', effects: 'Concentrated toxic plant compound.' },
+  { name: 'Onion', category: 'dangerous', reason: 'Destroys red blood cells', effects: 'Toxic to both dogs and cats.' },
+  { name: 'Garlic Powder', category: 'dangerous', reason: 'Toxic in concentrated amounts', effects: 'Can cause oxidative damage to red blood cells.' },
+  { name: 'Garlic', category: 'dangerous', reason: 'Toxic in large amounts', effects: 'Part of the Allium family, risk of anemia.' },
+  { name: 'Sodium Nitrite', category: 'dangerous', reason: 'Preservative linked to cancer', effects: 'Formulates cancer-causing nitrosamines.' },
+  { name: 'Red 40', category: 'dangerous', reason: 'Artificial color linked to cancer', effects: 'Linked to hyperactivity and tumors.' },
+  { name: 'Yellow 5', category: 'dangerous', reason: 'Artificial color linked to hyperactivity', effects: 'Common allergen and behavioral disruptor.' },
+  { name: 'Yellow 6', category: 'dangerous', reason: 'Artificial color linked to cancer', effects: 'Linked to adrenal tumors.' },
+  { name: 'Blue 2', category: 'dangerous', reason: 'Artificial color linked to brain tumors', effects: 'Potential carcinogen.' },
+  { name: 'Blue 1', category: 'dangerous', reason: 'Artificial color linked to cancer', effects: 'Potential carcinogen.' },
+  { name: 'Red 3', category: 'dangerous', reason: 'Artificial color banned in human food', effects: 'Linked to thyroid tumors.' },
+  { name: 'Carrageenan', category: 'dangerous', reason: 'Linked to intestinal inflammation', effects: 'Degraded carrageenan is a known carcinogen.' },
+  { name: 'Menadione', category: 'dangerous', reason: 'Synthetic vitamin linked to liver damage', effects: 'Synthetic Vitamin K3, banned for human use.' },
+  { name: 'Menadione Sodium Bisulfite', category: 'dangerous', reason: 'Synthetic vitamin linked to liver damage', effects: 'Toxic to liver and kidneys.' },
+  { name: 'Caffeine', category: 'dangerous', reason: 'Toxic to pets', effects: 'Causes rapid heart rate and tremors.' },
+  { name: 'Alcohol', category: 'dangerous', reason: 'Toxic to pets', effects: 'Causes severe central nervous system depression.' },
+  { name: 'Grapes', category: 'dangerous', reason: 'Causes kidney damage in dogs', effects: 'Even small amounts can be fatal.' },
+  { name: 'Raisins', category: 'dangerous', reason: 'Causes kidney damage in dogs', effects: 'Highly concentrated toxicity.' },
+  { name: 'Macadamia Nuts', category: 'dangerous', reason: 'Causes weakness and tremors', effects: 'Affects nerve and muscle function.' },
+  { name: 'Chocolate', category: 'dangerous', reason: 'Contains theobromine toxic to pets', effects: 'Affects heart and nervous system.' },
+  { name: 'Cocoa', category: 'dangerous', reason: 'Contains theobromine toxic to pets', effects: 'Highly concentrated toxin.' },
+  { name: 'Aflatoxin', category: 'dangerous', reason: 'Deadly mold toxin', effects: 'Common in low-quality grains, causes liver failure.' },
 
-  // 🟡 QUESTIONABLE
-  {
-    name: 'Corn Syrup',
-    category: 'questionable',
-    reason: 'Unnecessary sugar filler',
-    effects: 'Causes weight gain, obesity, and increases diabetes risk.'
-  },
-  {
-    name: 'Meat By-Products',
-    category: 'questionable',
-    reason: 'Vague, low-quality animal parts',
-    effects: 'Often includes parts not fit for human consumption; unknown quality.'
-  },
-  {
-    name: 'Animal Digest',
-    category: 'questionable',
-    reason: 'Rendered chemical "soup" of animal parts',
-    effects: 'Unknown animal sources; may contain contaminants.'
-  },
-  {
-    name: 'Brewers Rice',
-    category: 'questionable',
-    reason: 'Low-nutrition rice fragments',
-    effects: 'Nutritionally empty filler leftover from beer brewing.'
-  },
-  {
-    name: 'Corn Gluten Meal',
-    category: 'questionable',
-    reason: 'Cheap plant-based protein filler',
-    effects: 'Low bioavailability; often used to artificially boost protein count.'
-  },
-  {
-    name: 'Soy Protein',
-    category: 'questionable',
-    reason: 'Common allergen and often GMO',
-    effects: 'Can cause digestive distress and allergic reactions in sensitive pets.'
-  },
-  {
-    name: 'Artificial Flavors',
-    category: 'questionable',
-    reason: 'Vague chemical compounds',
-    effects: 'Unknown composition; can hide low-quality ingredients.'
-  },
-  {
-    name: 'MSG',
-    category: 'questionable',
-    reason: 'Flavor enhancer (Monosodium Glutamate)',
-    effects: 'Can cause behavioral issues and allergic reactions.'
-  },
-  {
-    name: 'Monosodium Glutamate',
-    category: 'questionable',
-    reason: 'Flavor enhancer',
-    effects: 'Potential neurotoxin; hides poor quality ingredients.'
-  },
-  {
-    name: 'Cellulose',
-    category: 'questionable',
-    reason: 'Inexpensive fiber source (often wood pulp)',
-    effects: 'Low-quality filler that provides zero nutrition.'
-  },
-  {
-    name: 'Rendered Fat',
-    category: 'questionable',
-    reason: 'Vague source of animal fat',
-    effects: 'May contain contaminants from 4-D animals (Dead, Dying, Diseased, Disabled).'
-  },
-  {
-    name: 'Calcium Propionate',
-    category: 'questionable',
-    reason: 'Mold inhibitor',
-    effects: 'Linked to behavioral issues and sleep disturbances.'
-  },
+  // 🟡 QUESTIONABLE (flag yellow)
+  { name: 'Corn Syrup', category: 'questionable', reason: 'Causes obesity and diabetes', effects: 'Unnecessary sugar filler.' },
+  { name: 'Meat By-Products', category: 'questionable', reason: 'Vague unknown quality', effects: 'May contain low-quality animal parts.' },
+  { name: 'Poultry By-Products', category: 'questionable', reason: 'Vague unknown quality', effects: 'Non-human grade animal parts.' },
+  { name: 'Animal Digest', category: 'questionable', reason: 'Rendered animal parts unknown source', effects: 'Chemical "soup" of animal tissues.' },
+  { name: 'Animal Fat', category: 'questionable', reason: 'Unknown sources may contain contaminants', effects: 'Vague labeling hides poor quality.' },
+  { name: 'Rendered Fat', category: 'questionable', reason: 'Unknown animal sources', effects: 'High risk of contaminants.' },
+  { name: 'Brewers Rice', category: 'questionable', reason: 'Low nutrition rice fragments', effects: 'Leftover waste from beer brewing.' },
+  { name: 'Corn Gluten Meal', category: 'questionable', reason: 'Cheap protein filler', effects: 'Low bioavailability for pets.' },
+  { name: 'Wheat Gluten', category: 'questionable', reason: 'Common allergen cheap filler', effects: 'Used to boost protein levels artificially.' },
+  { name: 'Soy Protein Isolate', category: 'questionable', reason: 'Common allergen often GMO', effects: 'Can disrupt thyroid function.' },
+  { name: 'Soy', category: 'questionable', reason: 'Common allergen often GMO', effects: 'Hard for many pets to digest.' },
+  { name: 'Artificial Flavors', category: 'questionable', reason: 'Unknown chemical compounds', effects: 'Vague and potentially harmful.' },
+  { name: 'Natural Flavors', category: 'questionable', reason: 'Vague undisclosed ingredients', effects: 'Can hide low-quality compounds.' },
+  { name: 'MSG', category: 'questionable', reason: 'May cause reactions', effects: 'Monosodium Glutamate.' },
+  { name: 'Cellulose', category: 'questionable', reason: 'Wood pulp filler low nutrition', effects: 'Indigestible fiber source.' },
+  { name: 'Calcium Propionate', category: 'questionable', reason: 'Preservative linked to behavioral issues', effects: 'Mold inhibitor.' },
+  { name: 'Sodium Hexametaphosphate', category: 'questionable', reason: 'May affect mineral absorption', effects: 'Dental health additive with side effects.' },
+  { name: 'Caramel Color', category: 'questionable', reason: 'Contains potential carcinogen 4-MEI', effects: 'Artificial coloring agent.' },
+  { name: 'Phosphoric Acid', category: 'questionable', reason: 'Linked to bone density loss', effects: 'Used to add flavor/acidity.' },
+  { name: 'Potassium Sorbate', category: 'questionable', reason: 'May cause allergic reactions', effects: 'Common food preservative.' },
+  { name: 'Sodium Benzoate', category: 'questionable', reason: 'Linked to hyperactivity', effects: 'Artificial preservative.' },
+  { name: 'TBHQ', category: 'questionable', reason: 'Linked to cancer in high doses', effects: 'Tertiary Butylhydroquinone preservative.' },
+  { name: 'Titanium Dioxide', category: 'questionable', reason: 'Potential carcinogen', effects: 'Whiting agent for food color.' },
+  { name: 'Carob Bean Gum', category: 'questionable', reason: 'May cause digestive issues', effects: 'Thickener/stabilizer.' },
+  { name: 'Guar Gum', category: 'questionable', reason: 'May cause digestive issues', effects: 'Thickener from guar beans.' },
+  { name: 'Xanthan Gum', category: 'questionable', reason: 'May cause digestive issues', effects: 'Fermentation-based thickener.' },
+  { name: 'Sorbitol', category: 'questionable', reason: 'May cause digestive upset', effects: 'Sugar alcohol sweetener.' },
+  { name: 'Glucose', category: 'questionable', reason: 'Unnecessary added sugar', effects: 'Spikes blood sugar levels.' },
+  { name: 'Sucrose', category: 'questionable', reason: 'Unnecessary added sugar', effects: 'Contributes to weight gain.' },
+  { name: 'Pea Protein', category: 'questionable', reason: 'Controversial link to DCM heart disease', effects: 'High levels of legumes linked to DCM in dogs.' },
+  { name: 'Lentils', category: 'questionable', reason: 'Controversial link to DCM in dogs', effects: 'Legume filler linked to heart issues.' },
+  { name: 'Chickpeas', category: 'questionable', reason: 'Controversial link to DCM', effects: 'Legume filler.' },
+  { name: 'Potatoes', category: 'questionable', reason: 'High glycemic linked to DCM', effects: 'Starchy filler.' },
+  { name: 'Rosemary Extract', category: 'questionable', reason: 'Can trigger seizures in epileptic pets', effects: 'Natural preservative with neurological risks.' },
+  { name: 'Nutmeg', category: 'questionable', reason: 'Toxic in large amounts', effects: 'Contains myristicin.' },
 
-  // 🟢 GOOD
-  {
-    name: 'Chicken',
-    category: 'good',
-    reason: 'High-quality named protein',
-    effects: 'Excellent source of essential amino acids for muscle health.'
-  },
-  {
-    name: 'Beef',
-    category: 'good',
-    reason: 'High-quality named protein',
-    effects: 'Rich in iron and B-vitamins.'
-  },
-  {
-    name: 'Salmon',
-    category: 'good',
-    reason: 'High-quality named protein',
-    effects: 'Rich in omega-3 fatty acids for skin and coat.'
-  },
-  {
-    name: 'Turkey',
-    category: 'good',
-    reason: 'High-quality named protein',
-    effects: 'Lean protein source, good for weight management.'
-  },
-  {
-    name: 'Sweet Potato',
-    category: 'good',
-    reason: 'Complex, healthy carbohydrate',
-    effects: 'High in fiber and vitamins A, B6, and C.'
-  },
-  {
-    name: 'Blueberries',
-    category: 'good',
-    reason: 'Antioxidant powerhouse',
-    effects: 'Supports brain health and immune system.'
-  },
-  {
-    name: 'Flaxseed',
-    category: 'good',
-    reason: 'Omega-3 fatty acid source',
-    effects: 'Promotes heart health and shiny coat.'
-  },
-  {
-    name: 'Probiotics',
-    category: 'good',
-    reason: 'Beneficial gut bacteria',
-    effects: 'Supports digestive health and nutrient absorption.'
-  },
-  {
-    name: 'Lactobacillus',
-    category: 'good',
-    reason: 'Targeted probiotic strain',
-    effects: 'Improves gut flora balance.'
-  },
-  {
-    name: 'Glucosamine',
-    category: 'good',
-    reason: 'Joint health supplement',
-    effects: 'Helps maintain cartilage and mobility.'
-  },
-  {
-    name: 'Chondroitin',
-    category: 'good',
-    reason: 'Joint health supplement',
-    effects: 'Supports joint lubrication and health.'
-  },
-  {
-    name: 'Pumpkin',
-    category: 'good',
-    reason: 'Fiber and digestive aid',
-    effects: 'Helps regulate digestion and stool quality.'
-  },
-  {
-    name: 'Salmon Oil',
-    category: 'good',
-    reason: 'Concentrated Omega-3s',
-    effects: 'Anti-inflammatory properties, supports brain development.'
-  },
-  {
-    name: 'Vitamin E',
-    category: 'good',
-    reason: 'Natural antioxidant and preservative',
-    effects: 'Protects cells from damage and preserves food naturally.'
-  },
-  {
-    name: 'Tocopherols',
-    category: 'good',
-    reason: 'Natural preservative (Vitamin E source)',
-    effects: 'Safest way to preserve pet food without chemicals.'
-  },
-  {
-    name: 'Cranberries',
-    category: 'good',
-    reason: 'Urinary tract support',
-    effects: 'Prevents bacteria from adhering to the bladder wall.'
-  }
+  // 🟢 GOOD (highlight green)
+  { name: 'Deboned Chicken', category: 'good', reason: 'High quality protein', effects: 'Fresh, named protein source.' },
+  { name: 'Deboned Beef', category: 'good', reason: 'High quality protein', effects: 'Nutrient-rich fresh meat.' },
+  { name: 'Deboned Salmon', category: 'good', reason: 'High quality protein rich in omega-3', effects: 'Supports skin, coat, and heart.' },
+  { name: 'Deboned Turkey', category: 'good', reason: 'High quality protein', effects: 'Lean, high-quality meat.' },
+  { name: 'Deboned Lamb', category: 'good', reason: 'High quality protein', effects: 'Excellent for sensitive stomachs.' },
+  { name: 'Deboned Duck', category: 'good', reason: 'High quality protein', effects: 'Novel protein source.' },
+  { name: 'Deboned Venison', category: 'good', reason: 'High quality protein', effects: 'High-protein, low-fat novel meat.' },
+  { name: 'Chicken Meal', category: 'good', reason: 'Concentrated protein', effects: 'Rich in essential amino acids.' },
+  { name: 'Salmon Meal', category: 'good', reason: 'Concentrated protein omega-3 rich', effects: 'High protein and healthy fats.' },
+  { name: 'Turkey Meal', category: 'good', reason: 'Concentrated protein', effects: 'Highly digestible protein source.' },
+  { name: 'Whole Egg', category: 'good', reason: 'Highly digestible complete protein', effects: 'Nature\'s perfect protein.' },
+  { name: 'Egg Product', category: 'good', reason: 'Good quality protein', effects: 'Highly bioavailable amino acids.' },
+  { name: 'Sweet Potato', category: 'good', reason: 'Healthy digestible carb', effects: 'Rich in fiber and vitamins.' },
+  { name: 'Pumpkin', category: 'good', reason: 'Excellent fiber digestive health', effects: 'Helps regulate digestion.' },
+  { name: 'Blueberries', category: 'good', reason: 'Antioxidants urinary health', effects: 'Supports immune system.' },
+  { name: 'Cranberries', category: 'good', reason: 'Urinary tract health', effects: 'Helps prevent UTIs.' },
+  { name: 'Carrots', category: 'good', reason: 'Beta-carotene vitamins', effects: 'Supports vision and immunity.' },
+  { name: 'Spinach', category: 'good', reason: 'Vitamins and minerals', effects: 'Rich in iron and antioxidants.' },
+  { name: 'Kale', category: 'good', reason: 'Vitamins and antioxidants', effects: 'Superfood for pets.' },
+  { name: 'Flaxseed', category: 'good', reason: 'Omega-3 fatty acids', effects: 'Supports healthy skin and coat.' },
+  { name: 'Salmon Oil', category: 'good', reason: 'Omega-3 coat and skin health', effects: 'Pure source of DHA and EPA.' },
+  { name: 'Fish Oil', category: 'good', reason: 'Omega-3 anti-inflammatory', effects: 'Supports joint and heart health.' },
+  { name: 'Coconut Oil', category: 'good', reason: 'Antimicrobial medium chain fatty acids', effects: 'Supports metabolism and brain.' },
+  { name: 'Vitamin E', category: 'good', reason: 'Natural preservative antioxidant', effects: 'Safest way to preserve food.' },
+  { name: 'Tocopherols', category: 'good', reason: 'Natural preservative antioxidant', effects: 'Natural source of Vitamin E.' },
+  { name: 'Vitamin C', category: 'good', reason: 'Antioxidant immune support', effects: 'Boosts natural defenses.' },
+  { name: 'Ascorbic Acid', category: 'good', reason: 'Antioxidant immune support', effects: 'Natural preservative and vitamin.' },
+  { name: 'Glucosamine', category: 'good', reason: 'Joint health cartilage support', effects: 'Essential for aging pets.' },
+  { name: 'Chondroitin', category: 'good', reason: 'Joint health support', effects: 'Works with glucosamine for mobility.' },
+  { name: 'Probiotics', category: 'good', reason: 'Gut health', effects: 'Supports a healthy microbiome.' },
+  { name: 'Lactobacillus', category: 'good', reason: 'Gut health', effects: 'Beneficial bacteria strain.' },
+  { name: 'Bifidobacterium', category: 'good', reason: 'Gut health', effects: 'Beneficial bacteria strain.' },
+  { name: 'Inulin', category: 'good', reason: 'Prebiotic feeds good gut bacteria', effects: 'Supports digestive regularity.' },
+  { name: 'Taurine', category: 'good', reason: 'Essential for cats heart health', effects: 'Critical for heart muscle function.' },
+  { name: 'L-Carnitine', category: 'good', reason: 'Supports healthy weight heart health', effects: 'Helps burn fat for energy.' },
+  { name: 'DHA', category: 'good', reason: 'Brain development puppies and kittens', effects: 'Docosahexaenoic acid.' },
+  { name: 'EPA', category: 'good', reason: 'Anti-inflammatory omega-3', effects: 'Eicosapentaenoic acid.' },
+  { name: 'Turmeric', category: 'good', reason: 'Anti-inflammatory', effects: 'Supports joint and systemic health.' },
+  { name: 'Kelp', category: 'good', reason: 'Natural iodine thyroid support', effects: 'Rich in ocean minerals.' },
+  { name: 'Chia Seeds', category: 'good', reason: 'Omega-3 and fiber', effects: 'Supports hydration and digestion.' },
+  { name: 'Brown Rice', category: 'good', reason: 'Digestible whole grain', effects: 'Steady energy source.' },
+  { name: 'Oatmeal', category: 'good', reason: 'Digestible whole grain sensitive stomachs', effects: 'Soothing on the gut.' },
+  { name: 'Barley', category: 'good', reason: 'Digestible whole grain', effects: 'Low glycemic whole grain.' },
+  { name: 'Millet', category: 'good', reason: 'Digestible whole grain gluten-free', effects: 'Ancient grain, easy to digest.' },
+  { name: 'Dried Chicory Root', category: 'good', reason: 'Prebiotic digestive health', effects: 'Source of inulin.' },
+  { name: 'Rosehips', category: 'good', reason: 'Vitamin C antioxidants', effects: 'Supports joint health naturally.' },
+  { name: 'Zinc', category: 'good', reason: 'Immune health skin health', effects: 'Critical for cell repair.' },
+  { name: 'Iron', category: 'good', reason: 'Blood health', effects: 'Prevents anemia and boosts energy.' },
 ];

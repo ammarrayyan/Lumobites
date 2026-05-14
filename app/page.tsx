@@ -62,10 +62,10 @@ export default function Home() {
             </Link>
             <Link 
               href="/scan" 
-              className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-[#F59E0B]/30 bg-[#FFFBEB]/40 text-[#B45309] text-[13px] font-bold hover:bg-[#FFFBEB]/80 hover:border-[#F59E0B]/50 transition-all"
+              className="mt-6 text-gray-400 hover:text-[#8B5E3C] transition-all text-[13px] font-medium"
               style={{ textDecoration: 'none' }}
             >
-              <span>⚠️</span> Is your pet&apos;s food safe? Check now &rarr;
+              🔍 Scan label &middot; Check ingredients &middot; Check FDA recalls &mdash; all free &rarr;
             </Link>
           </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -112,28 +112,6 @@ export default function Home() {
       {/* BRAND LOGOS STRIP */}
       <BrandMarquee />
 
-      {/* INGREDIENT CHECKER MINI CTA */}
-      <section className="w-full bg-[#FFFFFF] px-6 py-20 border-b border-[#EEEEEE]">
-        <div className="max-w-[1000px] mx-auto bg-[#F5EDE4] rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-4">Safety First</h3>
-            <h2 className="text-3xl md:text-4xl font-black text-[#191919] mb-6 leading-tight tracking-tight">Is Your Pet&apos;s Food Safe?</h2>
-            <p className="text-gray-600 mb-0 leading-relaxed">
-              Not sure if your pet&apos;s current food is safe? Paste the ingredients to check for hidden toxins, artificial colors, and low-quality fillers.
-            </p>
-          </div>
-          <div className="w-full md:w-[380px] bg-white rounded-2xl p-6 shadow-xl shadow-[#8B5E3C]/5 border border-[#E8D5C0]">
-             <div className="mb-4">
-                <div className="w-full h-24 bg-[#F9F9F9] rounded-xl border border-gray-100 flex items-center justify-center p-4 text-center">
-                   <p className="text-sm text-gray-400 italic font-medium">Chicken, Corn Syrup, BHA, Red 40...</p>
-                </div>
-             </div>
-             <Link href="/scan" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                Is My Pet&apos;s Food Safe? &rarr;
-             </Link>
-          </div>
-        </div>
-      </section>
 
       {/* HOW IT WORKS */}
       <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">

@@ -15,9 +15,7 @@ export default function ScanPage() {
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
-  const [manualBrand, setManualBrand] = useState('');
   const [manualIngredients, setManualIngredients] = useState('');
-  const [showBrandInput, setShowBrandInput] = useState(false);
   const [safetyResults, setSafetyResults] = useState<{
     score: string;
     scoreColor: string;
@@ -46,8 +44,6 @@ export default function ScanPage() {
         setIsCameraStarted(true);
       } catch (err) {
         console.error("Unable to start scanning", err);
-        // Fallback to manual entry if camera fails
-        setShowBrandInput(true);
       }
     };
 
@@ -81,20 +77,16 @@ export default function ScanPage() {
     setError(null);
     setProduct(null);
     setSafetyResults(null);
-    setShowBrandInput(false);
+    setHasRecall(false);
+    setRecallReason('');
     
     try {
       const res = await fetch(`/api/scan/${barcode}`);
       const data = await res.json();
       
       if (!res.ok) {
-        if (res.status === 400) {
-          setError('This product is not available in the US or is listed in a different language.');
-        } else {
-          // If barcode not found in OPFF, ask for brand
-          setShowBrandInput(true);
-          setError(null);
-        }
+        // If product not found in OPFF, set to Unknown and show results page with inline brand search
+        setProduct({ product_name: 'Unknown Product', brand: 'Unknown Brand' } as any);
       } else {
         setProduct(data.product);
         setHasRecall(data.hasRecall);
@@ -102,51 +94,17 @@ export default function ScanPage() {
         
         // Run ingredient safety check if ingredients exist
         if (data.product.ingredients) {
-          analyzeIngredients(data.product.ingredients);
+          analyzeIngredients(data.product.ingredients, data.hasRecall);
         }
       }
     } catch (err) {
-      setError('Failed to lookup product. Please check your connection.');
+      setProduct({ product_name: 'Unknown Product', brand: 'Unknown Brand' } as any);
     } finally {
       setLoading(false);
     }
   }
 
-  async function checkRecallByBrand(brand: string) {
-    setLoading(true);
-    setError(null);
-    setProduct(null);
-    
-    try {
-      const fdaRes = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(brand)}"&limit=10`);
-      if (fdaRes.ok) {
-        const fdaData = await fdaRes.json();
-        const match = fdaData.results?.find((r: any) => {
-          const desc = (r.product_description || '').toLowerCase();
-          return desc.includes(brand.toLowerCase()) && 
-                 (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
-        });
-        
-        if (match) {
-          setHasRecall(true);
-          setRecallReason(match.reason_for_recall);
-        } else {
-          setHasRecall(false);
-        }
-        setProduct({ brand } as any); // Minimal product info
-      } else {
-        setHasRecall(false);
-        setProduct({ brand } as any);
-      }
-    } catch (err) {
-      setError('Failed to check recalls. Please try again.');
-    } finally {
-      setLoading(false);
-      setShowBrandInput(false);
-    }
-  }
-
-  function analyzeIngredients(text: string) {
+  function analyzeIngredients(text: string, recallActive: boolean = false) {
     if (!text) return;
 
     const list = text
@@ -159,13 +117,9 @@ export default function ScanPage() {
     const seen = new Set<string>();
 
     list.forEach(item => {
-      // Normalize item: remove extra whitespace and punctuation
       const normalizedItem = item.toLowerCase().trim().replace(/[().]/g, ' ');
-      
       const match = ingredientDatabase.find(dbItem => {
         const dbName = dbItem.name.toLowerCase();
-        // Check if normalized item contains db name OR vice versa
-        // Use word boundaries for very short strings like "BHA" or "BHT"
         if (dbName.length <= 3) {
           const regex = new RegExp(`\\b${dbName}\\b`, 'i');
           return regex.test(normalizedItem);
@@ -180,12 +134,29 @@ export default function ScanPage() {
       }
     });
 
+    // Grading Logic:
+    // A = 0 dangerous, 0-2 questionable
+    // B = 0 dangerous, 3-5 questionable
+    // C = 0 dangerous, 6+ questionable OR 1 dangerous
+    // D = 2-3 dangerous
+    // F = 4+ dangerous OR active FDA recall
+    
     let score = 'A';
     let scoreColor = '#10B981';
-    if (counts.dangerous >= 2) { score = 'F'; scoreColor = '#EF4444'; }
-    else if (counts.dangerous === 1) { score = 'D'; scoreColor = '#F97316'; }
-    else if (counts.questionable >= 4) { score = 'C'; scoreColor = '#F59E0B'; }
-    else if (counts.questionable >= 1) { score = 'B'; scoreColor = '#84CC16'; }
+
+    if (recallActive || counts.dangerous >= 4) {
+      score = 'F';
+      scoreColor = '#EF4444';
+    } else if (counts.dangerous >= 2) {
+      score = 'D';
+      scoreColor = '#F97316';
+    } else if (counts.dangerous === 1 || counts.questionable >= 6) {
+      score = 'C';
+      scoreColor = '#F59E0B';
+    } else if (counts.questionable >= 3) {
+      score = 'B';
+      scoreColor = '#84CC16';
+    }
 
     setSafetyResults({ score, scoreColor, flagged, counts: { ...counts, neutral: list.length - flagged.length } });
   }
@@ -196,7 +167,7 @@ export default function ScanPage() {
     
     setLoading(true);
     setProduct({ product_name: 'Custom Entry', brand: 'User Input', ingredients: manualIngredients } as any);
-    analyzeIngredients(manualIngredients);
+    analyzeIngredients(manualIngredients, false);
     setLoading(false);
   };
 
@@ -205,20 +176,13 @@ export default function ScanPage() {
     if (manualBarcode.trim()) lookupProduct(manualBarcode.trim());
   };
 
-  const handleBrandSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (manualBrand.trim()) checkRecallByBrand(manualBrand.trim());
-  };
-
   const resetScanner = async () => {
     setProduct(null);
     setSafetyResults(null);
     setScannedResult(null);
     setError(null);
-    setShowBrandInput(false);
     setLoading(false);
     
-    // Small delay to ensure UI has transitioned and div is visible
     setTimeout(async () => {
       if (scannerRef.current) {
         try {
@@ -234,7 +198,6 @@ export default function ScanPage() {
           setIsCameraStarted(true);
         } catch (err) {
           console.error("Failed to restart scanner", err);
-          setError("Could not restart camera. Please refresh the page.");
         }
       }
     }, 300);
@@ -257,25 +220,13 @@ export default function ScanPage() {
             <p className="text-gray-600 leading-relaxed text-sm">Scan any pet food label for instant ingredient safety analysis + live FDA recall check</p>
         </div>
 
-        {/* Camera UI - Always mounted but hidden when not needed to avoid re-init bugs */}
-        <div className={(!product && !error && !showBrandInput && !loading) ? 'block space-y-6' : 'hidden'}>
+        {/* Search / Scan UI */}
+        <div className={(!product && !loading) ? 'block space-y-6' : 'hidden'}>
           <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
             <div id="reader" className="w-full"></div>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-500 font-medium">Position the barcode within the frame</p>
-              <div className="mt-2 h-1 w-32 bg-[#E8DDD4] mx-auto rounded-full overflow-hidden">
-                  <div className="h-full bg-[#8B5E3C] w-1/2 animate-shimmer"></div>
-              </div>
-            </div>
           </div>
 
           <div className="text-center">
-            <div className="relative flex py-5 items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="flex-shrink mx-4 text-gray-400 text-sm font-medium">OR</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-
             <form onSubmit={handleBarcodeSubmit} className="mt-4">
               <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Scan Food Label</label>
               <div className="flex gap-2">
@@ -303,47 +254,51 @@ export default function ScanPage() {
           </div>
         </div>
 
-        {showBrandInput && (
-           <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] animate-fade-in">
-              <div className="text-4xl mb-4 text-center">🔍</div>
-              <h3 className="text-xl font-bold text-[#191919] mb-6 text-center">Enter brand name to check FDA recalls</h3>
-              <form onSubmit={handleBrandSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    value={manualBrand}
-                    onChange={(e) => setManualBrand(e.target.value)}
-                    placeholder="e.g. Purina, Hill's, Blue Buffalo"
-                    className="w-full px-4 py-4 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]"
-                    autoFocus
-                />
-                <button type="submit" className="w-full bg-[#8B5E3C] text-white py-4 rounded-xl font-bold hover:bg-[#724a2e]">
-                    Check for Recalls
-                </button>
-                <button type="button" onClick={resetScanner} className="w-full text-[#8B5E3C] font-semibold text-sm">
-                    Back to Scanner
-                </button>
-              </form>
-           </div>
-        )}
-
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-4"></div>
-            <p className="text-[#8B5E3C] font-semibold">Checking FDA Database...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8DDD4] text-center">
-            <div className="text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-[#191919] mb-2">Error</h2>
-            <p className="text-gray-500 mb-6">{error}</p>
-            <button onClick={resetScanner} className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold">Try Again</button>
+            <p className="text-[#8B5E3C] font-semibold">Analyzing Safety...</p>
           </div>
         )}
 
         {product && !loading && (
           <div className="space-y-6 animate-fade-in-up">
+            {/* Inline Brand Search if Product Not Found */}
+            {product.product_name === 'Unknown Product' && (
+              <div className="bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-6">
+                <p className="text-xs font-bold text-[#8B5E3C] uppercase mb-2">Manual Brand Check</p>
+                <p className="text-sm text-gray-600 mb-4">We couldn&apos;t find this exact product. Enter the brand name below to check for active FDA recalls.</p>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const b = (e.target as any).brand.value;
+                    if (b) {
+                      setLoading(true);
+                      fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(b)}"&limit=10`)
+                        .then(r => r.json())
+                        .then(data => {
+                          const match = data.results?.find((r: any) => {
+                            const desc = (r.product_description || '').toLowerCase();
+                            return desc.includes(b.toLowerCase()) && (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+                          });
+                          if (match) {
+                            setHasRecall(true);
+                            setRecallReason(match.reason_for_recall);
+                            analyzeIngredients(product.ingredients || '', true);
+                          }
+                          setProduct({ ...product, brand: b });
+                          setLoading(false);
+                        });
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <input name="brand" placeholder="e.g. Purina" className="flex-1 px-4 py-2 rounded-xl border border-[#E8DDD4] outline-none text-sm" />
+                  <button type="submit" className="bg-[#8B5E3C] text-white px-4 py-2 rounded-xl font-bold text-sm">Check</button>
+                </form>
+              </div>
+            )}
+
             {hasRecall ? (
               <div className="bg-[#FEE2E2] border-2 border-[#EF4444] rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -356,7 +311,7 @@ export default function ScanPage() {
                     <p className="text-xs opacity-75">Check the full details on our <Link href="/recalls" className="underline font-bold">Recall Alerts</Link> page.</p>
                 </div>
               </div>
-            ) : (
+            ) : product.product_name !== 'Unknown Product' && (
               <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center">
                 <div className="text-4xl mb-2">✅</div>
                 <h3 className="text-[#166534] text-xl font-black uppercase">Safety Verified</h3>
@@ -454,6 +409,10 @@ export default function ScanPage() {
               <button onClick={resetScanner} className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-sm">Scan Another</button>
               <Link href="/recalls" className="text-[#8B5E3C] font-bold text-xs text-center">View All FDA Recalls &rarr;</Link>
             </div>
+
+            <p className="text-[10px] text-gray-400 text-center mt-6 leading-relaxed italic">
+              Results based on FDA and ASPCA guidelines for informational purposes only. Always consult your veterinarian before changing your pet&apos;s diet.
+            </p>
           </div>
         )}
       </main>
@@ -469,4 +428,3 @@ export default function ScanPage() {
     </div>
   );
 }
-
