@@ -5,7 +5,6 @@ import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import { ingredientDatabase, IngredientInfo } from '@/lib/ingredients';
-import Tesseract from 'tesseract.js';
 
 
 export default function ScanPage() {
@@ -107,13 +106,25 @@ export default function ScanPage() {
         setIsCameraStarted(false);
       }
 
-      const { data: { text } } = await Tesseract.recognize(imageData, 'eng');
+      // Call our new Google Vision OCR API
+      const res = await fetch('/api/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageData })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to read label");
+      }
+
+      const { text } = await res.json();
 
       setRawOcrText(text);
       processOCRResult(text);
-    } catch (err) {
+    } catch (err: any) {
       console.error("OCR Error:", err);
-      setError("Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
+      setError(err.message || "Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
       setOcrLoading(false);
     }
   };
