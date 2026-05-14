@@ -34,6 +34,8 @@ export default function ProductDetailPage() {
   const id = params.id as string;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recallData, setRecallData] = useState<{ active: boolean; reason?: string } | null>(null);
+  const [checkingRecall, setCheckingRecall] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -71,6 +73,40 @@ export default function ProductDetailPage() {
     };
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (!product?.brand) return;
+
+    const checkRecall = async () => {
+      setCheckingRecall(true);
+      try {
+        const res = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(product.brand)}"&limit=10`);
+        if (res.ok) {
+          const data = await res.json();
+          const match = data.results?.find((r: any) => {
+            const desc = (r.product_description || '').toLowerCase();
+            return desc.includes(product.brand.toLowerCase()) && 
+                   (desc.includes('dog') || desc.includes('cat') || desc.includes('pet') || desc.includes('animal'));
+          });
+          
+          if (match) {
+            setRecallData({ active: true, reason: match.reason_for_recall });
+          } else {
+            setRecallData({ active: false });
+          }
+        } else {
+          setRecallData({ active: false });
+        }
+      } catch (e) {
+        console.error('FDA check error:', e);
+        setRecallData({ active: false });
+      } finally {
+        setCheckingRecall(false);
+      }
+    };
+
+    checkRecall();
+  }, [product?.brand]);
 
   if (loading) {
     return (
@@ -125,7 +161,28 @@ export default function ProductDetailPage() {
           {product.pet_type === 'dog' ? '🐶' : '🐱'}
         </div>
         <h1 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', textAlign: 'center', color: '#191919', lineHeight: 1.2, margin: '0 0 8px 0' }}>{displayName}</h1>
-        <p style={{ textAlign: 'center', color: '#888', marginBottom: '16px', fontSize: '14px' }}>{product.brand}</p>
+        <p style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: '14px' }}>{product.brand}</p>
+        
+        {/* Recall Badge */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          {checkingRecall ? (
+            <div style={{ fontSize: '12px', color: '#999', animation: 'pulse 2s infinite' }}>Checking FDA recall status...</div>
+          ) : recallData?.active ? (
+            <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #EF4444', borderRadius: '8px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '16px' }}>🚨</span>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ color: '#991B1B', fontWeight: 'bold', fontSize: '13px', margin: 0 }}>ACTIVE RECALL FOUND</p>
+                <p style={{ color: '#7F1D1D', fontSize: '11px', margin: 0, opacity: 0.8 }}>{recallData.reason?.substring(0, 60)}...</p>
+              </div>
+            </div>
+          ) : recallData?.active === false ? (
+            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #22C55E', borderRadius: '8px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '14px' }}>✅</span>
+              <span style={{ color: '#166534', fontWeight: 'bold', fontSize: '13px' }}>No Active Recalls Found</span>
+            </div>
+          ) : null}
+        </div>
+
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
           {tags.map(tag => (
             <span key={tag} style={{ backgroundColor: '#F5EDE4', color: '#8B5E3C', fontSize: '12px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '100px', border: '1px solid #E8DDD4' }}>
