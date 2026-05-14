@@ -60,8 +60,12 @@ export default function Home() {
             <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
             </Link>
-            <Link href="/scan" className="hover:underline transition-all mt-4 opacity-80" style={{ fontSize: '14px', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', fontWeight: '600' }}>
-              <span>🐾</span> Is your pet&apos;s food safe? Scan to find out &rarr;
+            <Link 
+              href="/scan" 
+              className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-[#F59E0B]/30 bg-[#FFFBEB]/40 text-[#B45309] text-[13px] font-bold hover:bg-[#FFFBEB]/80 hover:border-[#F59E0B]/50 transition-all"
+              style={{ textDecoration: 'none' }}
+            >
+              <span>⚠️</span> Is your pet&apos;s food safe? Check now &rarr;
             </Link>
           </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
