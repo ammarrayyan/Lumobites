@@ -1,5 +1,6 @@
 import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
+import { ingredientDatabase, IngredientInfo } from './ingredients';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   const text = (product.product_name + ' ' + (product.categories || '') + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
@@ -14,50 +15,81 @@ function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both'
 }
 
 // ─── Score a single product against a pet profile ─────────────────────────────
-function scoreProduct(product: Product, profile: PetProfile): number {
-  let score = 0;
+function calculateMatchScore(product: Product, profile: PetProfile): number {
+  let score = 100;
 
-  // +20 per matching health tag
-  for (const tag of profile.health_issues) {
-    if (product.health_tags.includes(tag as HealthTag)) score += 20;
-  }
+  const ingredientsText = (product.ingredients || '').toLowerCase();
+  const ingredientList = ingredientsText.split(',').map(i => i.trim());
+  
+  // 1. Deductions for Ingredient Quality
+  let questionableCount = 0;
+  let dangerousCount = 0;
+  
+  ingredientDatabase.forEach(dbItem => {
+    const dbName = dbItem.name.toLowerCase();
+    const regex = dbName.length <= 3 ? new RegExp(`\\b${dbName}\\b`, 'i') : null;
+    
+    const isMatch = regex ? regex.test(ingredientsText) : ingredientsText.includes(dbName);
+    
+    if (isMatch) {
+      if (dbItem.category === 'dangerous') dangerousCount++;
+      if (dbItem.category === 'questionable') questionableCount++;
+    }
+  });
 
-  // +30 if food type matches (or if user selected both)
-  if (profile.food_type && profile.food_type !== 'both') {
-    const productFoodType = getProductFoodType(product);
-    if (productFoodType === profile.food_type) {
-      score += 30;
+  score -= (questionableCount * 5);
+  score -= (dangerousCount * 15);
+
+  // 2. Named Meat Check (First 3 ingredients)
+  const namedMeats = ['chicken', 'beef', 'salmon', 'turkey', 'lamb', 'duck', 'venison', 'pork'];
+  const firstThree = ingredientList.slice(0, 3);
+  const hasNamedMeatInTopThree = firstThree.some(ing => namedMeats.some(meat => ing.includes(meat) && !ing.includes('by-product') && !ing.includes('meal')));
+  
+  if (!hasNamedMeatInTopThree) score -= 10;
+
+  // 3. Senior Dog Logic (7+ years)
+  if (profile.age_years >= 7 && profile.pet_type === 'dog') {
+    const grains = ['corn', 'wheat', 'soy', 'gluten', 'brewers rice'];
+    const hasHighGrain = grains.some(g => ingredientList.slice(0, 5).some(ing => ing.includes(g)));
+    if (hasHighGrain) score -= 10;
+    
+    // Bonus for Glucosamine/Chondroitin
+    if (ingredientsText.includes('glucosamine') || ingredientsText.includes('chondroitin')) {
+      score += 5;
     }
   }
 
-  // +10 if protein > 28%
-  if (product.protein_pct > 28) score += 10;
-
-  // +10 if no recall history
-  if (!product.recall_history) score += 10;
-
-  // Budget-based Quality Boost: Prioritize premium items if user has a high budget
-  if (profile.budget_monthly_max >= 80) {
-    if (product.price_monthly_low >= 70) score += 20;
-    else if (product.price_monthly_low >= 40) score += 10;
-  } else if (profile.budget_monthly_max >= 50) {
-    if (product.price_monthly_low >= 40) score += 15;
+  // 4. Budget vs Premium Pricing
+  if (profile.budget_monthly_max < 40 && product.price_monthly_low > 60) {
+    score -= 10;
   }
 
-  return score;
+  // 5. Bonuses
+  // First ingredient deboned named meat
+  if (ingredientList[0] && ingredientList[0].includes('deboned') && namedMeats.some(meat => ingredientList[0].includes(meat))) {
+    score += 5;
+  }
+
+  // Grain-free bonus for sensitive pets
+  if (profile.health_issues.includes('allergies') || profile.health_issues.includes('sensitive_stomach')) {
+    const grains = ['corn', 'wheat', 'soy', 'rice', 'barley', 'oats'];
+    const isGrainFree = !grains.some(g => ingredientsText.includes(g));
+    if (isGrainFree) score += 5;
+  }
+
+  // Matching health tags bonus (original logic kept but balanced)
+  for (const tag of profile.health_issues) {
+    if (product.health_tags.includes(tag as HealthTag)) score += 5;
+  }
+
+  return Math.max(40, Math.min(99, score));
 }
 
 // ─── Build "why recommended" tag ─────────────────────────────────────────────
 function buildWhyTag(product: Product, profile: PetProfile): string {
   const name = profile.pet_name || (profile.pet_type === 'dog' ? 'your pup' : 'your cat');
-  const matchingTags = profile.health_issues.filter(t => product.health_tags.includes(t as HealthTag));
   const benefit = product.pros?.split('.')[0] || (product.protein_pct > 32 ? 'High protein' : 'Balanced nutrition');
 
-  if (matchingTags.length > 0) {
-    const tagLabel = matchingTags[0].replace('_', ' ');
-    return `${product.brand} ${product.product_name} — ${benefit.toLowerCase()}, great for ${tagLabel}`;
-  }
-  
   return `${product.brand} ${product.product_name} — ${benefit.toLowerCase()} for ${name}`;
 }
 
@@ -97,23 +129,18 @@ export function recommendProducts(
       filtered = filtered.filter(p => profile.health_issues.some(tag => p.health_tags.includes(tag as HealthTag)));
     }
 
-    const scored: ScoredProduct[] = filtered.map(p => {
-      const score = scoreProduct(p, profile);
-      let maxScoreCalc = profile.health_issues.length * 20 + 20;
-      if (profile.food_type && profile.food_type !== 'both') maxScoreCalc += 30;
-      if (profile.budget_monthly_max >= 80) maxScoreCalc += 20;
-      else if (profile.budget_monthly_max >= 50) maxScoreCalc += 15;
-
-      const maxScore = Math.max(maxScoreCalc, 30);
-      const match_pct = Math.min(99, Math.round(50 + (score / maxScore) * 49));
-      return {
-        ...p,
-        score,
-        match_pct,
-        why_recommended: buildWhyTag(p, profile),
-        budget_relaxed: p.price_monthly_low > budget,
-      };
-    });
+    const scored: ScoredProduct[] = filtered
+      .map(p => {
+        const match_pct = calculateMatchScore(p, profile);
+        return {
+          ...p,
+          score: match_pct, // Use match_pct as the sortable score
+          match_pct,
+          why_recommended: buildWhyTag(p, profile),
+          budget_relaxed: p.price_monthly_low > budget,
+        };
+      })
+      .filter(p => p.match_pct >= 40); // Cap minimum score at 40%
 
     return scored
       .filter(p => p.price_monthly_low <= currentBudget)
@@ -149,33 +176,14 @@ export function recommendProducts(
     tryAddFrom(getResults(basePool, budget * 1.2, false, true));
   }
   
-  // TIER 4: Keep pet type and food type only (remove budget/health constraints)
+  // TIER 4: Keep pet type and food type only
   if (selected.length < 5) {
     tryAddFrom(getResults(basePool, 9999, false, true));
   }
 
-  // TIER 5: Relax everything except pet type
+  // TIER 5: Final fallback - ignore food type if needed
   if (selected.length < 5) {
     tryAddFrom(getResults(basePool, 9999, false, false));
-  }
-
-  // TIER 6: Final fallback - ignore diversity and life stage if needed
-  if (selected.length < 5) {
-    const allRemaining = products.filter(p => p.pet_type === profile.pet_type);
-    const scoredRemaining = allRemaining.map(p => ({
-      ...p,
-      score: scoreProduct(p, profile),
-      match_pct: 50,
-      why_recommended: buildWhyTag(p, profile),
-      budget_relaxed: p.price_monthly_low > budget,
-    }));
-    
-    for (const p of scoredRemaining) {
-      if (!selected.find(s => s.id === p.id)) {
-        selected.push(p);
-        if (selected.length >= 5) break;
-      }
-    }
   }
 
   const anyRelaxed = selected.some(p => p.price_monthly_low > budget);
