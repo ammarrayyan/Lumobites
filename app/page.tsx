@@ -21,65 +21,97 @@ export default function Home() {
       </nav>
 
       {/* HERO SECTION */}
-      <section className="w-full flex flex-col items-center text-center px-6 bg-[#FDFAF7] pt-[48px] pb-16">
-        <div className="max-w-[680px] mx-auto flex flex-col items-center">
+      <section className="w-full bg-[#FDFAF7] pt-[48px] pb-16 px-6">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-12">
           
-          <AnimatedPets />
+          {/* LEFT COLUMN - 60% */}
+          <div className="flex-[1.5] flex flex-col items-center md:items-start text-center md:text-left">
+            <AnimatedPets />
+            
+            <div className="border border-[#C17D3C] text-[#8B5E3C] bg-transparent text-[12px] font-bold tracking-[0.1em] uppercase px-[18px] py-[7px] rounded-[100px] mb-8 relative z-10">
+              Free &middot; No Sign-up Required
+            </div>
+            
+            <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(44px, 5.5vw, 68px)' }}>
+              <span className="text-[#191919]">Find the best food</span>
+              <br />
+              <span className="text-[#C17D3C]">for your pet.</span>
+            </h1>
+            
+            <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10">
+              Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
+            </p>
 
-          <div className="border border-[#C17D3C] text-[#8B5E3C] bg-transparent text-[12px] font-bold tracking-[0.1em] uppercase px-[18px] py-[7px] rounded-[100px] mb-8 relative z-10">
-            Free &middot; No Sign-up Required
-          </div>
-          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] w-full relative z-10" style={{ fontSize: 'clamp(44px, 6.5vw, 76px)' }}>
-            <span className="text-[#191919]">Find the best food</span>
-            <br />
-            <span className="text-[#C17D3C]">for your pet.</span>
-          </h1>
-          <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] mx-auto relative z-10">
-            Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
-          </p>
-          <style>{`
-            @keyframes heartbeat {
-              0% { transform: scale(1); }
-              14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-              28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-              42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-              70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-            }
-            .btn-heartbeat {
-              animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
-              box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
-              transition: all 0.3s ease;
-            }
-            .btn-heartbeat:hover {
-              animation: none;
-              transform: scale(1.03) translateY(-2px);
-              box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
-            }
-          `}</style>
-          <div className="flex flex-col items-center gap-2">
-            <Link href="/chat" className="btn-heartbeat" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+            <style>{`
+              @keyframes heartbeat {
+                0% { transform: scale(1); }
+                14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+                28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+                42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+                70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+              }
+              .btn-heartbeat {
+                animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+                box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
+                transition: all 0.3s ease;
+              }
+              .btn-heartbeat:hover {
+                animation: none;
+                transform: scale(1.03) translateY(-2px);
+                box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
+              }
+            `}</style>
+
+            <Link href="/chat" className="btn-heartbeat mb-8" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
             </Link>
-            <Link 
-              href="/scan" 
-              className="mt-6 text-gray-400 hover:text-[#8B5E3C] transition-all text-[13px] font-medium"
-              style={{ textDecoration: 'none' }}
-            >
-              🔍 Scan label &middot; Check ingredients &middot; Check FDA recalls &mdash; all free &rarr;
-            </Link>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up
+              </span>
+              <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
+              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> 100% free
+              </span>
+              <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
+              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
+              </span>
+            </div>
           </div>
-          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up
-            </span>
-            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> 100% free
-            </span>
-            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
-            </span>
+
+          {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
+          <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
+            
+            {/* Card 1 - Safety Check */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔍</span>
+                <h3 className="text-[#191919] font-bold text-lg">Is This Food Safe?</h3>
+              </div>
+              <p className="text-sm text-[#666666] leading-relaxed">
+                Scan any pet food label to instantly check ingredients for hidden toxins and live FDA recalls.
+              </p>
+              <Link href="/scan" className="w-full py-3 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-sm text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+                Scan Now &rarr;
+              </Link>
+            </div>
+
+            {/* Card 2 - Recall Alerts */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚠️</span>
+                <h3 className="text-[#191919] font-bold text-lg">FDA Recall Alerts</h3>
+              </div>
+              <p className="text-sm text-[#666666] leading-relaxed">
+                Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts.
+              </p>
+              <Link href="/recalls" className="w-full py-3 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-sm text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+                Get Alerts &rarr;
+              </Link>
+            </div>
+
           </div>
         </div>
       </section>
