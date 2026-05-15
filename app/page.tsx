@@ -154,19 +154,19 @@ export default function Home() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="max-sm:grid-cols-1">
             <div className="bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🐾</span>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🎯</span>
               <h3 className="text-[#191919] font-bold text-xl mb-2">Matched to your pet</h3>
               <p className="text-[#666666] text-base leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
             </div>
             <div className="bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>💰</span>
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Within your budget</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Set your monthly limit. We only show foods you can afford, maximizing quality per dollar.</p>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🔍</span>
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Ingredient Safety Check</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
             </div>
             <div className="bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🏪</span>
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Find it nearby</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">See exactly where to buy — online delivery or at a local pet store near you.</p>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>⚠️</span>
+              <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts, no spam.</p>
             </div>
           </div>
         </div>
