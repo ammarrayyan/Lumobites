@@ -14,6 +14,7 @@ export default function ScanPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rawOcrText, setRawOcrText] = useState<string | null>(null);
+  const [ocrReviewText, setOcrReviewText] = useState<string>('');
   const [hasRecall, setHasRecall] = useState(false);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
@@ -76,75 +77,143 @@ export default function ScanPage() {
 
   function onScanFailure(error: any) {}
 
+  // ─── Advanced image preprocessing for best OCR accuracy ─────────────────────
+  const preprocessCanvas = (video: HTMLVideoElement): string => {
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext('2d')!;
+
+    // 1. Capture at 3x resolution
+    const scale = 3;
+    const srcW = video.videoWidth;
+    const srcH = video.videoHeight;
+    canvas.width = srcW * scale;
+    canvas.height = srcH * scale;
+
+    // 2. Draw original at high res
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // 3. Get pixel data and apply grayscale + contrast manually
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    const contrast = 2.2; // >1 increases contrast
+    const intercept = 128 * (1 - contrast);
+
+    for (let i = 0; i < d.length; i += 4) {
+      // Luminance-weighted grayscale
+      const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      // Apply contrast
+      const v = Math.min(255, Math.max(0, contrast * gray + intercept));
+      d[i] = d[i + 1] = d[i + 2] = v;
+      // d[i+3] alpha unchanged
+    }
+    ctx.putImageData(imgData, 0, 0);
+
+    // 4. Sharpen with convolution kernel
+    const sharpened = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const src = new Uint8ClampedArray(sharpened.data);
+    const w = canvas.width;
+    const h = canvas.height;
+    // Sharpen kernel: [0,-1,0,-1,5,-1,0,-1,0]
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = (y * w + x) * 4;
+        for (let c = 0; c < 3; c++) {
+          const val =
+            -src[((y - 1) * w + x) * 4 + c] +
+            -src[(y * w + (x - 1)) * 4 + c] +
+            5 * src[idx + c] +
+            -src[(y * w + (x + 1)) * 4 + c] +
+            -src[((y + 1) * w + x) * 4 + c];
+          sharpened.data[idx + c] = Math.min(255, Math.max(0, val));
+        }
+      }
+    }
+    ctx.putImageData(sharpened, 0, 0);
+
+    // 5. Crop center 80% where label text is most likely
+    const cropX = Math.floor(canvas.width * 0.1);
+    const cropY = Math.floor(canvas.height * 0.1);
+    const cropW = Math.floor(canvas.width * 0.8);
+    const cropH = Math.floor(canvas.height * 0.8);
+    const cropped = ctx.getImageData(cropX, cropY, cropW, cropH);
+    canvas.width = cropW;
+    canvas.height = cropH;
+    ctx.putImageData(cropped, 0, 0);
+
+    return canvas.toDataURL('image/png');
+  };
+
+  // ─── Post-OCR text cleanup ────────────────────────────────────────────────────
+  const cleanOcrText = (raw: string): string => {
+    let t = raw;
+    // Fix common OCR digit/letter confusions in ingredient context
+    t = t.replace(/\b0(?=[a-zA-Z])/g, 'O');   // 0rgan → Organ
+    t = t.replace(/(?<=[a-zA-Z])0\b/g, 'o');   // Chickeno → Chickeno (trailing)
+    t = t.replace(/\bl(?=[A-Z])/g, 'I');        // lNGREDIENTS → INGREDIENTS
+    t = t.replace(/\b1(?=[a-zA-Z]{2})/g, 'l'); // 1iver → liver
+    t = t.replace(/5(?=[a-zA-Z])/g, 'S');       // 5odium → Sodium
+    t = t.replace(/(?<=[a-zA-Z])5\b/g, 's');    // trailing 5
+    // Remove stray non-text characters but keep commas, parens, percent
+    t = t.replace(/[^a-zA-Z0-9\s,().%&\-'\n]/g, ' ');
+    // Collapse multiple spaces/newlines
+    t = t.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    return t;
+  };
+
   const captureAndOCR = async () => {
     if (!scannerRef.current || ocrLoading) return;
 
     setOcrLoading(true);
     setError(null);
     setRawOcrText(null);
+    setOcrReviewText('');
 
     try {
       const video = document.querySelector('#reader video') as HTMLVideoElement;
-      if (!video) throw new Error("Camera not active");
-
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const scale = 2;
-      canvas.width = video.videoWidth * scale;
-      canvas.height = video.videoHeight * scale;
-      
-      ctx.filter = 'grayscale(100%) contrast(150%) brightness(110%)';
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = canvas.toDataURL('image/png');
+      if (!video) throw new Error('Camera not active');
 
       if (scannerRef.current.isScanning) {
         await scannerRef.current.stop();
         setIsCameraStarted(false);
       }
 
-      // Call our new Google Vision OCR API
+      const imageData = preprocessCanvas(video);
+
       const res = await fetch('/api/ocr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageData })
+        body: JSON.stringify({ image: imageData }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to read label");
+        throw new Error(errorData.error || 'Failed to read label');
       }
 
       const { text } = await res.json();
-
-      setRawOcrText(text);
-      processOCRResult(text);
+      const cleaned = cleanOcrText(text || '');
+      setRawOcrText(cleaned);
+      setOcrReviewText(cleaned);   // <-- show review step
+      setOcrLoading(false);
     } catch (err: any) {
-      console.error("OCR Error:", err);
-      setError(err.message || "Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.");
+      console.error('OCR Error:', err);
+      setError(err.message || 'Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.');
       setOcrLoading(false);
     }
   };
 
-  const processOCRResult = async (text: string) => {
-    const cleaned = text.replace(/[^a-zA-Z0-9\s,.]/g, ' ').replace(/\s+/g, ' ').trim();
-    const normalized = cleaned.toLowerCase();
-    
-    // Categorization logic - focus on ingredients
-    const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb', 'protein', 'fat', 'fiber', 'ingredients'];
-    const hasIngredientKeywords = ingredientKeywords.some(word => normalized.includes(word));
-    const commaCount = (normalized.match(/,/g) || []).length;
+  const processOCRResult = (text: string) => {
+    const normalized = text.toLowerCase();
+    const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb',
+      'protein', 'fat', 'fiber', 'ingredients', 'meal', 'extract', 'oil', 'vitamin', 'mineral', 'salt'];
+    const hasIngredientKeywords = ingredientKeywords.some(w => normalized.includes(w));
+    const commaCount = (text.match(/,/g) || []).length;
 
-    if (hasIngredientKeywords || commaCount > 3 || cleaned.length > 30) {
+    if (hasIngredientKeywords || commaCount > 2 || text.length > 40) {
       setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
       analyzeIngredients(text, false);
-      setOcrLoading(false);
     } else {
-      setError("Could not clearly identify ingredient list. Please point at the back of the package or paste manually below.");
-      setOcrLoading(false);
+      setError('Could not clearly identify an ingredient list. Please point at the back of the package or paste manually below.');
     }
   };
 
@@ -275,6 +344,7 @@ export default function ScanPage() {
     setScannedResult(null);
     setError(null);
     setRawOcrText(null);
+    setOcrReviewText('');
     setLoading(false);
     setOcrLoading(false);
     
@@ -388,10 +458,40 @@ export default function ScanPage() {
         {(loading || ocrLoading) && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-            <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? "Reading Label..." : "Analyzing Safety..."}</h3>
-            <p className="text-gray-500 text-sm max-w-[200px] mx-auto">
-              {ocrLoading ? "Optical Character Recognition in progress. Hold tight!" : "Checking ingredients and live FDA databases."}
+            <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? 'Reading Label...' : 'Analyzing Safety...'}</h3>
+            <p className="text-gray-500 text-sm max-w-[240px] mx-auto">
+              {ocrLoading ? 'Preprocessing image and sending to Google Cloud Vision...' : 'Checking ingredients and live FDA databases.'}
             </p>
+          </div>
+        )}
+
+        {/* ── OCR Review Step ── show extracted text before analysis ────────── */}
+        {ocrReviewText && !product && !loading && !ocrLoading && (
+          <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm p-6 space-y-4 animate-fade-in-up">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🔍</span>
+              <p className="text-[11px] font-bold text-[#8B5E3C] uppercase tracking-widest">Text Extracted — Review Before Analysis</p>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">Check the text below matches what&apos;s on the label. Edit anything that looks wrong, then tap <strong>Analyze</strong>.</p>
+            <textarea
+              value={ocrReviewText}
+              onChange={e => setOcrReviewText(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-xs text-gray-700 font-mono h-36 resize-none leading-relaxed"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { processOCRResult(ocrReviewText); }}
+                className="flex-1 bg-[#8B5E3C] text-white py-3 rounded-xl font-bold text-sm"
+              >
+                ✅ Analyze These Ingredients
+              </button>
+              <button
+                onClick={() => { setOcrReviewText(''); resetScanner(); }}
+                className="px-4 py-3 rounded-xl border border-[#E8DDD4] text-gray-500 text-sm font-bold"
+              >
+                Retake
+              </button>
+            </div>
           </div>
         )}
 
