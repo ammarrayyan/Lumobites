@@ -163,14 +163,28 @@ export default function ScanPage() {
 
     try {
       const video = document.querySelector('#reader video') as HTMLVideoElement;
-      if (!video) throw new Error('Camera not active');
+      if (!video) throw new Error('Camera not active — please allow camera access and try again');
 
-      if (scannerRef.current.isScanning) {
-        await scannerRef.current.stop();
-        setIsCameraStarted(false);
+      // Wait up to 2 seconds for the video to report valid dimensions.
+      // videoWidth is 0 until the stream has delivered at least one frame.
+      let attempts = 0;
+      while ((!video.videoWidth || !video.videoHeight) && attempts < 20) {
+        await new Promise(r => setTimeout(r, 100));
+        attempts++;
+      }
+      if (!video.videoWidth || !video.videoHeight) {
+        throw new Error('Camera not ready — hold the camera still and tap Capture again');
       }
 
+      // ⚠️ Capture BEFORE stopping the scanner.
+      // Stopping the stream resets videoWidth/videoHeight to 0.
       const imageData = preprocessCanvas(video);
+
+      // Now it's safe to stop the scanner
+      if (scannerRef.current.isScanning) {
+        await scannerRef.current.stop().catch(() => {});
+        setIsCameraStarted(false);
+      }
 
       const res = await fetch('/api/ocr', {
         method: 'POST',
@@ -186,7 +200,7 @@ export default function ScanPage() {
       const { text } = await res.json();
       const cleaned = cleanOcrText(text || '');
       setRawOcrText(cleaned);
-      setOcrReviewText(cleaned);   // <-- show review step
+      setOcrReviewText(cleaned);
       setOcrLoading(false);
     } catch (err: any) {
       console.error('OCR Error:', err);
