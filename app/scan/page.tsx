@@ -85,22 +85,24 @@ export default function ScanPage() {
     const vh = video.videoHeight;
     if (!vw || !vh) throw new Error('Camera not ready — hold still and try again');
 
-    // Step 1: Crop center 80% and scale 3x in a single drawImage call.
-    // Using drawImage's source-rect avoids any getImageData out-of-range errors.
+    // Step 1: Crop center 80% of the frame.
     const srcX = Math.floor(vw * 0.1);
     const srcY = Math.floor(vh * 0.1);
     const srcW = Math.floor(vw * 0.8);
     const srcH = Math.floor(vh * 0.8);
-    const scale = 3;
-    canvas.width  = srcW * scale;
-    canvas.height = srcH * scale;
+
+    // Cap output width at 1600px to stay well under Google Vision's 20MB limit.
+    // Google Vision works best between 800-1600px wide for text detection.
+    const MAX_WIDTH = 1600;
+    const scale = Math.min(3, MAX_WIDTH / srcW);
+    canvas.width  = Math.round(srcW * scale);
+    canvas.height = Math.round(srcH * scale);
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    // Crop + scale in one drawImage call (avoids getImageData range errors)
     ctx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
 
-    // Step 2: Grayscale + contrast via temp canvas CSS filter.
-    // Applying filter through an offscreen canvas then compositing back
-    // avoids mutating a live ImageData in-place (which fails on mobile).
+    // Step 2: Grayscale + contrast via offscreen canvas CSS filter.
     const tmp = document.createElement('canvas');
     tmp.width  = canvas.width;
     tmp.height = canvas.height;
@@ -109,13 +111,12 @@ export default function ScanPage() {
     tmpCtx.drawImage(canvas, 0, 0);
     ctx.drawImage(tmp, 0, 0);
 
-    // Step 3: Sharpen with a 5-tap convolution kernel.
-    // Read from frozen copy `src`, write to `dst` — never mix the two buffers.
+    // Step 3: Sharpen with 5-tap kernel (read from frozen copy, write to dst).
     const w = canvas.width;
     const h = canvas.height;
     const imgData = ctx.getImageData(0, 0, w, h);
-    const src = new Uint8ClampedArray(imgData.data); // frozen copy
-    const dst = imgData.data;                         // write target
+    const src = new Uint8ClampedArray(imgData.data);
+    const dst = imgData.data;
 
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
@@ -133,10 +134,12 @@ export default function ScanPage() {
     }
     ctx.putImageData(imgData, 0, 0);
 
-    return canvas.toDataURL('image/png');
+    // Output as JPEG (much smaller than PNG for photos — keeps payload < 2MB)
+    return canvas.toDataURL('image/jpeg', 0.85);
   };
 
   // ─── Post-OCR text cleanup ────────────────────────────────────────────────────
+
   const cleanOcrText = (raw: string): string => {
     let t = raw;
     // Fix common OCR digit/letter confusions in ingredient context
