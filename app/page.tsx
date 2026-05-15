@@ -1,23 +1,21 @@
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import BrandMarquee from '@/components/BrandMarquee';
+import ShareButton from '@/components/ShareButton';
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
 
-      {/* TOP ANNOUNCEMENT BAR */}
-      <div className="w-full bg-[#C17D3C] h-[48px] flex items-center justify-center px-6">
-        <p className="text-white text-[14px] font-medium text-center">
-          🐾 New: Food Recall Alerts Coming Soon &mdash; Save your pet&apos;s food to get notified
-        </p>
-      </div>
 
       {/* NAVBAR */}
       <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center" style={{ height: '72px' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
           <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', transformOrigin: 'left center' }} />
         </Link>
+        <div style={{ marginLeft: 'auto' }}>
+          <ShareButton />
+        </div>
       </nav>
 
       {/* HERO SECTION */}
