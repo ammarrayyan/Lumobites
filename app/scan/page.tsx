@@ -80,65 +80,58 @@ export default function ScanPage() {
   // ─── Advanced image preprocessing for best OCR accuracy ─────────────────────
   const preprocessCanvas = (video: HTMLVideoElement): string => {
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
 
-    // 1. Capture at 3x resolution
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    if (!vw || !vh) throw new Error('Camera not ready — hold still and try again');
+
+    // Step 1: Crop center 80% and scale 3x in a single drawImage call.
+    // Using drawImage's source-rect avoids any getImageData out-of-range errors.
+    const srcX = Math.floor(vw * 0.1);
+    const srcY = Math.floor(vh * 0.1);
+    const srcW = Math.floor(vw * 0.8);
+    const srcH = Math.floor(vh * 0.8);
     const scale = 3;
-    const srcW = video.videoWidth;
-    const srcH = video.videoHeight;
-    canvas.width = srcW * scale;
+    canvas.width  = srcW * scale;
     canvas.height = srcH * scale;
 
-    // 2. Draw original at high res
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    ctx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
 
-    // 3. Get pixel data and apply grayscale + contrast manually
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    const contrast = 2.2; // >1 increases contrast
-    const intercept = 128 * (1 - contrast);
+    // Step 2: Grayscale + contrast via temp canvas CSS filter.
+    // Applying filter through an offscreen canvas then compositing back
+    // avoids mutating a live ImageData in-place (which fails on mobile).
+    const tmp = document.createElement('canvas');
+    tmp.width  = canvas.width;
+    tmp.height = canvas.height;
+    const tmpCtx = tmp.getContext('2d')!;
+    tmpCtx.filter = 'grayscale(100%) contrast(200%) brightness(108%)';
+    tmpCtx.drawImage(canvas, 0, 0);
+    ctx.drawImage(tmp, 0, 0);
 
-    for (let i = 0; i < d.length; i += 4) {
-      // Luminance-weighted grayscale
-      const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      // Apply contrast
-      const v = Math.min(255, Math.max(0, contrast * gray + intercept));
-      d[i] = d[i + 1] = d[i + 2] = v;
-      // d[i+3] alpha unchanged
-    }
-    ctx.putImageData(imgData, 0, 0);
-
-    // 4. Sharpen with convolution kernel
-    const sharpened = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const src = new Uint8ClampedArray(sharpened.data);
+    // Step 3: Sharpen with a 5-tap convolution kernel.
+    // Read from frozen copy `src`, write to `dst` — never mix the two buffers.
     const w = canvas.width;
     const h = canvas.height;
-    // Sharpen kernel: [0,-1,0,-1,5,-1,0,-1,0]
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const src = new Uint8ClampedArray(imgData.data); // frozen copy
+    const dst = imgData.data;                         // write target
+
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
-        const idx = (y * w + x) * 4;
+        const i = (y * w + x) * 4;
         for (let c = 0; c < 3; c++) {
-          const val =
-            -src[((y - 1) * w + x) * 4 + c] +
-            -src[(y * w + (x - 1)) * 4 + c] +
-            5 * src[idx + c] +
-            -src[(y * w + (x + 1)) * 4 + c] +
-            -src[((y + 1) * w + x) * 4 + c];
-          sharpened.data[idx + c] = Math.min(255, Math.max(0, val));
+          dst[i + c] = Math.min(255, Math.max(0,
+            5 * src[i + c]
+            - src[((y - 1) * w + x    ) * 4 + c]
+            - src[(     y  * w + x - 1) * 4 + c]
+            - src[(     y  * w + x + 1) * 4 + c]
+            - src[((y + 1) * w + x    ) * 4 + c]
+          ));
         }
       }
     }
-    ctx.putImageData(sharpened, 0, 0);
-
-    // 5. Crop center 80% where label text is most likely
-    const cropX = Math.floor(canvas.width * 0.1);
-    const cropY = Math.floor(canvas.height * 0.1);
-    const cropW = Math.floor(canvas.width * 0.8);
-    const cropH = Math.floor(canvas.height * 0.8);
-    const cropped = ctx.getImageData(cropX, cropY, cropW, cropH);
-    canvas.width = cropW;
-    canvas.height = cropH;
-    ctx.putImageData(cropped, 0, 0);
+    ctx.putImageData(imgData, 0, 0);
 
     return canvas.toDataURL('image/png');
   };
