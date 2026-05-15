@@ -19,7 +19,6 @@ export default function ScanPage() {
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
   const [manualIngredients, setManualIngredients] = useState('');
-  const [manualBrand, setManualBrand] = useState('');
   const [safetyResults, setSafetyResults] = useState<{
     score: string;
     scoreColor: string;
@@ -227,32 +226,7 @@ export default function ScanPage() {
     }
   };
 
-  const checkBrandRecall = async (brand: string) => {
-    setLoading(true);
-    setOcrLoading(false);
-    try {
-      const res = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(brand)}"&limit=10`);
-      const data = await res.json();
-      const match = data.results?.find((r: any) => {
-        const desc = (r.product_description || '').toLowerCase();
-        const reason = (r.reason_for_recall || '').toLowerCase();
-        const brandMatch = desc.includes(brand.toLowerCase());
-        const isPetRelated = desc.includes('pet food') || desc.includes('dog food') || desc.includes('cat food') || desc.includes('animal feed') ||
-                           reason.includes('pet food') || reason.includes('dog food') || reason.includes('cat food') || reason.includes('animal feed');
-        return brandMatch && isPetRelated;
-      });
-      
-      if (match) {
-        setHasRecall(true);
-        setRecallReason(match.reason_for_recall);
-      }
-      setProduct({ product_name: brand, brand: brand } as any);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   async function lookupProduct(barcode: string) {
     setLoading(true);
@@ -417,26 +391,6 @@ export default function ScanPage() {
 
           <div className="text-center">
             <p className="text-xs text-gray-400 mb-6 font-medium italic">Point at barcode OR ingredient list on back of package</p>
-            
-            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm mb-6">
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-left">Or enter brand name manually</label>
-              <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (manualBrand.trim()) checkBrandRecall(manualBrand.trim());
-                }}
-                className="flex gap-2"
-              >
-                <input
-                  type="text"
-                  value={manualBrand}
-                  onChange={(e) => setManualBrand(e.target.value)}
-                  placeholder="e.g. Wellness, Purina..."
-                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm"
-                />
-                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold text-sm">Check Recalls</button>
-              </form>
-            </div>
 
             <form onSubmit={handleBarcodeSubmit} className="mt-4">
               <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Manual Barcode Entry</label>
@@ -515,24 +469,6 @@ export default function ScanPage() {
 
         {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
-            {/* Inline Brand Search if Product Not Found */}
-            {product.product_name === 'Unknown Product' && (
-              <div className="bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-6">
-                <p className="text-xs font-bold text-[#8B5E3C] uppercase mb-2">Manual Brand Check</p>
-                <p className="text-sm text-gray-600 mb-4">We couldn&apos;t find this exact product. Enter the brand name below to check for active FDA recalls.</p>
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const b = (e.target as any).brand.value;
-                    if (b) checkBrandRecall(b);
-                  }}
-                  className="flex gap-2"
-                >
-                  <input name="brand" placeholder="e.g. Purina" className="flex-1 px-4 py-2 rounded-xl border border-[#E8DDD4] outline-none text-sm" />
-                  <button type="submit" className="bg-[#8B5E3C] text-white px-4 py-2 rounded-xl font-bold text-sm">Check</button>
-                </form>
-              </div>
-            )}
 
             {hasRecall ? (
               <div className="bg-[#FEE2E2] border-2 border-[#EF4444] rounded-2xl p-6">
