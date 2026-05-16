@@ -22,6 +22,14 @@ export async function POST(request: Request) {
         console.warn('OPFF returned 0 results, using fallback seed data.');
         products = seedProducts.filter(p => p.pet_type === profile.pet_type);
         usedFallback = true;
+      } else {
+        // Always augment with seed data so wet/dry/treats seed products are in the pool.
+        // This ensures the food_type filter always has guaranteed options to pull from.
+        const seedPool = seedProducts.filter(p => p.pet_type === profile.pet_type);
+        const opffIds = new Set(products.map(p => p.id));
+        const extraSeeds = seedPool.filter(p => !opffIds.has(p.id));
+        products = [...products, ...extraSeeds];
+        console.log(`OPFF returned ${products.length - extraSeeds.length} products, augmented with ${extraSeeds.length} seed products.`);
       }
     } catch (apiErr) {
       console.warn('Open Pet Food Facts API unavailable, falling back to seed data:', apiErr);

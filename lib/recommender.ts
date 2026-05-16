@@ -193,6 +193,9 @@ export function recommendProducts(
     return false;
   }
 
+  // If user explicitly chose a food type (not 'both'), food type is a HARD constraint — never relax it.
+  const foodTypeIsHard = profile.food_type && profile.food_type !== 'both';
+
   // TIER 1: Exact match (pet type + food type + budget + health issues)
   tryAddFrom(getResults(basePool, budget, true, true));
 
@@ -206,18 +209,24 @@ export function recommendProducts(
     tryAddFrom(getResults(basePool, budget * 1.2, false, true));
   }
 
-  // TIER 4: Keep pet type and food type only
+  // TIER 4: Relax budget completely — keep food type if hard constraint
   if (selected.length < 5) {
     tryAddFrom(getResults(basePool, 9999, false, true));
   }
 
-  // TIER 5: Ignore food type filter
-  if (selected.length < 5) {
+  // TIER 5: Ignore food type ONLY if user said 'both' or didn't specify
+  if (selected.length < 5 && !foodTypeIsHard) {
     tryAddFrom(getResults(basePool, 9999, false, false));
   }
 
-  // TIER 6: Absolute fallback - pull from entire pet-type pool ignoring life stage
+  // TIER 6: Full pet-type pool, ignore life stage — still respect food type if hard constraint
   if (selected.length < 5) {
+    const fullPool = products.filter(p => p.pet_type === profile.pet_type);
+    tryAddFrom(getResults(fullPool, 9999, false, foodTypeIsHard ? true : false));
+  }
+
+  // TIER 7: Absolute last resort — full pool, ignore everything (only if food type is NOT hard)
+  if (selected.length < 5 && !foodTypeIsHard) {
     const fullPool = products.filter(p => p.pet_type === profile.pet_type);
     tryAddFrom(getResults(fullPool, 9999, false, false));
   }
@@ -231,3 +240,4 @@ export function recommendProducts(
     fallback: anyFallback,
   };
 }
+
