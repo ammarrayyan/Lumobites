@@ -134,6 +134,16 @@ export default function ChatPage() {
       let isValid = false;
       let skipToNext = false;
 
+      const getNextStep = (info: ParsedPetInfo) => {
+        if (info.pet_type === undefined) return { step: 0, text: "I got some details, but is your pet a 🐱 cat or 🐶 dog?" };
+        if (info.age_years === undefined) return { step: 1, text: `Got it! A ${info.pet_type || 'pet'}. How old are they?\n(e.g. '2 years', '6 months')` };
+        if (info.weight_lbs === undefined) return { step: 2, text: `Got the age! How much do they weigh?\n(e.g. '10 pounds', 'not sure')` };
+        if (info.health_issues === undefined) return { step: 3, text: `Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.` };
+        if (info.food_type === undefined) return { step: 4, text: `Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference` };
+        if (info.budget_monthly_max === undefined) return { step: 5, text: `Almost done! What's your monthly budget for pet food?\n(e.g. '$30', '$50', '$80')` };
+        return { step: 6, text: `Got it all! 🐾 ${info.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...` };
+      };
+
       const handleRetry = (failMsg: string) => {
         if (retries >= 1) {
           skipToNext = true;
@@ -223,43 +233,19 @@ export default function ChatPage() {
             isValid = true;
             setRetries(0);
 
-            // Default optional fields if they provided a multi-field prompt
-            if (extractedCount >= 2) {
-              if (currentInfo.health_issues === undefined) currentInfo.health_issues = [];
-              if (currentInfo.food_type === undefined) currentInfo.food_type = 'both';
-            }
-
             // Figure out the FIRST missing field and skip to that question
-            if (currentInfo.pet_type === undefined) {
-              nextStep = 0;
-              botResponse = "I got some details, but is your pet a 🐱 cat or 🐶 dog?";
-            } else if (currentInfo.age_years === undefined) {
-              nextStep = 1;
-              botResponse = `Got it! A ${currentInfo.pet_type}. How old are they?\n(e.g. '2 years', '6 months')`;
-            } else if (currentInfo.weight_lbs === undefined) {
-              nextStep = 2;
-              botResponse = `Got the age! How much do they weigh?\n(e.g. '10 pounds', 'not sure')`;
-            } else if (currentInfo.health_issues === undefined) {
-              nextStep = 3;
-              botResponse = `Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.`;
-            } else if (currentInfo.food_type === undefined) {
-              nextStep = 4;
-              botResponse = `Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference`;
-            } else if (currentInfo.budget_monthly_max === undefined) {
-              nextStep = 5;
-              botResponse = `Almost done! What's your monthly budget for pet food?\n(e.g. '$30', '$50', '$80')`;
-            } else {
-              nextStep = 6;
-              botResponse = `Got it all! 🐾 ${currentInfo.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...`;
-            }
+            const next = getNextStep(currentInfo);
+            nextStep = next.step;
+            botResponse = next.text;
           }
 
           if (!isValid) {
             handleRetry("I didn't quite catch that. Is your pet a cat or a dog?");
             if (skipToNext) {
               currentInfo.pet_type = 'dog';
-              nextStep = 1;
-              botResponse = "I'll assume dog for now! How old are they?\n(e.g. '2 years', '6 months')";
+              const next = getNextStep(currentInfo);
+              nextStep = next.step;
+              botResponse = next.text;
             }
           }
         }
@@ -275,15 +261,18 @@ export default function ChatPage() {
           } else {
             currentInfo.age_years = ageRes.value;
             isValid = true;
-            nextStep = 2;
+            const next = getNextStep(currentInfo);
+            nextStep = next.step;
             setRetries(0);
-            botResponse = "Got it! How much do they weigh?\n(e.g. '10 pounds', '25 lbs', 'not sure')";
+            botResponse = next.text;
           }
         } else {
           handleRetry("I didn't quite catch the age. How old are they in years or months?");
           if (skipToNext) {
-            nextStep = 2;
-            botResponse = "Got it! How much do they weigh?\n(e.g. '10 pounds', 'not sure')";
+            currentInfo.age_years = null as any;
+            const next = getNextStep(currentInfo);
+            nextStep = next.step;
+            botResponse = next.text;
           }
         }
       } else if (step === 1.5) {
@@ -296,16 +285,18 @@ export default function ChatPage() {
         }
         if (isValid) {
           setTempAge(null);
-          nextStep = 2;
+          const next = getNextStep(currentInfo);
+          nextStep = next.step;
           setRetries(0);
-          botResponse = "Got it! How much do they weigh?\n(e.g. '10 pounds', '25 lbs', 'not sure')";
+          botResponse = next.text;
         } else {
           handleRetry("Sorry, is that years or months?");
           if (skipToNext) {
              currentInfo.age_years = tempAge || 0;
              setTempAge(null);
-             nextStep = 2;
-             botResponse = "Got it! How much do they weigh?\n(e.g. '10 pounds', 'not sure')";
+             const next = getNextStep(currentInfo);
+             nextStep = next.step;
+             botResponse = next.text;
           }
         }
       } else if (step === 2) {
@@ -320,14 +311,17 @@ export default function ChatPage() {
           }
         }
         if (isValid) {
-          nextStep = 3;
+          const next = getNextStep(currentInfo);
+          nextStep = next.step;
           setRetries(0);
-          botResponse = "Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.";
+          botResponse = next.text;
         } else {
           handleRetry("I didn't quite catch the weight. You can give a number like '10', or just say 'not sure'.");
           if (skipToNext) {
-             nextStep = 3;
-             botResponse = "Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.";
+             currentInfo.weight_lbs = null as any;
+             const next = getNextStep(currentInfo);
+             nextStep = next.step;
+             botResponse = next.text;
           }
         }
       } else if (step === 3) {
@@ -356,14 +350,17 @@ export default function ChatPage() {
         }
         
         if (isValid) {
-          nextStep = 4;
+          const next = getNextStep(currentInfo);
+          nextStep = next.step;
           setRetries(0);
-          botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference";
+          botResponse = next.text;
         } else {
           handleRetry("I didn't recognize those health issues. Could you pick from the list or say 'none'?");
           if (skipToNext) {
-            nextStep = 4;
-            botResponse = "Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference";
+            currentInfo.health_issues = [];
+            const next = getNextStep(currentInfo);
+            nextStep = next.step;
+            botResponse = next.text;
           }
         }
       } else if (step === 4) {
@@ -387,15 +384,17 @@ export default function ChatPage() {
         }
 
         if (isValid) {
-          nextStep = 5;
+          const next = getNextStep(currentInfo);
+          nextStep = next.step;
           setRetries(0);
-          botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+          botResponse = next.text;
         } else {
           handleRetry("I didn't quite catch that. Do they prefer dry food, wet food, treats, or all of them?");
           if (skipToNext) {
             currentInfo.food_type = 'both';
-            nextStep = 5;
-            botResponse = "Last one! What's your monthly budget for pet food?\n(e.g. '$30', 'around $50', 'under $80')";
+            const next = getNextStep(currentInfo);
+            nextStep = next.step;
+            botResponse = next.text;
           }
         }
       } else if (step === 5) {
@@ -403,15 +402,17 @@ export default function ChatPage() {
         if (budget !== undefined) {
           currentInfo.budget_monthly_max = budget;
           isValid = true;
-          nextStep = 6;
+          const next = getNextStep(currentInfo);
+          nextStep = next.step;
           setRetries(0);
-          botResponse = "Perfect! 🐾 Finding the best matches for your pet...";
+          botResponse = next.text;
         } else {
           handleRetry("I didn't quite catch the budget. Could you give a dollar amount like '$50'?");
           if (skipToNext) {
              currentInfo.budget_monthly_max = 60; // Default fallback as requested
-             nextStep = 6;
-             botResponse = "Perfect! 🐾 Finding the best matches for your pet...";
+             const next = getNextStep(currentInfo);
+             nextStep = next.step;
+             botResponse = next.text;
           }
         }
       }
