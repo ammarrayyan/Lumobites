@@ -6,11 +6,14 @@ import Link from 'next/link';
 import ChatBubble from '@/components/ChatBubble';
 import { ChatMessage, ParsedPetInfo } from '@/lib/types';
 
+const STORAGE_KEY = 'lumobites_last_search';
+
 export default function ChatPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [retries, setRetries] = useState(0);
   const [tempAge, setTempAge] = useState<number | null>(null);
+  const [returnBanner, setReturnBanner] = useState<{ petType: string; params: string } | null>(null);
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'assistant', content: "Hey! 👋 I'm here to help find the perfect food \nfor your pet. Let's start — is your pet a 🐱 cat \nor 🐶 dog?" }
@@ -29,6 +32,14 @@ export default function ChatPage() {
       const displayBrand = brand.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       setSelectedBrand(displayBrand);
     }
+    // Check for returning user
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const { petType, searchParams } = JSON.parse(saved);
+        if (petType && searchParams) setReturnBanner({ petType, params: searchParams });
+      }
+    } catch (_) {}
   }, []);
 
   // Health Chips State
@@ -136,10 +147,46 @@ export default function ChatPage() {
       if (step === 0) {
         const greetings = ['hi', 'hey', 'hello', 'sup', 'good morning', 'greetings'];
         const isGreeting = greetings.some(g => lowerInput === g || lowerInput.startsWith(g + ' '));
-        
-        if (isGreeting) {
+
+        // ── Multi-field extraction: e.g. 'cat 2 years 10 pounds dry food $50' ──
+        const hasPetType = lowerInput.includes('cat') || lowerInput.includes('kitten') ||
+                           lowerInput.includes('dog') || lowerInput.includes('pup');
+        const hasAge = /\d+\s*(year|yr|month|mo)/.test(lowerInput);
+        const hasWeight = /\d+\s*(lb|lbs|pound|kg)/.test(lowerInput);
+        const hasFoodType = /dry|kibble|wet|canned|treat|snack/.test(lowerInput);
+        const hasBudget = /\$\d+|\d+\s*dollar/.test(lowerInput);
+        const isMultiField = hasPetType && (hasAge || hasWeight || hasFoodType || hasBudget);
+
+        if (isMultiField) {
+          // Extract pet type
+          currentInfo.pet_type = (lowerInput.includes('cat') || lowerInput.includes('kitten')) ? 'cat' : 'dog';
+          // Extract age
+          const ageRes = await (async () => { const { extractAge } = await import('@/lib/parser'); return extractAge(userMessage); })();
+          if (ageRes) currentInfo.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
+          // Extract weight
+          const weightRes = await (async () => { const { extractWeight } = await import('@/lib/parser'); return extractWeight(userMessage); })();
+          if (weightRes) currentInfo.weight_lbs = weightRes;
+          // Extract food type
+          if (/dry|kibble/.test(lowerInput)) currentInfo.food_type = 'dry';
+          else if (/wet|canned/.test(lowerInput)) currentInfo.food_type = 'wet';
+          else if (/treat|snack/.test(lowerInput)) currentInfo.food_type = 'treats';
+          // Extract budget
+          const budgetRes = await (async () => { const { extractBudget } = await import('@/lib/parser'); return extractBudget(userMessage); })();
+          if (budgetRes) currentInfo.budget_monthly_max = budgetRes;
+          // Default health issues to empty
+          if (!currentInfo.health_issues) currentInfo.health_issues = [];
           isValid = true;
-          nextStep = 0; // Stay on step 0
+          setRetries(0);
+          if (currentInfo.budget_monthly_max) {
+            nextStep = 6;
+            botResponse = `Got it all! 🐾 ${currentInfo.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...`;
+          } else {
+            nextStep = 5;
+            botResponse = `Got it! Last thing — what's your monthly budget?\n(e.g. '$30', '$50', '$80')`;
+          }
+        } else if (isGreeting) {
+          isValid = true;
+          nextStep = 0;
           setRetries(0);
           botResponse = "Hey there! 😊 So let's find the perfect food for your pet — is your pet a 🐱 cat or 🐶 dog?";
         } else if (lowerInput.includes('cat') || lowerInput.includes('kitten')) {
@@ -150,14 +197,14 @@ export default function ChatPage() {
           isValid = true;
         }
         
-        if (isValid && !isGreeting) {
+        if (isValid && !isGreeting && !isMultiField) {
           nextStep = 1;
           setRetries(0);
           botResponse = "Cute! How old are they?\n(e.g. '2 years', '6 months', '8 years')";
         } else if (!isValid) {
           handleRetry("I didn't quite catch that. Is your pet a cat or a dog?");
           if (skipToNext) {
-            currentInfo.pet_type = 'dog'; // default fallback
+            currentInfo.pet_type = 'dog';
             nextStep = 1;
             botResponse = "I'll assume dog for now! How old are they?\n(e.g. '2 years', '6 months')";
           }
@@ -336,6 +383,13 @@ export default function ChatPage() {
                params.append('issues', currentInfo.health_issues.join(','));
              }
              if (selectedBrand) params.append('brand', selectedBrand);
+             // Save for returning user
+             try {
+               localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                 petType: currentInfo.pet_type,
+                 searchParams: params.toString(),
+               }));
+             } catch (_) {}
              router.push(`/results?${params.toString()}`);
           }, 1500);
         }
@@ -358,7 +412,30 @@ export default function ChatPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', display: 'flex', justifyContent: 'center', padding: '40px 20px' }}>
       <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4' }}>
-        
+
+        {/* Returning User Banner */}
+        {returnBanner && step === 0 && (
+          <div style={{ background: '#F5EDE4', borderBottom: '1px solid #E8D5C0', padding: '14px 20px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: '#191919', marginBottom: '8px' }}>
+              👋 Welcome back! Search again for your {returnBanner.petType}?
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => { setReturnBanner(null); router.push(`/results?${returnBanner.params}`); }}
+                style={{ flex: 1, background: '#8B5E3C', color: '#fff', border: 'none', borderRadius: '50px', padding: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Yes, show results →
+              </button>
+              <button
+                onClick={() => { setReturnBanner(null); try { localStorage.removeItem(STORAGE_KEY); } catch(_) {} }}
+                style={{ flex: 1, background: '#fff', color: '#8B5E3C', border: '1.5px solid #E8D5C0', borderRadius: '50px', padding: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                No, start over
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 20, display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #F5EDE4' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
