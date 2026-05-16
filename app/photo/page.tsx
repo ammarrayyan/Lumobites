@@ -9,6 +9,7 @@ type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'food' | 'budget'
 export default function PhotoPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>('upload');
   
   const [file, setFile] = useState<File | null>(null);
@@ -134,8 +135,7 @@ export default function PhotoPage() {
             <div 
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#D9C0A8] bg-[#F5EDE4] rounded-2xl p-12 text-center cursor-pointer hover:bg-[#F2E5D5] hover:border-[#C17D3C] transition-all flex flex-col items-center gap-4"
+              className="border-2 border-dashed border-[#D9C0A8] bg-[#F5EDE4] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center gap-6"
             >
               <input 
                 type="file" 
@@ -144,13 +144,37 @@ export default function PhotoPage() {
                 accept="image/*" 
                 className="hidden" 
               />
+              <input 
+                type="file" 
+                ref={cameraInputRef} 
+                onChange={handleFileSelect} 
+                accept="image/*"
+                capture="environment"
+                className="hidden" 
+              />
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-sm text-[#8B5E3C]">
                 🐾
               </div>
-              <div>
-                <p className="font-bold text-[#8B5E3C] text-lg mb-1">Drop your pet&apos;s photo here</p>
-                <p className="text-sm text-[#9A7760]">or tap to browse your files</p>
+              
+              <div className="flex flex-col gap-3 w-full max-w-[280px]">
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] hover:border-[#C17D3C] transition-all flex items-center justify-center gap-2 w-full"
+                >
+                  <span className="text-xl">📁</span> Upload from gallery
+                </button>
+                
+                <button 
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="md:hidden bg-[#8B5E3C] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 w-full shadow-sm"
+                >
+                  <span className="text-xl">📷</span> Take a photo
+                </button>
               </div>
+
+              <p className="text-sm text-[#9A7760] mt-2 hidden md:block">
+                or drag and drop your file here
+              </p>
             </div>
           )}
 
