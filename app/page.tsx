@@ -60,8 +60,12 @@ export default function Home() {
               }
             `}</style>
 
-            <Link href="/chat" className="btn-heartbeat mb-8" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+            <Link href="/chat" className="btn-heartbeat mb-4" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
+            </Link>
+
+            <Link href="/photo" className="text-[#8B5E3C] font-semibold text-[15px] mb-8 flex items-center justify-center gap-2 hover:underline transition-all hover:scale-105 active:scale-95" style={{ textDecoration: 'none' }}>
+              <span className="text-[18px]">📸</span> Find Food by Photo
             </Link>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
