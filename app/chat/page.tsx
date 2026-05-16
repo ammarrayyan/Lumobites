@@ -148,65 +148,118 @@ export default function ChatPage() {
         const greetings = ['hi', 'hey', 'hello', 'sup', 'good morning', 'greetings'];
         const isGreeting = greetings.some(g => lowerInput === g || lowerInput.startsWith(g + ' '));
 
-        // ── Multi-field extraction: e.g. 'cat 2 years 10 pounds dry food $50' ──
-        const hasPetType = lowerInput.includes('cat') || lowerInput.includes('kitten') ||
-                           lowerInput.includes('dog') || lowerInput.includes('pup');
-        const hasAge = /\d+\s*(year|yr|month|mo)/.test(lowerInput);
-        const hasWeight = /\d+\s*(lb|lbs|pound|kg)/.test(lowerInput);
-        const hasFoodType = /dry|kibble|wet|canned|treat|snack/.test(lowerInput);
-        const hasBudget = /\$\d+|\d+\s*dollar/.test(lowerInput);
-        const isMultiField = hasPetType && (hasAge || hasWeight || hasFoodType || hasBudget);
+        if (isGreeting && !lowerInput.includes('cat') && !lowerInput.includes('dog')) {
+          isValid = true;
+          nextStep = 0; // Stay on step 0
+          setRetries(0);
+          botResponse = "Hey there! 😊 So let's find the perfect food for your pet — is your pet a 🐱 cat or 🐶 dog?";
+        } else {
+          // ── Robust Multi-field Extraction ──
+          
+          // 1. Pet type
+          if (lowerInput.includes('cat') || lowerInput.includes('kitten')) currentInfo.pet_type = 'cat';
+          else if (lowerInput.includes('dog') || lowerInput.includes('pup')) currentInfo.pet_type = 'dog';
 
-        if (isMultiField) {
-          // Extract pet type
-          currentInfo.pet_type = (lowerInput.includes('cat') || lowerInput.includes('kitten')) ? 'cat' : 'dog';
-          // Extract age
-          const ageRes = await (async () => { const { extractAge } = await import('@/lib/parser'); return extractAge(userMessage); })();
-          if (ageRes) currentInfo.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
-          // Extract weight
-          const weightRes = await (async () => { const { extractWeight } = await import('@/lib/parser'); return extractWeight(userMessage); })();
-          if (weightRes) currentInfo.weight_lbs = weightRes;
-          // Extract food type
+          // 2. Age: any number followed by 'year', 'month', 'yr', 'mo'
+          const ageMatch = lowerInput.match(/(\d+(?:\.\d+)?)\s*(year|yr|month|mo)/);
+          if (ageMatch) {
+            const val = parseFloat(ageMatch[1]);
+            const isMonth = ageMatch[2].startsWith('mo');
+            currentInfo.age_years = isMonth ? val / 12 : val;
+          } else {
+            const ageRes = await (async () => { const { extractAge } = await import('@/lib/parser'); return extractAge(userMessage); })();
+            if (ageRes) currentInfo.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
+          }
+
+          // 3. Weight: any number followed by 'pound', 'lb', 'lbs', 'kg'
+          const weightMatch = lowerInput.match(/(\d+(?:\.\d+)?)\s*(pound|lb|kg)/);
+          if (weightMatch) {
+            const val = parseFloat(weightMatch[1]);
+            currentInfo.weight_lbs = weightMatch[2] === 'kg' ? val * 2.20462 : val;
+          } else {
+            const weightRes = await (async () => { const { extractWeight } = await import('@/lib/parser'); return extractWeight(userMessage); })();
+            if (weightRes) currentInfo.weight_lbs = weightRes;
+          }
+
+          // 4. Food type: 'dry', 'kibble', 'wet', 'canned', 'treats'
           if (/dry|kibble/.test(lowerInput)) currentInfo.food_type = 'dry';
           else if (/wet|canned/.test(lowerInput)) currentInfo.food_type = 'wet';
           else if (/treat|snack/.test(lowerInput)) currentInfo.food_type = 'treats';
-          // Extract budget
-          const budgetRes = await (async () => { const { extractBudget } = await import('@/lib/parser'); return extractBudget(userMessage); })();
-          if (budgetRes) currentInfo.budget_monthly_max = budgetRes;
-          // Default health issues to empty
-          if (!currentInfo.health_issues) currentInfo.health_issues = [];
-          isValid = true;
-          setRetries(0);
-          if (currentInfo.budget_monthly_max) {
-            nextStep = 6;
-            botResponse = `Got it all! 🐾 ${currentInfo.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...`;
+
+          // 5. Budget: number with $, dollar, budget, under, around
+          const budgetMatch = lowerInput.match(/(?:\$|dollars?|budget|under|around)\s*(\d+)/) || lowerInput.match(/(\d+)\s*(?:\$|dollars?)/);
+          if (budgetMatch) {
+            currentInfo.budget_monthly_max = parseInt(budgetMatch[1], 10);
           } else {
-            nextStep = 5;
-            botResponse = `Got it! Last thing — what's your monthly budget?\n(e.g. '$30', '$50', '$80')`;
+            const budgetRes = await (async () => { const { extractBudget } = await import('@/lib/parser'); return extractBudget(userMessage); })();
+            if (budgetRes) currentInfo.budget_monthly_max = budgetRes;
           }
-        } else if (isGreeting) {
-          isValid = true;
-          nextStep = 0;
-          setRetries(0);
-          botResponse = "Hey there! 😊 So let's find the perfect food for your pet — is your pet a 🐱 cat or 🐶 dog?";
-        } else if (lowerInput.includes('cat') || lowerInput.includes('kitten')) {
-          currentInfo.pet_type = 'cat';
-          isValid = true;
-        } else if (lowerInput.includes('dog') || lowerInput.includes('pup')) {
-          currentInfo.pet_type = 'dog';
-          isValid = true;
-        }
-        
-        if (isValid && !isGreeting && !isMultiField) {
-          nextStep = 1;
-          setRetries(0);
-          botResponse = "Cute! How old are they?\n(e.g. '2 years', '6 months', '8 years')";
-        } else if (!isValid) {
-          handleRetry("I didn't quite catch that. Is your pet a cat or a dog?");
-          if (skipToNext) {
-            currentInfo.pet_type = 'dog';
-            nextStep = 1;
-            botResponse = "I'll assume dog for now! How old are they?\n(e.g. '2 years', '6 months')";
+
+          // 6. Health issues
+          const issues: any[] = [];
+          if (lowerInput.match(/anxiety|stress/)) issues.push('anxiety');
+          if (lowerInput.match(/sensitive stomach|stomach|digestion/)) issues.push('sensitive_stomach');
+          if (lowerInput.match(/allergies|allergy|itch/)) issues.push('allergies');
+          if (lowerInput.match(/joint|hip/)) issues.push('joint');
+          if (lowerInput.match(/weight|fat|overweight/)) issues.push('weight_control');
+          if (lowerInput.match(/picky/)) issues.push('picky_eater');
+          
+          if (issues.length > 0) {
+            currentInfo.health_issues = issues as any;
+          }
+
+          const extractedCount = [
+            currentInfo.pet_type !== undefined,
+            currentInfo.age_years !== undefined,
+            currentInfo.weight_lbs !== undefined,
+            currentInfo.food_type !== undefined,
+            currentInfo.budget_monthly_max !== undefined,
+            currentInfo.health_issues !== undefined
+          ].filter(Boolean).length;
+
+          if (extractedCount === 0) {
+            isValid = false;
+          } else {
+            isValid = true;
+            setRetries(0);
+
+            // Default health issues to empty if not mentioned but they gave other details
+            if (currentInfo.health_issues === undefined && extractedCount >= 2) {
+              currentInfo.health_issues = [];
+            }
+
+            // Figure out the FIRST missing field and skip to that question
+            if (currentInfo.pet_type === undefined) {
+              nextStep = 0;
+              botResponse = "I got some details, but is your pet a 🐱 cat or 🐶 dog?";
+            } else if (currentInfo.age_years === undefined) {
+              nextStep = 1;
+              botResponse = `Got it! A ${currentInfo.pet_type}. How old are they?\n(e.g. '2 years', '6 months')`;
+            } else if (currentInfo.weight_lbs === undefined) {
+              nextStep = 2;
+              botResponse = `Got the age! How much do they weigh?\n(e.g. '10 pounds', 'not sure')`;
+            } else if (currentInfo.health_issues === undefined) {
+              nextStep = 3;
+              botResponse = `Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.`;
+            } else if (currentInfo.food_type === undefined) {
+              nextStep = 4;
+              botResponse = `Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference`;
+            } else if (currentInfo.budget_monthly_max === undefined) {
+              nextStep = 5;
+              botResponse = `Almost done! What's your monthly budget for pet food?\n(e.g. '$30', '$50', '$80')`;
+            } else {
+              nextStep = 6;
+              botResponse = `Got it all! 🐾 ${currentInfo.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...`;
+            }
+          }
+
+          if (!isValid) {
+            handleRetry("I didn't quite catch that. Is your pet a cat or a dog?");
+            if (skipToNext) {
+              currentInfo.pet_type = 'dog';
+              nextStep = 1;
+              botResponse = "I'll assume dog for now! How old are they?\n(e.g. '2 years', '6 months')";
+            }
           }
         }
       } else if (step === 1) {
