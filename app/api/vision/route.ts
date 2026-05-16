@@ -9,30 +9,47 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
     }
 
-    const apiKey = process.env.GOOGLE_VISION_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'Vision API key not configured' }, { status: 500 });
+      return NextResponse.json({ error: 'Anthropic API key not configured' }, { status: 500 });
     }
 
-    // Convert file to base64
+    // Convert file to base64 and get mime type
     const buffer = Buffer.from(await image.arrayBuffer());
     const base64Image = buffer.toString('base64');
+    const mediaType = image.type || 'image/jpeg';
 
-    // Call Google Cloud Vision API
-    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+    const systemPrompt = "Respond in JSON format only: {\"petType\": \"cat\" | \"dog\" | \"none\", \"breed\": \"string\", \"confidence\": \"High\" | \"Medium\" | \"Low\", \"breedDescription\": \"one sentence about this breed\"}";
+    const userPrompt = "Look at this photo and identify: 1) Is this a cat or dog? 2) What breed is it? If mixed breed say Mixed breed and list the likely breeds. 3) How confident are you?";
+
+    // Call Anthropic API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
       },
       body: JSON.stringify({
-        requests: [
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [
           {
-            image: {
-              content: base64Image
-            },
-            features: [
-              { type: 'LABEL_DETECTION', maxResults: 15 },
-              { type: 'WEB_DETECTION', maxResults: 15 }
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType === 'image/jpg' ? 'image/jpeg' : mediaType,
+                  data: base64Image
+                }
+              },
+              {
+                type: 'text',
+                text: userPrompt
+              }
             ]
           }
         ]
@@ -42,96 +59,29 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Google Vision API Error:', data);
+      console.error('Anthropic API Error:', data);
       return NextResponse.json({ error: 'Failed to analyze image' }, { status: response.status });
     }
 
-    const labels = data.responses[0]?.labelAnnotations || [];
-    const webEntities = data.responses[0]?.webDetection?.webEntities || [];
-
-    // Combine descriptions for easier searching
-    const allLabels: string[] = [
-      ...labels.map((l: any) => l.description?.toLowerCase()),
-      ...webEntities.map((e: any) => e.description?.toLowerCase())
-    ].filter(Boolean);
-
-    let petType = '';
-    let breed = '';
-
-    // Detect Pet Type
-    if (allLabels.some(l => l.includes('cat') || l.includes('feline') || l.includes('kitten'))) {
-      petType = 'cat';
-    } else if (allLabels.some(l => l.includes('dog') || l.includes('canine') || l.includes('puppy'))) {
-      petType = 'dog';
+    const content = data.content?.[0]?.text || '{}';
+    
+    // Parse JSON
+    let parsedInfo;
+    try {
+      // Extract JSON block if it's wrapped in markdown
+      const jsonStr = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
+      parsedInfo = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error('Failed to parse Claude JSON:', content);
+      return NextResponse.json({ error: 'Invalid response from AI' }, { status: 500 });
     }
-
-    // Common non-breed labels to ignore
-    const ignoreLabels = [
-      'dog', 'cat', 'puppy', 'kitten', 'snout', 'whiskers', 'carnivore', 'companion dog', 
-      'sporting group', 'working group', 'toy dog', 'pet', 'animal', 'fawn', 'fur', 'paw', 
-      'tail', 'canidae', 'felidae', 'mammal', 'vertebrate', 'terrier', 'dog breed'
-    ];
-
-    // Try to find a breed by looking for specific breed keywords
-    for (const label of allLabels) {
-      if (
-        (label.includes('retriever') || 
-         label.includes('shepherd') || 
-         label.includes('terrier') || 
-         label.includes('spaniel') || 
-         label.includes('hound') ||
-         label.includes('shorthair') ||
-         label.includes('longhair') ||
-         label.includes('bulldog') ||
-         label.includes('poodle') ||
-         label.includes('collie') ||
-         label.includes('corgi') ||
-         label.includes('husky') ||
-         label.includes('siamese') ||
-         label.includes('persian') ||
-         label.includes('bengal') ||
-         label.includes('ragdoll') ||
-         label.includes('maine coon') ||
-         label.includes('shiba') ||
-         label.includes('dachshund') ||
-         label.includes('pug') ||
-         label.includes('chihuahua') ||
-         label.includes('boxer') ||
-         label.includes('mastiff') ||
-         label.includes('beagle') ||
-         label.includes('mix') ||
-         label.includes('breed')) && 
-         !ignoreLabels.includes(label)
-      ) {
-        breed = label;
-        break;
-      }
-    }
-
-    // If no breed found by keyword, just take the most specific animal label that isn't generic
-    if (!breed) {
-      for (const label of allLabels) {
-        if (!ignoreLabels.includes(label) && label.split(' ').length <= 3 && label.length > 3) {
-          // Additional check to avoid weird labels
-          if (!label.includes('photography') && !label.includes('grass')) {
-            breed = label;
-            break;
-          }
-        }
-      }
-    }
-
-    if (!breed) {
-      breed = 'Mixed breed';
-    }
-
-    // Capitalize breed (e.g. "golden retriever" -> "Golden Retriever")
-    breed = breed.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     return NextResponse.json({
       success: true,
-      breed,
-      petType: petType || 'dog', // fallback to dog if completely uncertain
+      breed: parsedInfo.breed,
+      petType: parsedInfo.petType?.toLowerCase() || 'none', 
+      confidence: parsedInfo.confidence,
+      breedDescription: parsedInfo.breedDescription
     });
 
   } catch (error) {

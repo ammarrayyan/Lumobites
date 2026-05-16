@@ -17,6 +17,8 @@ export default function PhotoPage() {
   
   const [detectedBreed, setDetectedBreed] = useState('');
   const [detectedPetType, setDetectedPetType] = useState('dog');
+  const [confidence, setConfidence] = useState('');
+  const [breedDescription, setBreedDescription] = useState('');
   const [isManualBreed, setIsManualBreed] = useState(false);
   const [manualBreedInput, setManualBreedInput] = useState('');
 
@@ -58,6 +60,8 @@ export default function PhotoPage() {
       if (data.success) {
         setDetectedBreed(data.breed);
         setDetectedPetType(data.petType || 'dog');
+        setConfidence(data.confidence || '');
+        setBreedDescription(data.breedDescription || '');
       } else {
         // Fallback if API fails
         setDetectedBreed('Unknown Breed');
@@ -204,11 +208,67 @@ export default function PhotoPage() {
                 </div>
               )}
               
-              {!isManualBreed ? (
-                <>
-                  <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight max-w-[80%]">
-                    {detectedPetType === 'cat' ? '🐱' : '🐕'} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?
+              {detectedPetType === 'none' ? (
+                <div className="w-full flex flex-col gap-4 items-center">
+                  <h2 className="text-2xl font-[800] text-[#191919] leading-tight">
+                    We couldn&apos;t detect a pet! 🕵️
                   </h2>
+                  <p className="text-[#666666] mb-4">Please upload a clear photo of your cat or dog, or enter the breed manually.</p>
+                  <button 
+                    onClick={() => setStep('upload')}
+                    className="bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 px-6 rounded-xl font-bold hover:bg-[#EAE0D3] transition-colors"
+                  >
+                    Try another photo
+                  </button>
+                  <div className="w-full text-left mt-4 border-t border-[#EEEEEE] pt-6">
+                    <label className="font-bold text-[#191919] text-lg">Or enter breed manually:</label>
+                    <div className="flex gap-3 mt-2">
+                      <input 
+                        type="text" 
+                        value={manualBreedInput}
+                        onChange={(e) => setManualBreedInput(e.target.value)}
+                        placeholder="e.g. Beagle mix"
+                        className="flex-1 border-2 border-[#EEEEEE] rounded-xl px-5 py-4 text-lg focus:border-[#8B5E3C] focus:outline-none"
+                      />
+                      <button 
+                        onClick={handleSubmitManualBreed}
+                        disabled={!manualBreedInput.trim()}
+                        className="bg-[#8B5E3C] text-white px-8 rounded-xl font-bold disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : !isManualBreed ? (
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight max-w-[80%]">
+                      {detectedPetType === 'cat' ? '🐱' : '🐕'} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?
+                    </h2>
+                    {confidence && (
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest ${
+                        confidence === 'High' ? 'bg-green-100 text-green-700' :
+                        confidence === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {confidence} Match
+                      </span>
+                    )}
+                  </div>
+                  
+                  {breedDescription && (
+                    <p className="text-sm text-[#666666] max-w-[90%] italic">
+                      &quot;{breedDescription}&quot;
+                    </p>
+                  )}
+
+                  {confidence === 'Low' && (
+                    <div className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl text-sm w-full">
+                      We are not 100% sure. Please confirm or correct the breed below.
+                    </div>
+                  )}
+
                   <div className="flex flex-col md:flex-row gap-4 w-full mt-2">
                     <button 
                       onClick={handleConfirmBreed}
@@ -223,6 +283,27 @@ export default function PhotoPage() {
                       No, let me correct it
                     </button>
                   </div>
+
+                  {confidence === 'Low' && (
+                    <div className="w-full text-left mt-2">
+                      <div className="flex gap-3 mt-2">
+                        <input 
+                          type="text" 
+                          value={manualBreedInput}
+                          onChange={(e) => setManualBreedInput(e.target.value)}
+                          placeholder="e.g. Beagle mix"
+                          className="flex-1 border-2 border-[#EEEEEE] rounded-xl px-5 py-4 text-lg focus:border-[#8B5E3C] focus:outline-none"
+                        />
+                        <button 
+                          onClick={handleSubmitManualBreed}
+                          disabled={!manualBreedInput.trim()}
+                          className="bg-[#8B5E3C] text-white px-8 rounded-xl font-bold disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="w-full flex flex-col gap-4 text-left">
