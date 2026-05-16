@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 
     if (!response.ok) {
       console.error('Anthropic API Error:', data);
-      return NextResponse.json({ error: 'Failed to analyze image' }, { status: response.status });
+      return NextResponse.json({ error: data.error?.message || 'Failed to analyze image' }, { status: response.status });
     }
 
     const content = data.content?.[0]?.text || '{}';

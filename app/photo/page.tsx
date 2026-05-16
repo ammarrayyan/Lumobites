@@ -63,7 +63,8 @@ export default function PhotoPage() {
         setConfidence(data.confidence || '');
         setBreedDescription(data.breedDescription || '');
       } else {
-        // Fallback if API fails
+        // Surface error to user for debugging
+        alert('API Error: ' + (data.error || 'Unknown error'));
         setDetectedBreed('Unknown Breed');
       }
       setStep('confirm_breed');
