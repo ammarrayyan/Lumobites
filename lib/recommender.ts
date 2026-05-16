@@ -3,16 +3,43 @@ import { deriveLifeStage } from './parser';
 import { ingredientDatabase, IngredientInfo } from './ingredients';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
-  const text = (product.product_name + ' ' + (product.categories || '') + ' ' + (product.ingredients || '') + ' ' + product.pros + ' ' + product.cons).toLowerCase();
+  // Check the product's own food_type field first (set from Open Pet Food Facts)
+  if (product.food_type === 'wet') return 'wet';
+  if (product.food_type === 'dry') return 'dry';
+  if (product.food_type === 'treats') return 'treats';
 
-  if (text.includes('treat') || text.includes('snack') || text.includes('chew') || text.includes('bone') || text.includes('lickable') || text.includes('biscuit') || text.includes('jerky') || text.includes('marrow') || text.includes('rewards')) return 'treats';
+  // Fall back to keyword detection from product text
+  const text = (
+    product.product_name + ' ' +
+    (product.categories || '') + ' ' +
+    (product.ingredients || '') + ' ' +
+    (product.pros || '') + ' ' +
+    (product.cons || '')
+  ).toLowerCase();
 
-  if (text.includes('canned') || text.includes('wet') || text.includes('stew') || text.includes('pouch') || text.includes('pate') || text.includes('pate') || text.includes('broth') || text.includes('gravy') || text.includes('moist') || text.includes('shredded') || text.includes('morsel') || text.includes('can ')) return 'wet';
+  if (
+    text.includes('treat') || text.includes('snack') || text.includes('chew') ||
+    text.includes('bone') || text.includes('lickable') || text.includes('biscuit') ||
+    text.includes('jerky') || text.includes('marrow') || text.includes('rewards')
+  ) return 'treats';
 
-  if (text.includes('kibble') || text.includes('dry') || text.includes('crunchy') || text.includes('baked') || text.includes('mixer')) return 'dry';
+  if (
+    text.includes('canned') || text.includes('wet food') || text.includes('stew') ||
+    text.includes('pouch') || text.includes('pate') || text.includes('pâté') ||
+    text.includes('broth') || text.includes('gravy') || text.includes('moist') ||
+    text.includes('shredded') || text.includes('morsel') || text.includes('in jelly') ||
+    text.includes('in gravy') || text.includes('loaf') || text.includes('minced') ||
+    text.includes('mousse') || text.includes('terrine') || text.includes('chunks in')
+  ) return 'wet';
 
-  return 'dry';
+  if (
+    text.includes('kibble') || text.includes('dry food') || text.includes('crunchy') ||
+    text.includes('baked') || text.includes('mixer') || text.includes('extruded')
+  ) return 'dry';
+
+  return 'dry'; // safe default
 }
+
 
 // Score a single product against a pet profile
 function calculateMatchScore(product: Product, profile: PetProfile): number {

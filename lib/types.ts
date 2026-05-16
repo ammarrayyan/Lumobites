@@ -41,6 +41,7 @@ export interface Product {
   brand: string;
   pet_type: PetType;
   life_stage: LifeStage;
+  food_type?: FoodType;
   ingredients: string;
   protein_pct: number;
   fat_pct: number;

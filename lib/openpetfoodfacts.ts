@@ -223,12 +223,34 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
     ? ingredients.slice(0, 300) 
     : inferIngredientsFromName(name, petType);
 
+  // Infer food_type from product name and categories
+  const nameAndCat = (name + ' ' + (raw.categories || '')).toLowerCase();
+  let inferredFoodType: 'dry' | 'wet' | 'treats' = 'dry';
+  if (
+    nameAndCat.includes('treat') || nameAndCat.includes('snack') || nameAndCat.includes('chew') ||
+    nameAndCat.includes('biscuit') || nameAndCat.includes('jerky') || nameAndCat.includes('bone') ||
+    nameAndCat.includes('lickable') || nameAndCat.includes('rewards')
+  ) {
+    inferredFoodType = 'treats';
+  } else if (
+    nameAndCat.includes('wet') || nameAndCat.includes('canned') || nameAndCat.includes('pouch') ||
+    nameAndCat.includes('stew') || nameAndCat.includes('pate') || nameAndCat.includes('pâté') ||
+    nameAndCat.includes('broth') || nameAndCat.includes('gravy') || nameAndCat.includes('moist') ||
+    nameAndCat.includes('shredded') || nameAndCat.includes('in jelly') || nameAndCat.includes('in gravy') ||
+    nameAndCat.includes('mousse') || nameAndCat.includes('terrine') || nameAndCat.includes('loaf') ||
+    nameAndCat.includes('minced') || nameAndCat.includes('chunks') || nameAndCat.includes('flakes') ||
+    nameAndCat.includes('alimento umido') || nameAndCat.includes('wet-food')
+  ) {
+    inferredFoodType = 'wet';
+  }
+
   return {
     id: `opff_${petType}_${id.toString().slice(-8)}_${index}`,
     product_name: name === 'Unknown Product' ? (finalBrand !== 'Unknown Brand' ? `${finalBrand} Product` : 'Unknown Product') : (name.length > 80 ? name.slice(0, 77) + '…' : name),
     brand: finalBrand.length > 40 ? finalBrand.slice(0, 40) : finalBrand,
     pet_type: petType,
     life_stage: lifeStage,
+    food_type: inferredFoodType,
     ingredients: finalIngredients,
     protein_pct: proteinPct,
     fat_pct: fatPct,
@@ -247,6 +269,7 @@ function transformProduct(raw: any, petType: PetType, index: number, isBarcodeLo
     categories: raw.categories || '',
   };
 }
+
 
 // ─── Fetch from multiple search terms for better coverage ─────────────────────
 async function fetchPage(searchTerm: string, pageSize: number): Promise<any[]> {
