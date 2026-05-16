@@ -255,7 +255,7 @@ export default function PhotoPage() {
               <h2 className="text-2xl font-[800] text-[#191919] text-center mb-2">How old is your pet?</h2>
               <div className="flex flex-col gap-3">
                 {[
-                  { label: 'Puppy (Under 1 year)', val: 0.5 },
+                  { label: detectedPetType === 'cat' ? 'Kitten (Under 1 year)' : 'Puppy (Under 1 year)', val: 0.5 },
                   { label: 'Adult (1-7 years)', val: 4 },
                   { label: 'Senior (7+ years)', val: 10 }
                 ].map((opt) => (
