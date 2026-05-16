@@ -29,12 +29,38 @@ export default function AnimatedPets() {
           0%, 48%, 52%, 100% { transform: scaleY(1); }
           50% { transform: scaleY(0.1); }
         }
+        @keyframes dog-wiggle {
+          0%, 100% { transform: rotate(0deg) translateY(0); }
+          25% { transform: rotate(-4deg) translateY(-3px); }
+          75% { transform: rotate(4deg) translateY(-3px); }
+        }
+        @keyframes cat-bounce {
+          0%, 100% { transform: translateY(0px) scaleY(1); }
+          40% { transform: translateY(-8px) scaleY(1.02); }
+          60% { transform: translateY(-8px) scaleY(1.02); }
+        }
+        .pet-interactive {
+          cursor: pointer;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .pet-dog.pet-interactive:hover, .pet-dog.pet-interactive:active {
+          animation: dog-wiggle 0.4s ease-in-out infinite;
+        }
+        .pet-cat.pet-interactive:hover, .pet-cat.pet-interactive:active {
+          animation: cat-bounce 0.5s ease-in-out infinite;
+        }
+        .pet-dog.pet-interactive:hover .dog-tail, .pet-dog.pet-interactive:active .dog-tail {
+          animation-duration: 0.15s !important;
+        }
+        .pet-cat.pet-interactive:hover .cat-tail, .pet-cat.pet-interactive:active .cat-tail {
+          animation: tail-swish 0.5s ease-in-out infinite !important;
+        }
       `}</style>
 
       {/* Dog Animation */}
-      <div className="relative w-32 h-36 flex flex-col items-center justify-end z-10 drop-shadow-md">
+      <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end z-10 drop-shadow-md">
         {/* Dog Tail */}
-        <div className="absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
+        <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
         
         {/* Dog Body */}
         <div className="relative w-24 h-28 bg-[#FAEDCD] rounded-t-[40px] rounded-b-[20px] z-10 overflow-hidden flex justify-center">
@@ -65,9 +91,9 @@ export default function AnimatedPets() {
       </div>
 
       {/* Cat Animation (Based on the attached image) */}
-      <div className="relative w-24 h-32 flex flex-col items-center justify-end z-10 drop-shadow-md">
+      <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end z-10 drop-shadow-md">
         {/* Cat Tail */}
-        <div className="absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
+        <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
           <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
         </div>
         
