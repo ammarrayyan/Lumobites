@@ -9,47 +9,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Anthropic API key not configured' }, { status: 500 });
+    const apiKey = process.env.GOOGLE_VISION_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey || apiKey.startsWith('eyJ')) {
+      return NextResponse.json({ error: 'Google Vision API key not configured properly.' }, { status: 500 });
     }
 
-    // Convert file to base64 and get mime type
+    // Convert file to base64
     const buffer = Buffer.from(await image.arrayBuffer());
     const base64Image = buffer.toString('base64');
-    const mediaType = image.type || 'image/jpeg';
 
-    const systemPrompt = "Respond in JSON format only: {\"petType\": \"cat\" | \"dog\" | \"none\", \"breed\": \"string\", \"confidence\": \"High\" | \"Medium\" | \"Low\", \"breedDescription\": \"one sentence about this breed\"}";
-    const userPrompt = "Look at this photo and identify: 1) Is this a cat or dog? 2) What breed is it? If mixed breed say Mixed breed and list the likely breeds. 3) How confident are you?";
-
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call Google Cloud Vision API
+    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [
+        requests: [
           {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType === 'image/jpg' ? 'image/jpeg' : mediaType,
-                  data: base64Image
-                }
-              },
-              {
-                type: 'text',
-                text: userPrompt
-              }
+            image: {
+              content: base64Image
+            },
+            features: [
+              { type: 'LABEL_DETECTION', maxResults: 20 },
+              { type: 'WEB_DETECTION', maxResults: 20 },
+              { type: 'OBJECT_LOCALIZATION' }
             ]
           }
         ]
@@ -59,33 +43,127 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Anthropic API Error:', data);
+      console.error('Google Vision API Error:', data);
       return NextResponse.json({ error: data.error?.message || 'Failed to analyze image' }, { status: response.status });
     }
 
-    const content = data.content?.[0]?.text || '{}';
-    
-    // Parse JSON
-    let parsedInfo;
-    try {
-      // Extract JSON block if it's wrapped in markdown
-      const jsonStr = content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1);
-      parsedInfo = JSON.parse(jsonStr);
-    } catch (e) {
-      console.error('Failed to parse Claude JSON:', content);
-      return NextResponse.json({ error: 'Invalid response from AI' }, { status: 500 });
+    const res = data.responses[0];
+    if (!res) {
+      return NextResponse.json({ error: 'Unexpected response from Google Vision API' }, { status: 500 });
     }
+
+    const labels = res.labelAnnotations || [];
+    const webEntities = res.webDetection?.webEntities || [];
+    const bestGuessLabels = res.webDetection?.bestGuessLabels || [];
+    const objects = res.localizedObjectAnnotations || [];
+
+    // Combine all descriptions for pet type detection
+    const allText = [
+      ...labels.map((l: any) => l.description?.toLowerCase()),
+      ...webEntities.map((e: any) => e.description?.toLowerCase()),
+      ...bestGuessLabels.map((b: any) => b.label?.toLowerCase()),
+      ...objects.map((o: any) => o.name?.toLowerCase())
+    ].filter(Boolean);
+
+    let petType = 'none';
+
+    // Detect Pet Type First
+    if (allText.some(t => t.includes('cat') || t.includes('feline') || t.includes('kitten'))) {
+      petType = 'cat';
+    } else if (allText.some(t => t.includes('dog') || t.includes('canine') || t.includes('puppy'))) {
+      petType = 'dog';
+    }
+
+    if (petType === 'none') {
+      return NextResponse.json({
+        success: true,
+        breed: 'Unknown Breed',
+        petType: 'none',
+        confidence: 'Low'
+      });
+    }
+
+    // Common non-breed generic labels to ignore
+    const ignoreWords = [
+      'animal', 'mammal', 'vertebrate', 'fur', 'snout', 'whiskers', 'nose', 'eye', 
+      'dog', 'cat', 'pet', 'puppy', 'kitten', 'carnivore', 'companion dog', 
+      'sporting group', 'working group', 'toy dog', 'canidae', 'felidae', 'tail', 'paw', 
+      'grass', 'photography', 'dog breed', 'fawn', 'non-sporting group'
+    ];
+
+    const isGeneric = (str: string) => {
+      const lower = str.toLowerCase();
+      if (ignoreWords.includes(lower)) return true;
+      return false;
+    };
+
+    let breed = '';
+    let confidence = 'Low';
+
+    // 1. webDetection.webEntities (Highest priority, most accurate for specific breeds)
+    for (const entity of webEntities) {
+      if (entity.description) {
+        const desc = entity.description.toLowerCase();
+        if (!isGeneric(desc) && desc.length > 3) {
+          breed = entity.description;
+          if (entity.score > 0.8) {
+            confidence = 'High';
+          } else if (entity.score >= 0.5) {
+            confidence = 'Medium';
+          } else {
+            confidence = 'Low';
+          }
+          break;
+        }
+      }
+    }
+
+    // 2. webDetection.bestGuessLabels
+    if (!breed) {
+      for (const guess of bestGuessLabels) {
+        if (guess.label) {
+          const desc = guess.label.toLowerCase();
+          if (!isGeneric(desc) && desc.length > 3) {
+            breed = guess.label;
+            confidence = 'Medium';
+            break;
+          }
+        }
+      }
+    }
+
+    // 3. labelAnnotations (Fallback)
+    if (!breed) {
+      for (const label of labels) {
+        if (label.description) {
+          const desc = label.description.toLowerCase();
+          if (!isGeneric(desc) && desc.length > 3) {
+            breed = label.description;
+            confidence = 'Low';
+            break;
+          }
+        }
+      }
+    }
+
+    if (!breed) {
+      breed = 'Mixed breed';
+      confidence = 'Low';
+    }
+
+    // Capitalize breed (e.g. "golden retriever" -> "Golden Retriever")
+    breed = breed.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     return NextResponse.json({
       success: true,
-      breed: parsedInfo.breed,
-      petType: parsedInfo.petType?.toLowerCase() || 'none', 
-      confidence: parsedInfo.confidence,
-      breedDescription: parsedInfo.breedDescription
+      breed,
+      petType,
+      confidence,
+      breedDescription: '' // Google Cloud Vision doesn't provide dynamic facts
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Vision API Error:', error);
-    return NextResponse.json({ error: 'Failed to process image' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to process image' }, { status: 500 });
   }
 }
