@@ -56,32 +56,28 @@ export default function ResultsPage() {
         });
         
         const data = await res.json();
-        const overrideScores = [97, 89, 82, 74, 68];
-        const fixedResults = (data.results || []).map((r: any, i: number) => ({
-          ...r,
-          match_pct: overrideScores[i] || r.match_pct
-        }));
-
-        let finalResults = fixedResults;
+        let finalResults = data.results || [];
         if (brandParam) {
-           finalResults = fixedResults.filter((r: any) => 
-             r.brand?.toLowerCase().includes(brandParam.toLowerCase()) || 
-             brandParam.toLowerCase().includes(r.brand?.toLowerCase())
-           );
-           setBrandFallback(finalResults.length === 0);
+          finalResults = finalResults.filter((r: any) =>
+            r.brand?.toLowerCase().includes(brandParam.toLowerCase()) ||
+            brandParam.toLowerCase().includes(r.brand?.toLowerCase())
+          );
+          setBrandFallback(finalResults.length === 0);
         }
 
         setResults(finalResults);
         setBudgetRelaxed(data.budgetRelaxed);
         setFallback(data.fallback);
 
-        // Cache products in sessionStorage so the detail page can look them up
+        // Cache products + profile in sessionStorage so the detail page can look them up
         try {
           const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
           for (const p of finalResults) {
             existing[p.id] = p;
           }
           sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
+          // Store the profile so the product detail page knows which health issues user selected
+          sessionStorage.setItem('lumobites_profile', JSON.stringify(parsedProfile));
         } catch (_) {}
       } catch (err) {
         console.error(err);

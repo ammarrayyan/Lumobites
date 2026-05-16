@@ -36,6 +36,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [recallData, setRecallData] = useState<{ active: boolean; reason?: string } | null>(null);
   const [checkingRecall, setCheckingRecall] = useState(false);
+  const [userHealthIssues, setUserHealthIssues] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -54,6 +55,11 @@ export default function ProductDetailPage() {
               petco_link: p.buy_links?.petco,
               petsmart_link: p.buy_links?.petsmart,
             });
+            // Load user's selected health issues so we only show relevant tags
+            try {
+              const prof = JSON.parse(sessionStorage.getItem('lumobites_profile') || 'null');
+              setUserHealthIssues(prof?.health_issues || []);
+            } catch (_) {}
             setLoading(false);
             return;
           }
@@ -129,7 +135,8 @@ export default function ProductDetailPage() {
   }
 
   const displayName = product.product_name || product.name;
-  const searchTerm = encodeURIComponent(`${product.brand || ''} ${displayName} ${product.pet_type || ''} food`.trim());
+  const petFoodLabel = product.pet_type === 'dog' ? 'dog food' : product.pet_type === 'cat' ? 'cat food' : 'pet food';
+  const searchTerm = encodeURIComponent(`${product.brand || ''} ${displayName} ${petFoodLabel}`.trim());
   
   let amazonLink = product.amazon_link || product.buy_link || '#';
   if (amazonLink === '#') amazonLink = `https://www.amazon.com/s?k=${searchTerm}&tag=lumobites-20`;
@@ -142,10 +149,16 @@ export default function ProductDetailPage() {
 
   let petsmartLink = product.petsmart_link || product.buy_link || '#';
   if (petsmartLink === '#') petsmartLink = `https://www.petsmart.com/search/?q=${searchTerm}`;
-  const tags = Array.isArray(product.health_tags) ? product.health_tags : [];
+
+  // Only show health tags the user actually selected — not the product's full tag list.
+  // If user said 'no health issues', userHealthIssues will be [] so no tags show.
+  const productTags = Array.isArray(product.health_tags) ? product.health_tags : [];
+  const tags = userHealthIssues.length > 0
+    ? productTags.filter(t => userHealthIssues.includes(t))
+    : [];
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '220px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '280px' }}>
       {/* Header */}
       <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 30, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4' }}>
         <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B5E3C', flexShrink: 0 }}>
