@@ -187,7 +187,7 @@ export default function ChatPage() {
           else if (/treat|snack/.test(lowerInput)) currentInfo.food_type = 'treats';
 
           // 5. Budget: number with $, dollar, budget, under, around
-          const budgetMatch = lowerInput.match(/(?:\$|dollars?|budget|under|around)\s*(\d+)/) || lowerInput.match(/(\d+)\s*(?:\$|dollars?)/);
+          const budgetMatch = lowerInput.match(/(?:\$|dollars?|budget|under|around)\s*(\d+)/) || lowerInput.match(/(\d+)\s*(?:\$|dollars?|budget)/);
           if (budgetMatch) {
             currentInfo.budget_monthly_max = parseInt(budgetMatch[1], 10);
           } else {
@@ -223,9 +223,10 @@ export default function ChatPage() {
             isValid = true;
             setRetries(0);
 
-            // Default health issues to empty if not mentioned but they gave other details
-            if (currentInfo.health_issues === undefined && extractedCount >= 2) {
-              currentInfo.health_issues = [];
+            // Default optional fields if they provided a multi-field prompt
+            if (extractedCount >= 2) {
+              if (currentInfo.health_issues === undefined) currentInfo.health_issues = [];
+              if (currentInfo.food_type === undefined) currentInfo.food_type = 'both';
             }
 
             // Figure out the FIRST missing field and skip to that question
