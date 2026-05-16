@@ -328,6 +328,14 @@ export default function PhotoPage() {
                   </div>
                 </div>
               )}
+              {detectedPetType !== 'none' && (
+                <button 
+                  onClick={() => setStep('upload')}
+                  className="mt-4 text-sm font-bold text-[#9A7760] underline hover:text-[#8B5E3C] transition-colors"
+                >
+                  Retake Photo
+                </button>
+              )}
             </div>
           )}
 
