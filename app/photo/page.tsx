@@ -21,6 +21,7 @@ export default function PhotoPage() {
   const [breedDescription, setBreedDescription] = useState('');
   const [isManualBreed, setIsManualBreed] = useState(false);
   const [manualBreedInput, setManualBreedInput] = useState('');
+  const [manualPetType, setManualPetType] = useState('dog');
 
   const [age, setAge] = useState<number | null>(null);
   const [foodType, setFoodType] = useState<string>('');
@@ -86,6 +87,9 @@ export default function PhotoPage() {
   const handleSubmitManualBreed = () => {
     if (manualBreedInput.trim()) {
       setDetectedBreed(manualBreedInput.trim());
+      if (detectedPetType === 'none') {
+        setDetectedPetType(manualPetType);
+      }
       setStep('age');
     }
   };
@@ -223,6 +227,20 @@ export default function PhotoPage() {
                   </button>
                   <div className="w-full text-left mt-4 border-t border-[#EEEEEE] pt-6">
                     <label className="font-bold text-[#191919] text-lg">Or enter breed manually:</label>
+                    <div className="flex gap-4 mt-3 mb-4">
+                      <button 
+                        onClick={() => setManualPetType('dog')}
+                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${manualPetType === 'dog' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
+                      >
+                        🐕 Dog
+                      </button>
+                      <button 
+                        onClick={() => setManualPetType('cat')}
+                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${manualPetType === 'cat' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
+                      >
+                        🐱 Cat
+                      </button>
+                    </div>
                     <div className="flex gap-3 mt-2">
                       <input 
                         type="text" 
