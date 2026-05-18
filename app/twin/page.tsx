@@ -245,30 +245,144 @@ export default function TwinPage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const generateImageFile = async (ref: React.RefObject<HTMLDivElement | null>, filename: string): Promise<File | null> => {
+    if (!ref.current) return null;
+    try {
+      const canvas = await html2canvas(ref.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1.5,
+        width: ref.current.offsetWidth || 1080,
+        height: ref.current.offsetHeight || 1080
+      });
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], filename, { type: 'image/png' }));
+          } else {
+            resolve(null);
+          }
+        }, 'image/png');
+      });
+    } catch (err) {
+      console.error("Error generating image file:", err);
+      return null;
+    }
+  };
+
+  const sharePlatformWithImage = async (
+    ref: React.RefObject<HTMLDivElement | null>, 
+    filename: string, 
+    fallbackUrl: string, 
+    shareText: string
+  ) => {
+    if (!result) return;
+    setError(null);
+    setShareStatus(null);
+
+    const imageFile = await generateImageFile(ref, filename);
+
+    // 1. Mobile/Web Share API first (shares actual image + text)
+    if (imageFile && navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+      try {
+        await navigator.share({
+          files: [imageFile],
+          title: 'My Pet Twin',
+          text: shareText
+        });
+        return;
+      } catch (shareErr) {
+        console.error("Web Share API failed:", shareErr);
+        // Continue to fallback URL redirect on desktop/unsupported browser
+      }
+    }
+
+    // 2. Fallback to direct redirect
+    window.open(fallbackUrl, '_blank');
+  };
+
+  const sharePlatformWithDownloadOnly = async (
+    ref: React.RefObject<HTMLDivElement | null>,
+    filename: string,
+    shareText: string,
+    successToastMessage: string
+  ) => {
+    if (!result) return;
+    setError(null);
+    setShareStatus(null);
+
+    const imageFile = await generateImageFile(ref, filename);
+
+    // 1. Mobile/Web Share API first (shows WhatsApp, Instagram, TikTok natively)
+    if (imageFile && navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+      try {
+        await navigator.share({
+          files: [imageFile],
+          title: 'My Pet Twin',
+          text: shareText
+        });
+        return;
+      } catch (shareErr) {
+        console.error("Web Share API failed:", shareErr);
+      }
+    }
+
+    // 2. Fallback to manual download + instructions
+    if (ref.current) {
+      try {
+        const canvas = await html2canvas(ref.current, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 1,
+          width: ref.current.offsetWidth || 1080,
+          height: ref.current.offsetHeight || 1080
+        });
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        setShareStatus(successToastMessage);
+        setTimeout(() => setShareStatus(null), 8000);
+      } catch (err) {
+        console.error("Download fallback error:", err);
+      }
+    }
+  };
+
   const shareToWhatsApp = () => {
-    const text = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_square.png`;
+    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    const fallbackUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+    sharePlatformWithImage(squareCardRef, filename, fallbackUrl, shareText);
   };
 
   const shareToFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lumobites.net/twin')}`, '_blank');
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_square.png`;
+    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    const fallbackUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lumobites.net/twin')}`;
+    sharePlatformWithImage(squareCardRef, filename, fallbackUrl, shareText);
   };
 
   const shareToTwitter = () => {
-    const text = `I'm a ${result?.breed}! 🐾 https://lumobites.net/twin`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_twitter.png`;
+    const shareText = `I'm a ${result?.breed}! 🐾 https://lumobites.net/twin`;
+    const fallbackUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    sharePlatformWithImage(twitterCardRef, filename, fallbackUrl, shareText);
   };
 
-  const shareToTikTok = async () => {
-    await downloadStoryCard();
-    setShareStatus("Downloaded! Upload this to TikTok with your reaction");
-    setTimeout(() => setShareStatus(null), 5000);
+  const shareToTikTok = () => {
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_story.png`;
+    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    const successToastMessage = "Image saved! Open TikTok → tap + → upload this photo → add your reaction and post!";
+    sharePlatformWithDownloadOnly(storyCardRef, filename, shareText, successToastMessage);
   };
 
-  const shareToInstagram = async () => {
-    await downloadSquareCard();
-    setShareStatus("Downloaded! Share this to your Instagram feed or story");
-    setTimeout(() => setShareStatus(null), 5000);
+  const shareToInstagram = () => {
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_square.png`;
+    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    const successToastMessage = "Image saved! Open Instagram → tap + → select this photo → share as post or story";
+    sharePlatformWithDownloadOnly(squareCardRef, filename, shareText, successToastMessage);
   };
 
   const copyPageLink = async () => {
