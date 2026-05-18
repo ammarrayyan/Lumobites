@@ -58,13 +58,27 @@ export default function Home() {
               Find Your Pet&apos;s Food &rarr;
             </Link>
 
-            <Link href="/photo" className="text-[#8B5E3C] font-semibold text-[15px] mb-8 flex items-center justify-center gap-1.5 hover:underline transition-all hover:scale-105 active:scale-95" style={{ textDecoration: 'none' }}>
-              <svg className="w-5 h-5 inline-block mr-1 align-middle text-[#8B5E3C] transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Find Food by Photo of Your Pet
-            </Link>
+            <div style={{ marginBottom: '32px' }}>
+              <Link 
+                href="/photo" 
+                className="text-[#8B5E3C] font-semibold text-[13px] inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
+                style={{ 
+                  textDecoration: 'none',
+                  background: 'rgba(139, 94, 60, 0.05)',
+                  border: '1.2px solid rgba(139, 94, 60, 0.15)',
+                  padding: '7px 18px',
+                  borderRadius: '100px',
+                  boxShadow: '0 2px 8px rgba(139, 94, 60, 0.03)',
+                  letterSpacing: '0.01em'
+                }}
+              >
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                  <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Find Food by Photo of Your Pet</span>
+              </Link>
+            </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
