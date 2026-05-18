@@ -34,7 +34,10 @@ export default function TwinPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Refs for off-screen premium download templates
+  const squareCardRef = useRef<HTMLDivElement>(null);
+  const storyCardRef = useRef<HTMLDivElement>(null);
 
   // Cycle loading messages
   useEffect(() => {
@@ -55,18 +58,18 @@ export default function TwinPage() {
 
       const frame = () => {
         confetti({
-          particleCount: 3,
+          particleCount: 4,
           angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#8B5E3C', '#E8D5C0', '#F5EDE4']
+          spread: 60,
+          origin: { x: 0, y: 0.8 },
+          colors: ['#FF3E6C', '#FF8E53', '#8A2387', '#E94057']
         });
         confetti({
-          particleCount: 3,
+          particleCount: 4,
           angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#8B5E3C', '#E8D5C0', '#F5EDE4']
+          spread: 60,
+          origin: { x: 1, y: 0.8 },
+          colors: ['#FF3E6C', '#FF8E53', '#8A2387', '#E94057']
         });
 
         if (Date.now() < end) {
@@ -122,15 +125,34 @@ export default function TwinPage() {
     }
   };
 
-  const downloadCard = async () => {
-    if (cardRef.current) {
-      const canvas = await html2canvas(cardRef.current, {
+  const downloadSquareCard = async () => {
+    if (squareCardRef.current) {
+      const canvas = await html2canvas(squareCardRef.current, {
         useCORS: true,
-        scale: 2
+        allowTaint: true,
+        scale: 1,
+        width: 1080,
+        height: 1080
       });
       const link = document.createElement('a');
-      link.download = `${result?.breed}_twin_match.png`;
-      link.href = canvas.toDataURL();
+      link.download = `${result?.breed}_twin_square.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  };
+
+  const downloadStoryCard = async () => {
+    if (storyCardRef.current) {
+      const canvas = await html2canvas(storyCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1,
+        width: 1080,
+        height: 1920
+      });
+      const link = document.createElement('a');
+      link.download = `${result?.breed}_twin_story.png`;
+      link.href = canvas.toDataURL('image/png');
       link.click();
     }
   };
@@ -251,15 +273,12 @@ export default function TwinPage() {
             </div>
           )}
 
-          {/* STEP 3: RESULT CARD */}
+          {/* STEP 3: RESULT SCREEN */}
           {step === 'result' && result && (
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-6 w-full">
               
-              {/* Dynamic Twin Card to Download */}
-              <div 
-                ref={cardRef} 
-                className="w-full bg-gradient-to-br from-[#FFF8F2] to-[#FFF0E2] border border-[#F2DCC4] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-6 shadow-sm relative overflow-hidden"
-              >
+              {/* Web UI Preview Card */}
+              <div className="w-full bg-gradient-to-br from-[#FFF8F2] to-[#FFF0E2] border border-[#F2DCC4] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-6 shadow-sm relative overflow-hidden">
                 
                 {/* Match Badge */}
                 <div className="absolute top-4 right-4 bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] text-[#553300] font-black text-xs px-3 py-1.5 rounded-full shadow-sm border border-[#D4AF37] tracking-wider uppercase">
@@ -318,30 +337,38 @@ export default function TwinPage() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href={`/results?breed=${encodeURIComponent(result.breed)}`}
-                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-[#734A2E] transition-colors shadow-sm text-decoration-none"
+                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-[#734A2E] transition-colors shadow-sm"
                     style={{ textDecoration: 'none' }}
                   >
                     🍖 Find Best Food for {result.breed}
                   </Link>
-                  
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 w-full">
                   <button 
-                    onClick={downloadCard}
-                    className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-4 rounded-xl font-bold text-lg hover:bg-[#FDF9F5] transition-all flex items-center justify-center gap-2"
+                    onClick={downloadSquareCard}
+                    className="bg-gradient-to-r from-[#FF3E6C] to-[#FF8E53] text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
-                    📥 Download Result Card
+                    📸 Instagram Feed (1:1)
+                  </button>
+                  <button 
+                    onClick={downloadStoryCard}
+                    className="bg-gradient-to-r from-[#8A2387] to-[#E94057] text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                  >
+                    📱 Instagram Story (9:16)
                   </button>
                 </div>
 
                 <div className="flex gap-3 w-full">
                   <button 
                     onClick={() => setShowShareModal(true)}
-                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors"
+                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
                   >
                     📤 Share My Twin
                   </button>
                   <button 
                     onClick={() => setStep('upload')}
-                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors"
+                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
                   >
                     🔄 Try Again
                   </button>
@@ -355,6 +382,373 @@ export default function TwinPage() {
         </div>
       </main>
 
+      {/* ========================================================
+          1080x1080 INSTAGRAM SQUARE SHARE CARD TEMPLATE (OFF-SCREEN)
+          ======================================================== */}
+      {result && (
+        <div 
+          ref={squareCardRef}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1080px',
+            height: '1080px',
+            background: 'linear-gradient(135deg, #8A2387 0%, #E94057 50%, #F27121 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '70px',
+            color: '#FFFFFF',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            boxSizing: 'border-box'
+          }}
+        >
+          {/* Top Badge and Header */}
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(to right, #FFD700, #FFA500)',
+              color: '#553300',
+              fontWeight: 900,
+              fontSize: '32px',
+              padding: '10px 30px',
+              borderRadius: '50px',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+              border: '2px solid #FFFFFF',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              marginBottom: '35px'
+            }}>
+              🎯 {result.matchScore}% Match
+            </div>
+            <h2 style={{
+              fontSize: '64px',
+              fontWeight: 900,
+              margin: 0,
+              letterSpacing: '-1px',
+              textShadow: '0 4px 10px rgba(0,0,0,0.25)'
+            }}>
+              You&apos;re a {result.breed}!
+            </h2>
+          </div>
+
+          {/* Double Photos */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '50px',
+            margin: '30px 0'
+          }}>
+            <div style={{
+              width: '280px',
+              height: '280px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '8px solid #FFFFFF',
+              boxShadow: '0 12px 35px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}>
+              {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+              <span style={{
+                position: 'absolute',
+                bottom: '15px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0,0,0,0.6)',
+                color: '#FFFFFF',
+                fontSize: '22px',
+                fontWeight: 'bold',
+                padding: '4px 16px',
+                borderRadius: '50px'
+              }}>YOU</span>
+            </div>
+
+            <div style={{ fontSize: '100px', filter: 'drop-shadow(0 8px 15px rgba(0,0,0,0.3))' }}>🐾</div>
+
+            <div style={{
+              width: '280px',
+              height: '280px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '8px solid #FFFFFF',
+              boxShadow: '0 12px 35px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}>
+              <img src={result.unsplashImageUrl} alt="Twin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <span style={{
+                position: 'absolute',
+                bottom: '15px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0,0,0,0.6)',
+                color: '#FFFFFF',
+                fontSize: '22px',
+                fontWeight: 'bold',
+                padding: '4px 16px',
+                borderRadius: '50px'
+              }}>TWIN</span>
+            </div>
+          </div>
+
+          {/* Personality Traits */}
+          <div style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
+            {result.traits.map((trait, index) => (
+              <span 
+                key={index}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '26px',
+                  padding: '12px 30px',
+                  borderRadius: '20px',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                }}
+              >
+                {trait}
+              </span>
+            ))}
+          </div>
+
+          {/* Custom Quote */}
+          <div style={{
+            textAlign: 'center',
+            maxWidth: '850px',
+            borderTop: '2px solid rgba(255,255,255,0.2)',
+            paddingTop: '30px'
+          }}>
+            <p style={{
+              fontSize: '34px',
+              fontWeight: 700,
+              fontStyle: 'italic',
+              margin: 0,
+              lineHeight: 1.4,
+              textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              &quot;{result.quote}&quot;
+            </p>
+          </div>
+
+          {/* Footer branding */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            borderTop: '2px solid rgba(255,255,255,0.15)',
+            paddingTop: '25px',
+            boxSizing: 'border-box'
+          }}>
+            <span style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🐾 Find Your Pet Twin Free
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+              <span style={{ fontSize: '28px', fontWeight: 900 }}>Lumo Bites</span>
+              <span style={{ fontSize: '22px', opacity: 0.8, fontWeight: 600 }}>lumobites.net/twin</span>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* ========================================================
+          1080x1920 INSTAGRAM STORY SHARE CARD TEMPLATE (OFF-SCREEN)
+          ======================================================== */}
+      {result && (
+        <div 
+          ref={storyCardRef}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1080px',
+            height: '1920px',
+            background: 'linear-gradient(135deg, #8A2387 0%, #E94057 50%, #F27121 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '120px 80px',
+            color: '#FFFFFF',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            boxSizing: 'border-box'
+          }}
+        >
+          {/* Top Badge & Header */}
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(to right, #FFD700, #FFA500)',
+              color: '#553300',
+              fontWeight: 900,
+              fontSize: '36px',
+              padding: '12px 40px',
+              borderRadius: '50px',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+              border: '2px solid #FFFFFF',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              marginBottom: '50px'
+            }}>
+              🎯 {result.matchScore}% Match
+            </div>
+            
+            <span style={{ fontSize: '32px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', opacity: 0.9 }}>
+              My Pet Twin Match
+            </span>
+            <h2 style={{
+              fontSize: '84px',
+              fontWeight: 900,
+              margin: '20px 0 0 0',
+              letterSpacing: '-2px',
+              textShadow: '0 6px 15px rgba(0,0,0,0.3)',
+              lineHeight: 1.1
+            }}>
+              You&apos;re a<br />
+              <span style={{ fontSize: '96px', color: '#FFD700' }}>{result.breed}</span>!
+            </h2>
+          </div>
+
+          {/* Double Stacked Photos for Vertical Story */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '40px',
+            margin: '40px 0'
+          }}>
+            <div style={{
+              width: '380px',
+              height: '380px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '10px solid #FFFFFF',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}>
+              {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+              <span style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0,0,0,0.6)',
+                color: '#FFFFFF',
+                fontSize: '26px',
+                fontWeight: 'bold',
+                padding: '6px 20px',
+                borderRadius: '50px'
+              }}>YOU</span>
+            </div>
+
+            <div style={{ fontSize: '130px', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.35))', lineHeight: 1 }}>❤️</div>
+
+            <div style={{
+              width: '380px',
+              height: '380px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '10px solid #FFFFFF',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}>
+              <img src={result.unsplashImageUrl} alt="Twin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <span style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0,0,0,0.6)',
+                color: '#FFFFFF',
+                fontSize: '26px',
+                fontWeight: 'bold',
+                padding: '6px 20px',
+                borderRadius: '50px'
+              }}>TWIN</span>
+            </div>
+          </div>
+
+          {/* Trait Tags */}
+          <div style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            width: '100%'
+          }}>
+            {result.traits.map((trait, index) => (
+              <span 
+                key={index}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '28px',
+                  padding: '14px 36px',
+                  borderRadius: '25px',
+                  boxShadow: '0 5px 12px rgba(0,0,0,0.1)'
+                }}
+              >
+                {trait}
+              </span>
+            ))}
+          </div>
+
+          {/* Quote & Text */}
+          <div style={{
+            textAlign: 'center',
+            maxWidth: '900px',
+            borderTop: '2px solid rgba(255,255,255,0.2)',
+            paddingTop: '40px',
+            marginTop: '30px'
+          }}>
+            <p style={{
+              fontSize: '38px',
+              fontWeight: 700,
+              fontStyle: 'italic',
+              margin: 0,
+              lineHeight: 1.4,
+              textShadow: '0 2px 4px rgba(0,0,0,0.25)'
+            }}>
+              &quot;{result.quote}&quot;
+            </p>
+          </div>
+
+          {/* Footer brand info */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '15px',
+            width: '100%',
+            borderTop: '2px solid rgba(255,255,255,0.15)',
+            paddingTop: '40px',
+            boxSizing: 'border-box'
+          }}>
+            <span style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '1px' }}>
+              🐾 Find Your Pet Twin Free
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '36px', fontWeight: 900 }}>Lumo Bites</span>
+              <span style={{ fontSize: '26px', opacity: 0.8, fontWeight: 600 }}>lumobites.net/twin</span>
+            </div>
+          </div>
+
+        </div>
+      )}
+
       {/* SHARE MODAL */}
       {showShareModal && result && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -363,7 +757,7 @@ export default function TwinPage() {
               <h3 className="font-extrabold text-xl text-[#191919]">📤 Share Your Pet Twin</h3>
               <button 
                 onClick={() => setShowShareModal(false)}
-                className="text-[#999999] hover:text-[#191919] font-bold text-lg"
+                className="text-[#999999] hover:text-[#191919] font-bold text-lg cursor-pointer"
               >
                 ✕
               </button>
@@ -382,7 +776,7 @@ export default function TwinPage() {
 
               <button 
                 onClick={copyShareLink}
-                className="w-full py-4 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] rounded-xl font-bold text-center flex items-center justify-center gap-2 hover:bg-[#FDF9F5] transition-all"
+                className="w-full py-4 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] rounded-xl font-bold text-center flex items-center justify-center gap-2 hover:bg-[#FDF9F5] transition-all cursor-pointer"
               >
                 {isCopied ? "✓ Copied!" : "🔗 Copy Share Text"}
               </button>
