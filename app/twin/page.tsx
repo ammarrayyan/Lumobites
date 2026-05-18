@@ -32,8 +32,11 @@ export default function TwinPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
+  const [cameraActive, setCameraActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   
   // Refs for off-screen premium download templates
   const squareCardRef = useRef<HTMLDivElement>(null);
@@ -49,6 +52,58 @@ export default function TwinPage() {
     }
     return () => clearInterval(interval);
   }, [step]);
+
+  // Handle active webcam stream
+  useEffect(() => {
+    if (cameraActive) {
+      setError(null);
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1080 } } })
+        .then(stream => {
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch(err => {
+          console.error("Camera access error:", err);
+          setError("Could not access camera. Please upload a photo instead.");
+          setCameraActive(false);
+        });
+    } else {
+      stopCameraStream();
+    }
+    return () => stopCameraStream();
+  }, [cameraActive]);
+
+  const stopCameraStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const stopCamera = () => {
+    setCameraActive(false);
+  };
+
+  const captureSelfie = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth || 1080;
+      canvas.height = videoRef.current.videoHeight || 1080;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const capturedFile = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+            processFile(capturedFile);
+            setCameraActive(false);
+          }
+        }, 'image/jpeg', 0.95);
+      }
+    }
+  };
 
   // Trigger confetti on result screen
   useEffect(() => {
@@ -203,57 +258,83 @@ export default function TwinPage() {
 
           {/* STEP 1: UPLOAD */}
           {step === 'upload' && (
-            <div 
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              className="border-2 border-dashed border-[#D9C0A8] bg-[#F5EDE4] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center gap-6 cursor-pointer hover:border-[#8B5E3C] transition-all"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileSelect} 
-                accept="image/*" 
-                className="hidden" 
-              />
-              <input 
-                type="file" 
-                ref={cameraInputRef} 
-                onChange={handleFileSelect} 
-                accept="image/*"
-                capture="user"
-                className="hidden" 
-              />
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-sm text-[#8B5E3C]">
-                📸
+            cameraActive ? (
+              <div className="flex flex-col items-center gap-6 w-full">
+                <div className="w-full h-80 rounded-2xl overflow-hidden bg-black shadow-inner border border-[#D9C0A8] relative">
+                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                  <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-sm">
+                    <span className="w-2 h-2 bg-white rounded-full"></span> LIVE
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 w-full max-w-[340px]">
+                  <button 
+                    onClick={captureSelfie}
+                    className="flex-1 bg-[#8B5E3C] text-white py-3.5 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    📸 Capture Photo
+                  </button>
+                  <button 
+                    onClick={stopCamera}
+                    className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3.5 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    ✕ Cancel
+                  </button>
+                </div>
               </div>
-              
-              <div className="flex flex-col gap-2">
-                <span className="font-bold text-lg text-[#191919]">
-                  Drop your photo here — we&apos;ll find your animal twin! 🐾
-                </span>
-                <span className="text-sm text-[#8B5E3C]">or click to select</span>
-              </div>
+            ) : (
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                className="border-2 border-dashed border-[#D9C0A8] bg-[#F5EDE4] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center gap-6 cursor-pointer hover:border-[#8B5E3C] transition-all"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileSelect} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                <input 
+                  type="file" 
+                  ref={cameraInputRef} 
+                  onChange={handleFileSelect} 
+                  accept="image/*"
+                  capture="user"
+                  className="hidden" 
+                />
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-sm text-[#8B5E3C]">
+                  📸
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <span className="font-bold text-lg text-[#191919]">
+                    Drop your photo here — we&apos;ll find your animal twin! 🐾
+                  </span>
+                  <span className="text-sm text-[#8B5E3C]">or click to select</span>
+                </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[340px] mt-4" onClick={(e) => e.stopPropagation()}>
-                <button 
-                  onClick={() => cameraInputRef.current?.click()}
-                  className="flex-1 bg-[#8B5E3C] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <span>📷</span> Take Selfie
-                </button>
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] hover:border-[#C17D3C] transition-all flex items-center justify-center gap-2"
-                >
-                  <span>📁</span> Upload Photo
-                </button>
-              </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[340px] mt-4" onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    onClick={() => setCameraActive(true)}
+                    className="flex-1 bg-[#8B5E3C] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>📷</span> Take Selfie
+                  </button>
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] hover:border-[#C17D3C] transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>📁</span> Upload Photo
+                  </button>
+                </div>
 
-              <p className="text-xs text-[#9A7760] mt-4">
-                🔒 Your photo is analyzed instantly and never stored
-              </p>
-            </div>
+                <p className="text-xs text-[#9A7760] mt-4">
+                  🔒 Your photo is analyzed instantly and never stored
+                </p>
+              </div>
+            )
           )}
 
           {/* STEP 2: ANALYZING */}
