@@ -44,6 +44,7 @@ export default function TwinPage() {
   // Refs for off-screen premium download templates
   const squareCardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
+  const twitterCardRef = useRef<HTMLDivElement>(null);
 
   // Cycle loading messages
   useEffect(() => {
@@ -216,6 +217,22 @@ export default function TwinPage() {
       });
       const link = document.createElement('a');
       link.download = `${result?.breed}_twin_story.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  };
+
+  const downloadTwitterCard = async () => {
+    if (twitterCardRef.current) {
+      const canvas = await html2canvas(twitterCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1,
+        width: 1200,
+        height: 675
+      });
+      const link = document.createElement('a');
+      link.download = `${result?.breed}_twin_twitter.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
@@ -523,18 +540,24 @@ export default function TwinPage() {
                   </Link>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 w-full">
+                <div className="grid grid-cols-3 gap-2.5 w-full">
                   <button 
                     onClick={downloadSquareCard}
-                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
                   >
-                    📸 Instagram Feed (1:1)
+                    📸 Square (1:1)
                   </button>
                   <button 
                     onClick={downloadStoryCard}
-                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
                   >
-                    📱 Instagram Story (9:16)
+                    📱 Story (9:16)
+                  </button>
+                  <button 
+                    onClick={downloadTwitterCard}
+                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
+                  >
+                    🐦 Twitter/X (16:9)
                   </button>
                 </div>
 
@@ -796,29 +819,30 @@ export default function TwinPage() {
               display: 'inline-block',
               background: '#1E1E1E',
               color: '#FFFFFF',
-              fontWeight: 800,
-              fontSize: '28px',
-              padding: '14px 40px',
+              fontWeight: 900,
+              fontSize: '34px',
+              padding: '16px 48px',
               borderRadius: '50px',
-              letterSpacing: '1px',
+              letterSpacing: '1.5px',
               textTransform: 'uppercase',
-              marginBottom: '40px'
+              marginBottom: '40px',
+              boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
             }}>
               {result.matchScore}% Match
             </div>
             
-            <div style={{ fontSize: '24px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '4px', color: '#999999', marginBottom: '15px' }}>
-              Your Pet Twin Match
+            <div style={{ fontSize: '28px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', color: '#666666', marginBottom: '15px' }}>
+              My Pet Twin is a
             </div>
             <h2 style={{
               fontSize: '84px',
-              fontWeight: 900,
+              fontWeight: 950,
               margin: 0,
               color: '#191919',
               letterSpacing: '-3px',
               lineHeight: 1.1
             }}>
-              {result.breed}
+              {result.breed}!
             </h2>
           </div>
 
@@ -952,6 +976,166 @@ export default function TwinPage() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
               <span style={{ fontSize: '24px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
             </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* ========================================================
+          1200x675 TWITTER / X LANDSCAPE SHARE CARD TEMPLATE (OFF-SCREEN)
+          ======================================================== */}
+      {result && (
+        <div 
+          ref={twitterCardRef}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '-9999px',
+            width: '1200px',
+            height: '675px',
+            background: '#FFFFFF',
+            border: '16px solid #FFFFFF',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '50px 60px',
+            color: '#191919',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            boxSizing: 'border-box',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
+          }}
+        >
+          {/* Top Row: Header & Badge */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div>
+              <div style={{ fontSize: '18px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#999999', marginBottom: '4px' }}>
+                Your Pet Twin Match
+              </div>
+              <h2 style={{ fontSize: '56px', fontWeight: 900, margin: 0, color: '#191919', letterSpacing: '-1.5px', lineHeight: 1 }}>
+                {result.breed}
+              </h2>
+            </div>
+            <div style={{
+              background: '#1E1E1E',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: '22px',
+              padding: '12px 28px',
+              borderRadius: '50px',
+              letterSpacing: '1px',
+              textTransform: 'uppercase'
+            }}>
+              {result.matchScore}% Match
+            </div>
+          </div>
+
+          {/* Middle Row: Two Photos side by side */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '30px',
+            margin: '10px 0',
+            width: '100%'
+          }}>
+            {/* YOU photo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <span style={{ color: '#888888', fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px' }}>YOU</span>
+              <div style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '8px solid #FFFFFF',
+                boxShadow: '0 15px 30px rgba(0,0,0,0.1)'
+              }}>
+                {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+              </div>
+            </div>
+
+            <div style={{ fontSize: '48px', color: '#CCCCCC' }}>🐾</div>
+
+            {/* TWIN photo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '8px solid #FFFFFF',
+                boxShadow: '0 15px 30px rgba(0,0,0,0.1)',
+                background: '#F9F7F5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {imageError ? (
+                  <span style={{ fontSize: '70px' }}>🐕</span>
+                ) : (
+                  <img 
+                    src={result.unsplashImageUrl} 
+                    alt="Twin" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    onError={() => setImageError(true)}
+                  />
+                )}
+              </div>
+              <span style={{ color: '#888888', fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px' }}>TWIN</span>
+            </div>
+          </div>
+
+          {/* Personality Traits & Quote side-by-side or stacked cleanly */}
+          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', gap: '40px', borderTop: '1px solid #F2ECE6', paddingTop: '20px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', maxWidth: '50%' }}>
+              {result.traits.map((trait, index) => (
+                <span 
+                  key={index}
+                  style={{
+                    background: '#F9F7F5',
+                    border: '1px solid #EBEBEB',
+                    color: '#333333',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    padding: '8px 20px',
+                    borderRadius: '100px'
+                  }}
+                >
+                  {trait}
+                </span>
+              ))}
+            </div>
+            <p style={{
+              fontSize: '22px',
+              fontWeight: 500,
+              fontStyle: 'italic',
+              color: '#444444',
+              margin: 0,
+              maxWidth: '50%',
+              textAlign: 'right',
+              lineHeight: 1.3
+            }}>
+              &quot;{result.quote}&quot;
+            </p>
+          </div>
+
+          {/* Bottom branding footer */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            background: '#F9F7F5',
+            borderRadius: '16px',
+            padding: '16px 30px',
+            boxSizing: 'border-box',
+            border: '1px solid #EBEBEB'
+          }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
+              <span style={{ fontSize: '15px', color: '#666666', fontWeight: 400 }}>| Find Your Pet Twin Free</span>
+            </div>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
           </div>
 
         </div>
