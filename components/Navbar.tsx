@@ -24,8 +24,11 @@ export default function Navbar() {
           <Link href="/recalls" className="text-[#666666] font-medium text-sm hover:text-[#8B5E3C] transition-colors">
             ⚠️ Recalls
           </Link>
-          <Link href="/supplies" className="text-[#8B5E3C] font-bold text-sm hover:underline transition-all">
+          <Link href="/supplies" className="text-[#666666] font-medium text-sm hover:text-[#8B5E3C] transition-colors">
             🐾 Pet Supplies
+          </Link>
+          <Link href="/twin" className="text-[#8B5E3C] font-bold text-sm hover:underline transition-all">
+            🐾 Pet Twin
           </Link>
           <div className="pl-4 border-l border-[#EEEEEE]">
             <ShareButton />
@@ -69,9 +72,15 @@ export default function Navbar() {
             </Link>
             <Link 
               href="/supplies" 
-              className="px-4 py-3 text-[#8B5E3C] font-bold hover:bg-[#FDF9F5] rounded-xl transition-colors flex items-center gap-2"
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center gap-2"
             >
               <span>🐾</span> Pet Supplies
+            </Link>
+            <Link 
+              href="/twin" 
+              className="px-4 py-3 text-[#8B5E3C] font-bold hover:bg-[#FDF9F5] rounded-xl transition-colors flex items-center gap-2"
+            >
+              <span>🐾</span> Pet Twin
             </Link>
           </div>
         </div>
