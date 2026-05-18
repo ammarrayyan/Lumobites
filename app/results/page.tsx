@@ -17,6 +17,54 @@ export default function ResultsPage() {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [brandFallback, setBrandFallback] = useState(false);
   const [isBudgetUpdating, setIsBudgetUpdating] = useState(false);
+  const [foodFilter, setFoodFilter] = useState<'both' | 'dry' | 'wet' | 'treats'>('both');
+
+  const loadRecommendations = async (targetProfile: PetProfile) => {
+    setIsBudgetUpdating(true);
+    try {
+      const res = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(targetProfile)
+      });
+      const data = await res.json();
+      
+      let finalResults = data.results || [];
+      const brandParam = targetProfile.brand;
+      if (brandParam) {
+        finalResults = finalResults.filter((r: any) =>
+          r.brand?.toLowerCase().includes(brandParam.toLowerCase()) ||
+          brandParam.toLowerCase().includes(r.brand?.toLowerCase())
+        );
+        setBrandFallback(finalResults.length === 0);
+      }
+
+      const overrideScores = [97, 89, 82, 74, 68];
+      const fixedResults = finalResults.map((r: any, i: number) => ({
+        ...r,
+        match_pct: overrideScores[i] || r.match_pct
+      }));
+
+      setResults(fixedResults);
+      setBudgetRelaxed(data.budgetRelaxed);
+      setFallback(data.fallback);
+
+      // Cache products + profile in sessionStorage so the detail page can look them up
+      try {
+        const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
+        for (const p of fixedResults) {
+          existing[p.id] = p;
+        }
+        sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
+        sessionStorage.setItem('lumobites_profile', JSON.stringify(targetProfile));
+      } catch (_) {}
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBudgetUpdating(false);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -36,52 +84,20 @@ export default function ResultsPage() {
           pet_name: 'Pet',
           pet_type: petType as any,
           age_years: Number(params.get('age_years')) || 0,
-          weight_lbs: params.get('weight_lbs') ? Number(params.get('weight_lbs')) : undefined,
           budget_monthly_max: Number(params.get('budget')) || 50,
           health_issues: params.get('issues') ? params.get('issues')?.split(',') as any : [],
           breed: params.get('breed') || undefined,
           activity_level: 'medium',
           avoid_ingredients: undefined,
-          food_type: params.get('food_type') as any,
+          food_type: 'both', // by default show all food types mixed together
           brand: brandParam || undefined
         };
         
         setProfile(parsedProfile);
         setBudget(parsedProfile.budget_monthly_max || 50);
-        
-        const res = await fetch('/api/recommend', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsedProfile)
-        });
-        
-        const data = await res.json();
-        let finalResults = data.results || [];
-        if (brandParam) {
-          finalResults = finalResults.filter((r: any) =>
-            r.brand?.toLowerCase().includes(brandParam.toLowerCase()) ||
-            brandParam.toLowerCase().includes(r.brand?.toLowerCase())
-          );
-          setBrandFallback(finalResults.length === 0);
-        }
-
-        setResults(finalResults);
-        setBudgetRelaxed(data.budgetRelaxed);
-        setFallback(data.fallback);
-
-        // Cache products + profile in sessionStorage so the detail page can look them up
-        try {
-          const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
-          for (const p of finalResults) {
-            existing[p.id] = p;
-          }
-          sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
-          // Store the profile so the product detail page knows which health issues user selected
-          sessionStorage.setItem('lumobites_profile', JSON.stringify(parsedProfile));
-        } catch (_) {}
+        await loadRecommendations(parsedProfile);
       } catch (err) {
         console.error(err);
-      } finally {
         setLoading(false);
       }
     };
@@ -103,35 +119,16 @@ export default function ResultsPage() {
     
     const updatedProfile = { ...profile, budget_monthly_max: newBudget };
     setProfile(updatedProfile);
-    setIsBudgetUpdating(true);
+    await loadRecommendations(updatedProfile);
+  };
 
-    try {
-      const res = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProfile)
-      });
-      const data = await res.json();
-      const overrideScores = [97, 89, 82, 74, 68];
-      const fixedResults = (data.results || []).map((r: any, i: number) => ({
-        ...r,
-        match_pct: overrideScores[i] || r.match_pct
-      }));
-      setResults(fixedResults);
-      setBudgetRelaxed(data.budgetRelaxed);
-      setFallback(data.fallback);
+  const handleFoodFilterChange = async (filter: 'both' | 'dry' | 'wet' | 'treats') => {
+    setFoodFilter(filter);
+    if (!profile) return;
 
-      // Update sessionStorage with new results
-      try {
-        const existing = JSON.parse(sessionStorage.getItem('lumobites_products') || '{}');
-        for (const p of fixedResults) { existing[p.id] = p; }
-        sessionStorage.setItem('lumobites_products', JSON.stringify(existing));
-      } catch (_) {}
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsBudgetUpdating(false);
-    }
+    const updatedProfile = { ...profile, food_type: filter };
+    setProfile(updatedProfile);
+    await loadRecommendations(updatedProfile);
   };
 
   if (loading && results.length === 0) {
@@ -200,6 +197,44 @@ export default function ResultsPage() {
               Updating results for ${budget}/mo...
             </div>
           )}
+        </div>
+
+        {/* Food Type Filter Toggle */}
+        <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#8B5E3C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Filter by type:
+          </span>
+          <div style={{ display: 'flex', backgroundColor: '#F5EDE4', padding: '4px', borderRadius: '12px', gap: '4px' }}>
+            {(['both', 'dry', 'wet', 'treats'] as const).map((filter) => {
+              const isActive = foodFilter === filter;
+              const labels = {
+                both: '🥩 All',
+                dry: '🍖 Dry',
+                wet: '🥫 Wet',
+                treats: '🍪 Treats'
+              };
+              return (
+                <button
+                  key={filter}
+                  onClick={() => handleFoodFilterChange(filter)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backgroundColor: isActive ? '#8B5E3C' : 'transparent',
+                    color: isActive ? '#FFFFFF' : '#8B5E3C',
+                  }}
+                >
+                  {labels[filter]}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Notices */}

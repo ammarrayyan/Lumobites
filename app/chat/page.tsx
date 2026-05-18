@@ -127,7 +127,6 @@ export default function ChatPage() {
     try {
       const { extractAge, extractWeight, extractBudget, HEALTH_KEYWORD_MAP } = await import('@/lib/parser');
       const lowerInput = userMessage.toLowerCase();
-      
       let nextStep = step;
       let botResponse = '';
       let currentInfo = { ...parsedInfo };
@@ -137,9 +136,7 @@ export default function ChatPage() {
       const getNextStep = (info: ParsedPetInfo) => {
         if (info.pet_type === undefined) return { step: 0, text: "I got some details, but is your pet a 🐱 cat or 🐶 dog?" };
         if (info.age_years === undefined) return { step: 1, text: `Got it! A ${info.pet_type || 'pet'}. How old are they?\n(e.g. '2 years', '6 months')` };
-        if (info.weight_lbs === undefined) return { step: 2, text: `Got the age! How much do they weigh?\n(e.g. '10 pounds', 'not sure')` };
         if (info.health_issues === undefined) return { step: 3, text: `Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.` };
-        if (info.food_type === undefined) return { step: 4, text: `Got it! Does your pet prefer:\n🥩 Dry food (kibble)\n🍖 Wet food (canned)\n🦴 Treats & snacks\n🔀 All / No preference` };
         if (info.budget_monthly_max === undefined) return { step: 5, text: `Almost done! What's your monthly budget for pet food?\n(e.g. '$30', '$50', '$80')` };
         return { step: 6, text: `Got it all! 🐾 ${info.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...` };
       };
@@ -181,22 +178,7 @@ export default function ChatPage() {
             if (ageRes) currentInfo.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
           }
 
-          // 3. Weight: any number followed by 'pound', 'lb', 'lbs', 'kg'
-          const weightMatch = lowerInput.match(/(\d+(?:\.\d+)?)\s*(pound|lb|kg)/);
-          if (weightMatch) {
-            const val = parseFloat(weightMatch[1]);
-            currentInfo.weight_lbs = weightMatch[2] === 'kg' ? val * 2.20462 : val;
-          } else {
-            const weightRes = await (async () => { const { extractWeight } = await import('@/lib/parser'); return extractWeight(userMessage); })();
-            if (weightRes) currentInfo.weight_lbs = weightRes;
-          }
-
-          // 4. Food type: 'dry', 'kibble', 'wet', 'canned', 'treats'
-          if (/dry|kibble/.test(lowerInput)) currentInfo.food_type = 'dry';
-          else if (/wet|canned/.test(lowerInput)) currentInfo.food_type = 'wet';
-          else if (/treat|snack/.test(lowerInput)) currentInfo.food_type = 'treats';
-
-          // 5. Budget: number with $, dollar, budget, under, around
+          // 3. Budget: number with $, dollar, budget, under, around
           const budgetMatch = lowerInput.match(/(?:\$|dollars?|budget|under|around)\s*(\d+)/) || lowerInput.match(/(\d+)\s*(?:\$|dollars?|budget)/);
           if (budgetMatch) {
             currentInfo.budget_monthly_max = parseInt(budgetMatch[1], 10);
@@ -205,7 +187,7 @@ export default function ChatPage() {
             if (budgetRes) currentInfo.budget_monthly_max = budgetRes;
           }
 
-          // 6. Health issues
+          // 4. Health issues
           const issues: any[] = [];
           if (lowerInput.match(/anxiety|stress/)) issues.push('anxiety');
           if (lowerInput.match(/sensitive stomach|stomach|digestion/)) issues.push('sensitive_stomach');
@@ -221,8 +203,6 @@ export default function ChatPage() {
           const extractedCount = [
             currentInfo.pet_type !== undefined,
             currentInfo.age_years !== undefined,
-            currentInfo.weight_lbs !== undefined,
-            currentInfo.food_type !== undefined,
             currentInfo.budget_monthly_max !== undefined,
             currentInfo.health_issues !== undefined
           ].filter(Boolean).length;
@@ -299,31 +279,6 @@ export default function ChatPage() {
              botResponse = next.text;
           }
         }
-      } else if (step === 2) {
-        const vagueAnswers = ['not sure', 'dont know', "don't know", 'idk', 'yes', 'ok', 'sure', 'none', 'no'];
-        if (vagueAnswers.some(v => lowerInput.includes(v) || lowerInput === v)) {
-          isValid = true;
-        } else {
-          const weight = extractWeight(userMessage);
-          if (weight !== undefined) {
-            currentInfo.weight_lbs = weight;
-            isValid = true;
-          }
-        }
-        if (isValid) {
-          const next = getNextStep(currentInfo);
-          nextStep = next.step;
-          setRetries(0);
-          botResponse = next.text;
-        } else {
-          handleRetry("I didn't quite catch the weight. You can give a number like '10', or just say 'not sure'.");
-          if (skipToNext) {
-             currentInfo.weight_lbs = null as any;
-             const next = getNextStep(currentInfo);
-             nextStep = next.step;
-             botResponse = next.text;
-          }
-        }
       } else if (step === 3) {
         if (forceChipsSubmit) {
           if (selectedChips.includes('none')) {
@@ -363,40 +318,6 @@ export default function ChatPage() {
             botResponse = next.text;
           }
         }
-      } else if (step === 4) {
-        if (forceChipsSubmit && selectedFoodType) {
-          currentInfo.food_type = selectedFoodType as any;
-          isValid = true;
-        } else {
-          if (lowerInput.includes('dry') || lowerInput.includes('kibble')) {
-            currentInfo.food_type = 'dry';
-            isValid = true;
-          } else if (lowerInput.includes('wet') || lowerInput.includes('canned')) {
-            currentInfo.food_type = 'wet';
-            isValid = true;
-          } else if (lowerInput.includes('treats') || lowerInput.includes('snacks') || lowerInput.includes('chews') || lowerInput.includes('bones')) {
-            currentInfo.food_type = 'treats';
-            isValid = true;
-          } else if (lowerInput.includes('both') || lowerInput.includes('no pref') || lowerInput.includes('all')) {
-            currentInfo.food_type = 'both';
-            isValid = true;
-          }
-        }
-
-        if (isValid) {
-          const next = getNextStep(currentInfo);
-          nextStep = next.step;
-          setRetries(0);
-          botResponse = next.text;
-        } else {
-          handleRetry("I didn't quite catch that. Do they prefer dry food, wet food, treats, or all of them?");
-          if (skipToNext) {
-            currentInfo.food_type = 'both';
-            const next = getNextStep(currentInfo);
-            nextStep = next.step;
-            botResponse = next.text;
-          }
-        }
       } else if (step === 5) {
         const budget = extractBudget(userMessage);
         if (budget !== undefined) {
@@ -421,8 +342,6 @@ export default function ChatPage() {
 
       setTimeout(() => {
         setIsTyping(false);
-        // Don't append bot response if we stayed on step 0 due to greeting and botResponse is the same as the first msg
-        // Wait, botResponse is different for greetings so it's fine to append.
         setMessages(prev => [...prev, { role: 'assistant', content: botResponse }]);
         setStep(nextStep);
 
@@ -431,9 +350,7 @@ export default function ChatPage() {
              const params = new URLSearchParams();
              if (currentInfo.pet_type) params.append('pet_type', currentInfo.pet_type);
              if (currentInfo.age_years !== undefined) params.append('age_years', currentInfo.age_years.toString());
-             if (currentInfo.weight_lbs !== undefined) params.append('weight_lbs', currentInfo.weight_lbs.toString());
              if (currentInfo.budget_monthly_max !== undefined) params.append('budget', currentInfo.budget_monthly_max.toString());
-             if (currentInfo.food_type !== undefined) params.append('food_type', currentInfo.food_type);
              if (currentInfo.health_issues && currentInfo.health_issues.length > 0) {
                params.append('issues', currentInfo.health_issues.join(','));
              }
@@ -461,8 +378,26 @@ export default function ChatPage() {
     submitInput(input);
   };
 
-  const totalFields = 6;
-  const progress = Math.round((Math.floor(step) / totalFields) * 100);
+  const getQuestionNumber = (s: number): number => {
+    const floor = Math.floor(s);
+    if (floor === 0) return 1;
+    if (floor === 1) return 2;
+    if (floor === 3) return 3;
+    if (floor === 5) return 4;
+    return 4;
+  };
+
+  const getProgressPercentage = (s: number): number => {
+    const floor = Math.floor(s);
+    if (floor === 0) return 0;
+    if (floor === 1) return 25;
+    if (floor === 3) return 50;
+    if (floor === 5) return 75;
+    if (floor === 6) return 100;
+    return 100;
+  };
+
+  const progress = getProgressPercentage(step);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', display: 'flex', justifyContent: 'center', padding: '40px 20px' }}>
@@ -501,7 +436,7 @@ export default function ChatPage() {
                 style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', margin: '-15px 0', transform: 'scale(1.4)', transformOrigin: 'left center' }}
               />
             </Link>
-            <p className="text-xs text-[#8B5E3C] font-semibold">Question {Math.min(6, Math.floor(step) + 1)} of 6</p>
+            <p className="text-xs text-[#8B5E3C] font-semibold">Question {getQuestionNumber(step)} of 4</p>
           </div>
           {selectedBrand && (
             <div className="bg-[#8B5E3C] text-white py-1.5 px-4 text-[11px] font-bold text-center uppercase tracking-wider">

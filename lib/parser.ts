@@ -153,10 +153,6 @@ export function parsePetInfo(text: string): ParsedPetInfo {
     result.age_years = ageRes.unit === 'months' ? ageRes.value / 12 : ageRes.value;
   }
 
-  // Weight
-  const weight = extractWeight(text);
-  if (weight !== undefined) result.weight_lbs = weight;
-
   // Pet name
   const name = extractPetName(text);
   if (name) result.pet_name = name;
@@ -192,7 +188,6 @@ export function mergeParsedInfo(existing: ParsedPetInfo, newInfo: ParsedPetInfo)
   if (newInfo.pet_name && !merged.pet_name) merged.pet_name = newInfo.pet_name;
   if (newInfo.pet_type && !merged.pet_type) merged.pet_type = newInfo.pet_type;
   if (newInfo.age_years !== undefined && merged.age_years === undefined) merged.age_years = newInfo.age_years;
-  if (newInfo.weight_lbs !== undefined && merged.weight_lbs === undefined) merged.weight_lbs = newInfo.weight_lbs;
   if (newInfo.breed && !merged.breed) merged.breed = newInfo.breed;
   if (newInfo.health_issues?.length) {
     const combined = [...(merged.health_issues || []), ...newInfo.health_issues];
