@@ -15,13 +15,14 @@ export default function PhotoPage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
+  const [detectedPetType, setDetectedPetType] = useState<'cat' | 'dog' | 'none'>('dog');
   const [detectedBreed, setDetectedBreed] = useState('');
-  const [detectedPetType, setDetectedPetType] = useState('dog');
+  const [detectedBreed2, setDetectedBreed2] = useState('');
   const [confidence, setConfidence] = useState('');
   const [breedDescription, setBreedDescription] = useState('');
   const [isManualBreed, setIsManualBreed] = useState(false);
   const [manualBreedInput, setManualBreedInput] = useState('');
-  const [manualPetType, setManualPetType] = useState('dog');
+  const [manualPetType, setManualPetType] = useState<'cat' | 'dog'>('dog');
 
   const [age, setAge] = useState<number | null>(null);
   const [foodType, setFoodType] = useState<string>('');
@@ -60,7 +61,9 @@ export default function PhotoPage() {
       
       if (data.success) {
         setDetectedBreed(data.breed);
-        setDetectedPetType(data.petType || 'dog');
+        setDetectedPetType(data.petType as 'cat' | 'dog' | 'none');
+        if (data.breed2) setDetectedBreed2(data.breed2);
+        else setDetectedBreed2('');
         setConfidence(data.confidence || '');
         setBreedDescription(data.breedDescription || '');
       } else {
@@ -76,7 +79,8 @@ export default function PhotoPage() {
     }
   };
 
-  const handleConfirmBreed = () => {
+  const handleConfirmBreed = (selectedBreed?: string) => {
+    if (selectedBreed) setDetectedBreed(selectedBreed);
     setStep('age');
   };
 
@@ -263,9 +267,13 @@ export default function PhotoPage() {
                 <>
                   <div className="flex flex-col items-center gap-2">
                     <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight max-w-[80%]">
-                      {detectedPetType === 'cat' ? '🐱' : '🐕'} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?
+                      {detectedBreed2 ? (
+                        <>{detectedPetType === 'cat' ? '🐱' : '🐕'} Is your pet a <span className="text-[#8B5E3C]">{detectedBreed}</span> or <span className="text-[#8B5E3C]">{detectedBreed2}</span>?</>
+                      ) : (
+                        <>{detectedPetType === 'cat' ? '🐱' : '🐕'} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?</>
+                      )}
                     </h2>
-                    {confidence && (
+                    {confidence && !detectedBreed2 && (
                       <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest ${
                         confidence === 'High' ? 'bg-green-100 text-green-700' :
                         confidence === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
@@ -276,32 +284,57 @@ export default function PhotoPage() {
                     )}
                   </div>
                   
-                  {breedDescription && (
+                  {breedDescription && !detectedBreed2 && (
                     <p className="text-sm text-[#666666] max-w-[90%] italic">
                       &quot;{breedDescription}&quot;
                     </p>
                   )}
 
-                  {confidence === 'Low' && (
+                  {confidence === 'Low' && !detectedBreed2 && (
                     <div className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-xl text-sm w-full">
                       We are not 100% sure. Please confirm or correct the breed below.
                     </div>
                   )}
 
-                  <div className="flex flex-col md:flex-row gap-4 w-full mt-2">
-                    <button 
-                      onClick={handleConfirmBreed}
-                      className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors"
-                    >
-                      Yes, that&apos;s right!
-                    </button>
-                    <button 
-                      onClick={handleRejectBreed}
-                      className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-4 rounded-xl font-bold text-lg hover:bg-[#EAE0D3] transition-colors"
-                    >
-                      No, let me correct it
-                    </button>
-                  </div>
+                  {detectedBreed2 ? (
+                    <div className="flex flex-col gap-3 w-full mt-4">
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleConfirmBreed(detectedBreed)}
+                          className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors"
+                        >
+                          {detectedBreed}
+                        </button>
+                        <button 
+                          onClick={() => handleConfirmBreed(detectedBreed2)}
+                          className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors"
+                        >
+                          {detectedBreed2}
+                        </button>
+                      </div>
+                      <button 
+                        onClick={handleRejectBreed}
+                        className="w-full bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-4 rounded-xl font-bold text-lg hover:bg-[#EAE0D3] transition-colors"
+                      >
+                        Neither, let me type it
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col md:flex-row gap-4 w-full mt-2">
+                      <button 
+                        onClick={() => handleConfirmBreed()}
+                        className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors"
+                      >
+                        Yes, that&apos;s right!
+                      </button>
+                      <button 
+                        onClick={handleRejectBreed}
+                        className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-4 rounded-xl font-bold text-lg hover:bg-[#EAE0D3] transition-colors"
+                      >
+                        No, let me correct it
+                      </button>
+                    </div>
+                  )}
 
                   {confidence === 'Low' && (
                     <div className="w-full text-left mt-2">

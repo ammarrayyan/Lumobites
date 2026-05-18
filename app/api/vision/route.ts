@@ -97,51 +97,85 @@ export async function POST(req: Request) {
       return false;
     };
 
+    const topCatBreeds = ['persian', 'maine coon', 'siamese', 'ragdoll', 'bengal', 'british shorthair', 'british longhair', 'abyssinian', 'sphynx', 'scottish fold', 'american shorthair', 'burmese', 'russian blue', 'norwegian forest cat', 'birman'];
+    const topDogBreeds = ['labrador retriever', 'golden retriever', 'french bulldog', 'german shepherd', 'bulldog', 'poodle', 'beagle', 'rottweiler', 'yorkshire terrier', 'dachshund', 'siberian husky', 'doberman', 'shih tzu', 'chihuahua', 'border collie'];
+
+    const similarBreedsMap: Record<string, string[]> = {
+      'munchkin': ['persian', 'british shorthair'],
+      'exotic shorthair': ['persian', 'british shorthair'],
+      'himalayan': ['persian', 'siamese'],
+      'alaskan malamute': ['siberian husky'],
+      'belgian malinois': ['german shepherd'],
+      'pit bull': ['bulldog', 'staffordshire terrier']
+    };
+
+    let detectedBreeds: { name: string; score: number; source: string }[] = [];
+
+    const addBreed = (name: string | undefined, score: number, source: string) => {
+      if (!name) return;
+      const lower = name.toLowerCase();
+      if (!isGeneric(lower) && lower.length > 3) {
+        if (!detectedBreeds.find(b => b.name.toLowerCase() === lower)) {
+          detectedBreeds.push({ name, score, source });
+        }
+      }
+    };
+
+    webEntities.forEach((e: any) => addBreed(e.description, e.score || 0.5, 'webEntity'));
+    bestGuessLabels.forEach((b: any) => addBreed(b.label, 0.4, 'bestGuess'));
+    labels.forEach((l: any) => addBreed(l.description, l.score || 0.3, 'label'));
+
+    const priorityList = petType === 'cat' ? topCatBreeds : topDogBreeds;
+
+    // Evaluate similarities
+    const boostedBreeds: typeof detectedBreeds = [];
+    detectedBreeds.forEach(b => {
+      const lower = b.name.toLowerCase();
+      if (similarBreedsMap[lower]) {
+        similarBreedsMap[lower].forEach(sim => {
+          if (priorityList.includes(sim) && !detectedBreeds.find(db => db.name.toLowerCase() === sim)) {
+            boostedBreeds.push({ name: sim, score: b.score * 0.9, source: 'similarity' });
+          }
+        });
+      }
+    });
+    detectedBreeds = [...detectedBreeds, ...boostedBreeds];
+
+    // Sort
+    detectedBreeds.sort((a, b) => {
+      const aLower = a.name.toLowerCase();
+      const bLower = b.name.toLowerCase();
+      const aIsPriority = priorityList.includes(aLower);
+      const bIsPriority = priorityList.includes(bLower);
+
+      if (aIsPriority && !bIsPriority) return -1;
+      if (!aIsPriority && bIsPriority) return 1;
+      return b.score - a.score;
+    });
+
     let breed = '';
+    let breed2 = '';
     let confidence = 'Low';
 
-    // 1. webDetection.webEntities (Highest priority, most accurate for specific breeds)
-    for (const entity of webEntities) {
-      if (entity.description) {
-        const desc = entity.description.toLowerCase();
-        if (!isGeneric(desc) && desc.length > 3) {
-          breed = entity.description;
-          if (entity.score > 0.8) {
-            confidence = 'High';
-          } else if (entity.score >= 0.5) {
-            confidence = 'Medium';
-          } else {
-            confidence = 'Low';
-          }
-          break;
-        }
-      }
-    }
+    if (detectedBreeds.length > 0) {
+      const top = detectedBreeds[0];
+      breed = top.name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      
+      if (top.score > 0.8) confidence = 'High';
+      else if (top.score >= 0.5) confidence = 'Medium';
+      else confidence = 'Low';
 
-    // 2. webDetection.bestGuessLabels
-    if (!breed) {
-      for (const guess of bestGuessLabels) {
-        if (guess.label) {
-          const desc = guess.label.toLowerCase();
-          if (!isGeneric(desc) && desc.length > 3) {
-            breed = guess.label;
-            confidence = 'Medium';
-            break;
-          }
-        }
-      }
-    }
+      if (detectedBreeds.length > 1) {
+        const runnerUp = detectedBreeds[1];
+        const topLower = top.name.toLowerCase();
+        const runnerUpLower = runnerUp.name.toLowerCase();
+        const bothPriority = priorityList.includes(topLower) && priorityList.includes(runnerUpLower);
+        const similarScore = (top.score - runnerUp.score) < 0.2;
+        const areVerySimilar = (topLower === 'british longhair' && runnerUpLower === 'persian') || 
+                               (topLower === 'persian' && runnerUpLower === 'british longhair');
 
-    // 3. labelAnnotations (Fallback)
-    if (!breed) {
-      for (const label of labels) {
-        if (label.description) {
-          const desc = label.description.toLowerCase();
-          if (!isGeneric(desc) && desc.length > 3) {
-            breed = label.description;
-            confidence = 'Low';
-            break;
-          }
+        if (bothPriority || similarScore || areVerySimilar) {
+          breed2 = runnerUp.name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         }
       }
     }
@@ -151,15 +185,13 @@ export async function POST(req: Request) {
       confidence = 'Low';
     }
 
-    // Capitalize breed (e.g. "golden retriever" -> "Golden Retriever")
-    breed = breed.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-
     return NextResponse.json({
       success: true,
       breed,
+      breed2: breed2 || undefined,
       petType,
       confidence,
-      breedDescription: '' // Google Cloud Vision doesn't provide dynamic facts
+      breedDescription: ''
     });
 
   } catch (error: any) {
