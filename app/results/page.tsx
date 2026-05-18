@@ -207,12 +207,45 @@ export default function ResultsPage() {
           <div style={{ display: 'flex', backgroundColor: '#F5EDE4', padding: '4px', borderRadius: '12px', gap: '4px' }}>
             {(['both', 'dry', 'wet', 'treats'] as const).map((filter) => {
               const isActive = foodFilter === filter;
-              const labels = {
-                both: '🥩 All',
-                dry: '🍖 Dry',
-                wet: '🥫 Wet',
-                treats: '🍪 Treats'
+              
+              const getFilterIcon = () => {
+                if (filter === 'both') {
+                  return (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: '-1px' }}>
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                  );
+                }
+                if (filter === 'dry') {
+                  return (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: '-1px' }}>
+                      <path d="M3 12h18M3 12a9 9 0 0018 0M3 12v6a3 3 0 003 3h12a3 3 0 003-3v-6" />
+                    </svg>
+                  );
+                }
+                if (filter === 'wet') {
+                  return (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: '-1px' }}>
+                      <rect x="5" y="3" width="14" height="18" rx="2" ry="2" />
+                      <line x1="5" y1="9" x2="19" y2="9" />
+                      <line x1="5" y1="15" x2="19" y2="15" />
+                    </svg>
+                  );
+                }
+                return (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: '-1px' }}>
+                    <path d="M6.5 10c1.38 0 2.5-1.12 2.5-2.5S7.88 5 6.5 5 4 6.12 4 7.5 5.12 10 6.5 10zM17.5 10c1.38 0 2.5-1.12 2.5-2.5S18.88 5 17.5 5 15 6.12 15 7.5 16.12 10 17.5 10zM6.5 19c1.38 0 2.5-1.12 2.5-2.5S7.88 14 6.5 14 4 15.12 4 16.5 5.12 19 6.5 19zM17.5 19c1.38 0 2.5-1.12 2.5-2.5S18.88 14 17.5 14 15 15.12 15 16.5 16.12 19 17.5 19zM9 7.5h6M9 16.5h6" />
+                  </svg>
+                );
               };
+
+              const labels = {
+                both: 'All',
+                dry: 'Dry',
+                wet: 'Wet',
+                treats: 'Treats'
+              };
+
               return (
                 <button
                   key={filter}
@@ -228,8 +261,12 @@ export default function ResultsPage() {
                     transition: 'all 0.2s',
                     backgroundColor: isActive ? '#8B5E3C' : 'transparent',
                     color: isActive ? '#FFFFFF' : '#8B5E3C',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
+                  {getFilterIcon()}
                   {labels[filter]}
                 </button>
               );
