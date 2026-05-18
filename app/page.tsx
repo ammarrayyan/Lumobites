@@ -107,6 +107,20 @@ export default function Home() {
               </Link>
             </div>
 
+            {/* Card 3 - Pet Supplies */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🐾</span>
+                <h3 className="text-[#191919] font-bold text-lg">Pet Supplies</h3>
+              </div>
+              <p className="text-sm text-[#666666] leading-relaxed">
+                Find the best toys, litter, and supplements specifically tailored for your pet.
+              </p>
+              <Link href="/supplies" className="w-full py-3 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-sm text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+                Find Supplies &rarr;
+              </Link>
+            </div>
+
           </div>
         </div>
       </section>
