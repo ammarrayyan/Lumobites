@@ -159,6 +159,8 @@ export default function TwinPage() {
     setImageError(false);
     setResult(null);
 
+    console.log(`[Twin Client] Initiating fresh API match. File: ${selectedFile.name}, size: ${selectedFile.size} bytes`);
+
     try {
       const formData = new FormData();
       formData.append('image', selectedFile);
@@ -169,6 +171,7 @@ export default function TwinPage() {
       });
 
       const data = await res.json();
+      console.log("[Twin Client] Received match response data:", data);
 
       if (data.success) {
         setResult(data);
@@ -178,7 +181,7 @@ export default function TwinPage() {
         setStep('upload');
       }
     } catch (err: any) {
-      console.error(err);
+      console.error("[Twin Client] Analysis request failed:", err);
       setError('An error occurred during matching.');
       setStep('upload');
     }

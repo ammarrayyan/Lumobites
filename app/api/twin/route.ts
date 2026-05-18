@@ -281,8 +281,11 @@ export async function POST(req: Request) {
     const base64Image = buffer.toString('base64');
     const mediaType = image.type || 'image/jpeg';
 
+    const uniqueId = Math.random().toString(36).substring(7) + '-' + Date.now();
+    console.log(`[Twin API] Fresh request initiated. ID: ${uniqueId}, Image size: ${buffer.length} bytes`);
+
     // Call Anthropic Messages API directly for Selfie to Pet matching
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`https://api.anthropic.com/v1/messages?requestId=${uniqueId}`, {
       method: 'POST',
       cache: 'no-store',
       headers: {
@@ -307,7 +310,7 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: `Look at this person's photo. Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number between 85 and 99, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number between 85 and 99, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
               }
             ]
           }
@@ -318,11 +321,12 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Claude API Error:', data);
+      console.error(`[Twin API] Claude API Error for ID ${uniqueId}:`, data);
       return NextResponse.json({ error: data.error?.message || 'Failed to analyze image' }, { status: response.status });
     }
 
     const textContent = data.content?.find((c: any) => c.type === 'text')?.text || '';
+    console.log(`[Twin API] Claude response completed successfully for ID ${uniqueId}. Output:`, textContent);
     
     // Parse the JSON safely
     const cleanText = textContent.replace(/```json|```/g, '').trim();
