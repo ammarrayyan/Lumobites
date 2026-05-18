@@ -39,7 +39,7 @@ export default function ResultsPage() {
           weight_lbs: params.get('weight_lbs') ? Number(params.get('weight_lbs')) : undefined,
           budget_monthly_max: Number(params.get('budget')) || 50,
           health_issues: params.get('issues') ? params.get('issues')?.split(',') as any : [],
-          breed: undefined,
+          breed: params.get('breed') || undefined,
           activity_level: 'medium',
           avoid_ingredients: undefined,
           food_type: params.get('food_type') as any,
@@ -243,6 +243,9 @@ export default function ResultsPage() {
           )}
         </div>
 
+        {/* TOY RECOMMENDATIONS */}
+        <ToyRecommendations profile={profile} />
+
         {/* RECALL ALERT SUBSCRIPTION */}
         <RecallSubscribeWidget profile={profile} results={results} />
 
@@ -324,6 +327,99 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
             </form>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── TOY RECOMMENDATION LOGIC ──────────────────────────────────────────────────
+function getToyRecommendations(petType: string, breed?: string) {
+  const isCat = petType === 'cat';
+  const breedLower = (breed || '').toLowerCase();
+
+  const smallBreeds = ['chihuahua', 'pug', 'shih tzu', 'yorkshire', 'pomeranian', 'dachshund', 'maltese', 'french bulldog', 'corgi', 'boston terrier'];
+  const largeBreeds = ['shepherd', 'retriever', 'mastiff', 'great dane', 'husky', 'rottweiler', 'doberman', 'boxer', 'saint bernard', 'pitbull', 'labrador'];
+
+  let size = 'medium';
+  if (smallBreeds.some(b => breedLower.includes(b))) size = 'small';
+  if (largeBreeds.some(b => breedLower.includes(b))) size = 'large';
+
+  if (isCat) {
+    return [
+      { name: 'Feather Wand', emoji: '🪶', desc: 'Stimulates their natural hunting instinct.' },
+      { name: 'Laser Pointer', emoji: '🔴', desc: 'Great for high-energy burst cardio.' },
+      { name: 'Crinkle Balls', emoji: '🧶', desc: 'Lightweight toys perfect for batting around.' },
+      { name: 'Cat Tunnel', emoji: '🚇', desc: 'A cozy spot for hiding and ambushing.' },
+    ];
+  }
+
+  if (size === 'small') {
+    return [
+      { name: 'Puzzle Toy', emoji: '🧩', desc: 'Keeps clever small minds sharp.' },
+      { name: 'Small Fetch Ball', emoji: '🎾', desc: 'Sized perfectly for little jaws.' },
+      { name: 'Chew Ring', emoji: '🍩', desc: 'Great for teething and anxiety.' },
+      { name: 'Squeaky Plush', emoji: '🧸', desc: 'A soft companion they can carry around.' },
+    ];
+  }
+
+  if (size === 'large') {
+    return [
+      { name: 'Heavy Duty Chew Bone', emoji: '🦴', desc: 'Built for strong, aggressive chewers.' },
+      { name: 'Tug Rope', emoji: '🪢', desc: 'Perfect for interactive strength games.' },
+      { name: 'Large Fetch Ball', emoji: '⚾', desc: 'A durable ball that won\'t be easily destroyed.' },
+      { name: 'Interactive Treat Dispenser', emoji: '🎾', desc: 'Slows down eating and burns mental energy.' },
+    ];
+  }
+
+  // Medium / Default Dog
+  return [
+    { name: 'Classic Tennis Ball', emoji: '🎾', desc: 'The gold standard for fetch.' },
+    { name: 'Rope Toy', emoji: '🪢', desc: 'Great for tug-of-war and teeth cleaning.' },
+    { name: 'Treat Kong', emoji: '🥜', desc: 'Stuff with peanut butter to keep them busy.' },
+    { name: 'Squeaky Toy', emoji: '🧸', desc: 'A fun toy for active play.' },
+  ];
+}
+
+function ToyRecommendations({ profile }: { profile: PetProfile | null }) {
+  if (!profile) return null;
+
+  const toys = getToyRecommendations(profile.pet_type, profile.breed);
+  const displayBreed = profile.breed && profile.breed !== 'Unknown Breed' && profile.breed !== 'Mixed breed' ? profile.breed : profile.pet_type;
+  const sizeOrType = profile.pet_type === 'cat' ? 'cat' : 'dog';
+
+  return (
+    <div className="mt-10 mb-2">
+      <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', marginBottom: '4px', lineHeight: 1.2 }}>
+        🎾 Top Toys for your {displayBreed}
+      </h3>
+      <p className="text-sm text-gray-500 mb-6">Recommended for your pet&apos;s breed and size.</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {toys.map((toy, i) => {
+          // Amazon search query formatting
+          const query = `${toy.name} for ${displayBreed} ${sizeOrType} toy`;
+          const amazonLink = `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=lumobites-20`;
+
+          return (
+            <div key={i} className="bg-white border border-[#E8DDD4] rounded-2xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow">
+              <div className="text-4xl mb-3 bg-[#FDF9F5] w-16 h-16 rounded-full flex items-center justify-center">
+                {toy.emoji}
+              </div>
+              <h4 className="font-bold text-[#191919] text-sm mb-1">{toy.name}</h4>
+              <p className="text-xs text-gray-500 mb-4 line-clamp-2 leading-relaxed flex-grow">
+                {toy.desc}
+              </p>
+              <a 
+                href={amazonLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-[#f0c14b] text-[#111] border border-[#a88734] py-2 rounded-lg text-xs font-bold hover:bg-[#ddb347] transition-colors"
+              >
+                Buy on Amazon
+              </a>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
