@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import BrandMarquee from '@/components/BrandMarquee';
-import ShareButton from '@/components/ShareButton';
+import Navbar from '@/components/Navbar';
 
 export default function Home() {
   return (
@@ -9,17 +9,7 @@ export default function Home() {
 
 
       {/* NAVBAR */}
-      <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center" style={{ height: '72px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', transformOrigin: 'left center' }} />
-        </Link>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <Link href="/supplies" className="text-[#8B5E3C] font-bold text-sm hover:underline transition-all">
-            🐾 Pet Supplies
-          </Link>
-          <ShareButton />
-        </div>
-      </nav>
+      <Navbar />
 
       {/* HERO SECTION */}
       <section className="w-full bg-[#FDFAF7] pt-[48px] pb-16 px-6">
