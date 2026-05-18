@@ -245,40 +245,79 @@ export default function Home() {
               Real results for real pets.
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="max-sm:grid-cols-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. Lumo Bites matched her to a food with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. Lumo Bites matched her to a food with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐕</div>
                 <div>
-                  <p className="font-bold text-[#191919] text-sm">Sarah M.</p>
-                  <p className="text-[#999] text-xs">Golden Retriever owner, Texas</p>
+                  <p className="font-bold text-[#191919] text-xs">Sarah M.</p>
+                  <p className="text-[#999] text-[11px]">Golden Retriever owner, Texas</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;I have two cats with completely different needs. Lumo Bites recommended a high-protein wet food for my older cat and a different formula for my kitten. Both are obsessed with their food now. Worth every second.&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I have two cats with completely different needs. Lumo Bites recommended a high-protein wet food for my older cat and a different formula for my kitten. Both are obsessed with their food now. Worth every second.&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐈</div>
                 <div>
-                  <p className="font-bold text-[#191919] text-sm">James L.</p>
-                  <p className="text-[#999] text-xs">Multi-cat household, California</p>
+                  <p className="font-bold text-[#191919] text-xs">James L.</p>
+                  <p className="text-[#999] text-[11px]">Multi-cat household, California</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-base leading-[1.7] flex-1">&ldquo;As a student, budget is everything. I told Lumo Bites my limit was $35/month and it found the highest-rated options in that range. I didn&apos;t have to compromise on quality at all. My pug is thriving.&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;As a student, budget is everything. I told Lumo Bites my limit was $35/month and it found the highest-rated options in that range. I didn&apos;t have to compromise on quality at all. My pug is thriving.&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐶</div>
                 <div>
-                  <p className="font-bold text-[#191919] text-sm">Priya K.</p>
-                  <p className="text-[#999] text-xs">Pug owner, New York</p>
+                  <p className="font-bold text-[#191919] text-xs">Priya K.</p>
+                  <p className="text-[#999] text-[11px]">Pug owner, New York</p>
+                </div>
+              </div>
+            </div>
+
+            {/* New Card 4 - Safety Check */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I scanned a bag of kibble my Maine Coon has eaten for years, only to find the ingredients check flagged two hidden preservatives she&apos;s sensitive to. The A-to-F safety grading system is brilliant!&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐈‍⬛</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-xs">Marcus T.</p>
+                  <p className="text-[#999] text-[11px]">Maine Coon owner, Oregon</p>
+                </div>
+              </div>
+            </div>
+
+            {/* New Card 5 - FDA Recalls */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;The live FDA recall alert is a lifesaver. I received an instant email notification that my Labrador&apos;s food batch had a critical safety recall. We changed her food immediately. Every pet parent needs this!&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🦮</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-xs">Elena R.</p>
+                  <p className="text-[#999] text-[11px]">Labrador owner, Illinois</p>
+                </div>
+              </div>
+            </div>
+
+            {/* New Card 6 - Pet Twin */}
+            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
+              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;The Pet Twin feature is incredibly fun and shockingly accurate! It matched my selfie to a Turkish Angora, which is 100% my stubborn, high-energy personality. The Instagram share card is gorgeous!&rdquo;</p>
+              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
+                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐱</div>
+                <div>
+                  <p className="font-bold text-[#191919] text-xs">Chloe W.</p>
+                  <p className="text-[#999] text-[11px]">Tabby cat owner, Florida</p>
                 </div>
               </div>
             </div>
