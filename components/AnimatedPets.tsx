@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function AnimatedPets() {
   return (
-    <div className="relative flex justify-center items-end gap-16 mb-8 mt-4 h-[180px] w-full">
+    <div className="flex flex-col items-center w-full mb-10 mt-4">
       <style>{`
         @keyframes tail-swish {
           0% { transform: rotate(0deg); }
@@ -40,10 +40,6 @@ export default function AnimatedPets() {
           40% { transform: translateY(-8px) scaleY(1.02); }
           60% { transform: translateY(-8px) scaleY(1.02); }
         }
-        @keyframes bubble-bounce {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
         .pet-interactive {
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
@@ -62,18 +58,11 @@ export default function AnimatedPets() {
         }
       `}</style>
 
-      {/* Dog Animation Link */}
-      <Link href="/twin" className="no-underline block relative" style={{ textDecoration: 'none' }}>
-        {/* Dog Speech Bubble */}
-        <div 
-          className="absolute top-[-75px] left-[50%] transform -translate-x-[40%] bg-white text-[#191919] font-bold text-[12px] px-3 py-1.5 rounded-[18px] shadow-md border border-[#EAEAEA] whitespace-nowrap cursor-pointer z-30 transition-transform duration-200 hover:scale-105 select-none"
-          style={{ animation: 'bubble-bounce 3s ease-in-out infinite' }}
-        >
-          Do I look like you? 🤔
-          <div className="absolute bottom-[-6px] left-[40%] transform -translate-x-1/2 w-2.5 h-2.5 bg-white border-r border-b border-[#EAEAEA] rotate-45"></div>
-        </div>
-
-        <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end z-10 drop-shadow-md">
+      {/* Animals Display Wrapper */}
+      <div className="relative flex justify-center items-end gap-16 h-[160px] w-full mb-6 select-none">
+        
+        {/* Dog Animation */}
+        <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end drop-shadow-md">
           {/* Dog Tail */}
           <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
           
@@ -104,20 +93,9 @@ export default function AnimatedPets() {
           <div className="absolute bottom-[-5px] left-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
           <div className="absolute bottom-[-5px] right-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
         </div>
-      </Link>
 
-      {/* Cat Animation Link */}
-      <Link href="/twin" className="no-underline block relative" style={{ textDecoration: 'none' }}>
-        {/* Cat Speech Bubble */}
-        <div 
-          className="absolute top-[-75px] left-[50%] transform -translate-x-[40%] bg-white text-[#191919] font-bold text-[12px] px-3 py-1.5 rounded-[18px] shadow-md border border-[#EAEAEA] whitespace-nowrap cursor-pointer z-30 transition-transform duration-200 hover:scale-105 select-none"
-          style={{ animation: 'bubble-bounce 3s ease-in-out infinite 0.5s' }}
-        >
-          Find your twin! 😸
-          <div className="absolute bottom-[-6px] left-[40%] transform -translate-x-1/2 w-2.5 h-2.5 bg-white border-r border-b border-[#EAEAEA] rotate-45"></div>
-        </div>
-
-        <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end z-10 drop-shadow-md">
+        {/* Cat Animation */}
+        <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end drop-shadow-md">
           {/* Cat Tail */}
           <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
             <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
@@ -149,6 +127,16 @@ export default function AnimatedPets() {
           <div className="absolute bottom-[-2px] left-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
           <div className="absolute bottom-[-2px] right-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
         </div>
+
+      </div>
+
+      {/* Clean, Subtle Pill Badge below */}
+      <Link 
+        href="/twin"
+        className="inline-flex items-center gap-1.5 bg-white hover:bg-[#F9F7F5] active:bg-[#F2EFEA] text-[#666666] hover:text-[#444444] px-4 py-2 rounded-full border border-[#E5E0DA] text-[13px] tracking-wide transition-all shadow-sm select-none"
+        style={{ textDecoration: 'none' }}
+      >
+        <span>✨</span> Find Your Pet Twin
       </Link>
     </div>
   );
