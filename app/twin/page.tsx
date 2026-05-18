@@ -157,12 +157,13 @@ export default function TwinPage() {
     setLoadingIndex(0);
     setError(null);
     setImageError(false);
+    setResult(null);
 
     try {
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      const res = await fetch('/api/twin', {
+      const res = await fetch(`/api/twin?t=${Date.now()}`, {
         method: 'POST',
         body: formData,
       });
@@ -542,7 +543,13 @@ export default function TwinPage() {
                     )}
                   </button>
                   <button 
-                    onClick={() => setStep('upload')}
+                    onClick={() => {
+                      setResult(null);
+                      setFile(null);
+                      setPreviewUrl(null);
+                      setImageError(false);
+                      setStep('upload');
+                    }}
                     className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3.5 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
                   >
                     🔄 Try Again

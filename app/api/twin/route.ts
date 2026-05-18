@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: string }> = {
   // Dogs
   "golden retriever": {
@@ -282,6 +284,7 @@ export async function POST(req: Request) {
     // Call Anthropic Messages API directly for Selfie to Pet matching
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
@@ -335,8 +338,66 @@ export async function POST(req: Request) {
         `https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_Retriever_Dukedestiny01_drvd.jpg` // Dog generic fallback (Golden)
     };
 
-    // Use our beautiful, 100% reliable hardcoded breed image URL
-    const unsplashImageUrl = matchedData.imageUrl;
+const DOG_BREED_SLUGS: Record<string, string> = {
+  "golden retriever": "retriever/golden",
+  "labrador retriever": "retriever/labrador",
+  "german shepherd": "germanshepherd",
+  "french bulldog": "bulldog/french",
+  "poodle": "poodle/standard",
+  "bulldog": "bulldog/english",
+  "beagle": "beagle",
+  "rottweiler": "rottweiler",
+  "siberian husky": "husky",
+  "chihuahua": "chihuahua",
+  "pomeranian": "pomeranian",
+  "dachshund": "dachshund",
+  "border collie": "collie/border",
+  "shih tzu": "shihtzu",
+  "corgi": "corgi",
+  "doberman": "doberman",
+  "dalmatian": "dalmatian",
+  "australian shepherd": "shepherd/australian",
+  "samoyed": "samoyed",
+  "boxer": "boxer",
+  "great dane": "dane/great",
+  "maltese": "maltese",
+  "weimaraner": "weimaraner",
+  "akita": "akita",
+  "chow chow": "chow",
+  "irish setter": "setter/irish",
+  "cocker spaniel": "spaniel/cocker",
+  "vizsla": "vizsla",
+  "saint bernard": "stbernard"
+};
+
+    // Use TheDogAPI or TheCatAPI or Dog CEO for the primary high quality breed image
+    let unsplashImageUrl = matchedData.imageUrl;
+    try {
+      const breedQuery = result.breed.toLowerCase();
+      if (result.petType === 'cat') {
+        const breedApiUrl = `https://api.thecatapi.com/v1/images/search?breed_name=${encodeURIComponent(breedQuery)}`;
+        const petRes = await fetch(breedApiUrl, { cache: 'no-store' });
+        if (petRes.ok) {
+          const petData = await petRes.json();
+          if (Array.isArray(petData) && petData.length > 0 && petData[0]?.url) {
+            unsplashImageUrl = petData[0].url;
+          }
+        }
+      } else {
+        // Dog: Use Dog CEO API
+        const breedSlug = DOG_BREED_SLUGS[breedQuery] || breedQuery.replace(/\s+/g, '');
+        const breedApiUrl = `https://dog.ceo/api/breed/${breedSlug}/images/random`;
+        const petRes = await fetch(breedApiUrl, { cache: 'no-store' });
+        if (petRes.ok) {
+          const petData = await petRes.json();
+          if (petData.status === 'success' && petData.message) {
+            unsplashImageUrl = petData.message;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Pet breed search API failed:', err);
+    }
 
     return NextResponse.json({
       success: true,
