@@ -29,8 +29,9 @@ export default function TwinPage() {
   const [loadingIndex, setLoadingIndex] = useState(0);
   const [result, setResult] = useState<TwinResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const [cameraActive, setCameraActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -219,6 +220,74 @@ export default function TwinPage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const shareMyTwin = async () => {
+    if (!result || !squareCardRef.current) return;
+    setIsSharing(true);
+    setError(null);
+    setShareStatus(null);
+
+    try {
+      const canvas = await html2canvas(squareCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1.5,
+        width: 1080,
+        height: 1080
+      });
+
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          const imageFile = new File([blob], `${result.breed.replace(/\s+/g, '_')}_twin.png`, { type: 'image/png' });
+          const shareText = `Just found my pet twin on Lumo Bites — I'm a ${result.breed}! 😂🐾 Find yours free at lumobites.net/twin`;
+
+          // Check if Web Share API is available with files support
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+            try {
+              await navigator.share({
+                files: [imageFile],
+                title: 'My Pet Twin',
+                text: shareText
+              });
+              setIsSharing(false);
+              return;
+            } catch (shareErr) {
+              console.error("Web Share API failed:", shareErr);
+              // Fallback to desktop behavior below if user cancelled or failed
+            }
+          }
+
+          // Desktop/Fallback behavior:
+          // 1. Download image
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `${result.breed.replace(/\s+/g, '_')}_twin.png`;
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
+
+          // 2. Copy share text to clipboard
+          try {
+            await navigator.clipboard.writeText(shareText);
+          } catch (clipErr) {
+            console.error("Clipboard copy failed:", clipErr);
+          }
+
+          // 3. Show status toast
+          setShareStatus("Card downloaded! Share it on social media 📸");
+          setTimeout(() => setShareStatus(null), 5000);
+        } else {
+          setError("Could not generate share image. Please try again.");
+        }
+        setIsSharing(false);
+      }, 'image/png');
+
+    } catch (err) {
+      console.error("Share capture error:", err);
+      setError("An error occurred while preparing your share card.");
+      setIsSharing(false);
+    }
+  };
+
   const getWhatsAppShareUrl = () => {
     const text = `Just found my pet twin on Lumo Bites — I'm a ${result?.breed}! 😂🐾 Find yours free at https://lumobites.net/twin`;
     return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -253,6 +322,12 @@ export default function TwinPage() {
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-center font-medium">
               ⚠️ {error}
+            </div>
+          )}
+
+          {shareStatus && (
+            <div className="mb-6 p-4 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-xl text-center font-bold animate-bounce flex items-center justify-center gap-2 shadow-xs">
+              🎉 {shareStatus}
             </div>
           )}
 
@@ -442,14 +517,22 @@ export default function TwinPage() {
 
                 <div className="flex gap-3 w-full">
                   <button 
-                    onClick={() => setShowShareModal(true)}
-                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
+                    onClick={shareMyTwin}
+                    disabled={isSharing}
+                    className="flex-1 bg-[#8B5E3C] text-white border border-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#734A2E] hover:border-[#734A2E] disabled:bg-gray-400 disabled:border-gray-400 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    📤 Share My Twin
+                    {isSharing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Generating Card...
+                      </>
+                    ) : (
+                      <>📤 Share My Twin</>
+                    )}
                   </button>
                   <button 
                     onClick={() => setStep('upload')}
-                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
+                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3.5 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
                   >
                     🔄 Try Again
                   </button>
@@ -827,46 +910,6 @@ export default function TwinPage() {
             </div>
           </div>
 
-        </div>
-      )}
-
-      {/* SHARE MODAL */}
-      {showShareModal && result && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-[400px] w-full p-6 flex flex-col gap-6 shadow-xl border border-[#EEEEEE]">
-            <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-xl text-[#191919]">📤 Share Your Pet Twin</h3>
-              <button 
-                onClick={() => setShowShareModal(false)}
-                className="text-[#999999] hover:text-[#191919] font-bold text-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <a 
-                href={getWhatsAppShareUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 bg-[#25D366] text-white rounded-xl font-bold text-center flex items-center justify-center gap-2 text-decoration-none hover:opacity-90 transition-opacity"
-                style={{ textDecoration: 'none' }}
-              >
-                💬 Share on WhatsApp
-              </a>
-
-              <button 
-                onClick={copyShareLink}
-                className="w-full py-4 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] rounded-xl font-bold text-center flex items-center justify-center gap-2 hover:bg-[#FDF9F5] transition-all cursor-pointer"
-              >
-                {isCopied ? "✓ Copied!" : "🔗 Copy Share Text"}
-              </button>
-            </div>
-            
-            <p className="text-xs text-[#999999] text-center italic">
-              &quot;Just found my pet twin on Lumo Bites — I&apos;m a {result.breed}! 😂🐾 Find yours free at lumobites.net/twin&quot;
-            </p>
-          </div>
         </div>
       )}
 
