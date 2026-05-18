@@ -245,6 +245,36 @@ export default function TwinPage() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  const shareToWhatsApp = () => {
+    const text = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const shareToFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lumobites.net/twin')}`, '_blank');
+  };
+
+  const shareToTwitter = () => {
+    const text = `I'm a ${result?.breed}! 🐾 https://lumobites.net/twin`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const shareToTikTok = async () => {
+    await downloadStoryCard();
+    setShareStatus("Downloaded! Upload this to TikTok with your reaction");
+    setTimeout(() => setShareStatus(null), 5000);
+  };
+
+  const copyPageLink = async () => {
+    try {
+      await navigator.clipboard.writeText("https://lumobites.net/twin");
+      setShareStatus("Link copied!");
+      setTimeout(() => setShareStatus(null), 3000);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const shareMyTwin = async () => {
     if (!result || !squareCardRef.current) return;
     setIsSharing(true);
@@ -559,6 +589,67 @@ export default function TwinPage() {
                   >
                     🐦 Twitter/X (16:9)
                   </button>
+                </div>
+
+                {/* Social Media Share Buttons */}
+                <div className="flex flex-col items-center gap-3 mt-4 pt-4 border-t border-[#F2ECE6]">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Share on:</span>
+                  <div className="flex items-center justify-center gap-4">
+                    {/* WhatsApp */}
+                    <button
+                      onClick={shareToWhatsApp}
+                      className="w-11 h-11 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Share on WhatsApp"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.437.002 9.859-4.416 9.862-9.852.002-2.633-1.02-5.107-2.88-6.97C16.39 1.905 13.916.88 11.288.88 5.856.88 1.437 5.298 1.435 10.734c-.001 1.558.411 3.076 1.196 4.417L1.674 21.03l6.095-1.599.278.169zM18.8 15.39c-.33-.164-1.953-.964-2.253-1.074-.3-.11-.519-.165-.738.165-.219.33-.849 1.073-1.04 1.293-.191.22-.383.247-.713.082-.33-.165-1.393-.513-2.653-1.636-.98-.873-1.643-1.953-1.835-2.283-.192-.33-.021-.508.144-.672.148-.148.33-.385.495-.578.165-.192.22-.33.33-.55.11-.22.055-.413-.028-.578-.083-.166-.738-1.782-1.01-2.44-.267-.643-.538-.553-.738-.553-.191 0-.41-.013-.629-.013-.218 0-.575.082-.876.412-.3.33-1.15 1.127-1.15 2.746 0 1.62 1.178 3.189 1.34 3.41.164.22 2.318 3.54 5.616 4.966.783.339 1.396.541 1.873.693.788.25 1.505.215 2.072.13.633-.095 1.953-.798 2.227-1.57.275-.77 2.75-1.897 1.897-2.072zm0 0"/>
+                      </svg>
+                    </button>
+
+                    {/* Facebook */}
+                    <button
+                      onClick={shareToFacebook}
+                      className="w-11 h-11 rounded-full bg-[#1877F2] hover:bg-[#166fe5] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Share on Facebook"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    </button>
+
+                    {/* Twitter/X */}
+                    <button
+                      onClick={shareToTwitter}
+                      className="w-11 h-11 rounded-full bg-[#000000] hover:bg-[#191919] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Share on X (Twitter)"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </button>
+
+                    {/* TikTok */}
+                    <button
+                      onClick={shareToTikTok}
+                      className="w-11 h-11 rounded-full bg-[#000000] hover:bg-[#191919] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Share on TikTok"
+                    >
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.525.02c1.31-.032 2.61.1 3.86.38v3.47a8.13 8.13 0 0 1-2.38-.17v10.3a6 6 0 1 1-6-6c.3 0 .59.02.88.06v-3.1a9 9 0 1 0 9 9V0h4v3.5a4.5 4.5 0 0 1-4.5 4.5V5a7.1 7.1 0 0 0 4.5-4.5v-3h-8.475v.02z"/>
+                      </svg>
+                    </button>
+
+                    {/* Copy Link */}
+                    <button
+                      onClick={copyPageLink}
+                      className="w-11 h-11 rounded-full bg-[#7F8C8D] hover:bg-[#707b7c] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Copy Link"
+                    >
+                      <svg className="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 w-full">
