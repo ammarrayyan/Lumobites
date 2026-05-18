@@ -35,6 +35,7 @@ export default function TwinPage() {
   const [imageError, setImageError] = useState(false);
 
   const [cameraActive, setCameraActive] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -59,7 +60,8 @@ export default function TwinPage() {
   useEffect(() => {
     if (cameraActive) {
       setError(null);
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1080 } } })
+      stopCameraStream(); // Ensure we close the previous camera stream before switching
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1080 } } })
         .then(stream => {
           streamRef.current = stream;
           if (videoRef.current) {
@@ -75,7 +77,7 @@ export default function TwinPage() {
       stopCameraStream();
     }
     return () => stopCameraStream();
-  }, [cameraActive]);
+  }, [cameraActive, facingMode]);
 
   const stopCameraStream = () => {
     if (streamRef.current) {
@@ -346,6 +348,12 @@ export default function TwinPage() {
                   <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 shadow-sm">
                     <span className="w-2 h-2 bg-white rounded-full"></span> LIVE
                   </div>
+                  <button
+                    onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
+                    className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white text-xs font-bold px-3.5 py-2 rounded-full flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer"
+                  >
+                    🔄 Switch Camera
+                  </button>
                 </div>
                 
                 <div className="flex gap-3 w-full max-w-[340px]">
