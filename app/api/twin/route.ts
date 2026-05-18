@@ -310,7 +310,7 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number between 85 and 99, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number between 85 and 99, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
               }
             ]
           }
@@ -332,15 +332,17 @@ export async function POST(req: Request) {
     const cleanText = textContent.replace(/```json|```/g, '').trim();
     const result = JSON.parse(cleanText);
 
-    // Retrieve custom pre-defined traits/quotes/images to match requirements exactly
+    // Retrieve custom pre-defined images to match requirements exactly
     const breedKey = result.breed.toLowerCase();
     const matchedData = BREED_DATA[breedKey] || {
-      traits: result.traits || ["✨ Unique", "😊 Fun", "❤️ Friendly"],
-      quote: result.quote || "A perfect match for your one-of-a-kind personality!",
       imageUrl: result.petType === 'cat' ? 
         `https://upload.wikimedia.org/wikipedia/commons/1/15/White_Persian_Cat.jpg` : // Cat generic fallback (Persian)
         `https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_Retriever_Dukedestiny01_drvd.jpg` // Dog generic fallback (Golden)
     };
+
+    // Clean any emojis/symbols from traits
+    const rawTraits = result.traits || ["Charming", "Friendly", "Warm"];
+    const cleanTraits = rawTraits.map((t: string) => t.replace(/[^\w\s\-,.!?']/gu, '').trim()).filter(Boolean);
 
 const DOG_BREED_SLUGS: Record<string, string> = {
   "golden retriever": "retriever/golden",
@@ -378,7 +380,10 @@ const DOG_BREED_SLUGS: Record<string, string> = {
     let unsplashImageUrl = matchedData.imageUrl;
     try {
       const breedQuery = result.breed.toLowerCase();
-      if (result.petType === 'cat') {
+      if (breedQuery === 'saint bernard') {
+        // Enforce the magnificent adult Saint Bernard photo
+        unsplashImageUrl = 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Saint-Bernard-Wikicommons.jpg';
+      } else if (result.petType === 'cat') {
         const breedApiUrl = `https://api.thecatapi.com/v1/images/search?breed_name=${encodeURIComponent(breedQuery)}`;
         const petRes = await fetch(breedApiUrl, { cache: 'no-store' });
         if (petRes.ok) {
@@ -408,8 +413,8 @@ const DOG_BREED_SLUGS: Record<string, string> = {
       breed: result.breed,
       petType: result.petType,
       matchScore: result.matchScore || Math.floor(Math.random() * 15) + 85,
-      traits: matchedData.traits,
-      quote: matchedData.quote,
+      traits: cleanTraits.length >= 3 ? cleanTraits : ["Charming", "Friendly", "Warm"],
+      quote: result.quote || "A perfect match for your one-of-a-kind personality!",
       reason: result.reason || '',
       unsplashImageUrl
     });

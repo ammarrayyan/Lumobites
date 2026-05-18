@@ -318,10 +318,10 @@ export default function TwinPage() {
           {/* HEADER */}
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-tight mb-3">
-              🐾 Find Your Pet Twin
+              Find Your Pet Twin
             </h1>
-            <p className="text-[17px] text-[#666666]">
-              Upload your photo and discover which dog or cat breed you look like!
+            <p className="text-[16px] text-[#777777] font-normal">
+              Discover which dog or cat breed matches your personality
             </p>
           </div>
 
@@ -440,32 +440,32 @@ export default function TwinPage() {
             <div className="flex flex-col items-center gap-6 w-full">
               
               {/* Web UI Preview Card */}
-              <div className="w-full bg-gradient-to-br from-[#FFF8F2] to-[#FFF0E2] border border-[#F2DCC4] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-6 shadow-sm relative overflow-hidden">
+              <div className="w-full bg-white border border-[#EBEBEB] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-6 shadow-md relative overflow-hidden">
                 
                 {/* Match Badge */}
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] text-[#553300] font-black text-xs px-3 py-1.5 rounded-full shadow-sm border border-[#D4AF37] tracking-wider uppercase">
-                  ⭐ {result.matchScore}% Match
+                <div className="absolute top-4 right-4 bg-[#1E1E1E] text-white font-bold text-[11px] px-3.5 py-1.5 rounded-full shadow-xs tracking-wider uppercase">
+                  {result.matchScore}% Match
                 </div>
 
                 <div className="text-center mt-2">
-                  <span className="text-xs font-bold text-[#8B5E3C] uppercase tracking-widest">Your Pet Twin is a</span>
-                  <h2 className="text-3xl font-[900] text-[#191919] mt-1">
-                    {result.petType === 'cat' ? '🐱' : '🐕'} {result.breed}
+                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Your Pet Twin Match</span>
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-[#191919] tracking-tight mt-1">
+                    {result.breed}
                   </h2>
                 </div>
 
                 {/* Side-by-Side Images */}
-                <div className="flex items-center gap-4 my-2">
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative shrink-0">
+                <div className="flex items-center gap-6 my-2">
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_12px_28px_rgba(0,0,0,0.08)] relative shrink-0">
                     {previewUrl && <img src={previewUrl} alt="You" className="w-full h-full object-cover" />}
-                    <span className="absolute bottom-1 right-3 text-xs bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">You</span>
+                    <span className="absolute bottom-1.5 right-3.5 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">You</span>
                   </div>
                   
-                  <div className="text-4xl text-[#FF4D4D] animate-bounce">❤️</div>
+                  <div className="text-3xl text-gray-300">🐾</div>
 
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative shrink-0 bg-[#FFEBD6] flex items-center justify-center">
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_12px_28px_rgba(0,0,0,0.08)] relative shrink-0 bg-[#F9F7F5] flex items-center justify-center">
                     {imageError ? (
-                      <span className="text-5xl">{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+                      <span className="text-4xl">🐕</span>
                     ) : (
                       <img 
                         src={result.unsplashImageUrl} 
@@ -474,7 +474,7 @@ export default function TwinPage() {
                         onError={() => setImageError(true)}
                       />
                     )}
-                    <span className="absolute bottom-1 right-3 text-xs bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">Twin</span>
+                    <span className="absolute bottom-1.5 right-3.5 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">Twin</span>
                   </div>
                 </div>
 
@@ -483,7 +483,7 @@ export default function TwinPage() {
                   {result.traits.map((trait, index) => (
                     <span 
                       key={index}
-                      className="bg-white border border-[#E8D5C0] text-[#8B5E3C] font-extrabold text-sm px-4 py-2 rounded-xl shadow-xs"
+                      className="bg-white border border-[#EBEBEB] text-[#333333] font-medium text-xs px-3.5 py-1.5 rounded-full shadow-xs"
                     >
                       {trait}
                     </span>
@@ -491,11 +491,11 @@ export default function TwinPage() {
                 </div>
 
                 {/* Quote */}
-                <div className="w-full text-center border-t border-[#F2DCC4] pt-4 mt-2">
-                  <p className="text-[#8B5E3C] font-bold text-lg italic leading-relaxed max-w-[90%] mx-auto">
+                <div className="w-full text-center border-t border-[#F2ECE6] pt-5 mt-2">
+                  <p className="text-[#444444] font-medium text-lg italic leading-relaxed max-w-[90%] mx-auto">
                     &quot;{result.quote}&quot;
                   </p>
-                  <p className="text-sm text-[#666666] mt-3 max-w-[90%] mx-auto font-medium">
+                  <p className="text-sm text-gray-500 mt-3 max-w-[90%] mx-auto font-normal leading-relaxed">
                     {result.reason}
                   </p>
                 </div>
@@ -508,7 +508,7 @@ export default function TwinPage() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href={`/results?breed=${encodeURIComponent(result.breed)}`}
-                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-[#734A2E] transition-colors shadow-sm"
+                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-base text-center hover:bg-[#734A2E] transition-colors shadow-sm"
                     style={{ textDecoration: 'none' }}
                   >
                     🍖 Find Best Food for {result.breed}
@@ -518,13 +518,13 @@ export default function TwinPage() {
                 <div className="grid grid-cols-2 gap-3 w-full">
                   <button 
                     onClick={downloadSquareCard}
-                    className="bg-gradient-to-r from-[#FF3E6C] to-[#FF8E53] text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
                     📸 Instagram Feed (1:1)
                   </button>
                   <button 
                     onClick={downloadStoryCard}
-                    className="bg-gradient-to-r from-[#8A2387] to-[#E94057] text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                   >
                     📱 Instagram Story (9:16)
                   </button>
@@ -553,7 +553,7 @@ export default function TwinPage() {
                       setImageError(false);
                       setStep('upload');
                     }}
-                    className="flex-1 bg-[#F5EDE4] text-[#8B5E3C] border border-[#D9C0A8] py-3.5 rounded-xl font-bold text-sm hover:bg-[#EAE0D3] transition-colors cursor-pointer"
+                    className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer"
                   >
                     🔄 Try Again
                   </button>
@@ -579,7 +579,8 @@ export default function TwinPage() {
             top: '-9999px',
             width: '1080px',
             height: '1080px',
-            background: 'linear-gradient(135deg, #FFF6F8 0%, #F5ECFC 100%)',
+            background: '#FFFFFF',
+            border: '20px solid #FFFFFF',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -587,26 +588,28 @@ export default function TwinPage() {
             padding: '70px 50px',
             color: '#191919',
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
           }}
         >
           {/* Top Badge and Header */}
           <div style={{ textAlign: 'center', width: '100%' }}>
             <div style={{
               display: 'inline-block',
-              background: '#1A1A1A',
+              background: '#1E1E1E',
               color: '#FFFFFF',
-              fontWeight: 900,
-              fontSize: '28px',
-              padding: '12px 34px',
+              fontWeight: 800,
+              fontSize: '24px',
+              padding: '12px 30px',
               borderRadius: '50px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-              border: '2px solid #FFFFFF',
-              letterSpacing: '2px',
+              letterSpacing: '1px',
               textTransform: 'uppercase',
               marginBottom: '30px'
             }}>
-              🎯 <span style={{ color: '#FFD700' }}>{result.matchScore}% Match</span>
+              {result.matchScore}% Match
+            </div>
+            <div style={{ fontSize: '20px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#999999', marginBottom: '8px' }}>
+              Your Pet Twin Match
             </div>
             <h2 style={{
               fontSize: '68px',
@@ -616,7 +619,7 @@ export default function TwinPage() {
               letterSpacing: '-2px',
               lineHeight: 1.1
             }}>
-              You&apos;re a {result.breed}!
+              {result.breed}
             </h2>
           </div>
 
@@ -636,21 +639,20 @@ export default function TwinPage() {
                 height: '280px',
                 borderRadius: '50%',
                 overflow: 'hidden',
-                border: '12px solid #FFFFFF',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                position: 'relative'
+                border: '10px solid #FFFFFF',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
               }}>
                 {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
               <span style={{
-                color: '#666666',
-                fontSize: '22px',
+                color: '#888888',
+                fontSize: '18px',
                 fontWeight: 'bold',
-                letterSpacing: '3px'
+                letterSpacing: '2px'
               }}>YOU</span>
             </div>
 
-            <div style={{ fontSize: '80px', paddingBottom: '40px', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.05))' }}>🐾</div>
+            <div style={{ fontSize: '60px', paddingBottom: '30px', color: '#CCCCCC' }}>🐾</div>
 
             {/* TWIN photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
@@ -659,16 +661,15 @@ export default function TwinPage() {
                 height: '280px',
                 borderRadius: '50%',
                 overflow: 'hidden',
-                border: '12px solid #FFFFFF',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-                position: 'relative',
-                background: '#FFEBD6',
+                border: '10px solid #FFFFFF',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                background: '#F9F7F5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '110px' }}>{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+                  <span style={{ fontSize: '90px' }}>🐕</span>
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -679,10 +680,10 @@ export default function TwinPage() {
                 )}
               </div>
               <span style={{
-                color: '#666666',
-                fontSize: '22px',
+                color: '#888888',
+                fontSize: '18px',
                 fontWeight: 'bold',
-                letterSpacing: '3px'
+                letterSpacing: '2px'
               }}>TWIN</span>
             </div>
           </div>
@@ -690,7 +691,7 @@ export default function TwinPage() {
           {/* Personality Traits */}
           <div style={{
             display: 'flex',
-            gap: '18px',
+            gap: '14px',
             justifyContent: 'center',
             flexWrap: 'wrap',
             width: '100%'
@@ -700,13 +701,13 @@ export default function TwinPage() {
                 key={index}
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  color: '#222222',
-                  fontWeight: 800,
-                  fontSize: '24px',
-                  padding: '12px 30px',
+                  border: '1px solid #EBEBEB',
+                  color: '#333333',
+                  fontWeight: 600,
+                  fontSize: '20px',
+                  padding: '10px 24px',
                   borderRadius: '100px',
-                  boxShadow: '0 6px 15px rgba(0,0,0,0.03)'
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.02)'
                 }}
               >
                 {trait}
@@ -721,10 +722,10 @@ export default function TwinPage() {
             padding: '10px 0 20px 0'
           }}>
             <p style={{
-              fontSize: '32px',
-              fontWeight: 700,
+              fontSize: '28px',
+              fontWeight: 500,
               fontStyle: 'italic',
-              color: '#555555',
+              color: '#444444',
               margin: 0,
               lineHeight: 1.4
             }}>
@@ -738,20 +739,18 @@ export default function TwinPage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '100%',
-            background: '#FFFFFF',
+            background: '#F9F7F5',
             borderRadius: '24px',
             padding: '24px 40px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
             boxSizing: 'border-box',
-            border: '1px solid rgba(0,0,0,0.02)'
+            border: '1px solid #EBEBEB'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 900, color: '#191919' }}>Lumo Bites</span>
-              <span style={{ fontSize: '20px', color: '#666666', fontWeight: 500 }}>Find Your Pet Twin Free</span>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
+              <span style={{ fontSize: '18px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 800, color: '#8B5E3C' }}>lumobites.net/twin</span>
-              <span style={{ fontSize: '18px', color: '#999999', fontWeight: 600 }}>🐾 Lumo Quiz</span>
+              <span style={{ fontSize: '20px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
             </div>
           </div>
 
@@ -770,7 +769,8 @@ export default function TwinPage() {
             top: '-9999px',
             width: '1080px',
             height: '1920px',
-            background: 'linear-gradient(135deg, #FFF6F8 0%, #F5ECFC 100%)',
+            background: '#FFFFFF',
+            border: '24px solid #FFFFFF',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -778,30 +778,29 @@ export default function TwinPage() {
             padding: '120px 60px 100px 60px',
             color: '#191919',
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
           }}
         >
           {/* Top Badge & Header */}
           <div style={{ textAlign: 'center', width: '100%' }}>
             <div style={{
               display: 'inline-block',
-              background: '#1A1A1A',
+              background: '#1E1E1E',
               color: '#FFFFFF',
-              fontWeight: 900,
-              fontSize: '32px',
+              fontWeight: 800,
+              fontSize: '28px',
               padding: '14px 40px',
               borderRadius: '50px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-              border: '2px solid #FFFFFF',
-              letterSpacing: '2px',
+              letterSpacing: '1px',
               textTransform: 'uppercase',
               marginBottom: '40px'
             }}>
-              🎯 <span style={{ color: '#FFD700' }}>{result.matchScore}% Match</span>
+              {result.matchScore}% Match
             </div>
             
-            <div style={{ fontSize: '28px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', color: '#666666', marginBottom: '15px' }}>
-              My Pet Twin Match
+            <div style={{ fontSize: '24px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '4px', color: '#999999', marginBottom: '15px' }}>
+              Your Pet Twin Match
             </div>
             <h2 style={{
               fontSize: '84px',
@@ -811,8 +810,7 @@ export default function TwinPage() {
               letterSpacing: '-3px',
               lineHeight: 1.1
             }}>
-              You&apos;re a<br />
-              <span style={{ color: '#8B5E3C' }}>{result.breed}</span>!
+              {result.breed}
             </h2>
           </div>
 
@@ -832,21 +830,20 @@ export default function TwinPage() {
                 height: '320px',
                 borderRadius: '50%',
                 overflow: 'hidden',
-                border: '14px solid #FFFFFF',
-                boxShadow: '0 24px 48px rgba(0,0,0,0.08)',
-                position: 'relative'
+                border: '12px solid #FFFFFF',
+                boxShadow: '0 24px 48px rgba(0,0,0,0.1)'
               }}>
                 {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
               <span style={{
-                color: '#666666',
-                fontSize: '24px',
+                color: '#888888',
+                fontSize: '20px',
                 fontWeight: 'bold',
-                letterSpacing: '4px'
+                letterSpacing: '3px'
               }}>YOU</span>
             </div>
 
-            <div style={{ fontSize: '90px', paddingBottom: '50px', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.05))' }}>🐾</div>
+            <div style={{ fontSize: '70px', paddingBottom: '40px', color: '#CCCCCC' }}>🐾</div>
 
             {/* TWIN photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
@@ -855,16 +852,15 @@ export default function TwinPage() {
                 height: '320px',
                 borderRadius: '50%',
                 overflow: 'hidden',
-                border: '14px solid #FFFFFF',
-                boxShadow: '0 24px 48px rgba(0,0,0,0.08)',
-                position: 'relative',
-                background: '#FFEBD6',
+                border: '12px solid #FFFFFF',
+                boxShadow: '0 24px 48px rgba(0,0,0,0.1)',
+                background: '#F9F7F5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '130px' }}>{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+                  <span style={{ fontSize: '110px' }}>🐕</span>
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -875,10 +871,10 @@ export default function TwinPage() {
                 )}
               </div>
               <span style={{
-                color: '#666666',
-                fontSize: '24px',
+                color: '#888888',
+                fontSize: '20px',
                 fontWeight: 'bold',
-                letterSpacing: '4px'
+                letterSpacing: '3px'
               }}>TWIN</span>
             </div>
           </div>
@@ -897,13 +893,13 @@ export default function TwinPage() {
                 key={index}
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  color: '#222222',
-                  fontWeight: 800,
-                  fontSize: '28px',
-                  padding: '14px 36px',
+                  border: '1px solid #EBEBEB',
+                  color: '#333333',
+                  fontWeight: 600,
+                  fontSize: '24px',
+                  padding: '12px 30px',
                   borderRadius: '100px',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.03)'
+                  boxShadow: '0 6px 15px rgba(0,0,0,0.02)'
                 }}
               >
                 {trait}
@@ -918,10 +914,10 @@ export default function TwinPage() {
             padding: '20px 20px 0 20px'
           }}>
             <p style={{
-              fontSize: '36px',
-              fontWeight: 700,
+              fontSize: '32px',
+              fontWeight: 500,
               fontStyle: 'italic',
-              color: '#555555',
+              color: '#444444',
               margin: 0,
               lineHeight: 1.4
             }}>
@@ -935,20 +931,18 @@ export default function TwinPage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '100%',
-            background: '#FFFFFF',
+            background: '#F9F7F5',
             borderRadius: '30px',
             padding: '30px 50px',
-            boxShadow: '0 12px 36px rgba(0,0,0,0.03)',
             boxSizing: 'border-box',
-            border: '1px solid rgba(0,0,0,0.02)'
+            border: '1px solid #EBEBEB'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '32px', fontWeight: 900, color: '#191919' }}>Lumo Bites</span>
-              <span style={{ fontSize: '22px', color: '#666666', fontWeight: 500 }}>Find Your Pet Twin Free</span>
+              <span style={{ fontSize: '28px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
+              <span style={{ fontSize: '20px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#8B5E3C' }}>lumobites.net/twin</span>
-              <span style={{ fontSize: '20px', color: '#999999', fontWeight: 600 }}>🐾 Lumo Quiz</span>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
             </div>
           </div>
 
