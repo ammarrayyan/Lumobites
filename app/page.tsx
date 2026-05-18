@@ -11,12 +11,6 @@ export default function Home() {
       {/* NAVBAR */}
       <Navbar />
 
-      {/* VIRAL TWIN BANNER */}
-      <div className="w-full bg-[#8B5E3C] text-white py-3.5 px-6 text-center text-sm md:text-base font-extrabold tracking-wide hover:bg-[#734A2E] transition-all shrink-0">
-        <Link href="/twin" style={{ textDecoration: 'none', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <span>🐾</span> New! Find Your Pet Twin — Upload your selfie &rarr;
-        </Link>
-      </div>
 
       {/* HERO SECTION */}
       <section className="w-full bg-[#FDFAF7] pt-[48px] pb-16 px-6">

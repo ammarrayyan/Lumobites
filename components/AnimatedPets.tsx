@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function AnimatedPets() {
   return (
-    <div className="relative flex justify-center items-end gap-6 mb-8 mt-4 h-[180px] w-full">
+    <div className="relative flex justify-center items-end gap-16 mb-8 mt-4 h-[180px] w-full">
       <style>{`
         @keyframes tail-swish {
           0% { transform: rotate(0deg); }
@@ -39,6 +40,10 @@ export default function AnimatedPets() {
           40% { transform: translateY(-8px) scaleY(1.02); }
           60% { transform: translateY(-8px) scaleY(1.02); }
         }
+        @keyframes bubble-bounce {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
         .pet-interactive {
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
@@ -57,72 +62,94 @@ export default function AnimatedPets() {
         }
       `}</style>
 
-      {/* Dog Animation */}
-      <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end z-10 drop-shadow-md">
-        {/* Dog Tail */}
-        <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
-        
-        {/* Dog Body */}
-        <div className="relative w-24 h-28 bg-[#FAEDCD] rounded-t-[40px] rounded-b-[20px] z-10 overflow-hidden flex justify-center">
-          <div className="absolute top-[20px] w-14 h-16 bg-white rounded-full opacity-60"></div>
+      {/* Dog Animation Link */}
+      <Link href="/twin" className="no-underline block relative" style={{ textDecoration: 'none' }}>
+        {/* Dog Speech Bubble */}
+        <div 
+          className="absolute top-[-75px] left-[50%] transform -translate-x-[40%] bg-white text-[#191919] font-bold text-[12px] px-3 py-1.5 rounded-[18px] shadow-md border border-[#EAEAEA] whitespace-nowrap cursor-pointer z-30 transition-transform duration-200 hover:scale-105 select-none"
+          style={{ animation: 'bubble-bounce 3s ease-in-out infinite' }}
+        >
+          Do I look like you? 🤔
+          <div className="absolute bottom-[-6px] left-[40%] transform -translate-x-1/2 w-2.5 h-2.5 bg-white border-r border-b border-[#EAEAEA] rotate-45"></div>
         </div>
-        
-        {/* Dog Head */}
-        <div className="absolute top-[-20px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 4s ease-in-out infinite' }}>
-          {/* Ears */}
-          <div className="absolute left-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[-20deg]"></div>
-          <div className="absolute right-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[20deg]"></div>
-          
-          {/* Face */}
-          <div className="relative w-28 h-24 bg-[#FAEDCD] rounded-[40px] flex flex-col items-center pt-8">
-            <div className="flex gap-8 mb-2">
-              <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s' }}></div>
-              <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s' }}></div>
-            </div>
-            <div className="w-6 h-4 bg-gray-800 rounded-full mb-1"></div>
-            {/* Tongue */}
-            <div className="w-5 h-7 bg-[#FFB5A7] rounded-b-full origin-top" style={{ animation: 'pant 0.3s infinite alternate' }}></div>
-          </div>
-        </div>
-        
-        {/* Paws */}
-        <div className="absolute bottom-[-5px] left-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
-        <div className="absolute bottom-[-5px] right-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
-      </div>
 
-      {/* Cat Animation (Based on the attached image) */}
-      <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end z-10 drop-shadow-md">
-        {/* Cat Tail */}
-        <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
-          <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
-        </div>
-        
-        {/* Cat Body */}
-        <div className="relative w-20 h-24 bg-[#2B2D42] rounded-t-[30px] rounded-b-[10px] z-10 flex justify-center overflow-hidden">
-          {/* White Chest */}
-          <div className="absolute bottom-0 w-10 h-16 bg-[#EDF2F4] rounded-t-[20px]"></div>
-        </div>
-        
-        {/* Cat Head */}
-        <div className="absolute top-[-15px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 5s ease-in-out infinite 1s' }}>
-          {/* Ears */}
-          <div className="absolute left-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[-20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
-          <div className="absolute right-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+        <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end z-10 drop-shadow-md">
+          {/* Dog Tail */}
+          <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
           
-          {/* Face */}
-          <div className="relative w-20 h-18 bg-[#2B2D42] rounded-full flex flex-col items-center justify-center pt-2">
-            <div className="flex gap-6 mb-1">
-              <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s' }}></div>
-              <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s' }}></div>
-            </div>
-            <div className="w-2 h-1.5 bg-pink-300 rounded-full"></div>
+          {/* Dog Body */}
+          <div className="relative w-24 h-28 bg-[#FAEDCD] rounded-t-[40px] rounded-b-[20px] z-10 overflow-hidden flex justify-center">
+            <div className="absolute top-[20px] w-14 h-16 bg-white rounded-full opacity-60"></div>
           </div>
+          
+          {/* Dog Head */}
+          <div className="absolute top-[-20px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 4s ease-in-out infinite' }}>
+            {/* Ears */}
+            <div className="absolute left-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[-20deg]"></div>
+            <div className="absolute right-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[20deg]"></div>
+            
+            {/* Face */}
+            <div className="relative w-28 h-24 bg-[#FAEDCD] rounded-[40px] flex flex-col items-center pt-8">
+              <div className="flex gap-8 mb-2">
+                <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s' }}></div>
+                <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s' }}></div>
+              </div>
+              <div className="w-6 h-4 bg-gray-800 rounded-full mb-1"></div>
+              {/* Tongue */}
+              <div className="w-5 h-7 bg-[#FFB5A7] rounded-b-full origin-top" style={{ animation: 'pant 0.3s infinite alternate' }}></div>
+            </div>
+          </div>
+          
+          {/* Paws */}
+          <div className="absolute bottom-[-5px] left-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
+          <div className="absolute bottom-[-5px] right-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
         </div>
-        
-        {/* Paws */}
-        <div className="absolute bottom-[-2px] left-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
-        <div className="absolute bottom-[-2px] right-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
-      </div>
+      </Link>
+
+      {/* Cat Animation Link */}
+      <Link href="/twin" className="no-underline block relative" style={{ textDecoration: 'none' }}>
+        {/* Cat Speech Bubble */}
+        <div 
+          className="absolute top-[-75px] left-[50%] transform -translate-x-[40%] bg-white text-[#191919] font-bold text-[12px] px-3 py-1.5 rounded-[18px] shadow-md border border-[#EAEAEA] whitespace-nowrap cursor-pointer z-30 transition-transform duration-200 hover:scale-105 select-none"
+          style={{ animation: 'bubble-bounce 3s ease-in-out infinite 0.5s' }}
+        >
+          Find your twin! 😸
+          <div className="absolute bottom-[-6px] left-[40%] transform -translate-x-1/2 w-2.5 h-2.5 bg-white border-r border-b border-[#EAEAEA] rotate-45"></div>
+        </div>
+
+        <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end z-10 drop-shadow-md">
+          {/* Cat Tail */}
+          <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
+            <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
+          </div>
+          
+          {/* Cat Body */}
+          <div className="relative w-20 h-24 bg-[#2B2D42] rounded-t-[30px] rounded-b-[10px] z-10 flex justify-center overflow-hidden">
+            {/* White Chest */}
+            <div className="absolute bottom-0 w-10 h-16 bg-[#EDF2F4] rounded-t-[20px]"></div>
+          </div>
+          
+          {/* Cat Head */}
+          <div className="absolute top-[-15px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 5s ease-in-out infinite 1s' }}>
+            {/* Ears */}
+            <div className="absolute left-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[-20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+            <div className="absolute right-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+            
+            {/* Face */}
+            <div className="relative w-20 h-18 bg-[#2B2D42] rounded-full flex flex-col items-center justify-center pt-2">
+              <div className="flex gap-6 mb-1">
+                <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s' }}></div>
+                <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s' }}></div>
+              </div>
+              <div className="w-2 h-1.5 bg-pink-300 rounded-full"></div>
+            </div>
+          </div>
+          
+          {/* Paws */}
+          <div className="absolute bottom-[-2px] left-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
+          <div className="absolute bottom-[-2px] right-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
+        </div>
+      </Link>
     </div>
   );
 }
