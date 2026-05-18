@@ -342,7 +342,7 @@ export async function POST(req: Request) {
     const unsplashAccessKey = process.env.UNSPLASH_ACCESS_KEY;
     if (unsplashAccessKey) {
       try {
-        const query = `${result.breed} ${result.petType} portrait`;
+        const query = `${result.breed} ${result.petType === 'cat' ? 'cat' : 'dog'}`;
         const unsplashRes = await fetch(
           `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&client_id=${unsplashAccessKey}&per_page=1`
         );
