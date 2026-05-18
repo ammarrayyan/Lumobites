@@ -32,6 +32,7 @@ export default function TwinPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const [cameraActive, setCameraActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -155,6 +156,7 @@ export default function TwinPage() {
     setStep('analyzing');
     setLoadingIndex(0);
     setError(null);
+    setImageError(false);
 
     try {
       const formData = new FormData();
@@ -457,8 +459,17 @@ export default function TwinPage() {
                   
                   <div className="text-4xl text-[#FF4D4D] animate-bounce">❤️</div>
 
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative shrink-0">
-                    <img src={result.unsplashImageUrl} alt={result.breed} className="w-full h-full object-cover" />
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative shrink-0 bg-[#FFEBD6] flex items-center justify-center">
+                    {imageError ? (
+                      <span className="text-5xl">{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+                    ) : (
+                      <img 
+                        src={result.unsplashImageUrl} 
+                        alt={result.breed} 
+                        className="w-full h-full object-cover" 
+                        onError={() => setImageError(true)}
+                      />
+                    )}
                     <span className="absolute bottom-1 right-3 text-xs bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">Twin</span>
                   </div>
                 </div>
@@ -639,9 +650,22 @@ export default function TwinPage() {
               overflow: 'hidden',
               border: '8px solid #FFFFFF',
               boxShadow: '0 12px 35px rgba(0,0,0,0.3)',
-              position: 'relative'
+              position: 'relative',
+              background: '#FFEBD6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              <img src={result.unsplashImageUrl} alt="Twin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {imageError ? (
+                <span style={{ fontSize: '100px' }}>{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+              ) : (
+                <img 
+                  src={result.unsplashImageUrl} 
+                  alt="Twin" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={() => setImageError(true)}
+                />
+              )}
               <span style={{
                 position: 'absolute',
                 bottom: '15px',
@@ -824,9 +848,22 @@ export default function TwinPage() {
               overflow: 'hidden',
               border: '10px solid #FFFFFF',
               boxShadow: '0 15px 40px rgba(0,0,0,0.3)',
-              position: 'relative'
+              position: 'relative',
+              background: '#FFEBD6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              <img src={result.unsplashImageUrl} alt="Twin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {imageError ? (
+                <span style={{ fontSize: '140px' }}>{result.petType === 'cat' ? '🐱' : '🐶'}</span>
+              ) : (
+                <img 
+                  src={result.unsplashImageUrl} 
+                  alt="Twin" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  onError={() => setImageError(true)}
+                />
+              )}
               <span style={{
                 position: 'absolute',
                 bottom: '20px',

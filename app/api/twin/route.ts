@@ -130,7 +130,7 @@ const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: st
   "irish setter": {
     traits: ["🍀 Charming and warm", "🎉 Naturally magnetic", "❤️ Enthusiastically loving"],
     quote: "Effortlessly charming — people are just drawn to your warm energy!",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Irish_Setter.jpg"
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Irish_Setter.jpg/320px-Irish_Setter.jpg"
   },
   "cocker spaniel": {
     traits: ["🎵 Sensitive and artistic", "👁️ Big beautiful soul", "🤗 Gentle and loving"],
