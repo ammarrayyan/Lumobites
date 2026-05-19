@@ -6,11 +6,31 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lumo Bites — Find the Best Food for Your Pet",
-  description: "Lumo Bites helps you find the perfect pet food based on your pet's age, breed, and health needs. Free, honest, no fluff.",
+  title: "Find the Best Food for Your Pet | Lumo Bites",
+  description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
   icons: {
     icon: "/Logo.png",
   },
+  openGraph: {
+    title: "Find the Best Food for Your Pet | Lumo Bites",
+    description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+    url: "https://lumobites.net",
+    images: [
+      {
+        url: "https://lumobites.net/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Lumo Bites",
+      }
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Find the Best Food for Your Pet | Lumo Bites",
+    description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+    images: ["https://lumobites.net/og-image.png"],
+  }
 };
 
 export default function RootLayout({
