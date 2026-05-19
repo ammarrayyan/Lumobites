@@ -30,6 +30,22 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
   let badgeColor = '#9CA3AF'; // gray
   if (product.match_pct >= 90) badgeColor = '#10B981'; // green
   else if (product.match_pct >= 70) badgeColor = '#F59E0B'; // yellow
+  const [showBuyModal, setShowBuyModal] = useState(false);
+
+  // Compute buy links
+  const displayName = product.product_name || product.brand;
+  const petFoodLabel = product.pet_type === 'dog' ? 'dog food' : product.pet_type === 'cat' ? 'cat food' : 'pet food';
+  const searchTerm = encodeURIComponent(`${product.brand || ''} ${displayName} ${petFoodLabel}`.trim());
+  const chewySearchTerm = encodeURIComponent(`${product.brand || ''} ${displayName}`.trim());
+
+  let amazonLink = (product.buy_links?.amazon && product.buy_links.amazon !== '#') ? product.buy_links.amazon : '#';
+  if (amazonLink === '#') amazonLink = `https://www.amazon.com/s?k=${searchTerm}&tag=lumobites-20`;
+  else if (!amazonLink.includes('tag=')) {
+    amazonLink = amazonLink.includes('?') ? `${amazonLink}&tag=lumobites-20` : `${amazonLink}?tag=lumobites-20`;
+  }
+
+  const chewyLink = `https://www.chewy.com/s?query=${chewySearchTerm}`;
+
   return (
     <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #E8DDD4' }}>
       {product.match_pct >= 90 && (
@@ -89,15 +105,34 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
         >
           Details
         </Link>
-        <a 
-          href={(product.buy_links?.amazon && product.buy_links.amazon !== '#') ? product.buy_links.amazon : `https://www.amazon.com/s?k=${encodeURIComponent(`${product.brand} ${product.product_name} ${product.pet_type} food`)}&tag=lumobites-20`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
+        <button 
+          onClick={() => setShowBuyModal(true)}
+          style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', outline: 'none' }}
         >
           Buy Now
-        </a>
+        </button>
       </div>
+
+      {/* Buy Now Retailers Choice Modal Popup */}
+      {showBuyModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(25,25,25,0.4)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', width: '100%', maxWidth: '360px', padding: '24px', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', border: '1px solid #E8DDD4', textAlign: 'left' }}>
+            <button 
+              onClick={() => setShowBuyModal(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#999999', padding: '4px', fontWeight: 'bold' }}
+            >
+              ✕
+            </button>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#191919', marginBottom: '2px', paddingRight: '24px', margin: 0 }}>Where to buy</h3>
+            <p style={{ fontSize: '12px', color: '#888888', marginBottom: '20px', marginTop: '2px', margin: 0 }}>{product.brand} - {product.product_name}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
+              <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
+              <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

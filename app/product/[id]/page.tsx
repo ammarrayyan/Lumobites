@@ -132,23 +132,19 @@ export default function ProductDetailPage() {
         <Link href="/" className="text-[#8B5E3C] font-medium hover:underline">← Back to home</Link>
       </div>
     );
-  }
-
-  const displayName = product.product_name || product.name;
+  }  const displayName = product.product_name || product.name;
   const petFoodLabel = product.pet_type === 'dog' ? 'dog food' : product.pet_type === 'cat' ? 'cat food' : 'pet food';
   const searchTerm = encodeURIComponent(`${product.brand || ''} ${displayName} ${petFoodLabel}`.trim());
+  const chewySearchTerm = encodeURIComponent(`${product.brand || ''} ${displayName}`.trim());
   
   let amazonLink = product.amazon_link || product.buy_link || '#';
   if (amazonLink === '#') amazonLink = `https://www.amazon.com/s?k=${searchTerm}&tag=lumobites-20`;
+  else if (!amazonLink.includes('tag=')) {
+    // Append or inject the affiliate tag safely
+    amazonLink = amazonLink.includes('?') ? `${amazonLink}&tag=lumobites-20` : `${amazonLink}?tag=lumobites-20`;
+  }
 
-  let chewyLink = product.chewy_link || product.buy_link || '#';
-  if (chewyLink === '#') chewyLink = `https://www.chewy.com/s?query=${searchTerm}`;
-
-  let petcoLink = product.petco_link || product.buy_link || '#';
-  if (petcoLink === '#') petcoLink = `https://www.petco.com/shop/SearchDisplay?searchTerm=${searchTerm}`;
-
-  let petsmartLink = product.petsmart_link || product.buy_link || '#';
-  if (petsmartLink === '#') petsmartLink = `https://www.petsmart.com/search/?q=${searchTerm}`;
+  let chewyLink = `https://www.chewy.com/s?query=${chewySearchTerm}`;
 
   // Only show health tags the user actually selected — not the product's full tag list.
   // If user said 'no health issues', userHealthIssues will be [] so no tags show.
@@ -170,7 +166,7 @@ export default function ProductDetailPage() {
           <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', margin: '-15px 0', transformOrigin: 'left center' }} />
         </Link>
       </header>
-
+ 
       {/* Hero */}
       <div style={{ backgroundColor: '#FFFFFF', paddingTop: '32px', paddingBottom: '40px', paddingLeft: '24px', paddingRight: '24px', borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
         <div style={{ width: '192px', height: '192px', margin: '0 auto 32px auto', backgroundColor: '#F5EDE4', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '80px' }}>
@@ -198,7 +194,7 @@ export default function ProductDetailPage() {
             </div>
           ) : null}
         </div>
-
+ 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
           {tags.map(tag => (
             <span key={tag} style={{ backgroundColor: '#F5EDE4', color: '#8B5E3C', fontSize: '12px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '100px', border: '1px solid #E8DDD4' }}>
@@ -207,9 +203,9 @@ export default function ProductDetailPage() {
           ))}
         </div>
       </div>
-
+ 
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
+ 
         {/* Nutrition */}
         {(product.protein_pct || product.fat_pct || product.fiber_pct) && (
           <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
@@ -232,7 +228,7 @@ export default function ProductDetailPage() {
             </div>
           </section>
         )}
-
+ 
         {/* Ingredients */}
         <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
           <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 12px 0' }}>
@@ -240,7 +236,7 @@ export default function ProductDetailPage() {
           </h3>
           <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, margin: 0 }}>{product.ingredients}</p>
         </section>
-
+ 
         {/* Pros / Cons */}
         {(product.pros || product.cons || product.description) && (
           <div style={{ display: 'grid', gap: '16px' }}>
@@ -258,7 +254,7 @@ export default function ProductDetailPage() {
             )}
           </div>
         )}
-
+ 
         {/* 7-Day Transition Plan */}
         <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
           <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
@@ -277,7 +273,7 @@ export default function ProductDetailPage() {
           ))}
         </section>
       </div>
-
+ 
       {/* Sticky Buy Footer */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px', backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)', borderTop: '1px solid #E8DDD4', boxShadow: '0 -10px 40px rgba(0,0,0,0.05)', zIndex: 40 }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -286,13 +282,11 @@ export default function ProductDetailPage() {
             <div style={{ fontSize: '13px', color: '#888' }}>Est. ${product.price_monthly_low} - ${product.price_monthly_high}/mo</div>
             <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>Prices are estimates — check retailer for current price</div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-            <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
-            <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
-            <a href={petcoLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#DC2626', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🏪 Petco</a>
-            <a href={petsmartLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#EA580C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🏬 PetSmart</a>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
+            <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
+            <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
           </div>
-          <a href="https://www.google.com/maps/search/pet+store+near+me" target="_blank" rel="noopener noreferrer" style={{ marginTop: '12px', width: '100%', color: '#8B5E3C', fontWeight: 'bold', fontSize: '15px', height: '48px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
         </div>
       </div>
     </div>
