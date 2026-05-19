@@ -20,7 +20,7 @@ export default function Home() {
           <div className="flex-[1.5] flex flex-col items-center md:items-start text-center md:text-left">
             <AnimatedPets />
             
-            <div className="border border-[#C17D3C] text-[#8B5E3C] bg-transparent text-[12px] font-bold tracking-[0.1em] uppercase px-[18px] py-[7px] rounded-[100px] mb-8 relative z-10">
+            <div className="text-[#8B5E3C] text-[12px] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none">
               Free &middot; No Sign-up Required
             </div>
             

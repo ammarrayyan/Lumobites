@@ -62,7 +62,7 @@ export default function AnimatedPets() {
       <div className="relative flex justify-center items-end gap-16 h-[160px] w-full mb-6 select-none">
         
         {/* Dog Animation */}
-        <div className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end drop-shadow-md">
+        <Link href="/twin" className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end drop-shadow-md decoration-none" style={{ textDecoration: 'none' }}>
           {/* Dog Tail */}
           <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
           
@@ -92,10 +92,10 @@ export default function AnimatedPets() {
           {/* Paws */}
           <div className="absolute bottom-[-5px] left-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
           <div className="absolute bottom-[-5px] right-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
-        </div>
+        </Link>
 
         {/* Cat Animation */}
-        <div className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end drop-shadow-md">
+        <Link href="/twin" className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end drop-shadow-md decoration-none" style={{ textDecoration: 'none' }}>
           {/* Cat Tail */}
           <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
             <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
@@ -126,7 +126,7 @@ export default function AnimatedPets() {
           {/* Paws */}
           <div className="absolute bottom-[-2px] left-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
           <div className="absolute bottom-[-2px] right-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
-        </div>
+        </Link>
 
       </div>
 
