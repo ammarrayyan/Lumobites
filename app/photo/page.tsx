@@ -126,7 +126,9 @@ export default function PhotoPage() {
           &larr; Back to Home
         </Link>
         <div style={{ marginLeft: 'auto' }}>
-           <img src="/Logo.png" alt="Lumo Bites" style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} />
+          <Link href="/">
+            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} />
+          </Link>
         </div>
       </nav>
 
