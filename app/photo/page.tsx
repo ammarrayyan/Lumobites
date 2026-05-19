@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, ChangeEvent, DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'food' | 'budget';
+type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'budget';
 
 export default function PhotoPage() {
   const router = useRouter();
@@ -533,32 +533,6 @@ export default function PhotoPage() {
                     key={opt.label}
                     onClick={() => {
                       setAge(opt.val);
-                      setStep('food');
-                    }}
-                    className="border-2 border-[#EEEEEE] rounded-xl p-5 text-left font-bold text-lg text-[#555555] hover:border-[#8B5E3C] hover:bg-[#FDF9F5] transition-all flex items-center justify-between group"
-                  >
-                    {opt.label}
-                    <span className="text-[#8B5E3C] opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* FOOD PREF STEP */}
-          {step === 'food' && (
-            <div className="flex flex-col gap-6 animate-fade-in">
-              <h2 className="text-2xl font-[800] text-[#191919] text-center mb-2">What food do they prefer?</h2>
-              <div className="flex flex-col gap-3">
-                {[
-                  { label: '🥩 Dry food (kibble)', val: 'dry' },
-                  { label: '🍖 Wet food (canned)', val: 'wet' },
-                  { label: '🔀 Both / No preference', val: 'both' }
-                ].map((opt) => (
-                  <button 
-                    key={opt.val}
-                    onClick={() => {
-                      setFoodType(opt.val);
                       setStep('budget');
                     }}
                     className="border-2 border-[#EEEEEE] rounded-xl p-5 text-left font-bold text-lg text-[#555555] hover:border-[#8B5E3C] hover:bg-[#FDF9F5] transition-all flex items-center justify-between group"
