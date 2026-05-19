@@ -18,21 +18,28 @@ const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
 export default function BrandMarquee() {
   return (
-    <section className="w-full bg-white py-12 border-b border-[#EEEEEE] overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-6 mb-8 text-center">
-        <p className="text-[12px] font-bold tracking-[0.14em] uppercase text-[#BBBBBB]">Brands we cover</p>
+    <section className="w-full bg-[#FDFAF7] py-16 border-y border-[#F3EDE2] overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-6 mb-12 text-center">
+        <div className="inline-flex items-center gap-3 justify-center">
+          <span className="h-[1.5px] w-6 bg-[#EADFCF]"></span>
+          <p className="text-[12px] font-[800] tracking-[0.2em] uppercase text-[#8B5E3C]">Brands we cover</p>
+          <span className="h-[1.5px] w-6 bg-[#EADFCF]"></span>
+        </div>
+        <h3 className="text-[24px] md:text-[28px] font-[800] text-[#1D1D1F] mt-2 tracking-tight">
+          Analyze ingredients from 50+ premium brands
+        </h3>
       </div>
 
       <div className="relative w-full flex flex-col gap-6">
         {/* Row 1 - Left to Right */}
-        <div className="marquee-container relative w-full overflow-hidden flex">
-          <div className="marquee-content-right flex items-center whitespace-nowrap">
+        <div className="marquee-container relative w-full overflow-hidden flex py-2">
+          <div className="marquee-content-right flex items-center whitespace-nowrap gap-4">
             {[...brandsRow1, ...brandsRow1].map((brand, i) => (
               <Link 
                 key={`r1-${i}`} 
                 href={`/chat?brand=${slugify(brand)}`}
-                className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] hover:text-[#8B5E3C] transition-colors cursor-pointer no-underline select-none"
-                style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+                className="inline-flex items-center justify-center bg-white hover:bg-[#8B5E3C] text-[#555555] hover:text-white border border-[#EADFCF] hover:border-[#8B5E3C] px-6 py-2.5 rounded-full text-[14px] md:text-[15px] font-[600] shadow-[0_4px_10px_rgba(139,94,60,0.03)] hover:shadow-[0_8px_20px_rgba(139,94,60,0.12)] hover:scale-[1.04] transition-all cursor-pointer no-underline select-none"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {brand}
               </Link>
@@ -41,14 +48,14 @@ export default function BrandMarquee() {
         </div>
 
         {/* Row 2 - Right to Left */}
-        <div className="marquee-container relative w-full overflow-hidden flex">
-          <div className="marquee-content-left flex items-center whitespace-nowrap">
+        <div className="marquee-container relative w-full overflow-hidden flex py-2">
+          <div className="marquee-content-left flex items-center whitespace-nowrap gap-4">
             {[...brandsRow2, ...brandsRow2].map((brand, i) => (
               <Link 
                 key={`r2-${i}`} 
                 href={`/chat?brand=${slugify(brand)}`}
-                className="mx-6 text-[18px] md:text-[22px] font-[800] tracking-tight text-[#E5E5E5] hover:text-[#8B5E3C] transition-colors cursor-pointer no-underline select-none"
-                style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+                className="inline-flex items-center justify-center bg-white hover:bg-[#8B5E3C] text-[#555555] hover:text-white border border-[#EADFCF] hover:border-[#8B5E3C] px-6 py-2.5 rounded-full text-[14px] md:text-[15px] font-[600] shadow-[0_4px_10px_rgba(139,94,60,0.03)] hover:shadow-[0_8px_20px_rgba(139,94,60,0.12)] hover:scale-[1.04] transition-all cursor-pointer no-underline select-none"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {brand}
               </Link>
@@ -64,12 +71,11 @@ export default function BrandMarquee() {
         }
 
         .marquee-content-right {
-          animation: scrollRight 40s linear infinite;
-          /* Negative margin trick if needed to hide gap, but padding handles it */
+          animation: scrollRight 50s linear infinite;
         }
 
         .marquee-content-left {
-          animation: scrollLeft 40s linear infinite;
+          animation: scrollLeft 50s linear infinite;
         }
 
         /* Hover pauses the animation */
