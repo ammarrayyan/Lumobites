@@ -122,12 +122,12 @@ export default function PhotoPage() {
     <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
       {/* NAVBAR */}
       <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center shrink-0" style={{ height: '72px' }}>
-        <Link href="/" className="flex items-center text-[#8B5E3C] font-bold text-sm hover:underline">
-          &larr; Back to Home
+        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} />
         </Link>
         <div style={{ marginLeft: 'auto' }}>
-          <Link href="/">
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} />
+          <Link href="/" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
+            &larr; Go Home
           </Link>
         </div>
       </nav>
