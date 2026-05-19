@@ -547,74 +547,76 @@ export default function TwinPage() {
                 </div>
               </div>
             ) : (
-              <div 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                className="group border-2 border-dashed border-[#E8D5C0] hover:border-[#8B5E3C] bg-gradient-to-b from-[#FAF6F2] to-[#FAF8F5] hover:bg-[#FDFBF9] rounded-3xl p-8 md:p-12 text-center flex flex-col items-center gap-6 cursor-pointer transition-all duration-300 transform hover:scale-[1.01] hover:shadow-[0_8px_30px_rgba(139,94,60,0.04)]"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileSelect} 
-                  accept="image/*" 
-                  className="hidden" 
-                />
-                <input 
-                  type="file" 
-                  ref={cameraInputRef} 
-                  onChange={handleFileSelect} 
-                  accept="image/*"
-                  capture="user"
-                  className="hidden" 
-                />
-                
-                <div className="w-20 h-20 bg-white border border-[#E8D5C0] rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(139,94,60,0.06)] group-hover:shadow-[0_6px_20px_rgba(139,94,60,0.1)] transition-all duration-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-[#8B5E3C] transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <div className="flex flex-col gap-6 w-full">
+                {/* Clean Minimalist Dropzone */}
+                <div 
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
+                  className="group relative border-2 border-dashed border-gray-200 hover:border-[#8B5E3C] bg-[#FCFBF9]/60 hover:bg-white rounded-2xl p-8 md:p-10 text-center flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_24px_rgba(139,94,60,0.03)]"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileSelect} 
+                    accept="image/*" 
+                    className="hidden" 
+                  />
+                  <input 
+                    type="file" 
+                    ref={cameraInputRef} 
+                    onChange={handleFileSelect} 
+                    accept="image/*"
+                    capture="user"
+                    className="hidden" 
+                  />
+                  
+                  {/* Modern Illustrative Icon */}
+                  <div className="w-16 h-16 bg-white border border-gray-100 rounded-2xl flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:border-[#8B5E3C]/20 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400 group-hover:text-[#8B5E3C] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                    </svg>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1">
+                    <span className="font-semibold text-base text-gray-700 group-hover:text-[#8B5E3C] transition-colors">
+                      Drag & drop your pet photo here
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      or <span className="text-[#8B5E3C] font-semibold hover:underline">browse files</span> from your device
+                    </span>
+                  </div>
+                  
+                  <span className="text-xs text-gray-400 font-medium">
+                    Supports JPG, PNG, or WEBP up to 10MB
+                  </span>
+                </div>
+
+                {/* Minimal Divider */}
+                <div className="flex items-center gap-4 py-2">
+                  <div className="flex-1 h-px bg-gray-100"></div>
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-gray-100"></div>
+                </div>
+
+                {/* Live Action Selfie Option */}
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setCameraActive(true); }}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-4 px-6 rounded-2xl font-bold transition-all flex items-center justify-center gap-2.5 shadow-[0_4px_14px_rgba(139,94,60,0.12)] hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
                   </svg>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <span className="font-extrabold text-xl text-[#191919] tracking-tight group-hover:text-[#8B5E3C] transition-colors">
-                    Drop your photo here
-                  </span>
-                  <span className="text-sm text-[#777777] font-medium max-w-[280px] mx-auto leading-normal">
-                    We&apos;ll automatically identify your breed characteristics and find your twin!
-                  </span>
-                  <span className="text-xs font-bold text-[#8B5E3C] bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 rounded-full px-4 py-1.5 mt-2 self-center hover:bg-[#8B5E3C]/10 transition-colors">
-                    Or click to browse files
-                  </span>
-                </div>
+                  Use Live Camera / Take Selfie
+                </button>
 
-                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[340px] mt-4" onClick={(e) => e.stopPropagation()}>
-                  <button 
-                    onClick={() => setCameraActive(true)}
-                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(139,94,60,0.15)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                    </svg>
-                    Take Selfie
-                  </button>
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 bg-white border border-[#E8D5C0] hover:border-[#C17D3C] text-[#8B5E3C] py-3.5 px-4 rounded-xl font-bold hover:bg-[#FDFDFD] transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#8B5E3C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                    </svg>
-                    Upload Photo
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 bg-[#FDF9F5] border border-[#F0E4D8] py-2 px-4 rounded-full text-[11px] text-[#9A7760] font-semibold mt-4 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-[#8B5E3C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0V10.5m-2.25 10.5h13.5c.621 0 1.125-.504 1.125-1.125V11.25c0-.621-.504-1.125-1.125-1.125H4.875c-.621 0-1.125.504-1.125 1.125v7.875c0 .621.504 1.125 1.125 1.125Z" />
+                {/* Secure Privacy Banner */}
+                <div className="flex items-center justify-center gap-2 bg-[#F6FDF9] border border-[#E7F6EC] py-2.5 px-4 rounded-xl text-xs text-gray-500 font-medium mt-2 shadow-xs">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                   </svg>
-                  <span>Your photo is analyzed instantly and never stored</span>
+                  <span>HIPAA Compliant & Privacy Secure: Photos are deleted instantly after analysis</span>
                 </div>
               </div>
             )
