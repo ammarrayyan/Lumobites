@@ -27,6 +27,7 @@ export default function ScanPage() {
   } | null>(null);
   
   const [isCameraStarted, setIsCameraStarted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'scanner' | 'manual'>('scanner');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -365,71 +366,172 @@ export default function ScanPage() {
         </div>
       </header>
 
-      <main className="max-w-md mx-auto p-6">
-        <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-[#191919] mb-3">Is This Food Safe?</h2>
-            <p className="text-gray-600 leading-relaxed text-sm">Scan barcode or ingredient list for instant safety analysis + live FDA recall check</p>
-        </div>
+      <main className="max-w-2xl mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
+        <canvas ref={canvasRef} className="hidden" />
 
-        {/* Search / Scan UI */}
-        <div className={(!product && !loading && !ocrLoading) ? 'block space-y-6' : 'hidden'}>
-          <div className="relative">
-            <div className="bg-white rounded-3xl p-4 shadow-sm border border-[#E8DDD4] overflow-hidden">
-              <div id="reader" className="w-full"></div>
+        {/* Outer Premium Card Container */}
+        <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-6 md:p-10 flex flex-col gap-6">
+          
+          {/* Header Title Section */}
+          <div className="text-center flex flex-col items-center">
+            {/* Sparkle Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C]">
+                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.6 3.102-1.196 4.622c-.21.81.67 1.45 1.366 1.012L10 15.71l4.217 2.341c.697.438 1.577-.202 1.366-1.012l-1.196-4.622 3.6-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
+              </svg>
+              Live FDA Safety Check
             </div>
             
-            {isCameraStarted && (
-              <div className="absolute bottom-6 left-0 right-0 flex justify-center px-6 z-10">
-                <button 
-                  onClick={captureAndOCR}
-                  className="bg-[#8B5E3C] text-white px-8 py-4 rounded-full font-bold shadow-xl flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
-                >
-                  <span className="text-xl">📸</span>
-                  Capture & Analyze
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="text-center">
-            <p className="text-xs text-gray-400 mb-6 font-medium italic">Point at barcode OR ingredient list on back of package</p>
-
-            <form onSubmit={handleBarcodeSubmit} className="mt-4">
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Manual Barcode Entry</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={manualBarcode}
-                  onChange={(e) => setManualBarcode(e.target.value)}
-                  placeholder="Enter barcode..."
-                  className="flex-1 px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm"
-                />
-                <button type="submit" className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-bold text-sm">Go</button>
-              </div>
-            </form>
-
-            <form onSubmit={handleManualIngredientSubmit} className="mt-6">
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-left">Or paste ingredient list below</label>
-              <textarea
-                value={manualIngredients}
-                onChange={(e) => setManualIngredients(e.target.value)}
-                placeholder="Chicken, Rice, Corn Syrup..."
-                className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm h-24 resize-none"
-              />
-              <button type="submit" className="w-full mt-2 bg-white border border-[#E8DDD4] text-[#8B5E3C] py-3 rounded-xl font-bold text-sm hover:bg-[#FDFAF7]">Analyze Ingredients</button>
-            </form>
-          </div>
-        </div>
-
-        {(loading || ocrLoading) && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-            <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? 'Reading Label...' : 'Analyzing Safety...'}</h3>
-            <p className="text-gray-500 text-sm max-w-[240px] mx-auto">
-              {ocrLoading ? 'Preprocessing image and sending to Google Cloud Vision...' : 'Checking ingredients and live FDA databases.'}
+            <h2 className="text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Is This Food Safe?</h2>
+            <p className="text-sm text-gray-500 leading-relaxed max-w-[400px]">
+              Scan barcode or paste ingredients for instant safety analysis + live FDA recall check
             </p>
           </div>
-        )}
+
+          {/* Search / Scan UI */}
+          {(!product && !loading && !ocrLoading) ? (
+            <div className="flex flex-col gap-6">
+              
+              {/* Tab Selector */}
+              <div className="flex bg-[#F8F6F4] p-1.5 rounded-2xl border border-gray-100">
+                <button
+                  onClick={() => setActiveTab('scanner')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer ${
+                    activeTab === 'scanner'
+                      ? 'bg-white text-[#8B5E3C] shadow-xs'
+                      : 'text-gray-500 hover:text-[#8B5E3C]'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                  </svg>
+                  Live Camera Scanner
+                </button>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer ${
+                    activeTab === 'manual'
+                      ? 'bg-white text-[#8B5E3C] shadow-xs'
+                      : 'text-gray-500 hover:text-[#8B5E3C]'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                  Manual Entry
+                </button>
+              </div>
+
+              {/* TAB 1: Live Scanner Viewport */}
+              {activeTab === 'scanner' && (
+                <div className="flex flex-col gap-4">
+                  <div className="relative group">
+                    <div className="bg-[#FAF8F6] rounded-3xl p-4 border-2 border-dashed border-gray-200 overflow-hidden shadow-xs hover:border-[#8B5E3C] transition-colors relative">
+                      <div id="reader" className="w-full rounded-2xl overflow-hidden"></div>
+                    </div>
+                    
+                    {isCameraStarted && (
+                      <div className="absolute bottom-6 left-0 right-0 flex justify-center px-6 z-10">
+                        <button 
+                          onClick={captureAndOCR}
+                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-4 rounded-full font-bold shadow-xl flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                          </svg>
+                          Capture & Analyze Label
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 text-center font-semibold tracking-wide">
+                    Hold barcode or ingredient list steady within camera view frame
+                  </p>
+                </div>
+              )}
+
+              {/* TAB 2: Manual Barcode / Ingredient Input */}
+              {activeTab === 'manual' && (
+                <div className="flex flex-col gap-6">
+                  {/* Barcode Search Form */}
+                  <form onSubmit={handleBarcodeSubmit} className="flex flex-col gap-2">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-left">
+                      Manual Barcode Search
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={manualBarcode}
+                          onChange={(e) => setManualBarcode(e.target.value)}
+                          placeholder="e.g. 079100002598"
+                          className="w-full pl-4 pr-10 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                        />
+                        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 10.5v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 10.5v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM16.5 13.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm-2.25-4.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm4.5-2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <button 
+                        type="submit" 
+                        className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-xs transition-colors cursor-pointer"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Minimal Separator */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-px bg-gray-150"></div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">or</span>
+                    <div className="flex-1 h-px bg-gray-150"></div>
+                  </div>
+
+                  {/* Paste Ingredients Form */}
+                  <form onSubmit={handleManualIngredientSubmit} className="flex flex-col gap-2">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-left">
+                      Paste Ingredient List Below
+                    </label>
+                    <textarea
+                      value={manualIngredients}
+                      onChange={(e) => setManualIngredients(e.target.value)}
+                      placeholder="e.g. Chicken, Brown Rice, Barley, Natural Flavor, Sodium Selenite..."
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white h-28 resize-none transition-all placeholder:text-gray-300"
+                    />
+                    <button 
+                      type="submit" 
+                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-xs transition-colors cursor-pointer"
+                    >
+                      Analyze Ingredients
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Secure Privacy Banner */}
+              <div className="flex items-center justify-center gap-2 bg-[#F6FDF9] border border-[#E7F6EC] py-2.5 px-4 rounded-xl text-xs text-gray-500 font-medium mt-2 shadow-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                </svg>
+                <span>Your privacy is protected — we do not save or share your photos</span>
+              </div>
+            </div>
+          ) : null}
+
+          {(loading || ocrLoading) && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
+              <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? 'Reading Label...' : 'Analyzing Safety...'}</h3>
+              <p className="text-gray-500 text-sm max-w-[240px] mx-auto">
+                {ocrLoading ? 'Preprocessing image and sending to Google Cloud Vision...' : 'Checking ingredients and live FDA databases.'}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* ── OCR Review Step ── show extracted text before analysis ────────── */}
         {ocrReviewText && !product && !loading && !ocrLoading && (
