@@ -704,6 +704,15 @@ export default function TwinPage() {
                   </p>
                 </div>
 
+                {/* Footer branding */}
+                <div className="w-full flex justify-between items-center bg-[#F9F7F5] rounded-2xl p-4 mt-6 border border-[#EBEBEB] box-border">
+                  <div className="flex items-center gap-3">
+                    <img src="/lumo-bites-logo.png" alt="Lumo Bites Logo" className="h-6 object-contain" />
+                    <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider hidden sm:inline">Find Your Pet Twin Free</span>
+                  </div>
+                  <span className="text-xs font-bold text-[#8B5E3C]">lumobites.net/twin</span>
+                </div>
+
               </div>
 
               {/* CTAs & Options */}
@@ -1021,18 +1030,20 @@ export default function TwinPage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '100%',
-            background: '#F9F7F5',
+            background: '#FFFFFF',
             borderRadius: '24px',
             padding: '24px 40px',
             boxSizing: 'border-box',
             border: '1px solid #EBEBEB'
           }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
-              <span style={{ fontSize: '18px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ background: '#FFFFFF', padding: '8px 16px', borderRadius: '12px', border: '1px solid #EBEBEB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src="/lumo-bites-logo.png" alt="Lumo Bites" style={{ height: '55px', objectFit: 'contain' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
+                <span style={{ fontSize: '16px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
+              </div>
             </div>
           </div>
 
@@ -1211,21 +1222,24 @@ export default function TwinPage() {
           {/* Footer branding */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
             alignItems: 'center',
+            justifyContent: 'center',
+            gap: '15px',
             width: '100%',
-            background: '#F9F7F5',
+            background: '#FFFFFF',
             borderRadius: '30px',
-            padding: '30px 50px',
+            padding: '35px 50px',
             boxSizing: 'border-box',
-            border: '1px solid #EBEBEB'
+            border: '1px solid #EBEBEB',
+            textAlign: 'center'
           }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
-              <span style={{ fontSize: '20px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
+            <div style={{ background: '#FFFFFF', padding: '12px 24px', borderRadius: '16px', border: '1px solid #EBEBEB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/lumo-bites-logo.png" alt="Lumo Bites" style={{ height: '75px', objectFit: 'contain' }} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#8B5E3C', letterSpacing: '0.5px' }}>lumobites.net/twin</span>
+              <span style={{ fontSize: '18px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
             </div>
           </div>
 
@@ -1376,17 +1390,19 @@ export default function TwinPage() {
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '100%',
-            background: '#F9F7F5',
+            background: '#FFFFFF',
             borderRadius: '16px',
             padding: '16px 30px',
             boxSizing: 'border-box',
             border: '1px solid #EBEBEB'
           }}>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: '#191919' }}>Lumo Bites</span>
-              <span style={{ fontSize: '15px', color: '#666666', fontWeight: 400 }}>| Find Your Pet Twin Free</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ background: '#FFFFFF', padding: '6px 12px', borderRadius: '10px', border: '1px solid #EBEBEB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src="/lumo-bites-logo.png" alt="Lumo Bites" style={{ height: '40px', objectFit: 'contain' }} />
+              </div>
+              <span style={{ fontSize: '15px', color: '#666666', fontWeight: 400 }}>Find Your Pet Twin Free</span>
             </div>
-            <span style={{ fontSize: '16px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
+            <span style={{ fontSize: '18px', fontWeight: 700, color: '#8B5E3C' }}>lumobites.net/twin</span>
           </div>
 
         </div>
