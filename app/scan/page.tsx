@@ -354,13 +354,15 @@ export default function ScanPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-12">
-      <header className="bg-white border-b border-[#E8DDD4] p-4 flex items-center sticky top-0 z-50">
-        <Link href="/" className="mr-4 text-[#8B5E3C]">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+      <header className="bg-white border-b border-[#E8DDD4] px-6 md:px-[48px] flex items-center sticky top-0 z-50" style={{ height: '72px' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} />
         </Link>
-        <h1 className="text-xl font-bold text-[#191919]">Is This Food Safe?</h1>
+        <div style={{ marginLeft: 'auto' }}>
+          <Link href="/" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
+            &larr; Go Home
+          </Link>
+        </div>
       </header>
 
       <main className="max-w-md mx-auto p-6">
