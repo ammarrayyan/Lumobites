@@ -484,15 +484,21 @@ export default function TwinPage() {
       </nav>
 
       <main className="flex-1 flex flex-col items-center py-12 px-6">
-        <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-sm p-8 md:p-10 relative overflow-hidden">
+        <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 relative overflow-hidden">
           
           {/* HEADER */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-tight mb-3">
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C]">
+                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.6 3.102-1.196 4.622c-.21.81.67 1.45 1.366 1.012L10 15.71l4.217 2.341c.697.438 1.577-.202 1.366-1.012l-1.196-4.622 3.6-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
+              </svg>
+              AI Breed Matching
+            </div>
+            <h1 className="text-3xl md:text-4xl font-[900] text-[#191919] tracking-tight mb-3">
               Find Your Pet Twin
             </h1>
-            <p className="text-[16px] text-[#777777] font-normal">
-              Discover which dog or cat breed matches your personality
+            <p className="text-[15px] text-[#666666] font-medium leading-relaxed max-w-[450px]">
+              Discover which dog or cat breed matches your personality and traits using our advanced visual AI
             </p>
           </div>
 
@@ -544,7 +550,7 @@ export default function TwinPage() {
               <div 
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
-                className="border-2 border-dashed border-[#D9C0A8] bg-[#F5EDE4] rounded-2xl p-8 md:p-12 text-center flex flex-col items-center gap-6 cursor-pointer hover:border-[#8B5E3C] transition-all"
+                className="group border-2 border-dashed border-[#E8D5C0] hover:border-[#8B5E3C] bg-gradient-to-b from-[#FAF6F2] to-[#FAF8F5] hover:bg-[#FDFBF9] rounded-3xl p-8 md:p-12 text-center flex flex-col items-center gap-6 cursor-pointer transition-all duration-300 transform hover:scale-[1.01] hover:shadow-[0_8px_30px_rgba(139,94,60,0.04)]"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <input 
@@ -562,35 +568,54 @@ export default function TwinPage() {
                   capture="user"
                   className="hidden" 
                 />
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-sm text-[#8B5E3C]">
-                  📸
+                
+                <div className="w-20 h-20 bg-white border border-[#E8D5C0] rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(139,94,60,0.06)] group-hover:shadow-[0_6px_20px_rgba(139,94,60,0.1)] transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-[#8B5E3C] transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                  </svg>
                 </div>
                 
                 <div className="flex flex-col gap-2">
-                  <span className="font-bold text-lg text-[#191919]">
-                    Drop your photo here — we&apos;ll find your animal twin! 🐾
+                  <span className="font-extrabold text-xl text-[#191919] tracking-tight group-hover:text-[#8B5E3C] transition-colors">
+                    Drop your photo here
                   </span>
-                  <span className="text-sm text-[#8B5E3C]">or click to select</span>
+                  <span className="text-sm text-[#777777] font-medium max-w-[280px] mx-auto leading-normal">
+                    We&apos;ll automatically identify your breed characteristics and find your twin!
+                  </span>
+                  <span className="text-xs font-bold text-[#8B5E3C] bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 rounded-full px-4 py-1.5 mt-2 self-center hover:bg-[#8B5E3C]/10 transition-colors">
+                    Or click to browse files
+                  </span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[340px] mt-4" onClick={(e) => e.stopPropagation()}>
                   <button 
                     onClick={() => setCameraActive(true)}
-                    className="flex-1 bg-[#8B5E3C] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(139,94,60,0.15)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
-                    <span>📷</span> Take Selfie
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                    </svg>
+                    Take Selfie
                   </button>
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] hover:border-[#C17D3C] transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-white border border-[#E8D5C0] hover:border-[#C17D3C] text-[#8B5E3C] py-3.5 px-4 rounded-xl font-bold hover:bg-[#FDFDFD] transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
-                    <span>📁</span> Upload Photo
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#8B5E3C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                    </svg>
+                    Upload Photo
                   </button>
                 </div>
 
-                <p className="text-xs text-[#9A7760] mt-4">
-                  🔒 Your photo is analyzed instantly and never stored
-                </p>
+                <div className="flex items-center gap-2 bg-[#FDF9F5] border border-[#F0E4D8] py-2 px-4 rounded-full text-[11px] text-[#9A7760] font-semibold mt-4 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-[#8B5E3C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0V10.5m-2.25 10.5h13.5c.621 0 1.125-.504 1.125-1.125V11.25c0-.621-.504-1.125-1.125-1.125H4.875c-.621 0-1.125.504-1.125 1.125v7.875c0 .621.504 1.125 1.125 1.125Z" />
+                  </svg>
+                  <span>Your photo is analyzed instantly and never stored</span>
+                </div>
               </div>
             )
           )}
