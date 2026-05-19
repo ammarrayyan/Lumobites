@@ -425,7 +425,7 @@ export default function ScanPage() {
 
               {/* TAB 1: Live Scanner Viewport */}
               {activeTab === 'scanner' && (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-5">
                   <div className="relative group">
                     <div className="bg-[#FAF8F6] rounded-3xl p-4 border-2 border-dashed border-gray-200 overflow-hidden shadow-xs hover:border-[#8B5E3C] transition-colors relative">
                       <div id="reader" className="w-full rounded-2xl overflow-hidden"></div>
@@ -438,17 +438,46 @@ export default function ScanPage() {
                           className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-4 rounded-full font-bold shadow-xl flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
                           </svg>
-                          Capture & Analyze Label
+                          Capture & Scan Ingredients
                         </button>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 text-center font-semibold tracking-wide">
-                    Hold barcode or ingredient list steady within camera view frame
-                  </p>
+                  
+                  {/* Two-Column Scan Instructions Organiser */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    {/* Column 1: Barcode Scan */}
+                    <div className="bg-[#FAF8F6] border border-[#F0EBE5] rounded-2xl p-4 flex gap-3">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-150 shrink-0 text-[#8B5E3C] shadow-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 10.5v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 10.5v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM16.5 13.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm-2.25-4.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm4.5-2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008z" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-[#191919] mb-0.5">Scan Barcode</span>
+                        <p className="text-[11px] text-gray-500 leading-normal">
+                          Align any pet food barcode in the viewfinder. It will automatically detect and fetch the product.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Column 2: Ingredients Scan */}
+                    <div className="bg-[#FAF8F6] border border-[#F0EBE5] rounded-2xl p-4 flex gap-3">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-150 shrink-0 text-[#8B5E3C] shadow-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-[#191919] mb-0.5">Scan Ingredients</span>
+                        <p className="text-[11px] text-gray-500 leading-normal">
+                          Point the camera directly at the text ingredients block on the package back, then tap <strong className="text-[#8B5E3C]">Capture & Scan Ingredients</strong>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -511,14 +540,6 @@ export default function ScanPage() {
                   </form>
                 </div>
               )}
-
-              {/* Secure Privacy Banner */}
-              <div className="flex items-center justify-center gap-2 bg-[#F6FDF9] border border-[#E7F6EC] py-2.5 px-4 rounded-xl text-xs text-gray-500 font-medium mt-2 shadow-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                </svg>
-                <span>Your privacy is protected — we do not save or share your photos</span>
-              </div>
             </div>
           ) : null}
 
