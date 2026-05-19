@@ -13,9 +13,9 @@ export default function Navbar() {
       <div className="px-6 md:px-[48px] h-[72px] flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
-          <div className="flex items-center origin-left scale-[1.4] -my-[15px]">
+          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
             <img src="/Logo.png" alt="Lumo Bites" className="h-[70px] w-auto block object-contain" />
-            <sup className="text-[#8B5A2B] text-[10px] font-bold select-none ml-0.5 self-start mt-3 font-sans">™</sup>
+            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '12px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
           </div>
         </Link>
 
