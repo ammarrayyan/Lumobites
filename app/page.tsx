@@ -345,8 +345,11 @@ export default function Home() {
       <footer className="w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', maxWidth: '1200px', margin: '0 auto', marginBottom: '48px' }}>
           <div style={{ flex: '2 1 300px' }}>
-            <Link href="/" className="mb-4 inline-block">
-              <img src="/Logo.png" alt="Lumo Bites" style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }} />
+            <Link href="/" className="mb-4 inline-block" style={{ textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <img src="/Logo.png" alt="Lumo Bites" style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }} />
+                <sup style={{ fontSize: '16px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '14px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+              </div>
             </Link>
             <p className="text-sm max-w-sm leading-relaxed mt-2" style={{ color: '#AAAAAA' }}>
               Every pet deserves optimal nutrition without the marketing fluff.
@@ -378,7 +381,7 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-[1200px] mx-auto pt-8 border-t border-gray-800 text-[#AAAAAA] text-xs flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>&copy; {new Date().getFullYear()} Lumo Bites. All rights reserved.</div>
+          <div>&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. All rights reserved.</div>
           <div className="flex items-center gap-4 text-base">
             <a href="#" className="hover:text-[#C17D3C] transition-colors">𝕏</a>
             <a href="#" className="hover:text-[#C17D3C] transition-colors">📷</a>

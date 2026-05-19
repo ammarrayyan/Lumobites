@@ -84,8 +84,11 @@ export default function IngredientsPage() {
     <div className="min-h-screen bg-[#FDFAF7] pb-24">
       {/* NAVBAR */}
       <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center h-[72px]">
-        <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', transform: 'scale(1.4)', transformOrigin: 'left center' }} />
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center' }}>
+            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain' }} />
+            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '12px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+          </div>
         </Link>
       </nav>
 
@@ -231,10 +234,13 @@ export default function IngredientsPage() {
 
       {/* FOOTER */}
       <footer className="mt-24 bg-[#191919] py-16 px-6 text-center text-white">
-        <Link href="/">
-          <img src="/Logo.png" alt="Lumo Bites" className="h-12 mx-auto mb-6 invert brightness-0" />
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            <img src="/Logo.png" alt="Lumo Bites" className="h-12 invert brightness-0" />
+            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+          </div>
         </Link>
-        <p className="text-gray-500 text-sm mb-4">&copy; {new Date().getFullYear()} Lumo Bites. Every pet deserves safe food.</p>
+        <p className="text-gray-500 text-sm mb-4 mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Every pet deserves safe food.</p>
         <div className="flex justify-center gap-6 text-sm font-bold text-gray-400">
           <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
           <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>

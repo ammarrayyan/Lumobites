@@ -12,8 +12,11 @@ export default function Navbar() {
       {/* Desktop & Mobile Header Container */}
       <div className="px-6 md:px-[48px] h-[72px] flex items-center justify-between">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center">
-          <img src="/Logo.png" alt="Lumo Bites" className="h-[70px] w-auto block object-contain scale-[1.4] origin-left -my-[15px]" />
+        <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
+          <div className="flex items-center origin-left scale-[1.4] -my-[15px]">
+            <img src="/Logo.png" alt="Lumo Bites" className="h-[70px] w-auto block object-contain" />
+            <sup className="text-[#8B5A2B] text-[10px] font-bold select-none ml-0.5 self-start mt-3 font-sans">™</sup>
+          </div>
         </Link>
 
         {/* Right: Desktop Links & Share */}

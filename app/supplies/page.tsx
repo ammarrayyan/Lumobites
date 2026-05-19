@@ -89,8 +89,11 @@ export default function SuppliesPage() {
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans">
       {/* Header */}
       <header className="bg-white border-b border-[#E8DDD4] px-6 py-4 flex items-center sticky top-0 z-30 shadow-sm">
-        <Link href="/" className="flex items-center">
-          <img src="/Logo.png" alt="Lumo Bites" className="h-[70px] w-auto block object-contain scale-[1.4] -my-[15px] origin-left" />
+        <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
+            <img src="/Logo.png" alt="Lumo Bites" className="h-[70px] w-auto block object-contain" />
+            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '12px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+          </div>
         </Link>
       </header>
 

@@ -429,12 +429,11 @@ export default function ChatPage() {
         {/* Header */}
         <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 20, display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #F5EDE4' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link href="/">
-              <img 
-                src="/Logo.png" 
-                alt="Lumo Bites" 
-                style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain', margin: '-15px 0', transform: 'scale(1.4)', transformOrigin: 'left center' }}
-              />
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
+                <img src="/Logo.png" alt="Lumo Bites" style={{ height: '70px', width: 'auto', display: 'block', objectFit: 'contain' }} />
+                <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '12px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+              </div>
             </Link>
             <p className="text-xs text-[#8B5E3C] font-semibold">Question {getQuestionNumber(step)} of 4</p>
           </div>
