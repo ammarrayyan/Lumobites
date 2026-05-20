@@ -32,14 +32,38 @@ export default function ResultsPage() {
       let finalResults = data.results || [];
       const brandParam = targetProfile.brand;
       if (brandParam) {
-        const normalizeBrand = (b: string) => b.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]/g, ' ').trim();
-        const bpNormalized = normalizeBrand(brandParam);
-        
-        const filtered = finalResults.filter((r: any) => {
-          if (!r.brand) return false;
-          const rbNormalized = normalizeBrand(r.brand);
-          return rbNormalized.includes(bpNormalized) || bpNormalized.includes(rbNormalized);
-        });
+        const isBrandMatch = (pb: string | undefined, pn: string | undefined, fb: string) => {
+          if (!fb) return false;
+          const IGNORE_WORDS = new Set([
+            'science', 'diet', 'pro', 'plan', 'one', 'brand', 'pet', 'food', 'dog', 'cat', 'formula', 'recipe', 'nutrition',
+            'of', 'the', 'and', 'in', 'with', 'for', 'a', 'an'
+          ]);
+          
+          const getBrandWords = (s: string) => {
+            return s
+              .toLowerCase()
+              .replace(/['’]/g, '') // remove apostrophes
+              .replace(/[^a-z0-9]/g, ' ') // replace other non-alphanumeric with spaces
+              .split(/\s+/)
+              .map(w => w.trim())
+              .filter(w => w.length > 0 && !IGNORE_WORDS.has(w));
+          };
+          
+          const wordsFB = getBrandWords(fb);
+          if (wordsFB.length === 0) {
+            const cleanFB = fb.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const cleanPB = (pb || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const cleanPN = (pn || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return cleanPB.includes(cleanFB) || cleanPN.includes(cleanFB);
+          }
+          
+          const wordsPB = pb ? getBrandWords(pb) : [];
+          const wordsPN = pn ? getBrandWords(pn) : [];
+          
+          return wordsFB.some(w => wordsPB.includes(w) || wordsPN.includes(w));
+        };
+
+        const filtered = finalResults.filter((r: any) => isBrandMatch(r.brand, r.product_name, brandParam));
         if (filtered.length > 0) {
           finalResults = filtered;
           setBrandFallback(false);
