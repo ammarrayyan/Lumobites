@@ -24,15 +24,15 @@
 
 @media (min-width: 768px) {
   :root {
-    --text-body: 16px;
-    --text-desc: 15px;
+    --text-body: 17px;
+    --text-desc: 17px;
     --text-card-desc: 16px;
-    --text-small: 13px;
-    --text-small-caption: 13px;
-    --text-btn: 15px;
-    --text-nav: 15px;
+    --text-small: 14px;
+    --text-small-caption: 14px;
+    --text-btn: 16px;
+    --text-nav: 16px;
     --text-badge: 14px;
-    --text-hero-sub: 17px;
+    --text-hero-sub: 18px;
   }
 }
 
