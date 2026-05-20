@@ -8,7 +8,7 @@ export default function ChatBubble({ role, content }: { role: 'user' | 'assistan
           maxWidth: '85%',
           padding: '14px 20px',
           fontSize: '16px',
-          lineHeight: '1.5',
+          lineHeight: '1.6',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           backgroundColor: isUser ? '#8B5E3C' : '#F5EDE4',
           color: isUser ? '#FFFFFF' : '#1A1A1A',

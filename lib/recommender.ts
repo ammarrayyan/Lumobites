@@ -1,6 +1,7 @@
 import { Product, PetProfile, ScoredProduct, HealthTag } from './types';
 import { deriveLifeStage } from './parser';
 import { ingredientDatabase, IngredientInfo } from './ingredients';
+import { isBrandMatch } from './brand-matcher';
 
 function getProductFoodType(product: Product): 'dry' | 'wet' | 'treats' | 'both' {
   // Check the product's own food_type field first (set from Open Pet Food Facts)
@@ -141,10 +142,19 @@ export function recommendProducts(
   const lifeStage = deriveLifeStage(profile.pet_type, profile.age_years);
   const budget = profile.budget_monthly_max;
 
+  // If a brand is specified, try to restrict our candidate products to that brand.
+  let candidatePool = products;
+  if (profile.brand) {
+    const brandMatches = products.filter(p => isBrandMatch(p.brand, p.product_name, profile.brand!));
+    if (brandMatches.length > 0) {
+      candidatePool = brandMatches;
+    }
+  }
+
   // Base pool: pet type + life stage
-  let basePool = products.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
+  let basePool = candidatePool.filter(p => p.pet_type === profile.pet_type && p.life_stage === lifeStage);
   if (basePool.length < 10 && lifeStage !== 'adult') {
-    basePool = [...basePool, ...products.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult')];
+    basePool = [...basePool, ...candidatePool.filter(p => p.pet_type === profile.pet_type && p.life_stage === 'adult')];
   }
   basePool = basePool.filter(p => !hasAvoidedIngredients(p, profile.avoid_ingredients));
 
@@ -221,14 +231,23 @@ export function recommendProducts(
 
   // TIER 6: Full pet-type pool, ignore life stage — still respect food type if hard constraint
   if (selected.length < 5) {
-    const fullPool = products.filter(p => p.pet_type === profile.pet_type);
+    const fullPool = candidatePool.filter(p => p.pet_type === profile.pet_type);
     tryAddFrom(getResults(fullPool, 9999, false, foodTypeIsHard ? true : false));
   }
 
   // TIER 7: Absolute last resort — full pool, ignore everything (only if food type is NOT hard)
   if (selected.length < 5 && !foodTypeIsHard) {
-    const fullPool = products.filter(p => p.pet_type === profile.pet_type);
+    const fullPool = candidatePool.filter(p => p.pet_type === profile.pet_type);
     tryAddFrom(getResults(fullPool, 9999, false, false));
+  }
+
+  // TIER 8 (Fallback): Fill remaining spots with other brands if we are below 5
+  if (selected.length < 5 && candidatePool !== products) {
+    const fallbackPool = products.filter(p => p.pet_type === profile.pet_type);
+    tryAddFrom(getResults(fallbackPool, 9999, false, foodTypeIsHard ? true : false));
+    if (selected.length < 5 && !foodTypeIsHard) {
+      tryAddFrom(getResults(fallbackPool, 9999, false, false));
+    }
   }
 
   const anyRelaxed = selected.some(p => p.price_monthly_low > budget);

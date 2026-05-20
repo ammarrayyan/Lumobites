@@ -9,6 +9,27 @@
   --heading: #191919;
   --primary: #8B5E3C;
   --accent: #C17D3C;
+  
+  /* Responsive Font Size Variables */
+  --text-body: 14px;
+  --text-desc: 14px;
+  --text-card-desc: 13px;
+  --text-small: 12px;
+  --text-small-caption: 11px;
+  --text-btn: 14px;
+  --text-nav: 14px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --text-body: 16px;
+    --text-desc: 15px;
+    --text-card-desc: 15px;
+    --text-small: 13px;
+    --text-small-caption: 13px;
+    --text-btn: 15px;
+    --text-nav: 15px;
+  }
 }
 
 body {
@@ -16,8 +37,20 @@ body {
   background: var(--background);
   font-family: -apple-system, 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: 1.6 !important;
+}
+
+/* Responsive utility class overrides */
+.text-xs {
+  font-size: var(--text-small) !important;
+}
+.text-sm {
+  font-size: var(--text-desc) !important;
+}
+
+.body-text, p {
+  line-height: 1.6 !important;
 }
 
 h1, h2, h3, h4, h5, h6 {

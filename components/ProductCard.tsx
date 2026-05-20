@@ -49,7 +49,7 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
   return (
     <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #E8DDD4' }}>
       {product.match_pct >= 90 && (
-        <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#F59E0B', color: '#FFFFFF', fontSize: '12px', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '8px', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#F59E0B', color: '#FFFFFF', fontSize: 'var(--text-small)', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '8px', zIndex: 10 }}>
           Top Match
         </div>
       )}
@@ -71,10 +71,10 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
         </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: '12px', fontWeight: 600, color: '#8B5E3C', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '4px', margin: 0 }}>{product.brand}</p>
+          <p style={{ fontSize: 'var(--text-small)', fontWeight: 600, color: '#8B5E3C', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '4px', margin: 0 }}>{product.brand}</p>
           <h3 style={{ fontWeight: 800, letterSpacing: '-0.02em', fontSize: '18px', color: '#191919', lineHeight: 1.2, marginBottom: '8px', marginTop: '4px' }}>{product.product_name}</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: badgeColor, color: '#FFFFFF', fontSize: '12px', fontWeight: 'bold', padding: '4px 10px', borderRadius: '100px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: badgeColor, color: '#FFFFFF', fontSize: 'var(--text-small)', fontWeight: 'bold', padding: '4px 10px', borderRadius: '100px' }}>
               {product.match_pct}% Match
             </span>
           </div>
@@ -83,31 +83,31 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
       
       <div style={{ marginBottom: '16px' }}>
          <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
-             <p style={{ fontSize: '14px', color: '#78350F', fontWeight: 500, margin: 0, lineHeight: 1.4 }}>✨ {whyText}</p>
+             <p style={{ fontSize: 'var(--text-desc)', color: '#78350F', fontWeight: 500, margin: 0, lineHeight: 1.4 }}>✨ {whyText}</p>
              {product.budget_relaxed && (
-               <p style={{ fontSize: '12px', color: '#92400E', fontWeight: 700, margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                 <span style={{ fontSize: '14px' }}>💰</span> Slightly above your budget
+               <p style={{ fontSize: 'var(--text-small)', color: '#92400E', fontWeight: 700, margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                 <span style={{ fontSize: 'var(--text-desc)' }}>💰</span> Slightly above your budget
                </p>
              )}
          </div>
         
-        <div style={{ fontSize: '14px', color: '#555555' }}>
+        <div style={{ fontSize: 'var(--text-desc)', color: '#555555' }}>
           <p style={{ margin: '0 0 4px 0' }}><span style={{ fontWeight: 600, color: '#191919' }}>Key Ingredients:</span> <span>{product.ingredients.split(',').slice(0,3).join(', ')}</span></p>
           <p style={{ margin: 0 }}><span style={{ fontWeight: 600, color: '#191919' }}>Est. Cost:</span> ${product.price_monthly_low} - ${product.price_monthly_high} / mo</p>
-          <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#999999' }}>Prices are estimates — check retailer for current price</p>
+          <p style={{ margin: '4px 0 0 0', fontSize: 'var(--text-small-caption)', color: '#999999' }}>Prices are estimates — check retailer for current price</p>
         </div>
       </div>
       
       <div style={{ marginTop: 'auto', paddingTop: '16px', display: 'flex', gap: '12px' }}>
         <Link 
           href={`/product/${product.id}`}
-          style={{ flex: 1, backgroundColor: '#FFFFFF', color: '#8B5E3C', border: '1px solid #E8DDD4', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block' }}
+          style={{ flex: 1, backgroundColor: '#FFFFFF', color: '#8B5E3C', border: '1px solid #E8DDD4', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', textDecoration: 'none', display: 'inline-block', fontSize: 'var(--text-btn)' }}
         >
           Details
         </Link>
         <button 
           onClick={() => setShowBuyModal(true)}
-          style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', outline: 'none' }}
+          style={{ flex: 1, backgroundColor: '#8B5E3C', color: '#FFFFFF', border: '1px solid #8B5E3C', fontWeight: 'bold', padding: '10px 16px', borderRadius: '50px', textAlign: 'center', cursor: 'pointer', outline: 'none', fontSize: 'var(--text-btn)' }}
         >
           Buy Now
         </button>
@@ -124,11 +124,11 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
               ✕
             </button>
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#191919', marginBottom: '2px', paddingRight: '24px', margin: 0 }}>Where to buy</h3>
-            <p style={{ fontSize: '12px', color: '#888888', marginBottom: '20px', marginTop: '2px', margin: 0 }}>{product.brand} - {product.product_name}</p>
+            <p style={{ fontSize: 'var(--text-small)', color: '#888888', marginBottom: '20px', marginTop: '2px', margin: 0 }}>{product.brand} - {product.product_name}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
-              <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
-              <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '14px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
+              <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
+              <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
+              <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
             </div>
           </div>
         </div>

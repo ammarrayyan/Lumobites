@@ -417,19 +417,19 @@ export default function ChatPage() {
         {/* Returning User Banner */}
         {returnBanner && step === 0 && (
           <div style={{ background: '#F5EDE4', borderBottom: '1px solid #E8D5C0', padding: '14px 20px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#191919', marginBottom: '8px' }}>
+            <p style={{ fontSize: 'var(--text-body)', fontWeight: 700, color: '#191919', marginBottom: '8px' }}>
               👋 Welcome back! Search again for your {returnBanner.petType}?
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={() => { setReturnBanner(null); router.push(`/results?${returnBanner.params}`); }}
-                style={{ flex: 1, background: '#8B5E3C', color: '#fff', border: 'none', borderRadius: '50px', padding: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ flex: 1, background: '#8B5E3C', color: '#fff', border: 'none', borderRadius: '50px', padding: '10px', fontSize: 'var(--text-btn)', fontWeight: 700, cursor: 'pointer' }}
               >
                 Yes, show results →
               </button>
               <button
                 onClick={() => { setReturnBanner(null); try { localStorage.removeItem(STORAGE_KEY); } catch(_) {} }}
-                style={{ flex: 1, background: '#fff', color: '#8B5E3C', border: '1.5px solid #E8D5C0', borderRadius: '50px', padding: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                style={{ flex: 1, background: '#fff', color: '#8B5E3C', border: '1.5px solid #E8D5C0', borderRadius: '50px', padding: '10px', fontSize: 'var(--text-btn)', fontWeight: 600, cursor: 'pointer' }}
               >
                 No, start over
               </button>
@@ -486,7 +486,7 @@ export default function ChatPage() {
                            textAlign: 'left',
                            padding: '12px 16px',
                            borderRadius: '12px',
-                           fontSize: '14px',
+                           fontSize: 'var(--text-btn)',
                            fontWeight: 600,
                            cursor: 'pointer',
                            transition: 'all 0.2s ease',
@@ -503,7 +503,7 @@ export default function ChatPage() {
                 {selectedChips.length > 0 && (
                   <button 
                     onClick={() => submitInput('', true)}
-                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)' }}
+                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
                   >
                     Continue →
                   </button>
@@ -526,7 +526,7 @@ export default function ChatPage() {
                            textAlign: 'left',
                            padding: '12px 16px',
                            borderRadius: '12px',
-                           fontSize: '14px',
+                           fontSize: 'var(--text-btn)',
                            fontWeight: 600,
                            cursor: 'pointer',
                            transition: 'all 0.2s ease',
@@ -543,7 +543,7 @@ export default function ChatPage() {
                 {selectedFoodType !== '' && (
                   <button 
                     onClick={() => submitInput('', true)}
-                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)' }}
+                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
                   >
                     Continue →
                   </button>
@@ -558,8 +558,8 @@ export default function ChatPage() {
         <div style={{ padding: '20px', borderTop: '1px solid #E8DDD4', backgroundColor: '#FFFFFF' }}>
           {step < 6 && (
             <div className="mb-4 text-center px-4 py-2 bg-[#FDFAF7] rounded-xl border border-[#F5EDE4]">
-               <p className="text-[11px] text-[#8B5E3C] font-bold uppercase tracking-wider mb-1">Why this matters</p>
-               <p className="text-xs text-[#666666] leading-snug">
+               <p className="text-[var(--text-small-caption)] text-[#8B5E3C] font-bold uppercase tracking-wider mb-1">Why this matters</p>
+               <p className="text-[var(--text-small)] text-[#666666] leading-snug">
                   {Math.floor(step) === 0 && "Helps us filter for species-specific nutritional needs"}
                   {Math.floor(step) === 1 && "Helps us find food for the right life stage"}
                   {Math.floor(step) === 2 && "Helps calculate the right portion and calorie needs"}
@@ -576,7 +576,7 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type here..."
-              style={{ flex: 1, backgroundColor: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '50px', padding: '14px 20px', fontSize: '15px', color: '#191919', outline: 'none' }}
+              style={{ flex: 1, backgroundColor: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '50px', padding: '14px 20px', fontSize: 'var(--text-body)', color: '#191919', outline: 'none' }}
               disabled={step === 6 || isTyping}
             />
             <button

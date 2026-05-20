@@ -61,7 +61,7 @@ export default function Home() {
             <div style={{ marginBottom: '32px' }}>
               <Link 
                 href="/photo" 
-                className="text-[#8B5E3C] font-semibold text-[13px] inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
+                className="text-[#8B5E3C] font-semibold text-[var(--text-btn)] inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
                 style={{ 
                   textDecoration: 'none',
                   background: 'rgba(139, 94, 60, 0.05)',
@@ -108,10 +108,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-[#191919] font-bold text-base">Is This Food Safe?</h3>
               </div>
-              <p className="text-[13px] text-[#666666] leading-relaxed">
+              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
                 Scan any pet food label to instantly check ingredients for hidden toxins and live FDA recalls.
               </p>
-              <Link href="/scan" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-xs text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/scan" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
                 Scan Now &rarr;
               </Link>
             </div>
@@ -126,10 +126,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-[#191919] font-bold text-base">FDA Recall Alerts</h3>
               </div>
-              <p className="text-[13px] text-[#666666] leading-relaxed">
+              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
                 Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts.
               </p>
-              <Link href="/recalls" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-xs text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/recalls" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
                 Get Alerts &rarr;
               </Link>
             </div>
@@ -148,10 +148,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-[#191919] font-bold text-base">Pet Supplies</h3>
               </div>
-              <p className="text-[13px] text-[#666666] leading-relaxed">
+              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
                 Find the best toys, litter, and supplements specifically tailored for your pet.
               </p>
-              <Link href="/supplies" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-xs text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/supplies" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
                 Find Supplies &rarr;
               </Link>
             </div>
@@ -166,10 +166,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-[#191919] font-bold text-base">Find Your Pet Twin</h3>
               </div>
-              <p className="text-[13px] text-[#666666] leading-relaxed">
+              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
                 Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features and personality.
               </p>
-              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-xs text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
                 Find Your Twin &rarr;
               </Link>
             </div>

@@ -6,6 +6,7 @@ import { PetProfile, ScoredProduct } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import BudgetSlider from '@/components/BudgetSlider';
 import Link from 'next/link';
+import { isBrandMatch } from '@/lib/brand-matcher';
 
 export default function ResultsPage() {
   const [profile, setProfile] = useState<PetProfile | null>(null);
@@ -32,37 +33,6 @@ export default function ResultsPage() {
       let finalResults = data.results || [];
       const brandParam = targetProfile.brand;
       if (brandParam) {
-        const isBrandMatch = (pb: string | undefined, pn: string | undefined, fb: string) => {
-          if (!fb) return false;
-          const IGNORE_WORDS = new Set([
-            'science', 'diet', 'pro', 'plan', 'one', 'brand', 'pet', 'food', 'dog', 'cat', 'formula', 'recipe', 'nutrition',
-            'of', 'the', 'and', 'in', 'with', 'for', 'a', 'an'
-          ]);
-          
-          const getBrandWords = (s: string) => {
-            return s
-              .toLowerCase()
-              .replace(/['’]/g, '') // remove apostrophes
-              .replace(/[^a-z0-9]/g, ' ') // replace other non-alphanumeric with spaces
-              .split(/\s+/)
-              .map(w => w.trim())
-              .filter(w => w.length > 0 && !IGNORE_WORDS.has(w));
-          };
-          
-          const wordsFB = getBrandWords(fb);
-          if (wordsFB.length === 0) {
-            const cleanFB = fb.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const cleanPB = (pb || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            const cleanPN = (pn || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            return cleanPB.includes(cleanFB) || cleanPN.includes(cleanFB);
-          }
-          
-          const wordsPB = pb ? getBrandWords(pb) : [];
-          const wordsPN = pn ? getBrandWords(pn) : [];
-          
-          return wordsFB.some(w => wordsPB.includes(w) || wordsPN.includes(w));
-        };
-
         const filtered = finalResults.filter((r: any) => isBrandMatch(r.brand, r.product_name, brandParam));
         if (filtered.length > 0) {
           finalResults = filtered;
@@ -214,22 +184,22 @@ export default function ResultsPage() {
               </h2>
               {selectedBrand && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                  <div className="bg-[#8B5E3C] text-white px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-2 shadow-sm">
+                  <div className="bg-[#8B5E3C] text-white px-3 py-1 rounded-full text-[var(--text-small-caption)] font-bold flex items-center gap-2 shadow-sm">
                     Showing {selectedBrand} products only
                     <button onClick={clearBrandFilter} className="hover:opacity-70 transition-opacity border-l border-white/30 pl-2 ml-1">✕</button>
                   </div>
                   {brandFallback && (
-                    <p className="text-[11px] text-[#8B5E3C] font-medium italic">
+                    <p className="text-[var(--text-small-caption)] text-[#8B5E3C] font-medium italic">
                       Not enough {selectedBrand} products found — showing similar alternatives
                     </p>
                   )}
                 </div>
               )}
-              <p style={{ color: '#555555', margin: 0, fontSize: '14px' }}>Showing {results.length} results for your pet</p>
+              <p style={{ color: '#555555', margin: 0, fontSize: 'var(--text-body)' }}>Showing {results.length} results for your pet</p>
             </div>
             <Link 
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
-              style={{ fontSize: '13px', padding: '8px 20px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
+              style={{ fontSize: 'var(--text-btn)', padding: '8px 20px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
             >
               <span>🐾</span> Is this food safe?
             </Link>
@@ -239,7 +209,7 @@ export default function ResultsPage() {
         <div style={{ marginBottom: '24px', position: 'relative' }}>
           <BudgetSlider value={budget} onChange={handleBudgetChange} />
           {isBudgetUpdating && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', color: '#8B5E3C', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', color: '#8B5E3C', fontSize: 'var(--text-small)' }}>
               <div style={{ width: '14px', height: '14px', border: '2px solid #E8DDD4', borderTopColor: '#8B5E3C', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
               Updating results for ${budget}/mo...
             </div>
@@ -248,7 +218,7 @@ export default function ResultsPage() {
 
         {/* Food Type Filter Toggle */}
         <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: '#8B5E3C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: 'var(--text-small)', fontWeight: 700, color: '#8B5E3C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Filter by type:
           </span>
           <div style={{ display: 'flex', backgroundColor: '#F5EDE4', padding: '4px', borderRadius: '12px', gap: '4px' }}>
@@ -301,7 +271,7 @@ export default function ResultsPage() {
                     flex: 1,
                     padding: '8px 12px',
                     borderRadius: '8px',
-                    fontSize: '13px',
+                    fontSize: 'var(--text-btn)',
                     fontWeight: 700,
                     border: 'none',
                     cursor: 'pointer',
@@ -323,14 +293,14 @@ export default function ResultsPage() {
 
         {/* Notices */}
         {budgetRelaxed && !fallback && (
-          <div style={{ backgroundColor: '#EFF6FF', color: '#1E40AF', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <div style={{ backgroundColor: '#EFF6FF', color: '#1E40AF', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: 'var(--text-desc)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
              <span style={{ fontSize: '18px' }}>💡</span>
              <p style={{ margin: 0 }}>We expanded your budget slightly to find these perfect matches.</p>
           </div>
         )}
         
         {fallback && (
-          <div style={{ backgroundColor: '#FFFBEB', color: '#92400E', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <div style={{ backgroundColor: '#FFFBEB', color: '#92400E', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: 'var(--text-desc)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
              <span style={{ fontSize: '18px' }}>⚠️</span>
              <p style={{ margin: 0 }}>These are slightly above your budget but represent the absolute best options for {profile?.pet_name || 'your pet'}'s specific health needs.</p>
           </div>
