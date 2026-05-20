@@ -156,9 +156,9 @@ export default function MarketingPage() {
 
       <main className="max-w-[1200px] mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-[32px] font-[800] text-[#191919] tracking-tight mb-3">Ready-To-Post Promo Ads</h1>
-          <p className="text-[16px] text-[#666666] max-w-[600px] mx-auto leading-relaxed">
-            Generate pixel-perfect **1080x1080px (1:1 Square Ratio)** ad banners designed for Instagram, Facebook, and Twitter. High-fidelity rendering makes them perfect for social media feeds.
+          <h1 className="text-[32px] font-[800] text-[#191919] tracking-tight mb-3">Premium Social Ad Generator</h1>
+          <p className="text-[16px] text-[#666666] max-w-[700px] mx-auto leading-relaxed">
+            Generate and download high-end, clean, and professional **1080x1080px square** marketing ad banners. Perfect for premium social feeds like Instagram and LinkedIn.
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export default function MarketingPage() {
             <div className="relative border border-[#E2E8F0] shadow-md rounded-2xl overflow-hidden bg-[#FDFAF7]" style={{ width: '378px', height: '378px' }}>
               <div 
                 ref={ad1Ref}
-                className="absolute origin-top-left bg-[#FDFAF7]"
+                className="absolute origin-top-left"
                 style={{ 
                   width: '1080px', 
                   height: '1080px', 
@@ -197,65 +197,91 @@ export default function MarketingPage() {
                   display: 'flex', 
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  padding: '64px',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  padding: '72px',
+                  background: 'linear-gradient(135deg, #FDFAF7 0%, #F5EDE4 100%)',
+                  border: '16px solid #FDFAF7',
+                  boxShadow: 'inset 0 0 80px rgba(139, 94, 60, 0.03)',
+                  boxSizing: 'border-box',
+                  fontFamily: '"Outfit", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'
                 }}
               >
+                {/* Thin Elegant Inner Border */}
+                <div style={{ position: 'absolute', inset: '16px', border: '1px solid rgba(139, 94, 60, 0.15)', borderRadius: '12px', pointerEvents: 'none', zIndex: 1 }}></div>
+
                 {/* Top Badge */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-                  <div style={{ backgroundColor: '#191919', color: '#FFFFFF', fontSize: '20px', fontWeight: '800', letterSpacing: '0.12em', padding: '12px 32px', borderRadius: '100px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                    ✨ FREE · NO SIGN-UP NEEDED
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', zIndex: 2 }}>
+                  <div style={{ backgroundColor: 'rgba(25, 25, 25, 0.04)', border: '1px solid rgba(25, 25, 25, 0.12)', color: '#191919', fontSize: '15px', fontWeight: '800', letterSpacing: '0.18em', padding: '10px 28px', borderRadius: '100px', textTransform: 'uppercase' }}>
+                    ✦ FREE &middot; NO SIGN-UP NEEDED
                   </div>
                 </div>
 
-                {/* Hero Content */}
-                <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                  <h2 style={{ fontSize: '76px', fontWeight: '900', color: '#191919', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 16px 0' }}>
-                    Which pet are <span style={{ color: '#C17D3C' }}>YOU?</span>
+                {/* Hero Headline */}
+                <div style={{ textAlign: 'center', margin: '30px 0', zIndex: 2 }}>
+                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '78px', fontWeight: '900', color: '#191919', letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 16px 0' }}>
+                    Which pet are <span style={{ color: '#8B5E3C', fontStyle: 'italic', fontWeight: '400' }}>YOU?</span>
                   </h2>
-                  <p style={{ fontSize: '28px', color: '#666666', fontWeight: '500', margin: 0 }}>
+                  <p style={{ fontSize: '26px', color: '#555555', fontWeight: '500', margin: 0, letterSpacing: '0.01em' }}>
                     Upload your selfie &rarr; Find your pet twin in seconds
                   </p>
                 </div>
 
-                {/* Twin Comparison Visual */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-                    <div style={{ width: '180px', height: '180px', borderRadius: '50%', backgroundColor: '#FFFFFF', border: '6px solid #E8DDD4', boxShadow: '0 8px 24px rgba(139, 94, 60, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '96px' }}>
-                      👩‍💻
+                {/* High-End Vector Comparison Visual */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', zIndex: 2 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+                    {/* Left: Premium Minimalist Person Silhouette SVG */}
+                    <div style={{ width: '200px', height: '200px', borderRadius: '50%', backgroundColor: '#FFFFFF', border: '1px solid rgba(139, 94, 60, 0.25)', boxShadow: '0 15px 35px rgba(139, 94, 60, 0.08)', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#8B5E3C" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
                     </div>
-                    <div style={{ fontSize: '64px', color: '#8B5E3C', animation: 'bounce 1s infinite' }}>🐾</div>
-                    <div style={{ width: '180px', height: '180px', borderRadius: '50%', backgroundColor: '#FFFFFF', border: '6px solid #E8DDD4', boxShadow: '0 8px 24px rgba(139, 94, 60, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '96px' }}>
-                      🐶
+
+                    {/* Separator Sparkle */}
+                    <div style={{ fontSize: '48px', color: '#8B5E3C', opacity: 0.8, fontWeight: 'bold' }}>✦</div>
+
+                    {/* Right: Premium Minimalist Dog Silhouette SVG */}
+                    <div style={{ width: '200px', height: '200px', borderRadius: '50%', backgroundColor: '#FFFFFF', border: '1px solid rgba(139, 94, 60, 0.25)', boxShadow: '0 15px 35px rgba(139, 94, 60, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#8B5E3C" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5c.5-1.5 2-2.5 3.5-2.5s2.5 1 2.5 2.5c0 3-4 6-6 7.5-2-1.5-6-4.5-6-7.5C6 3.5 7 2.5 8.5 2.5S11.5 3.5 12 5z" fill="rgba(139, 94, 60, 0.05)" />
+                        <path d="M18 10h.01M6 10h.01M9 16c1 1.5 3 1.5 4 0" />
+                        <path d="M19 14.5a3 3 0 0 1-6 0c0-1.5 1.5-2.5 3-2.5s3 1 3 2.5z" />
+                        <path d="M5 14.5a3 3 0 0 0 6 0c0-1.5-1.5-2.5-3-2.5s-3 1-3 2.5z" />
+                      </svg>
                     </div>
                   </div>
                   
-                  <div style={{ backgroundColor: '#191919', color: '#FFFFFF', fontSize: '22px', fontWeight: '800', letterSpacing: '0.08em', padding: '10px 24px', borderRadius: '100px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                  {/* Styled Premium Match Label */}
+                  <div style={{ background: 'linear-gradient(135deg, #191919 0%, #333333 100%)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', fontSize: '18px', fontWeight: '800', letterSpacing: '0.12em', padding: '12px 36px', borderRadius: '100px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
                     91% MATCH 🎯
                   </div>
                 </div>
 
-                {/* Personality Quote */}
-                <div style={{ padding: '0 48px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '24px', fontStyle: 'italic', color: '#666666', margin: 0, lineHeight: 1.5, backgroundColor: 'rgba(139, 94, 60, 0.04)', padding: '24px 32px', borderRadius: '24px', border: '1px dashed #E8DDD4' }}>
-                    &ldquo;The kind who looks serious in meetings but has the best stories at happy hour&rdquo;
-                  </p>
+                {/* Elegant Serif Personality Quote */}
+                <div style={{ padding: '0 24px', textAlign: 'center', zIndex: 2 }}>
+                  <div style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(139, 94, 60, 0.12)', padding: '24px 36px', borderRadius: '20px', boxShadow: '0 8px 24px rgba(139, 94, 60, 0.03)', position: 'relative' }}>
+                    {/* Visual Quote Mark */}
+                    <span style={{ fontFamily: 'Georgia, serif', fontSize: '64px', color: 'rgba(139, 94, 60, 0.15)', position: 'absolute', top: '-15px', left: '16px', lineHeight: 1 }}>“</span>
+                    <p style={{ fontFamily: 'Georgia, serif', fontSize: '23px', fontStyle: 'italic', color: '#444444', margin: 0, lineHeight: 1.55 }}>
+                      The kind who looks serious in meetings but has the best stories at happy hour.
+                    </p>
+                  </div>
                 </div>
 
-                {/* CTA Button */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                  <div style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontSize: '28px', fontWeight: '800', padding: '22px 56px', borderRadius: '100px', boxShadow: '0 12px 30px rgba(139, 94, 60, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-                    Find Your Pet Twin Free &rarr;
+                {/* Elegant Dark CTA Button */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', zIndex: 2 }}>
+                  <div style={{ backgroundColor: '#191919', color: '#FFFFFF', fontSize: '24px', fontWeight: '700', padding: '22px 56px', borderRadius: '14px', boxShadow: '0 15px 35px rgba(25, 25, 25, 0.18)', display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span>Find Your Pet Twin Free</span>
+                    <span style={{ fontSize: '28px', lineHeight: 0, marginLeft: '4px', verticalAlign: 'middle' }}>&rarr;</span>
                   </div>
                 </div>
 
                 {/* Footer Brand Stripe */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '2px solid #E8DDD4', paddingTop: '28px', marginTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(139, 94, 60, 0.15)', paddingTop: '24px', marginTop: '12px', zIndex: 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/Logo.png" alt="Lumo Bites" style={{ height: '56px', width: 'auto' }} />
-                    <sup style={{ fontSize: '12px', color: '#8B5A2B', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '10px' }}>™</sup>
+                    <img src="/Logo.png" alt="Lumo Bites" style={{ height: '48px', width: 'auto' }} />
+                    <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '6px' }}>™</sup>
                   </div>
-                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.02em' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.04em' }}>
                     lumobites.net/twin
                   </div>
                 </div>
@@ -287,7 +313,7 @@ export default function MarketingPage() {
             <div className="relative border border-[#E2E8F0] shadow-md rounded-2xl overflow-hidden bg-[#FDFAF7]" style={{ width: '378px', height: '378px' }}>
               <div 
                 ref={ad2Ref}
-                className="absolute origin-top-left bg-[#FDFAF7]"
+                className="absolute origin-top-left"
                 style={{ 
                   width: '1080px', 
                   height: '1080px', 
@@ -295,71 +321,103 @@ export default function MarketingPage() {
                   display: 'flex', 
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  padding: '64px',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  padding: '72px',
+                  background: 'linear-gradient(135deg, #FDFAF7 0%, #F5EDE4 100%)',
+                  border: '16px solid #FDFAF7',
+                  boxShadow: 'inset 0 0 80px rgba(139, 94, 60, 0.03)',
+                  boxSizing: 'border-box',
+                  fontFamily: '"Outfit", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'
                 }}
               >
+                {/* Thin Inner Border */}
+                <div style={{ position: 'absolute', inset: '16px', border: '1px solid rgba(139, 94, 60, 0.15)', borderRadius: '12px', pointerEvents: 'none', zIndex: 1 }}></div>
+
                 {/* Top Badge */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-                  <div style={{ backgroundColor: '#191919', color: '#FFFFFF', fontSize: '20px', fontWeight: '800', letterSpacing: '0.12em', padding: '12px 32px', borderRadius: '100px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                    ✨ FREE · AI INGREDIENT CHECK
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', zIndex: 2 }}>
+                  <div style={{ backgroundColor: 'rgba(25, 25, 25, 0.04)', border: '1px solid rgba(25, 25, 25, 0.12)', color: '#191919', fontSize: '15px', fontWeight: '800', letterSpacing: '0.18em', padding: '10px 28px', borderRadius: '100px', textTransform: 'uppercase' }}>
+                    ✦ FREE &middot; AI INGREDIENT SAFETY CHECK
                   </div>
                 </div>
 
-                {/* Hero Content */}
-                <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                  <h2 style={{ fontSize: '74px', fontWeight: '950', color: '#191919', letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 16px 0' }}>
-                    Is your pet&apos;s food <span style={{ color: '#D97706' }}>safe? 🔍</span>
+                {/* Hero Headline */}
+                <div style={{ textAlign: 'center', margin: '30px 0', zIndex: 2 }}>
+                  <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '74px', fontWeight: '900', color: '#191919', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 16px 0' }}>
+                    Is your pet&apos;s food <span style={{ color: '#D97706', fontStyle: 'italic', fontWeight: '400' }}>safe?</span>
                   </h2>
-                  <p style={{ fontSize: '28px', color: '#666666', fontWeight: '500', margin: 0 }}>
-                    Scan any pet food label instantly &mdash; free AI safety check
+                  <p style={{ fontSize: '26px', color: '#555555', fontWeight: '500', margin: 0, letterSpacing: '0.01em' }}>
+                    Scan any label instantly &mdash; free AI safety analysis
                   </p>
                 </div>
 
-                {/* Grade Badges Display */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
-                  <div style={{ display: 'flex', gap: '32px', width: '100%', justifyContent: 'center' }}>
-                    {/* Grade A Card */}
-                    <div style={{ backgroundColor: '#FFFFFF', border: '4px solid #E8DDD4', padding: '36px', borderRadius: '32px', width: '300px', textAlign: 'center', boxShadow: '0 12px 36px rgba(139, 94, 60, 0.05)' }}>
-                      <div style={{ fontSize: '20px', fontWeight: '700', color: '#888888', marginBottom: '12px' }}>Premium Kibble</div>
-                      <div style={{ backgroundColor: '#D1FAE5', color: '#065F46', fontSize: '32px', fontWeight: '800', padding: '16px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        Grade A ✅
+                {/* Highly-Professional App Grade Cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                  <div style={{ display: 'flex', gap: '36px', width: '100%', justifyContent: 'center' }}>
+                    
+                    {/* Grade A Premium Interface Card */}
+                    <div style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(139, 94, 60, 0.18)', padding: '28px', borderRadius: '24px', width: '380px', textAlign: 'left', boxShadow: '0 15px 35px rgba(139, 94, 60, 0.05)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', justifyContent: 'space-between', borderBottom: '1px solid #F5EDE4', paddingBottom: '10px' }}>
+                        <span style={{ fontSize: '18px', fontWeight: '800', color: '#191919' }}>Organic Kibble</span>
+                        <span style={{ fontSize: '13px', color: '#059669', backgroundColor: '#D1FAE5', padding: '4px 10px', borderRadius: '100px', fontWeight: '700' }}>Verified safe</span>
                       </div>
-                      <div style={{ fontSize: '18px', color: '#059669', fontWeight: '600', marginTop: '12px' }}>Toxin-Free &middot; Safe</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{ width: '72px', height: '72px', borderRadius: '16px', backgroundColor: '#E6F4EA', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '900', color: '#137333' }}>
+                          A
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '20px', fontWeight: '800', color: '#137333' }}>Grade Excellent</div>
+                          <div style={{ fontSize: '14px', color: '#555555', marginTop: '2px' }}>Ingredients score 98/100</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#777777', lineHeight: 1.4, backgroundColor: '#FAF8F5', padding: '10px 14px', borderRadius: '10px' }}>
+                        <span style={{ fontWeight: '700', color: '#191919' }}>Active:</span> Organic Chicken, Sweet Potato, Blueberries, Salmon Oil. Zero fillers.
+                      </div>
                     </div>
 
-                    {/* Grade D Card */}
-                    <div style={{ backgroundColor: '#FFFFFF', border: '4px solid #E8DDD4', padding: '36px', borderRadius: '32px', width: '300px', textAlign: 'center', boxShadow: '0 12px 36px rgba(139, 94, 60, 0.05)' }}>
-                      <div style={{ fontSize: '20px', fontWeight: '700', color: '#888888', marginBottom: '12px' }}>Generic Brand</div>
-                      <div style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '32px', fontWeight: '800', padding: '16px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        Grade D ⚠️
+                    {/* Grade D Premium Interface Card */}
+                    <div style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(139, 94, 60, 0.18)', padding: '28px', borderRadius: '24px', width: '380px', textAlign: 'left', boxShadow: '0 15px 35px rgba(139, 94, 60, 0.05)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'space-between', justifyContent: 'space-between', borderBottom: '1px solid #F5EDE4', paddingBottom: '10px' }}>
+                        <span style={{ fontSize: '18px', fontWeight: '800', color: '#191919' }}>Generic Brand</span>
+                        <span style={{ fontSize: '13px', color: '#D97706', backgroundColor: '#FEF3C7', padding: '4px 10px', borderRadius: '100px', fontWeight: '700' }}>Warning flagged</span>
                       </div>
-                      <div style={{ fontSize: '18px', color: '#D97706', fontWeight: '600', marginTop: '12px' }}>Contains Carrageenan</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{ width: '72px', height: '72px', borderRadius: '16px', backgroundColor: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '900', color: '#B45309' }}>
+                          D
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '20px', fontWeight: '800', color: '#B45309' }}>Grade Poor</div>
+                          <div style={{ fontSize: '14px', color: '#555555', marginTop: '2px' }}>Toxins &amp; preservatives detected</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#777777', lineHeight: 1.4, backgroundColor: '#FAF8F5', padding: '10px 14px', borderRadius: '10px' }}>
+                        <span style={{ fontWeight: '700', color: '#D9534F' }}>Triggers:</span> BHA preservative, Artificial Red 40, Carrageenan thickener.
+                      </div>
                     </div>
+
                   </div>
                 </div>
 
                 {/* Additional Safety scanner copy */}
-                <div style={{ textAlign: 'center', padding: '0 48px' }}>
-                  <p style={{ fontSize: '24px', fontWeight: '600', color: '#555555', margin: 0, lineHeight: 1.5 }}>
-                    Our AI scans ingredients for hidden preservatives, artificial colors, and live FDA recalls in under 3 seconds! ⚡
+                <div style={{ textAlign: 'center', padding: '0 32px', zIndex: 2 }}>
+                  <p style={{ fontSize: '24px', fontWeight: '600', color: '#444444', margin: 0, lineHeight: 1.5, letterSpacing: '-0.01em' }}>
+                    Our AI cross-references ingredients against clinical research and live FDA recall feeds in under 3 seconds. Protect your pet today! 🛡️
                   </p>
                 </div>
 
-                {/* CTA Button */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                  <div style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontSize: '28px', fontWeight: '800', padding: '22px 56px', borderRadius: '100px', boxShadow: '0 12px 30px rgba(139, 94, 60, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-                    Check Your Pet&apos;s Food Free &rarr;
+                {/* Elegant Dark CTA Button */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', zIndex: 2 }}>
+                  <div style={{ backgroundColor: '#191919', color: '#FFFFFF', fontSize: '24px', fontWeight: '700', padding: '22px 56px', borderRadius: '14px', boxShadow: '0 15px 35px rgba(25, 25, 25, 0.18)', display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span>Check Your Pet&apos;s Food Free</span>
+                    <span style={{ fontSize: '28px', lineHeight: 0, marginLeft: '4px', verticalAlign: 'middle' }}>&rarr;</span>
                   </div>
                 </div>
 
                 {/* Footer Brand Stripe */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '2px solid #E8DDD4', paddingTop: '28px', marginTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(139, 94, 60, 0.15)', paddingTop: '24px', marginTop: '12px', zIndex: 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src="/Logo.png" alt="Lumo Bites" style={{ height: '56px', width: 'auto' }} />
-                    <sup style={{ fontSize: '12px', color: '#8B5A2B', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '10px' }}>™</sup>
+                    <img src="/Logo.png" alt="Lumo Bites" style={{ height: '48px', width: 'auto' }} />
+                    <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '6px' }}>™</sup>
                   </div>
-                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.02em' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.04em' }}>
                     lumobites.net/scan
                   </div>
                 </div>
