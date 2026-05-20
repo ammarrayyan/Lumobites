@@ -20,7 +20,7 @@ export default function Home() {
           <div className="flex-[1.5] flex flex-col items-center md:items-start text-center md:text-left">
             <AnimatedPets />
             
-            <div className="text-[#8B5E3C] text-[12px] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none">
+            <div className="text-[#8B5E3C] text-[var(--text-badge)] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none">
               Free &middot; No Sign-up Required
             </div>
             
@@ -30,7 +30,7 @@ export default function Home() {
               <span className="text-[#C17D3C]">for your pet.</span>
             </h1>
             
-            <p className="text-[19px] text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10">
+            <p className="text-[var(--text-hero-sub)] text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10">
               Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
             </p>
 
@@ -183,22 +183,22 @@ export default function Home() {
         <div className="max-w-[900px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">10,000+</span>
-            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Pets Matched</span>
+            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Pets Matched</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">50+</span>
-            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Brands Covered</span>
+            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Brands Covered</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">100%</span>
-            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Free Forever</span>
+            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Free Forever</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">4.9 ★</span>
-            <span className="text-[13px] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Avg. Rating</span>
+            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Avg. Rating</span>
           </div>
         </div>
       </section>

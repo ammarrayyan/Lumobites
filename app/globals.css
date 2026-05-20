@@ -18,17 +18,21 @@
   --text-small-caption: 11px;
   --text-btn: 14px;
   --text-nav: 14px;
+  --text-badge: 12px;
+  --text-hero-sub: 16px;
 }
 
 @media (min-width: 768px) {
   :root {
     --text-body: 16px;
     --text-desc: 15px;
-    --text-card-desc: 15px;
+    --text-card-desc: 16px;
     --text-small: 13px;
     --text-small-caption: 13px;
     --text-btn: 15px;
     --text-nav: 15px;
+    --text-badge: 14px;
+    --text-hero-sub: 17px;
   }
 }
 
