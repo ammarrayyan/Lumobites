@@ -20,7 +20,7 @@ export default function Home() {
           <div className="flex-[1.5] flex flex-col items-center md:items-start text-center md:text-left">
             <AnimatedPets />
             
-            <div className="text-[#8B5E3C] text-[var(--text-badge)] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none">
+            <div className="text-[#8B5E3C] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none" style={{ fontSize: 'var(--text-badge)' }}>
               Free &middot; No Sign-up Required
             </div>
             
@@ -30,7 +30,7 @@ export default function Home() {
               <span className="text-[#C17D3C]">for your pet.</span>
             </h1>
             
-            <p className="text-[var(--text-hero-sub)] text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10">
+            <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
               Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
             </p>
 
@@ -61,7 +61,7 @@ export default function Home() {
             <div style={{ marginBottom: '32px' }}>
               <Link 
                 href="/photo" 
-                className="text-[#8B5E3C] font-semibold text-[var(--text-btn)] inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
+                className="text-[#8B5E3C] font-semibold inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
                 style={{ 
                   textDecoration: 'none',
                   background: 'rgba(139, 94, 60, 0.05)',
@@ -69,7 +69,8 @@ export default function Home() {
                   padding: '7px 18px',
                   borderRadius: '100px',
                   boxShadow: '0 2px 8px rgba(139, 94, 60, 0.03)',
-                  letterSpacing: '0.01em'
+                  letterSpacing: '0.01em',
+                  fontSize: 'var(--text-btn)'
                 }}
               >
                 <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -106,12 +107,12 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <h3 className="text-[#191919] font-bold text-base">Is This Food Safe?</h3>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Is This Food Safe?</h3>
               </div>
-              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
                 Scan any pet food label to instantly check ingredients for hidden toxins and live FDA recalls.
               </p>
-              <Link href="/scan" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/scan" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
                 Scan Now &rarr;
               </Link>
             </div>
@@ -124,12 +125,12 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h3 className="text-[#191919] font-bold text-base">FDA Recall Alerts</h3>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>FDA Recall Alerts</h3>
               </div>
-              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
                 Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts.
               </p>
-              <Link href="/recalls" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/recalls" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
                 Get Alerts &rarr;
               </Link>
             </div>
@@ -146,12 +147,12 @@ export default function Home() {
                     <path d="M12 21.5c-3 0-5.5-2.5-5.5-5.5s2.5-4.5 5.5-4.5 5.5 1.5 5.5 4.5-2.5 5.5-5.5 5.5z" />
                   </svg>
                 </div>
-                <h3 className="text-[#191919] font-bold text-base">Pet Supplies</h3>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Supplies</h3>
               </div>
-              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
                 Find the best toys, litter, and supplements specifically tailored for your pet.
               </p>
-              <Link href="/supplies" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/supplies" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
                 Find Supplies &rarr;
               </Link>
             </div>
@@ -164,12 +165,12 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
                   </svg>
                 </div>
-                <h3 className="text-[#191919] font-bold text-base">Find Your Pet Twin</h3>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
               </div>
-              <p className="text-[var(--text-card-desc)] text-[#666666] leading-relaxed">
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
                 Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features and personality.
               </p>
-              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-[var(--text-btn)] text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none' }}>
+              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
                 Find Your Twin &rarr;
               </Link>
             </div>
@@ -183,22 +184,22 @@ export default function Home() {
         <div className="max-w-[900px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">10,000+</span>
-            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Pets Matched</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Pets Matched</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">50+</span>
-            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Brands Covered</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Brands Covered</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">100%</span>
-            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Free Forever</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Free Forever</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">4.9 ★</span>
-            <span className="text-[var(--text-small)] text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5">Avg. Rating</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Avg. Rating</span>
           </div>
         </div>
       </section>

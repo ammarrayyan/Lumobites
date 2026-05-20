@@ -558,8 +558,8 @@ export default function ChatPage() {
         <div style={{ padding: '20px', borderTop: '1px solid #E8DDD4', backgroundColor: '#FFFFFF' }}>
           {step < 6 && (
             <div className="mb-4 text-center px-4 py-2 bg-[#FDFAF7] rounded-xl border border-[#F5EDE4]">
-               <p className="text-[var(--text-small-caption)] text-[#8B5E3C] font-bold uppercase tracking-wider mb-1">Why this matters</p>
-               <p className="text-[var(--text-small)] text-[#666666] leading-snug">
+               <p className="text-[#8B5E3C] font-bold uppercase tracking-wider mb-1" style={{ fontSize: 'var(--text-small-caption)' }}>Why this matters</p>
+               <p className="text-[#666666] leading-snug" style={{ fontSize: 'var(--text-small)' }}>
                   {Math.floor(step) === 0 && "Helps us filter for species-specific nutritional needs"}
                   {Math.floor(step) === 1 && "Helps us find food for the right life stage"}
                   {Math.floor(step) === 2 && "Helps calculate the right portion and calorie needs"}

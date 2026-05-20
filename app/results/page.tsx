@@ -184,12 +184,12 @@ export default function ResultsPage() {
               </h2>
               {selectedBrand && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                  <div className="bg-[#8B5E3C] text-white px-3 py-1 rounded-full text-[var(--text-small-caption)] font-bold flex items-center gap-2 shadow-sm">
+                  <div className="bg-[#8B5E3C] text-white px-3 py-1 rounded-full font-bold flex items-center gap-2 shadow-sm" style={{ fontSize: 'var(--text-small-caption)' }}>
                     Showing {selectedBrand} products only
                     <button onClick={clearBrandFilter} className="hover:opacity-70 transition-opacity border-l border-white/30 pl-2 ml-1">✕</button>
                   </div>
                   {brandFallback && (
-                    <p className="text-[var(--text-small-caption)] text-[#8B5E3C] font-medium italic">
+                    <p className="text-[#8B5E3C] font-medium italic" style={{ fontSize: 'var(--text-small-caption)' }}>
                       Not enough {selectedBrand} products found — showing similar alternatives
                     </p>
                   )}
