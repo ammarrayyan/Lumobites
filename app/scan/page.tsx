@@ -4,8 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
-import { ingredientDatabase, IngredientInfo } from '@/lib/ingredients';
-
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -20,11 +18,23 @@ export default function ScanPage() {
   const [manualBarcode, setManualBarcode] = useState('');
   const [manualIngredients, setManualIngredients] = useState('');
   const [safetyResults, setSafetyResults] = useState<{
-    score: string;
-    scoreColor: string;
-    flagged: { info: IngredientInfo; match: string }[];
-    counts: { dangerous: number; questionable: number; good: number; neutral: number };
+    grade: string;
+    dangerous: { name: string; reason: string }[];
+    concerning: { name: string; reason: string }[];
+    safe: { name: string }[];
+    summary: string;
   } | null>(null);
+
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A': return '#10B981';
+      case 'B': return '#84CC16';
+      case 'C': return '#F59E0B';
+      case 'D': return '#F97316';
+      case 'F': return '#EF4444';
+      default: return '#8B5E3C';
+    }
+  };
   
   const [isCameraStarted, setIsCameraStarted] = useState(false);
   const [activeTab, setActiveTab] = useState<'scanner' | 'manual'>('scanner');
@@ -248,7 +258,7 @@ export default function ScanPage() {
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
         if (data.product.ingredients) {
-          analyzeIngredients(data.product.ingredients, data.hasRecall);
+          await analyzeIngredients(data.product.ingredients, data.hasRecall);
         }
       }
     } catch (err) {
@@ -258,64 +268,47 @@ export default function ScanPage() {
     }
   }
 
-  function analyzeIngredients(text: string, recallActive: boolean = false) {
+  async function analyzeIngredients(text: string, recallActive: boolean = false) {
     if (!text) return;
-
-    const list = text
-      .split(/[,\n;]/)
-      .map(i => i.trim())
-      .filter(i => i.length > 0);
-
-    const flagged: { info: IngredientInfo; match: string }[] = [];
-    const counts = { dangerous: 0, questionable: 0, good: 0, neutral: 0 };
-    const seen = new Set<string>();
-
-    list.forEach(item => {
-      const normalizedItem = item.toLowerCase().trim().replace(/[().]/g, ' ');
-      const match = ingredientDatabase.find(dbItem => {
-        const dbName = dbItem.name.toLowerCase();
-        if (dbName.length <= 3) {
-          const regex = new RegExp(`\\b${dbName}\\b`, 'i');
-          return regex.test(normalizedItem);
-        }
-        return normalizedItem.includes(dbName) || dbName.includes(normalizedItem);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients: text })
       });
-
-      if (match && !seen.has(match.name)) {
-        flagged.push({ info: match, match: item });
-        counts[match.category]++;
-        seen.add(match.name);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to analyze ingredients');
       }
-    });
-
-    let score = 'A';
-    let scoreColor = '#10B981';
-
-    if (recallActive || counts.dangerous >= 4) {
-      score = 'F';
-      scoreColor = '#EF4444';
-    } else if (counts.dangerous >= 2) {
-      score = 'D';
-      scoreColor = '#F97316';
-    } else if (counts.dangerous === 1 || counts.questionable >= 6) {
-      score = 'C';
-      scoreColor = '#F59E0B';
-    } else if (counts.questionable >= 3) {
-      score = 'B';
-      scoreColor = '#84CC16';
+      
+      let finalGrade = data.grade || 'C';
+      if (recallActive) {
+        finalGrade = 'F';
+      }
+      
+      setSafetyResults({
+        grade: finalGrade,
+        dangerous: data.dangerous || [],
+        concerning: data.concerning || [],
+        safe: data.safe || [],
+        summary: data.summary || ''
+      });
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Error analyzing ingredients with Claude AI.');
+    } finally {
+      setLoading(false);
     }
-
-    setSafetyResults({ score, scoreColor, flagged, counts: { ...counts, neutral: list.length - flagged.length } });
   }
 
-  const handleManualIngredientSubmit = (e: React.FormEvent) => {
+  const handleManualIngredientSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualIngredients.trim()) return;
     
-    setLoading(true);
     setProduct({ product_name: 'Custom Entry', brand: 'User Input', ingredients: manualIngredients } as any);
-    analyzeIngredients(manualIngredients, false);
-    setLoading(false);
+    await analyzeIngredients(manualIngredients, false);
   };
 
   const handleBarcodeSubmit = (e: React.FormEvent) => {
@@ -549,9 +542,13 @@ export default function ScanPage() {
           {(loading || ocrLoading) && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-              <h3 className="text-[#191919] font-bold text-lg mb-2">{ocrLoading ? 'Reading Label...' : 'Analyzing Safety...'}</h3>
-              <p className="text-gray-500 text-sm max-w-[240px] mx-auto">
-                {ocrLoading ? 'Preprocessing image and sending to Google Cloud Vision...' : 'Checking ingredients and live FDA databases.'}
+              <h3 className="text-[#191919] font-bold text-lg mb-2">
+                {ocrLoading ? 'Reading Label...' : '🔍 Analyzing ingredients with AI...'}
+              </h3>
+              <p className="text-gray-500 text-sm max-w-[280px] mx-auto leading-relaxed">
+                {ocrLoading 
+                  ? 'Preprocessing image and sending to Google Cloud Vision...' 
+                  : 'Claude AI is evaluating ingredient safety against veterinary & FDA guidelines.'}
               </p>
             </div>
           )}
@@ -630,21 +627,81 @@ export default function ScanPage() {
               {product.brand && product.brand !== 'User Input' && product.brand !== 'Camera Scan' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
               
               {safetyResults && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-bold text-[#191919]">Ingredient Grade</span>
-                    <span className="text-3xl font-black" style={{ color: safetyResults.scoreColor }}>{safetyResults.score}</span>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-5 text-left">
+                  {/* Premium Badge & Summary */}
+                  <div className="flex items-center gap-4 bg-[#F8F6F4] p-4 rounded-2xl border border-gray-100/80 shadow-3xs">
+                    <div 
+                      className="w-14 h-14 rounded-full flex items-center justify-center text-2xl font-black text-white shrink-0 shadow-sm"
+                      style={{ backgroundColor: getGradeColor(safetyResults.grade) }}
+                    >
+                      {safetyResults.grade}
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">AI Safety Grade</span>
+                      <p className="text-xs text-gray-700 font-bold leading-normal mt-0.5">
+                        {safetyResults.summary}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    {safetyResults.flagged.length > 0 ? (
-                      safetyResults.flagged.map((f, i) => (
-                        <div key={i} className={`p-3 rounded-xl border text-xs ${f.info.category === 'dangerous' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'}`}>
-                          <span className="font-bold uppercase block mb-1">{f.info.name} — {f.info.category}</span>
-                          <p className="text-gray-600 leading-tight">{f.info.reason}</p>
+
+                  {/* Detailed Analysis Breakdown */}
+                  <div className="space-y-4">
+                    {/* 🔴 Dangerous Ingredients */}
+                    {safetyResults.dangerous.length > 0 && (
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-sm leading-none">🔴</span> Dangerous Ingredients ({safetyResults.dangerous.length})
+                        </h5>
+                        <div className="space-y-1.5">
+                          {safetyResults.dangerous.map((item, i) => (
+                            <div key={i} className="p-3 bg-red-50/70 border border-red-100/50 rounded-xl text-xs flex flex-col gap-1 shadow-3xs">
+                              <span className="font-extrabold text-red-950 uppercase">{item.name}</span>
+                              <p className="text-red-800 leading-relaxed font-medium">{item.reason}</p>
+                            </div>
+                          ))}
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-green-600 font-medium">No dangerous ingredients found in our database.</p>
+                      </div>
+                    )}
+
+                    {/* 🟡 Concerning Ingredients */}
+                    {safetyResults.concerning.length > 0 && (
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-sm leading-none">⚠️</span> Concerning Ingredients ({safetyResults.concerning.length})
+                        </h5>
+                        <div className="space-y-1.5">
+                          {safetyResults.concerning.map((item, i) => (
+                            <div key={i} className="p-3 bg-amber-50/70 border border-amber-100/50 rounded-xl text-xs flex flex-col gap-1 shadow-3xs">
+                              <span className="font-extrabold text-amber-950 uppercase">{item.name}</span>
+                              <p className="text-amber-800 leading-relaxed font-medium">{item.reason}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 🟢 Safe Ingredients */}
+                    {safetyResults.safe.length > 0 && (
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-sm leading-none">🌱</span> Safe & Beneficial ({safetyResults.safe.length})
+                        </h5>
+                        <div className="flex flex-wrap gap-1.5 p-3 bg-emerald-50/30 border border-emerald-100/30 rounded-xl max-h-40 overflow-y-auto">
+                          {safetyResults.safe.map((item, i) => (
+                            <span key={i} className="px-2.5 py-1 bg-white text-emerald-800 border border-emerald-100/50 rounded-lg text-[10px] font-bold shadow-3xs">
+                              ✓ {item.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Perfect Score State */}
+                    {safetyResults.dangerous.length === 0 && safetyResults.concerning.length === 0 && (
+                      <div className="bg-emerald-50/60 border border-emerald-100/50 text-emerald-800 p-5 rounded-2xl text-center shadow-3xs">
+                        <p className="font-bold text-sm uppercase tracking-wide">Excellent Ingredient Quality! 🎉</p>
+                        <p className="text-xs text-emerald-700 mt-1 leading-normal">Claude AI did not identify any dangerous or concerning ingredients in this recipe.</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -697,7 +754,7 @@ export default function ScanPage() {
               <button 
                 onClick={() => {
                   const productName = product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' ? product.product_name : product.brand;
-                  const text = `${productName} scored ${safetyResults?.score || 'N/A'} for safety on Lumo Bites — is your pet's food safe? lumobites.net`;
+                  const text = `${productName} received a grade of ${safetyResults?.grade || 'N/A'} for safety on Lumo Bites — is your pet's food safe? lumobites.net`;
                   if (navigator.share) navigator.share({ title: 'Lumo Bites Safety Report', text, url: 'https://lumobites.net/scan' });
                   else { navigator.clipboard.writeText(text); alert('Result copied!'); }
                 }}

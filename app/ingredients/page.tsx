@@ -2,76 +2,72 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ingredientDatabase, IngredientInfo, IngredientCategory } from '@/lib/ingredients';
 
 export default function IngredientsPage() {
   const [ingredientsText, setIngredientsText] = useState('');
   const [petType, setPetType] = useState<'dog' | 'cat'>('dog');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<{
-    score: string;
-    scoreColor: string;
-    flagged: { info: IngredientInfo; match: string }[];
-    counts: { dangerous: number; questionable: number; good: number; neutral: number };
+    grade: string;
+    dangerous: { name: string; reason: string }[];
+    concerning: { name: string; reason: string }[];
+    safe: { name: string }[];
+    summary: string;
   } | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const checkIngredients = () => {
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case 'A': return '#10B981';
+      case 'B': return '#84CC16';
+      case 'C': return '#F59E0B';
+      case 'D': return '#F97316';
+      case 'F': return '#EF4444';
+      default: return '#8B5E3C';
+    }
+  };
+
+  const checkIngredients = async () => {
     if (!ingredientsText.trim()) return;
 
-    // Split ingredients by comma, semi-colon or new line
-    const list = ingredientsText
-      .split(/[,\n;]/)
-      .map(i => i.trim())
-      .filter(i => i.length > 0);
+    setLoading(true);
+    setError(null);
+    setResults(null);
 
-    const flagged: { info: IngredientInfo; match: string }[] = [];
-    const counts = { dangerous: 0, questionable: 0, good: 0, neutral: 0 };
-    const seen = new Set<string>();
-
-    list.forEach(item => {
-      const lowerItem = item.toLowerCase();
-      
-      // Find matching ingredient in database
-      const match = ingredientDatabase.find(dbItem => 
-        lowerItem.includes(dbItem.name.toLowerCase()) || 
-        dbItem.name.toLowerCase().includes(lowerItem)
-      );
-
-      if (match && !seen.has(match.name)) {
-        flagged.push({ info: match, match: item });
-        counts[match.category]++;
-        seen.add(match.name);
+    try {
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients: ingredientsText })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to analyze ingredients');
       }
-    });
 
-    // Scoring logic
-    let score = 'A';
-    let scoreColor = '#10B981'; // Green
+      setResults({
+        grade: data.grade || 'C',
+        dangerous: data.dangerous || [],
+        concerning: data.concerning || [],
+        safe: data.safe || [],
+        summary: data.summary || ''
+      });
 
-    if (counts.dangerous >= 2) {
-      score = 'F';
-      scoreColor = '#EF4444'; // Red
-    } else if (counts.dangerous === 1) {
-      score = 'D';
-      scoreColor = '#F97316'; // Orange
-    } else if (counts.questionable >= 4) {
-      score = 'C';
-      scoreColor = '#F59E0B'; // Yellow/Amber
-    } else if (counts.questionable >= 1) {
-      score = 'B';
-      scoreColor = '#84CC16'; // Light Green
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Error analyzing ingredients with Claude AI.');
+    } finally {
+      setLoading(false);
     }
-
-    setResults({ score, scoreColor, flagged, counts: { ...counts, neutral: list.length - flagged.length } });
-    
-    setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   const handleShare = () => {
     if (!results) return;
-    const text = `My pet's food scored a ${results.score} on Lumo Bites Ingredient Checker! 🐾 Check your pet's food at lumobites.net`;
+    const text = `My pet's food received a grade of ${results.grade} on Lumo Bites Ingredient Checker! 🐾 Check your pet's food at lumobites.net`;
     if (navigator.share) {
       navigator.share({ title: 'Lumo Bites Ingredient Checker', text, url: 'https://lumobites.net/ingredients' });
     } else {
@@ -131,91 +127,133 @@ export default function IngredientsPage() {
 
           <button 
             onClick={checkIngredients}
-            disabled={!ingredientsText.trim()}
-            className="w-full bg-[#8B5E3C] text-white py-5 rounded-2xl font-black text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#8B5E3C]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            disabled={!ingredientsText.trim() || loading}
+            className="w-full bg-[#8B5E3C] text-white py-5 rounded-2xl font-black text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#8B5E3C]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2.5"
           >
-            Check Ingredients Now &rarr;
+            {loading ? (
+              <>
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                🔍 Analyzing with AI...
+              </>
+            ) : (
+              "Check Ingredients Now →"
+            )}
           </button>
         </div>
+
+        {/* LOADING INDICATOR */}
+        {loading && (
+          <div className="mt-12 bg-white rounded-3xl p-12 border border-[#F0E6DD] text-center flex flex-col items-center justify-center shadow-xl shadow-[#8B5E3C]/5 animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
+            <h3 className="text-[#191919] font-bold text-lg mb-2">🔍 Analyzing ingredients with AI...</h3>
+            <p className="text-gray-500 text-sm max-w-[280px] mx-auto leading-relaxed">
+              Claude AI is evaluating ingredient safety against veterinary & FDA guidelines.
+            </p>
+          </div>
+        )}
+
+        {/* ERROR SCREEN */}
+        {error && (
+          <div className="mt-12 bg-red-50 border border-red-100 text-red-600 p-8 rounded-3xl text-sm text-center shadow-3xs">
+            <p className="font-bold mb-2 uppercase text-xs tracking-widest">Analysis Failed</p>
+            <p className="opacity-80">{error}</p>
+          </div>
+        )}
 
         {/* RESULTS */}
         {results && (
           <div ref={resultsRef} className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-[#F0E6DD]">
-              <div className="p-8 text-center border-b border-gray-100">
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Overall Safety Score</p>
+              <div className="p-8 text-center border-b border-gray-100 flex flex-col items-center">
+                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Overall Safety Grade</p>
                 <div 
-                  className="text-8xl font-black mb-4 inline-block"
-                  style={{ color: results.scoreColor }}
+                  className="w-20 h-20 rounded-full flex items-center justify-center text-4xl font-black text-white shadow-lg transition-transform hover:scale-105 mb-4"
+                  style={{ backgroundColor: getGradeColor(results.grade) }}
                 >
-                  {results.score}
+                  {results.grade}
                 </div>
-                <div className="flex justify-center gap-8 mt-4">
-                  <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#EF4444]">{results.counts.dangerous}</span>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Dangerous</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#F59E0B]">{results.counts.questionable}</span>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Questionable</span>
-                  </div>
-                  <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#10B981]">{results.counts.good}</span>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Good</span>
-                  </div>
+                <div className="bg-[#F8F6F4] p-4.5 rounded-2xl border border-gray-100/80 shadow-3xs max-w-xl w-full">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">AI Safety Analysis Summary</span>
+                  <p className="text-sm text-gray-700 font-bold leading-normal">
+                    {results.summary}
+                  </p>
                 </div>
               </div>
 
-              <div className="p-8">
-                <h3 className="font-black text-[#191919] text-xl mb-6">Detailed Analysis</h3>
+              <div className="p-8 text-left">
+                <h3 className="font-black text-[#191919] text-xl mb-6 text-center">Detailed Analysis Breakdown</h3>
                 
-                {results.flagged.length === 0 ? (
-                  <div className="bg-[#F0FDF4] p-6 rounded-2xl border border-[#BBF7D0] text-center">
-                    <p className="text-[#15803D] font-bold">No dangerous or questionable ingredients found! 🎉</p>
-                    <p className="text-[#166534] text-sm mt-1">This food appears to use clean ingredients based on our database.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {results.flagged.sort((a,b) => {
-                      const order = { dangerous: 0, questionable: 1, good: 2, neutral: 3 };
-                      return order[a.info.category] - order[b.info.category];
-                    }).map((f, i) => (
-                      <div 
-                        key={i} 
-                        className={`p-6 rounded-2xl border flex flex-col md:flex-row gap-4 md:items-center ${
-                          f.info.category === 'dangerous' ? 'bg-[#FEF2F2] border-[#FEE2E2]' :
-                          f.info.category === 'questionable' ? 'bg-[#FFFBEB] border-[#FEF3C7]' :
-                          'bg-[#F0FDF4] border-[#DCFCE7]'
-                        }`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`w-3 h-3 rounded-full ${
-                              f.info.category === 'dangerous' ? 'bg-[#EF4444]' :
-                              f.info.category === 'questionable' ? 'bg-[#F59E0B]' :
-                              'bg-[#10B981]'
-                            }`}></span>
-                            <h4 className="font-black text-[#191919] uppercase text-sm tracking-tight">{f.info.name}</h4>
-                            <span className="text-gray-400 text-xs font-bold px-2 py-0.5 bg-white/50 rounded-full border border-gray-100">{f.info.category}</span>
+                <div className="space-y-6">
+                  {/* 🔴 Dangerous Ingredients */}
+                  {results.dangerous.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-sm leading-none">🔴</span> Dangerous Ingredients ({results.dangerous.length})
+                      </h4>
+                      <div className="space-y-1.5">
+                        {results.dangerous.map((item, i) => (
+                          <div key={i} className="p-3.5 bg-red-50/70 border border-red-100/50 rounded-xl text-xs flex flex-col gap-1 shadow-3xs">
+                            <span className="font-extrabold text-red-950 uppercase">{item.name}</span>
+                            <p className="text-red-800 leading-relaxed font-medium">{item.reason}</p>
                           </div>
-                          <p className="text-xs text-gray-600 font-medium mb-2">{f.info.reason}</p>
-                          <p className="text-sm text-gray-800 leading-relaxed"><span className="font-bold">Impact:</span> {f.info.effects}</p>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  )}
+
+                  {/* 🟡 Concerning Ingredients */}
+                  {results.concerning.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-sm leading-none">⚠️</span> Concerning Ingredients ({results.concerning.length})
+                      </h4>
+                      <div className="space-y-1.5">
+                        {results.concerning.map((item, i) => (
+                          <div key={i} className="p-3.5 bg-amber-50/70 border border-amber-100/50 rounded-xl text-xs flex flex-col gap-1 shadow-3xs">
+                            <span className="font-extrabold text-amber-950 uppercase">{item.name}</span>
+                            <p className="text-amber-800 leading-relaxed font-medium">{item.reason}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 🟢 Safe Ingredients */}
+                  {results.safe.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-sm leading-none">🌱</span> Safe & Beneficial ({results.safe.length})
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5 p-3 bg-emerald-50/30 border border-emerald-100/30 rounded-xl max-h-40 overflow-y-auto">
+                        {results.safe.map((item, i) => (
+                          <span key={i} className="px-2.5 py-1 bg-white text-emerald-800 border border-emerald-100/50 rounded-lg text-[10px] font-bold shadow-3xs">
+                            ✓ {item.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Perfect Score State */}
+                  {results.dangerous.length === 0 && results.concerning.length === 0 && (
+                    <div className="bg-emerald-50/60 border border-emerald-100/50 text-emerald-800 p-5 rounded-2xl text-center shadow-3xs">
+                      <p className="font-bold text-sm uppercase tracking-wide">Excellent Ingredient Quality! 🎉</p>
+                      <p className="text-xs text-emerald-700 mt-1 leading-normal">Claude AI did not identify any dangerous or concerning ingredients in this recipe.</p>
+                    </div>
+                  )}
+                </div>
 
                 <div className="mt-8 flex flex-col md:flex-row gap-4">
                   <button 
                     onClick={handleShare}
-                    className="flex-1 bg-white border-2 border-gray-100 text-[#191919] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-[#8B5E3C]/20 transition-all"
+                    className="flex-1 bg-white border-2 border-gray-150 text-[#191919] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-[#8B5E3C]/20 transition-all cursor-pointer"
                   >
                     <span>🔗</span> Share Result
                   </button>
                   <Link 
-                    href={`/chat?issues=${results.flagged.filter(f => f.info.category !== 'good').map(f => f.info.name).join(',')}`}
-                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    href={`/chat?issues=${[...results.dangerous, ...results.concerning].map(item => item.name).join(',')}`}
+                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition-all text-center"
+                    style={{ textDecoration: 'none' }}
                   >
                     <span>🛡️</span> Find Safer Alternatives
                   </Link>
