@@ -3,7 +3,7 @@ import BrandMarquee from '@/components/BrandMarquee';
 
 export function generateStaticParams() {
   const brands = [
-    'purina', 'hills', 'royal-canin', 'iams', 'pedigree', 'blue-buffalo', 
+    'purina', 'hills', 'hill-s', 'royal-canin', 'iams', 'pedigree', 'blue-buffalo', 
     'orijen', 'acana', 'merrick', 'wellness', 'fancy-feast', 'friskies'
   ];
   return brands.map((slug) => ({ slug }));
@@ -15,6 +15,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
   const brandNames: Record<string, string> = {
     'purina': 'Purina',
     'hills': "Hill's Science Diet",
+    'hill-s': "Hill's Science Diet",
     'royal-canin': 'Royal Canin',
     'iams': 'Iams',
     'pedigree': 'Pedigree',

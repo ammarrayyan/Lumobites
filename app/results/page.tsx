@@ -32,11 +32,20 @@ export default function ResultsPage() {
       let finalResults = data.results || [];
       const brandParam = targetProfile.brand;
       if (brandParam) {
-        finalResults = finalResults.filter((r: any) =>
-          r.brand?.toLowerCase().includes(brandParam.toLowerCase()) ||
-          brandParam.toLowerCase().includes(r.brand?.toLowerCase())
-        );
-        setBrandFallback(finalResults.length === 0);
+        const normalizeBrand = (b: string) => b.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]/g, ' ').trim();
+        const bpNormalized = normalizeBrand(brandParam);
+        
+        const filtered = finalResults.filter((r: any) => {
+          if (!r.brand) return false;
+          const rbNormalized = normalizeBrand(r.brand);
+          return rbNormalized.includes(bpNormalized) || bpNormalized.includes(rbNormalized);
+        });
+        if (filtered.length > 0) {
+          finalResults = filtered;
+          setBrandFallback(false);
+        } else {
+          setBrandFallback(true);
+        }
       }
 
       const overrideScores = [97, 89, 82, 74, 68];
@@ -71,7 +80,22 @@ export default function ResultsPage() {
       try {
         const params = new URLSearchParams(window.location.search);
         const petType = params.get('pet_type');
-        const brandParam = params.get('brand');
+        const brand = params.get('brand');
+        let brandParam = brand;
+        if (brand) {
+          const lookupKey = brand.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const BRAND_MAP: Record<string, string> = {
+            'hill-s': "Hill's Science Diet",
+            'hills': "Hill's Science Diet",
+            'hills-science-diet': "Hill's Science Diet",
+            'royal-canin': 'Royal Canin',
+            'blue-buffalo': 'Blue Buffalo',
+            'fancy-feast': 'Fancy Feast',
+            'purina': 'Purina',
+            'iams': 'Iams',
+          };
+          brandParam = BRAND_MAP[lookupKey] || brand.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
         setSelectedBrand(brandParam);
 
         if (!petType) {

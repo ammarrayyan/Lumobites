@@ -29,7 +29,18 @@ export default function ChatPage() {
     const params = new URLSearchParams(window.location.search);
     const brand = params.get('brand');
     if (brand) {
-      const displayBrand = brand.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      const lookupKey = brand.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const BRAND_MAP: Record<string, string> = {
+        'hill-s': "Hill's Science Diet",
+        'hills': "Hill's Science Diet",
+        'hills-science-diet': "Hill's Science Diet",
+        'royal-canin': 'Royal Canin',
+        'blue-buffalo': 'Blue Buffalo',
+        'fancy-feast': 'Fancy Feast',
+        'purina': 'Purina',
+        'iams': 'Iams',
+      };
+      const displayBrand = BRAND_MAP[lookupKey] || brand.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       setSelectedBrand(displayBrand);
     }
     // Check for returning user

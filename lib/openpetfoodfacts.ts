@@ -299,7 +299,12 @@ export async function fetchPetFoodProducts(petType: PetType, pageSize = 50, food
   let selectedBrands: string[] = [];
   
   if (brand) {
-    selectedBrands = [brand];
+    const brandLower = brand.toLowerCase();
+    let queryBrand = brand;
+    if (brandLower.includes('hill') || brandLower.includes('science diet')) {
+      queryBrand = "Hill's";
+    }
+    selectedBrands = [queryBrand];
   } else {
     const pool = petType === 'cat' ? topCatBrands : topDogBrands;
     const shuffled = pool.sort(() => 0.5 - Math.random());
