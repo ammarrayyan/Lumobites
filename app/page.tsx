@@ -255,36 +255,36 @@ export default function Home() {
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. Lumo Bites matched her to a food with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. The Personalized Food Advisor matched her to a premium formula with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐕</div>
                 <div>
                   <p className="font-bold text-[#191919] text-xs">Sarah M.</p>
-                  <p className="text-[#999] text-[11px]">Golden Retriever owner, Texas</p>
+                  <p className="text-[#999] text-[11px]">Personalized Food Advisor • Golden Retriever Owner, TX</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I have two cats with completely different needs. Lumo Bites recommended a high-protein wet food for my older cat and a different formula for my kitten. Both are obsessed with their food now. Worth every second.&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;The Ingredient Safety Scanner is a lifesaver! I scanned the label of my cat&apos;s favorite wet food and discovered a hidden chemical preservative. Switching to a Grade A alternative has resolved their digestive issues completely.&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐈</div>
                 <div>
                   <p className="font-bold text-[#191919] text-xs">James L.</p>
-                  <p className="text-[#999] text-[11px]">Multi-cat household, California</p>
+                  <p className="text-[#999] text-[11px]">Ingredient Safety Scanner • Multi-cat Household, CA</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;As a student, budget is everything. I told Lumo Bites my limit was $35/month and it found the highest-rated options in that range. I didn&apos;t have to compromise on quality at all. My pug is thriving.&rdquo;</p>
+              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I tried the AI Pet Twin game just for fun, and it matched my selfie to a Pug with 94% accuracy! It was so hilariously spot-on and premium that I shared it on my Instagram story. It is such a mysterious and entertaining quiz!&rdquo;</p>
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
                 <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐶</div>
                 <div>
                   <p className="font-bold text-[#191919] text-xs">Priya K.</p>
-                  <p className="text-[#999] text-[11px]">Pug owner, New York</p>
+                  <p className="text-[#999] text-[11px]">AI Pet Twin Game • Pug Owner, NY</p>
                 </div>
               </div>
             </div>
