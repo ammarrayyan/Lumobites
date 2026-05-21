@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import PwaRegister from "@/components/PwaRegister";
+import PwaInstallBanner from "@/components/PwaInstallBanner";
+import PwaSplashScreen from "@/components/PwaSplashScreen";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Find the Best Food for Your Pet | Lumo Bites",
   description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+  manifest: "/manifest.json",
   icons: {
     icon: "/Logo.png",
+    apple: "/lumo-bites-logo.png",
   },
   openGraph: {
     title: "Find the Best Food for Your Pet | Lumo Bites",
@@ -41,6 +46,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Lumo Bites" />
+        <link rel="apple-touch-icon" href="/lumo-bites-logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/lumo-bites-logo.png" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-MNH8TBZHHR"
           strategy="afterInteractive"
@@ -54,7 +64,13 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <PwaRegister />
+        <PwaSplashScreen />
+        <PwaInstallBanner />
+        {children}
+      </body>
     </html>
   );
 }
+
