@@ -36,6 +36,7 @@ export default function ScanPage() {
   const [verifyingSession, setVerifyingSession] = useState(false);
   const [modalStep, setModalStep] = useState<'email' | 'verification'>('email');
   const [verificationCode, setVerificationCode] = useState('');
+  const [showProMenu, setShowProMenu] = useState(false);
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -147,10 +148,20 @@ export default function ScanPage() {
         });
       } else {
         setIsPro(false);
-        console.log('[Lumo Subscription] No cached Pro credentials. Standard Free tier active.');
       }
     }
   }, []);
+
+  const handleSignOut = () => {
+    console.log('[Lumo Subscription] Signing out. Clearing cached Pro credentials.');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lumo_pro_email');
+      localStorage.removeItem('lumo_admin_bypass');
+    }
+    setIsPro(false);
+    setProEmail('');
+    setShowProMenu(false);
+  };
 
   // Limit checker: returns true if allowed to scan, false if blocked (shows modal)
   const checkScanLimit = (): boolean => {
@@ -843,17 +854,52 @@ export default function ScanPage() {
           </div>
         </Link>
         {isPro && (
-          <div className="ml-4 flex items-center gap-2">
-            <div className="bg-[#8B5E3C] text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs animate-pulse">
-              PRO ✨
-            </div>
-            <Link 
-              href="/account" 
-              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-bold hover:underline"
-              style={{ textDecoration: 'none' }}
+          <div className="ml-4 relative">
+            <button
+              onClick={() => setShowProMenu(!showProMenu)}
+              className="flex items-center gap-2 bg-[#FDF6F0] hover:bg-[#FAF0E6] border border-[#8B5E3C]/20 px-3 py-1.5 rounded-full transition-all cursor-pointer select-none"
             >
-              Manage subscription
-            </Link>
+              <div className="bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs select-none">
+                PRO ✨
+              </div>
+              <span className="text-xs text-[#8B5E3C] font-extrabold flex items-center gap-0.5 select-none">
+                Account
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
+                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                </svg>
+              </span>
+            </button>
+
+            {showProMenu && (
+              <>
+                {/* Click outside to close backdrop */}
+                <div 
+                  className="fixed inset-0 z-40 bg-transparent cursor-default" 
+                  onClick={() => setShowProMenu(false)}
+                />
+                
+                {/* Floating Premium Menu */}
+                <div className="absolute left-0 mt-2 w-48 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_8px_30px_rgba(139,94,60,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in">
+                  <div className="px-3 py-1.5 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
+                    {proEmail || "Pro Member"}
+                  </div>
+                  <Link 
+                    href="/account"
+                    onClick={() => setShowProMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-bold hover:bg-[#FAF6F4] rounded-xl transition-all"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    ⚙️ Manage Subscription
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-bold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
+                  >
+                    🚪 Sign Out
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
         <div style={{ marginLeft: 'auto' }}>
