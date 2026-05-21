@@ -36,6 +36,11 @@ export default function PhotoPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isHumanDetected = 
+    detectedBreed.toLowerCase().includes('human') || 
+    detectedBreed2.toLowerCase().includes('human') || 
+    breedDescription.toLowerCase().includes('human');
+
   // Handle active webcam stream
   useEffect(() => {
     if (cameraActive) {
@@ -349,7 +354,35 @@ export default function PhotoPage() {
                 </div>
               )}
               
-              {detectedPetType === 'none' ? (
+              {isHumanDetected ? (
+                <div className="flex flex-col items-center gap-6 w-full max-w-[90%] mx-auto animate-fade-in">
+                  <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight">
+                    Oops! That looks like a human 😄
+                  </h2>
+                  <p className="text-[#666666] leading-relaxed">
+                    Please upload a photo of your dog or cat instead. We&apos;re designed to find the perfect food for pets!
+                  </p>
+                  
+                  <button 
+                    onClick={() => setStep('upload')}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-4 px-8 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer mt-2"
+                  >
+                    Try Another Photo
+                  </button>
+
+                  <div className="mt-6 pt-6 border-t border-[#EEEEEE] w-full text-center">
+                    <p className="text-sm text-gray-500 font-medium">
+                      Looking for YOUR pet twin instead? 
+                    </p>
+                    <Link 
+                      href="/twin" 
+                      className="inline-flex items-center gap-1.5 text-[#8B5E3C] hover:underline font-bold text-sm mt-1.5 animate-pulse"
+                    >
+                      Try our Pet Twin feature! 🐾
+                    </Link>
+                  </div>
+                </div>
+              ) : detectedPetType === 'none' ? (
                 <div className="w-full flex flex-col gap-4 items-center">
                   <h2 className="text-2xl font-[800] text-[#191919] leading-tight">
                     We couldn&apos;t detect a pet! 🕵️
@@ -511,7 +544,7 @@ export default function PhotoPage() {
                   </div>
                 </div>
               )}
-              {detectedPetType !== 'none' && (
+              {!isHumanDetected && detectedPetType !== 'none' && (
                 <button 
                   onClick={() => setStep('upload')}
                   className="mt-4 text-sm font-bold text-[#9A7760] underline hover:text-[#8B5E3C] transition-colors"

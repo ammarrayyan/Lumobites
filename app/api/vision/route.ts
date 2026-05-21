@@ -44,7 +44,7 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: 'Look at this photo. 1) Is this a cat or dog? 2) What specific breed is it? If mixed breed, list the likely breeds. 3) Confidence level: High, Medium, or Low. Respond in JSON only: {petType: "cat" or "dog", breed: string, confidence: "High" or "Medium" or "Low", breedDescription: string}'
+                text: 'Look at this photo. 1) Is this a cat, dog, or human/something else? 2) What specific breed of pet is it? If a human is detected instead of a pet, set petType to "none" and breed to "N/A - This is a human". 3) Confidence level: High, Medium, or Low. Respond in JSON only: {petType: "cat" | "dog" | "none", breed: string, confidence: "High" | "Medium" | "Low", breedDescription: string}'
               }
             ]
           }
