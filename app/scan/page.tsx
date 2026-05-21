@@ -226,6 +226,29 @@ export default function ScanPage() {
     }
   };
 
+  // Dedicated, bulletproof camera cleanup when the component unmounts completely
+  useEffect(() => {
+    return () => {
+      console.log('[Lumo Scan] ScanPage unmounting, double-checking that all camera tracks are stopped.');
+      try {
+        if (typeof window !== 'undefined') {
+          const videos = document.querySelectorAll('video');
+          videos.forEach(video => {
+            const stream = video.srcObject as MediaStream;
+            if (stream && typeof stream.getTracks === 'function') {
+              stream.getTracks().forEach(track => {
+                track.stop();
+                console.log('[Lumo Scan] Unmount cleanup: track stopped:', track.label);
+              });
+            }
+          });
+        }
+      } catch (e) {
+        console.error('[Lumo Scan] Unmount tracks cleanup error:', e);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const html5QrCode = new Html5Qrcode("reader");
     scannerRef.current = html5QrCode;
@@ -250,8 +273,44 @@ export default function ScanPage() {
     startScanner();
 
     return () => {
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(err => console.error("Failed to stop scanner", err));
+      console.log('[Lumo Scan] Cleaning up scanner and stopping all active camera tracks...');
+      
+      const stopAllTracks = () => {
+        try {
+          if (typeof window !== 'undefined') {
+            const videos = document.querySelectorAll('video');
+            videos.forEach(video => {
+              const stream = video.srcObject as MediaStream;
+              if (stream && typeof stream.getTracks === 'function') {
+                stream.getTracks().forEach(track => {
+                  track.stop();
+                  console.log('[Lumo Scan] Camera track stopped:', track.label);
+                });
+              }
+            });
+          }
+        } catch (err) {
+          console.error('[Lumo Scan] Error stopping tracks:', err);
+        }
+      };
+
+      if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop()
+            .then(() => {
+              console.log('[Lumo Scan] Scanner stopped successfully.');
+            })
+            .catch(err => {
+              console.error('[Lumo Scan] Failed to stop scanner:', err);
+            })
+            .finally(() => {
+              stopAllTracks();
+            });
+        } else {
+          stopAllTracks();
+        }
+      } else {
+        stopAllTracks();
       }
     };
   }, [isPro]);
@@ -581,29 +640,6 @@ export default function ScanPage() {
   const handleRestore = async () => {
     if (!modalEmail.trim()) {
       setModalMessage({ text: 'Please enter your email to restore your subscription.', isError: true });
-      return;
-    }
-    
-    const cleanEmail = modalEmail.toLowerCase().trim();
-    if (cleanEmail === 'premierpetnutritionllc@gmail.com') {
-      console.log('[Lumo Subscription] Owner bypass activated via restore input.');
-      setIsPro(true);
-      setProEmail(cleanEmail);
-      localStorage.setItem('lumo_pro_email', cleanEmail);
-      localStorage.removeItem('lumo_admin_bypass');
-      setShowUpgradeModal(false);
-      setModalStep('email');
-      setVerificationCode('');
-      
-      try {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {}
-      
-      alert('Welcome back! Your Pro status has been successfully restored ✨');
       return;
     }
     

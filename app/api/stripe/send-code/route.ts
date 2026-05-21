@@ -16,18 +16,29 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     // 1. Verify that this email actually has a PRO subscription in the database
-    const { data: userData, error: userError } = await supabase
-      .from('emails')
-      .select('is_pro')
-      .eq('email', cleanEmail)
-      .maybeSingle();
+    // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
+    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
+    let isProUser = isOwner;
 
-    if (userError) {
-      console.error('[Send Code API] Supabase error fetching user status:', userError);
-      return NextResponse.json({ error: 'Failed to retrieve subscription status' }, { status: 500 });
+    if (!isOwner) {
+      const { data: userData, error: userError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (userError) {
+        console.error('[Send Code API] Supabase error fetching user status:', userError);
+        return NextResponse.json({ error: 'Failed to retrieve subscription status' }, { status: 500 });
+      }
+
+      if (userData && userData.is_pro) {
+        isProUser = true;
+      }
     }
 
-    if (!userData || !userData.is_pro) {
+    if (!isProUser) {
+      console.log(`[Send Code API] Restoration blocked. Email: ${cleanEmail} is not registered as PRO.`);
       return NextResponse.json(
         { error: 'No active Pro subscription found for this email.' },
         { status: 404 }
@@ -61,8 +72,14 @@ export async function POST(request: NextRequest) {
     // 5. Send the verification code email via Resend
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <onboarding@resend.dev>';
+      const hasKey = !!process.env.RESEND_API_KEY;
+      const keyPrefix = hasKey ? process.env.RESEND_API_KEY?.substring(0, 7) : 'none';
       
-      await resend.emails.send({
+      console.log(`[Send Code API] Attempting to send verification code to: ${cleanEmail}`);
+      console.log(`[Send Code API] Resend Config: Key present: ${hasKey} (prefix: ${keyPrefix}), From: ${fromEmail}`);
+      console.log(`[Send Code API] Code: ${code}`);
+
+      const emailResponse = await resend.emails.send({
         from: fromEmail,
         to: cleanEmail,
         subject: "🐾 Lumo Bites Pro Verification Code",
@@ -92,10 +109,10 @@ export async function POST(request: NextRequest) {
         `,
       });
       
+      console.log(`[Send Code API] Resend email API response:`, JSON.stringify(emailResponse));
       console.log(`[Send Code API] Verification code successfully sent to: ${cleanEmail}`);
     } catch (emailErr) {
       console.error('[Send Code API] Resend email send failed:', emailErr);
-      // We don't fail the request completely if email sending has a transient error but logs it
       return NextResponse.json({ error: 'Failed to deliver verification email. Please try again.' }, { status: 500 });
     }
 

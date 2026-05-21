@@ -41,18 +41,29 @@ export async function POST(request: NextRequest) {
       .eq('id', codeData.id);
 
     // 3. Confirm double-verify that the user has a PRO subscription in the emails table
-    const { data: userData, error: userError } = await supabase
-      .from('emails')
-      .select('is_pro')
-      .eq('email', cleanEmail)
-      .maybeSingle();
+    // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
+    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
+    let isProUser = isOwner;
 
-    if (userError) {
-      console.error('[Verify Code API] Supabase error confirming user status:', userError);
-      return NextResponse.json({ error: 'Failed to verify subscription status' }, { status: 500 });
+    if (!isOwner) {
+      const { data: userData, error: userError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (userError) {
+        console.error('[Verify Code API] Supabase error confirming user status:', userError);
+        return NextResponse.json({ error: 'Failed to verify subscription status' }, { status: 500 });
+      }
+
+      if (userData && userData.is_pro) {
+        isProUser = true;
+      }
     }
 
-    if (!userData || !userData.is_pro) {
+    if (!isProUser) {
+      console.log(`[Verify Code API] Verification failed. Email: ${cleanEmail} is not registered as PRO.`);
       return NextResponse.json(
         { error: 'No active Pro subscription found for this email.' },
         { status: 404 }
