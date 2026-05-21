@@ -843,8 +843,17 @@ export default function ScanPage() {
           </div>
         </Link>
         {isPro && (
-          <div className="ml-4 bg-[#8B5E3C] text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs animate-pulse">
-            PRO ✨
+          <div className="ml-4 flex items-center gap-2">
+            <div className="bg-[#8B5E3C] text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs animate-pulse">
+              PRO ✨
+            </div>
+            <Link 
+              href="/account" 
+              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-bold hover:underline"
+              style={{ textDecoration: 'none' }}
+            >
+              Manage subscription
+            </Link>
           </div>
         )}
         <div style={{ marginLeft: 'auto' }}>
@@ -1303,141 +1312,164 @@ export default function ScanPage() {
               </button>
             )}
 
-            <div>
-              <div className="text-4xl mb-3">🔍</div>
-              <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                You&apos;ve used your free scan today 🔍
-              </h3>
-              <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-                Upgrade to Lumo Bites Pro for unlimited scans
-              </p>
-            </div>
-
-            <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
-              <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">$2.99/month — cancel anytime</span>
-            </div>
-
-            <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
-              <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-500 text-sm">✅</span> Detailed AI safety reports
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-emerald-500 text-sm">✅</span> Priority AI analysis
-                </li>
-              </ul>
-            </div>
-
-            {modalStep === 'email' ? (
-              <>
-                <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1.5 text-left">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                      Enter Your Email
-                    </label>
-                    <input
-                      type="email"
-                      value={modalEmail}
-                      onChange={(e) => setModalEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      required
-                      className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                    />
-                  </div>
-
-                  {modalMessage && (
-                    <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                      {modalMessage.text}
-                    </p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={modalLoading}
-                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {modalLoading ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    ) : 'Upgrade for $2.99/month'}
-                  </button>
-                </form>
-
-                <div className="flex flex-col gap-2.5">
-                  <button 
-                    type="button"
-                    onClick={handleRestore}
-                    disabled={modalLoading}
-                    className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    Already subscribed? Restore subscription
-                  </button>
-                  <span className="text-[11px] text-gray-400 text-center">
-                    Come back tomorrow for your free scan
-                  </span>
-                </div>
-              </>
-            ) : (
-              <form onSubmit={handleVerifyCode} className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1.5 text-left">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    Enter 6-Digit Verification Code
-                  </label>
-                  <p className="text-xs text-gray-500 font-medium">
-                    We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 10 minutes.
+            {isPro ? (
+              <div className="flex flex-col gap-5 py-4">
+                <div>
+                  <div className="text-4xl mb-3">✨</div>
+                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
+                    You are a Pro Member!
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
+                    Thank you for supporting Lumo Bites. You have unlimited scans and full safety analysis active.
                   </p>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="123456"
-                    required
-                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
-                  />
                 </div>
-
-                {modalMessage && (
-                  <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                    {modalMessage.text}
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={modalLoading}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                <Link
+                  href="/account"
+                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer text-center"
+                  style={{ textDecoration: 'none' }}
                 >
-                  {modalLoading ? (
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : 'Verify Code'}
-                </button>
-
-                <div className="flex justify-between items-center mt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalStep('email');
-                      setModalMessage(null);
-                      setVerificationCode('');
-                    }}
-                    className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    ← Back to Email
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleRestore}
-                    disabled={modalLoading}
-                    className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    Resend Code
-                  </button>
+                  Manage Subscription
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <div className="text-4xl mb-3">🔍</div>
+                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
+                    You&apos;ve used your free scan today 🔍
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
+                    Upgrade to Lumo Bites Pro for unlimited scans
+                  </p>
                 </div>
-              </form>
+
+                <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
+                  <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">$2.99/month — cancel anytime</span>
+                </div>
+
+                <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
+                  <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Detailed AI safety reports
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Priority AI analysis
+                    </li>
+                  </ul>
+                </div>
+
+                {modalStep === 'email' ? (
+                  <>
+                    <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Enter Your Email
+                        </label>
+                        <input
+                          type="email"
+                          value={modalEmail}
+                          onChange={(e) => setModalEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                        />
+                      </div>
+
+                      {modalMessage && (
+                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {modalMessage.text}
+                        </p>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={modalLoading}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {modalLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : 'Upgrade for $2.99/month'}
+                      </button>
+                    </form>
+
+                    <div className="flex flex-col gap-2.5">
+                      <button 
+                        type="button"
+                        onClick={handleRestore}
+                        disabled={modalLoading}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Already subscribed? Restore subscription
+                      </button>
+                      <span className="text-[11px] text-gray-400 text-center">
+                        Come back tomorrow for your free scan
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <form onSubmit={handleVerifyCode} className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1.5 text-left">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        Enter 6-Digit Verification Code
+                      </label>
+                      <p className="text-xs text-gray-500 font-medium">
+                        We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 10 minutes.
+                      </p>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="123456"
+                        required
+                        className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
+                      />
+                    </div>
+
+                    {modalMessage && (
+                      <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                        {modalMessage.text}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={modalLoading}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {modalLoading ? (
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : 'Verify Code'}
+                    </button>
+
+                    <div className="flex justify-between items-center mt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('email');
+                          setModalMessage(null);
+                          setVerificationCode('');
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back to Email
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleRestore}
+                        disabled={modalLoading}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Resend Code
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
             )}
 
           </div>
