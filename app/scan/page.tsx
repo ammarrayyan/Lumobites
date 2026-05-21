@@ -113,10 +113,12 @@ export default function ScanPage() {
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
       console.log('[Lumo Subscription] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
       
-      if (isAdminBypass) {
-        console.log('[Lumo Subscription] Admin bypass detected in localStorage. Activating Pro status.');
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      
+      if (isAdminBypass || isOwnerEmail) {
+        console.log('[Lumo Subscription] Admin/Owner bypass detected in localStorage. Activating Pro status.');
         setIsPro(true);
-        setProEmail('admin@lumobites.com');
+        setProEmail(cachedEmail || 'admin@lumobites.com');
       } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
         console.log('[Lumo Subscription] Active cached email found. Activating optimistic Pro state.');
         setProEmail(cachedEmail);
@@ -579,6 +581,29 @@ export default function ScanPage() {
   const handleRestore = async () => {
     if (!modalEmail.trim()) {
       setModalMessage({ text: 'Please enter your email to restore your subscription.', isError: true });
+      return;
+    }
+    
+    const cleanEmail = modalEmail.toLowerCase().trim();
+    if (cleanEmail === 'premierpetnutritionllc@gmail.com') {
+      console.log('[Lumo Subscription] Owner bypass activated via restore input.');
+      setIsPro(true);
+      setProEmail(cleanEmail);
+      localStorage.setItem('lumo_pro_email', cleanEmail);
+      localStorage.removeItem('lumo_admin_bypass');
+      setShowUpgradeModal(false);
+      setModalStep('email');
+      setVerificationCode('');
+      
+      try {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+      
+      alert('Welcome back! Your Pro status has been successfully restored ✨');
       return;
     }
     

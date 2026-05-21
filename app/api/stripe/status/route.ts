@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
+    if (cleanEmail === 'premierpetnutritionllc@gmail.com') {
+      return NextResponse.json({ isPro: true });
+    }
+
     const { data, error } = await supabase
       .from('emails')
       .select('is_pro')
