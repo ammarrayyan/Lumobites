@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       active: true,
       adminBypass: false,
       nextBillingDate,
+      cancelAtPeriodEnd: activeSubscription.cancel_at_period_end,
       subscriptionId: activeSubscription.id
     });
 

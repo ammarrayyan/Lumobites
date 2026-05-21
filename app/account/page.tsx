@@ -21,6 +21,7 @@ export default function AccountPage() {
     adminBypass: boolean;
     nextBillingDate: string;
     subscriptionId: string;
+    cancelAtPeriodEnd?: boolean;
   } | null>(null);
 
   // Cancellation states
@@ -104,7 +105,8 @@ export default function AccountPage() {
         active: data.active,
         adminBypass: data.adminBypass,
         nextBillingDate: data.nextBillingDate,
-        subscriptionId: data.subscriptionId
+        subscriptionId: data.subscriptionId,
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd
       });
       setStep('dashboard');
     } catch (err: any) {
@@ -138,14 +140,8 @@ export default function AccountPage() {
       setIsCancelled(true);
       setShowConfirmCancel(false);
       
-      // Update local Pro credentials if active device cached Pro status for this email
-      if (typeof window !== 'undefined') {
-        const cachedEmail = localStorage.getItem('lumo_pro_email');
-        if (cachedEmail?.toLowerCase().trim() === email.toLowerCase().trim()) {
-          localStorage.removeItem('lumo_pro_email');
-          localStorage.removeItem('lumo_admin_bypass');
-        }
-      }
+      // Optimistically update dashboard state to cancellation scheduled
+      setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: true } : null);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Could not cancel subscription. Please contact support.');
@@ -308,20 +304,20 @@ export default function AccountPage() {
               {isCancelled ? (
                 // Cancellation Success Screen
                 <div className="flex flex-col gap-6 text-center py-4">
-                  <div className="text-5xl mb-2">👋</div>
+                  <div className="text-5xl mb-2">📅</div>
                   <h2 className="text-2xl font-[900] text-gray-900 leading-tight">
-                    Subscription Cancelled
+                    Cancellation Scheduled
                   </h2>
                   <p className="text-[#666666] leading-relaxed text-sm">
-                    Your Pro benefits have been successfully deactivated. You can still scan once per day for free, and you can upgrade again at any time.
+                    Your subscription has been successfully set to cancel. Your Pro access and unlimited scans will continue until your billing cycle ends on <strong>{subDetails.nextBillingDate}</strong>.
                   </p>
                   
-                  <Link
-                    href="/scan"
-                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-4 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer mt-4"
+                  <button
+                    onClick={() => setIsCancelled(false)}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer mt-4"
                   >
-                    Return to Food Scanner 🐾
-                  </Link>
+                    Back to Dashboard
+                  </button>
                 </div>
               ) : (
                 // Active Subscription Status Dashboard
@@ -339,13 +335,21 @@ export default function AccountPage() {
                   <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
                     <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
-                      <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs">
-                        Active ✅
-                      </span>
+                      {subDetails.cancelAtPeriodEnd ? (
+                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs">
+                          Scheduled to Cancel ⚠️
+                        </span>
+                      ) : (
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs">
+                          Active ✅
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Next Billing Date</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
+                      </span>
                       <p className="text-[#191919] font-extrabold text-sm mt-0.5">
                         {subDetails.nextBillingDate}
                       </p>
@@ -358,17 +362,21 @@ export default function AccountPage() {
                     </p>
                   )}
 
-                  {!subDetails.adminBypass ? (
+                  {subDetails.adminBypass ? (
+                    <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
+                      💡 Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
+                    </div>
+                  ) : subDetails.cancelAtPeriodEnd ? (
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs font-semibold text-center leading-relaxed">
+                      Subscription cancelled — your Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
+                    </div>
+                  ) : (
                     <button
                       onClick={() => setShowConfirmCancel(true)}
                       className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
                     >
                       Cancel Subscription
                     </button>
-                  ) : (
-                    <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
-                      💡 Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
-                    </div>
                   )}
                 </div>
               )}
@@ -385,7 +393,7 @@ export default function AccountPage() {
                     Are you sure you want to cancel?
                   </h3>
                   <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                    You will immediately lose Pro features, including unlimited ingredients scanning and recall notification alerts.
+                    Your Pro benefits and unlimited scans will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your subscription will end.
                   </p>
                 </div>
 
