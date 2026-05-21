@@ -38,9 +38,9 @@ export async function POST(request: NextRequest) {
     // Send confirmation email - Don't block the response on email failure
     try {
       // Use a safer fallback if the domain isn't verified yet
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <onboarding@resend.dev>';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
       
-      await resend.emails.send({
+      const emailResponse = await resend.emails.send({
         from: fromEmail,
         to: email,
         subject: "🐾 You're subscribed to pet food recall alerts!",
@@ -54,8 +54,14 @@ export async function POST(request: NextRequest) {
           </div>
         `,
       });
+
+      if (emailResponse.error) {
+        console.error('[Recall Subscribe API] Resend SDK returned an error:', emailResponse.error);
+      } else {
+        console.log(`[Recall Subscribe API] Recall subscription email successfully sent to: ${email}`);
+      }
     } catch (emailErr) {
-      console.error('Email send error:', emailErr);
+      console.error('[Recall Subscribe API] Email send error exception:', emailErr);
     }
 
     return NextResponse.json({ success: true, message: 'Successfully subscribed to recall alerts!' });

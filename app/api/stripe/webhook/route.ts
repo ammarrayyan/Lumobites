@@ -56,9 +56,9 @@ export async function POST(request: NextRequest) {
 
           // Send transactional welcome email via Resend
           try {
-            const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <onboarding@resend.dev>';
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
             console.log(`[Stripe Webhook] Sending Pro Welcome Email to: ${cleanEmail}`);
-            await resend.emails.send({
+            const emailResponse = await resend.emails.send({
               from: fromEmail,
               to: cleanEmail,
               subject: "✨ Welcome to Lumo Bites Pro! 🐾",
@@ -101,9 +101,14 @@ export async function POST(request: NextRequest) {
                 </div>
               `,
             });
-            console.log(`[Stripe Webhook] Welcome email successfully sent to: ${cleanEmail}`);
+
+            if (emailResponse.error) {
+              console.error('[Stripe Webhook] Resend Pro welcome email delivery failed:', emailResponse.error);
+            } else {
+              console.log(`[Stripe Webhook] Welcome email successfully sent to: ${cleanEmail}`);
+            }
           } catch (emailErr) {
-            console.error('[Stripe Webhook] Failed to send Pro welcome email:', emailErr);
+            console.error('[Stripe Webhook] Failed to send Pro welcome email exception:', emailErr);
           }
         }
         break;

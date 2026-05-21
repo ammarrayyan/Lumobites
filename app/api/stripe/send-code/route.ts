@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Send the verification code email via Resend
     try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <onboarding@resend.dev>';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
       const hasKey = !!process.env.RESEND_API_KEY;
       const keyPrefix = hasKey ? process.env.RESEND_API_KEY?.substring(0, 7) : 'none';
       
@@ -110,9 +110,18 @@ export async function POST(request: NextRequest) {
       });
       
       console.log(`[Send Code API] Resend email API response:`, JSON.stringify(emailResponse));
+      
+      if (emailResponse.error) {
+        console.error('[Send Code API] Resend SDK returned an error:', emailResponse.error);
+        return NextResponse.json(
+          { error: `Email delivery failed: ${emailResponse.error.message}. Please verify your Resend setup.` },
+          { status: 500 }
+        );
+      }
+
       console.log(`[Send Code API] Verification code successfully sent to: ${cleanEmail}`);
     } catch (emailErr) {
-      console.error('[Send Code API] Resend email send failed:', emailErr);
+      console.error('[Send Code API] Resend email send failed exception:', emailErr);
       return NextResponse.json({ error: 'Failed to deliver verification email. Please try again.' }, { status: 500 });
     }
 
