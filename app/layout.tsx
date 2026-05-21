@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: "/Logo.png",
-    apple: "/lumo-bites-logo.png",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "Find the Best Food for Your Pet | Lumo Bites",
@@ -49,8 +49,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Lumo Bites" />
-        <link rel="apple-touch-icon" href="/lumo-bites-logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/lumo-bites-logo.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-MNH8TBZHHR"
           strategy="afterInteractive"
