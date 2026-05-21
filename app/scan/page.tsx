@@ -249,22 +249,50 @@ export default function ScanPage() {
     };
   }, []);
 
+  // Ref to hold the latest scan success callback to prevent stale closures
+  const onScanSuccessRef = useRef(onScanSuccess);
   useEffect(() => {
+    onScanSuccessRef.current = onScanSuccess;
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    // Ensure the container is completely empty to avoid duplicate/stacked video rendering in React Strict Mode
+    try {
+      const container = document.getElementById('reader');
+      if (container) {
+        container.innerHTML = '';
+      }
+    } catch (e) {}
+
     const html5QrCode = new Html5Qrcode("reader");
     scannerRef.current = html5QrCode;
 
     const startScanner = async () => {
       try {
+        // Short timeout allows previous elements/streams to detach cleanly
+        await new Promise(r => setTimeout(r, 100));
+        if (!active) return;
+
         await html5QrCode.start(
           { facingMode: "environment" },
           {
             fps: 10,
             qrbox: { width: 250, height: 250 },
           },
-          onScanSuccess,
+          (decodedText) => {
+            // Read from the ref to always get the freshest callback execution context
+            onScanSuccessRef.current(decodedText);
+          },
           onScanFailure
         );
-        setIsCameraStarted(true);
+        
+        if (active) {
+          setIsCameraStarted(true);
+        } else {
+          html5QrCode.stop().catch(() => {});
+        }
       } catch (err) {
         console.error("Unable to start scanning", err);
       }
@@ -273,6 +301,7 @@ export default function ScanPage() {
     startScanner();
 
     return () => {
+      active = false;
       console.log('[Lumo Scan] Cleaning up scanner and stopping all active camera tracks...');
       
       const stopAllTracks = () => {
@@ -294,36 +323,48 @@ export default function ScanPage() {
         }
       };
 
-      if (scannerRef.current) {
-        if (scannerRef.current.isScanning) {
-          scannerRef.current.stop()
-            .then(() => {
-              console.log('[Lumo Scan] Scanner stopped successfully.');
-            })
-            .catch(err => {
-              console.error('[Lumo Scan] Failed to stop scanner:', err);
-            })
-            .finally(() => {
-              stopAllTracks();
-            });
-        } else {
-          stopAllTracks();
-        }
+      if (html5QrCode.isScanning) {
+        html5QrCode.stop()
+          .then(() => {
+            console.log('[Lumo Scan] Scanner stopped successfully.');
+          })
+          .catch(err => {
+            console.error('[Lumo Scan] Failed to stop scanner:', err);
+          })
+          .finally(() => {
+            stopAllTracks();
+          });
       } else {
         stopAllTracks();
       }
     };
-  }, [isPro]);
+  }, []); // Empty dependency array ensures we only initialize the scanner ONCE on mount
 
   async function onScanSuccess(decodedText: string) {
     if (loading || ocrLoading) return;
     
     console.log('[Lumo Scan Limit] Barcode scanned by camera:', decodedText);
+    
+    const stopAllTracks = () => {
+      try {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+          const stream = video.srcObject as MediaStream;
+          if (stream && typeof stream.getTracks === 'function') {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        });
+      } catch (e) {}
+    };
+
     if (!checkScanLimit()) {
       if (scannerRef.current) {
         try {
-          await scannerRef.current.stop();
+          if (scannerRef.current.isScanning) {
+            await scannerRef.current.stop();
+          }
           setIsCameraStarted(false);
+          stopAllTracks();
         } catch (e) {}
       }
       return;
@@ -333,8 +374,11 @@ export default function ScanPage() {
 
     if (scannerRef.current) {
       try {
-        await scannerRef.current.stop();
+        if (scannerRef.current.isScanning) {
+          await scannerRef.current.stop();
+        }
         setIsCameraStarted(false);
+        stopAllTracks();
       } catch (e) {}
     }
 
@@ -426,10 +470,23 @@ export default function ScanPage() {
   const captureAndOCR = async () => {
     if (!scannerRef.current || ocrLoading) return;
 
+    const stopAllTracks = () => {
+      try {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+          const stream = video.srcObject as MediaStream;
+          if (stream && typeof stream.getTracks === 'function') {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        });
+      } catch (e) {}
+    };
+
     if (!checkScanLimit()) {
       if (scannerRef.current.isScanning) {
         await scannerRef.current.stop().catch(() => {});
         setIsCameraStarted(false);
+        stopAllTracks();
       }
       return;
     }
@@ -462,6 +519,7 @@ export default function ScanPage() {
       if (scannerRef.current.isScanning) {
         await scannerRef.current.stop().catch(() => {});
         setIsCameraStarted(false);
+        stopAllTracks();
       }
 
       const res = await fetch('/api/ocr', {
@@ -728,12 +786,25 @@ export default function ScanPage() {
     setOcrReviewText('');
     setLoading(false);
     setOcrLoading(false);
+
+    const stopAllTracks = () => {
+      try {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+          const stream = video.srcObject as MediaStream;
+          if (stream && typeof stream.getTracks === 'function') {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        });
+      } catch (e) {}
+    };
     
     setTimeout(async () => {
       if (scannerRef.current) {
         try {
           if (scannerRef.current.isScanning) {
             await scannerRef.current.stop();
+            stopAllTracks();
           }
           await scannerRef.current.start(
             { facingMode: "environment" },
