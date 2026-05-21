@@ -34,7 +34,7 @@ export default function ScanPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [verifyingSession, setVerifyingSession] = useState(false);
-  const [modalStep, setModalStep] = useState<'email' | 'verification'>('email');
+  const [modalStep, setModalStep] = useState<'paywall' | 'upgrade_email' | 'restore_email' | 'verification'>('paywall');
   const [verificationCode, setVerificationCode] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
 
@@ -778,7 +778,7 @@ export default function ScanPage() {
         localStorage.setItem('lumo_pro_email', modalEmail);
         localStorage.removeItem('lumo_admin_bypass');
         setShowUpgradeModal(false);
-        setModalStep('email');
+        setModalStep('paywall');
         setVerificationCode('');
 
         try {
@@ -1348,7 +1348,7 @@ export default function ScanPage() {
               <button 
                 onClick={() => {
                   setShowUpgradeModal(false);
-                  setModalStep('email');
+                  setModalStep('paywall');
                   setModalMessage(null);
                   setVerificationCode('');
                 }}
@@ -1407,8 +1407,43 @@ export default function ScanPage() {
                   </ul>
                 </div>
 
-                {modalStep === 'email' ? (
+                {modalStep === 'paywall' && (
+                  <div className="flex flex-col gap-4 mt-2">
+                    <button
+                      onClick={() => {
+                        setModalStep('upgrade_email');
+                        setModalMessage(null);
+                      }}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      Upgrade for $2.99/month
+                    </button>
+
+                    <div className="flex flex-col gap-2.5">
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('restore_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Already subscribed? Restore subscription
+                      </button>
+                      <span className="text-[11px] text-gray-400 text-center">
+                        Come back tomorrow for your free scan
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {modalStep === 'upgrade_email' && (
                   <>
+                    <div className="text-left mt-2">
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Upgrade to Pro</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter your email to proceed to secure Stripe checkout.</p>
+                    </div>
+
                     <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1.5 text-left">
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -1421,6 +1456,7 @@ export default function ScanPage() {
                           placeholder="your@email.com"
                           required
                           className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          autoFocus
                         />
                       </div>
 
@@ -1437,26 +1473,105 @@ export default function ScanPage() {
                       >
                         {modalLoading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : 'Upgrade for $2.99/month'}
+                        ) : 'Proceed to Checkout 🚀'}
                       </button>
                     </form>
 
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('paywall');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back
+                      </button>
+
                       <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('restore_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Restore subscription
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {modalStep === 'restore_email' && (
+                  <>
+                    <div className="text-left mt-2">
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Restore Subscription</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter the email you subscribed with to receive a 2-step verification code.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Enter Your Email
+                        </label>
+                        <input
+                          type="email"
+                          value={modalEmail}
+                          onChange={(e) => setModalEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          autoFocus
+                        />
+                      </div>
+
+                      {modalMessage && (
+                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {modalMessage.text}
+                        </p>
+                      )}
+
+                      <button
                         type="button"
                         onClick={handleRestore}
                         disabled={modalLoading}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {modalLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : 'Send Verification Code 📩'}
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('paywall');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('upgrade_email');
+                          setModalMessage(null);
+                        }}
                         className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
                       >
-                        Already subscribed? Restore subscription
+                        Upgrade to Pro
                       </button>
-                      <span className="text-[11px] text-gray-400 text-center">
-                        Come back tomorrow for your free scan
-                      </span>
                     </div>
                   </>
-                ) : (
-                  <form onSubmit={handleVerifyCode} className="flex flex-col gap-3">
+                )}
+
+                {modalStep === 'verification' && (
+                  <form onSubmit={handleVerifyCode} className="flex flex-col gap-3 mt-2">
                     <div className="flex flex-col gap-1.5 text-left">
                       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         Enter 6-Digit Verification Code
@@ -1472,6 +1587,7 @@ export default function ScanPage() {
                         placeholder="123456"
                         required
                         className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
+                        autoFocus
                       />
                     </div>
 
@@ -1491,11 +1607,11 @@ export default function ScanPage() {
                       ) : 'Verify Code'}
                     </button>
 
-                    <div className="flex justify-between items-center mt-1">
+                    <div className="flex justify-between items-center mt-1 border-t border-gray-150/40 pt-3">
                       <button
                         type="button"
                         onClick={() => {
-                          setModalStep('email');
+                          setModalStep('restore_email');
                           setModalMessage(null);
                           setVerificationCode('');
                         }}
