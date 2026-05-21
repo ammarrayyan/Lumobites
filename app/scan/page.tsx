@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
+import confetti from 'canvas-confetti';
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -25,6 +26,15 @@ export default function ScanPage() {
     summary: string;
   } | null>(null);
 
+  // Stripe & subscription state
+  const [isPro, setIsPro] = useState(false);
+  const [proEmail, setProEmail] = useState('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [modalEmail, setModalEmail] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [verifyingSession, setVerifyingSession] = useState(false);
+
   const getGradeColor = (grade: string) => {
     switch (grade) {
       case 'A': return '#10B981';
@@ -40,6 +50,154 @@ export default function ScanPage() {
   const [activeTab, setActiveTab] = useState<'scanner' | 'manual'>('scanner');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Load and verify Pro status on page mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const sessionId = searchParams.get('session_id');
+    const emailParam = searchParams.get('email');
+
+    console.log('[Lumo Subscription] Page mounted. Checking subscription status...');
+
+    if (sessionId) {
+      console.log('[Lumo Subscription] Found Stripe session_id in URL:', sessionId);
+      setVerifyingSession(true);
+      fetch(`/api/stripe/verify-session?session_id=${sessionId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.isPro) {
+            console.log('[Lumo Subscription] Session verified. User email:', data.email);
+            setIsPro(true);
+            const userEmail = data.email || emailParam || '';
+            setProEmail(userEmail);
+            localStorage.setItem('lumo_pro_email', userEmail);
+            
+            try {
+              confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+              });
+            } catch (e) {}
+          } else {
+            console.warn('[Lumo Subscription] Session verification returned not pro or failed:', data);
+          }
+        })
+        .catch(err => console.error('[Lumo Subscription] Verification error:', err))
+        .finally(() => {
+          setVerifyingSession(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    } else {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      console.log('[Lumo Subscription] Retrieved cached email from localStorage:', cachedEmail);
+      
+      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+        console.log('[Lumo Subscription] Active cached email found. Activating optimistic Pro state.');
+        setProEmail(cachedEmail);
+        setIsPro(true);
+        
+        console.log('[Lumo Subscription] Syncing status with database for email:', cachedEmail);
+        fetch('/api/stripe/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cachedEmail })
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log('[Lumo Subscription] Database status reply:', data);
+          if (data.isPro) {
+            setIsPro(true);
+            console.log('[Lumo Subscription] Pro status confirmed by Supabase.');
+          } else {
+            setIsPro(false);
+            localStorage.removeItem('lumo_pro_email');
+            console.log('[Lumo Subscription] Pro status rejected by Supabase. Downgraded to free tier.');
+          }
+        })
+        .catch((err) => {
+          console.error('[Lumo Subscription] Failed to sync status with Supabase:', err);
+        });
+      } else {
+        setIsPro(false);
+        console.log('[Lumo Subscription] No cached Pro credentials. Standard Free tier active.');
+      }
+    }
+  }, []);
+
+  // Limit checker: returns true if allowed to scan, false if blocked (shows modal)
+  const checkScanLimit = (): boolean => {
+    console.log('[Lumo Scan Limit] Evaluating checkScanLimit. Current isPro state:', isPro);
+    if (isPro) {
+      console.log('[Lumo Scan Limit] User is PRO. Bypassing scan checks.');
+      return true;
+    }
+
+    try {
+      const countStr = localStorage.getItem('lumo_scan_count');
+      const dateStr = localStorage.getItem('lumo_scan_date');
+      
+      // Robust local timezone date string formatter (YYYY-MM-DD)
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      let count = countStr ? parseInt(countStr, 10) : 0;
+      console.log(`[Lumo Scan Limit] Read from localStorage - count: ${count}, date: ${dateStr}, today: ${today}`);
+
+      if (dateStr !== today) {
+        console.log('[Lumo Scan Limit] Midnight reset triggered (date mismatch). Resetting scan count to 0.');
+        count = 0;
+      }
+
+      if (count >= 1) {
+        console.log('[Lumo Scan Limit] Limit exceeded! Displaying the Pro Upgrade Modal.');
+        setShowUpgradeModal(true);
+        return false;
+      }
+
+      console.log('[Lumo Scan Limit] Under limit. Access granted.');
+      return true;
+    } catch (err) {
+      console.error('[Lumo Scan Limit] Error reading scan limit from localStorage:', err);
+      // Fallback: allow scan in case localStorage is disabled
+      return true;
+    }
+  };
+
+  // Record scan usage
+  const recordScanUsage = () => {
+    if (isPro) {
+      console.log('[Lumo Scan Limit] Pro user, skipping scan usage recording.');
+      return;
+    }
+
+    try {
+      // Robust local timezone date string formatter (YYYY-MM-DD)
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      const countStr = localStorage.getItem('lumo_scan_count');
+      let count = countStr ? parseInt(countStr, 10) : 0;
+      const dateStr = localStorage.getItem('lumo_scan_date');
+
+      if (dateStr !== today) {
+        count = 0;
+      }
+
+      const newCount = count + 1;
+      localStorage.setItem('lumo_scan_count', newCount.toString());
+      localStorage.setItem('lumo_scan_date', today);
+      console.log(`[Lumo Scan Limit] Recorded scan. New count: ${newCount}, date: ${today}`);
+    } catch (err) {
+      console.error('[Lumo Scan Limit] Error writing scan limit to localStorage:', err);
+    }
+  };
 
   useEffect(() => {
     const html5QrCode = new Html5Qrcode("reader");
@@ -69,11 +227,24 @@ export default function ScanPage() {
         scannerRef.current.stop().catch(err => console.error("Failed to stop scanner", err));
       }
     };
-  }, []);
+  }, [isPro]);
 
   async function onScanSuccess(decodedText: string) {
     if (loading || ocrLoading) return;
     
+    console.log('[Lumo Scan Limit] Barcode scanned by camera:', decodedText);
+    if (!checkScanLimit()) {
+      if (scannerRef.current) {
+        try {
+          await scannerRef.current.stop();
+          setIsCameraStarted(false);
+        } catch (e) {}
+      }
+      return;
+    }
+
+    recordScanUsage();
+
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
@@ -82,7 +253,7 @@ export default function ScanPage() {
     }
 
     setScannedResult(decodedText);
-    lookupProduct(decodedText);
+    lookupProduct(decodedText, true);
   }
 
   function onScanFailure(error: any) {}
@@ -169,6 +340,14 @@ export default function ScanPage() {
   const captureAndOCR = async () => {
     if (!scannerRef.current || ocrLoading) return;
 
+    if (!checkScanLimit()) {
+      if (scannerRef.current.isScanning) {
+        await scannerRef.current.stop().catch(() => {});
+        setIsCameraStarted(false);
+      }
+      return;
+    }
+
     setOcrLoading(true);
     setError(null);
     setRawOcrText(null);
@@ -223,6 +402,9 @@ export default function ScanPage() {
   };
 
   const processOCRResult = (text: string) => {
+    if (!checkScanLimit()) return;
+    recordScanUsage();
+
     const normalized = text.toLowerCase();
     const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb',
       'protein', 'fat', 'fiber', 'ingredients', 'meal', 'extract', 'oil', 'vitamin', 'mineral', 'salt'];
@@ -231,7 +413,7 @@ export default function ScanPage() {
 
     if (hasIngredientKeywords || commaCount > 2 || text.length > 40) {
       setProduct({ product_name: 'Scanned Ingredients', brand: 'Camera Scan', ingredients: text } as any);
-      analyzeIngredients(text, false);
+      analyzeIngredients(text, false, true);
     } else {
       setError('Could not clearly identify an ingredient list. Please point at the back of the package or paste manually below.');
     }
@@ -239,7 +421,12 @@ export default function ScanPage() {
 
 
 
-  async function lookupProduct(barcode: string) {
+  async function lookupProduct(barcode: string, skipLimitCheck: boolean = false) {
+    if (!skipLimitCheck) {
+      if (!checkScanLimit()) return;
+      recordScanUsage();
+    }
+
     setLoading(true);
     setError(null);
     setProduct(null);
@@ -258,7 +445,7 @@ export default function ScanPage() {
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
         if (data.product.ingredients) {
-          await analyzeIngredients(data.product.ingredients, data.hasRecall);
+          await analyzeIngredients(data.product.ingredients, data.hasRecall, true);
         }
       }
     } catch (err) {
@@ -268,8 +455,13 @@ export default function ScanPage() {
     }
   }
 
-  async function analyzeIngredients(text: string, recallActive: boolean = false) {
+  async function analyzeIngredients(text: string, recallActive: boolean = false, skipLimitCheck: boolean = false) {
     if (!text) return;
+    if (!skipLimitCheck) {
+      if (!checkScanLimit()) return;
+      recordScanUsage();
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -307,13 +499,103 @@ export default function ScanPage() {
     e.preventDefault();
     if (!manualIngredients.trim()) return;
     
+    console.log('[Lumo Scan Limit] Manual ingredients submitted');
+    if (!checkScanLimit()) return;
+    recordScanUsage();
+    
     setProduct({ product_name: 'Custom Entry', brand: 'User Input', ingredients: manualIngredients } as any);
-    await analyzeIngredients(manualIngredients, false);
+    await analyzeIngredients(manualIngredients, false, true);
   };
 
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (manualBarcode.trim()) lookupProduct(manualBarcode.trim());
+    if (manualBarcode.trim()) {
+      console.log('[Lumo Scan Limit] Manual barcode submitted:', manualBarcode.trim());
+      if (!checkScanLimit()) return;
+      recordScanUsage();
+      lookupProduct(manualBarcode.trim(), true);
+    }
+  };
+
+  const handleUpgrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modalEmail.trim()) {
+      setModalMessage({ text: 'Please enter a valid email address.', isError: true });
+      return;
+    }
+    
+    setModalLoading(true);
+    setModalMessage(null);
+    
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: modalEmail })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Something went wrong. Please try again.', isError: true });
+      setModalLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!modalEmail.trim()) {
+      setModalMessage({ text: 'Please enter your email to restore your subscription.', isError: true });
+      return;
+    }
+    
+    setModalLoading(true);
+    setModalMessage(null);
+    
+    try {
+      const res = await fetch('/api/stripe/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: modalEmail })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to verify subscription');
+      }
+      
+      if (data.isPro) {
+        setIsPro(true);
+        setProEmail(modalEmail);
+        localStorage.setItem('lumo_pro_email', modalEmail);
+        setShowUpgradeModal(false);
+        
+        try {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        } catch (e) {}
+        
+        alert('Welcome back! Your Pro status has been successfully restored ✨');
+      } else {
+        setModalMessage({ text: 'No active Pro subscription found for this email.', isError: true });
+      }
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Could not verify status. Try again later.', isError: true });
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   const resetScanner = async () => {
@@ -355,6 +637,11 @@ export default function ScanPage() {
             <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
           </div>
         </Link>
+        {isPro && (
+          <div className="ml-4 bg-[#8B5E3C] text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-xs animate-pulse">
+            PRO ✨
+          </div>
+        )}
         <div style={{ marginLeft: 'auto' }}>
           <Link href="/" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
             &larr; Go Home
@@ -371,12 +658,18 @@ export default function ScanPage() {
           {/* Header Title Section */}
           <div className="text-center flex flex-col items-center">
             {/* Sparkle Badge */}
-            <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C]">
-                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.6 3.102-1.196 4.622c-.21.81.67 1.45 1.366 1.012L10 15.71l4.217 2.341c.697.438 1.577-.202 1.366-1.012l-1.196-4.622 3.6-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
-              </svg>
-              Live FDA Safety Check
-            </div>
+            {isPro ? (
+              <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 border border-amber-400 text-white text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-md">
+                ✨ Lumo Bites Pro Member
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C]">
+                  <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.6 3.102-1.196 4.622c-.21.81.67 1.45 1.366 1.012L10 15.71l4.217 2.341c.697.438 1.577-.202 1.366-1.012l-1.196-4.622 3.6-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
+                </svg>
+                Live FDA Safety Check
+              </div>
+            )}
             
             <h2 className="text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Is This Food Safe?</h2>
             <p className="text-sm text-gray-500 leading-relaxed max-w-[400px]">
@@ -775,10 +1068,119 @@ export default function ScanPage() {
 
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
+      {/* ── VERIFYING SESSION SPINNER ── */}
+      {verifyingSession && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="w-12 h-12 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-2"></div>
+            <h3 className="text-lg font-black text-[#191919]">Verifying Subscription...</h3>
+            <p className="text-xs text-gray-500">Securing your premium credentials from Stripe. Hold tight!</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── UPGRADE TO PRO MODAL ── */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
+            
+            {!modalLoading && (
+              <button 
+                onClick={() => setShowUpgradeModal(false)}
+                className="absolute right-5 top-5 text-gray-400 hover:text-gray-600 font-extrabold text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+
+            <div>
+              <div className="text-4xl mb-3">🔍</div>
+              <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
+                You&apos;ve used your free scan today 🔍
+              </h3>
+              <p className="text-sm text-gray-500 mt-2 font-medium text-center">
+                Upgrade to Lumo Bites Pro for unlimited scans
+              </p>
+            </div>
+
+            <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
+              <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">$2.99/month — cancel anytime</span>
+            </div>
+
+            <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
+              <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-500 text-sm">✅</span> Detailed AI safety reports
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-emerald-500 text-sm">✅</span> Priority AI analysis
+                </li>
+              </ul>
+            </div>
+
+            <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Enter Your Email
+                </label>
+                <input
+                  type="email"
+                  value={modalEmail}
+                  onChange={(e) => setModalEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                />
+              </div>
+
+              {modalMessage && (
+                <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                  {modalMessage.text}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={modalLoading}
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+              >
+                {modalLoading ? (
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : 'Upgrade for $2.99/month'}
+              </button>
+            </form>
+
+            <div className="flex flex-col gap-2.5">
+              <button 
+                type="button"
+                onClick={handleRestore}
+                disabled={modalLoading}
+                className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+              >
+                Already subscribed? Restore subscription
+              </button>
+              <span className="text-[11px] text-gray-400 text-center">
+                Come back tomorrow for your free scan
+              </span>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
     </div>
   );
