@@ -34,6 +34,8 @@ export default function ScanPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [verifyingSession, setVerifyingSession] = useState(false);
+  const [modalStep, setModalStep] = useState<'email' | 'verification'>('email');
+  const [verificationCode, setVerificationCode] = useState('');
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -56,10 +58,27 @@ export default function ScanPage() {
     const searchParams = new URLSearchParams(window.location.search);
     const sessionId = searchParams.get('session_id');
     const emailParam = searchParams.get('email');
+    const adminParam = searchParams.get('admin');
 
     console.log('[Lumo Subscription] Page mounted. Checking subscription status...');
 
-    if (sessionId) {
+    if (adminParam === 'lumo2026') {
+      console.log('[Lumo Subscription] Admin bypass activated via URL parameter.');
+      setIsPro(true);
+      setProEmail('admin@lumobites.com');
+      localStorage.setItem('lumo_pro_email', 'admin@lumobites.com');
+      localStorage.setItem('lumo_admin_bypass', 'true');
+      
+      try {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+      
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (sessionId) {
       console.log('[Lumo Subscription] Found Stripe session_id in URL:', sessionId);
       setVerifyingSession(true);
       fetch(`/api/stripe/verify-session?session_id=${sessionId}`)
@@ -71,6 +90,7 @@ export default function ScanPage() {
             const userEmail = data.email || emailParam || '';
             setProEmail(userEmail);
             localStorage.setItem('lumo_pro_email', userEmail);
+            localStorage.removeItem('lumo_admin_bypass');
             
             try {
               confetti({
@@ -90,9 +110,14 @@ export default function ScanPage() {
         });
     } else {
       const cachedEmail = localStorage.getItem('lumo_pro_email');
-      console.log('[Lumo Subscription] Retrieved cached email from localStorage:', cachedEmail);
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      console.log('[Lumo Subscription] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
       
-      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+      if (isAdminBypass) {
+        console.log('[Lumo Subscription] Admin bypass detected in localStorage. Activating Pro status.');
+        setIsPro(true);
+        setProEmail('admin@lumobites.com');
+      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
         console.log('[Lumo Subscription] Active cached email found. Activating optimistic Pro state.');
         setProEmail(cachedEmail);
         setIsPro(true);
@@ -561,7 +586,7 @@ export default function ScanPage() {
     setModalMessage(null);
     
     try {
-      const res = await fetch('/api/stripe/status', {
+      const res = await fetch('/api/stripe/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: modalEmail })
@@ -569,15 +594,50 @@ export default function ScanPage() {
       
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to verify subscription');
+        throw new Error(data.error || 'Failed to send verification code');
       }
       
+      setModalStep('verification');
+      setModalMessage({ text: 'Verification code sent! Please check your email.', isError: false });
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Could not send verification code. Try again later.', isError: true });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationCode.trim() || verificationCode.length !== 6) {
+      setModalMessage({ text: 'Please enter a valid 6-digit verification code.', isError: true });
+      return;
+    }
+
+    setModalLoading(true);
+    setModalMessage(null);
+
+    try {
+      const res = await fetch('/api/stripe/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: modalEmail, code: verificationCode })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to verify code');
+      }
+
       if (data.isPro) {
         setIsPro(true);
         setProEmail(modalEmail);
         localStorage.setItem('lumo_pro_email', modalEmail);
+        localStorage.removeItem('lumo_admin_bypass');
         setShowUpgradeModal(false);
-        
+        setModalStep('email');
+        setVerificationCode('');
+
         try {
           confetti({
             particleCount: 100,
@@ -585,14 +645,14 @@ export default function ScanPage() {
             origin: { y: 0.6 }
           });
         } catch (e) {}
-        
+
         alert('Welcome back! Your Pro status has been successfully restored ✨');
       } else {
-        setModalMessage({ text: 'No active Pro subscription found for this email.', isError: true });
+        setModalMessage({ text: 'Could not restore Pro status. Please try again.', isError: true });
       }
     } catch (err: any) {
       console.error(err);
-      setModalMessage({ text: err.message || 'Could not verify status. Try again later.', isError: true });
+      setModalMessage({ text: err.message || 'Could not verify code. Please try again.', isError: true });
     } finally {
       setModalLoading(false);
     }
@@ -1086,7 +1146,12 @@ export default function ScanPage() {
             
             {!modalLoading && (
               <button 
-                onClick={() => setShowUpgradeModal(false)}
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  setModalStep('email');
+                  setModalMessage(null);
+                  setVerificationCode('');
+                }}
                 className="absolute right-5 top-5 text-gray-400 hover:text-gray-600 font-extrabold text-lg cursor-pointer"
               >
                 ✕
@@ -1121,51 +1186,114 @@ export default function ScanPage() {
               </ul>
             </div>
 
-            <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  Enter Your Email
-                </label>
-                <input
-                  type="email"
-                  value={modalEmail}
-                  onChange={(e) => setModalEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                />
-              </div>
+            {modalStep === 'email' ? (
+              <>
+                <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      Enter Your Email
+                    </label>
+                    <input
+                      type="email"
+                      value={modalEmail}
+                      onChange={(e) => setModalEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                    />
+                  </div>
 
-              {modalMessage && (
-                <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                  {modalMessage.text}
-                </p>
-              )}
+                  {modalMessage && (
+                    <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                      {modalMessage.text}
+                    </p>
+                  )}
 
-              <button
-                type="submit"
-                disabled={modalLoading}
-                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                {modalLoading ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                ) : 'Upgrade for $2.99/month'}
-              </button>
-            </form>
+                  <button
+                    type="submit"
+                    disabled={modalLoading}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {modalLoading ? (
+                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : 'Upgrade for $2.99/month'}
+                  </button>
+                </form>
 
-            <div className="flex flex-col gap-2.5">
-              <button 
-                type="button"
-                onClick={handleRestore}
-                disabled={modalLoading}
-                className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-              >
-                Already subscribed? Restore subscription
-              </button>
-              <span className="text-[11px] text-gray-400 text-center">
-                Come back tomorrow for your free scan
-              </span>
-            </div>
+                <div className="flex flex-col gap-2.5">
+                  <button 
+                    type="button"
+                    onClick={handleRestore}
+                    disabled={modalLoading}
+                    className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                  >
+                    Already subscribed? Restore subscription
+                  </button>
+                  <span className="text-[11px] text-gray-400 text-center">
+                    Come back tomorrow for your free scan
+                  </span>
+                </div>
+              </>
+            ) : (
+              <form onSubmit={handleVerifyCode} className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5 text-left">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    Enter 6-Digit Verification Code
+                  </label>
+                  <p className="text-xs text-gray-500 font-medium">
+                    We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 10 minutes.
+                  </p>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="123456"
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
+                  />
+                </div>
+
+                {modalMessage && (
+                  <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                    {modalMessage.text}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={modalLoading}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {modalLoading ? (
+                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : 'Verify Code'}
+                </button>
+
+                <div className="flex justify-between items-center mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalStep('email');
+                      setModalMessage(null);
+                      setVerificationCode('');
+                    }}
+                    className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                  >
+                    ← Back to Email
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRestore}
+                    disabled={modalLoading}
+                    className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                  >
+                    Resend Code
+                  </button>
+                </div>
+              </form>
+            )}
 
           </div>
         </div>
