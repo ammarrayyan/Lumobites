@@ -34,6 +34,12 @@ export default function TwinPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // States for email capture modal
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [modalError, setModalError] = useState('');
+  const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
+
   const [cameraActive, setCameraActive] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,7 +118,7 @@ export default function TwinPage() {
 
   // Trigger confetti on result screen
   useEffect(() => {
-    if (step === 'result') {
+    if (step === 'result' && !showEmailModal) {
       const duration = 3 * 1000;
       const end = Date.now() + duration;
 
@@ -138,7 +144,7 @@ export default function TwinPage() {
       };
       frame();
     }
-  }, [step]);
+  }, [step, showEmailModal]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -179,6 +185,10 @@ export default function TwinPage() {
       if (data.success) {
         setResult(data);
         setStep('result');
+        const emailCaptured = localStorage.getItem('lumo_twin_email_captured') === 'true';
+        if (!emailCaptured) {
+          setShowEmailModal(true);
+        }
       } else {
         setError(data.error || 'Failed to detect matching breed.');
         setStep('upload');
@@ -188,6 +198,43 @@ export default function TwinPage() {
       setError('An error occurred during matching.');
       setStep('upload');
     }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmittingEmail(true);
+    setModalError('');
+
+    try {
+      const response = await fetch('/api/twin/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('lumo_twin_email_captured', 'true');
+        setShowEmailModal(false);
+      } else {
+        setModalError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      console.error('[Twin Email Modal] Submit error:', err);
+      setModalError('Failed to submit. Please try again or skip.');
+    } finally {
+      setIsSubmittingEmail(false);
+    }
+  };
+
+  const handleEmailSkip = () => {
+    localStorage.setItem('lumo_twin_email_captured', 'true');
+    setShowEmailModal(false);
   };
 
   const downloadSquareCard = async () => {
@@ -486,7 +533,7 @@ export default function TwinPage() {
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center py-12 px-6">
+      <main className={`flex-1 flex flex-col items-center py-12 px-6 ${showEmailModal ? 'blur-md pointer-events-none select-none' : ''}`}>
         <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 relative overflow-hidden">
           
           {/* HEADER */}
@@ -1422,6 +1469,92 @@ export default function TwinPage() {
 
         </div>
       )}
+
+      {/* EMAIL CAPTURE MODAL OVERLAY */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
+          <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 md:p-8 flex flex-col items-center text-center animate-scale-up relative">
+            
+            {/* Lumo Bites logo + trademark at the top */}
+            <div className="flex items-center justify-center mb-6 relative">
+              <img src="/Logo.png" alt="Lumo Bites Logo" className="h-9 object-contain" />
+              <sup className="text-[9px] text-[#8B5A2B] font-bold align-self-start -mt-1 ml-0.5 select-none">™</sup>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl md:text-2xl font-[900] text-[#191919] tracking-tight mb-2">
+              Your Pet Twin is Ready! 🐾
+            </h3>
+
+            {/* Subtitle */}
+            <p className="text-[13px] md:text-sm text-[#666666] leading-relaxed mb-6 max-w-[340px]">
+              Enter your email to reveal your match and get free FDA recall alerts for your pet
+            </p>
+
+            {/* Email form */}
+            <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-3">
+              {modalError && (
+                <div className="text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg p-2.5 mb-1 text-center">
+                  {modalError}
+                </div>
+              )}
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setModalError('');
+                }}
+                placeholder="your@email.com"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#333333] transition-all bg-gray-50/50"
+                disabled={isSubmittingEmail}
+              />
+              <button
+                type="submit"
+                disabled={isSubmittingEmail}
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(139,94,60,0.15)] disabled:bg-gray-400 cursor-pointer text-sm"
+              >
+                {isSubmittingEmail ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Revealing...
+                  </>
+                ) : (
+                  <>Reveal My Match →</>
+                )}
+              </button>
+            </form>
+
+            {/* Skip button */}
+            <button
+              onClick={handleEmailSkip}
+              disabled={isSubmittingEmail}
+              className="mt-4 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              Skip for now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Embedded CSS animations for the modal */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+        .animate-scale-up {
+          animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
 
     </div>
   );
