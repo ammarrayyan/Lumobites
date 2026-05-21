@@ -12,9 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-01-27-pre.0' as any,
-    });
+    const stripe = new Stripe(stripeSecretKey);
 
     const bodyText = await request.text();
     const sig = request.headers.get('stripe-signature');

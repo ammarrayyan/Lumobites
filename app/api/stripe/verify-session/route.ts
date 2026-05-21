@@ -18,9 +18,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-01-27-pre.0' as any,
-    });
+    const stripe = new Stripe(stripeSecretKey);
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
