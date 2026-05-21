@@ -535,6 +535,17 @@ export default function ScanPage() {
 
       const { text } = await res.json();
       const cleaned = cleanOcrText(text || '');
+      
+      const normalized = cleaned.toLowerCase();
+      const ingredientKeywords = ['chicken', 'beef', 'rice', 'corn', 'wheat', 'salmon', 'turkey', 'lamb',
+        'protein', 'fat', 'fiber', 'ingredients', 'meal', 'extract', 'oil', 'vitamin', 'mineral', 'salt'];
+      const hasIngredientKeywords = ingredientKeywords.some(w => normalized.includes(w));
+      const commaCount = (cleaned.match(/,/g) || []).length;
+
+      if (!cleaned.trim() || !(hasIngredientKeywords || commaCount > 2 || cleaned.length > 40)) {
+        throw new Error('Could not clearly identify an ingredient list. Please ensure you are scanning the back of the pet food package under good lighting, or paste ingredients manually below.');
+      }
+
       setRawOcrText(cleaned);
       setOcrReviewText(cleaned);
       setOcrLoading(false);
@@ -582,18 +593,20 @@ export default function ScanPage() {
       const res = await fetch(`/api/scan/${barcode}`);
       const data = await res.json();
       
-      if (!res.ok) {
-        setProduct({ product_name: 'Unknown Product', brand: 'Unknown Brand' } as any);
+      if (!res.ok || !data || !data.product) {
+        throw new Error(data?.error || "Barcode not recognized. We couldn't find this product in our database. Please scan the ingredients list on the back of the package instead, or enter them manually.");
       } else {
         setProduct(data.product);
         setHasRecall(data.hasRecall);
         setRecallReason(data.recallReason);
         if (data.product.ingredients) {
           await analyzeIngredients(data.product.ingredients, data.hasRecall, true);
+        } else {
+          throw new Error("Product found in database, but it has no ingredients list. Please scan the ingredients list on the back of the package instead, or enter them manually.");
         }
       }
-    } catch (err) {
-      setProduct({ product_name: 'Unknown Product', brand: 'Unknown Brand' } as any);
+    } catch (err: any) {
+      setError(err.message || "Barcode not recognized. We couldn't find this product in our database. Please scan the ingredients list on the back of the package instead, or enter them manually.");
     } finally {
       setLoading(false);
     }
