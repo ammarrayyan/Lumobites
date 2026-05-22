@@ -55,12 +55,19 @@ export default function ShareButton() {
         aria-label="Share Lumo Bites"
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: '40px', height: '40px', borderRadius: '50%',
-          border: '1.5px solid #E8DDD4', backgroundColor: '#FFFFFF',
+          width: '36px', height: '36px', borderRadius: '50%',
+          border: '1px solid #E6DFD9', backgroundColor: '#FFFFFF',
           cursor: 'pointer', color: '#8B5E3C', transition: 'all 0.2s',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#F5EDE4')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#FFFFFF')}
+        onMouseEnter={e => {
+          e.currentTarget.style.backgroundColor = '#FAF8F5';
+          e.currentTarget.style.borderColor = '#D6CDC2';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.backgroundColor = '#FFFFFF';
+          e.currentTarget.style.borderColor = '#E6DFD9';
+        }}
       >
         {/* Share icon */}
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
