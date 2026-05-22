@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
 export default function SuppliesPage() {
   // Toys State
@@ -87,15 +87,7 @@ export default function SuppliesPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans">
-      {/* Header */}
-      <header className="bg-white border-b border-[#E8DDD4] px-6 py-4 flex items-center sticky top-0 z-30 shadow-sm">
-        <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
-            <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-      </header>
+      <Navbar />
 
       <main className="max-w-[800px] mx-auto px-6 py-12">
         <div className="text-center mb-12">
