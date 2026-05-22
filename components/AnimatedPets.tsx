@@ -56,10 +56,140 @@ export default function AnimatedPets() {
         .pet-cat.pet-interactive:hover .cat-tail, .pet-cat.pet-interactive:active .cat-tail {
           animation: tail-swish 0.5s ease-in-out infinite !important;
         }
+
+        /* ── CTA Button ── */
+        @keyframes shimmer-slide {
+          0%   { transform: translateX(-110%) skewX(-18deg); }
+          100% { transform: translateX(220%)  skewX(-18deg); }
+        }
+        @keyframes sparkle-float {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.9; }
+          50%       { transform: translateY(-4px) scale(1.15); opacity: 1; }
+        }
+        @keyframes sparkle-float-2 {
+          0%, 100% { transform: translateY(0px) scale(1) rotate(0deg); opacity: 0.7; }
+          50%       { transform: translateY(-5px) scale(1.2) rotate(20deg); opacity: 1; }
+        }
+        @keyframes pulse-ring {
+          0%   { transform: scale(1);    opacity: 0.6; }
+          100% { transform: scale(1.18); opacity: 0;   }
+        }
+        @keyframes gradient-shift {
+          0%   { background-position: 0%   50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0%   50%; }
+        }
+        .twin-cta-btn {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 30px;
+          border-radius: 100px;
+          border: none;
+          cursor: pointer;
+          overflow: hidden;
+          text-decoration: none;
+          background: linear-gradient(135deg, #8B5E3C 0%, #C4874A 40%, #8B5E3C 80%, #A0693F 100%);
+          background-size: 250% 250%;
+          animation: gradient-shift 5s ease infinite;
+          box-shadow:
+            0 4px 20px rgba(139, 94, 60, 0.35),
+            0 1px 4px rgba(0,0,0,0.10),
+            inset 0 1px 0 rgba(255,255,255,0.18);
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+          user-select: none;
+        }
+        .twin-cta-btn:hover {
+          transform: translateY(-2px) scale(1.03);
+          box-shadow:
+            0 8px 32px rgba(139, 94, 60, 0.45),
+            0 2px 8px rgba(0,0,0,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+        .twin-cta-btn:active {
+          transform: translateY(0px) scale(0.99);
+          box-shadow:
+            0 3px 12px rgba(139, 94, 60, 0.30),
+            inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        /* shimmer sweep */
+        .twin-cta-btn::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0;
+          width: 45%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%);
+          animation: shimmer-slide 2.8s ease-in-out infinite;
+          pointer-events: none;
+        }
+        /* top-edge highlight */
+        .twin-cta-btn::after {
+          content: '';
+          position: absolute;
+          top: 0; left: 10%; right: 10%;
+          height: 1px;
+          background: rgba(255,255,255,0.40);
+          border-radius: 100px;
+          pointer-events: none;
+        }
+        .twin-cta-label {
+          position: relative;
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: 0.02em;
+          color: #fff;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+        }
+        .twin-cta-spark {
+          font-size: 16px;
+          line-height: 1;
+          animation: sparkle-float 2.2s ease-in-out infinite;
+          filter: drop-shadow(0 1px 3px rgba(255,220,100,0.6));
+        }
+        .twin-cta-spark-2 {
+          font-size: 12px;
+          line-height: 1;
+          animation: sparkle-float-2 2.6s ease-in-out infinite 0.4s;
+          filter: drop-shadow(0 1px 3px rgba(255,220,100,0.5));
+        }
+        /* pulse ring */
+        .twin-cta-wrap {
+          position: relative;
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        }
+        .twin-cta-ring {
+          position: absolute;
+          inset: -1px;
+          border-radius: 100px;
+          border: 2px solid rgba(139, 94, 60, 0.55);
+          animation: pulse-ring 2s ease-out infinite;
+          pointer-events: none;
+        }
+        .twin-cta-ring-2 {
+          position: absolute;
+          inset: -1px;
+          border-radius: 100px;
+          border: 2px solid rgba(139, 94, 60, 0.30);
+          animation: pulse-ring 2s ease-out infinite 0.7s;
+          pointer-events: none;
+        }
+        /* subtle sub-label */
+        .twin-cta-sub {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #A89080;
+        }
       `}</style>
 
       {/* Animals Display Wrapper */}
-      <div className="relative flex justify-center items-end gap-16 h-[160px] w-full mb-6 select-none">
+      <div className="relative flex justify-center items-end gap-16 h-[160px] w-full mb-8 select-none">
         
         {/* Dog Animation */}
         <Link href="/twin" className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end drop-shadow-md decoration-none" style={{ textDecoration: 'none' }}>
@@ -130,14 +260,17 @@ export default function AnimatedPets() {
 
       </div>
 
-      {/* Clean, Subtle Pill Badge below */}
-      <Link 
-        href="/twin"
-        className="inline-flex items-center gap-1.5 bg-white hover:bg-[#F9F7F5] active:bg-[#F2EFEA] text-[#666666] hover:text-[#444444] px-4 py-2 rounded-full border border-[#E5E0DA] text-[13px] tracking-wide transition-all shadow-sm select-none"
-        style={{ textDecoration: 'none' }}
-      >
-        <span>✨</span> Find Your Pet Twin
-      </Link>
+      {/* Premium CTA Button */}
+      <div className="twin-cta-wrap">
+        <div className="twin-cta-ring" />
+        <div className="twin-cta-ring-2" />
+        <Link href="/twin" className="twin-cta-btn">
+          <span className="twin-cta-spark">✨</span>
+          <span className="twin-cta-label">Find Your Pet Twin</span>
+          <span className="twin-cta-spark-2">🐾</span>
+        </Link>
+        <span className="twin-cta-sub">Free · Instant Results</span>
+      </div>
     </div>
   );
 }
