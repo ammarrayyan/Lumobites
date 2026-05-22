@@ -5,6 +5,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import confetti from 'canvas-confetti';
+import Navbar from '@/components/Navbar';
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -56,6 +57,27 @@ export default function ScanPage() {
 
   // Load and verify Pro status on page mount
   useEffect(() => {
+    const syncStatus = () => {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      
+      if (isAdminBypass || isOwnerEmail) {
+        setIsPro(true);
+        setProEmail(cachedEmail || 'admin@lumobites.com');
+      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+        setIsPro(true);
+        setProEmail(cachedEmail);
+      } else {
+        setIsPro(false);
+        setProEmail('');
+      }
+    };
+
+    syncStatus();
+    window.addEventListener('lumo-pro-update', syncStatus);
+    window.addEventListener('storage', syncStatus);
+
     const searchParams = new URLSearchParams(window.location.search);
     const sessionId = searchParams.get('session_id');
     const emailParam = searchParams.get('email');
@@ -69,6 +91,7 @@ export default function ScanPage() {
       setProEmail('admin@lumobites.com');
       localStorage.setItem('lumo_pro_email', 'admin@lumobites.com');
       localStorage.setItem('lumo_admin_bypass', 'true');
+      window.dispatchEvent(new Event('lumo-pro-update'));
       
       try {
         confetti({
@@ -92,6 +115,7 @@ export default function ScanPage() {
             setProEmail(userEmail);
             localStorage.setItem('lumo_pro_email', userEmail);
             localStorage.removeItem('lumo_admin_bypass');
+            window.dispatchEvent(new Event('lumo-pro-update'));
             
             try {
               confetti({
@@ -136,10 +160,12 @@ export default function ScanPage() {
           console.log('[Lumo Subscription] Database status reply:', data);
           if (data.isPro) {
             setIsPro(true);
+            window.dispatchEvent(new Event('lumo-pro-update'));
             console.log('[Lumo Subscription] Pro status confirmed by Supabase.');
           } else {
             setIsPro(false);
             localStorage.removeItem('lumo_pro_email');
+            window.dispatchEvent(new Event('lumo-pro-update'));
             console.log('[Lumo Subscription] Pro status rejected by Supabase. Downgraded to free tier.');
           }
         })
@@ -150,18 +176,12 @@ export default function ScanPage() {
         setIsPro(false);
       }
     }
-  }, []);
 
-  const handleSignOut = () => {
-    console.log('[Lumo Subscription] Signing out. Clearing cached Pro credentials.');
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_admin_bypass');
-    }
-    setIsPro(false);
-    setProEmail('');
-    setShowProMenu(false);
-  };
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('storage', syncStatus);
+    };
+  }, []);
 
   // Limit checker: returns true if allowed to scan, false if blocked (shows modal)
   const checkScanLimit = (): boolean => {
@@ -777,6 +797,7 @@ export default function ScanPage() {
         setProEmail(modalEmail);
         localStorage.setItem('lumo_pro_email', modalEmail);
         localStorage.removeItem('lumo_admin_bypass');
+        window.dispatchEvent(new Event('lumo-pro-update'));
         setShowUpgradeModal(false);
         setModalStep('paywall');
         setVerificationCode('');
@@ -846,68 +867,7 @@ export default function ScanPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-12">
-      <header className="bg-white border-b border-[#E8DDD4] px-6 md:px-[48px] flex items-center sticky top-0 z-50" style={{ height: '72px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-        {isPro && (
-          <div className="ml-4 relative">
-            <button
-              onClick={() => setShowProMenu(!showProMenu)}
-              className="flex items-center gap-2 bg-[#FDF6F0] hover:bg-[#FAF0E6] border border-[#8B5E3C]/20 px-3 py-1.5 rounded-full transition-all cursor-pointer select-none"
-            >
-              <div className="bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs select-none">
-                PRO ✨
-              </div>
-              <span className="text-xs text-[#8B5E3C] font-extrabold flex items-center gap-0.5 select-none">
-                Account
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
-              </span>
-            </button>
-
-            {showProMenu && (
-              <>
-                {/* Click outside to close backdrop */}
-                <div 
-                  className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                  onClick={() => setShowProMenu(false)}
-                />
-                
-                {/* Floating Premium Menu */}
-                <div className="absolute left-0 mt-2 w-48 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_8px_30px_rgba(139,94,60,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in">
-                  <div className="px-3 py-1.5 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                    {proEmail || "Pro Member"}
-                  </div>
-                  <Link 
-                    href="/account"
-                    onClick={() => setShowProMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-bold hover:bg-[#FAF6F4] rounded-xl transition-all"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    ⚙️ Manage Subscription
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-bold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
-                  >
-                    🚪 Sign Out
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        <div style={{ marginLeft: 'auto' }}>
-          <Link href="/" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
-            &larr; Go Home
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-2xl mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
         <canvas ref={canvasRef} className="hidden" />

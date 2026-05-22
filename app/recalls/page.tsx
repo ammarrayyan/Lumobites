@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
 interface Recall {
   id: string;
@@ -211,17 +212,7 @@ export default function RecallsPage() {
     <div className="min-h-screen bg-[#FDFAF7]" style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
 
       {/* NAV */}
-      <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-12 flex items-center justify-between" style={{ height: '72px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-        <Link href="/chat" style={{ fontSize: '14px', fontWeight: 600, color: '#8B5E3C', textDecoration: 'none', padding: '10px 22px', border: '1.5px solid #C17D3C', borderRadius: '100px' }}>
-          Find My Pet&apos;s Food →
-        </Link>
-      </nav>
+      <Navbar />
 
       {/* HERO */}
       <section className="w-full bg-gradient-to-br from-[#FDFAF7] to-[#F5EDE4] py-16 px-6 text-center border-b border-[#E8D5C0]">

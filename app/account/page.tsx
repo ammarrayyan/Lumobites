@@ -1,13 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
 export default function AccountPage() {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+        setEmail(cachedEmail);
+      }
+    }
+  }, []);
   const [verificationCode, setVerificationCode] = useState('');
   
   // Loading & error states
@@ -154,19 +164,7 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
       {/* NAVBAR */}
-      <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center shrink-0" style={{ height: '72px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-        <div style={{ marginLeft: 'auto' }}>
-          <Link href="/scan" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
-            &larr; Back to Scanner
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="flex-1 flex flex-col items-center py-16 px-6">
         <div className="w-full max-w-[500px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 relative">

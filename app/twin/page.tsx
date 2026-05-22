@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 
@@ -519,19 +520,7 @@ export default function TwinPage() {
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
       
       {/* NAVBAR */}
-      <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center shrink-0" style={{ height: '72px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-        <div style={{ marginLeft: 'auto' }}>
-          <Link href="/" className="text-[#8B5E3C] font-semibold text-sm hover:underline" style={{ textDecoration: 'none' }}>
-            &larr; Go Home
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className={`flex-1 flex flex-col items-center py-12 px-6 ${showEmailModal ? 'blur-md pointer-events-none select-none' : ''}`}>
         <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 relative overflow-hidden">

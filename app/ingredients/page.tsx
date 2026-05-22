@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 
 export default function IngredientsPage() {
   const [ingredientsText, setIngredientsText] = useState('');
@@ -79,14 +80,7 @@ export default function IngredientsPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-24">
       {/* NAVBAR */}
-      <nav className="bg-white border-b border-[#EEEEEE] px-6 md:px-[48px] flex items-center h-[72px]">
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-      </nav>
+      <Navbar />
 
       <main className="max-w-[800px] mx-auto px-6 pt-12">
         <div className="text-center mb-12">
