@@ -3,193 +3,135 @@
 import React from 'react';
 import Link from 'next/link';
 
-// Brand warm brown — matches site palette
-const C = '#8B5A2B';
-
 export default function AnimatedPets() {
   return (
-    <div className="flex flex-col items-center w-full mb-8 mt-2 select-none">
+    <div className="flex flex-col items-center w-full mb-10 mt-4">
       <style>{`
-        /* ── Breathing ───────────────────────────────────── */
-        @keyframes breathe {
-          0%, 100% { transform: scaleY(1)     scaleX(1);    }
-          45%       { transform: scaleY(1.025) scaleX(0.987); }
+        @keyframes tail-swish {
+          0% { transform: rotate(0deg); }
+          50% { transform: rotate(-25deg); }
+          100% { transform: rotate(0deg); }
         }
-
-        /* ── Dog tail wag ────────────────────────────────── */
-        @keyframes dog-wag {
-          0%, 100% { transform: rotate(-12deg); }
-          50%       { transform: rotate(14deg);  }
+        @keyframes tail-wag {
+          0% { transform: rotate(-10deg); }
+          50% { transform: rotate(15deg); }
+          100% { transform: rotate(-10deg); }
         }
-
-        /* ── Cat tail sway ───────────────────────────────── */
-        @keyframes cat-sway {
-          0%, 100% { transform: rotate(-6deg);  }
-          50%       { transform: rotate(22deg); }
+        @keyframes head-tilt {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-5deg); }
+          75% { transform: rotate(5deg); }
         }
-
-        /* ── Gentle idle float ───────────────────────────── */
-        @keyframes float-dog {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-5px); }
+        @keyframes pant {
+          0%, 100% { transform: translateY(0px) scaleY(1); }
+          50% { transform: translateY(2px) scaleY(1.1); }
         }
-        @keyframes float-cat {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-5px); }
+        @keyframes blink {
+          0%, 48%, 52%, 100% { transform: scaleY(1); }
+          50% { transform: scaleY(0.1); }
         }
-
-        /* ── Hover lean toward each other ────────────────── */
-        .pet-dog-svg {
-          animation: float-dog 3.8s ease-in-out infinite;
+        @keyframes dog-wiggle {
+          0%, 100% { transform: rotate(0deg) translateY(0); }
+          25% { transform: rotate(-4deg) translateY(-3px); }
+          75% { transform: rotate(4deg) translateY(-3px); }
+        }
+        @keyframes cat-bounce {
+          0%, 100% { transform: translateY(0px) scaleY(1); }
+          40% { transform: translateY(-8px) scaleY(1.02); }
+          60% { transform: translateY(-8px) scaleY(1.02); }
+        }
+        .pet-interactive {
           cursor: pointer;
-          display: block;
-          transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+          -webkit-tap-highlight-color: transparent;
         }
-        .pet-dog-svg:hover {
-          animation: none;
-          transform: rotate(6deg) translateX(10px);
-          transform-origin: bottom right;
-          filter: drop-shadow(4px 6px 12px rgba(139,90,43,0.28));
+        .pet-dog.pet-interactive:hover, .pet-dog.pet-interactive:active {
+          animation: dog-wiggle 0.4s ease-in-out infinite;
         }
-
-        .pet-cat-svg {
-          animation: float-cat 4.2s ease-in-out infinite 1.0s;
-          cursor: pointer;
-          display: block;
-          transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        .pet-cat.pet-interactive:hover, .pet-cat.pet-interactive:active {
+          animation: cat-bounce 0.5s ease-in-out infinite;
         }
-        .pet-cat-svg:hover {
-          animation: none;
-          transform: rotate(-6deg) translateX(-10px);
-          transform-origin: bottom left;
-          filter: drop-shadow(-4px 6px 12px rgba(139,90,43,0.28));
+        .pet-dog.pet-interactive:hover .dog-tail, .pet-dog.pet-interactive:active .dog-tail {
+          animation-duration: 0.15s !important;
         }
-
-        /* ── Tail & breathe applied to sub-groups ─────────── */
-        .dog-breathe { animation: breathe 3.8s ease-in-out infinite; transform-origin: 50% 95%; }
-        .cat-breathe { animation: breathe 3.4s ease-in-out infinite 0.6s; transform-origin: 50% 95%; }
-        .dog-tail    { animation: dog-wag 1.1s ease-in-out infinite; transform-origin: 80% 12%; }
-        .cat-tail    { animation: cat-sway 2.6s ease-in-out infinite; transform-origin: 18% 5%; }
+        .pet-cat.pet-interactive:hover .cat-tail, .pet-cat.pet-interactive:active .cat-tail {
+          animation: tail-swish 0.5s ease-in-out infinite !important;
+        }
       `}</style>
 
-      <div className="flex items-end justify-center gap-2 mb-5" style={{ height: '210px' }}>
-
-        {/* ──────────────────── DOG ──────────────────────────
-            Sitting Labrador facing RIGHT (toward cat).
-            Silhouette built from overlapping same-colour shapes.
-            ViewBox 0 0 190 210.
-        ─────────────────────────────────────────────────── */}
-        <Link href="/twin" style={{ textDecoration: 'none' }}>
-          <svg
-            className="pet-dog-svg"
-            width="185"
-            height="205"
-            viewBox="0 0 190 210"
-            fill={C}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Tail — low behind haunches, curving backward-left */}
-            <g className="dog-tail">
-              <path d="M 36,138
-                       C 22,136 10,128  8,116
-                       C  6,104 14, 94 24, 97
-                       C 34,100 38,115 36,138 Z" />
-            </g>
-
-            {/* Body group that breathes */}
-            <g className="dog-breathe">
-
-              {/* Haunches — large rounded mass, lower-left */}
-              <ellipse cx="54"  cy="158" rx="38" ry="44" />
-
-              {/* Torso — angled oval connecting haunches to chest */}
-              <ellipse cx="96"  cy="122" rx="40" ry="56"
-                       transform="rotate(-14 96 122)" />
-
-              {/* Chest / shoulder connector toward head (upper-right) */}
-              <path d="M 112,80
-                       C 124,65 142,58 155,66
-                       C 164,72 162,88 150,94
-                       C 136,100 118,96 112,80 Z" />
-
-              {/* Head — oval, elongated slightly right (muzzle direction) */}
-              <ellipse cx="160" cy="84"  rx="28" ry="25" />
-
-              {/* Ear — floppy, drooping forward off right side of skull */}
-              <ellipse cx="162" cy="100" rx="12" ry="19"
-                       transform="rotate(12 162 100)" />
-
-              {/* Front-leg left */}
-              <rect x="93"  y="158" width="17" height="42" rx="8.5" />
-              {/* Front-leg right */}
-              <rect x="114" y="158" width="17" height="42" rx="8.5" />
-              {/* Paw base — smooths the two legs into the ground */}
-              <ellipse cx="115" cy="198" rx="26" ry="9" />
-
-            </g>
-          </svg>
+      {/* Animals Display Wrapper */}
+      <div className="relative flex justify-center items-end gap-16 h-[160px] w-full mb-6 select-none">
+        
+        {/* Dog Animation */}
+        <Link href="/twin" className="pet-dog pet-interactive relative w-32 h-36 flex flex-col items-center justify-end drop-shadow-md decoration-none" style={{ textDecoration: 'none' }}>
+          {/* Dog Tail */}
+          <div className="dog-tail absolute right-[-10px] bottom-[30px] w-6 h-16 bg-[#D4A373] rounded-full origin-bottom z-0" style={{ animation: 'tail-wag 0.4s ease-in-out infinite' }}></div>
+          
+          {/* Dog Body */}
+          <div className="relative w-24 h-28 bg-[#FAEDCD] rounded-t-[40px] rounded-b-[20px] z-10 overflow-hidden flex justify-center">
+            <div className="absolute top-[20px] w-14 h-16 bg-white rounded-full opacity-60"></div>
+          </div>
+          
+          {/* Dog Head */}
+          <div className="absolute top-[-20px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 4s ease-in-out infinite' }}>
+            {/* Ears */}
+            <div className="absolute left-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[-20deg]"></div>
+            <div className="absolute right-[-15px] top-[10px] w-10 h-16 bg-[#D4A373] rounded-full rotate-[20deg]"></div>
+            
+            {/* Face */}
+            <div className="relative w-28 h-24 bg-[#FAEDCD] rounded-[40px] flex flex-col items-center pt-8">
+              <div className="flex gap-8 mb-2">
+                <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s', transformOrigin: 'center' }}></div>
+                <div className="w-3 h-3 bg-gray-800 rounded-full" style={{ animation: 'blink 5s infinite 1s', transformOrigin: 'center' }}></div>
+              </div>
+              <div className="w-6 h-4 bg-gray-800 rounded-full mb-1"></div>
+              {/* Tongue */}
+              <div className="w-5 h-7 bg-[#FFB5A7] rounded-b-full origin-top" style={{ animation: 'pant 0.3s infinite alternate' }}></div>
+            </div>
+          </div>
+          
+          {/* Paws */}
+          <div className="absolute bottom-[-5px] left-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
+          <div className="absolute bottom-[-5px] right-[10px] w-8 h-6 bg-[#D4A373] rounded-full z-20"></div>
         </Link>
 
-        {/* ──────────────────── CAT ──────────────────────────
-            Sitting domestic shorthair facing LEFT (toward dog).
-            More upright posture, pointed ears, curling tail.
-            ViewBox 0 0 155 200.
-        ─────────────────────────────────────────────────── */}
-        <Link href="/twin" style={{ textDecoration: 'none' }}>
-          <svg
-            className="pet-cat-svg"
-            width="152"
-            height="200"
-            viewBox="0 0 155 200"
-            fill={C}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Tail — wraps around lower-right, curving outward */}
-            <g className="cat-tail">
-              <path d="M 88,152
-                       C 108,146 122,132 120,118
-                       C 118,106 108,100 99,106
-                       C 90,113  88,132 88,152 Z" />
-            </g>
-
-            {/* Body group that breathes */}
-            <g className="cat-breathe">
-
-              {/* Body — upright oval, cats sit more vertically */}
-              <ellipse cx="60"  cy="130" rx="30" ry="60" />
-
-              {/* Haunches — wider base */}
-              <ellipse cx="60"  cy="174" rx="34" ry="22" />
-
-              {/* Neck connector patch */}
-              <path d="M 40,82
-                       C 36,70 42,55 54,53
-                       C 66,51 74,63 70,76
-                       C 66,88 50,90 40,82 Z" />
-
-              {/* Head — slightly wider than tall (domestic cat proportions) */}
-              <ellipse cx="48"  cy="64"  rx="29" ry="27" />
-
-              {/* Left ear — angled outward-left */}
-              <polygon points="28,48 18,21 45,38" />
-              {/* Right ear — angled outward-right */}
-              <polygon points="58,38 66,14 78,42" />
-
-              {/* Front-leg left */}
-              <rect x="36"  y="168" width="14" height="28" rx="7" />
-              {/* Front-leg right */}
-              <rect x="54"  y="168" width="14" height="28" rx="7" />
-              {/* Paw base */}
-              <ellipse cx="52"  cy="194" rx="22" ry="7" />
-
-            </g>
-          </svg>
+        {/* Cat Animation */}
+        <Link href="/twin" className="pet-cat pet-interactive relative w-24 h-32 flex flex-col items-center justify-end drop-shadow-md decoration-none" style={{ textDecoration: 'none' }}>
+          {/* Cat Tail */}
+          <div className="cat-tail absolute right-[-30px] bottom-[10px] w-16 h-4 bg-[#2B2D42] rounded-full origin-left z-0" style={{ animation: 'tail-swish 3s ease-in-out infinite' }}>
+            <div className="absolute right-0 top-[-10px] w-4 h-14 bg-[#2B2D42] rounded-full origin-bottom"></div>
+          </div>
+          
+          {/* Cat Body */}
+          <div className="relative w-20 h-24 bg-[#2B2D42] rounded-t-[30px] rounded-b-[10px] z-10 flex justify-center overflow-hidden">
+            {/* White Chest */}
+            <div className="absolute bottom-0 w-10 h-16 bg-[#EDF2F4] rounded-t-[20px]"></div>
+          </div>
+          
+          {/* Cat Head */}
+          <div className="absolute top-[-15px] z-20 flex flex-col items-center" style={{ animation: 'head-tilt 5s ease-in-out infinite 1s' }}>
+            {/* Ears */}
+            <div className="absolute left-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[-20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+            <div className="absolute right-[0px] top-[-8px] w-6 h-8 bg-[#2B2D42] rotate-[20deg]" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+            
+            {/* Face */}
+            <div className="relative w-20 h-18 bg-[#2B2D42] rounded-full flex flex-col items-center justify-center pt-2">
+              <div className="flex gap-6 mb-1">
+                <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s', transformOrigin: 'center' }}></div>
+                <div className="w-2 h-2 bg-gray-100 rounded-full" style={{ animation: 'blink 4s infinite 2s', transformOrigin: 'center' }}></div>
+              </div>
+              <div className="w-2 h-1.5 bg-pink-300 rounded-full"></div>
+            </div>
+          </div>
+          
+          {/* Paws */}
+          <div className="absolute bottom-[-2px] left-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
+          <div className="absolute bottom-[-2px] right-[15px] w-5 h-4 bg-[#2B2D42] rounded-full z-20"></div>
         </Link>
 
       </div>
 
-      {/* Original clean pill button — unchanged */}
-      <Link
+      {/* Clean, Subtle Pill Badge below */}
+      <Link 
         href="/twin"
         className="inline-flex items-center gap-1.5 bg-white hover:bg-[#F9F7F5] active:bg-[#F2EFEA] text-[#666666] hover:text-[#444444] px-4 py-2 rounded-full border border-[#E5E0DA] text-[13px] tracking-wide transition-all shadow-sm select-none"
         style={{ textDecoration: 'none' }}
