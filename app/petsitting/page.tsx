@@ -401,16 +401,30 @@ export default function PetSitting() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: sitterEmail })
       });
-      const data = await res.json();
+      
+      let data;
+      const text = await res.text();
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error(`Server error: ${text.substring(0, 100)}`);
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+
       if (data.sessionId) {
         const stripe = await stripePromise;
-        await stripe?.redirectToCheckout({ sessionId: data.sessionId });
+        if (!stripe) throw new Error('Stripe failed to load on the client.');
+        const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+        if (error) throw new Error(error.message);
       } else {
-        setProfileMessage(data.error || 'Failed to start checkout');
-        setProfileLoading(false);
+        throw new Error('Failed to start checkout: no session ID returned');
       }
-    } catch (error) {
-      setProfileMessage('Failed to connect to payment processor.');
+    } catch (error: any) {
+      console.error('Stripe Checkout Error:', error);
+      setProfileMessage(`Error: ${error.message}`);
       setProfileLoading(false);
     }
   };
