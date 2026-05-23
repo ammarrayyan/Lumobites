@@ -134,7 +134,7 @@ export default function Navbar() {
                   onClick={() => setShowProMenu(!showProMenu)}
                   className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                 >
-                  <div className="bg-gradient-to-r from-[#8B5E3C] to-[#A37B5C] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm select-none">
+                  <div className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm select-none">
                     PRO ✨
                   </div>
                   <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
@@ -190,7 +190,7 @@ export default function Navbar() {
                 onClick={() => setShowProMenu(!showProMenu)}
                 className="flex items-center gap-2 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] px-3 py-1.5 rounded-full transition-all cursor-pointer select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               >
-                <div className="bg-gradient-to-r from-[#8B5E3C] to-[#A37B5C] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm select-none">
+                <div className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm select-none">
                   PRO ✨
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
