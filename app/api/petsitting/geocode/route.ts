@@ -21,7 +21,17 @@ export async function GET(request: NextRequest) {
 
     if (data.status === 'OK' && data.results && data.results.length > 0) {
       const location = data.results[0].geometry.location;
-      return NextResponse.json({ lat: location.lat, lng: location.lng });
+      const addressComponents = data.results[0].address_components;
+      let city = '';
+      
+      for (const component of addressComponents) {
+        if (component.types.includes('locality') || component.types.includes('postal_town')) {
+          city = component.long_name;
+          break;
+        }
+      }
+
+      return NextResponse.json({ lat: location.lat, lng: location.lng, city });
     } else {
       console.error('[Geocode API] No results or error from Google:', data.status, data.error_message);
       return NextResponse.json({ error: 'Could not geocode address', details: data.status }, { status: 400 });

@@ -81,6 +81,20 @@ export default function PetSitting() {
   const [profileMessage, setProfileMessage] = useState('');
   const [profilePreviewMode, setProfilePreviewMode] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  
+  // Sitter Auth State
+  const [sitterAuthMode, setSitterAuthMode] = useState<'email' | 'otp' | 'form'>('email');
+  const [sitterAuthCode, setSitterAuthCode] = useState('');
+  const [sitterAuthLoading, setSitterAuthLoading] = useState(false);
+  const [sitterAuthError, setSitterAuthError] = useState('');
+
+  // Delete Profile State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Zip Code Validation State
+  const [zipGeocoding, setZipGeocoding] = useState(false);
+  const [zipError, setZipError] = useState('');
 
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
@@ -123,6 +137,34 @@ export default function PetSitting() {
     return () => clearTimeout(timeoutId);
   }, [searchZip]);
 
+  // Zip Code Smart Validation Effect
+  useEffect(() => {
+    if (sitterZip.trim().length < 4 || sitterAuthMode !== 'form') {
+      setZipError('');
+      return;
+    }
+    
+    const timeoutId = setTimeout(async () => {
+      setZipGeocoding(true);
+      try {
+        const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(sitterZip + ' ' + sitterCountry)}`);
+        const data = await res.json();
+        if (res.ok && data.city) {
+          setSitterCity(data.city);
+          setZipError('');
+        } else {
+          setZipError('We couldn\'t find that zip code — please check and try again');
+        }
+      } catch (e) {
+        setZipError('Error validating zip code.');
+      } finally {
+        setZipGeocoding(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [sitterZip, sitterCountry, sitterAuthMode]);
+
   const fetchSitters = async (email?: string) => {
     try {
       const url = email ? `/api/petsitting/sitters?owner_email=${encodeURIComponent(email)}` : '/api/petsitting/sitters';
@@ -162,6 +204,99 @@ export default function PetSitting() {
       console.error('Failed to load profile');
     } finally {
       setProfileLoading(false);
+    }
+  };
+
+  const handleSitterEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sitterEmail.trim()) return;
+    
+    setSitterAuthLoading(true);
+    setSitterAuthError('');
+    
+    try {
+      // Check if profile exists
+      const res = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
+      
+      if (res.status === 200) {
+        // Exists, send OTP
+        const otpRes = await fetch('/api/petsitting/auth/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: sitterEmail })
+        });
+        if (otpRes.ok) {
+          setSitterAuthMode('otp');
+        } else {
+          setSitterAuthError('Failed to send verification code.');
+        }
+      } else {
+        // Doesn't exist, go straight to form
+        setSitterAuthMode('form');
+      }
+    } catch (e) {
+      setSitterAuthError('An error occurred.');
+    } finally {
+      setSitterAuthLoading(false);
+    }
+  };
+
+  const handleSitterOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sitterAuthCode.trim()) return;
+
+    setSitterAuthLoading(true);
+    setSitterAuthError('');
+
+    try {
+      const res = await fetch('/api/petsitting/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sitterEmail, code: sitterAuthCode })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        await loadSitterProfile(sitterEmail);
+        setSitterAuthMode('form');
+      } else {
+        setSitterAuthError(data.error || 'Invalid verification code.');
+      }
+    } catch (e) {
+      setSitterAuthError('An error occurred verifying the code.');
+    } finally {
+      setSitterAuthLoading(false);
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/petsitting/profile/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sitterEmail })
+      });
+      if (res.ok) {
+        // Reset state
+        setSitterAuthMode('email');
+        setSitterEmail('');
+        setSitterName('');
+        setSitterPhoto('');
+        setSitterCity('');
+        setSitterZip('');
+        setSitterBio('');
+        setSitterPetTypes('both');
+        setSitterRate('');
+        setIsProSitter(false);
+        setDeleteModalOpen(false);
+      } else {
+        alert('Failed to delete profile. Please try again.');
+      }
+    } catch (e) {
+      alert('An error occurred during deletion.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -577,26 +712,58 @@ export default function PetSitting() {
               <>
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Lumo Sitters</h2>
-                  <p className="text-[#8B7E7D]">Create your profile to start receiving pet sitting requests in your neighborhood.</p>
+                  <p className="text-[#8B7E7D]">Create or manage your profile to receive pet sitting requests in your neighborhood.</p>
                 </div>
 
-            {!isProSitter && (
-              <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
-                <span className="text-xl">⚠️</span>
+            {sitterAuthMode === 'email' && (
+              <form onSubmit={handleSitterEmailSubmit} className="space-y-4 max-w-sm mx-auto animate-fade-in">
                 <div>
-                  <h4 className="font-bold text-red-800 text-sm">Profile Inactive & Hidden</h4>
-                  <p className="text-red-700 text-xs mt-1">Your sitter profile is hidden from search results. Enter your email below to update your profile and subscribe for $9.99/mo to go live.</p>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Enter your email</label>
+                  <input required type="email" value={sitterEmail} onChange={e => setSitterEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" placeholder="your@email.com" />
                 </div>
-              </div>
+                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
+                <button type="submit" disabled={sitterAuthLoading || !sitterEmail} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm">
+                  {sitterAuthLoading ? 'Checking...' : 'Continue'}
+                </button>
+              </form>
             )}
 
-            <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
-              <div>
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Account Email</label>
-                <input required type="email" value={sitterEmail} onChange={e => {setSitterEmail(e.target.value); loadSitterProfile(e.target.value);}} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('email') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="your@email.com" />
-              </div>
+            {sitterAuthMode === 'otp' && (
+              <form onSubmit={handleSitterOtpSubmit} className="space-y-4 max-w-sm mx-auto animate-fade-in">
+                <div className="text-center mb-4">
+                  <span className="text-3xl mb-2 block">🔐</span>
+                  <p className="text-sm text-[#8B7E7D]">Enter the 6-digit code we sent to <strong>{sitterEmail}</strong></p>
+                </div>
+                <div>
+                  <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-2xl tracking-[0.5em] font-bold text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="••••••" />
+                </div>
+                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
+                <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm">
+                  {sitterAuthLoading ? 'Verifying...' : 'Verify & Login'}
+                </button>
+                <button type="button" onClick={() => setSitterAuthMode('email')} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#8B5E3C] mt-2">
+                  &larr; Back
+                </button>
+              </form>
+            )}
 
-              {profileLoading && <div className="text-sm text-[#8B5E3C]">Loading existing profile...</div>}
+            {sitterAuthMode === 'form' && (
+              <div className="animate-fade-in">
+                {!isProSitter && profileMessage === '' && (
+                  <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start">
+                    <span className="text-xl">⚠️</span>
+                    <div>
+                      <h4 className="font-bold text-red-800 text-sm">Profile Inactive & Hidden</h4>
+                      <p className="text-red-700 text-xs mt-1">Your sitter profile is hidden from search results. Subscribe for $9.99/mo to go live.</p>
+                    </div>
+                  </div>
+                )}
+
+            <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
+              <div className="flex justify-between items-center mb-2 border-b border-[#E8DDD4] pb-4">
+                <div className="text-sm font-bold text-[#8B7E7D]">Editing as: {sitterEmail}</div>
+                <button type="button" onClick={() => setSitterAuthMode('email')} className="text-[#8B5E3C] text-sm font-bold hover:underline">Change</button>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -634,7 +801,11 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Zip Code</label>
-                  <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  <div className="relative">
+                    <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                    {zipGeocoding && <div className="absolute right-3 top-3 text-xs text-[#8B5E3C]">Validating...</div>}
+                  </div>
+                  {zipError && <p className="text-red-500 text-xs mt-1 font-semibold">{zipError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Country</label>
@@ -689,7 +860,16 @@ export default function PetSitting() {
                   {profileSaving ? 'Saving...' : 'Save Profile'}
                 </button>
               )}
+
+              <div className="pt-8 border-t border-[#E8DDD4] mt-8 text-center">
+                <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
+                  Delete My Profile
+                </button>
+              </div>
+
             </form>
+              </div>
+            )}
           </>
           )}
           </div>
@@ -788,6 +968,34 @@ export default function PetSitting() {
                 {unlockLoading ? 'Verifying...' : 'Unlock Profiles'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE MODAL */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
+            <span className="text-5xl mb-4 block">⚠️</span>
+            <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Are you sure?</h3>
+            <p className="text-[#8B7E7D] text-sm mb-6">This will permanently delete your profile and cancel your subscription. You will no longer appear in search results.</p>
+
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={handleDeleteProfile} 
+                disabled={deleteLoading} 
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl transition-all shadow-md"
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete Profile'}
+              </button>
+              <button 
+                onClick={() => setDeleteModalOpen(false)} 
+                disabled={deleteLoading} 
+                className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#4A3E3D] font-bold py-3 rounded-xl transition-colors border border-[#E8DDD4]"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
