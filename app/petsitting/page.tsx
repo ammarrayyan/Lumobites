@@ -44,10 +44,10 @@ export default function PetSitting() {
 
   // Become Sitter State
   const [sitterEmail, setSitterEmail] = useState('');
-  const [sitterName, setSitterName] = useState('Ammar');
+  const [sitterName, setSitterName] = useState('');
   const [sitterPhoto, setSitterPhoto] = useState('');
-  const [sitterCity, setSitterCity] = useState('Louisville');
-  const [sitterZip, setSitterZip] = useState('40202');
+  const [sitterCity, setSitterCity] = useState('');
+  const [sitterZip, setSitterZip] = useState('');
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
   const [sitterRate, setSitterRate] = useState('');
@@ -62,8 +62,6 @@ export default function PetSitting() {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     if (cachedEmail && cachedEmail !== 'undefined') {
       setReqEmail(cachedEmail);
-      setSitterEmail(cachedEmail);
-      loadSitterProfile(cachedEmail);
       fetchSitters(cachedEmail);
     } else {
       fetchSitters();
