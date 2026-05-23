@@ -24,7 +24,7 @@ export default function Home() {
               Free &middot; No Sign-up Required
             </div>
             
-            <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(44px, 5.5vw, 68px)' }}>
+            <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
               <span className="text-[#191919]">Find the best food</span>
               <br />
               <span className="text-[#C17D3C]">for your pet.</span>
@@ -54,7 +54,7 @@ export default function Home() {
               }
             `}</style>
 
-            <Link href="/chat" className="btn-heartbeat mb-4" style={{ fontSize: '18px', padding: '18px 52px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+            <Link href="/chat" className="btn-heartbeat mb-4" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
               Find Your Pet&apos;s Food &rarr;
             </Link>
 
@@ -100,10 +100,10 @@ export default function Home() {
           <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
             
             {/* Card 1 - Safety Check */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-5 h-5 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -118,10 +118,10 @@ export default function Home() {
             </div>
 
             {/* Card 2 - Recall Alerts */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-5 h-5 text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
@@ -136,10 +136,10 @@ export default function Home() {
             </div>
 
             {/* Card 3 - Pet Supplies */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-5 h-5 text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
                     <circle cx="4.5" cy="11.5" r="2.5" />
                     <circle cx="9.5" cy="7.5" r="2.5" />
                     <circle cx="14.5" cy="7.5" r="2.5" />
@@ -158,10 +158,10 @@ export default function Home() {
             </div>
 
             {/* Card 4 - Pet Twin */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-5 h-5 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
                   </svg>
                 </div>
@@ -213,7 +213,7 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
-            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(24px, 3vw, 36px)' }}>
+            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(20px, 2.5vw, 28px)' }}>
               Personalized recommendations, not generic lists.
             </h2>
           </div>
@@ -247,7 +247,7 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">What pet owners say</h3>
-            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[500px] mx-auto" style={{ fontSize: 'clamp(22px, 3vw, 34px)' }}>
+            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[500px] mx-auto" style={{ fontSize: 'clamp(18px, 2.5vw, 26px)' }}>
               Real results for real pets.
             </h2>
           </div>
@@ -298,13 +298,13 @@ export default function Home() {
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
         <div className="max-w-[700px] mx-auto">
-          <h2 className="font-[800] tracking-[-0.02em] leading-tight mb-4" style={{ fontSize: 'clamp(28px, 4vw, 44px)', color: '#FFFFFF' }}>
+          <h2 className="font-[800] tracking-[-0.02em] leading-tight mb-4" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: '#FFFFFF' }}>
             Ready to find the perfect food?
           </h2>
           <p className="text-[18px] mb-10 max-w-[480px] mx-auto" style={{ color: 'rgba(255,255,255,0.85)' }}>
             Join thousands of pet owners who found their pet&apos;s favorite food.
           </p>
-          <Link href="/chat" style={{ fontSize: '18px', padding: '16px 48px', textDecoration: 'none', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
+          <Link href="/chat" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
             Get Started &rarr;
           </Link>
         </div>
