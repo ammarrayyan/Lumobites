@@ -24,26 +24,12 @@ export async function POST(request: NextRequest) {
 
     const isOwnerPro = emailData?.is_pro || false;
 
-    // 2. Check quota if not PRO
+    // 2. Enforce PRO requirement
     if (!isOwnerPro) {
-      const firstDayOfMonth = new Date();
-      firstDayOfMonth.setDate(1);
-      firstDayOfMonth.setHours(0, 0, 0, 0);
-
-      const { count, error: countError } = await supabase
-        .from('sitting_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('owner_email', cleanEmail)
-        .gte('created_at', firstDayOfMonth.toISOString());
-
-      if (countError) throw countError;
-
-      if ((count || 0) >= 3) {
-        return NextResponse.json(
-          { error: 'Quota exceeded. Upgrade to PRO for unlimited requests.' },
-          { status: 403 }
-        );
-      }
+      return NextResponse.json(
+        { error: 'requires_pro', message: 'You must have an active Lumo Bites PRO membership ($2.99/mo) to contact sitters.' },
+        { status: 403 }
+      );
     }
 
     // 3. Get Sitter details

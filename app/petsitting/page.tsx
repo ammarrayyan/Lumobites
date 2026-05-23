@@ -161,6 +161,28 @@ export default function PetSitting() {
     }
   };
 
+  const handleOwnerStripeCheckout = async () => {
+    try {
+      setReqLoading(true);
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: reqEmail })
+      });
+      const data = await res.json();
+      if (data.sessionId) {
+        const stripe = await stripePromise;
+        await stripe?.redirectToCheckout({ sessionId: data.sessionId });
+      } else {
+        setReqError(data.error || 'Failed to start checkout');
+        setReqLoading(false);
+      }
+    } catch (error) {
+      setReqError('Failed to connect to payment processor.');
+      setReqLoading(false);
+    }
+  };
+
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setReqLoading(true);
@@ -189,7 +211,11 @@ export default function PetSitting() {
           setReqSuccess(false);
         }, 3000);
       } else {
-        setReqError(data.error || 'Failed to submit request');
+        if (data.error === 'requires_pro') {
+          setReqError('requires_pro');
+        } else {
+          setReqError(data.error || 'Failed to submit request');
+        }
       }
     } catch (err) {
       setReqError('An unexpected error occurred.');
@@ -445,12 +471,24 @@ export default function PetSitting() {
                   <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]"></textarea>
                 </div>
 
-                {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
+                {reqError && reqError !== 'requires_pro' && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
 
-                <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm">
-                  {reqLoading ? 'Sending...' : 'Send Request'}
-                </button>
-                <p className="text-[10px] text-center text-gray-400 mt-3">PRO members get unlimited requests. Free users get 3 requests/month.</p>
+                {reqError === 'requires_pro' ? (
+                  <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] rounded-xl p-5 text-center shadow-md mt-6">
+                    <h3 className="text-[#E8D5C0] font-black mb-1">Lumo Bites Pro Required</h3>
+                    <p className="text-gray-300 text-xs mb-4">You need an active $2.99/mo PRO membership to contact sitters.</p>
+                    <button type="button" onClick={handleOwnerStripeCheckout} disabled={reqLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-3 rounded-lg transition-all shadow-sm">
+                      {reqLoading ? 'Redirecting...' : 'Upgrade to PRO for $2.99/mo'}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm">
+                      {reqLoading ? 'Sending...' : 'Send Request'}
+                    </button>
+                    <p className="text-[10px] text-center text-gray-400 mt-3">Active Lumo Bites PRO membership ($2.99/mo) required to contact sitters.</p>
+                  </>
+                )}
               </form>
             )}
           </div>
