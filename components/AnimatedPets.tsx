@@ -38,7 +38,6 @@ export default function AnimatedPets() {
         .pet-group-img {
           object-fit: contain;
           z-index: 10;
-          mix-blend-mode: darken;
           transition: transform 0.4s ease;
         }
         .image-container:hover .pet-group-img {
@@ -50,9 +49,9 @@ export default function AnimatedPets() {
       <Link href="/twin" className="image-container" style={{ textDecoration: 'none' }}>
         <div className="image-glow" />
         <div className="relative w-full h-full flex justify-center items-end">
-          {/* Using multiply blend mode to remove white background natively */}
+          {/* Using the actual transparent PNG image */}
           <Image 
-            src="/pets-group.jpg" 
+            src="/pets-group.png" 
             alt="Group of dogs and cats" 
             fill
             className="pet-group-img"
