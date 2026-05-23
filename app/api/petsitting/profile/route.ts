@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, name, photo_url, city, zip, country, bio, pet_types, rate_per_night, availability } = body;
+    const { email, name, photo_url, city, zip, country, bio, pet_types, rate_per_night, availability, phone_number, phone_visible } = body;
 
     if (!email || !name) {
       return NextResponse.json({ error: 'Email and name are required' }, { status: 400 });
@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
         country: resolvedCountry,
         lat,
         lng,
+        phone_number: phone_number || null,
+        phone_visible: phone_visible !== undefined ? phone_visible : false,
         bio,
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,

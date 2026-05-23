@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('sitters')
-      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night')
+      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible')
       .eq('is_pro', true)
       .eq('availability', true)
       .order('created_at', { ascending: false });
@@ -27,12 +27,17 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     // Mask data if the owner is not PRO
-    const sitters = isOwnerPro ? data : data?.map(sitter => ({
-      ...sitter,
-      name: 'Local Sitter',
-      photo_url: '',
-      bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
-    }));
+    const sitters = data?.map(sitter => {
+      if (isOwnerPro) return sitter;
+      
+      return {
+        ...sitter,
+        name: 'Local Sitter',
+        photo_url: '',
+        bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
+        phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
+      };
+    });
 
     return NextResponse.json({ sitters, isOwnerPro });
   } catch (error: any) {

@@ -19,6 +19,8 @@ interface Sitter {
   bio: string;
   pet_types: string;
   rate_per_night: number;
+  phone_number?: string;
+  phone_visible?: boolean;
   distance?: number;
 }
 
@@ -73,6 +75,8 @@ export default function PetSitting() {
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
   const [sitterRate, setSitterRate] = useState('');
+  const [sitterPhone, setSitterPhone] = useState('');
+  const [sitterPhoneVisible, setSitterPhoneVisible] = useState(false);
   const [sitterAvailable, setSitterAvailable] = useState(true);
   const [isProSitter, setIsProSitter] = useState(false);
   
@@ -196,6 +200,8 @@ export default function PetSitting() {
           setSitterBio(data.bio || '');
           setSitterPetTypes(data.pet_types || 'both');
           setSitterRate(data.rate_per_night?.toString() || '');
+          setSitterPhone(data.phone_number || '');
+          setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability);
           setIsProSitter(data.is_pro);
         }
@@ -288,6 +294,8 @@ export default function PetSitting() {
         setSitterBio('');
         setSitterPetTypes('both');
         setSitterRate('');
+        setSitterPhone('');
+        setSitterPhoneVisible(false);
         setIsProSitter(false);
         setDeleteModalOpen(false);
       } else {
@@ -337,6 +345,8 @@ export default function PetSitting() {
           bio: sitterBio,
           pet_types: sitterPetTypes,
           rate_per_night: sitterRate,
+          phone_number: sitterPhone,
+          phone_visible: sitterPhoneVisible,
           availability: sitterAvailable
         })
       });
@@ -616,6 +626,11 @@ export default function PetSitting() {
                         <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
                           📍 {sitter.city}, {sitter.country || 'United States'}
                         </p>
+                        {sitter.phone_number && (
+                          <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
+                            📞 <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
+                          </p>
+                        )}
                         {sitter.distance !== undefined && (
                           <p className="text-[#8B5E3C] text-xs font-bold mt-0.5 ml-5">
                             {sitter.distance.toFixed(1)} miles away
@@ -827,6 +842,14 @@ export default function PetSitting() {
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
                   <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('rate') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number (Optional)</label>
+                  <input type="tel" value={sitterPhone} onChange={e => setSitterPhone(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] mb-2" placeholder="(555) 555-5555" />
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="phone_vis" checked={sitterPhoneVisible} onChange={e => setSitterPhoneVisible(e.target.checked)} className="w-4 h-4 accent-[#8B5E3C]" />
+                    <label htmlFor="phone_vis" className="text-[#8B7E7D] text-xs font-semibold cursor-pointer">Show my phone number to PRO members</label>
+                  </div>
                 </div>
               </div>
 
