@@ -23,6 +23,10 @@ export default function PetSitting() {
   // Find Sitter State
   const [sitters, setSitters] = useState<Sitter[]>([]);
   const [loadingSitters, setLoadingSitters] = useState(true);
+  const [isOwnerPro, setIsOwnerPro] = useState(false);
+  const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+  const [unlockEmail, setUnlockEmail] = useState('');
+  const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
   const [requestModalOpen, setRequestModalOpen] = useState(false);
@@ -55,22 +59,25 @@ export default function PetSitting() {
   const [profileMessage, setProfileMessage] = useState('');
 
   useEffect(() => {
-    fetchSitters();
-    
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     if (cachedEmail && cachedEmail !== 'undefined') {
       setReqEmail(cachedEmail);
       setSitterEmail(cachedEmail);
       loadSitterProfile(cachedEmail);
+      fetchSitters(cachedEmail);
+    } else {
+      fetchSitters();
     }
   }, []);
 
-  const fetchSitters = async () => {
+  const fetchSitters = async (email?: string) => {
     try {
-      const res = await fetch('/api/petsitting/sitters');
+      const url = email ? `/api/petsitting/sitters?owner_email=${encodeURIComponent(email)}` : '/api/petsitting/sitters';
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setSitters(data);
+        setSitters(data.sitters);
+        setIsOwnerPro(data.isOwnerPro);
       }
     } catch (e) {
       console.error('Failed to fetch sitters');
@@ -180,6 +187,43 @@ export default function PetSitting() {
     } catch (error) {
       setReqError('Failed to connect to payment processor.');
       setReqLoading(false);
+    }
+  };
+
+  const handleUnlockProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUnlockLoading(true);
+    setReqError('');
+
+    try {
+      const res = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
+      const data = await res.json();
+      
+      if (data.isOwnerPro) {
+        setSitters(data.sitters);
+        setIsOwnerPro(true);
+        setUnlockModalOpen(false);
+        localStorage.setItem('lumo_pro_email', unlockEmail);
+        setReqEmail(unlockEmail);
+      } else {
+        // Not PRO, trigger checkout
+        const checkoutRes = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: unlockEmail })
+        });
+        const checkoutData = await checkoutRes.json();
+        if (checkoutData.sessionId) {
+          const stripe = await stripePromise;
+          await stripe?.redirectToCheckout({ sessionId: checkoutData.sessionId });
+        } else {
+          setReqError('Failed to start checkout');
+        }
+      }
+    } catch (error) {
+      setReqError('An error occurred.');
+    } finally {
+      setUnlockLoading(false);
     }
   };
 
@@ -315,7 +359,7 @@ export default function PetSitting() {
                       </div>
                     </div>
 
-                    <p className="text-[#555555] text-sm mb-4 line-clamp-3 h-[60px]">{sitter.bio}</p>
+                    <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
 
                     <div className="flex items-center justify-between mb-6">
                       <div className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-lg">
@@ -326,12 +370,22 @@ export default function PetSitting() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
-                      className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
-                    >
-                      Request Sitter
-                    </button>
+                    {isOwnerPro ? (
+                      <button
+                        onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
+                      >
+                        Request Sitter
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setUnlockModalOpen(true)}
+                        className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex justify-center items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                        Unlock Profile
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -346,6 +400,16 @@ export default function PetSitting() {
               <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Lumo Sitters</h2>
               <p className="text-[#8B7E7D]">Create your profile to start receiving pet sitting requests in your neighborhood.</p>
             </div>
+
+            {!isProSitter && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <h4 className="font-bold text-red-800 text-sm">Profile Inactive & Hidden</h4>
+                  <p className="text-red-700 text-xs mt-1">Your sitter profile is hidden from search results. Enter your email below to update your profile and subscribe for $9.99/mo to go live.</p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleProfileSubmit} className="space-y-6">
               <div>
@@ -512,6 +576,32 @@ export default function PetSitting() {
                 )}
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* UNLOCK MODAL */}
+      {unlockModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in">
+            <button onClick={() => setUnlockModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            
+            <h3 className="text-2xl font-black text-[#4A3E3D] mb-2 text-center">Unlock Profiles</h3>
+            <p className="text-[#8B7E7D] text-sm mb-6 text-center">Enter your email to verify your Lumo Bites PRO membership ($2.99/mo).</p>
+
+            <form onSubmit={handleUnlockProfile} className="space-y-4">
+              <div>
+                <input required type="email" placeholder="your@email.com" value={unlockEmail} onChange={e => setUnlockEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" />
+              </div>
+
+              {reqError && <div className="text-red-600 text-sm font-bold text-center mt-2">{reqError}</div>}
+
+              <button disabled={unlockLoading} type="submit" className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mt-4">
+                {unlockLoading ? 'Verifying...' : 'Unlock Profiles'}
+              </button>
+            </form>
           </div>
         </div>
       )}
