@@ -238,9 +238,10 @@ export default function PetSitting() {
     try {
       // Check if profile exists
       const res = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
+      const profileData = await res.json();
       
-      if (res.status === 200) {
-        // Exists, send OTP
+      if (res.ok && profileData && profileData.id) {
+        // Returning user, send OTP
         const otpRes = await fetch('/api/petsitting/auth/send-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -252,7 +253,14 @@ export default function PetSitting() {
           setSitterAuthError('Failed to send verification code.');
         }
       } else {
-        // Doesn't exist, go straight to form
+        // New user, go straight to signup form
+        // Pre-fill email, clear the rest
+        setSitterName('');
+        setSitterPhoto('');
+        setSitterCity('');
+        setSitterZip('');
+        setSitterBio('');
+        setSitterRate('');
         setSitterAuthMode('form');
       }
     } catch (e) {
@@ -803,7 +811,9 @@ export default function PetSitting() {
 
             <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
               <div className="flex justify-between items-center mb-2 border-b border-[#E8DDD4] pb-4">
-                <div className="text-sm font-bold text-[#8B7E7D]">Editing as: {sitterEmail}</div>
+                <div className="text-sm font-bold text-[#8B7E7D]">
+                  {sitterName ? 'Editing Profile:' : 'Creating Profile:'} {sitterEmail}
+                </div>
                 <button type="button" onClick={() => setSitterAuthMode('email')} className="text-[#8B5E3C] text-sm font-bold hover:underline">Change</button>
               </div>
 
