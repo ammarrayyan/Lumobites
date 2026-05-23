@@ -48,6 +48,8 @@ export default function PetSitting() {
   const [unlockEmail, setUnlockEmail] = useState('');
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
+  const [searchLocationName, setSearchLocationName] = useState('');
+  const [searchLocationError, setSearchLocationError] = useState(false);
   const [searchPetType, setSearchPetType] = useState('all');
   const [searchRadius, setSearchRadius] = useState('25');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -114,25 +116,36 @@ export default function PetSitting() {
   useEffect(() => {
     if (!searchZip.trim()) {
       setSearchCoords(null);
+      setSearchLocationName('');
+      setSearchLocationError(false);
       return;
     }
     
     const timeoutId = setTimeout(async () => {
       setIsGeocoding(true);
+      setSearchLocationError(false);
       try {
         const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(searchZip)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.lat && data.lng) {
             setSearchCoords({ lat: data.lat, lng: data.lng });
+            setSearchLocationName(data.formatted_address || data.city || '');
+            setSearchLocationError(false);
           } else {
             setSearchCoords(null);
+            setSearchLocationName('');
+            setSearchLocationError(true);
           }
         } else {
           setSearchCoords(null);
+          setSearchLocationName('');
+          setSearchLocationError(true);
         }
       } catch (e) {
         setSearchCoords(null);
+        setSearchLocationName('');
+        setSearchLocationError(true);
       } finally {
         setIsGeocoding(false);
       }
@@ -500,26 +513,27 @@ export default function PetSitting() {
     return true;
   });
 
-  if (searchCoords && searchRadius !== 'any') {
-    // Add distance to each sitter
-    filteredSitters = filteredSitters.map(s => {
-      if (s.lat && s.lng) {
-        return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
-      }
-      return s;
-    });
+  if (searchZip.trim()) {
+    if (isGeocoding || searchLocationError || !searchCoords) {
+      // User is typing, or geocoding failed/pending -> wait for verification before showing results
+      filteredSitters = [];
+    } else {
+      // Verified! Filter using haversine if radius applies
+      filteredSitters = filteredSitters.map(s => {
+        if (s.lat && s.lng) {
+          return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
+        }
+        return s;
+      });
 
-    // Filter by radius and sort
-    const radius = parseFloat(searchRadius);
-    filteredSitters = filteredSitters
-      .filter(s => s.distance !== undefined && s.distance <= radius)
-      .sort((a, b) => (a.distance || 0) - (b.distance || 0));
-  } else if (searchZip) {
-    // Fallback to text matching if geocoding failed or isn't ready
-    filteredSitters = filteredSitters.filter(s => {
-      const q = searchZip.toLowerCase();
-      return s.zip.toLowerCase().includes(q) || s.city.toLowerCase().includes(q);
-    });
+      if (searchRadius !== 'any') {
+        const radius = parseFloat(searchRadius);
+        filteredSitters = filteredSitters.filter(s => s.distance !== undefined && s.distance <= radius);
+      }
+      
+      // Always sort by distance if available
+      filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    }
   }
 
   const isFormValid = sitterEmail.trim() && sitterName.trim() && sitterPhoto && sitterCity.trim() && sitterZip.trim() && sitterRate && sitterBio.trim();
@@ -556,7 +570,7 @@ export default function PetSitting() {
         {activeTab === 'find' && (
           <div className="animate-fade-in">
             {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 relative">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-2 flex flex-col md:flex-row gap-4 relative">
               <input
                 type="text"
                 placeholder="City, Zip or Postal Code..."
@@ -564,11 +578,6 @@ export default function PetSitting() {
                 value={searchZip}
                 onChange={(e) => setSearchZip(e.target.value)}
               />
-              {isGeocoding && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0 text-sm text-[#8B5E3C] md:flex md:items-center">
-                  Locating...
-                </div>
-              )}
               <select
                 className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                 value={searchRadius}
@@ -585,6 +594,27 @@ export default function PetSitting() {
                 value={searchPetType}
                 onChange={(e) => setSearchPetType(e.target.value)}
               >
+                <option value="all">All Pets</option>
+                <option value="dog">Dogs Only</option>
+                <option value="cat">Cats Only</option>
+              </select>
+            </div>
+
+            {/* Location Verification Status */}
+            {searchZip.trim() && (
+              <div className="mb-6 px-2 min-h-[24px]">
+                {isGeocoding ? (
+                  <span className="text-[#8B5E3C] text-sm font-semibold flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-[#8B5E3C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Locating...
+                  </span>
+                ) : searchLocationError ? (
+                  <span className="text-red-600 text-sm font-semibold">❌ Location not found — please try a different city or zip code</span>
+                ) : searchLocationName ? (
+                  <span className="text-green-700 text-sm font-semibold">✅ {searchLocationName}</span>
+                ) : null}
+              </div>
+            )}
                 <option value="all">All Pets</option>
                 <option value="dog">Dogs Only</option>
                 <option value="cat">Cats Only</option>
