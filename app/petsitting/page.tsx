@@ -48,7 +48,7 @@ export default function PetSitting() {
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
   const [searchLocationName, setSearchLocationName] = useState('');
-  const [searchLocationError, setSearchLocationError] = useState(false);
+  const [searchLocationError, setSearchLocationError] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
   const [searchRadius, setSearchRadius] = useState('25');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -117,35 +117,35 @@ export default function PetSitting() {
     if (!searchZip.trim()) {
       setSearchCoords(null);
       setSearchLocationName('');
-      setSearchLocationError(false);
+      setSearchLocationError('');
       return;
     }
     
     const timeoutId = setTimeout(async () => {
       setIsGeocoding(true);
-      setSearchLocationError(false);
+      setSearchLocationError('');
       try {
         const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(searchZip)}`);
+        const data = await res.json();
         if (res.ok) {
-          const data = await res.json();
           if (data.lat && data.lng) {
             setSearchCoords({ lat: data.lat, lng: data.lng });
             setSearchLocationName(data.formatted_address || data.city || '');
-            setSearchLocationError(false);
+            setSearchLocationError('');
           } else {
             setSearchCoords(null);
             setSearchLocationName('');
-            setSearchLocationError(true);
+            setSearchLocationError('Location not found — please try a different city or zip code');
           }
         } else {
           setSearchCoords(null);
           setSearchLocationName('');
-          setSearchLocationError(true);
+          setSearchLocationError(data.error || 'Location not found — please try a different city or zip code');
         }
       } catch (e) {
         setSearchCoords(null);
         setSearchLocationName('');
-        setSearchLocationError(true);
+        setSearchLocationError('Location not found — please try a different city or zip code');
       } finally {
         setIsGeocoding(false);
       }
@@ -590,14 +590,16 @@ export default function PetSitting() {
         {activeTab === 'find' && (
           <div className="animate-fade-in">
             {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-2 flex flex-col md:flex-row gap-4 relative">
-              <input
-                type="text"
-                placeholder="City, Zip or Postal Code..."
-                className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchZip}
-                onChange={(e) => setSearchZip(e.target.value)}
-              />
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col md:flex-row gap-4 relative">
+              <div className="flex-1 flex flex-col justify-center">
+                <input
+                  type="text"
+                  placeholder="City or Zip Code (e.g. Louisville or 40202)"
+                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                  value={searchZip}
+                  onChange={(e) => setSearchZip(e.target.value)}
+                />
+              </div>
               <select
                 className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                 value={searchRadius}
@@ -620,6 +622,8 @@ export default function PetSitting() {
               </select>
             </div>
 
+            <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
+
             {/* Location Verification Status */}
             {searchZip.trim() && (
               <div className="mb-6 px-2 min-h-[24px]">
@@ -629,7 +633,7 @@ export default function PetSitting() {
                     Locating...
                   </span>
                 ) : searchLocationError ? (
-                  <span className="text-red-600 text-sm font-semibold">❌ Location not found — please try a different city or zip code</span>
+                  <span className="text-red-600 text-sm font-semibold">❌ {searchLocationError}</span>
                 ) : searchLocationName ? (
                   <span className="text-green-700 text-sm font-semibold">✅ {searchLocationName}</span>
                 ) : null}

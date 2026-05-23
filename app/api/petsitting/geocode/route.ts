@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.status === 'OK' && data.results && data.results.length > 0) {
+      const resultTypes = data.results[0].types || [];
+      if (resultTypes.includes('administrative_area_level_1') || resultTypes.includes('country') || resultTypes.includes('administrative_area_level_2')) {
+        return NextResponse.json({ 
+          error: `Please enter a specific city or zip code for better results — for example 'Louisville' instead of '${address}'`
+        }, { status: 400 });
+      }
+
       const location = data.results[0].geometry?.location;
       const addressComponents = data.results[0].address_components || [];
       const formatted_address = data.results[0].formatted_address;
