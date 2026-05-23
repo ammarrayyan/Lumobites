@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <p className="mt-2">All payment and subscription data is securely handled by Stripe. We never store or directly process your credit card information on our servers.</p>
           
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>7. Data Storage & Breach Notification</h2>
-          <p className="mt-2">Your user data and profiles are securely stored using Supabase, which employs industry-standard encryption and security protocols. In the event of a data breach affecting your personal information we will notify you via email within 72 hours.</p>
+          <p className="mt-2">Your user data and profiles are securely stored using Supabase, which employs industry-standard encryption and security protocols. In the event of a data breach affecting your personal information we will notify affected users via email as soon as reasonably possible.</p>
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>8. Governing Law</h2>
           <p className="mt-2">This Privacy Policy is governed by the laws of the State of Kentucky, United States.</p>
