@@ -45,7 +45,11 @@ export async function POST(request: NextRequest) {
     let lat = null;
     let lng = null;
     try {
-      const address = `${city}, ${zip}, ${resolvedCountry}`;
+      const addressParts = [city];
+      if (zip && zip.trim() !== '') addressParts.push(zip);
+      addressParts.push(resolvedCountry);
+      const address = addressParts.join(', ');
+      
       const apiKey = process.env.GOOGLE_VISION_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (apiKey) {
         const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`);

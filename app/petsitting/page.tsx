@@ -319,7 +319,7 @@ export default function PetSitting() {
     if (!sitterName.trim()) errors.push('name');
     if (!sitterPhoto) errors.push('photo');
     if (!sitterCity.trim()) errors.push('city');
-    if (!sitterZip.trim()) errors.push('zip');
+    if (sitterCountry === 'United States' && !sitterZip.trim()) errors.push('zip');
     if (!sitterRate || parseInt(sitterRate) <= 0) errors.push('rate');
     if (!sitterBio.trim()) errors.push('bio');
     
@@ -815,9 +815,11 @@ export default function PetSitting() {
                   <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('city') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Zip Code</label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
+                    {sitterCountry === 'United States' ? 'Zip Code' : 'Postal Code (Optional)'}
+                  </label>
                   <div className="relative">
-                    <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                    <input required={sitterCountry === 'United States'} type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                     {zipGeocoding && <div className="absolute right-3 top-3 text-xs text-[#8B5E3C]">Validating...</div>}
                   </div>
                   {zipError && <p className="text-red-500 text-xs mt-1 font-semibold">{zipError}</p>}
