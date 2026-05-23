@@ -57,6 +57,7 @@ export default function PetSitting() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
+  const [profilePreviewMode, setProfilePreviewMode] = useState(false);
 
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
@@ -132,9 +133,11 @@ export default function PetSitting() {
       });
 
       if (res.ok) {
-        setProfileMessage('Profile saved successfully!');
         if (!isProSitter) {
-          handleStripeCheckout();
+          // If not PRO, show the preview screen
+          setProfilePreviewMode(true);
+        } else {
+          setProfileMessage('Profile saved successfully!');
         }
       } else {
         const err = await res.json();
@@ -394,10 +397,59 @@ export default function PetSitting() {
         {/* BECOME A SITTER TAB */}
         {activeTab === 'become' && (
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Lumo Sitters</h2>
-              <p className="text-[#8B7E7D]">Create your profile to start receiving pet sitting requests in your neighborhood.</p>
-            </div>
+            {profilePreviewMode ? (
+              <div className="animate-fade-in text-center">
+                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Your profile is ready!</h2>
+                <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">Upgrade to Lumo Sitter Pro for $9.99/month to go live and start receiving requests from pet owners near you.</p>
+                
+                {/* Profile Preview Card */}
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto">
+                  <div className="flex items-center gap-4 mb-4">
+                    {sitterPhoto ? (
+                      <img src={sitterPhoto} alt={sitterName} className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-xl font-bold text-[#8B7E7D]">
+                        {sitterName.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName}</h3>
+                      <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
+                        {sitterCity}, {sitterZip}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[#555555] text-sm mb-4 line-clamp-3">{sitterBio}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold text-[#8B5E3C] bg-white px-3 py-1 rounded-lg border border-[#E8DDD4]">
+                      {sitterPetTypes === 'both' ? 'Dogs & Cats' : sitterPetTypes === 'dog' ? 'Dogs Only' : 'Cats Only'}
+                    </div>
+                    <div className="text-lg font-black text-[#4A3E3D]">
+                      ${sitterRate}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
+                    </div>
+                  </div>
+                </div>
+
+                {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
+
+                <button onClick={handleStripeCheckout} disabled={profileLoading} className="w-full max-w-sm bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mx-auto flex justify-center items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
+                </button>
+                <button onClick={() => setProfilePreviewMode(false)} className="mt-6 text-[#8B7E7D] text-sm font-semibold hover:text-[#8B5E3C]">
+                  &larr; Back to edit profile
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Lumo Sitters</h2>
+                  <p className="text-[#8B7E7D]">Create your profile to start receiving pet sitting requests in your neighborhood.</p>
+                </div>
 
             {!isProSitter && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
@@ -495,15 +547,13 @@ export default function PetSitting() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] rounded-2xl p-6 text-center shadow-lg mt-8">
-                  <h3 className="text-[#E8D5C0] font-black text-xl mb-2">Lumo Sitter Pro</h3>
-                  <p className="text-gray-300 text-sm mb-6">Sitter profiles require an active $9.99/mo subscription to appear in search results and receive requests. No hidden booking fees.</p>
-                  <button type="submit" disabled={profileSaving} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md">
-                    {profileSaving ? 'Saving...' : 'Save & Subscribe for $9.99/mo'}
-                  </button>
-                </div>
+                <button type="submit" disabled={profileSaving} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-4 rounded-xl transition-all shadow-md">
+                  {profileSaving ? 'Saving...' : 'Save Profile'}
+                </button>
               )}
             </form>
+          </>
+          )}
           </div>
         )}
 
