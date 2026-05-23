@@ -414,11 +414,8 @@ export default function PetSitting() {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
 
-      if (data.sessionId) {
-        const stripe = await stripePromise;
-        if (!stripe) throw new Error('Stripe failed to load on the client.');
-        const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
-        if (error) throw new Error(error.message);
+      if (data.sessionId && data.url) {
+        window.location.href = data.url;
       } else {
         throw new Error('Failed to start checkout: no session ID returned');
       }
@@ -438,9 +435,8 @@ export default function PetSitting() {
         body: JSON.stringify({ email: reqEmail })
       });
       const data = await res.json();
-      if (data.sessionId) {
-        const stripe = await stripePromise;
-        await stripe?.redirectToCheckout({ sessionId: data.sessionId });
+      if (data.sessionId && data.url) {
+        window.location.href = data.url;
       } else {
         setReqError(data.error || 'Failed to start checkout');
         setReqLoading(false);
@@ -474,9 +470,8 @@ export default function PetSitting() {
           body: JSON.stringify({ email: unlockEmail })
         });
         const checkoutData = await checkoutRes.json();
-        if (checkoutData.sessionId) {
-          const stripe = await stripePromise;
-          await stripe?.redirectToCheckout({ sessionId: checkoutData.sessionId });
+        if (checkoutData.sessionId && checkoutData.url) {
+          window.location.href = checkoutData.url;
         } else {
           setReqError('Failed to start checkout');
         }
