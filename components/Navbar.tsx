@@ -9,6 +9,24 @@ export default function Navbar() {
   const [isPro, setIsPro] = useState(false);
   const [proEmail, setProEmail] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
+
+  const changeLanguage = (langCode: string) => {
+    setCurrentLang(langCode);
+    setShowLangMenu(false);
+    
+    document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
+
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+    if (select) {
+      select.value = langCode;
+      select.dispatchEvent(new Event('change'));
+    } else {
+      document.cookie = `googtrans=/en/${langCode}; path=/`;
+      window.location.reload();
+    }
+  };
 
   const syncStatus = () => {
     if (typeof window === 'undefined') return;
@@ -30,6 +48,16 @@ export default function Navbar() {
 
   useEffect(() => {
     syncStatus();
+    
+    const match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
+    if (match) {
+      const parts = match[1].split('/');
+      if (parts.length > 2) {
+        const langCode = parts[2];
+        setCurrentLang(langCode);
+        document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
+      }
+    }
     
     // Add listeners for custom state synchronization
     window.addEventListener('lumo-pro-update', syncStatus);
@@ -132,6 +160,33 @@ export default function Navbar() {
             Pet Twin
           </Link>
           <div className="pl-4 border-l border-[#EEEEEE] flex items-center gap-4">
+            {/* Language Switcher Desktop */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="flex items-center justify-center p-1 rounded-full hover:bg-[#FDF9F5] transition-colors text-2xl"
+                title="Change Language"
+              >
+                🌐
+              </button>
+              {showLangMenu && (
+                <>
+                  <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowLangMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-32 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] py-2 z-50 flex flex-col animate-fade-in text-left">
+                    <button onClick={() => changeLanguage('en')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'en' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                      🇺🇸 English
+                    </button>
+                    <button onClick={() => changeLanguage('es')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'es' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                      🇪🇸 Spanish
+                    </button>
+                    <button onClick={() => changeLanguage('ar')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'ar' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                      🇸🇦 Arabic
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <ShareButton />
             
             {isPro && (
@@ -186,8 +241,35 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: Share + PRO badge + Hamburger */}
-        <div className="flex md:hidden items-center gap-3 ml-auto">
+        {/* Mobile: Share + Lang + PRO badge + Hamburger */}
+        <div className="flex md:hidden items-center gap-2 ml-auto">
+          {/* Language Switcher Mobile */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="flex items-center justify-center p-1 rounded-full hover:bg-[#FDF9F5] transition-colors text-2xl"
+              title="Change Language"
+            >
+              🌐
+            </button>
+            {showLangMenu && (
+              <>
+                <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowLangMenu(false)} />
+                <div className="absolute right-0 mt-2 w-32 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] py-2 z-50 flex flex-col animate-fade-in text-left">
+                  <button onClick={() => changeLanguage('en')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'en' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                    🇺🇸 English
+                  </button>
+                  <button onClick={() => changeLanguage('es')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'es' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                    🇪🇸 Spanish
+                  </button>
+                  <button onClick={() => changeLanguage('ar')} className={`px-4 py-2 text-sm font-semibold hover:bg-[#FAF6F4] text-left transition-colors flex items-center gap-2 ${currentLang === 'ar' ? 'text-[#8B5E3C]' : 'text-[#555555]'}`}>
+                    🇸🇦 Arabic
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
           <ShareButton />
           
           {isPro && (
