@@ -375,12 +375,11 @@ export default function PetSitting() {
       });
 
       if (res.ok) {
-        if (!isProSitter) {
-          // If not PRO, show the preview screen
-          setProfilePreviewMode(true);
-        } else {
-          setProfileMessage('Profile saved successfully!');
+        const updatedData = await res.json();
+        if (updatedData?.is_pro) {
+          setIsProSitter(true);
         }
+        setProfilePreviewMode(true);
       } else {
         const err = await res.json();
         setProfileMessage(err.error || 'Failed to save profile');
