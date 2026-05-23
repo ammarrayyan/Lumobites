@@ -389,30 +389,59 @@ export default function AccountPage() {
                           <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
                         )}
                       </div>
-                      <button
-                        onClick={async () => {
-                          setLoading(true);
-                          setError(null);
-                          try {
-                            const res = await fetch('/api/stripe/reactivate-subscription', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
-                            });
-                            const data = await res.json();
-                            if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
-                            setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
-                          } catch (err: any) {
-                            setError(err.message);
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                        disabled={loading}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
-                      >
-                        {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '🔄 Reactivate Subscription'}
-                      </button>
+                      {(subDetails.daysRemaining ?? 0) > 0 ? (
+                        <button
+                          onClick={async () => {
+                            setLoading(true);
+                            setError(null);
+                            try {
+                              const res = await fetch('/api/stripe/reactivate-subscription', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
+                              });
+                              const data = await res.json();
+                              if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
+                              setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+                            } catch (err: any) {
+                              setError(err.message);
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
+                        >
+                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '🔄 Reactivate Subscription'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            setLoading(true);
+                            setError(null);
+                            try {
+                              const res = await fetch('/api/stripe/checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: email.trim() })
+                              });
+                              const data = await res.json();
+                              if (data.url) {
+                                window.location.href = data.url;
+                              } else {
+                                throw new Error(data.error || 'Failed to start checkout');
+                              }
+                            } catch (err: any) {
+                              setError(err.message);
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center"
+                        >
+                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '✨ Upgrade to PRO — $2.99/mo'}
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <button
