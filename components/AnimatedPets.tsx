@@ -17,7 +17,9 @@ export default function AnimatedPets() {
           position: relative;
           width: 100%;
           max-width: 900px;
-          height: 380px;
+          aspect-ratio: 900 / 380;
+          height: auto;
+          max-height: 380px;
           display: flex;
           justify-content: center;
           align-items: flex-end;
