@@ -5,7 +5,7 @@
 
 const LOGO_SVG = `
 <div style="text-align:center; padding: 10px 0;">
-  <img src="https://lumobites.net/logo.png" alt="Lumo Bites" width="120" style="display:block; margin: 0 auto; max-width: 120px;" />
+  <img src="https://lumobites.net/lumo-bites-logo.png" alt="Lumo Bites" width="120" style="display:block; margin: 0 auto; max-width: 120px;" />
 </div>
 `;
 

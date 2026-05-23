@@ -46,10 +46,32 @@ export async function POST(request: NextRequest) {
     console.log(`[Cancel Subscription API] Setting cancel_at_period_end = true for subscription: ${subscriptionId} for email: ${cleanEmail}`);
     const updatedSub = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
 
-    // Compute human-readable end date and days remaining
-    const periodEndMs = updatedSub.current_period_end * 1000;
-    const endDate = new Date(periodEndMs).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
-    const daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
+    // Defensively extract current_period_end — fall back to items[0] if top-level is missing
+    let rawPeriodEnd: number | null | undefined = updatedSub.current_period_end;
+    if (!rawPeriodEnd && updatedSub.items?.data?.[0]) {
+      rawPeriodEnd = (updatedSub.items.data[0] as any).current_period_end;
+      console.log('[Cancel Subscription API] Used items[0].current_period_end fallback:', rawPeriodEnd);
+    }
+
+    let endDate = 'N/A';
+    let daysRemaining = 0;
+
+    if (rawPeriodEnd && rawPeriodEnd > 0) {
+      const periodEndMs = rawPeriodEnd * 1000;
+      try {
+        endDate = new Date(periodEndMs).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          timeZone: 'UTC',
+        });
+      } catch {
+        endDate = new Date(periodEndMs).toDateString();
+      }
+      daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
+    } else {
+      console.error('[Cancel Subscription API] current_period_end is missing or zero for subscription:', subscriptionId);
+    }
 
     // Note: We do NOT update Supabase's emails table to is_pro = false here.
     // The customer retains Pro access until their billing cycle finishes, at which point
@@ -66,7 +88,7 @@ export async function POST(request: NextRequest) {
           subject: '📅 Your Lumo Bites Pro subscription has been cancelled',
           preheader: `Your Pro access continues until ${endDate} — ${daysRemaining} days remaining.`,
           body: `
-    <h1 style="${emailStyles.h1}">Subscription Cancelled 📅</h1>
+    <h1 style="${emailStyles.h1}">Subscription Cancelled</h1>
     <p style="${emailStyles.p}">Your Lumo Bites Pro subscription has been cancelled. You still have full access until your billing period ends.</p>
     ${emailStyles.highlightBox(`
       <p style="margin:0 0 4px 0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Pro Access Ends On</p>
