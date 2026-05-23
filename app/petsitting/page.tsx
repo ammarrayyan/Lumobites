@@ -615,11 +615,6 @@ export default function PetSitting() {
                 ) : null}
               </div>
             )}
-                <option value="all">All Pets</option>
-                <option value="dog">Dogs Only</option>
-                <option value="cat">Cats Only</option>
-              </select>
-            </div>
 
             {/* Sitters Grid */}
             {loadingSitters ? (
