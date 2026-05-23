@@ -44,6 +44,8 @@ export default function PetSitting() {
   const [loadingSitters, setLoadingSitters] = useState(true);
   const [isOwnerPro, setIsOwnerPro] = useState(false);
   const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+  const [ownerAuthMode, setOwnerAuthMode] = useState<'email' | 'verify'>('email');
+  const [ownerAuthCode, setOwnerAuthCode] = useState('');
   const [unlockEmail, setUnlockEmail] = useState('');
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
@@ -453,27 +455,56 @@ export default function PetSitting() {
     setReqError('');
 
     try {
-      const res = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
-      const data = await res.json();
-      
-      if (data.isOwnerPro) {
-        setSitters(data.sitters);
-        setIsOwnerPro(true);
-        setUnlockModalOpen(false);
-        localStorage.setItem('lumo_pro_email', unlockEmail);
-        setReqEmail(unlockEmail);
+      if (ownerAuthMode === 'email') {
+        const res = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
+        const data = await res.json();
+        
+        if (data.isOwnerPro) {
+          const otpRes = await fetch('/api/petsitting/auth/send-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: unlockEmail, type: 'owner' })
+          });
+          if (otpRes.ok) {
+            setOwnerAuthMode('verify');
+          } else {
+            setReqError('Failed to send verification code. Please try again.');
+          }
+        } else {
+          // Not PRO, trigger checkout
+          const checkoutRes = await fetch('/api/stripe/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: unlockEmail })
+          });
+          const checkoutData = await checkoutRes.json();
+          if (checkoutData.sessionId && checkoutData.url) {
+            window.location.href = checkoutData.url;
+          } else {
+            setReqError('Failed to start checkout');
+          }
+        }
       } else {
-        // Not PRO, trigger checkout
-        const checkoutRes = await fetch('/api/stripe/checkout', {
+        // Verify mode
+        const res = await fetch('/api/petsitting/auth/verify-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: unlockEmail })
+          body: JSON.stringify({ email: unlockEmail, code: ownerAuthCode })
         });
-        const checkoutData = await checkoutRes.json();
-        if (checkoutData.sessionId && checkoutData.url) {
-          window.location.href = checkoutData.url;
+        
+        if (res.ok) {
+          const sittersRes = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
+          const sittersData = await sittersRes.json();
+          
+          setSitters(sittersData.sitters || []);
+          setIsOwnerPro(true);
+          setUnlockModalOpen(false);
+          setOwnerAuthMode('email');
+          setOwnerAuthCode('');
+          localStorage.setItem('lumo_pro_email', unlockEmail);
+          setReqEmail(unlockEmail);
         } else {
-          setReqError('Failed to start checkout');
+          setReqError('Invalid or expired code.');
         }
       }
     } catch (error) {
@@ -710,7 +741,12 @@ export default function PetSitting() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => setUnlockModalOpen(true)}
+                        onClick={() => {
+                          setOwnerAuthMode('email');
+                          setOwnerAuthCode('');
+                          setReqError('');
+                          setUnlockModalOpen(true);
+                        }}
                         className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex justify-center items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
@@ -1036,17 +1072,27 @@ export default function PetSitting() {
             </button>
             
             <h3 className="text-2xl font-black text-[#4A3E3D] mb-2 text-center">Unlock Profiles</h3>
-            <p className="text-[#8B7E7D] text-sm mb-6 text-center">Enter your email to verify your Lumo Bites PRO membership ($2.99/mo).</p>
+            <p className="text-[#8B7E7D] text-sm mb-6 text-center">
+              {ownerAuthMode === 'email' 
+                ? 'Enter your email to verify your Lumo Bites PRO membership ($2.99/mo).' 
+                : 'Enter the 6-digit code we sent to your email to verify your account.'}
+            </p>
 
             <form onSubmit={handleUnlockProfile} className="space-y-4">
-              <div>
-                <input required type="email" placeholder="your@email.com" value={unlockEmail} onChange={e => setUnlockEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" />
-              </div>
+              {ownerAuthMode === 'email' ? (
+                <div>
+                  <input required type="email" placeholder="your@email.com" value={unlockEmail} onChange={e => setUnlockEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" />
+                </div>
+              ) : (
+                <div>
+                  <input required type="text" placeholder="6-digit code" maxLength={6} value={ownerAuthCode} onChange={e => setOwnerAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center text-2xl tracking-[0.5em] font-mono font-bold" />
+                </div>
+              )}
 
               {reqError && <div className="text-red-600 text-sm font-bold text-center mt-2">{reqError}</div>}
 
               <button disabled={unlockLoading} type="submit" className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mt-4">
-                {unlockLoading ? 'Verifying...' : 'Unlock Profiles'}
+                {unlockLoading ? 'Verifying...' : (ownerAuthMode === 'email' ? 'Unlock Profiles' : 'Verify Code')}
               </button>
             </form>
           </div>

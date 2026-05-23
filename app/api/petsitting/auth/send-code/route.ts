@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email } = body;
+    const { email, type } = body;
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -16,18 +16,30 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Verify that this email has a profile in the sitters table
-    const { data: userData, error: userError } = await supabase
-      .from('sitters')
-      .select('id')
-      .eq('email', cleanEmail)
-      .maybeSingle();
+    if (type === 'owner') {
+      const { data: ownerData, error: ownerError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
 
-    if (userError || !userData) {
-      return NextResponse.json(
-        { error: 'No sitter profile found for this email.' },
-        { status: 404 }
-      );
+      if (ownerError || !ownerData || !ownerData.is_pro) {
+        return NextResponse.json({ error: 'No active PRO membership found for this email.' }, { status: 404 });
+      }
+    } else {
+      // 1. Verify that this email has a profile in the sitters table
+      const { data: userData, error: userError } = await supabase
+        .from('sitters')
+        .select('id')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (userError || !userData) {
+        return NextResponse.json(
+          { error: 'No sitter profile found for this email.' },
+          { status: 404 }
+        );
+      }
     }
 
     // 2. Generate a secure 6-digit verification code
@@ -47,7 +59,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (dbError) {
-      console.error('[Sitter Auth Send Code] Supabase error inserting code:', dbError);
+      console.error('[Auth Send Code] Supabase error inserting code:', dbError);
       return NextResponse.json({ error: 'Failed to generate verification code' }, { status: 500 });
     }
 
@@ -57,13 +69,13 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: fromEmail,
         to: cleanEmail,
-        subject: '🔐 Your Sitter Profile Verification Code',
+        subject: '🔐 Your Lumo Bites Verification Code',
         html: brandedEmail({
           subject: '🔐 Login Verification Code',
-          preheader: `Your one-time login code is ${code}.`,
+          preheader: `Your one-time verification code is ${code}.`,
           body: `
-    <h1 style="${emailStyles.h1}">Sitter Profile Login 🔐</h1>
-    <p style="${emailStyles.p}">Use the code below to log in and manage your Lumo Sitter profile:</p>
+    <h1 style="${emailStyles.h1}">${type === 'owner' ? 'PRO Verification' : 'Sitter Profile Login'} 🔐</h1>
+    <p style="${emailStyles.p}">Use the code below to verify your account:</p>
     ${emailStyles.codeBox(code)}
     <p style="${emailStyles.pSmall}">This code expires in <strong>10 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
     ${emailStyles.divider}
