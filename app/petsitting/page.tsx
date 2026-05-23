@@ -290,6 +290,7 @@ export default function PetSitting() {
       if (res.ok) {
         await loadSitterProfile(sitterEmail);
         setSitterAuthMode('form');
+        setProfilePreviewMode(true);
       } else {
         setSitterAuthError(data.error || 'Invalid verification code.');
       }
@@ -765,50 +766,75 @@ export default function PetSitting() {
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
             {profilePreviewMode ? (
               <div className="animate-fade-in text-center">
-                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isProSitter ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  {isProSitter ? (
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                  ) : (
+                    <span className="text-3xl">⚠️</span>
+                  )}
                 </div>
-                <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Your profile is ready!</h2>
-                <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">Upgrade to Lumo Sitter Pro for $9.99/month to go live and start receiving requests from pet owners near you.</p>
+                <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">
+                  {isProSitter ? 'Lumo Sitter Pro Active' : 'Profile Inactive & Hidden'}
+                </h2>
+                <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                  {isProSitter 
+                    ? 'Your profile is live and visible to pet owners in your neighborhood.'
+                    : 'Upgrade to Lumo Sitter Pro for $9.99/month to go live and start receiving requests.'}
+                </p>
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto">
-                  <div className="flex items-center gap-4 mb-4">
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden">
+                  {!isProSitter && (
+                     <div className="absolute top-4 right-4 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Hidden</div>
+                  )}
+                  {isProSitter && (
+                     <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Live</div>
+                  )}
+                  <div className="flex items-center gap-4 mb-4 mt-2">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt={sitterName} className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white" />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-xl font-bold text-[#8B7E7D]">
-                        {sitterName.charAt(0)}
+                        {sitterName.charAt(0) || '?'}
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName}</h3>
-                      <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
+                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
+                      <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
-                        {sitterCity}, {sitterZip}
+                        {sitterCity || 'City'}, {sitterZip || 'Zip'}
                       </p>
                     </div>
                   </div>
-                  <p className="text-[#555555] text-sm mb-4 line-clamp-3">{sitterBio}</p>
+                  <p className="text-[#555555] text-sm mb-4 line-clamp-3">{sitterBio || 'Your bio will appear here...'}</p>
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-[#8B5E3C] bg-white px-3 py-1 rounded-lg border border-[#E8DDD4]">
                       {sitterPetTypes === 'both' ? 'Dogs & Cats' : sitterPetTypes === 'dog' ? 'Dogs Only' : 'Cats Only'}
                     </div>
                     <div className="text-lg font-black text-[#4A3E3D]">
-                      ${sitterRate}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
+                      ${sitterRate || '0'}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
                     </div>
                   </div>
                 </div>
 
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
-                <button onClick={handleStripeCheckout} disabled={profileLoading} className="w-full max-w-sm bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mx-auto flex justify-center items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
-                </button>
-                <button onClick={() => setProfilePreviewMode(false)} className="mt-6 text-[#8B7E7D] text-sm font-semibold hover:text-[#8B5E3C]">
-                  &larr; Back to edit profile
-                </button>
+                <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                  <button onClick={() => setProfilePreviewMode(false)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm">
+                    Edit Profile
+                  </button>
+                  
+                  {isProSitter ? (
+                    <button type="button" onClick={() => window.location.href = '/account'} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 rounded-xl transition-all shadow-sm">
+                      Manage Subscription
+                    </button>
+                  ) : (
+                    <button type="button" onClick={handleStripeCheckout} disabled={profileLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <>
