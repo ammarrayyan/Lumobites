@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       ...sitter,
       name: 'Local Sitter',
       photo_url: '',
-      bio: 'Subscribe to Lumo Bites PRO to read this sitter\\'s full bio, see their experience, and contact them directly.',
+      bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
     }));
 
     return NextResponse.json({ sitters, isOwnerPro });
