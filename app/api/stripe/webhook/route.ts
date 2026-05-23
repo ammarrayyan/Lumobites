@@ -40,75 +40,106 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const email = session.customer_details?.email || session.metadata?.email;
+        const service = session.metadata?.service;
+        
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
-          console.log(`[Stripe Webhook] Setting PRO status for email: ${cleanEmail}`);
           
-          await supabase.from('emails').upsert(
-            {
-              email: cleanEmail,
-              is_pro: true,
-              source: 'stripe-webhook',
-              created_at: new Date().toISOString(),
-            },
-            { onConflict: 'email' }
-          );
+          if (service === 'sitter-pro') {
+            console.log(`[Stripe Webhook] Setting Sitter PRO status for email: ${cleanEmail}`);
+            
+            await supabase
+              .from('sitters')
+              .update({ is_pro: true, stripe_customer_id: session.customer as string })
+              .eq('email', cleanEmail);
 
-          // Send transactional welcome email via Resend
-          try {
-            const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
-            console.log(`[Stripe Webhook] Sending Pro Welcome Email to: ${cleanEmail}`);
-            const emailResponse = await resend.emails.send({
-              from: fromEmail,
-              to: cleanEmail,
-              subject: "✨ Welcome to Lumo Bites Pro! 🐾",
-              html: `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; border: 1px solid #F0E6DF; border-radius: 16px; background-color: #FFFFFF; color: #191919; box-shadow: 0 4px 12px rgba(139, 94, 60, 0.05);">
-                  <div style="text-align: center; margin-bottom: 24px;">
-                    <span style="font-size: 40px;">✨</span>
-                    <h1 style="color: #8B5E3C; margin: 12px 0 4px 0; font-size: 24px; font-weight: 800;">Lumo Bites Pro</h1>
-                    <p style="color: #A08068; margin: 0; font-size: 14px; font-weight: 600; text-transform: uppercase; tracking-widest: 1px;">Subscription Confirmed</p>
+            // Send Sitter Pro Welcome Email
+            try {
+              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+              await resend.emails.send({
+                from: fromEmail,
+                to: cleanEmail,
+                subject: "✨ Welcome to Lumo Sitter Pro! 🐾",
+                html: `
+                  <div style="font-family: sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; background-color: #FFFFFF; color: #191919;">
+                    <h2>Welcome to Lumo Sitter Pro!</h2>
+                    <p>Your sitter profile is now active and boosted in search results. Pet owners can now discover your services and contact you directly.</p>
                   </div>
-                  
-                  <div style="height: 1px; background-color: #F5EBE4; margin: 24px 0;"></div>
-                  
-                  <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A; margin-top: 0;">Hi there,</p>
-                  <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A;">Thank you for upgrading to <strong>Lumo Bites Pro</strong>! Your account is now active with unlimited barcode scans, instant ingredient analyses, and priority access to our FDA recall check database. 🐾</p>
-                  
-                  <div style="background-color: #FAF6F4; border: 1px solid #F5EBE4; border-radius: 12px; padding: 20px; margin: 28px 0;">
-                    <h3 style="margin-top: 0; color: #8B5E3C; font-size: 16px; font-weight: 700;">💳 Subscription Details:</h3>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #555555; line-height: 1.6;">
-                      <li><strong>Status:</strong> Active ✅</li>
-                      <li><strong>Plan:</strong> Lumo Bites Pro ($2.99/mo)</li>
-                      <li><strong>Benefits:</strong> Unlimited ingredient scanning & recall alerts</li>
-                    </ul>
-                  </div>
-
-                  <h3 style="color: #8B5E3C; font-size: 16px; font-weight: 700; margin-top: 24px;">⚙️ Manage or Cancel Subscription:</h3>
-                  <p style="font-size: 14px; line-height: 1.6; color: #4A4A4A;">
-                    You are in full control of your subscription. You can view your status, check your billing period, or cancel your subscription at any time by visiting your account page:
-                  </p>
-                  <div style="text-align: center; margin: 20px 0;">
-                    <a href="https://lumobites.net/account" style="background-color: #8B5E3C; color: #FFFFFF; font-weight: bold; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block; font-size: 14px;">Manage Subscription</a>
-                  </div>
-                  <p style="font-size: 12px; line-height: 1.5; color: #8C8C8C; margin-top: 16px; text-align: center;">
-                    Or copy this link: <a href="https://lumobites.net/account" style="color: #8B5E3C; text-decoration: underline;">https://lumobites.net/account</a>
-                  </p>
-
-                  <div style="height: 1px; background-color: #F5EBE4; margin: 28px 0;"></div>
-                  
-                  <p style="font-size: 14px; line-height: 1.6; color: #6D6D6D; margin-bottom: 0;">Stay safe,<br/><strong>The Lumo Bites Team</strong></p>
-                </div>
-              `,
-            });
-
-            if (emailResponse.error) {
-              console.error('[Stripe Webhook] Resend Pro welcome email delivery failed:', emailResponse.error);
-            } else {
-              console.log(`[Stripe Webhook] Welcome email successfully sent to: ${cleanEmail}`);
+                `
+              });
+            } catch (err) {
+              console.error('[Stripe Webhook] Failed to send Sitter Pro welcome email:', err);
             }
-          } catch (emailErr) {
-            console.error('[Stripe Webhook] Failed to send Pro welcome email exception:', emailErr);
+            
+          } else {
+            console.log(`[Stripe Webhook] Setting PRO status for email: ${cleanEmail}`);
+            
+            await supabase.from('emails').upsert(
+              {
+                email: cleanEmail,
+                is_pro: true,
+                source: 'stripe-webhook',
+                created_at: new Date().toISOString(),
+              },
+              { onConflict: 'email' }
+            );
+
+            // Send transactional welcome email via Resend
+            try {
+              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+              console.log(`[Stripe Webhook] Sending Pro Welcome Email to: ${cleanEmail}`);
+              const emailResponse = await resend.emails.send({
+                from: fromEmail,
+                to: cleanEmail,
+                subject: "✨ Welcome to Lumo Bites Pro! 🐾",
+                html: `
+                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; border: 1px solid #F0E6DF; border-radius: 16px; background-color: #FFFFFF; color: #191919; box-shadow: 0 4px 12px rgba(139, 94, 60, 0.05);">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                      <span style="font-size: 40px;">✨</span>
+                      <h1 style="color: #8B5E3C; margin: 12px 0 4px 0; font-size: 24px; font-weight: 800;">Lumo Bites Pro</h1>
+                      <p style="color: #A08068; margin: 0; font-size: 14px; font-weight: 600; text-transform: uppercase; tracking-widest: 1px;">Subscription Confirmed</p>
+                    </div>
+                    
+                    <div style="height: 1px; background-color: #F5EBE4; margin: 24px 0;"></div>
+                    
+                    <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A; margin-top: 0;">Hi there,</p>
+                    <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A;">Thank you for upgrading to <strong>Lumo Bites Pro</strong>! Your account is now active with unlimited barcode scans, instant ingredient analyses, and priority access to our FDA recall check database. 🐾</p>
+                    
+                    <div style="background-color: #FAF6F4; border: 1px solid #F5EBE4; border-radius: 12px; padding: 20px; margin: 28px 0;">
+                      <h3 style="margin-top: 0; color: #8B5E3C; font-size: 16px; font-weight: 700;">💳 Subscription Details:</h3>
+                      <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #555555; line-height: 1.6;">
+                        <li><strong>Status:</strong> Active ✅</li>
+                        <li><strong>Plan:</strong> Lumo Bites Pro ($2.99/mo)</li>
+                        <li><strong>Benefits:</strong> Unlimited ingredient scanning & recall alerts</li>
+                      </ul>
+                    </div>
+
+                    <h3 style="color: #8B5E3C; font-size: 16px; font-weight: 700; margin-top: 24px;">⚙️ Manage or Cancel Subscription:</h3>
+                    <p style="font-size: 14px; line-height: 1.6; color: #4A4A4A;">
+                      You are in full control of your subscription. You can view your status, check your billing period, or cancel your subscription at any time by visiting your account page:
+                    </p>
+                    <div style="text-align: center; margin: 20px 0;">
+                      <a href="https://lumobites.net/account" style="background-color: #8B5E3C; color: #FFFFFF; font-weight: bold; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block; font-size: 14px;">Manage Subscription</a>
+                    </div>
+                    <p style="font-size: 12px; line-height: 1.5; color: #8C8C8C; margin-top: 16px; text-align: center;">
+                      Or copy this link: <a href="https://lumobites.net/account" style="color: #8B5E3C; text-decoration: underline;">https://lumobites.net/account</a>
+                    </p>
+
+                    <div style="height: 1px; background-color: #F5EBE4; margin: 28px 0;"></div>
+                    
+                    <p style="font-size: 14px; line-height: 1.6; color: #6D6D6D; margin-bottom: 0;">Stay safe,<br/><strong>The Lumo Bites Team</strong></p>
+                  </div>
+                `,
+              });
+
+              if (emailResponse.error) {
+                console.error('[Stripe Webhook] Resend Pro welcome email delivery failed:', emailResponse.error);
+              } else {
+                console.log(`[Stripe Webhook] Welcome email successfully sent to: ${cleanEmail}`);
+              }
+            } catch (emailErr) {
+              console.error('[Stripe Webhook] Failed to send Pro welcome email exception:', emailErr);
+            }
           }
         }
         break;
@@ -118,17 +149,14 @@ export async function POST(request: NextRequest) {
         const email = invoice.customer_email;
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
-          console.log(`[Stripe Webhook] Payment succeeded, ensuring PRO status for email: ${cleanEmail}`);
           
+          // Try to update both tables to be safe, since we don't have metadata here easily
           await supabase.from('emails').upsert(
-            {
-              email: cleanEmail,
-              is_pro: true,
-              source: 'stripe-webhook-invoice',
-              created_at: new Date().toISOString(),
-            },
+            { email: cleanEmail, is_pro: true, source: 'stripe-webhook-invoice', created_at: new Date().toISOString() },
             { onConflict: 'email' }
           );
+          
+          await supabase.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
         }
         break;
       }
@@ -145,10 +173,9 @@ export async function POST(request: NextRequest) {
               const cleanEmail = email.toLowerCase().trim();
               console.log(`[Stripe Webhook] Subscription deleted, removing PRO status for email: ${cleanEmail}`);
               
-              await supabase
-                .from('emails')
-                .update({ is_pro: false })
-                .eq('email', cleanEmail);
+              // Remove PRO from both owner and sitter tables
+              await supabase.from('emails').update({ is_pro: false }).eq('email', cleanEmail);
+              await supabase.from('sitters').update({ is_pro: false }).eq('email', cleanEmail);
             }
           }
         }
