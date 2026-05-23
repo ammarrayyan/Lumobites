@@ -134,8 +134,8 @@ export default function Navbar() {
                   onClick={() => setShowProMenu(!showProMenu)}
                   className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                 >
-                  <div className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm select-none">
-                    PRO ✨
+                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-serif italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
+                    Pro ✨
                   </div>
                   <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
                     Account
@@ -190,8 +190,8 @@ export default function Navbar() {
                 onClick={() => setShowProMenu(!showProMenu)}
                 className="flex items-center gap-2 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] px-3 py-1.5 rounded-full transition-all cursor-pointer select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               >
-                <div className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm select-none">
-                  PRO ✨
+                <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-serif italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
+                  Pro ✨
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
                   <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
