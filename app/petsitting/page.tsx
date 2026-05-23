@@ -153,8 +153,10 @@ export default function PetSitting() {
       try {
         const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(sitterZip + ' ' + sitterCountry)}`);
         const data = await res.json();
-        if (res.ok && data.city) {
-          setSitterCity(data.city);
+        if (res.ok) {
+          if (data.city) {
+            setSitterCity(data.city);
+          }
           setZipError('');
         } else {
           setZipError('We couldn\'t find that zip code — please check and try again');
@@ -595,7 +597,7 @@ export default function PetSitting() {
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
                 <span className="text-4xl mb-4 block">🐾</span>
-                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
+                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No active sitters found in this area yet.</h3>
                 <p className="text-[#8B7E7D] mb-4">Try expanding your search distance, or be the first to join!</p>
                 <button 
                   onClick={() => setActiveTab('become')}
