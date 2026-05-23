@@ -25,6 +25,13 @@ export default function AnimatedPets() {
           align-items: flex-end;
           margin-bottom: 30px;
         }
+        @media (min-width: 1024px) {
+          .image-container {
+            max-width: 1100px;
+            max-height: 464px;
+            margin-bottom: 40px;
+          }
+        }
         .image-glow {
           position: absolute;
           bottom: 20px;
