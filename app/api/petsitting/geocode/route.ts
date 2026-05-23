@@ -7,8 +7,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Address is required' }, { status: 400 });
   }
 
-  // We use the vision key since it is the active Google API key in this project
-  const apiKey = process.env.GOOGLE_VISION_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  // We prioritize the dedicated Maps key if provided, otherwise fallback to vision key
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({ error: 'Google API key is not configured' }, { status: 500 });
