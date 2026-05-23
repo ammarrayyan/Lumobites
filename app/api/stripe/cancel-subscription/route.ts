@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     // Send cancellation confirmation email
     try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
       await resend.emails.send({
         from: fromEmail,
         to: cleanEmail,

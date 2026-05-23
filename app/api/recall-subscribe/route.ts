@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Send confirmation email - Don't block the response on email failure
     try {
       // Use a safer fallback if the domain isn't verified yet
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
       
       const emailResponse = await resend.emails.send({
         from: fromEmail,

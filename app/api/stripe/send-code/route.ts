@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Send the verification code email via Resend
     try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
       const hasKey = !!process.env.RESEND_API_KEY;
       const keyPrefix = hasKey ? process.env.RESEND_API_KEY?.substring(0, 7) : 'none';
       

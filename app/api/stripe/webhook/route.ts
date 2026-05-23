@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
             // Send Sitter Pro Welcome Email
             try {
-              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
               await resend.emails.send({
                 from: fromEmail,
                 to: cleanEmail,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
             // Send transactional welcome email via Resend
             try {
-              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <notifications@lumobites.net>';
+              const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
               console.log(`[Stripe Webhook] Sending Pro Welcome Email to: ${cleanEmail}`);
               const emailResponse = await resend.emails.send({
                 from: fromEmail,

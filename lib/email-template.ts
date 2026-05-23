@@ -60,12 +60,15 @@ export function brandedEmail({
               <p style="margin:0 0 6px 0;font-size:12px;color:#A08068;">
                 © 2026 Lumo Bites — Premier Pet Nutrition LLC
               </p>
-              <p style="margin:0;font-size:11px;color:#B8A090;">
+              <p style="margin:0 0 10px 0;font-size:11px;color:#B8A090;">
                 <a href="https://lumobites.net/privacy" style="color:#8B6A50;text-decoration:none;">Privacy Policy</a>
                 &nbsp;·&nbsp;
                 <a href="https://lumobites.net/terms" style="color:#8B6A50;text-decoration:none;">Terms of Service</a>
                 &nbsp;·&nbsp;
                 <a href="https://lumobites.net" style="color:#8B6A50;text-decoration:none;">lumobites.net</a>
+              </p>
+              <p style="margin:0;font-size:11px;color:#C4A898;font-style:italic;">
+                This is an automated message — please do not reply. For support email <a href="mailto:info@lumobitespet.com" style="color:#8B6A50;text-decoration:none;">info@lumobitespet.com</a>
               </p>
             </td>
           </tr>
