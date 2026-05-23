@@ -53,7 +53,7 @@ export default function AnimatedPets() {
         <div className="relative w-full h-full flex justify-center items-end">
           {/* We assume the user saves the image as public/pets-group.png */}
           <Image 
-            src="/pets-group.png" 
+            src="/pets-group.jpg" 
             alt="Group of dogs and cats" 
             fill
             className="pet-group-img"
