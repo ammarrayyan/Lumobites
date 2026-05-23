@@ -16,20 +16,20 @@ export default function AnimatedPets() {
           animation: subtle-float 6s ease-in-out infinite;
           position: relative;
           width: 100%;
-          max-width: 600px;
-          height: 200px;
+          max-width: 900px;
+          height: 380px;
           display: flex;
           justify-content: center;
           align-items: flex-end;
-          margin-bottom: 20px;
+          margin-bottom: 30px;
         }
         .image-glow {
           position: absolute;
-          bottom: 10px;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
-          width: 80%;
-          height: 20px;
+          width: 85%;
+          height: 30px;
           background: radial-gradient(ellipse at center, rgba(139, 90, 43, 0.15) 0%, rgba(139, 90, 43, 0) 70%);
           border-radius: 50%;
           z-index: 0;
@@ -38,6 +38,7 @@ export default function AnimatedPets() {
         .pet-group-img {
           object-fit: contain;
           z-index: 10;
+          mix-blend-mode: multiply;
           filter: drop-shadow(0 8px 16px rgba(139, 90, 43, 0.08));
           transition: filter 0.4s ease, transform 0.4s ease;
         }
