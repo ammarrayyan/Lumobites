@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const stripePromiseTest = loadStripe(process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Sitter {
   id: string;
@@ -181,7 +182,7 @@ export default function PetSitting() {
       });
       const data = await res.json();
       if (data.sessionId) {
-        const stripe = await stripePromise;
+        const stripe = await stripePromiseTest;
         await stripe?.redirectToCheckout({ sessionId: data.sessionId });
       } else {
         setProfileMessage(data.error || 'Failed to start checkout');

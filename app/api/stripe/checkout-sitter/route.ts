@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripeSecretKey = process.env.STRIPE_TEST_SECRET_KEY;
 
 export async function POST(request: NextRequest) {
   try {
     if (!stripeSecretKey) {
-      console.error('[Stripe Checkout API] Missing STRIPE_SECRET_KEY');
+      console.error('[Stripe Checkout API] Missing STRIPE_TEST_SECRET_KEY');
       return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
     }
 
