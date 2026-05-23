@@ -63,6 +63,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to generate verification code' }, { status: 500 });
     }
 
+    // TEMP FIX: Log the code to console so user can test login while email is debugged
+    console.log(`\n\n========================================`);
+    console.log(`[AUTH CODE] OTP for ${cleanEmail} is: ${code}`);
+    console.log(`========================================\n\n`);
+
     // 5. Send email via Resend
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
