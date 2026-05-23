@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('sitters')
-      .select('id, name, photo_url, city, zip, bio, pet_types, rate_per_night')
+      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night')
       .eq('is_pro', true)
       .eq('availability', true)
       .order('created_at', { ascending: false });

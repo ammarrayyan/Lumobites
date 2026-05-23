@@ -13,9 +13,26 @@ interface Sitter {
   photo_url: string;
   city: string;
   zip: string;
+  country?: string;
+  lat?: number;
+  lng?: number;
   bio: string;
   pet_types: string;
   rate_per_night: number;
+  distance?: number;
+}
+
+// Haversine formula to calculate distance between two coordinates in miles
+function getDistanceInMiles(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 3958.8; // Radius of the earth in miles
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  return R * c;
 }
 
 export default function PetSitting() {
@@ -30,6 +47,9 @@ export default function PetSitting() {
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
+  const [searchRadius, setSearchRadius] = useState('25');
+  const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedSitter, setSelectedSitter] = useState<Sitter | null>(null);
   
@@ -49,6 +69,7 @@ export default function PetSitting() {
   const [sitterPhoto, setSitterPhoto] = useState('');
   const [sitterCity, setSitterCity] = useState('');
   const [sitterZip, setSitterZip] = useState('');
+  const [sitterCountry, setSitterCountry] = useState('United States');
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
   const [sitterRate, setSitterRate] = useState('');
@@ -70,6 +91,37 @@ export default function PetSitting() {
       fetchSitters();
     }
   }, []);
+
+  // Debounced geocoding effect
+  useEffect(() => {
+    if (!searchZip.trim()) {
+      setSearchCoords(null);
+      return;
+    }
+    
+    const timeoutId = setTimeout(async () => {
+      setIsGeocoding(true);
+      try {
+        const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(searchZip)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.lat && data.lng) {
+            setSearchCoords({ lat: data.lat, lng: data.lng });
+          } else {
+            setSearchCoords(null);
+          }
+        } else {
+          setSearchCoords(null);
+        }
+      } catch (e) {
+        setSearchCoords(null);
+      } finally {
+        setIsGeocoding(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchZip]);
 
   const fetchSitters = async (email?: string) => {
     try {
@@ -98,6 +150,7 @@ export default function PetSitting() {
           setSitterPhoto(data.photo_url || '');
           setSitterCity(data.city || '');
           setSitterZip(data.zip || '');
+          setSitterCountry(data.country || 'United States');
           setSitterBio(data.bio || '');
           setSitterPetTypes(data.pet_types || 'both');
           setSitterRate(data.rate_per_night?.toString() || '');
@@ -145,6 +198,7 @@ export default function PetSitting() {
           photo_url: sitterPhoto,
           city: sitterCity,
           zip: sitterZip,
+          country: sitterCountry,
           bio: sitterBio,
           pet_types: sitterPetTypes,
           rate_per_night: sitterRate,
@@ -294,11 +348,32 @@ export default function PetSitting() {
     }
   };
 
-  const filteredSitters = sitters.filter(s => {
-    if (searchZip && !s.zip.includes(searchZip) && !s.city.toLowerCase().includes(searchZip.toLowerCase())) return false;
+  let filteredSitters = sitters.filter(s => {
     if (searchPetType !== 'all' && s.pet_types !== 'both' && s.pet_types !== searchPetType) return false;
     return true;
   });
+
+  if (searchCoords && searchRadius !== 'any') {
+    // Add distance to each sitter
+    filteredSitters = filteredSitters.map(s => {
+      if (s.lat && s.lng) {
+        return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
+      }
+      return s;
+    });
+
+    // Filter by radius and sort
+    const radius = parseFloat(searchRadius);
+    filteredSitters = filteredSitters
+      .filter(s => s.distance !== undefined && s.distance <= radius)
+      .sort((a, b) => (a.distance || 0) - (b.distance || 0));
+  } else if (searchZip) {
+    // Fallback to text matching if geocoding failed or isn't ready
+    filteredSitters = filteredSitters.filter(s => {
+      const q = searchZip.toLowerCase();
+      return s.zip.toLowerCase().includes(q) || s.city.toLowerCase().includes(q);
+    });
+  }
 
   const isFormValid = sitterEmail.trim() && sitterName.trim() && sitterPhoto && sitterCity.trim() && sitterZip.trim() && sitterRate && sitterBio.trim();
 
@@ -334,14 +409,30 @@ export default function PetSitting() {
         {activeTab === 'find' && (
           <div className="animate-fade-in">
             {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 relative">
               <input
                 type="text"
-                placeholder="Zip code or city..."
+                placeholder="City, Zip or Postal Code..."
                 className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                 value={searchZip}
                 onChange={(e) => setSearchZip(e.target.value)}
               />
+              {isGeocoding && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0 text-sm text-[#8B5E3C] md:flex md:items-center">
+                  Locating...
+                </div>
+              )}
+              <select
+                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                value={searchRadius}
+                onChange={(e) => setSearchRadius(e.target.value)}
+              >
+                <option value="10">Within 10 miles</option>
+                <option value="25">Within 25 miles</option>
+                <option value="50">Within 50 miles</option>
+                <option value="100">Within 100 miles</option>
+                <option value="any">Any distance</option>
+              </select>
               <select
                 className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                 value={searchPetType}
@@ -359,8 +450,14 @@ export default function PetSitting() {
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
                 <span className="text-4xl mb-4 block">🐾</span>
-                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found</h3>
-                <p className="text-[#8B7E7D]">Try expanding your search criteria.</p>
+                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
+                <p className="text-[#8B7E7D] mb-4">Try expanding your search distance, or be the first to join!</p>
+                <button 
+                  onClick={() => setActiveTab('become')}
+                  className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
+                >
+                  Be the first! &rarr;
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -382,8 +479,13 @@ export default function PetSitting() {
                       <div>
                         <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
                         <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
-                          📍 {sitter.city}, {sitter.zip}
+                          📍 {sitter.city}, {sitter.country || 'United States'}
                         </p>
+                        {sitter.distance !== undefined && (
+                          <p className="text-[#8B5E3C] text-xs font-bold mt-0.5 ml-5">
+                            {sitter.distance.toFixed(1)} miles away
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -533,6 +635,15 @@ export default function PetSitting() {
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Zip Code</label>
                   <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Country</label>
+                  <select value={sitterCountry} onChange={e => setSitterCountry(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Australia">Australia</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pets Accepted</label>
