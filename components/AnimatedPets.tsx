@@ -49,9 +49,11 @@ export default function AnimatedPets() {
           z-index: 10;
           transition: transform 0.4s ease;
           pointer-events: none;
+          transform: scale(1.15);
+          transform-origin: bottom center;
         }
         .image-container:hover .pet-group-img {
-          transform: scale(1.02);
+          transform: scale(1.18);
         }
       `}</style>
 
