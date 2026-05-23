@@ -58,6 +58,7 @@ export default function PetSitting() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [profilePreviewMode, setProfilePreviewMode] = useState(false);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
@@ -112,8 +113,26 @@ export default function PetSitting() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileSaving(true);
     setProfileMessage('');
+    setFormErrors([]);
+
+    // Strict Validation
+    const errors: string[] = [];
+    if (!sitterEmail.trim()) errors.push('email');
+    if (!sitterName.trim()) errors.push('name');
+    if (!sitterPhoto) errors.push('photo');
+    if (!sitterCity.trim()) errors.push('city');
+    if (!sitterZip.trim()) errors.push('zip');
+    if (!sitterRate || parseInt(sitterRate) <= 0) errors.push('rate');
+    if (!sitterBio.trim()) errors.push('bio');
+    
+    if (errors.length > 0) {
+      setFormErrors(errors);
+      setProfileMessage('Please fill out all missing fields highlighted in red.');
+      return;
+    }
+
+    setProfileLoading(true);
 
     try {
       const res = await fetch('/api/petsitting/profile', {
@@ -274,6 +293,8 @@ export default function PetSitting() {
     if (searchPetType !== 'all' && s.pet_types !== 'both' && s.pet_types !== searchPetType) return false;
     return true;
   });
+
+  const isFormValid = sitterEmail.trim() && sitterName.trim() && sitterPhoto && sitterCity.trim() && sitterZip.trim() && sitterRate && sitterBio.trim();
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
@@ -461,10 +482,10 @@ export default function PetSitting() {
               </div>
             )}
 
-            <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
               <div>
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Account Email</label>
-                <input required type="email" value={sitterEmail} onChange={e => {setSitterEmail(e.target.value); loadSitterProfile(e.target.value);}} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="your@email.com" />
+                <input required type="email" value={sitterEmail} onChange={e => {setSitterEmail(e.target.value); loadSitterProfile(e.target.value);}} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('email') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="your@email.com" />
               </div>
 
               {profileLoading && <div className="text-sm text-[#8B5E3C]">Loading existing profile...</div>}
@@ -472,11 +493,11 @@ export default function PetSitting() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Full Name</label>
-                  <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('name') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo</label>
-                  <div className="flex items-center gap-4">
+                  <div className={`flex items-center gap-4 p-2 rounded-xl ${formErrors.includes('photo') ? 'border border-red-500 bg-red-50' : ''}`}>
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8DDD4]" />
                     ) : (
@@ -495,17 +516,17 @@ export default function PetSitting() {
                           reader.readAsDataURL(file);
                         }
                       }} 
-                      className="flex-1 block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                      className={`flex-1 block w-full text-sm ${formErrors.includes('photo') ? 'text-red-500' : 'text-[#666666]'} file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none`} 
                     />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">City</label>
-                  <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('city') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Zip Code</label>
-                  <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  <input required type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pets Accepted</label>
@@ -517,13 +538,13 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
-                  <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="25" />
+                  <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('rate') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">About You (Bio)</label>
-                <textarea required rows={4} value={sitterBio} onChange={e => setSitterBio(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="Tell pet owners about your experience..."></textarea>
+                <textarea required rows={4} value={sitterBio} onChange={e => setSitterBio(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('bio') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="Tell pet owners about your experience..."></textarea>
               </div>
 
               <div className="flex items-center gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
@@ -542,12 +563,12 @@ export default function PetSitting() {
                   <span className="text-3xl mb-2 block">✨</span>
                   <h3 className="text-green-800 font-bold text-lg mb-1">Lumo Sitter Pro Active</h3>
                   <p className="text-green-700 text-sm mb-4">Your profile is visible in search results.</p>
-                  <button type="submit" disabled={profileSaving} className="bg-green-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-800 transition">
+                  <button type="submit" disabled={profileSaving} className={`bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-green-800'}`}>
                     {profileSaving ? 'Saving...' : 'Update Profile'}
                   </button>
                 </div>
               ) : (
-                <button type="submit" disabled={profileSaving} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-4 rounded-xl transition-all shadow-md">
+                <button type="submit" disabled={profileSaving} className={`w-full text-white font-black py-4 rounded-xl transition-all shadow-md ${!isFormValid ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8B5E3C] hover:bg-[#7A5234]'}`}>
                   {profileSaving ? 'Saving...' : 'Save Profile'}
                 </button>
               )}
