@@ -38,12 +38,10 @@ export default function AnimatedPets() {
         .pet-group-img {
           object-fit: contain;
           z-index: 10;
-          mix-blend-mode: multiply;
-          filter: drop-shadow(0 8px 16px rgba(139, 90, 43, 0.08));
-          transition: filter 0.4s ease, transform 0.4s ease;
+          mix-blend-mode: darken;
+          transition: transform 0.4s ease;
         }
         .image-container:hover .pet-group-img {
-          filter: drop-shadow(0 12px 24px rgba(139, 90, 43, 0.15));
           transform: scale(1.02);
         }
       `}</style>
