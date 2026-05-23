@@ -39,6 +39,7 @@ export default function AnimatedPets() {
           object-fit: contain;
           z-index: 10;
           transition: transform 0.4s ease;
+          pointer-events: none;
         }
         .image-container:hover .pet-group-img {
           transform: scale(1.02);
@@ -56,6 +57,8 @@ export default function AnimatedPets() {
             fill
             className="pet-group-img"
             priority
+            draggable={false}
+            unoptimized={true}
           />
         </div>
       </Link>
