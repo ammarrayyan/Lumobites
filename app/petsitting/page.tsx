@@ -166,10 +166,13 @@ export default function PetSitting() {
       setProfileMessage('An error occurred while saving.');
     } finally {
       setProfileSaving(false);
+      setProfileLoading(false);
     }
   };
 
   const handleStripeCheckout = async () => {
+    setProfileLoading(true);
+    setProfileMessage('');
     try {
       const res = await fetch('/api/stripe/checkout-sitter', {
         method: 'POST',
@@ -182,9 +185,11 @@ export default function PetSitting() {
         await stripe?.redirectToCheckout({ sessionId: data.sessionId });
       } else {
         setProfileMessage(data.error || 'Failed to start checkout');
+        setProfileLoading(false);
       }
     } catch (error) {
       setProfileMessage('Failed to connect to payment processor.');
+      setProfileLoading(false);
     }
   };
 
