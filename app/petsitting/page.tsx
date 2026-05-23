@@ -59,8 +59,9 @@ export default function PetSitting() {
   // Request Form State
   const [reqEmail, setReqEmail] = useState('');
   const [reqPetName, setReqPetName] = useState('');
-  const [reqPetType, setReqPetType] = useState('dog');
-  const [reqDates, setReqDates] = useState('');
+  const [reqPetType, setReqPetType] = useState('Dog');
+  const [reqStartDate, setReqStartDate] = useState('');
+  const [reqEndDate, setReqEndDate] = useState('');
   const [reqNotes, setReqNotes] = useState('');
   const [reqLoading, setReqLoading] = useState(false);
   const [reqError, setReqError] = useState('');
@@ -490,6 +491,10 @@ export default function PetSitting() {
     setReqSuccess(false);
 
     try {
+      const startFmt = reqStartDate ? new Date(reqStartDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
+
       const res = await fetch('/api/petsitting/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -498,7 +503,7 @@ export default function PetSitting() {
           owner_email: reqEmail,
           pet_name: reqPetName,
           pet_type: reqPetType,
-          dates: reqDates,
+          dates: finalDates,
           special_notes: reqNotes
         })
       });
@@ -985,7 +990,10 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
-                  <input required type="text" placeholder="e.g. Oct 12 - Oct 15" value={reqDates} onChange={e => setReqDates(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
+                  <div className="flex space-x-2">
+                    <input required type="date" value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
+                    <input required type="date" value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Special Notes (Optional)</label>

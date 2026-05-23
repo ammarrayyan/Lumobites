@@ -56,11 +56,14 @@ export async function POST(request: NextRequest) {
         special_notes
       });
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('[PetSitting Request API] Supabase Insert Error:', insertError);
+      return NextResponse.json({ error: insertError.message || 'Database error' }, { status: 500 });
+    }
 
     // 5. Send Email to Sitter
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-    await resend.emails.send({
+    const emailRes = await resend.emails.send({
       from: fromEmail,
       to: sitter.email,
       replyTo: cleanEmail,
@@ -87,9 +90,14 @@ export async function POST(request: NextRequest) {
       })
     });
 
+    if (emailRes.error) {
+      console.error('[PetSitting Request API] Resend Error:', emailRes.error);
+      return NextResponse.json({ error: emailRes.error.message || 'Email service error' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[PetSitting Request API] Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[PetSitting Request API] Unhandled Error:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
