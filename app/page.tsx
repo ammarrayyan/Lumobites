@@ -175,6 +175,24 @@ export default function Home() {
               </Link>
             </div>
 
+            {/* Card 5 - Pet Sitting */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
+              </p>
+              <Link href="/petsitting" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
+                Find a Sitter &rarr;
+              </Link>
+            </div>
+
           </div>
         </div>
       </section>
