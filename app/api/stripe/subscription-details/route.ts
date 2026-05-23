@@ -79,14 +79,44 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const periodEndMs = activeSubscription.current_period_end * 1000;
-    const nextBillingDate = new Date(periodEndMs).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: 'UTC',
-    });
-    const daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
+    // Log raw subscription data to diagnose the Invalid Date issue
+    console.log('[Subscription Details API] Raw subscription:', JSON.stringify({
+      id: activeSubscription.id,
+      status: activeSubscription.status,
+      current_period_end: activeSubscription.current_period_end,
+      cancel_at_period_end: activeSubscription.cancel_at_period_end,
+      items_count: activeSubscription.items?.data?.length,
+    }));
+
+    // Defensively extract current_period_end — fall back to items[0] if top-level is missing
+    let rawPeriodEnd: number | null | undefined = activeSubscription.current_period_end;
+    if (!rawPeriodEnd && activeSubscription.items?.data?.[0]) {
+      rawPeriodEnd = (activeSubscription.items.data[0] as any).current_period_end;
+      console.log('[Subscription Details API] Used items[0].current_period_end fallback:', rawPeriodEnd);
+    }
+
+    let nextBillingDate = 'N/A';
+    let periodEndMs = 0;
+    let daysRemaining = 0;
+
+    if (rawPeriodEnd && rawPeriodEnd > 0) {
+      periodEndMs = rawPeriodEnd * 1000;
+      try {
+        nextBillingDate = new Date(periodEndMs).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          timeZone: 'UTC',
+        });
+      } catch {
+        nextBillingDate = new Date(periodEndMs).toDateString();
+      }
+      daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
+    } else {
+      console.error('[Subscription Details API] current_period_end is missing or zero for subscription:', activeSubscription.id);
+    }
+
+    console.log('[Subscription Details API] Resolved nextBillingDate:', nextBillingDate, 'daysRemaining:', daysRemaining);
 
     return NextResponse.json({
       success: true,
