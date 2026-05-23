@@ -28,7 +28,12 @@ export async function GET(request: NextRequest) {
 
     // Mask data if the owner is not PRO
     const sitters = data?.map(sitter => {
-      if (isOwnerPro) return sitter;
+      if (isOwnerPro) {
+        return {
+          ...sitter,
+          phone_number: sitter.phone_visible ? sitter.phone_number : null
+        };
+      }
       
       return {
         ...sitter,
