@@ -79,17 +79,22 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const nextBillingDate = new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
+    const periodEndMs = activeSubscription.current_period_end * 1000;
+    const nextBillingDate = new Date(periodEndMs).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC',
     });
+    const daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
 
     return NextResponse.json({
       success: true,
       active: true,
       adminBypass: false,
       nextBillingDate,
+      periodEndMs,
+      daysRemaining,
       cancelAtPeriodEnd: activeSubscription.cancel_at_period_end,
       subscriptionId: activeSubscription.id
     });

@@ -32,11 +32,14 @@ export default function AccountPage() {
     nextBillingDate: string;
     subscriptionId: string;
     cancelAtPeriodEnd?: boolean;
+    daysRemaining?: number;
   } | null>(null);
 
   // Cancellation states
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [cancelEndDate, setCancelEndDate] = useState<string>('');
+  const [cancelDaysRemaining, setCancelDaysRemaining] = useState<number>(0);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +119,8 @@ export default function AccountPage() {
         adminBypass: data.adminBypass,
         nextBillingDate: data.nextBillingDate,
         subscriptionId: data.subscriptionId,
-        cancelAtPeriodEnd: data.cancelAtPeriodEnd
+        cancelAtPeriodEnd: data.cancelAtPeriodEnd,
+        daysRemaining: data.daysRemaining,
       });
       setStep('dashboard');
     } catch (err: any) {
@@ -149,7 +153,9 @@ export default function AccountPage() {
 
       setIsCancelled(true);
       setShowConfirmCancel(false);
-      
+      // Store the end date and days remaining from the API response
+      setCancelEndDate(data.endDate || subDetails.nextBillingDate);
+      setCancelDaysRemaining(data.daysRemaining ?? subDetails.daysRemaining ?? 0);
       // Optimistically update dashboard state to cancellation scheduled
       setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: true } : null);
     } catch (err: any) {
@@ -301,18 +307,29 @@ export default function AccountPage() {
             <div className="flex flex-col gap-6 animate-fade-in">
               {isCancelled ? (
                 // Cancellation Success Screen
-                <div className="flex flex-col gap-6 text-center py-4">
+                <div className="flex flex-col gap-5 text-center py-4">
                   <div className="text-5xl mb-2">📅</div>
                   <h2 className="text-2xl font-[900] text-gray-900 leading-tight">
                     Cancellation Scheduled
                   </h2>
-                  <p className="text-[#666666] leading-relaxed text-sm">
-                    Your subscription has been successfully set to cancel. Your Pro access and unlimited scans will continue until your billing cycle ends on <strong>{subDetails.nextBillingDate}</strong>.
-                  </p>
-                  
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left flex flex-col gap-2">
+                    <p className="text-sm text-amber-900 leading-relaxed">
+                      Your Pro subscription has been cancelled. You will continue to have <strong>full access</strong> until{' '}
+                      <strong>{cancelEndDate}</strong>{' '}({cancelDaysRemaining} days remaining). After that your account will return to the free plan.
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 bg-amber-200 rounded-full h-2">
+                        <div
+                          className="bg-amber-500 h-2 rounded-full"
+                          style={{ width: `${Math.min(100, (cancelDaysRemaining / 30) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-amber-700 whitespace-nowrap">{cancelDaysRemaining}d left</span>
+                    </div>
+                  </div>
                   <button
                     onClick={() => setIsCancelled(false)}
-                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer mt-4"
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer"
                   >
                     Back to Dashboard
                   </button>
@@ -365,8 +382,37 @@ export default function AccountPage() {
                       💡 Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
                     </div>
                   ) : subDetails.cancelAtPeriodEnd ? (
-                    <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs font-semibold text-center leading-relaxed">
-                      Subscription cancelled — your Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
+                    <div className="flex flex-col gap-3">
+                      <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
+                        Subscription cancelled — Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
+                        {subDetails.daysRemaining !== undefined && (
+                          <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={async () => {
+                          setLoading(true);
+                          setError(null);
+                          try {
+                            const res = await fetch('/api/stripe/reactivate-subscription', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
+                            });
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
+                            setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+                          } catch (err: any) {
+                            setError(err.message);
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={loading}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
+                      >
+                        {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '🔄 Reactivate Subscription'}
+                      </button>
                     </div>
                   ) : (
                     <button
