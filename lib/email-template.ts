@@ -4,13 +4,9 @@
  */
 
 const LOGO_SVG = `
-<table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 4px auto;">
-  <tr>
-    <td style="background-color:#3B2410; border-radius:12px; padding:10px 14px; text-align:center;">
-      <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:18px; font-weight:900; color:#F5F0E8; letter-spacing:-0.5px;">🐾 Lumo Bites</span>
-    </td>
-  </tr>
-</table>
+<div style="text-align:center; padding: 10px 0;">
+  <img src="https://lumobites.net/logo.png" alt="Lumo Bites" width="120" style="display:block; margin: 0 auto; max-width: 120px;" />
+</div>
 `;
 
 export function brandedEmail({
@@ -43,7 +39,6 @@ export function brandedEmail({
           <tr>
             <td align="center" style="padding-bottom:20px;">
               ${LOGO_SVG}
-              <p style="margin:6px 0 0 0;font-size:12px;color:#8B6A50;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Premier Pet Nutrition</p>
             </td>
           </tr>
 
@@ -58,7 +53,7 @@ export function brandedEmail({
           <tr>
             <td align="center" style="padding:24px 16px 8px 16px;">
               <p style="margin:0 0 6px 0;font-size:12px;color:#A08068;">
-                © 2026 Lumo Bites — Premier Pet Nutrition LLC
+                © 2026 Lumo Bites
               </p>
               <p style="margin:0 0 10px 0;font-size:11px;color:#B8A090;">
                 <a href="https://lumobites.net/privacy" style="color:#8B6A50;text-decoration:none;">Privacy Policy</a>
