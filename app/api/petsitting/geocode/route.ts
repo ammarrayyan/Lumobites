@@ -15,23 +15,37 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=us&key=${apiKey}`;
+    let res = await fetch(url);
+    let data = await res.json();
+
+    // Fallback if ZERO_RESULTS and it looks like a US zip code (5 digits)
+    if (data.status === 'ZERO_RESULTS' && /^\d{5}$/.test(address.trim())) {
+      url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address + ' USA')}&key=${apiKey}`;
+      res = await fetch(url);
+      data = await res.json();
+    }
 
     if (data.status === 'OK' && data.results && data.results.length > 0) {
-      const location = data.results[0].geometry.location;
-      const addressComponents = data.results[0].address_components;
+      const location = data.results[0].geometry?.location;
+      const addressComponents = data.results[0].address_components || [];
       const formatted_address = data.results[0].formatted_address;
       
+      let city = '';
+      
       for (const component of addressComponents) {
-        if (component.types.includes('locality') || component.types.includes('postal_town')) {
+        if (component.types.includes('locality') || component.types.includes('postal_town') || component.types.includes('neighborhood') || component.types.includes('administrative_area_level_3')) {
           city = component.long_name;
           break;
         }
       }
 
-      return NextResponse.json({ lat: location.lat, lng: location.lng, city, formatted_address });
+      if (!city) {
+        // If we still can't find a city, fallback to the first word of the formatted address
+        city = formatted_address.split(',')[0];
+      }
+
+      return NextResponse.json({ lat: location?.lat || 0, lng: location?.lng || 0, city, formatted_address });
     } else {
       console.error('[Geocode API] No results or error from Google:', data.status, data.error_message);
       return NextResponse.json({ error: 'Could not geocode address', details: data.status }, { status: 400 });
