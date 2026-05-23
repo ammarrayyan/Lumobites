@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -59,13 +60,23 @@ export async function POST(request: NextRequest) {
               await resend.emails.send({
                 from: fromEmail,
                 to: cleanEmail,
-                subject: "✨ Welcome to Lumo Sitter Pro! 🐾",
-                html: `
-                  <div style="font-family: sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; background-color: #FFFFFF; color: #191919;">
-                    <h2>Welcome to Lumo Sitter Pro!</h2>
-                    <p>Your sitter profile is now active and boosted in search results. Pet owners can now discover your services and contact you directly.</p>
-                  </div>
-                `
+                subject: '✨ Welcome to Lumo Sitter Pro!',
+                html: brandedEmail({
+                  subject: '✨ Welcome to Lumo Sitter Pro!',
+                  preheader: 'Your sitter profile is now live — pet owners can find you!',
+                  body: `
+    <h1 style="${emailStyles.h1}">Welcome to Lumo Sitter Pro! ✨</h1>
+    <p style="${emailStyles.p}">Your sitter profile is now <strong>active and live</strong> in search results. Pet owners in your area can discover your services and send you requests directly.</p>
+    ${emailStyles.infoBox(`
+      <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">✅ <strong>Status:</strong> Active & Visible</p>
+      <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">📩 <strong>Requests:</strong> Enabled — owners can now contact you</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;">⭐ <strong>Plan:</strong> Lumo Sitter Pro ($9.99/mo)</p>
+    `)}
+    ${emailStyles.button('https://lumobites.net/petsitting', 'View Your Profile')}
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+                })
               });
             } catch (err) {
               console.error('[Stripe Webhook] Failed to send Sitter Pro welcome email:', err);
@@ -91,45 +102,23 @@ export async function POST(request: NextRequest) {
               const emailResponse = await resend.emails.send({
                 from: fromEmail,
                 to: cleanEmail,
-                subject: "✨ Welcome to Lumo Bites Pro! 🐾",
-                html: `
-                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; border: 1px solid #F0E6DF; border-radius: 16px; background-color: #FFFFFF; color: #191919; box-shadow: 0 4px 12px rgba(139, 94, 60, 0.05);">
-                    <div style="text-align: center; margin-bottom: 24px;">
-                      <span style="font-size: 40px;">✨</span>
-                      <h1 style="color: #8B5E3C; margin: 12px 0 4px 0; font-size: 24px; font-weight: 800;">Lumo Bites Pro</h1>
-                      <p style="color: #A08068; margin: 0; font-size: 14px; font-weight: 600; text-transform: uppercase; tracking-widest: 1px;">Subscription Confirmed</p>
-                    </div>
-                    
-                    <div style="height: 1px; background-color: #F5EBE4; margin: 24px 0;"></div>
-                    
-                    <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A; margin-top: 0;">Hi there,</p>
-                    <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A;">Thank you for upgrading to <strong>Lumo Bites Pro</strong>! Your account is now active with unlimited barcode scans, instant ingredient analyses, and priority access to our FDA recall check database. 🐾</p>
-                    
-                    <div style="background-color: #FAF6F4; border: 1px solid #F5EBE4; border-radius: 12px; padding: 20px; margin: 28px 0;">
-                      <h3 style="margin-top: 0; color: #8B5E3C; font-size: 16px; font-weight: 700;">💳 Subscription Details:</h3>
-                      <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #555555; line-height: 1.6;">
-                        <li><strong>Status:</strong> Active ✅</li>
-                        <li><strong>Plan:</strong> Lumo Bites Pro ($2.99/mo)</li>
-                        <li><strong>Benefits:</strong> Unlimited ingredient scanning & recall alerts</li>
-                      </ul>
-                    </div>
-
-                    <h3 style="color: #8B5E3C; font-size: 16px; font-weight: 700; margin-top: 24px;">⚙️ Manage or Cancel Subscription:</h3>
-                    <p style="font-size: 14px; line-height: 1.6; color: #4A4A4A;">
-                      You are in full control of your subscription. You can view your status, check your billing period, or cancel your subscription at any time by visiting your account page:
-                    </p>
-                    <div style="text-align: center; margin: 20px 0;">
-                      <a href="https://lumobites.net/account" style="background-color: #8B5E3C; color: #FFFFFF; font-weight: bold; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block; font-size: 14px;">Manage Subscription</a>
-                    </div>
-                    <p style="font-size: 12px; line-height: 1.5; color: #8C8C8C; margin-top: 16px; text-align: center;">
-                      Or copy this link: <a href="https://lumobites.net/account" style="color: #8B5E3C; text-decoration: underline;">https://lumobites.net/account</a>
-                    </p>
-
-                    <div style="height: 1px; background-color: #F5EBE4; margin: 28px 0;"></div>
-                    
-                    <p style="font-size: 14px; line-height: 1.6; color: #6D6D6D; margin-bottom: 0;">Stay safe,<br/><strong>The Lumo Bites Team</strong></p>
-                  </div>
-                `,
+                subject: '✨ Welcome to Lumo Bites Pro!',
+                html: brandedEmail({
+                  subject: '✨ Welcome to Lumo Bites Pro!',
+                  preheader: 'Your Pro subscription is active — enjoy unlimited scans and recall alerts.',
+                  body: `
+    <h1 style="${emailStyles.h1}">Welcome to Lumo Bites Pro! ✨</h1>
+    <p style="${emailStyles.p}">Thank you for upgrading! Your account now has full Pro access with unlimited ingredient scanning and priority recall alerts.</p>
+    ${emailStyles.infoBox(`
+      <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;">✅ <strong style="color:#3B2410;">Status:</strong> Active</p>
+      <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;">💳 <strong style="color:#3B2410;">Plan:</strong> Lumo Bites Pro ($2.99/mo)</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;">🛡️ <strong style="color:#3B2410;">Benefits:</strong> Unlimited scanning, recall alerts, sitter contact</p>
+    `)}
+    ${emailStyles.button('https://lumobites.net/account', 'Manage Subscription')}
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+                })
               });
 
               if (emailResponse.error) {

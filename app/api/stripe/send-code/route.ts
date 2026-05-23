@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -82,31 +83,19 @@ export async function POST(request: NextRequest) {
       const emailResponse = await resend.emails.send({
         from: fromEmail,
         to: cleanEmail,
-        subject: "🐾 Lumo Bites Pro Verification Code",
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; border: 1px solid #F0E6DF; border-radius: 16px; background-color: #FFFFFF; color: #191919; box-shadow: 0 4px 12px rgba(139, 94, 60, 0.05);">
-            <div style="text-align: center; margin-bottom: 24px;">
-              <span style="font-size: 40px;">🐾</span>
-              <h1 style="color: #8B5E3C; margin: 12px 0 4px 0; font-size: 24px; font-weight: 800;">Lumo Bites</h1>
-              <p style="color: #A08068; margin: 0; font-size: 14px; font-weight: 600; text-transform: uppercase; tracking-widest: 1px;">Restore Pro Status</p>
-            </div>
-            
-            <div style="height: 1px; background-color: #F5EBE4; margin: 24px 0;"></div>
-            
-            <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A; margin-top: 0;">Hi there,</p>
-            <p style="font-size: 16px; line-height: 1.6; color: #4A4A4A;">We received a request to restore your Lumo Bites Pro subscription on this device. Please use the 6-digit verification code below to confirm your email ownership:</p>
-            
-            <div style="background-color: #FAF6F4; border: 1px dashed #8B5E3C; border-radius: 12px; padding: 20px; text-align: center; margin: 28px 0;">
-              <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; color: #8B5E3C; letter-spacing: 6px; display: inline-block;">${code}</span>
-            </div>
-            
-            <p style="font-size: 13px; line-height: 1.5; color: #8C8C8C;">This code is temporary and will expire in <strong>10 minutes</strong>. If you did not make this request, you can safely ignore this email.</p>
-            
-            <div style="height: 1px; background-color: #F5EBE4; margin: 24px 0;"></div>
-            
-            <p style="font-size: 14px; line-height: 1.6; color: #6D6D6D; margin-bottom: 0;">Stay safe,<br/><strong>The Lumo Bites Team</strong></p>
-          </div>
-        `,
+        subject: '🔐 Your Lumo Bites Verification Code',
+        html: brandedEmail({
+          subject: '🔐 Your Lumo Bites Verification Code',
+          preheader: `Your one-time verification code is ${code}. It expires in 10 minutes.`,
+          body: `
+    <h1 style="${emailStyles.h1}">Verify Your Identity 🔐</h1>
+    <p style="${emailStyles.p}">We received a request to access your Lumo Bites Pro account. Use the code below to confirm your identity:</p>
+    ${emailStyles.codeBox(code)}
+    <p style="${emailStyles.pSmall}">This code expires in <strong>10 minutes</strong>. If you did not request this, you can safely ignore this email — your account remains secure.</p>
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+        })
       });
       
       console.log(`[Send Code API] Resend email API response:`, JSON.stringify(emailResponse));

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -63,23 +64,27 @@ export async function POST(request: NextRequest) {
       from: fromEmail,
       to: sitter.email,
       replyTo: cleanEmail,
-      subject: `🐾 Pet Sitting Request from ${cleanEmail}!`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 550px; margin: 0 auto; padding: 32px 24px; background-color: #FFFFFF; color: #191919;">
-          <h2>New Pet Sitting Request!</h2>
-          <p>Hi ${sitter.name},</p>
-          <p>You have received a new pet sitting request on Lumo Bites.</p>
-          <div style="background-color: #F9F9F9; padding: 16px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Owner Contact:</strong> ${cleanEmail}</p>
-            <p><strong>Pet Name:</strong> ${pet_name}</p>
-            <p><strong>Pet Type:</strong> ${pet_type}</p>
-            <p><strong>Dates Needed:</strong> ${dates}</p>
-            <p><strong>Notes:</strong> ${special_notes || 'None'}</p>
-          </div>
-          <p><strong>To accept or discuss this request, simply reply directly to this email!</strong></p>
-          <p>Happy Sitting,<br/>The Lumo Bites Team</p>
-        </div>
-      `
+      subject: `🐾 New Pet Sitting Request from ${cleanEmail}`,
+      html: brandedEmail({
+        subject: `🐾 New Pet Sitting Request from ${cleanEmail}`,
+        preheader: `${pet_name} needs a sitter! Reply to connect with the owner.`,
+        body: `
+    <h1 style="${emailStyles.h1}">New Pet Sitting Request! 🐾</h1>
+    <p style="${emailStyles.p}">Hi <strong>${sitter.name}</strong>,</p>
+    <p style="${emailStyles.p}">You have a new pet sitting request through Lumo Bites. Here are the details:</p>
+    ${emailStyles.divider}
+    ${emailStyles.infoBox(`
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Email:</strong> ${cleanEmail}</p>
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Name:</strong> ${pet_name}</p>
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Type:</strong> ${pet_type}</p>
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Dates Needed:</strong> ${dates}</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Notes:</strong> ${special_notes || 'None'}</p>
+    `)}
+    ${emailStyles.divider}
+    <p style="${emailStyles.p}"><strong>To accept or discuss this request, simply reply directly to this email</strong> — it will go straight to the owner at ${cleanEmail}.</p>
+    ${emailStyles.signoff}
+  `
+      })
     });
 
     return NextResponse.json({ success: true });

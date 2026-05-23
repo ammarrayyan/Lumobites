@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -43,16 +44,22 @@ export async function POST(request: NextRequest) {
       const emailResponse = await resend.emails.send({
         from: fromEmail,
         to: email,
-        subject: "🐾 You're subscribed to pet food recall alerts!",
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #191919;">
-            <h2 style="color: #8B5E3C;">You're subscribed!</h2>
-            <p>We'll notify you whenever there's a new pet food recall from the FDA.</p>
-            <p><strong>Status:</strong> Monitoring for ${pet_type || 'all'} pet food recalls.</p>
-            ${product_names?.length ? `<p><strong>Watching:</strong> ${product_names.join(', ')}</p>` : ''}
-            <p>Stay safe,<br/>The Lumo Bites Team</p>
-          </div>
-        `,
+        subject: `🐾 You're subscribed to FDA pet food recall alerts`,
+        html: brandedEmail({
+          subject: `🐾 You're subscribed to FDA pet food recall alerts`,
+          preheader: `We'll notify you the moment a new recall is issued.`,
+          body: `
+    <h1 style="${emailStyles.h1}">You're Subscribed! ✅</h1>
+    <p style="${emailStyles.p}">You will now receive an alert whenever the FDA issues a new pet food recall — so you can protect your pet fast.</p>
+    ${emailStyles.infoBox(`
+      <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Monitoring:</strong> ${pet_type || 'All'} pet food recalls</p>
+      ${product_names?.length ? `<p style="margin:0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Watching Products:</strong> ${product_names.join(', ')}</p>` : ''}
+    `)}
+    ${emailStyles.button('https://lumobites.net/recalls', 'View Latest Recalls')}
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+        })
       });
 
       if (emailResponse.error) {
