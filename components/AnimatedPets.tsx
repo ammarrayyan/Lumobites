@@ -38,7 +38,6 @@ export default function AnimatedPets() {
         .pet-group-img {
           object-fit: contain;
           z-index: 10;
-          mix-blend-mode: multiply;
           filter: drop-shadow(0 8px 16px rgba(139, 90, 43, 0.08));
           transition: filter 0.4s ease, transform 0.4s ease;
         }
@@ -52,9 +51,9 @@ export default function AnimatedPets() {
       <Link href="/twin" className="image-container" style={{ textDecoration: 'none' }}>
         <div className="image-glow" />
         <div className="relative w-full h-full flex justify-center items-end">
-          {/* We assume the user saves the image as public/pets-group.png */}
+          {/* We assume the user saves the transparent image as public/pets-group.png */}
           <Image 
-            src="/pets-group.jpg" 
+            src="/pets-group.png" 
             alt="Group of dogs and cats" 
             fill
             className="pet-group-img"
