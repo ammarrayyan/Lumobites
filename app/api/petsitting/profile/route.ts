@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
         availability: availability !== undefined ? availability : true,
+        ...(cleanEmail === 'premierpetnutritionllc@gmail.com' ? { is_pro: true } : {})
       }, { onConflict: 'email', ignoreDuplicates: false })
       .select()
       .single();
