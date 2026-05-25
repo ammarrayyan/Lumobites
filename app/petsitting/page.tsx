@@ -83,6 +83,13 @@ export default function PetSitting() {
   const [sitterPhoneVisible, setSitterPhoneVisible] = useState(false);
   const [sitterAvailable, setSitterAvailable] = useState(true);
   const [isProSitter, setIsProSitter] = useState(false);
+
+  // Sitter Sub Details
+  const [sitterSubCancelAtPeriodEnd, setSitterSubCancelAtPeriodEnd] = useState(false);
+  const [sitterSubDaysRemaining, setSitterSubDaysRemaining] = useState(0);
+  const [sitterSubEndDate, setSitterSubEndDate] = useState('');
+  const [sitterSubId, setSitterSubId] = useState('');
+  const [sitterSubActionLoading, setSitterSubActionLoading] = useState(false);
   
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
@@ -221,6 +228,25 @@ export default function PetSitting() {
           setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability);
           setIsProSitter(data.is_pro);
+          
+          if (data.is_pro) {
+            try {
+              const subRes = await fetch('/api/stripe/subscription-details', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+              });
+              const subData = await subRes.json();
+              if (subRes.ok && subData.success && !subData.adminBypass) {
+                setSitterSubCancelAtPeriodEnd(subData.cancelAtPeriodEnd);
+                setSitterSubDaysRemaining(subData.daysRemaining);
+                setSitterSubEndDate(subData.nextBillingDate);
+                setSitterSubId(subData.subscriptionId);
+              }
+            } catch (e) {
+              console.error('Failed to load sitter subscription details');
+            }
+          }
         }
       }
     } catch (e) {
@@ -1040,21 +1066,44 @@ export default function PetSitting() {
               )}
 
               {isProSitter ? (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
-                  <span className="text-3xl mb-2 block">✨</span>
-                  <h3 className="text-green-800 font-bold text-lg mb-1">Lumo Sitter Pro Active</h3>
-                  <p className="text-green-700 text-sm mb-4">Your profile is visible in search results.</p>
-                  <button type="submit" disabled={profileSaving} className={`bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-green-800'}`}>
-                    {profileSaving ? 'Saving...' : 'Update Profile'}
-                  </button>
-                </div>
+                sitterSubCancelAtPeriodEnd ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
+                    <span className="text-3xl mb-2 block">⏳</span>
+                    <h3 className="text-yellow-800 font-bold text-lg mb-1">Subscription Cancelled</h3>
+                    <p className="text-yellow-700 text-sm mb-4">
+                      Your subscription has been cancelled. Your profile will remain visible until <strong>{sitterSubEndDate}</strong> — <strong>{sitterSubDaysRemaining} days remaining</strong>. After that your profile will be hidden from search results.
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      <button type="submit" disabled={profileSaving} className={`bg-white border-2 border-yellow-700 text-yellow-800 font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-100'}`}>
+                        {profileSaving ? 'Saving...' : 'Update Profile'}
+                      </button>
+                      <button type="button" onClick={handleReactivateSitterSub} disabled={sitterSubActionLoading} className="bg-yellow-700 hover:bg-yellow-800 text-white font-bold py-2 px-6 rounded-lg transition shadow-sm">
+                        {sitterSubActionLoading ? 'Processing...' : 'Reactivate'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
+                    <span className="text-3xl mb-2 block">✨</span>
+                    <h3 className="text-green-800 font-bold text-lg mb-1">Lumo Sitter Pro Active</h3>
+                    <p className="text-green-700 text-sm mb-4">Your profile is visible in search results.</p>
+                    <button type="submit" disabled={profileSaving} className={`w-full bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-green-800'}`}>
+                      {profileSaving ? 'Saving...' : 'Update Profile'}
+                    </button>
+                  </div>
+                )
               ) : (
                 <button type="submit" disabled={profileSaving} className={`w-full text-white font-black py-4 rounded-xl transition-all shadow-md ${!isFormValid ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8B5E3C] hover:bg-[#7A5234]'}`}>
                   {profileSaving ? 'Saving...' : 'Save Profile'}
                 </button>
               )}
 
-              <div className="pt-8 border-t border-[#E8DDD4] mt-8 text-center">
+              <div className="pt-8 border-t border-[#E8DDD4] mt-8 flex flex-col items-center gap-4">
+                {isProSitter && !sitterSubCancelAtPeriodEnd && (
+                  <button type="button" onClick={handleCancelSitterSub} disabled={sitterSubActionLoading} className="text-[#8B5E3C] hover:text-[#724C2F] text-sm font-bold underline underline-offset-4">
+                    {sitterSubActionLoading ? 'Processing...' : 'Cancel Subscription'}
+                  </button>
+                )}
                 <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
                   Delete My Profile
                 </button>

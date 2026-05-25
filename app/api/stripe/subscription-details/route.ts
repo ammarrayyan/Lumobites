@@ -28,14 +28,22 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Verify Pro status first in Supabase to prevent unauthenticated access
-    const { data: userData, error: userError } = await supabase
+    // Verify Pro status first in Supabase to prevent unauthenticated access (check both owner and sitter tables)
+    const { data: emailData } = await supabase
       .from('emails')
       .select('is_pro')
       .eq('email', cleanEmail)
       .maybeSingle();
 
-    if (userError || !userData || !userData.is_pro) {
+    const { data: sitterData } = await supabase
+      .from('sitters')
+      .select('is_pro')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    const isPro = (emailData && emailData.is_pro) || (sitterData && sitterData.is_pro);
+
+    if (!isPro) {
       return NextResponse.json({
         success: true,
         active: false,
