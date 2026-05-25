@@ -63,24 +63,8 @@ export default function RootLayout({
             gtag('config', 'G-MNH8TBZHHR');
           `}
         </Script>
-        <Script id="google-translate-init" strategy="beforeInteractive">
-          {`
-            function googleTranslateElementInit() {
-              new window.google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,es,ar',
-                autoDisplay: false
-              }, 'google_translate_element');
-            }
-          `}
-        </Script>
-        <Script 
-          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="afterInteractive"
-        />
       </head>
       <body className={inter.className}>
-        <div id="google_translate_element" style={{ display: 'none' }}></div>
         <PwaRegister />
         <PwaSplashScreen />
         <PwaInstallBanner />
