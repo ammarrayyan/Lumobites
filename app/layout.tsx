@@ -9,16 +9,16 @@ import PwaSplashScreen from "@/components/PwaSplashScreen";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Find the Best Food for Your Pet | Lumo Bites",
-  description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+  title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
+  description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
   manifest: "/manifest.json",
   icons: {
     icon: "/Logo.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Find the Best Food for Your Pet | Lumo Bites",
-    description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+    title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
+    description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
     url: "https://lumobites.net",
     images: [
       {
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Find the Best Food for Your Pet | Lumo Bites",
-    description: "Free tools for pet owners — scan ingredients, check FDA recalls, find your pet twin and discover the best food for your pet",
+    title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
+    description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
     images: ["https://lumobites.net/og-image.png"],
   }
 };
