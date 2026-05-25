@@ -12,8 +12,8 @@ export default function Home() {
       <Navbar />
 
       {/* FREE LAUNCH BANNER */}
-      <div className="bg-gradient-to-r from-[#8B5E3C] to-[#C17D3C] text-white py-3 px-4 text-center shadow-md">
-        <span className="text-xl mr-2">🎉</span>
+      <div className="bg-gradient-to-r from-[#8B5E3C] to-[#C17D3C] text-white py-3 px-4 text-center shadow-md flex items-center justify-center">
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
         <span className="font-bold text-sm md:text-base tracking-wide">Lumo Bites is free for our founding members! Join now while it lasts.</span>
       </div>
 
@@ -129,7 +129,7 @@ export default function Home() {
 
             <div className="mt-10 bg-[#F5EDE4] border border-[#E8D5C0] rounded-2xl p-6 text-center max-w-[460px] relative z-10 shadow-sm hover:shadow-md transition-shadow">
               <h3 className="text-[#8B5E3C] font-black text-lg mb-2 flex justify-center items-center gap-2">
-                <span className="text-2xl">🐕</span> Love animals?
+                <svg className="w-6 h-6 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 5.00001c2.5-3 5.5-2.5 6.5 0 1 2.5-.5 5.5-3 6.5-2.5-1-5-4-3.5-6.5z"/><path d="M11 12.5C9 14 7 14 5.5 12c-1.5-2-.5-5 2-5.5"/><path d="M13 12.5c2 1.5 4 1.5 5.5-.5 1.5-2 .5-5-2-5.5"/><path d="M18.5 16.5c-1 3-4 4.5-6.5 4.5s-5.5-1.5-6.5-4.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5z"/></svg> Love animals?
               </h3>
               <p className="text-[#666666] text-sm mb-4 leading-relaxed">
                 Join as a founding sitter — free to join, earn money in your neighborhood, be part of our community from day one!
