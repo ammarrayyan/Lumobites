@@ -343,7 +343,6 @@ export default function PetSitting() {
     const errors: string[] = [];
     if (!sitterEmail.trim()) errors.push('email');
     if (!sitterName.trim()) errors.push('name');
-    if (!sitterPhoto) errors.push('photo');
     if (!sitterCity.trim()) errors.push('city');
     if (sitterCountry === 'United States' && !sitterZip.trim()) errors.push('zip');
     if (!sitterRate || parseInt(sitterRate) <= 0) errors.push('rate');
@@ -901,8 +900,8 @@ export default function PetSitting() {
                   <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('name') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo</label>
-                  <div className={`flex items-center gap-4 p-2 rounded-xl ${formErrors.includes('photo') ? 'border border-red-500 bg-red-50' : ''}`}>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo <span className="text-gray-400 font-normal text-xs ml-1">(Optional)</span></label>
+                  <div className="flex items-center gap-4 p-2 rounded-xl">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8DDD4]" />
                     ) : (
@@ -921,7 +920,7 @@ export default function PetSitting() {
                           reader.readAsDataURL(file);
                         }
                       }} 
-                      className={`flex-1 block w-full text-sm ${formErrors.includes('photo') ? 'text-red-500' : 'text-[#666666]'} file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none`} 
+                      className="flex-1 block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
                     />
                   </div>
                 </div>
