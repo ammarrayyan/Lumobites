@@ -873,6 +873,7 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-2xl tracking-[0.5em] font-bold text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="••••••" />
+                  <p className="text-xs text-[#8B7E7D] text-center mt-3">Didn't receive the code? Check your spam or junk folder. Still need help? Email us at <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a></p>
                 </div>
                 {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
                 <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm">
