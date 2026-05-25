@@ -99,12 +99,60 @@ export default function Home() {
                 <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
               </span>
             </div>
+
+            <div className="mt-10 bg-[#F5EDE4] border border-[#E8D5C0] rounded-2xl p-6 text-center max-w-[460px] relative z-10 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-[#8B5E3C] font-black text-lg mb-2 flex justify-center items-center gap-2">
+                <span className="text-2xl">🐕</span> Love animals?
+              </h3>
+              <p className="text-[#666666] text-sm mb-4 leading-relaxed">
+                Join as a founding sitter — free to join, earn money in your neighborhood, be part of our community from day one!
+              </p>
+              <Link href="/petsitting" className="inline-block w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-xl hover:bg-[#7A5234] transition-colors shadow-sm text-decoration-none">
+                Become a Pet Sitter &rarr;
+              </Link>
+            </div>
           </div>
 
           {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
           <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
             
-            {/* Card 1 - Safety Check */}
+            {/* Card 1 - Pet Sitting */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
+              </p>
+              <Link href="/petsitting" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
+                Find a Sitter &rarr;
+              </Link>
+            </div>
+
+            {/* Card 2 - Pet Twin */}
+            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
+                  </svg>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features and personality.
+              </p>
+              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
+                Find Your Twin &rarr;
+              </Link>
+            </div>
+
+            {/* Card 3 - Safety Check */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -122,7 +170,7 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Card 2 - Recall Alerts */}
+            {/* Card 4 - Recall Alerts */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -140,7 +188,7 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Card 3 - Pet Supplies */}
+            {/* Card 5 - Pet Supplies */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -162,41 +210,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Card 4 - Pet Twin */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features and personality.
-              </p>
-              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Find Your Twin &rarr;
-              </Link>
-            </div>
-
-            {/* Card 5 - Pet Sitting */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
-              </p>
-              <Link href="/petsitting" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Find a Sitter &rarr;
-              </Link>
-            </div>
 
           </div>
         </div>

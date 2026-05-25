@@ -770,6 +770,16 @@ export default function TwinPage() {
                   </Link>
                 </div>
 
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <Link 
+                    href="/petsitting"
+                    className="flex-1 bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    🐕 Find a pet sitter who loves your breed! Search sitters near you &rarr;
+                  </Link>
+                </div>
+
                 <div className="grid grid-cols-3 gap-2.5 w-full">
                   <button 
                     onClick={downloadSquareCard}
