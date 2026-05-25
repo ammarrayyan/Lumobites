@@ -63,7 +63,7 @@ export default function AnimatedPets() {
         <div className="relative w-full h-full flex justify-center items-end">
           {/* Using the actual transparent PNG image */}
           <Image 
-            src="/pets-group.png" 
+            src="/new_pet _group_nobg.png" 
             alt="Group of dogs and cats" 
             fill
             className="pet-group-img"
