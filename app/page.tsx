@@ -36,7 +36,7 @@ export default function Home() {
             </h1>
             
             <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
-              Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
+              Find a trusted pet sitter near you, scan food ingredients, get FDA recall alerts and more — all in one place.
             </p>
 
             <style>{`
@@ -59,13 +59,13 @@ export default function Home() {
               }
             `}</style>
 
-            <Link href="/chat" className="btn-heartbeat mb-4" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
-              Find Your Pet&apos;s Food &rarr;
+            <Link href="/petsitting" className="btn-heartbeat mb-4" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600' }}>
+              Find a Pet Sitter &rarr;
             </Link>
 
             <div style={{ marginBottom: '32px' }}>
               <Link 
-                href="/photo" 
+                href="/twin" 
                 className="text-[#8B5E3C] font-semibold inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
                 style={{ 
                   textDecoration: 'none',
@@ -82,21 +82,21 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                   <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                <span>Find Food by Photo of Your Pet</span>
+                <span>Find Your Pet Twin &rarr;</span>
               </Link>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to join
               </span>
               <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> 100% free
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No commission
               </span>
               <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Trusted sitters near you
               </span>
             </div>
 

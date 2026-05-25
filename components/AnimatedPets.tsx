@@ -74,10 +74,10 @@ export default function AnimatedPets() {
         </div>
       </Link>
 
-      {/* Original clean pill button — unchanged style */}
+      {/* Subtle secondary pill */}
       <Link 
         href="/twin"
-        className="inline-flex items-center gap-1.5 bg-white hover:bg-[#F9F7F5] active:bg-[#F2EFEA] text-[#666666] hover:text-[#444444] px-4 py-2 rounded-full border border-[#E5E0DA] text-[13px] tracking-wide transition-all shadow-sm select-none"
+        className="inline-flex items-center gap-1.5 text-[#999999] hover:text-[#8B5E3C] hover:bg-[#8B5E3C]/5 px-3 py-1 rounded-full text-[12px] tracking-wide transition-all select-none opacity-80 hover:opacity-100"
         style={{ textDecoration: 'none' }}
       >
         <span>✨</span> Find Your Pet Twin
