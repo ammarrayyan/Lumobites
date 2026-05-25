@@ -2,6 +2,88 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import QRCode from 'qrcode';
+
+const qrConfigs = [
+  { title: "Homepage", url: "https://lumobites.net", tagline: "Find the best food for your pet. Free. No sign-up required.", filename: "lumobites-homepage-qr.png" },
+  { title: "Pet Twin", url: "https://lumobites.net/twin", tagline: "Which dog or cat breed matches YOUR personality? Find out free in 30 seconds!", filename: "lumobites-twin-qr.png" },
+  { title: "Ingredient Scanner", url: "https://lumobites.net/scan", tagline: "Is your pet's food safe? Scan any label instantly and find out what's really inside.", filename: "lumobites-scan-qr.png" },
+  { title: "FDA Recalls", url: "https://lumobites.net/recalls", tagline: "Get instant alerts if your pet's food is recalled by the FDA. Free. Could save your pet's life.", filename: "lumobites-recalls-qr.png" },
+  { title: "Pet Sitting", url: "https://lumobites.net/petsitting", tagline: "Love animals? Become a Lumo Bites sitter and start earning money in your neighborhood!", filename: "lumobites-petsitting-qr.png" },
+  { title: "Pet Supplies", url: "https://lumobites.net/supplies", tagline: "Find the best toys, food, and supplies tailored specifically for your pet.", filename: "lumobites-supplies-qr.png" },
+  { title: "Breed Detection", url: "https://lumobites.net/photo", tagline: "Upload a photo of any dog or cat and instantly find out their breed. Free!", filename: "lumobites-photo-qr.png" }
+];
+
+const QRCodeCard = ({ title, url, tagline, filename }: { title: string, url: string, tagline: string, filename: string }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, url, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#3B2410', // Lumo Bites brown
+          light: '#F5F0E8', // Lumo Bites cream
+        },
+        errorCorrectionLevel: 'H',
+      }, (error) => {
+        if (error) console.error('QR Code generation error:', error);
+        
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d');
+          if (ctx) {
+            const logo = new Image();
+            logo.src = '/lumo-bites-logo.png';
+            logo.onload = () => {
+              const canvasSize = canvasRef.current!.width;
+              const logoSize = canvasSize * 0.25;
+              const xPos = (canvasSize - logoSize) / 2;
+              const yPos = (canvasSize - logoSize) / 2;
+              
+              ctx.fillStyle = '#F5F0E8';
+              ctx.fillRect(xPos - 6, yPos - 6, logoSize + 12, logoSize + 12);
+
+              ctx.drawImage(logo, xPos, yPos, logoSize, logoSize);
+            };
+          }
+        }
+      });
+    }
+  }, [url]);
+
+  const handleDownload = () => {
+    if (canvasRef.current) {
+      const dataUrl = canvasRef.current.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div className="bg-white border border-[#E8DDD4] p-6 rounded-[28px] shadow-sm flex flex-col items-center w-full max-w-[400px]">
+      <h3 className="font-bold text-[#191919] text-[18px] text-center mb-1">{title}</h3>
+      <p className="text-[#8B5E3C] text-sm font-semibold mb-4 text-center">{url.replace('https://', '')}</p>
+      
+      <div className="bg-[#F5F0E8] p-4 rounded-2xl shadow-inner mb-4">
+        <canvas ref={canvasRef} />
+      </div>
+
+      <p className="text-sm text-[#666666] text-center mb-6 px-2 flex-grow">{tagline}</p>
+
+      <button
+        onClick={handleDownload}
+        className="w-full bg-[#8B5E3C] text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-[#724C2F] active:scale-[0.98] transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2 mt-auto"
+      >
+        <span>📥</span> Download PNG
+      </button>
+    </div>
+  );
+};
 
 export default function MarketingPage() {
   const [password, setPassword] = useState('');
@@ -412,6 +494,22 @@ export default function MarketingPage() {
             </div>
           </div>
 
+        </div>
+
+        {/* QR Codes Section */}
+        <div className="mt-20 pt-16 border-t border-[#E8DDD4] mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-[32px] font-[800] text-[#191919] tracking-tight mb-3">Branded QR Codes</h2>
+            <p className="text-[16px] text-[#666666] max-w-[700px] mx-auto leading-relaxed">
+              Download perfectly branded QR codes for all Lumo Bites services to use on print materials, packaging, or digital flyers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 justify-items-center">
+            {qrConfigs.map((config, index) => (
+              <QRCodeCard key={index} {...config} />
+            ))}
+          </div>
         </div>
 
         {/* Usage notes */}
