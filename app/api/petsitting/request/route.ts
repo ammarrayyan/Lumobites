@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = owner_email.toLowerCase().trim();
 
-    // 1. Check if owner is PRO
+    // 1. Check if owner is PRO (Code intact for future)
     const { data: emailData } = await supabase
       .from('emails')
       .select('is_pro')
@@ -25,13 +25,13 @@ export async function POST(request: NextRequest) {
 
     const isOwnerPro = emailData?.is_pro || false;
 
-    // 2. Enforce PRO requirement
-    if (!isOwnerPro) {
-      return NextResponse.json(
-        { error: 'requires_pro', message: 'You must have an active Lumo Bites PRO membership ($2.99/mo) to contact sitters.' },
-        { status: 403 }
-      );
-    }
+    // 2. Enforce PRO requirement - FREE LAUNCH: BYPASSED
+    // if (!isOwnerPro) {
+    //   return NextResponse.json(
+    //     { error: 'requires_pro', message: 'You must have an active Lumo Bites PRO membership ($2.99/mo) to contact sitters.' },
+    //     { status: 403 }
+    //   );
+    // }
 
     // 3. Get Sitter details
     const { data: sitter, error: sitterError } = await supabase

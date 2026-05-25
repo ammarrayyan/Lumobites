@@ -227,7 +227,9 @@ export default function PetSitting() {
           setSitterPhone(data.phone_number || '');
           setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability);
-          setIsProSitter(data.is_pro);
+          
+          // FREE LAUNCH: Automatically treat any loaded profile as PRO
+          setIsProSitter(true);
           
           if (data.is_pro) {
             try {
@@ -409,9 +411,8 @@ export default function PetSitting() {
 
       if (res.ok) {
         const updatedData = await res.json();
-        if (updatedData?.is_pro) {
-          setIsProSitter(true);
-        }
+        // FREE LAUNCH: Automatically treat saved profile as PRO
+        setIsProSitter(true);
         setProfilePreviewMode(true);
       } else {
         const err = await res.json();
@@ -622,17 +623,27 @@ export default function PetSitting() {
       filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
-
   const isFormValid = sitterEmail.trim() && sitterName.trim() && sitterPhoto && sitterCity.trim() && sitterZip.trim() && sitterRate && sitterBio.trim();
+
+  // Auto-set isProSitter to true on load/save to bypass sitter paywall UI.
+  useEffect(() => {
+    setIsProSitter(true);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        {/* FREE LAUNCH BANNER */}
+        <div className="bg-gradient-to-r from-[#8B5E3C] to-[#C17D3C] text-white p-4 rounded-2xl mb-8 text-center shadow-lg transform hover:scale-[1.01] transition-transform">
+          <span className="text-xl mr-2">🎉</span>
+          <span className="font-bold text-lg tracking-wide">Lumo Bites is free for our founding members! Join now while it lasts.</span>
+        </div>
+
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-4">Lumo Bites Pet Sitting</h1>
-          <p className="text-[#8B5E3C] font-medium text-lg">Connect with trusted, local pet sitters in your neighborhood.</p>
+          <p className="text-[#8B5E3C] font-medium text-lg">Connect with trusted, local pet sitters in your community.</p>
         </div>
 
         {/* Custom Tabs */}
@@ -768,27 +779,12 @@ export default function PetSitting() {
                       </div>
                     </div>
 
-                    {isOwnerPro ? (
-                      <button
-                        onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
-                      >
-                        Request Sitter
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setOwnerAuthMode('email');
-                          setOwnerAuthCode('');
-                          setReqError('');
-                          setUnlockModalOpen(true);
-                        }}
-                        className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex justify-center items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                        Unlock Profile
-                      </button>
-                    )}
+                    <button
+                      onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
+                    >
+                      Request Sitter
+                    </button>
                   </div>
                 ))}
               </div>
@@ -809,12 +805,10 @@ export default function PetSitting() {
                   )}
                 </div>
                 <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">
-                  {isProSitter ? 'Lumo Sitter Pro Active' : 'Profile Inactive & Hidden'}
+                  Sitter Profile Active
                 </h2>
                 <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                  {isProSitter 
-                    ? 'Your profile is live and visible to pet owners in your neighborhood.'
-                    : 'Upgrade to Lumo Sitter Pro for $9.99/month to go live and start receiving requests.'}
+                  Your profile is live and visible to pet owners in your neighborhood.
                 </p>
                 
                 {/* Profile Preview Card */}
@@ -1085,7 +1079,7 @@ export default function PetSitting() {
                 ) : (
                   <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
                     <span className="text-3xl mb-2 block">✨</span>
-                    <h3 className="text-green-800 font-bold text-lg mb-1">Lumo Sitter Pro Active</h3>
+                    <h3 className="text-green-800 font-bold text-lg mb-1">Sitter Profile Active</h3>
                     <p className="text-green-700 text-sm mb-4">Your profile is visible in search results.</p>
                     <button type="submit" disabled={profileSaving} className={`w-full bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-green-800'}`}>
                       {profileSaving ? 'Saving...' : 'Update Profile'}
@@ -1167,62 +1161,13 @@ export default function PetSitting() {
                   <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]"></textarea>
                 </div>
 
-                {reqError && reqError !== 'requires_pro' && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
+                {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
 
-                {reqError === 'requires_pro' ? (
-                  <div className="bg-gradient-to-br from-[#1A1A1A] to-[#2D2D2D] rounded-xl p-5 text-center shadow-md mt-6">
-                    <h3 className="text-[#E8D5C0] font-black mb-1">Lumo Bites Pro Required</h3>
-                    <p className="text-gray-300 text-xs mb-4">You need an active $2.99/mo PRO membership to contact sitters.</p>
-                    <button type="button" onClick={handleOwnerStripeCheckout} disabled={reqLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-3 rounded-lg transition-all shadow-sm">
-                      {reqLoading ? 'Redirecting...' : 'Upgrade to PRO for $2.99/mo'}
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm">
-                      {reqLoading ? 'Sending...' : 'Send Request'}
-                    </button>
-                    <p className="text-[10px] text-center text-gray-400 mt-3">Active Lumo Bites PRO membership ($2.99/mo) required to contact sitters.</p>
-                  </>
-                )}
+                <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm">
+                  {reqLoading ? 'Sending...' : 'Send Request'}
+                </button>
               </form>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* UNLOCK MODAL */}
-      {unlockModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in">
-            <button onClick={() => setUnlockModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            
-            <h3 className="text-2xl font-black text-[#4A3E3D] mb-2 text-center">Unlock Profiles</h3>
-            <p className="text-[#8B7E7D] text-sm mb-6 text-center">
-              {ownerAuthMode === 'email' 
-                ? 'Enter your email to verify your Lumo Bites PRO membership ($2.99/mo).' 
-                : 'Enter the 6-digit code we sent to your email to verify your account.'}
-            </p>
-
-            <form onSubmit={handleUnlockProfile} className="space-y-4">
-              {ownerAuthMode === 'email' ? (
-                <div>
-                  <input required type="email" placeholder="your@email.com" value={unlockEmail} onChange={e => setUnlockEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" />
-                </div>
-              ) : (
-                <div>
-                  <input required type="text" placeholder="6-digit code" maxLength={6} value={ownerAuthCode} onChange={e => setOwnerAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center text-2xl tracking-[0.5em] font-mono font-bold" />
-                </div>
-              )}
-
-              {reqError && <div className="text-red-600 text-sm font-bold text-center mt-2">{reqError}</div>}
-
-              <button disabled={unlockLoading} type="submit" className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mt-4">
-                {unlockLoading ? 'Verifying...' : (ownerAuthMode === 'email' ? 'Unlock Profiles' : 'Verify Code')}
-              </button>
-            </form>
           </div>
         </div>
       )}

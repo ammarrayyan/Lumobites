@@ -6,21 +6,24 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const ownerEmail = request.nextUrl.searchParams.get('owner_email');
-    let isOwnerPro = false;
+    
+    // FREE LAUNCH: Force Owner PRO to true so all data is unmasked
+    let isOwnerPro = true;
 
-    if (ownerEmail) {
-      const { data: emailData } = await supabase
-        .from('emails')
-        .select('is_pro')
-        .eq('email', ownerEmail.toLowerCase().trim())
-        .single();
-      isOwnerPro = emailData?.is_pro || false;
-    }
+    // ORIGINAL STRIPE CODE INTENTIONALLY COMMENTED OUT FOR FREE LAUNCH
+    // if (ownerEmail) {
+    //   const { data: emailData } = await supabase
+    //     .from('emails')
+    //     .select('is_pro')
+    //     .eq('email', ownerEmail.toLowerCase().trim())
+    //     .single();
+    //   isOwnerPro = emailData?.is_pro || false;
+    // }
 
     const { data, error } = await supabase
       .from('sitters')
       .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible')
-      .eq('is_pro', true)
+      // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true)
       .order('created_at', { ascending: false });
 

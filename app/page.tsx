@@ -11,9 +11,14 @@ export default function Home() {
       {/* NAVBAR */}
       <Navbar />
 
+      {/* FREE LAUNCH BANNER */}
+      <div className="bg-gradient-to-r from-[#8B5E3C] to-[#C17D3C] text-white py-3 px-4 text-center shadow-md">
+        <span className="text-xl mr-2">🎉</span>
+        <span className="font-bold text-sm md:text-base tracking-wide">Lumo Bites is free for our founding members! Join now while it lasts.</span>
+      </div>
 
       {/* HERO SECTION */}
-      <section className="w-full bg-[#FDFAF7] pt-[48px] pb-16 px-6">
+      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-16 px-6">
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-12">
           
           {/* LEFT COLUMN - 60% */}
