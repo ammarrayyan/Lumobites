@@ -59,58 +59,28 @@ export default function Home() {
               }
             `}</style>
 
-            <Link href="/petsitting" className="btn-heartbeat mb-4" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8B5E3C', borderRadius: '100px', fontWeight: '600', width: '100%', maxWidth: '320px' }}>
-              Find a Pet Sitter &rarr;
-            </Link>
-
-            <div style={{ marginBottom: '16px' }}>
-              <Link 
-                href="/twin" 
-                className="text-[#8B5E3C] font-semibold inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
-                style={{ 
-                  textDecoration: 'none',
-                  background: 'rgba(139, 94, 60, 0.05)',
-                  border: '1.2px solid rgba(139, 94, 60, 0.15)',
-                  padding: '7px 18px',
-                  borderRadius: '100px',
-                  boxShadow: '0 2px 8px rgba(139, 94, 60, 0.03)',
-                  letterSpacing: '0.01em',
-                  fontSize: 'var(--text-btn)'
-                }}
-              >
-                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                  <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Find Your Pet Twin &rarr;</span>
+            <div className="flex flex-col gap-4 w-full max-w-[460px] mb-8 relative z-10">
+              <Link href="/petsitting" className="btn-heartbeat w-full bg-[#8B5E3C] text-white py-3.5 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#7A5234] shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '16px' }}>
+                Find a Pet Sitter &rarr;
               </Link>
-            </div>
-
-            <Link href="/chat" className="mb-4 text-[#8B5E3C] hover:bg-[#8B5E3C] hover:text-white transition-all duration-300" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #8B5E3C', borderRadius: '100px', fontWeight: '600', width: '100%', maxWidth: '320px' }}>
-              Find Your Pet&apos;s Food &rarr;
-            </Link>
-
-            <div style={{ marginBottom: '32px' }}>
-              <Link 
-                href="/photo" 
-                className="text-[#8B5E3C] font-semibold inline-flex items-center gap-2 hover:scale-[1.03] active:scale-[0.98] transition-all" 
-                style={{ 
-                  textDecoration: 'none',
-                  background: 'rgba(139, 94, 60, 0.05)',
-                  border: '1.2px solid rgba(139, 94, 60, 0.15)',
-                  padding: '7px 18px',
-                  borderRadius: '100px',
-                  boxShadow: '0 2px 8px rgba(139, 94, 60, 0.03)',
-                  letterSpacing: '0.01em',
-                  fontSize: 'var(--text-btn)'
-                }}
-              >
-                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                  <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>Find Food by Photo of Your Pet</span>
+              
+              <Link href="/chat" className="w-full bg-white border-2 border-[#8B5E3C] text-[#8B5E3C] py-3 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#8B5E3C] hover:text-white shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '15px' }}>
+                Find Your Pet&apos;s Food &rarr;
               </Link>
+
+              <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+                <Link href="/twin" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
+                  <span>✨</span>
+                  <span>Find Your Pet Twin</span>
+                </Link>
+                <Link href="/photo" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>Scan Food Label</span>
+                </Link>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
