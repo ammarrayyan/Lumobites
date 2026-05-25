@@ -246,23 +246,23 @@ export default function Home() {
       <section className="w-full bg-[#F5EDE4] border-y border-[#E8D5C0] py-5">
         <div className="max-w-[900px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
           <div className="flex flex-col items-center">
-            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">10,000+</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Pets Matched</span>
-          </div>
-          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
-          <div className="flex flex-col items-center">
-            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">50+</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Brands Covered</span>
-          </div>
-          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
-          <div className="flex flex-col items-center">
             <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">100%</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Free Forever</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Free to Join</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">4.9 ★</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Avg. Rating</span>
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">Trusted</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Pet Care</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">No</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Commission Ever</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[22px] font-[800] text-[#8B5E3C] tracking-tight">FDA</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Recall Alerts</span>
           </div>
         </div>
       </section>
