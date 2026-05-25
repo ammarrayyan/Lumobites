@@ -66,12 +66,47 @@ export async function POST(request: NextRequest) {
       console.error('[PetSitting Profile] Geocoding exception:', e);
     }
 
+    let finalPhotoUrl = photo_url;
+    if (photo_url && photo_url.startsWith('data:image/')) {
+      try {
+        const matches = photo_url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+          const base64Data = matches[2];
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          const fileName = `${cleanEmail.replace(/[^a-z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('sitter-photos')
+            .upload(fileName, buffer, {
+              contentType: `image/${matches[1]}`,
+              upsert: true
+            });
+            
+          if (uploadError) {
+            console.error('[PetSitting Profile] Upload error:', uploadError);
+            throw uploadError;
+          }
+          
+          const { data: publicUrlData } = supabase.storage
+            .from('sitter-photos')
+            .getPublicUrl(fileName);
+            
+          finalPhotoUrl = publicUrlData.publicUrl;
+        }
+      } catch (uploadEx) {
+        console.error('[PetSitting Profile] Failed to upload photo to storage:', uploadEx);
+        throw uploadEx;
+      }
+    }
+
     const { data, error } = await supabase
       .from('sitters')
       .upsert({
         email: cleanEmail,
         name,
-        photo_url,
+        photo_url: finalPhotoUrl,
         city,
         zip,
         country: resolvedCountry,

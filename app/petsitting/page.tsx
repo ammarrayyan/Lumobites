@@ -900,7 +900,7 @@ export default function PetSitting() {
                   <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('name') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo <span className="text-gray-400 font-normal text-xs ml-1">(Optional)</span></label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo <span className="text-gray-400 font-normal text-xs ml-1">(Optional - under 5MB)</span></label>
                   <div className="flex items-center gap-4 p-2 rounded-xl">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8DDD4]" />
@@ -915,8 +915,43 @@ export default function PetSitting() {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            alert('File is too large. Please select an image under 5MB.');
+                            return;
+                          }
                           const reader = new FileReader();
-                          reader.onloadend = () => setSitterPhoto(reader.result as string);
+                          reader.onloadend = () => {
+                            const img = new window.Image();
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              let width = img.width;
+                              let height = img.height;
+                              
+                              const MAX_WIDTH = 800;
+                              const MAX_HEIGHT = 800;
+                              
+                              if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                  height *= MAX_WIDTH / width;
+                                  width = MAX_WIDTH;
+                                }
+                              } else {
+                                if (height > MAX_HEIGHT) {
+                                  width *= MAX_HEIGHT / height;
+                                  height = MAX_HEIGHT;
+                                }
+                              }
+                              
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext('2d');
+                              ctx?.drawImage(img, 0, 0, width, height);
+                              
+                              const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                              setSitterPhoto(dataUrl);
+                            };
+                            img.src = reader.result as string;
+                          };
                           reader.readAsDataURL(file);
                         }
                       }} 
