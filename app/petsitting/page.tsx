@@ -88,7 +88,7 @@ export default function PetSitting() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [profilePreviewMode, setProfilePreviewMode] = useState(false);
-  const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
   // Sitter Auth State
   const [sitterAuthMode, setSitterAuthMode] = useState<'email' | 'otp' | 'form'>('email');
@@ -232,7 +232,11 @@ export default function PetSitting() {
 
   const handleSitterEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sitterEmail.trim()) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!sitterEmail.trim() || !emailRegex.test(sitterEmail.trim())) {
+      setSitterAuthError('Please enter a valid email address');
+      return;
+    }
     
     setSitterAuthLoading(true);
     setSitterAuthError('');
@@ -337,18 +341,19 @@ export default function PetSitting() {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileMessage('');
-    setFormErrors([]);
+    setFormErrors({});
 
     // Strict Validation
-    const errors: string[] = [];
-    if (!sitterEmail.trim()) errors.push('email');
-    if (!sitterName.trim()) errors.push('name');
-    if (!sitterCity.trim()) errors.push('city');
-    if (sitterCountry === 'United States' && !sitterZip.trim()) errors.push('zip');
-    if (!sitterRate || parseInt(sitterRate) <= 0) errors.push('rate');
-    if (!sitterBio.trim()) errors.push('bio');
+    const errors: Record<string, string> = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!sitterEmail.trim() || !emailRegex.test(sitterEmail.trim())) errors['email'] = 'Please enter a valid email address';
+    if (!sitterName.trim()) errors['name'] = 'Please enter your full name';
+    if (!sitterCity.trim()) errors['city'] = 'Please enter your city';
+    if (sitterCountry === 'United States' && !sitterZip.trim()) errors['zip'] = 'Please enter your zip code';
+    if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
+    if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     
-    if (errors.length > 0) {
+    if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       setProfileMessage('Please fill out all missing fields highlighted in red.');
       return;
@@ -384,10 +389,15 @@ export default function PetSitting() {
         setProfilePreviewMode(true);
       } else {
         const err = await res.json();
-        setProfileMessage(err.error || 'Failed to save profile');
+        if (err.error === 'location_not_found') {
+          setFormErrors({ city: "We couldn't find that location. Please check your city and zip code", zip: "We couldn't find that location. Please check your city and zip code" });
+          setProfileMessage('');
+        } else {
+          setProfileMessage(err.error || 'Something went wrong saving your profile. Please try again or contact support at info@lumobitespet.com');
+        }
       }
     } catch (error) {
-      setProfileMessage('An error occurred while saving.');
+      setProfileMessage('Connection problem. Please check your internet and try again');
     } finally {
       setProfileSaving(false);
       setProfileLoading(false);
@@ -897,10 +907,12 @@ export default function PetSitting() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Full Name</label>
-                  <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('name') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['name'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  {formErrors['name'] && <p className="text-red-500 text-sm mt-1">{formErrors['name']}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo <span className="text-gray-400 font-normal text-xs ml-1">(Optional - under 5MB)</span></label>
+                  {formErrors['photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['photo']}</p>}
                   <div className="flex items-center gap-4 p-2 rounded-xl">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8DDD4]" />
@@ -915,9 +927,11 @@ export default function PetSitting() {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 5 * 1024 * 1024) {
-                            alert('File is too large. Please select an image under 5MB.');
+                          if (file.size > 4 * 1024 * 1024) {
+                            setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB or try a different image' }));
                             return;
+                          } else {
+                            setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
                           }
                           const reader = new FileReader();
                           reader.onloadend = () => {
@@ -961,14 +975,16 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">City</label>
-                  <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('city') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['city'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  {formErrors['city'] && <p className="text-red-500 text-sm mt-1">{formErrors['city']}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
                     {sitterCountry === 'United States' ? 'Zip Code' : 'Postal Code (Optional)'}
                   </label>
                   <div className="relative">
-                    <input required={sitterCountry === 'United States'} type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : formErrors.includes('zip') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                    <input required={sitterCountry === 'United States'} type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : !!formErrors['zip'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                    {formErrors['zip'] && <p className="text-red-500 text-sm mt-1">{formErrors['zip']}</p>}
                     {zipGeocoding && <div className="absolute right-3 top-3 text-xs text-[#8B5E3C]">Validating...</div>}
                   </div>
                   {zipError && <p className="text-red-500 text-xs mt-1 font-semibold">{zipError}</p>}
@@ -992,7 +1008,8 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
-                  <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('rate') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
+                  <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['rate'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
+                  {formErrors['rate'] && <p className="text-red-500 text-sm mt-1">{formErrors['rate']}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number (Optional)</label>
@@ -1006,7 +1023,8 @@ export default function PetSitting() {
 
               <div>
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">About You (Bio)</label>
-                <textarea required rows={4} value={sitterBio} onChange={e => setSitterBio(e.target.value)} className={`w-full bg-[#FAF6F4] border ${formErrors.includes('bio') ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="Tell pet owners about your experience..."></textarea>
+                <textarea required rows={4} value={sitterBio} onChange={e => setSitterBio(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['bio'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="Tell pet owners about your experience..."></textarea>
+                {formErrors['bio'] && <p className="text-red-500 text-sm mt-1">{formErrors['bio']}</p>}
               </div>
 
               <div className="flex items-center gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">

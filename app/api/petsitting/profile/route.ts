@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('[PetSitting Profile API] Error fetching:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong loading your profile. Please try again or contact support at info@lumobitespet.com' }, { status: 500 });
   }
 }
 
@@ -60,10 +60,12 @@ export async function POST(request: NextRequest) {
           console.log(`[PetSitting Profile] Geocoded ${address} to ${lat}, ${lng}`);
         } else {
           console.warn('[PetSitting Profile] Geocode failed or no results:', geoData.status);
+          return NextResponse.json({ error: 'location_not_found' }, { status: 400 });
         }
       }
     } catch (e) {
       console.error('[PetSitting Profile] Geocoding exception:', e);
+      return NextResponse.json({ error: 'location_not_found' }, { status: 400 });
     }
 
     let finalPhotoUrl = photo_url;
@@ -128,6 +130,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('[PetSitting Profile API] Error saving:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong saving your profile. Please try again or contact support at info@lumobitespet.com' }, { status: 500 });
   }
 }
