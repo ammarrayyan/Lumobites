@@ -41,6 +41,22 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+    // 1.5 Rate Limiting Check
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from('otp_requests_log')
+      .select('*', { count: 'exact', head: true })
+      .eq('email', cleanEmail)
+      .gte('created_at', oneHourAgo);
+
+    if (countError) {
+      console.error('[Auth Send Code] Supabase error checking rate limit:', countError);
+    } else if (count !== null && count >= 10) {
+      return NextResponse.json({ error: 'Too many requests — please try again in 1 hour' }, { status: 429 });
+    }
+
+    // Log the new request
+    await supabase.from('otp_requests_log').insert({ email: cleanEmail });
 
     // 2. Generate a secure 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();

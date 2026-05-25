@@ -29,7 +29,7 @@ export default function MarketingPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'lumo2026') {
+    if (password === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
       setIsAuthorized(true);
       setError('');
       sessionStorage.setItem('lumo_marketing_auth', 'true');

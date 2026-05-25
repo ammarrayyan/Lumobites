@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     // 1. Fetch sitter to see if they have a Stripe Customer ID
-    const { data: sitter, error: fetchError } = await supabase
+    const { data: sitter, error: fetchError } = await supabaseAdmin
       .from('sitters')
       .select('stripe_customer_id')
       .eq('email', cleanEmail)
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Delete from Supabase
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabaseAdmin
       .from('sitters')
       .delete()
       .eq('email', cleanEmail);

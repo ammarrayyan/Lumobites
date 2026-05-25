@@ -85,7 +85,7 @@ export default function ScanPage() {
 
     console.log('[Lumo Subscription] Page mounted. Checking subscription status...');
 
-    if (adminParam === 'lumo2026') {
+    if (adminParam === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
       console.log('[Lumo Subscription] Admin bypass activated via URL parameter.');
       setIsPro(true);
       setProEmail('admin@lumobites.com');

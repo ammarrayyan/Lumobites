@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
           
           const fileName = `${cleanEmail.replace(/[^a-z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
           
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
             .from('sitter-photos')
             .upload(fileName, buffer, {
               contentType: `image/${matches[1]}`,
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
             throw uploadError;
           }
           
-          const { data: publicUrlData } = supabase.storage
+          const { data: publicUrlData } = supabaseAdmin.storage
             .from('sitter-photos')
             .getPublicUrl(fileName);
             
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sitters')
       .upsert({
         email: cleanEmail,

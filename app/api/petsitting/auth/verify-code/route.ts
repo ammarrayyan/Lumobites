@@ -26,9 +26,8 @@ export async function POST(request: NextRequest) {
 
     // 2. Check expiration
     if (new Date(codeData.expires_at) < new Date()) {
-      // Code is expired
       await supabase.from('verification_codes').delete().eq('id', codeData.id);
-      return NextResponse.json({ error: 'Verification code has expired. Please request a new one.' }, { status: 400 });
+      return NextResponse.json({ error: 'Code expired — please request a new one' }, { status: 400 });
     }
 
     // 3. Mark successful login by clearing the code
