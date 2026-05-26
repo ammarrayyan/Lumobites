@@ -108,6 +108,22 @@ export default function Navbar() {
         {/* Right: Desktop Links & Share */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
 
+          {/* Pet Sitting - Coming Soon */}
+          <div className="relative group" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[#BBBBBB] font-medium flex items-center gap-1.5 cursor-default select-none">
+              <svg className="w-4 h-4 inline-block align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Pet Sitting
+              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full">Soon</span>
+            </span>
+            {/* Tooltip */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#191919] text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+              Coming Soon!
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-[#191919]" />
+            </div>
+          </div>
+
           <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -262,6 +278,15 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
+
+            {/* Pet Sitting - Coming Soon (mobile) */}
+            <div className="px-4 py-3 text-[#BBBBBB] font-medium flex items-center gap-2 rounded-xl cursor-default">
+              <svg className="w-4 h-4 inline-block align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Pet Sitting
+              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full">Coming Soon</span>
+            </div>
 
             <Link 
               href="/scan" 

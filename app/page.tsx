@@ -1,12 +1,64 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import BrandMarquee from '@/components/BrandMarquee';
 import Navbar from '@/components/Navbar';
 
 export default function Home() {
+  const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
+  const [notifyEmail, setNotifyEmail] = useState('');
+  const [notifySubmitted, setNotifySubmitted] = useState(false);
+
+  const handleNotifySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (notifyEmail) setNotifySubmitted(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
 
+      {/* PET SITTING COMING SOON MODAL */}
+      {petSittingModalOpen && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4" onClick={() => setPetSittingModalOpen(false)}>
+          <div className="bg-white rounded-3xl p-8 max-w-[420px] w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setPetSittingModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="w-14 h-14 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg className="w-7 h-7 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <p className="text-[#8B5E3C] text-xs font-bold tracking-[0.15em] uppercase text-center mb-2">Coming Soon</p>
+            <h3 className="text-xl font-black text-[#191919] text-center mb-3">Pet Sitting is on its way!</h3>
+            <p className="text-[#666666] text-sm text-center leading-relaxed mb-6">
+              We&apos;re building a trusted marketplace for local pet sitters — completely free, no commission. Join our founding member list to be the first to know when it launches.
+            </p>
+            {!notifySubmitted ? (
+              <form onSubmit={handleNotifySubmit} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  required
+                  value={notifyEmail}
+                  onChange={e => setNotifyEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full bg-[#FDFAF7] border border-[#E8DDD4] rounded-full px-5 py-3 text-sm outline-none focus:border-[#8B5E3C] transition-colors"
+                />
+                <button type="submit" className="w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-full hover:bg-[#7A5234] transition-colors">
+                  Notify Me When It Launches
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center justify-center gap-2 text-green-600 font-semibold py-3">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                You&apos;re on the list! We&apos;ll notify you at launch.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* NAVBAR */}
       <Navbar />
@@ -36,7 +88,7 @@ export default function Home() {
             </h1>
             
             <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
-              Find a trusted pet sitter near you, scan food ingredients, get FDA recall alerts and more — all in one place.
+              Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
             </p>
 
             <style>{`
@@ -69,7 +121,7 @@ export default function Home() {
                   <span>✨</span>
                   <span>Find Your Pet Twin</span>
                 </Link>
-                <Link href="/photo" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
+                <Link href="/scan" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
@@ -93,12 +145,38 @@ export default function Home() {
               </span>
             </div>
 
-
           </div>
 
           {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
           <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
-            
+
+            {/* Card 1 - Pet Sitting (Coming Soon) */}
+            <div
+              className="relative bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm cursor-pointer group opacity-80 hover:opacity-90 transition-all"
+              onClick={() => setPetSittingModalOpen(true)}
+            >
+              {/* Coming Soon badge */}
+              <span className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Coming Soon
+              </span>
+              {/* Greyed overlay */}
+              <div className="absolute inset-0 rounded-3xl bg-white/30 backdrop-grayscale-[20%] pointer-events-none" />
+              <div className="flex items-center gap-3 relative">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed relative" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
+              </p>
+              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C]/40 text-[#8B5E3C]/60 font-bold text-center select-none" style={{ fontSize: 'var(--text-btn)' }}>
+                Notify Me &rarr;
+              </div>
+            </div>
 
             {/* Card 2 - Pet Twin */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
@@ -176,7 +254,6 @@ export default function Home() {
               </Link>
             </div>
 
-
           </div>
         </div>
       </section>
@@ -233,14 +310,13 @@ export default function Home() {
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>⚠️</span>
               <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet's food is recalled by the FDA. Free email alerts, no spam.</p>
+              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts, no spam.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>✨</span>
               <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
             </div>
-
           </div>
         </div>
       </section>
@@ -255,7 +331,6 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
               <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. The Personalized Food Advisor matched her to a premium formula with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
@@ -267,7 +342,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
               <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;The Ingredient Safety Scanner is a lifesaver! I scanned the label of my cat&apos;s favorite wet food and discovered a hidden chemical preservative. Switching to a Grade A alternative has resolved their digestive issues completely.&rdquo;</p>
@@ -279,7 +353,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
               <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
               <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I tried the AI Pet Twin game just for fun, and it matched my selfie to a Pug with 94% accuracy! It was so hilariously spot-on and premium that I shared it on my Instagram story. It is such a mysterious and entertaining quiz!&rdquo;</p>
@@ -291,9 +364,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
-
-
           </div>
         </div>
       </section>
@@ -334,7 +404,7 @@ export default function Home() {
               <li><Link href="/chat" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Compare Foods</Link></li>
               <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Is My Pet&apos;s Food Safe?</Link></li>
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
-              <li><Link href="/petsitting" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Sitting</Link></li>
+              <li><span style={{ color: '#777777', cursor: 'default' }}>Pet Sitting <span style={{ fontSize: '10px', background: '#333', color: '#999', padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', verticalAlign: 'middle' }}>Soon</span></span></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
           </div>
