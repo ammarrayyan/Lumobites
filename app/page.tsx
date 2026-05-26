@@ -60,11 +60,7 @@ export default function Home() {
             `}</style>
 
             <div className="flex flex-col gap-4 w-full max-w-[460px] mb-8 relative z-10">
-              <Link href="/petsitting" className="btn-heartbeat w-full bg-[#8B5E3C] text-white py-3.5 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#7A5234] shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '16px' }}>
-                Find a Pet Sitter &rarr;
-              </Link>
-              
-              <Link href="/chat" className="w-full bg-white border-2 border-[#8B5E3C] text-[#8B5E3C] py-3 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#8B5E3C] hover:text-white shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '15px' }}>
+              <Link href="/chat" className="btn-heartbeat w-full bg-[#8B5E3C] text-white py-3.5 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#7A5234] shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '16px' }}>
                 Find Your Pet&apos;s Food &rarr;
               </Link>
 
@@ -85,51 +81,24 @@ export default function Home() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to join
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to use
               </span>
               <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No commission
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up needed
               </span>
               <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Trusted sitters near you
+                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
               </span>
             </div>
 
-            <div className="mt-10 bg-[#F5EDE4] border border-[#E8D5C0] rounded-2xl p-6 text-center max-w-[460px] relative z-10 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-[#8B5E3C] font-black text-lg mb-2 flex justify-center items-center gap-2">
-                <svg className="w-6 h-6 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 5.00001c2.5-3 5.5-2.5 6.5 0 1 2.5-.5 5.5-3 6.5-2.5-1-5-4-3.5-6.5z"/><path d="M11 12.5C9 14 7 14 5.5 12c-1.5-2-.5-5 2-5.5"/><path d="M13 12.5c2 1.5 4 1.5 5.5-.5 1.5-2 .5-5-2-5.5"/><path d="M18.5 16.5c-1 3-4 4.5-6.5 4.5s-5.5-1.5-6.5-4.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5z"/></svg> Love animals?
-              </h3>
-              <p className="text-[#666666] text-sm mb-4 leading-relaxed">
-                Join as a founding sitter — free to join, earn money in your neighborhood, be part of our community from day one!
-              </p>
-              <Link href="/petsitting" className="inline-block w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-xl hover:bg-[#7A5234] transition-colors shadow-sm text-decoration-none">
-                Become a Pet Sitter &rarr;
-              </Link>
-            </div>
+
           </div>
 
           {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
           <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
             
-            {/* Card 1 - Pet Sitting */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
-              </p>
-              <Link href="/petsitting" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Find a Sitter &rarr;
-              </Link>
-            </div>
 
             {/* Card 2 - Pet Twin */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
@@ -271,11 +240,7 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🏠</span>
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Pet Sitting</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.</p>
-            </div>
+
           </div>
         </div>
       </section>

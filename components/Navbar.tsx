@@ -107,12 +107,7 @@ export default function Navbar() {
 
         {/* Right: Desktop Links & Share */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
-          <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
-            <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Pet Sitting
-          </Link>
+
           <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -267,16 +262,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
-            <Link 
-              href="/petsitting" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Pet Sitting
-            </Link>
+
             <Link 
               href="/scan" 
               className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
