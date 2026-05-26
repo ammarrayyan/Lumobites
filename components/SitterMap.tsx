@@ -59,7 +59,7 @@ export default function SitterMap({ sitters, searchCoords, onSelectSitter }: Sit
         <Map
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
-          mapId="LUMO_BITES_MAP"
+          mapId="DEMO_MAP_ID"
           gestureHandling="greedy"
           disableDefaultUI={false}
           zoomControl={true}
