@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   APIProvider,
   Map,
-  AdvancedMarker,
-  Pin,
+  Marker,
   InfoWindow,
   useMap
 } from '@vis.gl/react-google-maps';
@@ -59,7 +58,6 @@ export default function SitterMap({ sitters, searchCoords, onSelectSitter }: Sit
         <Map
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
-          mapId="DEMO_MAP_ID"
           gestureHandling="greedy"
           disableDefaultUI={false}
           zoomControl={true}
@@ -72,17 +70,11 @@ export default function SitterMap({ sitters, searchCoords, onSelectSitter }: Sit
             if (!sitter.lat || !sitter.lng) return null;
             
             return (
-              <AdvancedMarker
+              <Marker
                 key={sitter.id}
                 position={{ lat: sitter.lat, lng: sitter.lng }}
                 onClick={() => setSelectedSitter(sitter)}
-              >
-                <Pin 
-                  background={'#3B2410'} 
-                  borderColor={'#C17D3C'} 
-                  glyphColor={'#F5EDE4'} 
-                />
-              </AdvancedMarker>
+              />
             );
           })}
 
