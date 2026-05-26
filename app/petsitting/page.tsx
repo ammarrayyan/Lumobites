@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
@@ -718,7 +719,7 @@ export default function PetSitting() {
               </div>
             )}
 
-            {/* Sitters Grid */}
+            {/* Sitters & Map Layout */}
             {loadingSitters ? (
               <div className="text-center text-[#8B5E3C] py-12">Loading trusted sitters...</div>
             ) : filteredSitters.length === 0 ? (
@@ -734,59 +735,73 @@ export default function PetSitting() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredSitters.map(sitter => (
-                  <div key={sitter.id} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative">
-                    <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                      Verified
-                    </div>
-                    
-                    <div className="flex items-center gap-4 mb-4">
-                      {sitter.photo_url ? (
-                        <img src={sitter.photo_url} alt={sitter.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4]" />
-                      ) : (
-                        <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl">
-                          {sitter.name.charAt(0)}
+              <div className="flex flex-col lg:flex-row gap-8">
+                {/* Sitters List (Bottom on mobile, Left on desktop) */}
+                <div className="flex-1 order-2 lg:order-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    {filteredSitters.map(sitter => (
+                      <div key={sitter.id} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative">
+                        <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+                          Verified
                         </div>
-                      )}
-                      <div>
-                        <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
-                        <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
-                          📍 {sitter.city}, {sitter.country || 'United States'}
-                        </p>
-                        {sitter.phone_number && (
-                          <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
-                            📞 <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
-                          </p>
-                        )}
-                        {sitter.distance !== undefined && (
-                          <p className="text-[#8B5E3C] text-xs font-bold mt-0.5 ml-5">
-                            {sitter.distance.toFixed(1)} miles away
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                        
+                        <div className="flex items-center gap-4 mb-4">
+                          {sitter.photo_url ? (
+                            <img src={sitter.photo_url} alt={sitter.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4]" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl">
+                              {sitter.name.charAt(0)}
+                            </div>
+                          )}
+                          <div>
+                            <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
+                            <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
+                              📍 {sitter.city}, {sitter.country || 'United States'}
+                            </p>
+                            {sitter.phone_number && (
+                              <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
+                                📞 <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
+                              </p>
+                            )}
+                            {sitter.distance !== undefined && (
+                              <p className="text-[#8B5E3C] text-xs font-bold mt-0.5 ml-5">
+                                {sitter.distance.toFixed(1)} miles away
+                              </p>
+                            )}
+                          </div>
+                        </div>
 
-                    <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
+                        <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
 
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-lg">
-                        {sitter.pet_types === 'both' ? 'Dogs & Cats' : sitter.pet_types === 'dog' ? 'Dogs Only' : 'Cats Only'}
-                      </div>
-                      <div className="text-lg font-black text-[#4A3E3D]">
-                        ${sitter.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
-                      </div>
-                    </div>
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-lg">
+                            {sitter.pet_types === 'both' ? 'Dogs & Cats' : sitter.pet_types === 'dog' ? 'Dogs Only' : 'Cats Only'}
+                          </div>
+                          <div className="text-lg font-black text-[#4A3E3D]">
+                            ${sitter.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
+                          </div>
+                        </div>
 
-                    <button
-                      onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
-                      className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
-                    >
-                      Request Sitter
-                    </button>
+                        <button
+                          onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
+                        >
+                          Request Sitter
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Map (Top on mobile, Right on desktop) */}
+                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                  <SitterMap 
+                    sitters={filteredSitters}
+                    searchCoords={searchCoords}
+                    onSelectSitter={(sitter) => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
+                  />
+                </div>
               </div>
             )}
           </div>
