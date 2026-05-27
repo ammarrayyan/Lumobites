@@ -65,219 +65,217 @@ export default function Home() {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-16 px-6">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-12">
+      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6">
+        <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           
-          {/* LEFT COLUMN - 60% */}
-          <div className="flex-[1.5] flex flex-col items-center md:items-start text-center md:text-left">
-            <AnimatedPets />
-            
-            <div className="text-[#8B5E3C] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none" style={{ fontSize: 'var(--text-badge)' }}>
-              Free &middot; No Sign-up Required
+          <AnimatedPets />
+          
+          <div className="text-[#8B5E3C] font-[700] tracking-[0.15em] uppercase mb-6 relative z-10 select-none mt-4" style={{ fontSize: 'var(--text-badge)' }}>
+            Free &middot; No Sign-up Required
+          </div>
+          
+          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
+            <span className="text-[#191919]">Everything your pet needs</span>
+            <br />
+            <span className="text-[#C17D3C]">— in one place.</span>
+          </h1>
+          
+          <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
+            Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
+          </p>
+
+          <style>{`
+            @keyframes heartbeat {
+              0% { transform: scale(1); }
+              14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+              28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+              42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
+              70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
+            }
+            .btn-heartbeat {
+              animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+              box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
+              transition: all 0.3s ease;
+            }
+            .btn-heartbeat:hover {
+              animation: none;
+              transform: scale(1.03) translateY(-2px);
+              box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
+            }
+          `}</style>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to use
+            </span>
+            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
+            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up needed
+            </span>
+            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
+            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
+            </span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* SERVICES GRID SECTION */}
+      <section className="w-full bg-[#FDFAF7] px-6 pb-16">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Card 1 - Find Pet Food */}
+          <Link href="/chat" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <span className="text-[#8B5E3C] text-lg">🍽️</span>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Pet Food</h3>
             </div>
-            
-            <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
-              <span className="text-[#191919]">Everything your pet needs</span>
-              <br />
-              <span className="text-[#C17D3C]">— in one place.</span>
-            </h1>
-            
-            <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
               Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
             </p>
-
-            <style>{`
-              @keyframes heartbeat {
-                0% { transform: scale(1); }
-                14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-                28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-                42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-                70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-              }
-              .btn-heartbeat {
-                animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
-                box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
-                transition: all 0.3s ease;
-              }
-              .btn-heartbeat:hover {
-                animation: none;
-                transform: scale(1.03) translateY(-2px);
-                box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
-              }
-            `}</style>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to use
-              </span>
-              <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up needed
-              </span>
-              <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-              <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
-              </span>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Find Food &rarr;
             </div>
+          </Link>
 
+          {/* Card 2 - Find Food by Photo */}
+          <Link href="/photo" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <span className="text-[#8B5E3C] text-lg">📷</span>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Food by Photo</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Upload a photo of your pet and we&apos;ll instantly find the best food matched to their breed.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Upload Photo &rarr;
+            </div>
+          </Link>
+
+          {/* Card 3 - Pet Twin */}
+          <Link href="/twin" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
+                </svg>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Find Twin &rarr;
+            </div>
+          </Link>
+
+          {/* Card 4 - Safety Check */}
+          <Link href="/scan" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Is This Food Safe?</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Scan any pet food label to instantly check ingredients for hidden toxins and live FDA recalls.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Scan Now &rarr;
+            </div>
+          </Link>
+
+          {/* Card 5 - Recall Alerts */}
+          <Link href="/recalls" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>FDA Recall Alerts</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Get Alerts &rarr;
+            </div>
+          </Link>
+
+          {/* Card 6 - Pet Supplies */}
+          <Link href="/supplies" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="4.5" cy="11.5" r="2.5" />
+                  <circle cx="9.5" cy="7.5" r="2.5" />
+                  <circle cx="14.5" cy="7.5" r="2.5" />
+                  <circle cx="19.5" cy="11.5" r="2.5" />
+                  <path d="M12 21.5c-3 0-5.5-2.5-5.5-5.5s2.5-4.5 5.5-4.5 5.5 1.5 5.5 4.5-2.5 5.5-5.5 5.5z" />
+                </svg>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Supplies</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Find the best toys, litter, and supplements specifically tailored for your pet.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Find Supplies &rarr;
+            </div>
+          </Link>
+
+          {/* Card 7 - Lost Pets */}
+          <Link href="/lost-pets" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <span className="text-[#8B5E3C] text-lg">🐾</span>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Lost Pets</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              A community board to help reunite lost pets with their families. Free to post and browse.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              View Board &rarr;
+            </div>
+          </Link>
+
+          {/* Card 8 - Pet Sitting (Coming Soon) */}
+          <div
+            className="relative bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm cursor-pointer group opacity-80 hover:opacity-90 transition-all"
+            onClick={() => setPetSittingModalOpen(true)}
+          >
+            <span className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full flex items-center gap-1 z-10">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Coming Soon
+            </span>
+            <div className="absolute inset-0 rounded-3xl bg-white/30 backdrop-grayscale-[20%] pointer-events-none" />
+            
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed relative flex-1 z-10" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C]/40 text-[#8B5E3C]/60 font-bold text-center select-none relative z-10" style={{ fontSize: 'var(--text-btn)' }}>
+              Notify Me &rarr;
+            </div>
           </div>
 
-          {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
-          <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
-
-            {/* NEW Card - Find Pet Food */}
-            <Link href="/chat" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <span className="text-[#8B5E3C] text-lg">🍽️</span>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Pet Food</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
-              </p>
-              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
-                Find Food &rarr;
-              </div>
-            </Link>
-
-            {/* NEW Card - Find Food by Photo */}
-            <Link href="/photo" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <span className="text-[#8B5E3C] text-lg">📷</span>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Food by your pet Photo</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Upload a photo of your pet and we&apos;ll instantly find the best food matched to their breed.
-              </p>
-              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
-                Upload Photo &rarr;
-              </div>
-            </Link>
-
-            {/* Card 1 - Pet Sitting (Coming Soon) */}
-            <div
-              className="relative bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm cursor-pointer group opacity-80 hover:opacity-90 transition-all"
-              onClick={() => setPetSittingModalOpen(true)}
-            >
-              {/* Coming Soon badge */}
-              <span className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Coming Soon
-              </span>
-              {/* Greyed overlay */}
-              <div className="absolute inset-0 rounded-3xl bg-white/30 backdrop-grayscale-[20%] pointer-events-none" />
-              <div className="flex items-center gap-3 relative">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed relative" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
-              </p>
-              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C]/40 text-[#8B5E3C]/60 font-bold text-center select-none" style={{ fontSize: 'var(--text-btn)' }}>
-                Notify Me &rarr;
-              </div>
-            </div>
-
-            {/* Card 1.5 - Lost Pets */}
-            <Link href="/lost-pets" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <span className="text-[#8B5E3C] text-lg">🐾</span>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Lost Pets</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                A community board to help reunite lost pets with their families. Free to post and browse.
-              </p>
-              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
-                View Board &rarr;
-              </div>
-            </Link>
-
-            {/* Card 2 - Pet Twin */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features and personality.
-              </p>
-              <Link href="/twin" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Find Your Twin &rarr;
-              </Link>
-            </div>
-
-            {/* Card 3 - Safety Check */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Is This Food Safe?</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Scan any pet food label to instantly check ingredients for hidden toxins and live FDA recalls.
-              </p>
-              <Link href="/scan" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Scan Now &rarr;
-              </Link>
-            </div>
-
-            {/* Card 4 - Recall Alerts */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>FDA Recall Alerts</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts.
-              </p>
-              <Link href="/recalls" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Get Alerts &rarr;
-              </Link>
-            </div>
-
-            {/* Card 5 - Pet Supplies */}
-            <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
-                    <circle cx="4.5" cy="11.5" r="2.5" />
-                    <circle cx="9.5" cy="7.5" r="2.5" />
-                    <circle cx="14.5" cy="7.5" r="2.5" />
-                    <circle cx="19.5" cy="11.5" r="2.5" />
-                    <path d="M12 21.5c-3 0-5.5-2.5-5.5-5.5s2.5-4.5 5.5-4.5 5.5 1.5 5.5 4.5-2.5 5.5-5.5 5.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Supplies</h3>
-              </div>
-              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
-                Find the best toys, litter, and supplements specifically tailored for your pet.
-              </p>
-              <Link href="/supplies" className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
-                Find Supplies &rarr;
-              </Link>
-            </div>
-
-          </div>
         </div>
       </section>
 
