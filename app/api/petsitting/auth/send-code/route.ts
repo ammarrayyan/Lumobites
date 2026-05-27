@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // 1. Verify that this email has a profile in the sitters table
-      const { data: userData, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabaseAdmin
         .from('sitters')
         .select('id')
         .eq('email', cleanEmail)
