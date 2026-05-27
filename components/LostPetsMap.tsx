@@ -146,7 +146,7 @@ export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
             const btn = document.getElementById(`pet-btn-${pet.id}`);
             if (btn) {
               btn.onclick = () => {
-                window.location.href = \`/lost-pets/\${pet.id}\`;
+                window.location.href = `/lost-pets/${pet.id}`;
               };
             }
           }, 100);

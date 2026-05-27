@@ -3,7 +3,7 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { randomUUID } from 'crypto';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function GET(request: NextRequest) {
   try {
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     if (contact_email && process.env.RESEND_API_KEY) {
       const manageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobitespet.com'}/lost-pets/manage?id=${data.id}&token=${editToken}`;
       
-      await resend.emails.send({
+      await resend?.emails.send({
         from: 'Lumo Bites Pet <noreply@lumobitespet.com>',
         to: contact_email,
         subject: `Your ${type === 'lost' ? 'Lost' : 'Found'} Pet Post is Live!`,
