@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('sitters')
       .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible')
+      .eq('approval_status', 'approved')
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true)
       .order('created_at', { ascending: false });

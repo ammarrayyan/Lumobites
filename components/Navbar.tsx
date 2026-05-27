@@ -108,6 +108,13 @@ export default function Navbar() {
         {/* Right: Desktop Links & Share */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
 
+          {/* Lost Pets - Coming Soon */}
+          <Link href="/lost-pets" className="relative group text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[14px] mr-1.5 align-middle leading-none">🐾</span>
+            Lost Pets
+            <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-1">Soon</span>
+          </Link>
+
           {/* Pet Sitting - Coming Soon */}
           <div className="relative group" style={{ fontSize: 'var(--text-nav)' }}>
             <span className="text-[#BBBBBB] font-medium flex items-center gap-1.5 cursor-default select-none">
@@ -278,6 +285,17 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
+
+            {/* Lost Pets - Coming Soon (mobile) */}
+            <Link 
+              href="/lost-pets" 
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="text-[16px] mr-2.5 align-middle leading-none">🐾</span>
+              Lost Pets
+              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-2">Soon</span>
+            </Link>
 
             {/* Pet Sitting - Coming Soon (mobile) */}
             <div className="px-4 py-3 text-[#BBBBBB] font-medium flex items-center gap-2 rounded-xl cursor-default">

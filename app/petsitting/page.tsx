@@ -74,6 +74,8 @@ export default function PetSitting() {
   const [sitterEmail, setSitterEmail] = useState('');
   const [sitterName, setSitterName] = useState('');
   const [sitterPhoto, setSitterPhoto] = useState('');
+  const [sitterIdPhoto, setSitterIdPhoto] = useState('');
+  const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
   const [sitterCity, setSitterCity] = useState('');
   const [sitterZip, setSitterZip] = useState('');
   const [sitterCountry, setSitterCountry] = useState('United States');
@@ -228,6 +230,7 @@ export default function PetSitting() {
           setSitterPhone(data.phone_number || '');
           setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability);
+          setSitterApprovalStatus(data.approval_status || 'pending');
           
           // FREE LAUNCH: Automatically treat any loaded profile as PRO
           setIsProSitter(true);
@@ -398,6 +401,7 @@ export default function PetSitting() {
           email: sitterEmail,
           name: sitterName,
           photo_url: sitterPhoto,
+          id_photo_url: sitterIdPhoto,
           city: sitterCity,
           zip: sitterZip,
           country: sitterCountry,
@@ -412,6 +416,7 @@ export default function PetSitting() {
 
       if (res.ok) {
         const updatedData = await res.json();
+        setSitterApprovalStatus(updatedData.approval_status || 'pending');
         // FREE LAUNCH: Automatically treat saved profile as PRO
         setIsProSitter(true);
         setProfilePreviewMode(true);
@@ -742,8 +747,7 @@ export default function PetSitting() {
                     {filteredSitters.map(sitter => (
                       <div key={sitter.id} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative">
                         <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                          Verified
+                          📸 Photo Verified
                         </div>
                         
                         <div className="flex items-center gap-4 mb-4">
@@ -812,28 +816,47 @@ export default function PetSitting() {
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
             {profilePreviewMode ? (
               <div className="animate-fade-in text-center">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isProSitter ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                  {isProSitter ? (
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                  ) : (
-                    <span className="text-3xl">⚠️</span>
-                  )}
-                </div>
-                <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">
-                  Sitter Profile Active
-                </h2>
-                <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                  Your profile is live and visible to pet owners in your neighborhood.
-                </p>
+                {sitterApprovalStatus === 'pending' && (
+                  <>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-yellow-100 text-yellow-600">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Submitted for Review</h2>
+                    <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                      Your profile has been submitted for review. We will notify you by email within 24 hours once approved.
+                    </p>
+                  </>
+                )}
+                {sitterApprovalStatus === 'rejected' && (
+                  <>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100 text-red-600">
+                      <span className="text-3xl">❌</span>
+                    </div>
+                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Not Approved</h2>
+                    <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                      Please check your email for the reason and update your profile below to resubmit.
+                    </p>
+                  </>
+                )}
+                {sitterApprovalStatus === 'approved' && (
+                  <>
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isProSitter ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {isProSitter ? (
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <span className="text-3xl">⚠️</span>
+                      )}
+                    </div>
+                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Sitter Profile Active</h2>
+                    <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                      Your profile is approved and visible to pet owners in your neighborhood.
+                    </p>
+                  </>
+                )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden">
-                  {!isProSitter && (
-                     <div className="absolute top-4 right-4 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Hidden</div>
-                  )}
-                  {isProSitter && (
-                     <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Live</div>
-                  )}
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
+                  <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
                   <div className="flex items-center gap-4 mb-4 mt-2">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt={sitterName} className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white" />
@@ -868,11 +891,12 @@ export default function PetSitting() {
                     Edit Profile
                   </button>
                   
-                  {isProSitter ? (
+                  {sitterApprovalStatus === 'approved' && isProSitter && (
                     <button type="button" onClick={() => window.location.href = '/account'} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 rounded-xl transition-all shadow-sm">
                       Manage Subscription
                     </button>
-                  ) : (
+                  )}
+                  {sitterApprovalStatus === 'approved' && !isProSitter && (
                     <button type="button" onClick={handleStripeCheckout} disabled={profileLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
@@ -946,8 +970,8 @@ export default function PetSitting() {
                   <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['name'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                   {formErrors['name'] && <p className="text-red-500 text-sm mt-1">{formErrors['name']}</p>}
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Profile Photo <span className="text-gray-400 font-normal text-xs ml-1">(Optional - under 5MB)</span></label>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Take a selfie or upload a recent photo of yourself <span className="text-red-500 ml-1">— required for verification</span></label>
                   {formErrors['photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['photo']}</p>}
                   <div className="flex items-center gap-4 p-2 rounded-xl">
                     {sitterPhoto ? (
@@ -964,7 +988,7 @@ export default function PetSitting() {
                         const file = e.target.files?.[0];
                         if (file) {
                           if (file.size > 4 * 1024 * 1024) {
-                            setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB or try a different image' }));
+                            setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
                             return;
                           } else {
                             setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
@@ -976,10 +1000,8 @@ export default function PetSitting() {
                               const canvas = document.createElement('canvas');
                               let width = img.width;
                               let height = img.height;
-                              
                               const MAX_WIDTH = 800;
                               const MAX_HEIGHT = 800;
-                              
                               if (width > height) {
                                 if (width > MAX_WIDTH) {
                                   height *= MAX_WIDTH / width;
@@ -991,14 +1013,63 @@ export default function PetSitting() {
                                   height = MAX_HEIGHT;
                                 }
                               }
-                              
                               canvas.width = width;
                               canvas.height = height;
                               const ctx = canvas.getContext('2d');
                               ctx?.drawImage(img, 0, 0, width, height);
-                              
-                              const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                              setSitterPhoto(dataUrl);
+                              setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                            };
+                            img.src = reader.result as string;
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }} 
+                      className="flex-1 block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                    />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Upload a photo of your ID (passport, driver's license) <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span></label>
+                  <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
+                    {sitterIdPhoto ? (
+                      <div className="w-16 h-12 rounded bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs border border-green-200">
+                        Uploaded
+                      </div>
+                    ) : (
+                      <div className="w-16 h-12 rounded bg-[#E8DDD4] flex items-center justify-center text-gray-400">
+                        🪪
+                      </div>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 4 * 1024 * 1024) {
+                            alert('Your ID photo is too large. Please use a photo under 4MB');
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const img = new window.Image();
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas');
+                              let width = img.width;
+                              let height = img.height;
+                              const MAX_WIDTH = 1200; // slightly larger for ID text clarity
+                              const MAX_HEIGHT = 1200;
+                              if (width > height) {
+                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                              } else {
+                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                              }
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext('2d');
+                              ctx?.drawImage(img, 0, 0, width, height);
+                              setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
                             };
                             img.src = reader.result as string;
                           };

@@ -172,6 +172,27 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Card 1.5 - Lost Pets (Coming Soon) */}
+            <div className="relative bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] overflow-hidden">
+              <Link href="/lost-pets" className="absolute inset-0 z-10"></Link>
+              <span className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full flex items-center gap-1 z-20 pointer-events-none">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Coming Soon
+              </span>
+              <div className="flex items-center gap-3 relative z-20 pointer-events-none">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <span className="text-[#8B5E3C] text-lg">🐾</span>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Lost Pets</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed relative z-20 pointer-events-none" style={{ fontSize: 'var(--text-card-desc)' }}>
+                A community board to help reunite lost pets with their families. Free to post and browse.
+              </p>
+              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-decoration-none relative z-20 pointer-events-none" style={{ textDecoration: 'none', fontSize: 'var(--text-btn)' }}>
+                View Board &rarr;
+              </div>
+            </div>
+
             {/* Card 2 - Pet Twin */}
             <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-3">
@@ -399,6 +420,7 @@ export default function Home() {
               <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Is My Pet&apos;s Food Safe?</Link></li>
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
               <li><span style={{ color: '#777777', cursor: 'default' }}>Pet Sitting <span style={{ fontSize: '10px', background: '#333', color: '#999', padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', verticalAlign: 'middle' }}>Soon</span></span></li>
+              <li><Link href="/lost-pets" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Lost Pets <span style={{ fontSize: '10px', background: '#333', color: '#999', padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', verticalAlign: 'middle' }}>Soon</span></Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
           </div>
