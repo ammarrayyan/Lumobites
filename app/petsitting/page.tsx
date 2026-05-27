@@ -72,7 +72,9 @@ export default function PetSitting() {
 
   // Become Sitter State
   const [sitterEmail, setSitterEmail] = useState('');
-  const [sitterName, setSitterName] = useState('');
+  const [sitterFirstName, setSitterFirstName] = useState('');
+  const [sitterLastName, setSitterLastName] = useState('');
+  const sitterName = `${sitterFirstName} ${sitterLastName}`.trim();
   const [sitterPhoto, setSitterPhoto] = useState('');
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
   const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
@@ -219,7 +221,9 @@ export default function PetSitting() {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          setSitterName(data.name || '');
+          const nameParts = (data.name || '').trim().split(/\s+/);
+          setSitterFirstName(nameParts[0] || '');
+          setSitterLastName(nameParts.slice(1).join(' ') || '');
           setSitterPhoto(data.photo_url || '');
           setSitterCity(data.city || '');
           setSitterZip(data.zip || '');
@@ -293,7 +297,8 @@ export default function PetSitting() {
       } else {
         // New user, go straight to signup form
         // Pre-fill email, clear the rest
-        setSitterName('');
+        setSitterFirstName('');
+        setSitterLastName('');
         setSitterPhoto('');
         setSitterCity('');
         setSitterZip('');
@@ -349,7 +354,8 @@ export default function PetSitting() {
         // Reset state
         setSitterAuthMode('email');
         setSitterEmail('');
-        setSitterName('');
+        setSitterFirstName('');
+        setSitterLastName('');
         setSitterPhoto('');
         setSitterCity('');
         setSitterZip('');
@@ -379,7 +385,8 @@ export default function PetSitting() {
     const errors: Record<string, string> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!sitterEmail.trim() || !emailRegex.test(sitterEmail.trim())) errors['email'] = 'Please enter a valid email address';
-    if (!sitterName.trim()) errors['name'] = 'Please enter your full name';
+    if (!sitterFirstName.trim()) errors['firstName'] = 'Please enter your first name';
+    if (!sitterLastName.trim()) errors['lastName'] = 'Please enter your last name';
     if (!sitterCity.trim()) errors['city'] = 'Please enter your city';
     if (sitterCountry === 'United States' && !sitterZip.trim()) errors['zip'] = 'Please enter your zip code';
     if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
@@ -1016,9 +1023,14 @@ export default function PetSitting() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Full Name</label>
-                  <input required type="text" value={sitterName} onChange={e => setSitterName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['name'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
-                  {formErrors['name'] && <p className="text-red-500 text-sm mt-1">{formErrors['name']}</p>}
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name</label>
+                  <input required type="text" value={sitterFirstName} onChange={e => setSitterFirstName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['firstName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  {formErrors['firstName'] && <p className="text-red-500 text-sm mt-1">{formErrors['firstName']}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name</label>
+                  <input required type="text" value={sitterLastName} onChange={e => setSitterLastName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['lastName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  {formErrors['lastName'] && <p className="text-red-500 text-sm mt-1">{formErrors['lastName']}</p>}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Take a selfie or upload a recent photo of yourself <span className="text-red-500 ml-1">— required for verification</span></label>
@@ -1034,6 +1046,7 @@ export default function PetSitting() {
                     <input 
                       type="file" 
                       accept="image/*" 
+                      capture="user"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -1094,6 +1107,7 @@ export default function PetSitting() {
                     <input 
                       type="file" 
                       accept="image/*" 
+                      capture="environment"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
