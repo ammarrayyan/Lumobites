@@ -109,11 +109,18 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6 ml-auto">
 
           {/* Lost Pets - Coming Soon */}
-          <Link href="/lost-pets" className="relative group text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
-            <span className="text-[14px] mr-1.5 align-middle leading-none">🐾</span>
-            Lost Pets
-            <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-1">Soon</span>
-          </Link>
+          <div className="relative group" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[#BBBBBB] font-medium flex items-center gap-1.5 cursor-default select-none">
+              <span className="text-[14px] leading-none opacity-60">🐾</span>
+              Lost Pets
+              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full">Soon</span>
+            </span>
+            {/* Tooltip */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#191919] text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+              Coming Soon!
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-[#191919]" />
+            </div>
+          </div>
 
           {/* Pet Sitting - Coming Soon */}
           <div className="relative group" style={{ fontSize: 'var(--text-nav)' }}>
@@ -287,15 +294,11 @@ export default function Navbar() {
           <div className="flex flex-col p-4 gap-2">
 
             {/* Lost Pets - Coming Soon (mobile) */}
-            <Link 
-              href="/lost-pets" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-[16px] mr-2.5 align-middle leading-none">🐾</span>
+            <div className="px-4 py-3 text-[#BBBBBB] font-medium flex items-center gap-2 rounded-xl cursor-default">
+              <span className="text-[16px] leading-none opacity-60">🐾</span>
               Lost Pets
-              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-2">Soon</span>
-            </Link>
+              <span className="text-[9px] bg-[#8B5E3C]/10 text-[#8B5E3C] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full">Coming Soon</span>
+            </div>
 
             {/* Pet Sitting - Coming Soon (mobile) */}
             <div className="px-4 py-3 text-[#BBBBBB] font-medium flex items-center gap-2 rounded-xl cursor-default">
