@@ -80,8 +80,8 @@ export default function Home() {
             <span className="text-[#C17D3C]">— in one place.</span>
           </h1>
           
-          <p className="text-[#666666] mb-10 leading-[1.65] max-w-[460px] relative z-10" style={{ fontSize: 'var(--text-hero-sub)' }}>
-            Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
+          <p className="text-[#666666] mb-10 leading-[1.65] max-w-[600px] relative z-10 mx-auto" style={{ fontSize: 'var(--text-hero-sub)' }}>
+            Your neighborhood pet community — find trusted sitters, reunite lost pets, scan food ingredients, get FDA recall alerts and discover your Pet Twin. Built for pet lovers, by pet lovers.
           </p>
 
           <style>{`
@@ -106,15 +106,15 @@ export default function Home() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to use
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to Join
             </span>
             <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
             <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> No sign-up needed
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Community Powered
             </span>
             <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
             <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Results in seconds
+              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> AI Driven
             </span>
           </div>
 
