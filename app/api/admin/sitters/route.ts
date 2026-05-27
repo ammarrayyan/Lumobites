@@ -127,6 +127,34 @@ export async function POST(req: NextRequest) {
           <p>Best,<br/>The Lumo Bites Team</p>
         `
       });
+    } else if (action === 'delete') {
+      // Permanently delete the sitter profile
+      const { error: deleteErr } = await supabaseAdmin
+        .from('sitters')
+        .delete()
+        .eq('id', id);
+
+      if (deleteErr) throw deleteErr;
+
+      // Send deletion notification email
+      if (sitter.email) {
+        try {
+          await resend.emails.send({
+            from: fromEmail,
+            to: sitter.email,
+            subject: 'Your Lumo Bites sitter profile has been removed',
+            html: `
+              <h2>Hi ${sitter.name},</h2>
+              <p>Your Lumo Bites sitter profile has been removed by our admin team.</p>
+              <p>If you have questions please contact <a href="mailto:info@lumobitespet.com">info@lumobitespet.com</a>.</p>
+              <br/>
+              <p>Best,<br/>The Lumo Bites Team</p>
+            `
+          });
+        } catch (emailErr) {
+          console.error('[Admin Sitters] Failed to send deletion email:', emailErr);
+        }
+      }
     } else {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }

@@ -8,6 +8,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
 
   useEffect(() => {
@@ -80,6 +81,38 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
       alert(err.message);
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm('Are you sure you want to permanently delete this sitter profile? This cannot be undone.');
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    try {
+      const res = await fetch('/api/admin/sitters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ id, action: 'delete' })
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete sitter');
+      }
+
+      // Remove from local state immediately
+      setSitters(sitters.filter(s => s.id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -218,6 +251,15 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     )}
                   </>
                 )}
+
+                {/* Delete Button — always visible */}
+                <button
+                  onClick={() => handleDelete(sitter.id)}
+                  disabled={processingId === sitter.id || deletingId === sitter.id}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+                >
+                  {deletingId === sitter.id ? 'Deleting...' : '🗑️ Delete Profile'}
+                </button>
               </div>
             </div>
           ))
