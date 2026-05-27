@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import LostPetsMap from '@/components/LostPetsMap';
 
 export default function LostPetsFeed() {
   const [pets, setPets] = useState<any[]>([]);
@@ -178,8 +179,11 @@ export default function LostPetsFeed() {
             <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pets.map((pet) => (
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            {/* Pets Grid */}
+            <div className="flex-1 order-2 lg:order-1 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {pets.map((pet) => (
               <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
                 <div className="relative h-64 overflow-hidden bg-gray-100">
                   {pet.photo_url ? (
@@ -237,6 +241,13 @@ export default function LostPetsFeed() {
                 </div>
               </div>
             ))}
+              </div>
+            </div>
+
+            {/* Interactive Map */}
+            <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+              <LostPetsMap pets={pets} searchCoords={searchCoords} />
+            </div>
           </div>
         )}
       </main>
