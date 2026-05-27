@@ -10,17 +10,68 @@ export default function LostPetsFeed() {
   const [loading, setLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchRadius, setSearchRadius] = useState('25');
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
+  const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [locationVerified, setLocationVerified] = useState(false);
 
   useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchCoords(null);
+      setLocationVerified(false);
+      return;
+    }
+
+    const geocode = async () => {
+      setIsGeocoding(true);
+      setLocationVerified(false);
+      try {
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) return;
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(searchQuery)}&key=${apiKey}`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const lat = data.results[0].geometry.location.lat;
+          const lng = data.results[0].geometry.location.lng;
+          setSearchCoords({ lat, lng });
+          setLocationVerified(true);
+        } else {
+          setSearchCoords(null);
+        }
+      } catch (err) {
+        setSearchCoords(null);
+      } finally {
+        setIsGeocoding(false);
+      }
+    };
+
+    const delay = setTimeout(geocode, 600);
+    return () => clearTimeout(delay);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (isGeocoding) return;
+
     const fetchPets = async () => {
       setLoading(true);
       try {
         const params = new URLSearchParams();
         if (filterType !== 'all') params.append('type', filterType);
         if (filterSpecies !== 'all') params.append('species', filterSpecies);
-        if (searchQuery) params.append('q', searchQuery);
+        
+        if (searchQuery) {
+          if (searchCoords) {
+            params.append('lat', searchCoords.lat.toString());
+            params.append('lng', searchCoords.lng.toString());
+            if (searchRadius !== 'any') {
+              params.append('radius', searchRadius);
+            }
+          } else {
+            params.append('q', searchQuery);
+          }
+        }
 
         const res = await fetch(`/api/lost-pets?${params.toString()}`);
         const data = await res.json();
@@ -34,9 +85,8 @@ export default function LostPetsFeed() {
       }
     };
 
-    const delay = setTimeout(fetchPets, 500);
-    return () => clearTimeout(delay);
-  }, [searchQuery, filterType, filterSpecies]);
+    fetchPets();
+  }, [searchQuery, searchCoords, searchRadius, filterType, filterSpecies, isGeocoding]);
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
@@ -55,15 +105,38 @@ export default function LostPetsFeed() {
 
         {/* Search & Filters */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 sticky top-4 z-10">
-          <div className="flex-1">
+          <div className="flex-1 relative">
             <input
               type="text"
               placeholder="Search by city or zip code..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setLocationVerified(false);
+              }}
+              className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
             />
+            {isGeocoding && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+            )}
+            {locationVerified && !isGeocoding && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+              </div>
+            )}
           </div>
+          <select
+            value={searchRadius}
+            onChange={(e) => setSearchRadius(e.target.value)}
+            className={`bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!searchCoords && !!searchQuery}
+          >
+            <option value="10">Within 10 miles</option>
+            <option value="25">Within 25 miles</option>
+            <option value="50">Within 50 miles</option>
+            <option value="100">Within 100 miles</option>
+            <option value="any">Any distance</option>
+          </select>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -90,8 +163,10 @@ export default function LostPetsFeed() {
         ) : pets.length === 0 ? (
           <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm">
             <span className="text-5xl mb-4 block">🐾</span>
-            <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">No pets found</h3>
-            <p className="text-[#8B7E7D]">Try adjusting your search or filters.</p>
+            <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">
+              {searchCoords && searchRadius !== 'any' ? `No pets found within ${searchRadius} miles of this location` : 'No pets found'}
+            </h3>
+            <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -123,8 +198,13 @@ export default function LostPetsFeed() {
                     </span>
                   </div>
                   
-                  <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex items-center gap-1">
-                    📍 {pet.city}, {pet.zip_code}
+                  <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
+                    <span className="flex items-center gap-1">📍 {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                    {pet.distance !== undefined && pet.distance !== null && (
+                      <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
+                        {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+                      </span>
+                    )}
                   </p>
                   
                   <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">
