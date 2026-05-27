@@ -136,6 +136,12 @@ export default function PetSitting() {
     } else {
       fetchSitters();
     }
+
+    // Set activeTab from URL search params or hash
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'become' || window.location.hash === '#become') {
+      setActiveTab('become');
+    }
   }, []);
 
   // Debounced geocoding effect
