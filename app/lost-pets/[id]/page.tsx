@@ -21,6 +21,16 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [copied, setCopied] = useState(false);
   const [showContact, setShowContact] = useState(false);
 
+  const [editToken, setEditToken] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('token')) {
+      setEditToken(params.get('token'));
+    }
+  }, []);
+
   useEffect(() => {
     const fetchPetAndComments = async () => {
       try {
@@ -61,6 +71,37 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     navigator.clipboard.writeText(`${text} ${url}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
+  };
+
+  const handleOwnerAction = async (action: 'resolve' | 'delete') => {
+    if (action === 'delete') {
+      if (!window.confirm("Are you sure you want to delete this post? This cannot be undone.")) return;
+    }
+    
+    setActionLoading(true);
+    try {
+      const endpoint = action === 'resolve' ? '/api/lost-pets/resolve' : '/api/lost-pets/delete';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, token: editToken })
+      });
+      
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to perform action');
+      }
+      
+      if (action === 'delete') {
+        window.location.href = '/lost-pets';
+      } else {
+        setPet({ ...pet, status: 'resolved' });
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -198,6 +239,32 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 >
                   <span className="text-xl">🔗</span> {copied ? 'Link Copied!' : 'Share this post'}
                 </button>
+
+                {editToken && (
+                  <div className="mt-6 border-t border-[#E8DDD4] pt-6">
+                    <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
+                      <span className="text-lg">⚙️</span> Manage Your Post
+                    </h4>
+                    <div className="flex flex-col gap-3">
+                      {pet.status === 'active' && (
+                        <button 
+                          onClick={() => handleOwnerAction('resolve')}
+                          disabled={actionLoading}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50"
+                        >
+                          {actionLoading ? 'Processing...' : 'Mark as Resolved 🎉'}
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleOwnerAction('delete')}
+                        disabled={actionLoading}
+                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50"
+                      >
+                        {actionLoading ? 'Processing...' : 'Delete My Post'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

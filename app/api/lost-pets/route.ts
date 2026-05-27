@@ -139,16 +139,16 @@ export async function POST(request: NextRequest) {
       await resend?.emails.send({
         from: 'Lumo Bites Pet <noreply@lumobitespet.com>',
         to: contact_email,
-        subject: `Your ${type === 'lost' ? 'Lost' : 'Found'} Pet Post is Live!`,
+        subject: `Manage your Lumo Bites lost pet post`,
         html: `
-          <h1>We hope you find ${pet_name || 'them'} soon!</h1>
-          <p>Your post has been successfully shared on the Lumo Bites community board.</p>
-          <p>You can view your post here: <a href="${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}">${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}</a></p>
+          <h1>Your post for ${pet_name || 'them'} has been shared!</h1>
+          <p>Use the links below to manage your post. Please do not share these secure links.</p>
           <hr />
           <h3>Manage Your Post</h3>
-          <p>When you want to mark your post as "Found / Resolved", click the secure link below:</p>
-          <p><a href="${manageUrl}">Mark as Found 🎉</a></p>
-          <p><em>Please do not share this link, as it allows anyone to modify your post's status.</em></p>
+          <p><a href="${manageUrl}">Mark as Resolved 🎉</a></p>
+          <p><a href="${manageUrl}">Delete My Post</a></p>
+          <br/>
+          <p>You can also manage your post directly on its page by visiting this secure link: <a href="${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}?token=${editToken}">${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}?token=${editToken}</a></p>
         `
       });
     }
