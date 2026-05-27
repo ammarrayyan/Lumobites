@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     
     // Find the most recent request log for this email in the last 30 minutes
-    const { data: recentLog, error: logError } = await supabase
+    const { data: recentLog, error: logError } = await supabaseAdmin
       .from('otp_requests_log')
       .select('*')
       .eq('email', cleanEmail)
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Look up the code
-    const { data: codeData, error: codeError } = await supabase
+    const { data: codeData, error: codeError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('email', cleanEmail)
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     if (codeError || !codeData) {
       // Increment failed_attempts if a log exists
       if (recentLog) {
-        await supabase
+        await supabaseAdmin
           .from('otp_requests_log')
           .update({ failed_attempts: (recentLog.failed_attempts || 0) + 1 })
           .eq('id', recentLog.id);
@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
 
     // 2. Check expiration
     if (new Date(codeData.expires_at) < new Date()) {
-      await supabase.from('verification_codes').delete().eq('id', codeData.id);
+      await supabaseAdmin.from('verification_codes').delete().eq('id', codeData.id);
       return NextResponse.json({ error: 'Code expired — please request a new one' }, { status: 400 });
     }
 
     // 3. Mark successful login by clearing the code
-    await supabase.from('verification_codes').delete().eq('id', codeData.id);
+    await supabaseAdmin.from('verification_codes').delete().eq('id', codeData.id);
     if (recentLog) {
-      await supabase.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);
+      await supabaseAdmin.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);
     }
 
     return NextResponse.json({ success: true, message: 'Logged in successfully' });

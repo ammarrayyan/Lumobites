@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     if (type === 'owner') {
-      const { data: ownerData, error: ownerError } = await supabase
+      const { data: ownerData, error: ownerError } = await supabaseAdmin
         .from('emails')
         .select('is_pro')
         .eq('email', cleanEmail)
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
     // 1.5 Rate Limiting Check
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await supabaseAdmin
       .from('otp_requests_log')
       .select('*', { count: 'exact', head: true })
       .eq('email', cleanEmail)
@@ -56,17 +56,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the new request
-    await supabase.from('otp_requests_log').insert({ email: cleanEmail });
+    await supabaseAdmin.from('otp_requests_log').insert({ email: cleanEmail });
 
     // 2. Generate a secure 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
     // 3. Clear existing codes
-    await supabase.from('verification_codes').delete().eq('email', cleanEmail);
+    await supabaseAdmin.from('verification_codes').delete().eq('email', cleanEmail);
 
     // 4. Store the new code
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('verification_codes')
       .insert({
         email: cleanEmail,
