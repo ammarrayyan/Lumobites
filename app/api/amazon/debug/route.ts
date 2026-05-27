@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const CLIENT_ID = process.env.AMAZON_CLIENT_ID || '';
   const CLIENT_SECRET = process.env.AMAZON_CLIENT_SECRET || '';
   const PARTNER_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'lumobites-20';
@@ -18,43 +18,47 @@ export async function GET(req: NextRequest) {
   const token = (await tokenRes.json()).access_token;
   if (!token) return NextResponse.json({ error: 'No token' });
 
-  const bodyCamel = {
+  // Test 1: Header marketplace + camelCase searchIndex
+  const bodyCamel1 = {
     keywords: 'dog food',
     partnerTag: PARTNER_TAG,
     partnerType: 'Associates',
-    searchIndex: 'PetSupplies', // Try PascalCase index, it shouldn't matter but maybe?
+    searchIndex: 'petSupplies', 
     itemCount: 2,
-    resources: [
-      'images.primary.large',
-      'images.primary.medium',
-      'itemInfo.title',
-      'offersV2.listings.price',
-      'offersV2.listings.deliveryInfo.isPrimeEligible',
-      'customerReviews.starRating',
-      'customerReviews.count',
-    ],
+    resources: ['itemInfo.title', 'offersV2.listings.price'],
   };
-  
-  const headers = {
+  const headers1 = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
-    'Accept': 'application/json',
-    'User-Agent': 'LumoBites/1.0 (Node.js)'
+    'x-marketplace': 'www.amazon.com'
   };
 
-  try {
-    const SEARCH_URL = 'https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com';
-    const r = await fetch(SEARCH_URL, { method: 'POST', headers, body: JSON.stringify(bodyCamel) });
-    const rawText = await r.text();
-    return NextResponse.json({
-      status: r.status,
-      bodyString: rawText,
-      parsed: JSON.parse(rawText || '{}')
-    });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message });
-  }
-}
+  // Test 2: Query marketplace + camelCase searchIndex
+  const bodyCamel2 = { ...bodyCamel1 };
+  const headers2 = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
 
-// Export POST as well to avoid caching
-export const POST = GET;
+  // Test 3: Header marketplace + PascalCase searchIndex (to prove if it's the culprit)
+  const bodyCamel3 = { ...bodyCamel1, searchIndex: 'PetSupplies' };
+
+  const results: any = {};
+  
+  try {
+    const r = await fetch('https://creatorsapi.amazon/catalog/v1/items/search', { method: 'POST', headers: headers1, body: JSON.stringify(bodyCamel1) });
+    results['test1_header_marketplace_camelCase_index'] = { status: r.status, body: (await r.text()).slice(0, 500) };
+  } catch (e: any) { results['test1'] = e.message; }
+
+  try {
+    const r = await fetch('https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com', { method: 'POST', headers: headers2, body: JSON.stringify(bodyCamel2) });
+    results['test2_query_marketplace_camelCase_index'] = { status: r.status, body: (await r.text()).slice(0, 500) };
+  } catch (e: any) { results['test2'] = e.message; }
+
+  try {
+    const r = await fetch('https://creatorsapi.amazon/catalog/v1/items/search', { method: 'POST', headers: headers1, body: JSON.stringify(bodyCamel3) });
+    results['test3_header_marketplace_PascalCase_index'] = { status: r.status, body: (await r.text()).slice(0, 500) };
+  } catch (e: any) { results['test3'] = e.message; }
+
+  return NextResponse.json(results);
+}
