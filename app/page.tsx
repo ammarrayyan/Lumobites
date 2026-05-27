@@ -236,17 +236,11 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 8 - Pet Sitting (Coming Soon) */}
-          <div
-            className="relative bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm cursor-pointer group opacity-80 hover:opacity-90 transition-all"
-            onClick={() => setPetSittingModalOpen(true)}
+          {/* Card 8 - Pet Sitting */}
+          <Link
+            href="/petsitting"
+            className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none"
           >
-            <span className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full flex items-center gap-1 z-10">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Coming Soon
-            </span>
-            <div className="absolute inset-0 rounded-3xl bg-white/30 backdrop-grayscale-[20%] pointer-events-none" />
-            
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
                 <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -256,12 +250,12 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Sitting</h3>
             </div>
             <p className="text-[#666666] leading-relaxed relative flex-1 z-10" style={{ fontSize: 'var(--text-card-desc)' }}>
-              Connect with trusted, local pet sitters in your neighborhood or become a sitter yourself.
+              Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join
             </p>
-            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C]/40 text-[#8B5E3C]/60 font-bold text-center select-none relative z-10" style={{ fontSize: 'var(--text-btn)' }}>
-              Notify Me &rarr;
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all relative z-10" style={{ fontSize: 'var(--text-btn)' }}>
+              Find Sitters &rarr;
             </div>
-          </div>
+          </Link>
 
         </div>
       </section>
@@ -333,13 +327,11 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet's needs.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden">
-              <div className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[9px] font-black uppercase tracking-[0.12em] px-2 py-0.5 rounded-full z-10">Soon</div>
-              <div className="absolute inset-0 bg-white/40 backdrop-grayscale-[30%] pointer-events-none z-0"></div>
+            <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
               <span className="relative z-10" style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🏡</span>
               <h3 className="text-[#191919] font-bold text-xl mb-2 relative z-10">Sitting & Community</h3>
               <p className="text-[#666666] text-base leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -416,7 +408,7 @@ export default function Home() {
               <li><Link href="/chat" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Compare Foods</Link></li>
               <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Is My Pet&apos;s Food Safe?</Link></li>
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
-              <li><span style={{ color: '#777777', cursor: 'default' }}>Pet Sitting <span style={{ fontSize: '10px', background: '#333', color: '#999', padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', verticalAlign: 'middle' }}>Soon</span></span></li>
+              <li><Link href="/petsitting" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Sitting</Link></li>
               <li><Link href="/lost-pets" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Lost Pets</Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
