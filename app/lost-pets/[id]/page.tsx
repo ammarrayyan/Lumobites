@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
-export default function LostPetDetail({ params }: { params: { id: string } }) {
+export default function LostPetDetail({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params);
+  const id = unwrappedParams.id;
+  
   const [pet, setPet] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,12 +24,12 @@ export default function LostPetDetail({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchPetAndComments = async () => {
       try {
-        const petRes = await fetch(`/api/lost-pets/${params.id}`);
+        const petRes = await fetch(`/api/lost-pets/${id}`);
         if (!petRes.ok) throw new Error('Pet not found');
         const petData = await petRes.json();
         setPet(petData.pet);
 
-        const commRes = await fetch(`/api/lost-pets/comments?lost_pet_id=${params.id}`);
+        const commRes = await fetch(`/api/lost-pets/comments?lost_pet_id=${id}`);
         if (commRes.ok) {
           const commData = await commRes.json();
           setComments(commData.comments || []);
@@ -38,7 +41,7 @@ export default function LostPetDetail({ params }: { params: { id: string } }) {
       }
     };
     fetchPetAndComments();
-  }, [params.id]);
+  }, [id]);
 
   const handleShare = async () => {
     if (!pet) return;
@@ -70,7 +73,7 @@ export default function LostPetDetail({ params }: { params: { id: string } }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          lost_pet_id: params.id,
+          lost_pet_id: id,
           author_name: commentAuthor,
           comment_text: newComment
         })

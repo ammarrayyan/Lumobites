@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'lost_pet_id is required' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('lost_pet_comments')
       .select('*')
       .eq('lost_pet_id', lost_pet_id)
