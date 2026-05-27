@@ -16,38 +16,37 @@ export async function POST(req: NextRequest) {
     }).toString(),
   });
   const token = (await tokenRes.json()).access_token;
-  if (!token) return NextResponse.json({ error: 'No token' });
 
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
-    'x-marketplace': 'www.amazon.com'
+    'x-marketplace': 'www.amazon.com',
+    'Accept': 'application/json',
+    'User-Agent': 'LumoBites/1.0 (Node.js)'
   };
 
-  const results: any = {};
-  
-  // Test 1: Empty resources array
-  const bodyEmptyResources = {
+  const bodyCamel = {
     keywords: 'dog food',
     partnerTag: PARTNER_TAG,
-    partnerType: 'Associates',
-  };
-
-  // Test 2: PascalCase resources strings
-  const bodyPascalResources = {
-    ...bodyEmptyResources,
-    resources: ['ItemInfo.Title', 'OffersV2.Listings.Price'],
+    searchIndex: 'petSupplies',
+    itemCount: 2,
+    resources: [
+      'images.primary.large',
+      'itemInfo.title',
+      'offersV2.listings.price'
+    ],
   };
 
   try {
-    const r = await fetch('https://creatorsapi.amazon/catalog/v1/items/search', { method: 'POST', headers, body: JSON.stringify(bodyEmptyResources) });
-    results['test1_empty_resources'] = { status: r.status, body: (await r.text()).slice(0, 500) };
-  } catch (e: any) { results['test1'] = e.message; }
-
-  try {
-    const r = await fetch('https://creatorsapi.amazon/catalog/v1/items/search', { method: 'POST', headers, body: JSON.stringify(bodyPascalResources) });
-    results['test2_pascal_resources'] = { status: r.status, body: (await r.text()).slice(0, 500) };
-  } catch (e: any) { results['test2'] = e.message; }
-
-  return NextResponse.json(results);
+    const r = await fetch('https://creatorsapi.amazon/catalog/v1/searchItems', { method: 'POST', headers, body: JSON.stringify(bodyCamel) });
+    const rawText = await r.text();
+    return NextResponse.json({
+      status: r.status,
+      bodyString: rawText,
+      parsed: JSON.parse(rawText || '{}')
+    });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message });
+  }
 }
+export const GET = POST;
