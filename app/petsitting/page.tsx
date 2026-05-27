@@ -79,8 +79,11 @@ export default function PetSitting() {
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
   const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
   const [sitterCity, setSitterCity] = useState('');
-  const [sitterZip, setSitterZip] = useState('');
-  const [sitterCountry, setSitterCountry] = useState('United States');
+  const [sitterLocationInput, setSitterLocationInput] = useState('');
+  const [sitterLocationVerified, setSitterLocationVerified] = useState(false);
+  const [sitterLocationOptions, setSitterLocationOptions] = useState<any[]>([]);
+  const [sitterSelectedLocation, setSitterSelectedLocation] = useState<any>(null);
+  const [sitterIsLocating, setSitterIsLocating] = useState(false);
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
   const [sitterRate, setSitterRate] = useState('');
@@ -117,6 +120,7 @@ export default function PetSitting() {
   const [cameraTarget, setCameraTarget] = useState<'selfie' | 'id' | null>(null);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState('');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Zip Code Validation State
@@ -175,35 +179,7 @@ export default function PetSitting() {
     return () => clearTimeout(timeoutId);
   }, [searchZip]);
 
-  // Zip Code Smart Validation Effect
-  useEffect(() => {
-    if (sitterZip.trim().length < 4 || sitterAuthMode !== 'form') {
-      setZipError('');
-      return;
-    }
-    
-    const timeoutId = setTimeout(async () => {
-      setZipGeocoding(true);
-      try {
-        const res = await fetch(`/api/petsitting/geocode?address=${encodeURIComponent(sitterZip + ' ' + sitterCountry)}`);
-        const data = await res.json();
-        if (res.ok) {
-          if (data.city) {
-            setSitterCity(data.city);
-          }
-          setZipError('');
-        } else {
-          setZipError('We couldn\'t find that zip code — please check and try again');
-        }
-      } catch (e) {
-        setZipError('Error validating zip code.');
-      } finally {
-        setZipGeocoding(false);
-      }
-    }, 1000);
 
-    return () => clearTimeout(timeoutId);
-  }, [sitterZip, sitterCountry, sitterAuthMode]);
 
   const fetchSitters = async (email?: string) => {
     try {
@@ -233,8 +209,15 @@ export default function PetSitting() {
           setSitterLastName(nameParts.slice(1).join(' ') || '');
           setSitterPhoto(data.photo_url || '');
           setSitterCity(data.city || '');
-          setSitterZip(data.zip || '');
-          setSitterCountry(data.country || 'United States');
+          setSitterLocationInput(data.city || '');
+          setSitterLocationVerified(!!data.city);
+          if (data.city) {
+            setSitterSelectedLocation({
+              formatted_address: data.city,
+              lat: data.lat,
+              lng: data.lng
+            });
+          }
           setSitterBio(data.bio || '');
           setSitterPetTypes(data.pet_types || 'both');
           setSitterRate(data.rate_per_night?.toString() || '');
@@ -308,7 +291,11 @@ export default function PetSitting() {
         setSitterLastName('');
         setSitterPhoto('');
         setSitterCity('');
-        setSitterZip('');
+        setSitterLocationInput('');
+        setSitterLocationVerified(false);
+        setSitterLocationOptions([]);
+        setSitterSelectedLocation(null);
+        setSitterIsLocating(false);
         setSitterBio('');
         setSitterRate('');
         setSitterAuthMode('form');
@@ -365,7 +352,11 @@ export default function PetSitting() {
         setSitterLastName('');
         setSitterPhoto('');
         setSitterCity('');
-        setSitterZip('');
+        setSitterLocationInput('');
+        setSitterLocationVerified(false);
+        setSitterLocationOptions([]);
+        setSitterSelectedLocation(null);
+        setSitterIsLocating(false);
         setSitterBio('');
         setSitterPetTypes('both');
         setSitterRate('');
@@ -394,8 +385,9 @@ export default function PetSitting() {
     if (!sitterEmail.trim() || !emailRegex.test(sitterEmail.trim())) errors['email'] = 'Please enter a valid email address';
     if (!sitterFirstName.trim()) errors['firstName'] = 'Please enter your first name';
     if (!sitterLastName.trim()) errors['lastName'] = 'Please enter your last name';
-    if (!sitterCity.trim()) errors['city'] = 'Please enter your city';
-    if (sitterCountry === 'United States' && !sitterZip.trim()) errors['zip'] = 'Please enter your zip code';
+    if (!sitterLocationInput.trim() || !sitterLocationVerified) errors['location'] = 'Please enter and verify your location';
+    if (!sitterPhoto) errors['photo'] = 'A profile photo is required';
+    if (!sitterIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     
@@ -416,9 +408,9 @@ export default function PetSitting() {
           name: sitterName,
           photo_url: sitterPhoto,
           id_photo_url: sitterIdPhoto,
-          city: sitterCity,
-          zip: sitterZip,
-          country: sitterCountry,
+          city: sitterCity || sitterLocationInput,
+          zip: '',
+          country: 'United States',
           bio: sitterBio,
           pet_types: sitterPetTypes,
           rate_per_night: sitterRate,
@@ -621,14 +613,25 @@ export default function PetSitting() {
     }
   };
 
-  const startCamera = async (target: 'selfie' | 'id') => {
+  const startCamera = async (target: 'selfie' | 'id', mode?: 'user' | 'environment') => {
+    const activeMode = mode || (target === 'selfie' ? 'user' : 'environment');
     setCameraTarget(target);
+    setFacingMode(activeMode);
     setCameraModalOpen(true);
     setCameraError('');
     
+    // Stop any existing stream first to avoid hardware conflicts
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: target === 'selfie' ? { facingMode: 'user', width: 640, height: 640 } : { facingMode: 'environment', width: 1280, height: 720 },
+        video: { 
+          facingMode: activeMode,
+          width: target === 'selfie' ? { ideal: 640 } : { ideal: 1280 },
+          height: target === 'selfie' ? { ideal: 640 } : { ideal: 720 }
+        },
         audio: false
       });
       setCameraStream(stream);
@@ -636,10 +639,17 @@ export default function PetSitting() {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-      }, 100);
+      }, 150);
     } catch (err: any) {
       console.error('Camera access error:', err);
       setCameraError('Unable to access camera. Please make sure you have given camera permissions to this website.');
+    }
+  };
+
+  const toggleCameraFacing = () => {
+    if (cameraTarget) {
+      const newMode = facingMode === 'user' ? 'environment' : 'user';
+      startCamera(cameraTarget, newMode);
     }
   };
 
@@ -676,6 +686,59 @@ export default function PetSitting() {
         }
       }
       stopCamera();
+    }
+  };
+
+  const handleSitterLocationBlur = async () => {
+    const input = sitterLocationInput.trim();
+    if (!input) {
+      setSitterLocationVerified(false);
+      setSitterLocationOptions([]);
+      setSitterSelectedLocation(null);
+      return;
+    }
+    
+    setSitterIsLocating(true);
+    setSitterLocationVerified(false);
+    setSitterLocationOptions([]);
+    setSitterSelectedLocation(null);
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+         setSitterCity(input);
+         setSitterLocationVerified(true);
+         return;
+      }
+      
+      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&key=${apiKey}`);
+      const data = await res.json();
+      
+      if (data.results && data.results.length > 0) {
+        const options = data.results.map((r: any) => ({
+          formatted_address: r.formatted_address,
+          lat: r.geometry.location.lat,
+          lng: r.geometry.location.lng,
+          place_id: r.place_id
+        }));
+        
+        setSitterLocationOptions(options);
+        
+        if (options.length === 1) {
+          setSitterSelectedLocation(options[0]);
+          setSitterCity(options[0].formatted_address);
+          setSitterLocationVerified(true);
+        }
+      } else {
+        setSitterCity(input);
+        setSitterLocationVerified(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setSitterCity(input);
+      setSitterLocationVerified(true);
+    } finally {
+      setSitterIsLocating(false);
     }
   };
 
@@ -751,7 +814,7 @@ export default function PetSitting() {
       filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
-  const isFormValid = sitterEmail.trim() && sitterName.trim() && sitterPhoto && sitterCity.trim() && sitterZip.trim() && sitterRate && sitterBio.trim();
+  const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && sitterIdPhoto && sitterLocationInput.trim() && sitterLocationVerified && sitterRate && sitterBio.trim();
 
   // Auto-set isProSitter to true on load/save to bypass sitter paywall UI.
   useEffect(() => {
@@ -991,7 +1054,7 @@ export default function PetSitting() {
                       <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
                       <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
-                        {sitterCity || 'City'}, {sitterZip || 'Zip'}
+                        {sitterCity || sitterLocationInput || 'Location'}
                       </p>
                     </div>
                   </div>
@@ -1167,7 +1230,8 @@ export default function PetSitting() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Upload a photo of your ID (passport, driver's license) <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span></label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Upload a photo of your ID (passport, driver's license) <span className="text-red-500 font-bold ml-1">*Required</span> <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span></label>
+                  {formErrors['id_photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['id_photo']}</p>}
                   <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
                     {sitterIdPhoto ? (
                       <div className="w-16 h-12 rounded bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs border border-green-200">
@@ -1227,30 +1291,63 @@ export default function PetSitting() {
                     </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">City</label>
-                  <input required type="text" value={sitterCity} onChange={e => setSitterCity(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['city'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
-                  {formErrors['city'] && <p className="text-red-500 text-sm mt-1">{formErrors['city']}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
-                    {sitterCountry === 'United States' ? 'Zip Code' : 'Postal Code (Optional)'}
-                  </label>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Location (City or Zip Code)</label>
                   <div className="relative">
-                    <input required={sitterCountry === 'United States'} type="text" value={sitterZip} onChange={e => setSitterZip(e.target.value)} className={`w-full bg-[#FAF6F4] border ${zipError ? 'border-red-500 bg-red-50' : !!formErrors['zip'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
-                    {formErrors['zip'] && <p className="text-red-500 text-sm mt-1">{formErrors['zip']}</p>}
-                    {zipGeocoding && <div className="absolute right-3 top-3 text-xs text-[#8B5E3C]">Validating...</div>}
+                    <input 
+                      required 
+                      type="text" 
+                      value={sitterLocationInput} 
+                      onChange={e => {
+                        setSitterLocationInput(e.target.value);
+                        setSitterLocationVerified(false);
+                        setSitterSelectedLocation(null);
+                        setSitterLocationOptions([]);
+                      }} 
+                      onBlur={handleSitterLocationBlur}
+                      className={`w-full bg-[#FAF6F4] border ${sitterLocationVerified ? 'border-green-500' : !!formErrors['location'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
+                      placeholder="Enter city name OR 5-digit zip code..." 
+                    />
+                    {sitterIsLocating && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                    {sitterLocationVerified && !sitterIsLocating && sitterSelectedLocation && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                    )}
                   </div>
-                  {zipError && <p className="text-red-500 text-xs mt-1 font-semibold">{zipError}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Country</label>
-                  <select value={sitterCountry} onChange={e => setSitterCountry(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
-                    <option value="United States">United States</option>
-                    <option value="Canada">Canada</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Australia">Australia</option>
-                  </select>
+                  
+                  {formErrors['location'] && <p className="text-red-500 text-sm mt-1">{formErrors['location']}</p>}
+                  
+                  {sitterSelectedLocation && (
+                    <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 animate-fade-in">
+                      ✅ {sitterSelectedLocation.formatted_address}
+                    </p>
+                  )}
+                  
+                  {sitterLocationOptions.length > 1 && !sitterSelectedLocation && (
+                    <div className="mt-3 p-4 bg-white border border-[#E8DDD4] rounded-xl shadow-sm absolute z-10 w-full left-0 right-0 max-h-60 overflow-y-auto">
+                      <p className="text-sm font-bold text-[#4A3E3D] mb-2">Multiple locations found. Please select one:</p>
+                      <div className="flex flex-col gap-2">
+                        {sitterLocationOptions.map((opt, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                              setSitterSelectedLocation(opt);
+                              setSitterCity(opt.formatted_address);
+                              setSitterLocationVerified(true);
+                              setSitterLocationInput(opt.formatted_address);
+                            }}
+                            className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D] text-sm"
+                          >
+                            📍 {opt.formatted_address}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pets Accepted</label>
@@ -1428,7 +1525,7 @@ export default function PetSitting() {
                   ref={videoRef} 
                   autoPlay 
                   playsInline 
-                  className={`w-full h-full object-cover ${cameraTarget === 'selfie' ? 'scale-x-[-1]' : ''}`}
+                  className={`w-full h-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
                 />
                 {cameraTarget === 'selfie' && (
                   <div className="absolute inset-0 border-[3px] border-dashed border-[#8B5E3C]/40 rounded-full max-w-[240px] max-h-[240px] m-auto pointer-events-none" />
@@ -1438,13 +1535,23 @@ export default function PetSitting() {
             
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               {!cameraError && (
-                <button 
-                  onClick={capturePhoto} 
-                  disabled={!cameraStream}
-                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-3 px-8 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-                >
-                  📸 Capture Photo
-                </button>
+                <>
+                  <button 
+                    onClick={capturePhoto} 
+                    disabled={!cameraStream}
+                    className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-3 px-8 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    📸 Capture Photo
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={toggleCameraFacing} 
+                    disabled={!cameraStream}
+                    className="bg-white hover:bg-gray-100 text-[#8B5E3C] font-bold py-3 px-6 rounded-xl transition-all border border-[#E8DDD4] flex items-center justify-center gap-2"
+                  >
+                    🔄 Switch Camera
+                  </button>
+                </>
               )}
               <button 
                 onClick={stopCamera} 
