@@ -141,23 +141,29 @@ export async function POST(request: NextRequest) {
 
     // 4. Send email if provided
     if (contact_email && process.env.RESEND_API_KEY) {
-      const manageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobitespet.com'}/lost-pets/manage?id=${data.id}&token=${editToken}`;
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobitespet.com';
+      const manageUrl = `${siteUrl}/lost-pets/manage?id=${data.id}&token=${editToken}`;
       
-      await resend?.emails.send({
-        from: 'Lumo Bites Pet <noreply@lumobitespet.com>',
-        to: contact_email,
-        subject: `Manage your Lumo Bites lost pet post`,
-        html: `
-          <h1>Your post for ${pet_name || 'them'} has been shared!</h1>
-          <p>Use the links below to manage your post. Please do not share these secure links.</p>
-          <hr />
-          <h3>Manage Your Post</h3>
-          <p><a href="${manageUrl}">Mark as Resolved 🎉</a></p>
-          <p><a href="${manageUrl}">Delete My Post</a></p>
-          <br/>
-          <p>You can also manage your post directly on its page by visiting this secure link: <a href="${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}?token=${editToken}">${process.env.NEXT_PUBLIC_SITE_URL}/lost-pets/${data.id}?token=${editToken}</a></p>
-        `
-      });
+      try {
+        const resendResponse = await resend?.emails.send({
+          from: 'Lumo Bites Pet <no-reply@lumobites.net>',
+          to: contact_email,
+          subject: `Manage your Lumo Bites lost pet post`,
+          html: `
+            <h1>Your post for ${pet_name || 'them'} has been shared!</h1>
+            <p>Use the links below to manage your post. Please do not share these secure links.</p>
+            <hr />
+            <h3>Manage Your Post</h3>
+            <p><a href="${manageUrl}">Mark as Resolved 🎉</a></p>
+            <p><a href="${manageUrl}">Delete My Post</a></p>
+            <br/>
+            <p>You can also manage your post directly on its page by visiting this secure link: <a href="${siteUrl}/lost-pets/${data.id}?token=${editToken}">${siteUrl}/lost-pets/${data.id}?token=${editToken}</a></p>
+          `
+        });
+        console.log('[Lost Pets POST] Resend response:', resendResponse);
+      } catch (emailError) {
+        console.error('[Lost Pets POST] Resend error:', emailError);
+      }
     }
 
     const { edit_token, pet_type, ...safePet } = data;
