@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
+
 
 interface Recall {
   id: string;
@@ -131,6 +133,9 @@ function RecallCard({ r }: { r: Recall }) {
         </div>
         <ShareRecallButton recall={r} />
       </div>
+
+      {/* ── Safe Alternatives from Amazon ── */}
+      <AmazonSafeAlternatives recall={r} />
     </div>
   );
 }
@@ -390,6 +395,73 @@ export default function RecallsPage() {
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
+    </div>
+  );
+}
+
+// ─── Amazon Safe Alternatives ─────────────────────────────────────────────────
+function AmazonSafeAlternatives({ recall }: { recall: Recall }) {
+  const [products, setProducts] = useState<AmazonProduct[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const petType = useMemo(() => {
+    const txt = `${recall.product} ${recall.reason}`.toLowerCase();
+    if (txt.includes('cat') || txt.includes('feline')) return 'cat';
+    return 'dog';
+  }, [recall]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    let cancelled = false;
+    setLoading(true);
+    const query = `best safe premium ${petType} food grain free no recall`;
+    fetch(`/api/amazon/search?q=${encodeURIComponent(query)}&limit=2`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) { setProducts(d.products ?? []); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [expanded, petType]);
+
+  return (
+    <div className="mt-4 pt-4 border-t border-[#F0E8E0]">
+      {!expanded ? (
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex items-center gap-2 text-[12px] font-semibold text-[#166534] bg-[#DCFCE7] border border-[#86EFAC] px-4 py-2 rounded-full hover:bg-[#BBF7D0] transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          Safe alternatives →
+        </button>
+      ) : (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[12px] font-bold text-[#166534] uppercase tracking-wide">✅ Safe Alternatives</p>
+            <span className="text-[9px] text-gray-400">Powered by Amazon</span>
+          </div>
+          {loading ? (
+            <div className="flex flex-col gap-2">
+              <AmazonProductCardSkeleton compact />
+              <AmazonProductCardSkeleton compact />
+            </div>
+          ) : products.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {products.map(p => <AmazonProductCard key={p.asin} product={p} compact />)}
+            </div>
+          ) : (
+            <a
+              href={`https://www.amazon.com/s?k=${encodeURIComponent('safe premium ' + petType + ' food')}&tag=lumobites-20`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-[#FFD814] border border-[#FCD200] text-[#0F1111] font-bold text-xs px-4 py-2.5 rounded-lg hover:bg-[#F7CA00] transition-colors"
+            >
+              Browse safe {petType} food on Amazon →
+            </a>
+          )}
+          <p className="text-[9px] text-gray-400 mt-2">
+            Affiliate links support Lumo Bites at no extra cost to you.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

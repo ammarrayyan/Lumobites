@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import BudgetSlider from '@/components/BudgetSlider';
 import Link from 'next/link';
 import { isBrandMatch } from '@/lib/brand-matcher';
+import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 
 export default function ResultsPage() {
   const [profile, setProfile] = useState<PetProfile | null>(null);
@@ -335,6 +336,9 @@ export default function ResultsPage() {
         {/* TOY RECOMMENDATIONS */}
         <ToyRecommendations profile={profile} />
 
+        {/* AMAZON PICKS */}
+        <AmazonPicks profile={profile} topResult={results[0] ?? null} />
+
         {/* RECALL ALERT SUBSCRIPTION */}
         <RecallSubscribeWidget profile={profile} results={results} />
 
@@ -417,6 +421,74 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── AMAZON PICKS ────────────────────────────────────────────────────────────
+function AmazonPicks({ profile, topResult }: { profile: PetProfile | null; topResult: ScoredProduct | null }) {
+  const [products, setProducts] = useState<AmazonProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!profile) return;
+    const brand = topResult?.brand || '';
+    const petType = profile.pet_type || 'dog';
+    const foodType = profile.food_type === 'wet' ? 'wet' : profile.food_type === 'treats' ? 'treats' : 'dry';
+    const query = brand
+      ? `${brand} ${petType} food ${foodType}`
+      : `best premium ${petType} food ${foodType}`;
+
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/amazon/search?q=${encodeURIComponent(query)}&limit=4`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) { setProducts(data.products ?? []); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [profile?.pet_type, topResult?.brand, profile?.food_type]);
+
+  if (!profile) return null;
+
+  const petLabel = profile.pet_type === 'cat' ? 'Cat' : 'Dog';
+  const brand = topResult?.brand;
+
+  return (
+    <div className="mt-10 mb-2">
+      <div className="flex items-center justify-between mb-1">
+        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', lineHeight: 1.2 }}>
+          🛒 {brand ? `${brand} on Amazon` : `Top ${petLabel} Food on Amazon`}
+        </h3>
+        <span className="text-[10px] text-gray-400">Powered by Amazon</span>
+      </div>
+      <p className="text-sm text-gray-500 mb-5">
+        {brand ? `Shop ${brand} with Prime delivery.` : 'Real prices. Prime delivery. Affiliate links support Lumo Bites.'}
+      </p>
+
+      {loading ? (
+        <div className="grid grid-cols-2 gap-4">
+          {[0,1,2,3].map(i => <AmazonProductCardSkeleton key={i} />)}
+        </div>
+      ) : products.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4">
+          {products.map(p => <AmazonProductCard key={p.asin} product={p} />)}
+        </div>
+      ) : (
+        <div className="bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-5 text-center">
+          <p className="text-sm text-gray-500 mb-3">Live Amazon data unavailable right now.</p>
+          <a
+            href={`https://www.amazon.com/s?k=${encodeURIComponent((brand || petLabel) + ' pet food')}&tag=lumobites-20`}
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#FFD814] border border-[#FCD200] text-[#0F1111] font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-[#F7CA00] transition-colors"
+          >
+            Search Amazon →
+          </a>
+        </div>
+      )}
+
+      <p className="text-[10px] text-gray-400 mt-3 text-center leading-relaxed">
+        Lumo Bites participates in the Amazon Associates Program. Purchases through these links support us at no extra cost to you.
+      </p>
     </div>
   );
 }

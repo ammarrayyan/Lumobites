@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import confetti from 'canvas-confetti';
 import Navbar from '@/components/Navbar';
+import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -1226,7 +1227,11 @@ export default function ScanPage() {
                     <p className="text-xs text-gray-500 line-clamp-3">{product.ingredients}</p>
                 </div>
               )}
+
+              {/* ── Find on Amazon ── */}
+              <AmazonFindBlock product={product} />
             </div>
+
 
             <div className="bg-[#191919] rounded-2xl p-6 text-white">
               <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
@@ -1609,6 +1614,66 @@ export default function ScanPage() {
         .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       `}</style>
+    </div>
+  );
+}
+
+// ─── Amazon Find Block ────────────────────────────────────────────────────────
+function AmazonFindBlock({ product }: { product: any }) {
+  const [items, setItems] = useState<AmazonProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const productName =
+    product?.product_name &&
+    product.product_name !== 'Unknown Product' &&
+    product.product_name !== 'Custom Entry' &&
+    product.product_name !== 'Scanned Ingredients'
+      ? product.product_name
+      : product?.brand;
+
+  useEffect(() => {
+    if (!productName) { setLoading(false); return; }
+    let cancelled = false;
+    fetch(`/api/amazon/search?q=${encodeURIComponent(productName + ' pet food')}&limit=2`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) { setItems(d.products ?? []); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [productName]);
+
+  if (!productName) return null;
+
+  const searchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(productName + ' pet food')}&tag=lumobites-20`;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-bold text-[#191919] uppercase tracking-wide">🛒 Find on Amazon</p>
+        <span className="text-[9px] text-gray-400">Powered by Amazon</span>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col gap-2">
+          <AmazonProductCardSkeleton compact />
+          <AmazonProductCardSkeleton compact />
+        </div>
+      ) : items.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {items.map(p => <AmazonProductCard key={p.asin} product={p} compact />)}
+        </div>
+      ) : (
+        <a
+          href={searchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-[#FFD814] border border-[#FCD200] text-[#0F1111] font-bold text-xs py-2.5 rounded-lg hover:bg-[#F7CA00] transition-colors"
+        >
+          Find &ldquo;{productName}&rdquo; on Amazon →
+        </a>
+      )}
+      <p className="text-[9px] text-gray-400 mt-2 text-center">
+        Affiliate links support Lumo Bites at no extra cost to you.
+      </p>
     </div>
   );
 }
