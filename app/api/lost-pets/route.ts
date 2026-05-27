@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       type, pet_name, species, photo_url, description,
-      city, zip_code, contact_email, contact_phone, date_lost_found
+      city, zip_code, contact_email, contact_phone, date_lost_found,
+      latitude, longitude
     } = body;
 
     if (!type || !species || !photo_url || !description || !city || (!contact_email && !contact_phone)) {
@@ -94,6 +95,8 @@ export async function POST(request: NextRequest) {
       description,
       city,
       zip_code,
+      latitude,
+      longitude,
       contact_email: contact_email || null,
       contact_phone: contact_phone || null,
       date_lost_found,

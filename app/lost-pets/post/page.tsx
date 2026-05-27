@@ -20,6 +20,8 @@ export default function PostLostPet() {
   const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+  const [locationOptions, setLocationOptions] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
   
   const [dateLostFound, setDateLostFound] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -30,55 +32,52 @@ export default function PostLostPet() {
     const input = locationInput.trim();
     if (!input) {
       setLocationVerified(false);
+      setLocationOptions([]);
+      setSelectedLocation(null);
       return;
     }
     
-    // If it's a 5 digit number, treat as Zip Code
-    if (/^\d{5}$/.test(input)) {
-      setIsLocating(true);
-      try {
-        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-        if (!apiKey) {
-           setZipCode(input);
-           setCity('');
-           setLocationVerified(true);
-           return;
-        }
+    setIsLocating(true);
+    setLocationVerified(false);
+    setLocationOptions([]);
+    setSelectedLocation(null);
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+         setCity(input);
+         setLocationVerified(true);
+         return;
+      }
+      
+      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&key=${apiKey}`);
+      const data = await res.json();
+      
+      if (data.results && data.results.length > 0) {
+        const options = data.results.map((r: any) => ({
+          formatted_address: r.formatted_address,
+          lat: r.geometry.location.lat,
+          lng: r.geometry.location.lng,
+          place_id: r.place_id
+        }));
         
-        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${input}&key=${apiKey}`);
-        const data = await res.json();
+        setLocationOptions(options);
         
-        if (data.results && data.results.length > 0) {
-          const addressComponents = data.results[0].address_components;
-          const cityComponent = addressComponents.find((c: any) => c.types.includes('locality') || c.types.includes('administrative_area_level_3') || c.types.includes('neighborhood'));
-          
-          if (cityComponent) {
-            setCity(cityComponent.long_name);
-            setZipCode(input);
-            setLocationVerified(true);
-            setLocationInput(`${cityComponent.long_name}, ${input}`);
-          } else {
-            setZipCode(input);
-            setCity('');
-            setLocationVerified(true);
-          }
-        } else {
-          setZipCode(input);
-          setCity('');
+        if (options.length === 1) {
+          setSelectedLocation(options[0]);
+          setCity(options[0].formatted_address);
           setLocationVerified(true);
         }
-      } catch (err) {
-        console.error(err);
-        setZipCode(input);
+      } else {
+        setCity(input);
         setLocationVerified(true);
-      } finally {
-        setIsLocating(false);
       }
-    } else {
-      // Treat as city
+    } catch (err) {
+      console.error(err);
       setCity(input);
-      setZipCode('');
       setLocationVerified(true);
+    } finally {
+      setIsLocating(false);
     }
   };
 
@@ -120,6 +119,8 @@ export default function PostLostPet() {
     setError('');
 
     const finalCity = city || locationInput.trim();
+    const finalLat = selectedLocation ? selectedLocation.lat : null;
+    const finalLng = selectedLocation ? selectedLocation.lng : null;
 
     if (!photoUrl) {
       setError('A photo is required so others can identify the pet.');
@@ -143,7 +144,8 @@ export default function PostLostPet() {
           type, species, pet_name: petName, description,
           city: finalCity, zip_code: zipCode, date_lost_found: dateLostFound,
           contact_email: contactEmail, contact_phone: contactPhone,
-          photo_url: photoUrl
+          photo_url: photoUrl,
+          latitude: finalLat, longitude: finalLng
         })
       });
       
@@ -235,6 +237,8 @@ export default function PostLostPet() {
                     onChange={e => {
                       setLocationInput(e.target.value);
                       setLocationVerified(false);
+                      setSelectedLocation(null);
+                      setLocationOptions([]);
                     }} 
                     onBlur={handleLocationBlur}
                     className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
@@ -243,12 +247,41 @@ export default function PostLostPet() {
                   {isLocating && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
                   )}
-                  {locationVerified && !isLocating && (
+                  {locationVerified && !isLocating && selectedLocation && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                     </div>
                   )}
                 </div>
+                
+                {selectedLocation && (
+                  <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5">
+                    ✅ {selectedLocation.formatted_address}
+                  </p>
+                )}
+                
+                {locationOptions.length > 1 && !selectedLocation && (
+                  <div className="mt-3 p-4 bg-white border border-[#E8DDD4] rounded-xl shadow-sm">
+                    <p className="text-sm font-bold text-[#4A3E3D] mb-2">Multiple locations found. Please select one:</p>
+                    <div className="flex flex-col gap-2">
+                      {locationOptions.map((opt, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setSelectedLocation(opt);
+                            setCity(opt.formatted_address);
+                            setLocationVerified(true);
+                            setLocationInput(opt.formatted_address);
+                          }}
+                          className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D]"
+                        >
+                          📍 {opt.formatted_address}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-2">
