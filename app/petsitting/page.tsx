@@ -968,9 +968,11 @@ export default function PetSitting() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
                       <div key={sitter.id} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative">
-                        <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                          📸 Photo Verified
-                        </div>
+                        {sitter.approval_status === 'approved' && (
+                          <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                            ✅ Identity Verified
+                          </div>
+                        )}
                         
                         <div className="flex items-center gap-4 mb-4">
                           {sitter.photo_url ? (
