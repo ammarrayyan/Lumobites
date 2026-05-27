@@ -10,6 +10,10 @@ interface Stats {
   proOwners: number;
   proSitters: number;
   newSignups: number;
+  totalLostPets: number;
+  activeLostPets: number;
+  resolvedLostPets: number;
+  weeklyLostPets: number;
 }
 
 export default function StatisticsDashboard({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
@@ -55,6 +59,10 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
     { label: 'PRO Owners', value: stats.proOwners, color: 'from-purple-500/20 to-purple-600/20 text-purple-400' },
     { label: 'PRO Sitters', value: stats.proSitters, color: 'from-pink-500/20 to-pink-600/20 text-pink-400' },
     { label: 'New Signups (7d)', value: stats.newSignups, color: 'from-[#c2e59c]/20 to-[#64b3f4]/20 text-[#c2e59c]' },
+    { label: 'Total Lost Pets', value: stats.totalLostPets, color: 'from-orange-500/20 to-orange-600/20 text-orange-400' },
+    { label: 'Active Lost Pets', value: stats.activeLostPets, color: 'from-red-500/20 to-red-600/20 text-red-400' },
+    { label: 'Resolved Pets', value: stats.resolvedLostPets, color: 'from-emerald-500/20 to-emerald-600/20 text-emerald-400' },
+    { label: 'Lost Pets (7d)', value: stats.weeklyLostPets, color: 'from-indigo-500/20 to-indigo-600/20 text-indigo-400' },
   ];
 
   return (

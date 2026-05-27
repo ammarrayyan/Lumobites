@@ -55,6 +55,26 @@ export async function GET(req: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .gte('created_at', oneWeekAgo.toISOString());
 
+    // Lost Pets Stats
+    const { count: totalLostPets } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: activeLostPets } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active');
+
+    const { count: resolvedLostPets } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'resolved');
+
+    const { count: weeklyLostPets } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', oneWeekAgo.toISOString());
+
     return NextResponse.json({
       totalSitters: totalSitters || 0,
       pendingSitters: pendingSitters || 0,
@@ -63,6 +83,10 @@ export async function GET(req: NextRequest) {
       proOwners: proOwners || 0,
       proSitters: proSitters || 0,
       newSignups: newSignups || 0,
+      totalLostPets: totalLostPets || 0,
+      activeLostPets: activeLostPets || 0,
+      resolvedLostPets: resolvedLostPets || 0,
+      weeklyLostPets: weeklyLostPets || 0,
     });
   } catch (err: any) {
     console.error('[Admin Stats]', err);
