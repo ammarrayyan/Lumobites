@@ -46,6 +46,14 @@ export async function POST(req: NextRequest) {
 
       if (updateErr) throw updateErr;
     } else if (action === 'delete') {
+      // Delete associated comments first to avoid foreign key constraint errors
+      const { error: commentDeleteErr } = await supabaseAdmin
+        .from('lost_pet_comments')
+        .delete()
+        .eq('lost_pet_id', id);
+
+      if (commentDeleteErr) throw commentDeleteErr;
+
       const { error: deleteErr } = await supabaseAdmin
         .from('lost_pets')
         .delete()
