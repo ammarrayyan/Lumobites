@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
@@ -111,6 +111,13 @@ export default function PetSitting() {
   // Delete Profile State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Camera Webcam State
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [cameraTarget, setCameraTarget] = useState<'selfie' | 'id' | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState('');
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
@@ -614,6 +621,64 @@ export default function PetSitting() {
     }
   };
 
+  const startCamera = async (target: 'selfie' | 'id') => {
+    setCameraTarget(target);
+    setCameraModalOpen(true);
+    setCameraError('');
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: target === 'selfie' ? { facingMode: 'user', width: 640, height: 640 } : { facingMode: 'environment', width: 1280, height: 720 },
+        audio: false
+      });
+      setCameraStream(stream);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 100);
+    } catch (err: any) {
+      console.error('Camera access error:', err);
+      setCameraError('Unable to access camera. Please make sure you have given camera permissions to this website.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setCameraModalOpen(false);
+    setCameraTarget(null);
+    setCameraError('');
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && cameraTarget) {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      const width = video.videoWidth || 640;
+      const height = video.videoHeight || 640;
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        
+        if (cameraTarget === 'selfie') {
+          setSitterPhoto(dataUrl);
+          setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
+        } else {
+          setSitterIdPhoto(dataUrl);
+        }
+      }
+      stopCamera();
+    }
+  };
+
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setReqLoading(true);
@@ -1043,52 +1108,61 @@ export default function PetSitting() {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
                     )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      capture="user"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          if (file.size > 4 * 1024 * 1024) {
-                            setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
-                            return;
-                          } else {
-                            setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
-                          }
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const img = new window.Image();
-                            img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let width = img.width;
-                              let height = img.height;
-                              const MAX_WIDTH = 800;
-                              const MAX_HEIGHT = 800;
-                              if (width > height) {
-                                if (width > MAX_WIDTH) {
-                                  height *= MAX_WIDTH / width;
-                                  width = MAX_WIDTH;
+                    <div className="flex-1 flex flex-col gap-2">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="user"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
+                              return;
+                            } else {
+                              setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 800;
+                                const MAX_HEIGHT = 800;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                  }
+                                } else {
+                                  if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                  }
                                 }
-                              } else {
-                                if (height > MAX_HEIGHT) {
-                                  width *= MAX_HEIGHT / height;
-                                  height = MAX_HEIGHT;
-                                }
-                              }
-                              canvas.width = width;
-                              canvas.height = height;
-                              const ctx = canvas.getContext('2d');
-                              ctx?.drawImage(img, 0, 0, width, height);
-                              setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                              };
+                              img.src = reader.result as string;
                             };
-                            img.src = reader.result as string;
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }} 
-                      className="flex-1 block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
-                    />
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                        className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => startCamera('selfie')}
+                        className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
+                      >
+                        📷 Take Photo with Webcam
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1104,44 +1178,53 @@ export default function PetSitting() {
                         🪪
                       </div>
                     )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      capture="environment"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          if (file.size > 4 * 1024 * 1024) {
-                            alert('Your ID photo is too large. Please use a photo under 4MB');
-                            return;
-                          }
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const img = new window.Image();
-                            img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let width = img.width;
-                              let height = img.height;
-                              const MAX_WIDTH = 1200; // slightly larger for ID text clarity
-                              const MAX_HEIGHT = 1200;
-                              if (width > height) {
-                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                              } else {
-                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                              }
-                              canvas.width = width;
-                              canvas.height = height;
-                              const ctx = canvas.getContext('2d');
-                              ctx?.drawImage(img, 0, 0, width, height);
-                              setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                    <div className="flex-1 flex flex-col gap-2">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              alert('Your ID photo is too large. Please use a photo under 4MB');
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 1200; // slightly larger for ID text clarity
+                                const MAX_HEIGHT = 1200;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                              };
+                              img.src = reader.result as string;
                             };
-                            img.src = reader.result as string;
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }} 
-                      className="flex-1 block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
-                    />
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                        className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => startCamera('id')}
+                        className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
+                      >
+                        📷 Take Photo with Webcam
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -1318,6 +1401,58 @@ export default function PetSitting() {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CAMERA CAPTURE MODAL */}
+      {cameraModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <div className="bg-[#FAF6F4] rounded-3xl p-6 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
+            <button onClick={stopCamera} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            
+            <h3 className="text-xl font-black text-[#4A3E3D] mb-4">
+              Take {cameraTarget === 'selfie' ? 'Selfie' : 'ID Photo'}
+            </h3>
+            
+            {cameraError ? (
+              <div className="py-12 px-4 text-red-600 text-sm font-semibold">
+                <span className="text-3xl mb-2 block">⚠️</span>
+                {cameraError}
+              </div>
+            ) : (
+              <div className="relative bg-black rounded-2xl overflow-hidden aspect-video mb-6 max-h-[350px] flex items-center justify-center border border-[#E8DDD4]">
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  className={`w-full h-full object-cover ${cameraTarget === 'selfie' ? 'scale-x-[-1]' : ''}`}
+                />
+                {cameraTarget === 'selfie' && (
+                  <div className="absolute inset-0 border-[3px] border-dashed border-[#8B5E3C]/40 rounded-full max-w-[240px] max-h-[240px] m-auto pointer-events-none" />
+                )}
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              {!cameraError && (
+                <button 
+                  onClick={capturePhoto} 
+                  disabled={!cameraStream}
+                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-3 px-8 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  📸 Capture Photo
+                </button>
+              )}
+              <button 
+                onClick={stopCamera} 
+                className="bg-white hover:bg-gray-100 text-[#4A3E3D] font-bold py-3 px-8 rounded-xl transition-colors border border-[#E8DDD4]"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
