@@ -106,24 +106,6 @@ export default function Home() {
               }
             `}</style>
 
-            <div className="flex flex-col gap-4 w-full max-w-[460px] mb-8 relative z-10">
-              <Link href="/chat" className="btn-heartbeat w-full bg-[#8B5E3C] text-white py-3.5 px-6 rounded-full font-bold flex items-center justify-center transition-all hover:bg-[#7A5234] shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '16px' }}>
-                Find Your Pet&apos;s Food &rarr;
-              </Link>
-
-              <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
-                <Link href="/twin" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
-                  <span>✨</span>
-                  <span>Find Your Pet Twin</span>
-                </Link>
-                <Link href="/scan" className="flex-1 bg-[#8B5E3C]/5 hover:bg-[#8B5E3C]/10 border border-[#8B5E3C]/15 text-[#8B5E3C] py-2.5 px-4 rounded-full font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-center" style={{ textDecoration: 'none', fontSize: '14px' }}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    <circle cx="12" cy="13" r="3.25" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span>Scan Food Label</span>
-                </Link>
-              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
@@ -144,6 +126,38 @@ export default function Home() {
 
           {/* RIGHT COLUMN - 40% - SERVICE CARDS */}
           <div className="flex-1 w-full max-w-[400px] flex flex-col gap-4">
+
+            {/* NEW Card - Find Pet Food */}
+            <Link href="/chat" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <span className="text-[#8B5E3C] text-lg">🍽️</span>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Pet Food</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Tell us your pet&apos;s age, breed and health needs. We&apos;ll find the perfect food that fits your budget.
+              </p>
+              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+                Find Food &rarr;
+              </div>
+            </Link>
+
+            {/* NEW Card - Find Food by Photo */}
+            <Link href="/photo" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] text-decoration-none">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <span className="text-[#8B5E3C] text-lg">📷</span>
+                </div>
+                <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Food by your pet Photo</h3>
+              </div>
+              <p className="text-[#666666] leading-relaxed" style={{ fontSize: 'var(--text-card-desc)' }}>
+                Upload a photo of your pet and we&apos;ll instantly find the best food matched to their breed.
+              </p>
+              <div className="w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+                Upload Photo &rarr;
+              </div>
+            </Link>
 
             {/* Card 1 - Pet Sitting (Coming Soon) */}
             <div
