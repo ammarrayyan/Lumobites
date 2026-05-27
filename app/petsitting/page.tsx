@@ -471,6 +471,56 @@ export default function PetSitting() {
     }
   };
 
+  const handleCancelSitterSub = async () => {
+    if (!sitterSubId) return;
+    setSitterSubActionLoading(true);
+    setProfileMessage('');
+    try {
+      const res = await fetch('/api/stripe/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sitterEmail, subscriptionId: sitterSubId })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSitterSubCancelAtPeriodEnd(true);
+        if (data.endDate) setSitterSubEndDate(data.endDate);
+        if (data.daysRemaining !== undefined) setSitterSubDaysRemaining(data.daysRemaining);
+        setProfileMessage('Subscription cancelled successfully.');
+      } else {
+        setProfileMessage(data.error || 'Failed to cancel subscription.');
+      }
+    } catch (e) {
+      setProfileMessage('Error connecting to subscription service.');
+    } finally {
+      setSitterSubActionLoading(false);
+    }
+  };
+
+  const handleReactivateSitterSub = async () => {
+    if (!sitterSubId) return;
+    setSitterSubActionLoading(true);
+    setProfileMessage('');
+    try {
+      const res = await fetch('/api/stripe/reactivate-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptionId: sitterSubId })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSitterSubCancelAtPeriodEnd(false);
+        setProfileMessage('Subscription reactivated successfully!');
+      } else {
+        setProfileMessage(data.error || 'Failed to reactivate subscription.');
+      }
+    } catch (e) {
+      setProfileMessage('Error connecting to subscription service.');
+    } finally {
+      setSitterSubActionLoading(false);
+    }
+  };
+
   const handleOwnerStripeCheckout = async () => {
     try {
       setReqLoading(true);
