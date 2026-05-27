@@ -147,6 +147,14 @@ export async function POST(req: NextRequest) {
         })
       });
     } else if (action === 'delete') {
+      // Delete associated sitting requests first to satisfy foreign key constraints
+      const { error: reqDeleteErr } = await supabaseAdmin
+        .from('sitting_requests')
+        .delete()
+        .eq('sitter_id', id);
+
+      if (reqDeleteErr) throw reqDeleteErr;
+
       // Permanently delete the sitter profile
       const { error: deleteErr } = await supabaseAdmin
         .from('sitters')

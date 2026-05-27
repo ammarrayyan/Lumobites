@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Fetch sitter to see if they have a Stripe Customer ID
+    // 1. Fetch sitter to see if they have a Stripe Customer ID and their ID
     const { data: sitter, error: fetchError } = await supabaseAdmin
       .from('sitters')
-      .select('stripe_customer_id')
+      .select('id, stripe_customer_id')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -46,7 +46,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Delete from Supabase
+    // 3. Delete associated sitting requests first to satisfy foreign key constraints
+    if (sitter?.id) {
+      const { error: reqDeleteError } = await supabaseAdmin
+        .from('sitting_requests')
+        .delete()
+        .eq('sitter_id', sitter.id);
+      
+      if (reqDeleteError) {
+        console.error('[Delete Sitter Profile] Failed to delete associated sitting requests:', reqDeleteError);
+        return NextResponse.json({ error: 'Failed to delete sitting requests from database' }, { status: 500 });
+      }
+    }
+
+    // 4. Delete from Supabase
     const { error: deleteError } = await supabaseAdmin
       .from('sitters')
       .delete()
