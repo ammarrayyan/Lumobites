@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
@@ -87,14 +88,23 @@ export async function POST(req: NextRequest) {
         from: fromEmail,
         to: sitter.email,
         subject: 'Your Lumo Bites Pet Sitter Profile is Approved! 🎉',
-        html: `
-          <h2>Congratulations, ${sitter.name}!</h2>
-          <p>Your Lumo Bites sitter profile has been approved.</p>
-          <p>You are now live and will start receiving requests from pet owners near you.</p>
-          <p>You can view and edit your profile here: <a href="https://lumobites.net/petsitting">Lumo Bites Pet Sitting</a></p>
-          <br/>
-          <p>Best,<br/>The Lumo Bites Team</p>
-        `
+        html: brandedEmail({
+          subject: 'Your Lumo Bites Pet Sitter Profile is Approved! 🎉',
+          preheader: 'Congratulations! Your sitter profile is live on the Lumo Bites community board.',
+          body: `
+            <h1 style="${emailStyles.h1}">Congratulations, ${sitter.name}! 🎉</h1>
+            <p style="${emailStyles.p}">Your Lumo Bites pet sitter profile has been reviewed and approved by our safety team!</p>
+            ${emailStyles.highlightBox(`
+              <p style="margin:0;font-size:12px;color:#2F5A32;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Profile Status</p>
+              <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#2E7D32;">🟢 ACTIVE & LIVE</p>
+              <p style="margin:8px 0 0 0;font-size:13px;color:#555555;line-height:1.4;">Your profile is now visible in sitter search results, and pet owners in your neighborhood can send you requests directly.</p>
+            `)}
+            <p style="${emailStyles.p}">You can manage your availability, pricing, or update your profile details at any time by logging into the dashboard.</p>
+            ${emailStyles.button('https://lumobites.net/petsitting', 'View & Manage Profile')}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `
+        })
       });
 
     } else if (action === 'reject') {
@@ -118,14 +128,23 @@ export async function POST(req: NextRequest) {
         from: fromEmail,
         to: sitter.email,
         subject: 'Action Required: Update your Lumo Bites Profile',
-        html: `
-          <h2>Hi ${sitter.name},</h2>
-          <p>Thank you for submitting your sitter profile. Unfortunately, your profile was not approved at this time.</p>
-          <p><strong>Reason:</strong> ${reason}</p>
-          <p>Please update your profile on the <a href="https://lumobites.net/petsitting">Lumo Bites website</a> and resubmit it for review.</p>
-          <br/>
-          <p>Best,<br/>The Lumo Bites Team</p>
-        `
+        html: brandedEmail({
+          subject: 'Action Required: Update your Lumo Bites Profile',
+          preheader: 'Your sitter profile needs updates before we can approve it.',
+          body: `
+            <h1 style="${emailStyles.h1}">Profile Update Needed ⚠️</h1>
+            <p style="${emailStyles.p}">Hi ${sitter.name},</p>
+            <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites. During our review, our safety team noted that some changes are required before we can list your profile publicly.</p>
+            ${emailStyles.highlightBox(`
+              <p style="margin:0;font-size:12px;color:#8B0000;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Reason for Request</p>
+              <p style="margin:8px 0 0 0;font-size:15px;color:#8B0000;font-weight:bold;line-height:1.4;">${reason}</p>
+            `)}
+            <p style="${emailStyles.p}">Please log in, update the highlighted details, and resubmit your profile for review. We look forward to getting you live!</p>
+            ${emailStyles.button('https://lumobites.net/petsitting', 'Update My Profile')}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `
+        })
       });
     } else if (action === 'delete') {
       // Permanently delete the sitter profile

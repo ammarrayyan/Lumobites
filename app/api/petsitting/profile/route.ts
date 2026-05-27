@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
 export async function GET(request: NextRequest) {
   const email = request.nextUrl.searchParams.get('email');
@@ -180,6 +184,36 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    // Send application confirmation email
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      await resend.emails.send({
+        from: fromEmail,
+        to: cleanEmail,
+        subject: 'Your Lumo Bites Sitter Application is Under Review 🐾',
+        html: brandedEmail({
+          subject: 'Your Lumo Bites Sitter Application is Under Review 🐾',
+          preheader: 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
+          body: `
+            <h1 style="${emailStyles.h1}">Application Received 🐾</h1>
+            <p style="${emailStyles.p}">Hi ${name},</p>
+            <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our safety team is currently reviewing your application.</p>
+            ${emailStyles.highlightBox(`
+              <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
+              <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ PENDING REVIEW</p>
+              <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review applications in the order they are received, usually within 24 to 48 hours. You will receive another email from us as soon as your status is updated.</p>
+            `)}
+            <p style="${emailStyles.p}">While you wait, feel free to visit the Lumo Bites community board or manage your settings.</p>
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `
+        })
+      });
+      console.log(`[PetSitting Profile API] Application confirmation email sent to: ${cleanEmail}`);
+    } catch (emailErr) {
+      console.error('[PetSitting Profile API] Failed to send confirmation email:', emailErr);
+    }
 
     return NextResponse.json(data);
   } catch (error: any) {
