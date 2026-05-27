@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('lost_pets')
       .select('*')
       .eq('id', params.id)

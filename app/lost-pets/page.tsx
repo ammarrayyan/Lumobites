@@ -14,6 +14,7 @@ export default function LostPetsFeed() {
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [searchLocationName, setSearchLocationName] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
 
@@ -36,12 +37,15 @@ export default function LostPetsFeed() {
           const lat = data.results[0].geometry.location.lat;
           const lng = data.results[0].geometry.location.lng;
           setSearchCoords({ lat, lng });
+          setSearchLocationName(data.results[0].formatted_address);
           setLocationVerified(true);
         } else {
           setSearchCoords(null);
+          setSearchLocationName('');
         }
       } catch (err) {
         setSearchCoords(null);
+        setSearchLocationName('');
       } finally {
         setIsGeocoding(false);
       }
@@ -123,6 +127,11 @@ export default function LostPetsFeed() {
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
               </div>
+            )}
+            {locationVerified && !isGeocoding && searchCoords && (
+               <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 absolute -bottom-6 left-1">
+                 ✅ {searchLocationName}
+               </p>
             )}
           </div>
           <select

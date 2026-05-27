@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null;
     const radius = searchParams.get('radius') ? parseInt(searchParams.get('radius')!) : null;
 
-    let query = supabase.from('lost_pets').select('*').order('created_at', { ascending: false });
+    let query = supabaseAdmin.from('lost_pets').select('*').order('created_at', { ascending: false });
 
     if (type && type !== 'all') query = query.eq('pet_type', type);
     if (species && species !== 'all') query = query.eq('species', species);
