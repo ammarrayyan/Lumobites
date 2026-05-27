@@ -12,15 +12,14 @@ export default function LostPetsPreview() {
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        const { data, error } = await supabase
-          .from('lost_pets')
-          .select('*')
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(3);
-
-        if (error) throw error;
-        setPets(data || []);
+        const res = await fetch('/api/lost-pets?status=active');
+        const data = await res.json();
+        
+        if (res.ok) {
+          setPets(data.pets?.slice(0, 3) || []);
+        } else {
+          throw new Error(data.error);
+        }
       } catch (err) {
         console.error('Failed to fetch preview pets:', err);
       } finally {

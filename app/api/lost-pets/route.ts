@@ -14,18 +14,25 @@ export async function GET(request: NextRequest) {
     const lat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null;
     const lng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null;
     const radius = searchParams.get('radius') ? parseInt(searchParams.get('radius')!) : null;
+    const status = searchParams.get('status');
 
     let query = supabaseAdmin.from('lost_pets').select('*').order('created_at', { ascending: false });
 
     if (type && type !== 'all') query = query.eq('pet_type', type);
     if (species && species !== 'all') query = query.eq('species', species);
+    if (status) query = query.eq('status', status);
     if (q && !lat) { // Only fallback to text search if no lat/lng provided
       query = query.or(`city.ilike.%${q}%,zip_code.ilike.%${q}%`);
     }
 
     const { data, error } = await query;
+    console.log('[Lost Pets API] Querying with params:', { type, species, status, q, lat, lng, radius });
+    console.log('[Lost Pets API] Supabase response count:', data ? data.length : 0);
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Lost Pets API] Supabase error:', error);
+      throw error;
+    }
 
     // Helper function for Haversine distance
     const getDistanceInMiles = (lat1: number, lon1: number, lat2: number, lon2: number) => {
