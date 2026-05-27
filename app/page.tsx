@@ -106,8 +106,6 @@ export default function Home() {
               }
             `}</style>
 
-            </div>
-
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to use
