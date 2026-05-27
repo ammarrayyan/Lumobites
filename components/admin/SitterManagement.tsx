@@ -170,7 +170,26 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     </span>
                   </div>
                   <p className="text-sm text-white/60 mb-2">{sitter.email}</p>
-                  <p className="text-sm text-white/80"><strong>Location:</strong> {sitter.city}, {sitter.zip_code}, {sitter.country}</p>
+                  <p className="text-sm text-white/80">
+                    <strong>Location:</strong> {sitter.city ? (() => {
+                      let locStr = sitter.city;
+                      const cityLower = sitter.city.toLowerCase();
+                      const zipVal = sitter.zip || sitter.zip_code;
+                      if (zipVal && !cityLower.includes(zipVal.toLowerCase())) {
+                        locStr += `, ${zipVal}`;
+                      }
+                      if (sitter.country) {
+                        const countryLower = sitter.country.toLowerCase();
+                        const hasCountry = cityLower.includes(countryLower) || 
+                                           (countryLower === 'united states' && (cityLower.includes('usa') || cityLower.includes('u.s.a.'))) ||
+                                           (countryLower === 'united kingdom' && (cityLower.includes('uk') || cityLower.includes('u.k.')));
+                        if (!hasCountry) {
+                          locStr += `, ${sitter.country}`;
+                        }
+                      }
+                      return locStr;
+                    })() : ''}
+                  </p>
                   <p className="text-sm text-white/80"><strong>Rate:</strong> ${sitter.daily_rate}/day</p>
                   <p className="text-sm text-white/80"><strong>Phone:</strong> {sitter.phone || 'N/A'}</p>
                 </div>

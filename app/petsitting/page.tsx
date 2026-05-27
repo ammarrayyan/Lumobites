@@ -90,6 +90,7 @@ export default function PetSitting() {
   const [sitterPhone, setSitterPhone] = useState('');
   const [sitterPhoneVisible, setSitterPhoneVisible] = useState(false);
   const [sitterAvailable, setSitterAvailable] = useState(true);
+  const [sitterGender, setSitterGender] = useState('');
   const [isProSitter, setIsProSitter] = useState(false);
 
   // Sitter Sub Details
@@ -215,10 +216,12 @@ export default function PetSitting() {
             setSitterSelectedLocation({
               formatted_address: data.city,
               lat: data.lat,
-              lng: data.lng
+              lng: data.lng,
+              country: data.country || ''
             });
           }
           setSitterBio(data.bio || '');
+          setSitterGender(data.gender || '');
           setSitterPetTypes(data.pet_types || 'both');
           setSitterRate(data.rate_per_night?.toString() || '');
           setSitterPhone(data.phone_number || '');
@@ -297,6 +300,7 @@ export default function PetSitting() {
         setSitterSelectedLocation(null);
         setSitterIsLocating(false);
         setSitterBio('');
+        setSitterGender('');
         setSitterRate('');
         setSitterAuthMode('form');
       }
@@ -358,6 +362,7 @@ export default function PetSitting() {
         setSitterSelectedLocation(null);
         setSitterIsLocating(false);
         setSitterBio('');
+        setSitterGender('');
         setSitterPetTypes('both');
         setSitterRate('');
         setSitterPhone('');
@@ -410,13 +415,18 @@ export default function PetSitting() {
           id_photo_url: sitterIdPhoto,
           city: sitterCity || sitterLocationInput,
           zip: '',
-          country: 'United States',
+          country: (() => {
+            const addressParts = (sitterCity || sitterLocationInput || '').split(',');
+            const parsedCountry = addressParts.length > 0 ? addressParts[addressParts.length - 1].trim() : '';
+            return sitterSelectedLocation?.country || parsedCountry || '';
+          })(),
           bio: sitterBio,
           pet_types: sitterPetTypes,
           rate_per_night: sitterRate,
           phone_number: sitterPhone,
           phone_visible: sitterPhoneVisible,
-          availability: sitterAvailable
+          availability: sitterAvailable,
+          gender: sitterGender
         })
       });
 
@@ -715,12 +725,16 @@ export default function PetSitting() {
       const data = await res.json();
       
       if (data.results && data.results.length > 0) {
-        const options = data.results.map((r: any) => ({
-          formatted_address: r.formatted_address,
-          lat: r.geometry.location.lat,
-          lng: r.geometry.location.lng,
-          place_id: r.place_id
-        }));
+        const options = data.results.map((r: any) => {
+          const countryComp = r.address_components?.find((c: any) => c.types.includes('country'));
+          return {
+            formatted_address: r.formatted_address,
+            lat: r.geometry.location.lat,
+            lng: r.geometry.location.lng,
+            place_id: r.place_id,
+            country: countryComp ? countryComp.long_name : ''
+          };
+        });
         
         setSitterLocationOptions(options);
         
@@ -944,9 +958,22 @@ export default function PetSitting() {
                             </div>
                           )}
                           <div>
-                            <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
+                             <div className="flex items-center gap-2 flex-wrap">
+                               <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
+                               {sitter.gender && (
+                                 <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
+                                   {sitter.gender}
+                                 </span>
+                               )}
+                             </div>
                             <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
-                              📍 {sitter.city}, {sitter.country || 'United States'}
+                              📍 {sitter.city ? (
+                                (sitter.country && (
+                                  sitter.city.toLowerCase().includes(sitter.country.toLowerCase()) ||
+                                  (sitter.country.toLowerCase() === 'united states' && (sitter.city.toLowerCase().includes('usa') || sitter.city.toLowerCase().includes('u.s.a.'))) ||
+                                  (sitter.country.toLowerCase() === 'united kingdom' && (sitter.city.toLowerCase().includes('uk') || sitter.city.toLowerCase().includes('u.k.')))
+                                )) ? sitter.city : `${sitter.city}${sitter.country ? `, ${sitter.country}` : ''}`
+                              ) : ''}
                             </p>
                             {sitter.phone_number && (
                               <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
@@ -1355,6 +1382,16 @@ export default function PetSitting() {
                     <option value="both">Dogs & Cats</option>
                     <option value="dog">Dogs Only</option>
                     <option value="cat">Cats Only</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Gender (Optional)</label>
+                  <select value={sitterGender} onChange={e => setSitterGender(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
                   </select>
                 </div>
                 <div>

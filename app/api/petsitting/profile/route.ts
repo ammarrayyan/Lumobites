@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
-      bio, pet_types, rate_per_night, availability, phone_number, phone_visible 
+      bio, pet_types, rate_per_night, availability, phone_number, phone_visible,
+      gender
     } = body;
 
     if (!email || !name) {
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const resolvedCountry = country || 'United States';
+    let resolvedCountry = country || '';
 
     // Geocode the address
     let lat = null;
@@ -58,7 +59,18 @@ export async function POST(request: NextRequest) {
     try {
       const addressParts = [city];
       if (zip && zip.trim() !== '') addressParts.push(zip);
-      addressParts.push(resolvedCountry);
+      
+      const cityLower = city.toLowerCase();
+      const countryLower = resolvedCountry.toLowerCase();
+      const hasCountry = resolvedCountry && (
+        cityLower.includes(countryLower) || 
+        (countryLower === 'united states' && (cityLower.includes('usa') || cityLower.includes('u.s.a.'))) ||
+        (countryLower === 'united kingdom' && (cityLower.includes('uk') || cityLower.includes('u.k.')))
+      );
+
+      if (resolvedCountry && !hasCountry) {
+        addressParts.push(resolvedCountry);
+      }
       const address = addressParts.join(', ');
       
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
@@ -68,6 +80,11 @@ export async function POST(request: NextRequest) {
         if (geoData.status === 'OK' && geoData.results && geoData.results.length > 0) {
           lat = geoData.results[0].geometry.location.lat;
           lng = geoData.results[0].geometry.location.lng;
+          
+          const countryComp = geoData.results[0].address_components?.find((c: any) => c.types.includes('country'));
+          if (countryComp) {
+            resolvedCountry = countryComp.long_name;
+          }
         } else {
           return NextResponse.json({ error: 'location_not_found' }, { status: 400 });
         }
@@ -174,6 +191,7 @@ export async function POST(request: NextRequest) {
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
         availability: availability !== undefined ? availability : true,
+        gender: gender || null,
         // Reset approval status upon submission/resubmission
         approval_status: 'pending',
         is_approved: false,
