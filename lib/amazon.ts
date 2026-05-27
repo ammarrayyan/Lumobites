@@ -132,14 +132,14 @@ export async function searchAmazonProducts(
       _token = null;
       _tokenExpiry = 0;
     }
-    return [];
+    throw new Error(`Amazon API returned ${res.status}: ${text}`);
   }
 
   const data = await res.json();
 
   if (data?.errors) {
     console.error('[Amazon] SearchItems API errors:', JSON.stringify(data.errors));
-    return [];
+    throw new Error(`Amazon API errors: ${JSON.stringify(data.errors)}`);
   }
 
   const items: any[] = data?.searchResult?.items ?? [];
