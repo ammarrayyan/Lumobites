@@ -311,7 +311,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
             <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(20px, 2.5vw, 28px)' }}>
-              Everything your pet needs, all in one place.
+              Personalized recommendations, not generic lists.
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
