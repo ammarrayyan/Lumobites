@@ -1,23 +1,25 @@
-const fs = require('fs');
+const token = process.env.AMAZON_TOKEN;
 
 async function test() {
-  const CLIENT_ID = process.env.AMAZON_CLIENT_ID;
-  const CLIENT_SECRET = process.env.AMAZON_CLIENT_SECRET;
-  const PARTNER_TAG = process.env.AMAZON_ASSOCIATE_TAG;
-  
-  if (!CLIENT_ID) {
-    console.log("No credentials found in env. Load them from .env.local");
-    const env = fs.readFileSync('.env.local', 'utf-8');
-    const getVal = (key) => {
-      const match = env.match(new RegExp(`${key}=(.*)`));
-      return match ? match[1].trim() : '';
-    };
-    process.env.AMAZON_CLIENT_ID = getVal('AMAZON_CLIENT_ID');
-    process.env.AMAZON_CLIENT_SECRET = getVal('AMAZON_CLIENT_SECRET');
-    process.env.AMAZON_ASSOCIATE_TAG = getVal('AMAZON_ASSOCIATE_TAG');
-    
-    // Oh wait, the user said they added them to Vercel. They might not be in .env.local.
-    // Let's just use the fact that the next app /api/amazon/debug already has them!
+  const url = 'https://creatorsapi.amazon/catalog/v1/items/search';
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'x-marketplace': 'www.amazon.com'
+  };
+
+  const payloads = [
+    // 1: camelCase
+    { keywords: "dog food", partnerTag: "lumobites-20", partnerType: "Associates" },
+    // 2: PascalCase
+    { Keywords: "dog food", PartnerTag: "lumobites-20", PartnerType: "Associates" },
+    // 3: Missing x-marketplace
+    { keywords: "dog food", partnerTag: "lumobites-20" },
+  ];
+
+  for (const p of payloads) {
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(p) });
+    console.log(await res.text());
   }
 }
 test();

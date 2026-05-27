@@ -17,19 +17,20 @@ export async function POST(req: NextRequest) {
   });
   const token = (await tokenRes.json()).access_token;
 
+  // Fully lowerCamelCase body, including array values
   const bodyCamel = {
     keywords: 'dog food',
     partnerTag: PARTNER_TAG,
     partnerType: 'Associates',
-    searchIndex: 'PetSupplies',
+    marketplace: 'www.amazon.com',
+    searchIndex: 'petSupplies', // Or petSupplies?
     itemCount: 2,
-    resources: ['ItemInfo.Title', 'OffersV2.Listings.Price'],
+    resources: ['itemInfo.title', 'offersV2.listings.price'],
   };
   
   const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'x-marketplace': 'www.amazon.com'
+    'Authorization': `Bearer ${token}`
   };
 
   const results: any = {};
@@ -38,8 +39,7 @@ export async function POST(req: NextRequest) {
   const urls = [
     'https://creatorsapi.amazon/catalog/v1/items/search',
     'https://creatorsapi.amazon/catalog/v1/items',
-    'https://creatorsapi.amazon/catalog/v1/searchitems',
-    'https://creatorsapi.amazon/api/v1/searchitems'
+    'https://creatorsapi.amazon/api/v1/searchItems'
   ];
 
   for (const url of urls) {
