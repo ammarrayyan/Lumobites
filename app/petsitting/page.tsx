@@ -923,6 +923,29 @@ export default function PetSitting() {
               </div>
             )}
 
+            {/* Premium PRO Upgrade Banner */}
+            {!isOwnerPro && (
+              <div className="bg-gradient-to-r from-[#FFB703]/10 to-[#FB8500]/10 border border-[#FB8500]/30 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in shadow-sm">
+                <div className="text-left flex items-start gap-4">
+                  <span className="text-4xl">👑</span>
+                  <div>
+                    <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
+                      Unlock Full Directory Access with Lumo Bites PRO
+                    </h4>
+                    <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed">
+                      Sitter profiles are currently blurred. Subscribe to PRO to view full bios, phone numbers, contact sitters directly, and enjoy instant lost pet broadcasts, pet scan alerts, and premium care resources!
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setUnlockModalOpen(true)}
+                  className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-3 px-6 rounded-xl transition-all shadow-md text-sm whitespace-nowrap cursor-pointer"
+                >
+                  Unlock PRO Features
+                </button>
+              </div>
+            )}
+
             {/* Sitters & Map Layout */}
             {loadingSitters ? (
               <div className="text-center text-[#8B5E3C] py-12">Loading trusted sitters...</div>
@@ -1000,10 +1023,18 @@ export default function PetSitting() {
                         </div>
 
                         <button
-                          onClick={() => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors"
+                          onClick={() => {
+                            if (!isOwnerPro) {
+                              setUnlockModalOpen(true);
+                            } else {
+                              setSelectedSitter(sitter);
+                              setRequestModalOpen(true);
+                            }
+                          }}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          Request Sitter
+                          {!isOwnerPro && <span className="text-xs">🔒</span>}
+                          <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
                         </button>
                       </div>
                     ))}
@@ -1015,7 +1046,14 @@ export default function PetSitting() {
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
-                    onSelectSitter={(sitter) => { setSelectedSitter(sitter); setRequestModalOpen(true); }}
+                    onSelectSitter={(sitter) => {
+                      if (!isOwnerPro) {
+                        setUnlockModalOpen(true);
+                      } else {
+                        setSelectedSitter(sitter);
+                        setRequestModalOpen(true);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -1597,6 +1635,138 @@ export default function PetSitting() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PREMIUM UNLOCK MODAL */}
+      {unlockModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
+            <button 
+              onClick={() => {
+                setUnlockModalOpen(false);
+                setOwnerAuthMode('email');
+                setReqError('');
+              }} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            
+            {/* Premium Gold Header Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#FFB703]/20 to-[#FB8500]/20 text-[#FB8500] text-xs font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-6 animate-pulse">
+              👑 Lumo Bites PRO
+            </div>
+            
+            <h3 className="text-3xl font-black text-[#4A3E3D] mb-3 leading-tight">Unlock Premium Pet Sitters</h3>
+            <p className="text-[#8B7E7D] text-sm mb-6 max-w-sm mx-auto">
+              Get direct access to trusted local sitters, unblurred biographies, and the ability to send request messages instantly!
+            </p>
+            
+            {/* Other services reminder list */}
+            <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-5 text-left mb-6 space-y-4">
+              <p className="text-[#4A3E3D] font-black text-sm uppercase tracking-wider border-b border-[#E8DDD4] pb-2">
+                Also Included with PRO Membership:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg">🚨</span>
+                  <div>
+                    <h5 className="font-bold text-xs text-[#4A3E3D]">Lost Pet Alerts</h5>
+                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Instant SMS & email neighborhood alerts</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg">🔍</span>
+                  <div>
+                    <h5 className="font-bold text-xs text-[#4A3E3D]">Smart Pet Scanning</h5>
+                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Scan tools & interactive pet profiles</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg">💬</span>
+                  <div>
+                    <h5 className="font-bold text-xs text-[#4A3E3D]">Direct Messaging</h5>
+                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Chat in real-time with local caretakers</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="text-lg">📚</span>
+                  <div>
+                    <h5 className="font-bold text-xs text-[#4A3E3D]">Premium Care Guides</h5>
+                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Exclusive pet nutrition & care resources</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleUnlockProfile} className="space-y-4">
+              {ownerAuthMode === 'email' ? (
+                <div className="text-left">
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5 uppercase tracking-wider">Your Email Address</label>
+                  <input 
+                    required 
+                    type="email" 
+                    value={unlockEmail} 
+                    onChange={e => setUnlockEmail(e.target.value)} 
+                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                    placeholder="Enter your email to verify or subscribe..." 
+                  />
+                  <p className="text-[10px] text-[#8B7E7D] mt-2 leading-relaxed">
+                    Already a PRO member? We'll send you a verification code to log in. Not a member yet? This will direct you to Stripe checkout.
+                  </p>
+                </div>
+              ) : (
+                <div className="text-left animate-fade-in">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">Verification Code</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setOwnerAuthMode('email')} 
+                      className="text-xs font-bold text-[#8B5E3C] hover:underline"
+                    >
+                      Change Email
+                    </button>
+                  </div>
+                  <input 
+                    required 
+                    type="text" 
+                    maxLength={6}
+                    value={ownerAuthCode} 
+                    onChange={e => setOwnerAuthCode(e.target.value)} 
+                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest"
+                    placeholder="------" 
+                  />
+                  <p className="text-[10px] text-[#8B7E7D] mt-2 leading-relaxed">
+                    Enter the 6-digit code sent to <strong>{unlockEmail}</strong>.
+                  </p>
+                </div>
+              )}
+
+              {reqError && (
+                <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-xl text-center">
+                  ⚠️ {reqError}
+                </div>
+              )}
+
+              <button 
+                disabled={unlockLoading} 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mt-4 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {unlockLoading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>👑 {ownerAuthMode === 'email' ? 'Unlock All Features Now' : 'Verify & Access Sitters'}</span>
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       )}
