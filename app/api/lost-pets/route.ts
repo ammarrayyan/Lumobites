@@ -73,6 +73,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('[Lost Pets POST] Received body:', { ...body, photo_url: body.photo_url ? '[TRUNCATED_BASE64]' : undefined });
+    
     const {
       type, pet_name, species, photo_url, description,
       city, zip_code, contact_email, contact_phone, date_lost_found,
@@ -141,13 +143,17 @@ export async function POST(request: NextRequest) {
 
     // 4. Send email if provided
     if (contact_email && process.env.RESEND_API_KEY) {
+      console.log(`[Lost Pets POST] About to send email to: ${contact_email}`);
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobitespet.com';
       const manageUrl = `${siteUrl}/lost-pets/manage?id=${data.id}&token=${editToken}`;
       
       try {
         const textContent = `Your post for ${pet_name || 'them'} has been shared!\n\nUse the links below to manage your post. Please do not share these secure links.\n\nManage Your Post:\nMark as Resolved: ${manageUrl}\nDelete My Post: ${manageUrl}\n\nYou can also manage your post directly on its page by visiting this secure link: ${siteUrl}/lost-pets/${data.id}?token=${editToken}`;
 
-        const resendResponse = await resend?.emails.send({
+        // Instantiate resend locally to ensure process.env.RESEND_API_KEY is available
+        const localResend = new Resend(process.env.RESEND_API_KEY);
+
+        const resendResponse = await localResend.emails.send({
           from: 'Lumo Bites Pet <no-reply@lumobites.net>',
           to: contact_email,
           subject: `Manage your Lumo Bites lost pet post`,
@@ -164,7 +170,7 @@ export async function POST(request: NextRequest) {
           `
         });
         
-        console.log('[Lost Pets POST] Resend API called. Raw response:', JSON.stringify(resendResponse, null, 2));
+        console.log('[Lost Pets POST] Resend called, response:', JSON.stringify(resendResponse, null, 2));
         
         if (resendResponse?.error) {
            console.error('[Lost Pets POST] Resend returned an error object:', resendResponse.error);
@@ -172,6 +178,8 @@ export async function POST(request: NextRequest) {
       } catch (emailError) {
         console.error('[Lost Pets POST] Resend threw an exception:', emailError);
       }
+    } else {
+      console.log(`[Lost Pets POST] Not sending email. Has contact_email: ${!!contact_email}, Has RESEND_API_KEY: ${!!process.env.RESEND_API_KEY}`);
     }
 
     const { edit_token, pet_type, ...safePet } = data;
