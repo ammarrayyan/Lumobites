@@ -7,18 +7,16 @@ export async function GET(request: NextRequest) {
   try {
     const ownerEmail = request.nextUrl.searchParams.get('owner_email');
     
-    // FREE LAUNCH: Force Owner PRO to true so all data is unmasked
-    let isOwnerPro = true;
+    let isOwnerPro = false;
 
-    // ORIGINAL STRIPE CODE INTENTIONALLY COMMENTED OUT FOR FREE LAUNCH
-    // if (ownerEmail) {
-    //   const { data: emailData } = await supabase
-    //     .from('emails')
-    //     .select('is_pro')
-    //     .eq('email', ownerEmail.toLowerCase().trim())
-    //     .single();
-    //   isOwnerPro = emailData?.is_pro || false;
-    // }
+    if (ownerEmail) {
+      const { data: emailData } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', ownerEmail.toLowerCase().trim())
+        .single();
+      isOwnerPro = emailData?.is_pro || false;
+    }
 
     const { data, error } = await supabase
       .from('sitters')
