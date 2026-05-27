@@ -145,10 +145,13 @@ export async function POST(request: NextRequest) {
       const manageUrl = `${siteUrl}/lost-pets/manage?id=${data.id}&token=${editToken}`;
       
       try {
+        const textContent = `Your post for ${pet_name || 'them'} has been shared!\n\nUse the links below to manage your post. Please do not share these secure links.\n\nManage Your Post:\nMark as Resolved: ${manageUrl}\nDelete My Post: ${manageUrl}\n\nYou can also manage your post directly on its page by visiting this secure link: ${siteUrl}/lost-pets/${data.id}?token=${editToken}`;
+
         const resendResponse = await resend?.emails.send({
           from: 'Lumo Bites Pet <no-reply@lumobites.net>',
           to: contact_email,
           subject: `Manage your Lumo Bites lost pet post`,
+          text: textContent,
           html: `
             <h1>Your post for ${pet_name || 'them'} has been shared!</h1>
             <p>Use the links below to manage your post. Please do not share these secure links.</p>
@@ -160,9 +163,14 @@ export async function POST(request: NextRequest) {
             <p>You can also manage your post directly on its page by visiting this secure link: <a href="${siteUrl}/lost-pets/${data.id}?token=${editToken}">${siteUrl}/lost-pets/${data.id}?token=${editToken}</a></p>
           `
         });
-        console.log('[Lost Pets POST] Resend response:', resendResponse);
+        
+        console.log('[Lost Pets POST] Resend API called. Raw response:', JSON.stringify(resendResponse, null, 2));
+        
+        if (resendResponse?.error) {
+           console.error('[Lost Pets POST] Resend returned an error object:', resendResponse.error);
+        }
       } catch (emailError) {
-        console.error('[Lost Pets POST] Resend error:', emailError);
+        console.error('[Lost Pets POST] Resend threw an exception:', emailError);
       }
     }
 
