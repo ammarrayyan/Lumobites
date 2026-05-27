@@ -2,13 +2,13 @@
  * Amazon Creators API v3.x Client
  * - OAuth 2.0 client credentials (Login with Amazon / LwA)
  * - Token request: form-encoded, scope = creatorsapi::default
- * - Search endpoint: webservices.amazon.com/paapi5/searchitems (PascalCase body, Bearer auth)
+ * - Search endpoint: https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com
  * - Token cached in-process with 5-min safety margin
  * - All credentials server-side only — never exposed to the browser
  */
 
 const TOKEN_URL = 'https://api.amazon.com/auth/o2/token';
-const SEARCH_URL = 'https://webservices.amazon.com/paapi5/searchitems';
+const SEARCH_URL = 'https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com';
 const PARTNER_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'lumobites-20';
 const CLIENT_ID = process.env.AMAZON_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.AMAZON_CLIENT_SECRET || '';
@@ -31,20 +31,17 @@ let _tokenExpiry = 0; // Unix ms
 
 async function getToken(): Promise<string> {
   const now = Date.now();
-  // Re-use token if it has >5 minutes left
   if (_token && now < _tokenExpiry - 5 * 60_000) {
     console.log('[Amazon] Reusing cached token');
     return _token;
   }
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('Amazon credentials not configured. Ensure AMAZON_CLIENT_ID and AMAZON_CLIENT_SECRET are set in Vercel environment variables.');
+    throw new Error('Amazon credentials not configured.');
   }
 
   console.log('[Amazon] Fetching new access token...');
 
-  // Login with Amazon (LwA) requires form-encoded body (not JSON)
-  // Scope: creatorsapi::default for the Creators API v3.x
   const params = new URLSearchParams({
     grant_type: 'client_credentials',
     client_id: CLIENT_ID,
@@ -58,7 +55,6 @@ async function getToken(): Promise<string> {
     body: params.toString(),
   });
 
-  // Fallback: try without scope (some credential sets don't need it)
   if (!res.ok) {
     const errText = await res.text();
     console.warn(`[Amazon] Token with scope failed (${res.status}): ${errText}. Retrying without scope...`);
@@ -82,7 +78,7 @@ async function getToken(): Promise<string> {
 
   const data = await res.json();
   if (!data.access_token) {
-    throw new Error(`Amazon token response missing access_token: ${JSON.stringify(data)}`);
+    throw new Error(`Amazon token missing access_token: ${JSON.stringify(data)}`);
   }
 
   _token = data.access_token as string;
@@ -98,21 +94,21 @@ export async function searchAmazonProducts(
 ): Promise<AmazonProduct[]> {
   const token = await getToken();
 
-  // Creators API SearchItems — PascalCase body, Bearer auth
+  // Creators API SearchItems uses fully lowerCamelCase payload
   const body = {
-    Keywords: keyword,
-    PartnerTag: PARTNER_TAG,
-    PartnerType: 'Associates',
-    SearchIndex: 'PetSupplies',
-    ItemCount: Math.min(limit, 10),
-    Resources: [
-      'Images.Primary.Large',
-      'Images.Primary.Medium',
-      'ItemInfo.Title',
-      'OffersV2.Listings.Price',
-      'OffersV2.Listings.DeliveryInfo.IsPrimeEligible',
-      'CustomerReviews.StarRating',
-      'CustomerReviews.Count',
+    keywords: keyword,
+    partnerTag: PARTNER_TAG,
+    partnerType: 'Associates',
+    searchIndex: 'petSupplies', // or "all", but let's stick to petSupplies
+    itemCount: Math.min(limit, 10),
+    resources: [
+      'images.primary.large',
+      'images.primary.medium',
+      'itemInfo.title',
+      'offersV2.listings.price',
+      'offersV2.listings.deliveryInfo.isPrimeEligible',
+      'customerReviews.starRating',
+      'customerReviews.count',
     ],
   };
 
@@ -123,6 +119,8 @@ export async function searchAmazonProducts(
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+      'User-Agent': 'LumoBites/1.0 (Node.js)'
     },
     body: JSON.stringify(body),
   });
@@ -130,7 +128,6 @@ export async function searchAmazonProducts(
   if (!res.ok) {
     const text = await res.text();
     console.error(`[Amazon] SearchItems failed (${res.status}): ${text}`);
-    // Invalidate token on 401/403 so next call re-fetches
     if (res.status === 401 || res.status === 403) {
       _token = null;
       _tokenExpiry = 0;
@@ -140,21 +137,21 @@ export async function searchAmazonProducts(
 
   const data = await res.json();
 
-  if (data?.Errors) {
-    console.error('[Amazon] SearchItems API errors:', JSON.stringify(data.Errors));
+  if (data?.errors) {
+    console.error('[Amazon] SearchItems API errors:', JSON.stringify(data.errors));
     return [];
   }
 
-  const items: any[] = data?.SearchResult?.Items ?? [];
+  const items: any[] = data?.searchResult?.items ?? [];
   console.log(`[Amazon] SearchItems returned ${items.length} items`);
 
   return items.map((item: any): AmazonProduct => {
-    const asin: string = item.ASIN ?? '';
-    const title: string = item.ItemInfo?.Title?.DisplayValue ?? 'Unknown Product';
+    const asin: string = item.asin ?? '';
+    const title: string = item.itemInfo?.title?.displayValue ?? 'Unknown Product';
 
-    // Affiliate URL — always ensure tag is present
+    // Affiliate URL
     const detailUrl: string =
-      item.DetailPageURL ??
+      item.detailPageURL ??
       `https://www.amazon.com/dp/${asin}?tag=${PARTNER_TAG}`;
     const url = detailUrl.includes('tag=')
       ? detailUrl
@@ -162,25 +159,25 @@ export async function searchAmazonProducts(
 
     // Image
     const image: string =
-      item.Images?.Primary?.Large?.URL ??
-      item.Images?.Primary?.Medium?.URL ??
+      item.images?.primary?.large?.url ??
+      item.images?.primary?.medium?.url ??
       '';
 
-    // Price (OffersV2)
-    const listings: any[] = item.OffersV2?.Listings ?? [];
+    // Price
+    const listings: any[] = item.offersV2?.listings ?? [];
     const priceRaw: number =
-      listings[0]?.Price?.Amount != null
-        ? Math.round(Number(listings[0].Price.Amount) * 100)
+      listings[0]?.price?.amount != null
+        ? Math.round(Number(listings[0].price.amount) * 100)
         : 0;
     const price = priceRaw ? `$${(priceRaw / 100).toFixed(2)}` : '';
 
     // Prime
     const isPrime: boolean =
-      listings[0]?.DeliveryInfo?.IsPrimeEligible === true;
+      listings[0]?.deliveryInfo?.isPrimeEligible === true;
 
     // Reviews
-    const rating: number = Number(item.CustomerReviews?.StarRating?.Value ?? 0);
-    const reviewCount: number = Number(item.CustomerReviews?.Count ?? 0);
+    const rating: number = Number(item.customerReviews?.starRating?.value ?? 0);
+    const reviewCount: number = Number(item.customerReviews?.count ?? 0);
 
     return { asin, title, url, image, price, priceRaw, rating, reviewCount, isPrime };
   });
