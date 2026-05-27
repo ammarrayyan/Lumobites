@@ -36,17 +36,23 @@ export async function GET(req: NextRequest) {
     const cacheKey = `${q}::${limit}`;
     const cached = getCached(cacheKey);
     if (cached) {
+      console.log(`[/api/amazon/search] Cache hit: "${q}"`);
       return NextResponse.json({ products: cached, source: 'cache' });
     }
 
+    console.log(`[/api/amazon/search] Fetching: "${q}" limit=${limit}`);
     const products = await searchAmazonProducts(q, limit);
-    setCache(cacheKey, products);
+    
+    if (products.length > 0) {
+      setCache(cacheKey, products);
+    }
 
     return NextResponse.json({ products, source: 'amazon' });
   } catch (err: any) {
-    console.error('[/api/amazon/search]', err?.message ?? err);
+    const message = err?.message ?? String(err);
+    console.error('[/api/amazon/search] Error:', message);
     return NextResponse.json(
-      { products: [], error: 'Amazon search temporarily unavailable' },
+      { products: [], error: message, source: 'error' },
       { status: 200 }, // Return 200 with empty array so frontend degrades gracefully
     );
   }
