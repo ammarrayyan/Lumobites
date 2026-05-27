@@ -144,7 +144,10 @@ export async function POST(request: NextRequest) {
     // 4. Send email if provided
     if (contact_email && process.env.RESEND_API_KEY) {
       console.log(`[Lost Pets POST] About to send email to: ${contact_email}`);
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobitespet.com';
+      let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lumobites.net';
+      if (!siteUrl.startsWith('http')) {
+        siteUrl = `https://${siteUrl}`;
+      }
       const manageUrl = `${siteUrl}/lost-pets/manage?id=${data.id}&token=${editToken}`;
       
       try {
