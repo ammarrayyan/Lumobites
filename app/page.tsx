@@ -311,7 +311,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
             <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(20px, 2.5vw, 28px)' }}>
-              Personalized recommendations, not generic lists.
+              Everything your pet needs, all in one place.
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
@@ -334,6 +334,18 @@ export default function Home() {
               <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>✨</span>
               <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🛍️</span>
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet's needs.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden">
+              <div className="absolute top-3 right-3 bg-[#8B5E3C] text-white text-[9px] font-black uppercase tracking-[0.12em] px-2 py-0.5 rounded-full z-10">Soon</div>
+              <div className="absolute inset-0 bg-white/40 backdrop-grayscale-[30%] pointer-events-none z-0"></div>
+              <span className="relative z-10" style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🏡</span>
+              <h3 className="text-[#191919] font-bold text-xl mb-2 relative z-10">Sitting & Community</h3>
+              <p className="text-[#666666] text-base leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
             </div>
           </div>
         </div>
