@@ -344,49 +344,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* COMING SOON SECTION */}
       <section className="w-full bg-[#FDFAF7] px-6 py-[80px]">
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
-            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">What pet owners say</h3>
-            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[500px] mx-auto" style={{ fontSize: 'clamp(18px, 2.5vw, 26px)' }}>
-              Real results for real pets.
+            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">More features coming soon 🐾</h3>
+            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(18px, 2.5vw, 26px)' }}>
+              We&apos;re constantly building new ways to help you and your pet
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
-              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;My golden retriever was struggling with joint issues and I had no idea what to feed her. The Personalized Food Advisor matched her to a premium formula with glucosamine in seconds. She&apos;s been on it two months and is noticeably more active!&rdquo;</p>
-              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
-                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐕</div>
-                <div>
-                  <p className="font-bold text-[#191919] text-xs">Sarah M.</p>
-                  <p className="text-[#999] text-[11px]">Personalized Food Advisor • Golden Retriever Owner, TX</p>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
+              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>🏥</span>
+              <h3 className="text-[#191919] font-bold text-lg mb-1">Pet Insurance</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Find the best pet insurance plans tailored to your pet&apos;s breed and age.</p>
             </div>
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
-              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;The Ingredient Safety Scanner is a lifesaver! I scanned the label of my cat&apos;s favorite wet food and discovered a hidden chemical preservative. Switching to a Grade A alternative has resolved their digestive issues completely.&rdquo;</p>
-              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
-                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐈</div>
-                <div>
-                  <p className="font-bold text-[#191919] text-xs">James L.</p>
-                  <p className="text-[#999] text-[11px]">Ingredient Safety Scanner • Multi-cat Household, CA</p>
-                </div>
-              </div>
+
+            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
+              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>⭐</span>
+              <h3 className="text-[#191919] font-bold text-lg mb-1">Sitter Reviews</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Verified reviews from real pet owners about their sitter experience.</p>
             </div>
-            <div className="bg-white rounded-[20px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform">
-              <div className="flex gap-1 text-[#C17D3C] text-lg">{'★★★★★'}</div>
-              <p className="text-[#444444] text-sm leading-[1.7] flex-1">&ldquo;I tried the AI Pet Twin game just for fun, and it matched my selfie to a Pug with 94% accuracy! It was so hilariously spot-on and premium that I shared it on my Instagram story. It is such a mysterious and entertaining quiz!&rdquo;</p>
-              <div className="flex items-center gap-3 pt-2 border-t border-[#F0E8E0]">
-                <div className="w-9 h-9 rounded-full bg-[#F5EDE4] flex items-center justify-center text-lg">🐶</div>
-                <div>
-                  <p className="font-bold text-[#191919] text-xs">Priya K.</p>
-                  <p className="text-[#999] text-[11px]">AI Pet Twin Game • Pug Owner, NY</p>
-                </div>
-              </div>
+
+            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
+              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
+              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>💊</span>
+              <h3 className="text-[#191919] font-bold text-lg mb-1">Pet Health Tracker</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Track your pet&apos;s health, vaccinations and vet visits all in one place.</p>
             </div>
+
           </div>
         </div>
       </section>
