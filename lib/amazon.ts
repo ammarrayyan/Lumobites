@@ -2,13 +2,13 @@
  * Amazon Creators API v3.x Client
  * - OAuth 2.0 client credentials (Login with Amazon / LwA)
  * - Token request: form-encoded, scope = creatorsapi::default
- * - Search endpoint: https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com
+ * - Search endpoint: https://creatorsapi.amazon/catalog/v1/searchItems
  * - Token cached in-process with 5-min safety margin
  * - All credentials server-side only — never exposed to the browser
  */
 
 const TOKEN_URL = 'https://api.amazon.com/auth/o2/token';
-const SEARCH_URL = 'https://creatorsapi.amazon/catalog/v1/items/search?marketplace=www.amazon.com';
+const SEARCH_URL = 'https://creatorsapi.amazon/catalog/v1/searchItems';
 const PARTNER_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'lumobites-20';
 const CLIENT_ID = process.env.AMAZON_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.AMAZON_CLIENT_SECRET || '';
@@ -98,7 +98,6 @@ export async function searchAmazonProducts(
   const body = {
     keywords: keyword,
     partnerTag: PARTNER_TAG,
-    partnerType: 'Associates',
     searchIndex: 'petSupplies', // or "all", but let's stick to petSupplies
     itemCount: Math.min(limit, 10),
     resources: [
@@ -120,7 +119,8 @@ export async function searchAmazonProducts(
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
-      'User-Agent': 'LumoBites/1.0 (Node.js)'
+      'User-Agent': 'LumoBites/1.0 (Node.js)',
+      'x-marketplace': 'www.amazon.com'
     },
     body: JSON.stringify(body),
   });
