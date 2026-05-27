@@ -14,8 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       throw error;
     }
 
-    const { edit_token, ...safePet } = data;
-    return NextResponse.json({ pet: safePet });
+    const { edit_token, pet_type, ...safePet } = data;
+    return NextResponse.json({ pet: { ...safePet, type: pet_type } });
   } catch (err: any) {
     console.error('[Lost Pets GET ID]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });

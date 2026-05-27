@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from('lost_pets').select('*').order('created_at', { ascending: false });
 
-    if (type && type !== 'all') query = query.eq('type', type);
+    if (type && type !== 'all') query = query.eq('pet_type', type);
     if (species && species !== 'all') query = query.eq('species', species);
     if (q) {
       query = query.or(`city.ilike.%${q}%,zip_code.ilike.%${q}%`);
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 
     // Filter out the edit_token from public responses!
     const sanitizedData = data.map(pet => {
-      const { edit_token, ...safePet } = pet;
-      return safePet;
+      const { edit_token, pet_type, ...safePet } = pet;
+      return { ...safePet, type: pet_type };
     });
 
     return NextResponse.json({ pets: sanitizedData });
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Insert into DB
     const { data, error } = await supabaseAdmin.from('lost_pets').insert({
-      type,
+      pet_type: type,
       pet_name,
       species,
       photo_url: finalPhotoUrl,
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { edit_token, ...safePet } = data;
-    return NextResponse.json({ pet: safePet });
+    const { edit_token, pet_type, ...safePet } = data;
+    return NextResponse.json({ pet: { ...safePet, type: pet_type } });
   } catch (err: any) {
     console.error('[Lost Pets POST]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
