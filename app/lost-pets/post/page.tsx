@@ -126,8 +126,8 @@ export default function PostLostPet() {
       setError('A photo is required so others can identify the pet.');
       return;
     }
-    if (!contactEmail && !contactPhone) {
-      setError('Please provide at least an email or phone number so you can be contacted.');
+    if (!contactEmail) {
+      setError('Email is required so we can send you a link to manage your post');
       return;
     }
     if (!finalCity) {
@@ -303,11 +303,11 @@ export default function PostLostPet() {
 
               <div className="md:col-span-2 mt-4 pt-6 border-t border-[#E8DDD4]">
                 <h3 className="text-lg font-black text-[#4A3E3D] mb-4">Contact Information</h3>
-                <p className="text-sm text-[#8B7E7D] mb-4">Please provide at least one way for the community to reach you.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address</label>
-                    <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="you@email.com" />
+                    <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span className="text-red-500">*Required</span></label>
+                    <input required type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="you@email.com" />
+                    <p className="text-xs text-[#8B7E7D] mt-2 font-medium">Required — we'll send you a secure link to manage or delete your post anytime.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number</label>
