@@ -18,15 +18,6 @@ export async function POST(req: NextRequest) {
   const token = (await tokenRes.json()).access_token;
   if (!token) return NextResponse.json({ error: 'No token' });
 
-  const bodyPascal = {
-    Keywords: 'dog food',
-    PartnerTag: PARTNER_TAG,
-    PartnerType: 'Associates',
-    SearchIndex: 'PetSupplies',
-    ItemCount: 2,
-    Resources: ['ItemInfo.Title', 'OffersV2.Listings.Price'],
-  };
-  
   const bodyCamel = {
     keywords: 'dog food',
     partnerTag: PARTNER_TAG,
@@ -37,40 +28,57 @@ export async function POST(req: NextRequest) {
   };
 
   const results: any = {};
-  const urls = [
-    'https://webservices.amazon.com/paapi5/searchitems',
-    'https://api.amazon.com/paapi5/searchitems',
-    'https://creatorsapi.amazon.com/catalog/v1/items',
-    'https://creatorsapi.amazon.com/paapi5/searchitems',
-    'https://creatorsapi.amazon.com/api/v1/searchitems',
-    'https://api.amazon.com/creators/v1/searchitems'
-  ];
 
-  for (const url of urls) {
-    try {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(bodyCamel),
-      });
-      results[url + '_camel'] = { status: r.status, body: (await r.text()).slice(0, 300) };
-    } catch (e: any) { results[url + '_camel'] = e.message; }
+  try {
+    const r = await fetch('https://webservices.amazon.com/paapi5/searchitems', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-marketplace': 'www.amazon.com'
+      },
+      body: JSON.stringify(bodyCamel),
+    });
+    results['test_webservices_paapi5'] = { status: r.status, body: (await r.text()).slice(0, 300) };
+  } catch (e: any) { results['test_webservices_paapi5'] = e.message; }
 
-    try {
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(bodyPascal),
-      });
-      results[url + '_pascal'] = { status: r.status, body: (await r.text()).slice(0, 300) };
-    } catch (e: any) { results[url + '_pascal'] = e.message; }
-  }
+  try {
+    const r = await fetch('https://api.amazon.com/creators/catalog/v1/items/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-marketplace': 'www.amazon.com'
+      },
+      body: JSON.stringify(bodyCamel),
+    });
+    results['test_creators_catalog_search'] = { status: r.status, body: (await r.text()).slice(0, 300) };
+  } catch (e: any) { results['test_creators_catalog_search'] = e.message; }
+
+  try {
+    const r = await fetch('https://api.amazon.com/creatorsapi/v1/searchitems', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'x-marketplace': 'www.amazon.com'
+      },
+      body: JSON.stringify(bodyCamel),
+    });
+    results['test_api_creatorsapi_searchitems'] = { status: r.status, body: (await r.text()).slice(0, 300) };
+  } catch (e: any) { results['test_api_creatorsapi_searchitems'] = e.message; }
+
+  try {
+    const r = await fetch('https://webservices.amazon.com/paapi5/searchitems', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ ...bodyCamel, marketplace: 'www.amazon.com' }),
+    });
+    results['test_webservices_marketplace_body'] = { status: r.status, body: (await r.text()).slice(0, 300) };
+  } catch (e: any) { results['test_webservices_marketplace_body'] = e.message; }
 
   return NextResponse.json(results);
 }
