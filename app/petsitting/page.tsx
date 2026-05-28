@@ -24,6 +24,9 @@ interface Sitter {
   distance?: number;
   avg_rating?: number;
   review_count?: number;
+  available_days?: string[];
+  available_times?: string[];
+  service_types?: string[];
 }
 
 // Haversine formula to calculate distance between two coordinates in miles
@@ -55,6 +58,8 @@ export default function PetSitting() {
   const [searchLocationName, setSearchLocationName] = useState('');
   const [searchLocationError, setSearchLocationError] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
+  const [searchDay, setSearchDay] = useState('all');
+  const [searchServiceType, setSearchServiceType] = useState('all');
   const [searchRadius, setSearchRadius] = useState('25');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -94,6 +99,9 @@ export default function PetSitting() {
   const [sitterIsLocating, setSitterIsLocating] = useState(false);
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
+  const [sitterAvailableDays, setSitterAvailableDays] = useState<string[]>([]);
+  const [sitterAvailableTimes, setSitterAvailableTimes] = useState<string[]>([]);
+  const [sitterServiceTypes, setSitterServiceTypes] = useState<string[]>([]);
   const [sitterRate, setSitterRate] = useState('');
   const [sitterPhone, setSitterPhone] = useState('');
   const [sitterPhoneVisible, setSitterPhoneVisible] = useState(false);
@@ -196,9 +204,18 @@ export default function PetSitting() {
 
 
 
-  const fetchSitters = async (email?: string) => {
+  const fetchSitters = async (email?: string, dayOverride?: string, serviceOverride?: string) => {
     try {
-      const url = email ? `/api/petsitting/sitters?owner_email=${encodeURIComponent(email)}` : '/api/petsitting/sitters';
+      const qEmail = email !== undefined ? email : reqEmail;
+      const qDay = dayOverride !== undefined ? dayOverride : searchDay;
+      const qService = serviceOverride !== undefined ? serviceOverride : searchServiceType;
+
+      const params = new URLSearchParams();
+      if (qEmail) params.append('owner_email', qEmail);
+      if (qDay && qDay !== 'all') params.append('day', qDay);
+      if (qService && qService !== 'all') params.append('service_type', qService);
+
+      const url = `/api/petsitting/sitters?${params.toString()}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -261,6 +278,9 @@ export default function PetSitting() {
           setSitterPhone(data.phone_number || '');
           setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability);
+          setSitterAvailableDays(data.available_days || []);
+          setSitterAvailableTimes(data.available_times || []);
+          setSitterServiceTypes(data.service_types || []);
           setSitterApprovalStatus(data.approval_status || 'pending');
           
           // FREE LAUNCH: Automatically treat any loaded profile as PRO
@@ -460,6 +480,9 @@ export default function PetSitting() {
           phone_number: sitterPhone,
           phone_visible: sitterPhoneVisible,
           availability: sitterAvailable,
+          available_days: sitterAvailableDays,
+          available_times: sitterAvailableTimes,
+          service_types: sitterServiceTypes,
           gender: sitterGender
         })
       });
@@ -937,6 +960,31 @@ export default function PetSitting() {
                 <option value="dog">Dogs Only</option>
                 <option value="cat">Cats Only</option>
               </select>
+              <select
+                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                value={searchDay}
+                onChange={(e) => { setSearchDay(e.target.value); fetchSitters(undefined, e.target.value, undefined); }}
+              >
+                <option value="all">Any Day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
+              <select
+                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                value={searchServiceType}
+                onChange={(e) => { setSearchServiceType(e.target.value); fetchSitters(undefined, undefined, e.target.value); }}
+              >
+                <option value="all">Any Service</option>
+                <option value="Home visits">🏠 Home visits</option>
+                <option value="Overnight stays">🌙 Overnight stays</option>
+                <option value="Dog walking">🚶 Dog walking</option>
+                <option value="Sitter's home boarding">🏡 Sitter's home boarding</option>
+              </select>
             </div>
 
             <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
@@ -1055,6 +1103,23 @@ export default function PetSitting() {
                         </div>
 
                         <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
+
+                        <div className="flex flex-col gap-2 mb-4">
+                          {(sitter.available_days?.length || 0) > 0 && (
+                            <p className="text-xs text-[#8B7E7D]">
+                              📅 <span className="font-semibold text-[#4A3E3D]">Available:</span> {sitter.available_days?.length === 7 ? 'All Week' : sitter.available_days?.includes('Saturday') && sitter.available_days?.includes('Sunday') && sitter.available_days?.length === 2 ? 'Weekends Only' : sitter.available_days?.join(', ')}
+                            </p>
+                          )}
+                          {(sitter.service_types?.length || 0) > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {sitter.service_types?.map(st => (
+                                <span key={st} className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4]">
+                                  {st === 'Home visits' ? '🏠 Drop-in' : st === 'Overnight stays' ? '🌙 Overnight' : st === 'Dog walking' ? '🚶 Walking' : '🏡 Boarding'}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
 
                         <div className="flex items-center justify-between mb-6">
                           <div className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-lg">
@@ -1491,7 +1556,66 @@ export default function PetSitting() {
                 </div>
               </div>
 
-              <div>
+              <div className="md:col-span-2 space-y-6 pt-4 border-t border-[#E8DDD4]">
+                <h3 className="text-lg font-black text-[#4A3E3D]">Availability & Services</h3>
+                
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-3">Days Available</label>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <button type="button" onClick={() => setSitterAvailableDays(['Saturday', 'Sunday'])} className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E8DDD4] text-[#666666] hover:bg-[#FAF6F4]">Weekends Only</button>
+                    <button type="button" onClick={() => setSitterAvailableDays(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])} className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E8DDD4] text-[#666666] hover:bg-[#FAF6F4]">Weekdays Only</button>
+                    <button type="button" onClick={() => setSitterAvailableDays(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])} className="px-3 py-1.5 text-xs font-bold rounded-lg border border-[#E8DDD4] text-[#666666] hover:bg-[#FAF6F4]">All Week</button>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                      <label key={day} className="flex items-center gap-2 text-sm text-[#4A3E3D] cursor-pointer">
+                        <input type="checkbox" checked={sitterAvailableDays.includes(day)} onChange={e => {
+                          if (e.target.checked) setSitterAvailableDays([...sitterAvailableDays, day]);
+                          else setSitterAvailableDays(sitterAvailableDays.filter(d => d !== day));
+                        }} className="w-4 h-4 accent-[#8B5E3C]" />
+                        {day}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-3">Times Available</label>
+                  <div className="flex flex-wrap gap-3">
+                    {['Morning (6am-12pm)', 'Afternoon (12pm-6pm)', 'Evening (6pm-10pm)', 'Overnight', 'Flexible'].map(time => (
+                      <label key={time} className="flex items-center gap-2 text-sm text-[#4A3E3D] cursor-pointer">
+                        <input type="checkbox" checked={sitterAvailableTimes.includes(time)} onChange={e => {
+                          if (e.target.checked) setSitterAvailableTimes([...sitterAvailableTimes, time]);
+                          else setSitterAvailableTimes(sitterAvailableTimes.filter(t => t !== time));
+                        }} className="w-4 h-4 accent-[#8B5E3C]" />
+                        {time}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-3">Service Types Offered</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { val: 'Home visits', label: '🏠 Home visits (drop-in)' },
+                      { val: 'Overnight stays', label: '🌙 Overnight stays' },
+                      { val: 'Dog walking', label: '🚶 Dog walking' },
+                      { val: 'Sitter\'s home boarding', label: '🏡 Sitter\'s home boarding' }
+                    ].map(st => (
+                      <label key={st.val} className="flex items-center gap-2 text-sm text-[#4A3E3D] cursor-pointer">
+                        <input type="checkbox" checked={sitterServiceTypes.includes(st.val)} onChange={e => {
+                          if (e.target.checked) setSitterServiceTypes([...sitterServiceTypes, st.val]);
+                          else setSitterServiceTypes(sitterServiceTypes.filter(t => t !== st.val));
+                        }} className="w-4 h-4 accent-[#8B5E3C]" />
+                        {st.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">About You (Bio)</label>
                 <textarea required rows={4} value={sitterBio} onChange={e => setSitterBio(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['bio'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="Tell pet owners about your experience..."></textarea>
                 {formErrors['bio'] && <p className="text-red-500 text-sm mt-1">{formErrors['bio']}</p>}

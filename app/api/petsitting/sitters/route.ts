@@ -18,13 +18,24 @@ export async function GET(request: NextRequest) {
       isOwnerPro = emailData?.is_pro || false;
     }
 
-    const { data, error } = await supabase
+    const day = request.nextUrl.searchParams.get('day');
+    const serviceType = request.nextUrl.searchParams.get('service_type');
+
+    let query = supabase
       .from('sitters')
-      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible, approval_status, avg_rating, review_count')
+      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types')
       .eq('approval_status', 'approved')
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
-      .eq('availability', true)
-      .order('created_at', { ascending: false });
+      .eq('availability', true);
+
+    if (day && day !== 'all') {
+      query = query.contains('available_days', [day]);
+    }
+    if (serviceType && serviceType !== 'all') {
+      query = query.contains('service_types', [serviceType]);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
 

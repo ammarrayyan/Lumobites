@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, availability, phone_number, phone_visible,
-      gender
+      gender, available_days, available_times, service_types
     } = body;
 
     if (!email || !name) {
@@ -191,6 +191,9 @@ export async function POST(request: NextRequest) {
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
         availability: availability !== undefined ? availability : true,
+        available_days: available_days || [],
+        available_times: available_times || [],
+        service_types: service_types || [],
         gender: gender || null,
         // Reset approval status upon submission/resubmission
         approval_status: 'pending',
