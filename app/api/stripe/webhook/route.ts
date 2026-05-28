@@ -42,9 +42,27 @@ export async function POST(request: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session;
         const email = session.customer_details?.email || session.metadata?.email;
         const service = session.metadata?.service;
+        const referralCode = session.metadata?.referral_code;
         
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
+          
+          if (referralCode) {
+            console.log(`[Stripe Webhook] Processing referral for code: ${referralCode}`);
+            const { data: referrer } = await supabase.from('referrers').select('id').eq('code', referralCode).single();
+            if (referrer) {
+              await supabase.from('referred_users').insert({
+                referrer_id: referrer.id,
+                referral_code: referralCode,
+                referred_email: cleanEmail,
+                subscribed: true,
+                subscription_type: service === 'sitter-pro' ? 'pro_sitter' : 'pro_owner',
+                monthly_value: service === 'sitter-pro' ? 9.99 : 2.99,
+                subscription_date: new Date().toISOString(),
+                active_months: 1,
+              });
+            }
+          }
           
           if (service === 'sitter-pro') {
             console.log(`[Stripe Webhook] Setting Sitter PRO status for email: ${cleanEmail}`);
@@ -146,6 +164,25 @@ export async function POST(request: NextRequest) {
           );
           
           await supabase.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
+
+          if (invoice.billing_reason === 'subscription_cycle') {
+            // Fetch the referred user by email and increment active_months using RPC or select/update
+            const { data: referred } = await supabase
+              .from('referred_users')
+              .select('id, active_months')
+              .eq('referred_email', cleanEmail)
+              .eq('cancelled', false)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+              
+            if (referred) {
+              await supabase
+                .from('referred_users')
+                .update({ active_months: (referred.active_months || 1) + 1 })
+                .eq('id', referred.id);
+            }
+          }
         }
         break;
       }
@@ -165,6 +202,12 @@ export async function POST(request: NextRequest) {
               // Remove PRO from both owner and sitter tables
               await supabase.from('emails').update({ is_pro: false }).eq('email', cleanEmail);
               await supabase.from('sitters').update({ is_pro: false }).eq('email', cleanEmail);
+
+              // Mark referral as cancelled
+              await supabase.from('referred_users').update({
+                cancelled: true,
+                cancelled_date: new Date().toISOString(),
+              }).eq('referred_email', cleanEmail).eq('cancelled', false);
             }
           }
         }

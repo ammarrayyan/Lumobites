@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { email } = body;
+    const referralCode = request.cookies.get('lumobites_ref')?.value;
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required to checkout.' }, { status: 400 });
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         email: email.toLowerCase().trim(),
         service: 'safety-scanner-pro',
+        ...(referralCode && { referral_code: referralCode }),
       },
     });
 
