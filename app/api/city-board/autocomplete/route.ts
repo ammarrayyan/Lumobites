@@ -18,9 +18,31 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
 
     if (data.results) {
-      const options = data.results.map((r: any) => ({
-        formatted_address: r.formatted_address
-      }));
+      const options = data.results.map((r: any) => {
+        let city = '';
+        let state = '';
+        
+        for (const comp of (r.address_components || [])) {
+          if (comp.types.includes('locality')) {
+            city = comp.long_name;
+          } else if (!city && comp.types.includes('sublocality')) {
+            city = comp.long_name;
+          } else if (!city && comp.types.includes('neighborhood')) {
+            city = comp.long_name;
+          }
+          if (comp.types.includes('administrative_area_level_1')) {
+            state = comp.short_name;
+          }
+        }
+        
+        let formatted = r.formatted_address;
+        if (city && state) {
+          formatted = `${city}, ${state}`;
+        }
+        
+        return { formatted_address: formatted };
+      });
+
       // Remove duplicates just in case
       const uniqueOptions = Array.from(new Set(options.map((o: any) => o.formatted_address)))
         .map(address => ({ formatted_address: address }));
