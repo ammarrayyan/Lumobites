@@ -129,6 +129,17 @@ export default function CityBoardPostPage() {
             <span className="text-sm text-[#8B7E7D] ml-auto">{formatDistanceToNow(new Date(post.created_at))} ago</span>
           </div>
           <p className="text-[#4A3E3D] whitespace-pre-wrap text-lg">{post.content}</p>
+          <div className="flex items-center justify-end border-t border-[#E8DDD4] pt-4 mt-6">
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
+                alert('Link copied to clipboard!');
+              }}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-[#8B7E7D] hover:text-[#4A3E3D] transition-colors bg-[#FAF6F4] px-4 py-2 rounded-lg border border-[#E8DDD4]"
+            >
+              🔗 Copy Share Link
+            </button>
+          </div>
         </div>
 
         <h3 className="text-xl font-black text-[#4A3E3D] mb-4 pl-2">Replies ({replies.length})</h3>

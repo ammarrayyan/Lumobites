@@ -21,6 +21,7 @@ export default function CityBoardPage() {
   const [loading, setLoading] = useState(true);
 
   // Filters
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [searchCity, setSearchCity] = useState('');
   const [searchCategory, setSearchCategory] = useState('All');
   const [searchPostId, setSearchPostId] = useState('');
@@ -46,6 +47,7 @@ export default function CityBoardPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      if (searchKeyword) params.append('keyword', searchKeyword);
       if (searchCity) params.append('city', searchCity);
       if (searchCategory !== 'All') params.append('category', searchCategory);
       if (searchPostId) params.append('post_id', searchPostId);
@@ -67,7 +69,7 @@ export default function CityBoardPage() {
     if (deviceCookie) {
       fetchPosts();
     }
-  }, [searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie]);
+  }, [searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie]);
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,11 +170,18 @@ export default function CityBoardPage() {
           </form>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
-          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex gap-2 w-full overflow-x-auto pb-2 hide-scrollbar">
             <input 
               type="text" 
-              placeholder="Search City..." 
+              placeholder="Keyword (e.g. vet)..." 
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+              className="bg-white border border-[#E8DDD4] rounded-xl px-4 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] min-w-[150px]"
+            />
+            <input 
+              type="text" 
+              placeholder="City..." 
               value={searchCity}
               onChange={e => setSearchCity(e.target.value)}
               className="bg-white border border-[#E8DDD4] rounded-xl px-4 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] min-w-[150px]"
@@ -187,13 +196,13 @@ export default function CityBoardPage() {
             </select>
             <input 
               type="text" 
-              placeholder="Search ID (LB-...)" 
+              placeholder="ID (LB-...)" 
               value={searchPostId}
               onChange={e => setSearchPostId(e.target.value)}
               className="bg-white border border-[#E8DDD4] rounded-xl px-4 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] min-w-[150px]"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-2">
             <input 
               type="checkbox" 
               id="my_posts" 
@@ -225,9 +234,20 @@ export default function CityBoardPage() {
                 </div>
                 <p className="text-[#4A3E3D] whitespace-pre-wrap mb-4">{post.content}</p>
                 
-                <Link href={`/city-board/${post.post_id}`} className="inline-flex items-center gap-1 text-sm font-bold text-[#8B5E3C] hover:text-[#7A5234]">
-                  💬 {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
-                </Link>
+                <div className="flex items-center justify-between border-t border-[#E8DDD4] pt-4 mt-2">
+                  <Link href={`/city-board/${post.post_id}`} className="inline-flex items-center gap-1.5 text-sm font-bold text-[#8B5E3C] hover:text-[#7A5234]">
+                    💬 {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
+                      alert('Link copied to clipboard!');
+                    }}
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[#8B7E7D] hover:text-[#4A3E3D] transition-colors bg-[#FAF6F4] px-3 py-1.5 rounded-lg"
+                  >
+                    🔗 Share
+                  </button>
+                </div>
               </div>
             ))}
           </div>

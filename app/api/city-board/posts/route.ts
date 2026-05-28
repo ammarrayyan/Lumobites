@@ -9,13 +9,16 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get('category');
     const postId = searchParams.get('post_id');
     const deviceCookie = searchParams.get('device_cookie');
+    const keyword = searchParams.get('keyword');
     const sort = searchParams.get('sort') || 'newest';
 
     let query = supabaseAdmin
       .from('city_board_posts')
       .select('*, city_board_replies(count)');
 
-    if (city) {
+    if (keyword) {
+      query = query.or(`city.ilike.%${keyword}%,content.ilike.%${keyword}%`);
+    } else if (city) {
       // Basic text search for city. We can use ilike for case-insensitive.
       query = query.ilike('city', `%${city}%`);
     }
