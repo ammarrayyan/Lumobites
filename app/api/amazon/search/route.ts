@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchAmazonProducts, AmazonProduct } from '@/lib/amazon';
+import { getMockProducts } from '@/lib/amazon-mocks';
 
 // ── Server-side 1-hour result cache ──────────────────────────────────────────
 interface CacheEntry {
@@ -51,6 +52,12 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     const message = err?.message ?? String(err);
     console.error('[/api/amazon/search] Error:', message);
+    if (message.includes('AssociateNotEligible') || message.includes('AccessDeniedException')) {
+      console.log('[/api/amazon/search] Using mock fallback due to AssociateNotEligible.');
+      const mockProducts = getMockProducts(q, limit);
+      return NextResponse.json({ products: mockProducts, source: 'mock_fallback' });
+    }
+
     return NextResponse.json(
       { products: [], error: message, source: 'error' },
       { status: 200 }, // Return 200 with empty array so frontend degrades gracefully
