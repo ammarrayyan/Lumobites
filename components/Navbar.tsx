@@ -108,12 +108,6 @@ export default function Navbar() {
         {/* Right: Desktop Links & Share */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
 
-          {/* Lost Pets */}
-          <Link href="/lost-pets" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
-            <span className="text-[14px] leading-none mr-1.5">🐾</span>
-            Lost Pets
-          </Link>
-
           {/* Pet Sitting */}
           <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -122,18 +116,29 @@ export default function Navbar() {
             Pet Sitting
           </Link>
 
+          {/* Safety Check */}
           <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             Safety Check
           </Link>
+
+          {/* Lost Pets */}
+          <Link href="/lost-pets" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[14px] leading-none mr-1.5">🐾</span>
+            Lost Pets
+          </Link>
+
+          {/* Recalls */}
           <Link href="/recalls" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             Recalls
           </Link>
+
+          {/* Pet Supplies */}
           <Link href="/supplies" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#666666] hover:text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
               <circle cx="4.5" cy="11.5" r="2.5" />
@@ -144,6 +149,8 @@ export default function Navbar() {
             </svg>
             Pet Supplies
           </Link>
+
+          {/* Pet Twin */}
           <Link href="/twin" className="text-[#8B5E3C] font-bold hover:underline transition-all flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
@@ -277,12 +284,6 @@ export default function Navbar() {
         <div className="md:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
 
-            {/* Lost Pets */}
-            <Link href="/lost-pets" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
-              <span className="text-[16px] leading-none">🐾</span>
-              Lost Pets
-            </Link>
-
             {/* Pet Sitting (mobile) */}
             <Link href="/petsitting" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center gap-2 text-decoration-none">
               <svg className="w-4 h-4 inline-block align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -293,7 +294,7 @@ export default function Navbar() {
 
             <Link 
               href="/scan" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 inline-block mr-2.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -301,9 +302,16 @@ export default function Navbar() {
               </svg>
               Safety Check
             </Link>
+
+            {/* Lost Pets */}
+            <Link href="/lost-pets" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
+              <span className="text-[16px] leading-none">🐾</span>
+              Lost Pets
+            </Link>
+
             <Link 
               href="/recalls" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 inline-block mr-2.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -313,7 +321,7 @@ export default function Navbar() {
             </Link>
             <Link 
               href="/supplies" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 inline-block mr-2.5 align-middle" fill="currentColor" viewBox="0 0 24 24">
@@ -327,7 +335,7 @@ export default function Navbar() {
             </Link>
             <Link 
               href="/twin" 
-              className="px-4 py-3 text-[#8B5E3C] font-bold hover:bg-[#FDF9F5] rounded-xl transition-colors flex items-center animate-fade-in"
+              className="px-4 py-3 text-[#8B5E3C] font-bold hover:bg-[#FDF9F5] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
               onClick={() => setIsOpen(false)}
             >
               <svg className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
