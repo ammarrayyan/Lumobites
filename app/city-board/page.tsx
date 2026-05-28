@@ -48,24 +48,26 @@ export default function CityBoardPage() {
     setDeviceCookie(cookie);
   }, []);
 
-  const handleLocationBlur = async (input: string) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (newCity && !newCityVerified) {
+        fetchLocationOptions(newCity);
+      } else if (!newCity) {
+        setNewCityOptions([]);
+      }
+    }, 400); // 400ms debounce
+    return () => clearTimeout(timer);
+  }, [newCity, newCityVerified]);
+
+  const fetchLocationOptions = async (input: string) => {
     const trimmedInput = input.trim();
-    if (!trimmedInput) {
-      setNewCityVerified(false);
-      setNewCityOptions([]);
-      return;
-    }
+    if (!trimmedInput) return;
 
     setIsLocatingNewCity(true);
-    setNewCityVerified(false);
-    setNewCityOptions([]);
-
+    
     try {
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        setNewCityVerified(true);
-        return;
-      }
+      if (!apiKey) return;
       
       const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(trimmedInput)}&key=${apiKey}`);
       const data = await res.json();
@@ -74,18 +76,12 @@ export default function CityBoardPage() {
         const options = data.results.map((r: any) => ({
           formatted_address: r.formatted_address
         }));
-        
         setNewCityOptions(options);
-        if (options.length === 1) {
-          setNewCity(options[0].formatted_address);
-          setNewCityVerified(true);
-        }
       } else {
-        setNewCityVerified(true);
+        setNewCityOptions([]);
       }
     } catch (err) {
       console.error(err);
-      setNewCityVerified(true);
     } finally {
       setIsLocatingNewCity(false);
     }
@@ -125,7 +121,7 @@ export default function CityBoardPage() {
       setPostError('City and content are required.');
       return;
     }
-    if (!newCityVerified && newCityOptions.length > 1) {
+    if (!newCityVerified) {
       setPostError('Please select a specific city from the dropdown options.');
       return;
     }
@@ -185,9 +181,7 @@ export default function CityBoardPage() {
                     onChange={e => {
                       setNewCity(e.target.value);
                       setNewCityVerified(false);
-                      setNewCityOptions([]);
                     }} 
-                    onBlur={() => handleLocationBlur(newCity)}
                     placeholder="e.g. Louisville, KY" 
                     className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                     required
@@ -201,7 +195,7 @@ export default function CityBoardPage() {
                     <div className="absolute right-3 top-3 text-green-600 font-bold">✓</div>
                   )}
                 </div>
-                {newCityOptions.length > 1 && !newCityVerified && (
+                {newCityOptions.length > 0 && !newCityVerified && (
                   <div className="mt-2 p-2 bg-white border border-[#E8DDD4] rounded-xl shadow-sm absolute z-10 w-full">
                     <p className="text-xs font-bold text-[#4A3E3D] mb-1">Did you mean:</p>
                     {newCityOptions.map((opt, i) => (
