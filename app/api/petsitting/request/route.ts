@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Insert Request Record
-    const { error: insertError } = await supabase
+    const { data: insertedReq, error: insertError } = await supabase
       .from('sitting_requests')
       .insert({
         owner_email: cleanEmail,
@@ -54,14 +54,17 @@ export async function POST(request: NextRequest) {
         pet_type,
         dates,
         special_notes
-      });
+      })
+      .select('id, secure_token')
+      .single();
 
-    if (insertError) {
+    if (insertError || !insertedReq) {
       console.error('[PetSitting Request API] Supabase Insert Error:', insertError);
-      return NextResponse.json({ error: insertError.message || 'Database error' }, { status: 500 });
+      return NextResponse.json({ error: insertError?.message || 'Database error' }, { status: 500 });
     }
 
     // 5. Send Email to Sitter
+    const origin = request.nextUrl.origin;
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const emailRes = await resend.emails.send({
       from: fromEmail,
@@ -84,7 +87,12 @@ export async function POST(request: NextRequest) {
       <p style="margin:0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Notes:</strong> ${special_notes || 'None'}</p>
     `)}
     ${emailStyles.divider}
-    <p style="${emailStyles.p}"><strong>To accept or discuss this request, simply reply directly to this email</strong> — it will go straight to the owner at ${cleanEmail}.</p>
+    <p style="${emailStyles.p}">Please respond to this request by clicking one of the buttons below:</p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${origin}/api/petsitting/request/accept?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#10B981;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;margin-right:12px;">✅ Accept Request</a>
+      <a href="${origin}/api/petsitting/request/decline?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#EF4444;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">❌ Decline Request</a>
+    </div>
+    <p style="${emailStyles.p}">Alternatively, you can reply directly to this email to discuss details with the owner at ${cleanEmail}.</p>
     ${emailStyles.signoff}
   `
       })

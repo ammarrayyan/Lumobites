@@ -22,6 +22,8 @@ interface Sitter {
   phone_number?: string;
   phone_visible?: boolean;
   distance?: number;
+  avg_rating?: number;
+  review_count?: number;
 }
 
 // Haversine formula to calculate distance between two coordinates in miles
@@ -58,6 +60,12 @@ export default function PetSitting() {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedSitter, setSelectedSitter] = useState<Sitter | null>(null);
+
+  // Reviews State
+  const [reviewsModalOpen, setReviewsModalOpen] = useState(false);
+  const [selectedSitterForReviews, setSelectedSitterForReviews] = useState<Sitter | null>(null);
+  const [sitterReviews, setSitterReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   
   // Request Form State
   const [reqEmail, setReqEmail] = useState('');
@@ -201,6 +209,26 @@ export default function PetSitting() {
       console.error('Failed to fetch sitters');
     } finally {
       setLoadingSitters(false);
+    }
+  };
+
+  const handleViewReviews = async (sitter: Sitter) => {
+    setSelectedSitterForReviews(sitter);
+    setReviewsModalOpen(true);
+    setLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/petsitting/reviews?sitter_id=${sitter.id}`);
+      const data = await res.json();
+      if (res.ok && data.reviews) {
+        setSitterReviews(data.reviews);
+      } else {
+        setSitterReviews([]);
+      }
+    } catch (e) {
+      console.error('Failed to load reviews');
+      setSitterReviews([]);
+    } finally {
+      setLoadingReviews(false);
     }
   };
 
@@ -973,7 +1001,7 @@ export default function PetSitting() {
                 <div className="flex-1 order-2 lg:order-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
-                      <div key={sitter.id} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative">
+                      <div key={sitter.id} onClick={() => handleViewReviews(sitter)} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative cursor-pointer">
                         {sitter.approval_status === 'approved' && (
                           <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                             ✅ Identity Verified
@@ -995,6 +1023,13 @@ export default function PetSitting() {
                                  <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
                                    {sitter.gender}
                                  </span>
+                               )}
+                             </div>
+                             <div className="text-sm mt-0.5 mb-1">
+                               {sitter.review_count ? (
+                                 <span className="text-[#D97706] font-bold">⭐ {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span></span>
+                               ) : (
+                                 <span className="text-[#8B7E7D]">No reviews yet</span>
                                )}
                              </div>
                             <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
@@ -1031,7 +1066,8 @@ export default function PetSitting() {
                         </div>
 
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (!isOwnerPro) {
                               setUnlockModalOpen(true);
                             } else {
@@ -1775,6 +1811,77 @@ export default function PetSitting() {
                 )}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* REVIEWS MODAL */}
+      {reviewsModalOpen && selectedSitterForReviews && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-[#E8DDD4] flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-3">
+                {selectedSitterForReviews.photo_url ? (
+                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#FAF6F4]" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-lg">
+                    {selectedSitterForReviews.name.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-xl font-black text-[#4A3E3D]">{selectedSitterForReviews.name}</h3>
+                  <div className="text-sm mt-0.5">
+                    {selectedSitterForReviews.review_count ? (
+                      <span className="text-[#D97706] font-bold">⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span></span>
+                    ) : (
+                      <span className="text-[#8B7E7D]">No reviews yet</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setReviewsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer">
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 bg-[#FDFAF7]">
+              {loadingReviews ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B5E3C] mb-4"></div>
+                  <p className="text-[#8B7E7D] text-sm">Loading reviews...</p>
+                </div>
+              ) : sitterReviews.length === 0 ? (
+                <div className="text-center py-12">
+                  <span className="text-4xl mb-4 block">🐾</span>
+                  <p className="text-[#8B7E7D] font-medium">No reviews yet for {selectedSitterForReviews.name}.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {sitterReviews.map(review => (
+                    <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#E8DDD4] shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-[#4A3E3D]">{review.owner_name}</span>
+                        <span className="text-xs text-[#8B7E7D]">{new Date(review.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex text-[#D97706] text-sm mb-3">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i}>{i < review.rating ? '★' : '☆'}</span>
+                        ))}
+                      </div>
+                      <p className="text-[#555555] text-sm leading-relaxed">{review.review_text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0">
+               <button 
+                onClick={() => setReviewsModalOpen(false)} 
+                className="w-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
