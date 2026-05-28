@@ -130,6 +130,12 @@ export default function Navbar() {
             Lost Pets
           </Link>
 
+          {/* City Board */}
+          <Link href="/city-board" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[14px] leading-none mr-1.5">💬</span>
+            City Board
+          </Link>
+
           {/* Recalls */}
           <Link href="/recalls" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -307,6 +313,12 @@ export default function Navbar() {
             <Link href="/lost-pets" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
               <span className="text-[16px] leading-none">🐾</span>
               Lost Pets
+            </Link>
+
+            {/* City Board */}
+            <Link href="/city-board" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
+              <span className="text-[16px] leading-none">💬</span>
+              City Board
             </Link>
 
             <Link 

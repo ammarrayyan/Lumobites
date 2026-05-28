@@ -200,6 +200,22 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* Card 4.5 - City Board */}
+          <Link href="/city-board" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <span className="text-[#8B5E3C] text-lg">💬</span>
+              </div>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>City Board</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Your anonymous local pet community. Ask questions, share tips, find vets and groomers in your city — no account needed.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
+              Join Discussion &rarr;
+            </div>
+          </Link>
+
           {/* Card 5 - Recall Alerts */}
           <Link href="/recalls" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
             <div className="flex items-center gap-3">
@@ -417,6 +433,7 @@ export default function Home() {
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
               <li><Link href="/petsitting" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Sitting</Link></li>
               <li><Link href="/lost-pets" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Lost Pets</Link></li>
+              <li><Link href="/city-board" style={{ color: '#AAAAAA', textDecoration: 'none' }}>City Board</Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
           </div>

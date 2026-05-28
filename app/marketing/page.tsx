@@ -12,7 +12,8 @@ const qrConfigs = [
   { title: "Pet Sitting", url: "https://lumobites.net/petsitting", tagline: "Find a trusted pet sitter near you — or earn money sitting pets in your neighborhood. Free to join, verified profiles!", filename: "lumobites-petsitting-qr.png" },
   { title: "Pet Supplies", url: "https://lumobites.net/supplies", tagline: "Find the best toys, food, and supplies tailored specifically for your pet.", filename: "lumobites-supplies-qr.png" },
   { title: "Breed Detection", url: "https://lumobites.net/photo", tagline: "Upload a photo of any dog or cat and instantly find out their breed. Free!", filename: "lumobites-photo-qr.png" },
-  { title: "Lost Pets Community Board", url: "https://lumobites.net/lost-pets", tagline: "Lost or found a pet? Post it free and help reunite pets with their families in your neighborhood!", filename: "lumobites-lost-pets-qr.png" }
+  { title: "Lost Pets Community Board", url: "https://lumobites.net/lost-pets", tagline: "Lost or found a pet? Post it free and help reunite pets with their families in your neighborhood!", filename: "lumobites-lost-pets-qr.png" },
+  { title: "City Board", url: "https://lumobites.net/city-board", tagline: "Join your local pet community — ask questions, share tips, find vets and groomers near you. Free and anonymous!", filename: "lumobites-city-board-qr.png" }
 ];
 
 const QRCodeCard = ({ title, url, tagline, filename }: { title: string, url: string, tagline: string, filename: string }) => {
