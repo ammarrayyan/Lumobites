@@ -14,14 +14,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ options: [] });
     }
 
-    const res = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=(cities)&components=country:us&key=${apiKey}`);
+    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&components=country:US&key=${apiKey}`);
     const data = await res.json();
 
-    if (data.predictions) {
-      const options = data.predictions.map((p: any) => ({
-        formatted_address: p.description
+    if (data.results) {
+      const options = data.results.map((r: any) => ({
+        formatted_address: r.formatted_address
       }));
-      return NextResponse.json({ options });
+      // Remove duplicates just in case
+      const uniqueOptions = Array.from(new Set(options.map((o: any) => o.formatted_address)))
+        .map(address => ({ formatted_address: address }));
+      return NextResponse.json({ options: uniqueOptions });
     }
 
     return NextResponse.json({ options: [] });
