@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
                 referred_email: cleanEmail,
                 subscribed: true,
                 subscription_type: service === 'sitter-pro' ? 'pro_sitter' : 'pro_owner',
-                monthly_value: service === 'sitter-pro' ? 9.99 : 2.99,
+                monthly_value: session.amount_total ? session.amount_total / 100 : (service === 'sitter-pro' ? 9.99 : 2.99),
                 subscription_date: new Date().toISOString(),
                 active_months: 1,
               });
