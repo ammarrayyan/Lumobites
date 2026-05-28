@@ -7,12 +7,13 @@ import AccountManagement from '@/components/admin/AccountManagement';
 import LostPetsManagement from '@/components/admin/LostPetsManagement';
 import ReviewsManagement from '@/components/admin/ReviewsManagement';
 import ReferralsManagement from '@/components/admin/ReferralsManagement';
+import CityBoardManagement from '@/components/admin/CityBoardManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals' | 'city-board'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -146,6 +147,16 @@ export default function AdminPage() {
           >
             Referrals
           </button>
+          <button
+            onClick={() => setActiveTab('city-board')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'city-board'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            City Board
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -156,6 +167,7 @@ export default function AdminPage() {
           {activeTab === 'lost-pets' && <LostPetsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'reviews' && <ReviewsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'referrals' && <ReferralsManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'city-board' && <CityBoardManagement adminKey={password} onUnauthorized={handleLogout} />}
         </div>
       </div>
     </div>

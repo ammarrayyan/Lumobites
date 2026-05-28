@@ -1,0 +1,191 @@
+import React, { useState, useEffect } from 'react';
+
+interface CityBoardManagementProps {
+  adminKey: string;
+  onUnauthorized: () => void;
+}
+
+export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBoardManagementProps) {
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [replies, setReplies] = useState<any[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/city-board/posts');
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data.posts || []);
+      } else if (res.status === 401) {
+        onUnauthorized();
+      } else {
+        setError('Failed to fetch posts');
+      }
+    } catch (e) {
+      setError('An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReplies = async (postId: string) => {
+    setLoadingReplies(true);
+    try {
+      const res = await fetch(`/api/city-board/replies?post_id=${postId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReplies(data.replies || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch replies', e);
+    } finally {
+      setLoadingReplies(false);
+    }
+  };
+
+  const toggleReplies = (postId: string) => {
+    if (expandedPostId === postId) {
+      setExpandedPostId(null);
+      setReplies([]);
+    } else {
+      setExpandedPostId(postId);
+      fetchReplies(postId);
+    }
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this post? This will also delete all its replies.')) return;
+    
+    try {
+      const res = await fetch('/api/city-board/posts', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`
+        },
+        body: JSON.stringify({ post_id: postId })
+      });
+      
+      if (res.ok) {
+        setPosts(posts.filter(p => p.post_id !== postId));
+        if (expandedPostId === postId) {
+          setExpandedPostId(null);
+          setReplies([]);
+        }
+      } else if (res.status === 401) {
+        onUnauthorized();
+      } else {
+        alert('Failed to delete post');
+      }
+    } catch (e) {
+      alert('An error occurred');
+    }
+  };
+
+  const deleteReply = async (replyId: string) => {
+    if (!confirm('Are you sure you want to delete this reply?')) return;
+    
+    try {
+      const res = await fetch('/api/city-board/replies', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`
+        },
+        body: JSON.stringify({ id: replyId })
+      });
+      
+      if (res.ok) {
+        setReplies(replies.filter(r => r.id !== replyId));
+      } else if (res.status === 401) {
+        onUnauthorized();
+      } else {
+        alert('Failed to delete reply');
+      }
+    } catch (e) {
+      alert('An error occurred');
+    }
+  };
+
+  if (loading) return <div className="text-white/70">Loading posts...</div>;
+  if (error) return <div className="text-red-400">{error}</div>;
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-white">City Board Management</h2>
+        <button onClick={fetchPosts} className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+          Refresh
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {posts.map(post => (
+          <div key={post.id} className="bg-black/40 border border-white/10 rounded-xl p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-[#c2e59c] text-black text-xs font-bold px-2 py-0.5 rounded">{post.post_id}</span>
+                  <span className="text-white/70 text-sm">{post.city} • {post.category}</span>
+                </div>
+                <div className="text-xs text-white/50">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => toggleReplies(post.post_id)}
+                  className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 px-3 py-1 rounded text-sm transition-colors"
+                >
+                  Replies ({post.reply_count})
+                </button>
+                <button 
+                  onClick={() => deletePost(post.post_id)}
+                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1 rounded text-sm transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div className="text-white bg-white/5 p-3 rounded-lg text-sm whitespace-pre-wrap">{post.content}</div>
+
+            {expandedPostId === post.post_id && (
+              <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
+                <h4 className="text-sm font-bold text-white/70">Replies</h4>
+                {loadingReplies ? (
+                  <div className="text-white/50 text-sm">Loading replies...</div>
+                ) : replies.length === 0 ? (
+                  <div className="text-white/50 text-sm">No replies yet.</div>
+                ) : (
+                  replies.map(reply => (
+                    <div key={reply.id} className="bg-white/5 rounded-lg p-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="text-xs text-white/50">Device: {reply.device_cookie} • {new Date(reply.created_at).toLocaleString()}</div>
+                        <button 
+                          onClick={() => deleteReply(reply.id)}
+                          className="text-red-400 hover:text-red-300 text-xs transition-colors"
+                        >
+                          Delete Reply
+                        </button>
+                      </div>
+                      <div className="text-white/90 text-sm whitespace-pre-wrap">{reply.content}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+        {posts.length === 0 && (
+          <div className="text-white/50 text-center py-8">No posts found.</div>
+        )}
+      </div>
+    </div>
+  );
+}
