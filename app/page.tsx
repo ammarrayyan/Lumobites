@@ -120,6 +120,48 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PRO BANNER SECTION */}
+      <section className="w-full bg-[#FDFAF7] px-6 pb-8">
+        <div className="max-w-[1200px] mx-auto bg-[#3B2410] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+          
+          <div className="flex-1 relative z-10 text-center md:text-left">
+            <h2 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">🌟 Unlock Lumo Bites PRO</h2>
+            <p className="text-[#F5F0E8]/80 text-sm md:text-base font-medium">Contact verified pet sitters + unlimited food scans — all for less than a coffee</p>
+          </div>
+          
+          <div className="flex flex-col items-center md:items-end gap-3 relative z-10 w-full md:w-auto">
+            <div className="text-center md:text-right hidden md:block">
+              <span className="text-2xl font-black text-white block">$2.99<span className="text-sm text-[#F5F0E8]/70 font-medium">/month</span></span>
+            </div>
+            <button
+              onClick={async () => {
+                let email = localStorage.getItem('lumo_pro_email');
+                if (!email) {
+                  email = window.prompt("Enter your email to continue to Stripe checkout:");
+                  if (!email) return;
+                }
+                try {
+                  const res = await fetch('/api/stripe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.trim() })
+                  });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch (e) {
+                  alert('Checkout failed. Please try again.');
+                }
+              }}
+              className="bg-[#D97706] hover:bg-[#B45309] text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95 w-full md:w-auto flex items-center justify-center gap-2 text-lg"
+            >
+              Upgrade to PRO <span className="md:hidden ml-1 text-sm bg-white/20 px-2 py-0.5 rounded-md">$2.99/mo</span> <span className="hidden md:inline">→</span>
+            </button>
+            <span className="text-[11px] text-[#F5F0E8]/60 font-medium">Cancel anytime · No commitment</span>
+          </div>
+        </div>
+      </section>
+
       {/* SERVICES GRID SECTION */}
       <section className="w-full bg-[#FDFAF7] px-6 pb-16">
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

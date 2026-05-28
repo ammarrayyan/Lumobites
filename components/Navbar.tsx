@@ -166,7 +166,7 @@ export default function Navbar() {
           <div className="pl-4 border-l border-[#EEEEEE] flex items-center gap-4">
             <ShareButton />
             
-            {isPro && (
+            {isPro ? (
               <div className="relative">
                 <button
                   onClick={() => setShowProMenu(!showProMenu)}
@@ -214,6 +214,30 @@ export default function Navbar() {
                   </>
                 )}
               </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  let email = localStorage.getItem('lumo_pro_email');
+                  if (!email) {
+                    email = window.prompt("Enter your email to continue to Stripe checkout:");
+                    if (!email) return;
+                  }
+                  try {
+                    const res = await fetch('/api/stripe/checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: email.trim() })
+                    });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch (e) {
+                    alert('Checkout failed. Please try again.');
+                  }
+                }}
+                className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors"
+              >
+                Go PRO ✨
+              </button>
             )}
           </div>
         </div>
@@ -222,7 +246,7 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2 ml-auto">
           <ShareButton />
           
-          {isPro && (
+          {isPro ? (
             <div className="relative">
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
@@ -267,6 +291,30 @@ export default function Navbar() {
                 </>
               )}
             </div>
+          ) : (
+            <button
+              onClick={async () => {
+                let email = localStorage.getItem('lumo_pro_email');
+                if (!email) {
+                  email = window.prompt("Enter your email to continue to Stripe checkout:");
+                  if (!email) return;
+                }
+                try {
+                  const res = await fetch('/api/stripe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.trim() })
+                  });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                } catch (e) {
+                  alert('Checkout failed. Please try again.');
+                }
+              }}
+              className="bg-[#D97706] hover:bg-[#B45309] text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors"
+            >
+              Go PRO ✨
+            </button>
           )}
 
           <button 
