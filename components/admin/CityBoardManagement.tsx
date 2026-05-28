@@ -69,7 +69,7 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminKey}`
+          'x-admin-key': adminKey
         },
         body: JSON.stringify({ post_id: postId })
       });
@@ -98,7 +98,7 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminKey}`
+          'x-admin-key': adminKey
         },
         body: JSON.stringify({ id: replyId })
       });

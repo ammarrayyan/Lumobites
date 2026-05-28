@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
+    const authHeader = req.headers.get('x-admin-key');
+    if (authHeader !== process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
