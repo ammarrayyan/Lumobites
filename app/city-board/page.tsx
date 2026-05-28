@@ -34,6 +34,11 @@ export default function CityBoardPage() {
   const [isPosting, setIsPosting] = useState(false);
   const [postError, setPostError] = useState('');
 
+  // Location Verification for New Post
+  const [newCityVerified, setNewCityVerified] = useState(false);
+  const [newCityOptions, setNewCityOptions] = useState<any[]>([]);
+  const [isLocatingNewCity, setIsLocatingNewCity] = useState(false);
+
   useEffect(() => {
     let cookie = localStorage.getItem('lumo_city_board_cookie');
     if (!cookie) {
@@ -42,6 +47,49 @@ export default function CityBoardPage() {
     }
     setDeviceCookie(cookie);
   }, []);
+
+  const handleLocationBlur = async (input: string) => {
+    const trimmedInput = input.trim();
+    if (!trimmedInput) {
+      setNewCityVerified(false);
+      setNewCityOptions([]);
+      return;
+    }
+
+    setIsLocatingNewCity(true);
+    setNewCityVerified(false);
+    setNewCityOptions([]);
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        setNewCityVerified(true);
+        return;
+      }
+      
+      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(trimmedInput)}&key=${apiKey}`);
+      const data = await res.json();
+      
+      if (data.results && data.results.length > 0) {
+        const options = data.results.map((r: any) => ({
+          formatted_address: r.formatted_address
+        }));
+        
+        setNewCityOptions(options);
+        if (options.length === 1) {
+          setNewCity(options[0].formatted_address);
+          setNewCityVerified(true);
+        }
+      } else {
+        setNewCityVerified(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setNewCityVerified(true);
+    } finally {
+      setIsLocatingNewCity(false);
+    }
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -75,6 +123,10 @@ export default function CityBoardPage() {
     e.preventDefault();
     if (!newCity.trim() || !newContent.trim()) {
       setPostError('City and content are required.');
+      return;
+    }
+    if (!newCityVerified && newCityOptions.length > 1) {
+      setPostError('Please select a specific city from the dropdown options.');
       return;
     }
     setIsPosting(true);
@@ -124,16 +176,50 @@ export default function CityBoardPage() {
           </h2>
           <form onSubmit={handleCreatePost} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-1">City</label>
-                <input 
-                  type="text" 
-                  value={newCity} 
-                  onChange={e => setNewCity(e.target.value)} 
-                  placeholder="e.g. Louisville, KY" 
-                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                  required
-                />
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={newCity} 
+                    onChange={e => {
+                      setNewCity(e.target.value);
+                      setNewCityVerified(false);
+                      setNewCityOptions([]);
+                    }} 
+                    onBlur={() => handleLocationBlur(newCity)}
+                    placeholder="e.g. Louisville, KY" 
+                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                    required
+                  />
+                  {isLocatingNewCity && (
+                    <div className="absolute right-3 top-3">
+                      <svg className="animate-spin h-5 w-5 text-[#8B5E3C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </div>
+                  )}
+                  {newCityVerified && !isLocatingNewCity && (
+                    <div className="absolute right-3 top-3 text-green-600 font-bold">✓</div>
+                  )}
+                </div>
+                {newCityOptions.length > 1 && !newCityVerified && (
+                  <div className="mt-2 p-2 bg-white border border-[#E8DDD4] rounded-xl shadow-sm absolute z-10 w-full">
+                    <p className="text-xs font-bold text-[#4A3E3D] mb-1">Did you mean:</p>
+                    {newCityOptions.map((opt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          setNewCity(opt.formatted_address);
+                          setNewCityVerified(true);
+                          setNewCityOptions([]);
+                        }}
+                        className="block w-full text-left px-2 py-1.5 hover:bg-[#FAF6F4] rounded text-sm text-[#4A3E3D]"
+                      >
+                        📍 {opt.formatted_address}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-1">Category</label>
