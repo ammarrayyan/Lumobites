@@ -5,6 +5,7 @@ import Script from "next/script";
 import PwaRegister from "@/components/PwaRegister";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import PwaSplashScreen from "@/components/PwaSplashScreen";
+import FloatingQRCode from "@/components/FloatingQRCode";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -69,6 +70,7 @@ export default function RootLayout({
         <PwaSplashScreen />
         <PwaInstallBanner />
         {children}
+        <FloatingQRCode />
       </body>
     </html>
   );
