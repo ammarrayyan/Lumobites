@@ -18,7 +18,14 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
 
     if (data.results) {
-      const options = data.results.map((r: any) => {
+      // Filter to only actual cities/towns
+      const validResults = data.results.filter((r: any) => {
+        return r.types.includes('locality') || 
+               r.types.includes('sublocality') || 
+               r.types.includes('administrative_area_level_3');
+      });
+
+      const options = validResults.map((r: any) => {
         let city = '';
         let state = '';
         
@@ -27,7 +34,7 @@ export async function GET(req: NextRequest) {
             city = comp.long_name;
           } else if (!city && comp.types.includes('sublocality')) {
             city = comp.long_name;
-          } else if (!city && comp.types.includes('neighborhood')) {
+          } else if (!city && comp.types.includes('administrative_area_level_3')) {
             city = comp.long_name;
           }
           if (comp.types.includes('administrative_area_level_1')) {
@@ -43,9 +50,11 @@ export async function GET(req: NextRequest) {
         return { formatted_address: formatted };
       });
 
-      // Remove duplicates just in case
-      const uniqueOptions = Array.from(new Set(options.map((o: any) => o.formatted_address)))
+      // Filter out any empty results and remove duplicates
+      const validOptions = options.filter(o => o.formatted_address && o.formatted_address.includes(','));
+      const uniqueOptions = Array.from(new Set(validOptions.map((o: any) => o.formatted_address)))
         .map(address => ({ formatted_address: address }));
+        
       return NextResponse.json({ options: uniqueOptions });
     }
 
