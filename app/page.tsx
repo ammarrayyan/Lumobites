@@ -166,6 +166,7 @@ export default function Home() {
       <section className="w-full bg-[#FDFAF7] px-6 pb-16">
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
+          {/* Row 1 */}
           {/* Card 1 - Pet Sitting (Most Prominent) */}
           <Link
             href="/petsitting"
@@ -190,7 +191,30 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 2 - Safety Check */}
+          {/* Card 2 - City Board (New, Prominent) */}
+          <Link
+            href="/city-board"
+            className="bg-[#F5EDE4] border-2 border-[#8B5E3C] rounded-3xl p-5 flex flex-col gap-3 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 text-decoration-none relative overflow-hidden md:col-span-2 lg:col-span-2"
+          >
+            <div className="absolute top-0 right-0 bg-[#D97706] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm">
+              🔥 New
+            </div>
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                <span className="text-[#8B5E3C] text-lg">💬</span>
+              </div>
+              <h3 className="text-[#191919] font-bold text-xl">City Board</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed relative flex-1 z-10" style={{ fontSize: 'var(--text-card-desc)' }}>
+              Your anonymous local pet community. Ask questions, share tips, find vets and groomers in your city — no account needed. Free forever.
+            </p>
+            <div className="w-full py-2.5 mt-auto rounded-xl bg-[#8B5E3C] text-white font-bold text-center hover:bg-[#7A5234] transition-all relative z-10 shadow-sm" style={{ fontSize: 'var(--text-btn)' }}>
+              Join Discussion &rarr;
+            </div>
+          </Link>
+
+          {/* Row 2 */}
+          {/* Card 3 - Safety Check */}
           <Link href="/scan" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -205,24 +229,6 @@ export default function Home() {
             </p>
             <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
               Scan Now &rarr;
-            </div>
-          </Link>
-
-          {/* Card 3 - Pet Twin */}
-          <Link href="/twin" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
-                </svg>
-              </div>
-              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
-            </div>
-            <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
-              Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features.
-            </p>
-            <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
-              Find Twin &rarr;
             </div>
           </Link>
 
@@ -242,23 +248,25 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 4.5 - City Board */}
-          <Link href="/city-board" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
+          {/* Card 5 - Pet Twin */}
+          <Link href="/twin" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                <span className="text-[#8B5E3C] text-lg">💬</span>
+                <svg className="w-4 h-4 text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
+                </svg>
               </div>
-              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>City Board</h3>
+              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Your Pet Twin</h3>
             </div>
             <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
-              Your anonymous local pet community. Ask questions, share tips, find vets and groomers in your city — no account needed.
+              Upload a selfie to discover which cat or dog breed perfectly matches your unique facial features.
             </p>
             <div className="w-full py-2.5 mt-auto rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all" style={{ fontSize: 'var(--text-btn)' }}>
-              Join Discussion &rarr;
+              Find Twin &rarr;
             </div>
           </Link>
 
-          {/* Card 5 - Recall Alerts */}
+          {/* Card 6 - Recall Alerts */}
           <Link href="/recalls" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
@@ -276,8 +284,9 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 6 - Pet Supplies */}
-          <Link href="/supplies" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none">
+          {/* Row 3 */}
+          {/* Card 7 - Pet Supplies */}
+          <Link href="/supplies" className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none md:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
                 <svg className="w-4 h-4 text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
@@ -288,7 +297,7 @@ export default function Home() {
                   <path d="M12 21.5c-3 0-5.5-2.5-5.5-5.5s2.5-4.5 5.5-4.5 5.5 1.5 5.5 4.5-2.5 5.5-5.5 5.5z" />
                 </svg>
               </div>
-              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Pet Supplies</h3>
+              <h3 className="text-[#191919] font-bold text-xl">Pet Supplies</h3>
             </div>
             <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
               Find the best toys, litter, and supplements specifically tailored for your pet.
@@ -298,13 +307,13 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 7 - Find Pet Food */}
-          <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none lg:col-span-2">
+          {/* Card 8 - Find Pet Food */}
+          <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-5 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 text-decoration-none md:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
                 <span className="text-[#8B5E3C] text-lg">🍽️</span>
               </div>
-              <h3 className="text-[#191919] font-bold" style={{ fontSize: 'var(--text-hero-sub)' }}>Find Pet Food</h3>
+              <h3 className="text-[#191919] font-bold text-xl">Find Pet Food</h3>
             </div>
             <p className="text-[#666666] leading-relaxed flex-1" style={{ fontSize: 'var(--text-card-desc)' }}>
               Tell us your pet&apos;s age, breed and health needs — or upload a photo of your pet. We&apos;ll find the perfect food that fits your budget.
