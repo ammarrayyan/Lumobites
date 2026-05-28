@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Copy, Plus, Users, DollarSign, Activity, XCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Copy, Plus, Users, DollarSign, Activity, XCircle, CheckCircle, ChevronDown, ChevronUp, QrCode, Download, Share2 } from 'lucide-react';
+import QRCode from 'qrcode';
 
 interface ReferralsManagementProps {
   adminKey: string;
@@ -14,6 +15,56 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
   const [newReferrerName, setNewReferrerName] = useState('');
   const [creating, setCreating] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [qrModalReferrer, setQrModalReferrer] = useState<any>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (qrModalReferrer && qrCanvasRef.current) {
+      const url = `https://lumobites.net?ref=${qrModalReferrer.code}`;
+      QRCode.toCanvas(qrCanvasRef.current, url, {
+        width: 250,
+        margin: 2,
+        color: {
+          dark: '#3B2410',
+          light: '#FFF9F2' // Cream color
+        }
+      }, (error) => {
+        if (error) console.error(error);
+        const canvas = qrCanvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          const img = new window.Image();
+          // We can use the existing logo
+          img.src = '/Logo.png'; 
+          img.onload = () => {
+            const size = 60;
+            const x = (canvas.width - size) / 2;
+            const y = (canvas.height - size) / 2;
+            
+            // Draw white background circle for the logo
+            ctx.fillStyle = '#FFF9F2';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, size/1.8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.drawImage(img, x, y, size, size);
+          };
+        }
+      });
+    }
+  }, [qrModalReferrer]);
+
+  const handleDownloadQR = () => {
+    if (!qrCanvasRef.current || !qrModalReferrer) return;
+    const url = qrCanvasRef.current.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `LumoBites-QR-${qrModalReferrer.name.replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const fetchData = async () => {
     try {
@@ -158,6 +209,9 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                         <button onClick={() => copyToClipboard(referrer.code)} className="text-white/40 hover:text-white transition-colors" title="Copy Link">
                           <Copy size={14} />
                         </button>
+                        <button onClick={() => setQrModalReferrer(referrer)} className="bg-[#3B2410] text-[#FFF9F2] px-2 py-1 rounded-md text-[10px] flex items-center gap-1 hover:bg-[#4a2e15] transition-colors" title="Show QR Code">
+                          <QrCode size={12} /> QR
+                        </button>
                       </div>
                     </td>
                     <td className="p-4 text-center">{referrer.stats.clicks}</td>
@@ -252,6 +306,44 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
           </table>
         </div>
       </div>
+
+      {/* QR Code Modal */}
+      {qrModalReferrer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#FFF9F2] p-8 rounded-3xl max-w-sm w-full flex flex-col items-center relative text-[#3B2410] shadow-2xl">
+            <button 
+              onClick={() => setQrModalReferrer(null)}
+              className="absolute top-4 right-4 text-[#3B2410]/50 hover:text-[#3B2410]"
+            >
+              <XCircle size={24} />
+            </button>
+            
+            <h3 className="text-xl font-bold mb-6 text-center">Referral QR Code</h3>
+            
+            <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 border border-[#3B2410]/10">
+              <canvas ref={qrCanvasRef} className="rounded-xl w-[250px] h-[250px] mx-auto"></canvas>
+            </div>
+            
+            <p className="font-bold text-lg mb-1">{qrModalReferrer.name}</p>
+            <p className="text-sm opacity-70 mb-8 font-medium">lumobites.net?ref={qrModalReferrer.code}</p>
+            
+            <div className="w-full flex gap-3">
+              <button
+                onClick={handleDownloadQR}
+                className="flex-1 bg-[#3B2410] text-[#FFF9F2] py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#4a2e15] transition-colors shadow-md"
+              >
+                <Download size={18} /> Download
+              </button>
+              <button
+                onClick={() => copyToClipboard(qrModalReferrer.code)}
+                className="flex-1 bg-white border-2 border-[#3B2410] text-[#3B2410] py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#f5ece1] transition-colors shadow-md"
+              >
+                <Share2 size={18} /> Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
