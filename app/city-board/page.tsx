@@ -196,7 +196,8 @@ export default function CityBoardPage() {
         <div className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 shadow-sm border border-[#3B2410]/10 mb-8">
           <div className="mb-6">
             <h2 className="text-2xl md:text-3xl font-black text-[#3B2410] flex items-center gap-2">
-              💬 Share with your pet community
+              <img src="/Logo.png" alt="Lumo Bites" className="h-6 md:h-8 w-auto object-contain drop-shadow-sm" />
+              Share with your pet community
             </h2>
             <p className="text-[#3B2410]/70 mt-2 font-medium">Ask questions, share tips, get recommendations — anonymously</p>
           </div>
