@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Plus, Users, DollarSign, Activity, XCircle, CheckCircle, ChevronDown, ChevronUp, QrCode, Download, Share2 } from 'lucide-react';
+import { Copy, Plus, Users, DollarSign, Activity, XCircle, CheckCircle, ChevronDown, ChevronUp, QrCode, Download, Share2, Trash2 } from 'lucide-react';
 import QRCode from 'qrcode';
 
 interface ReferralsManagementProps {
@@ -16,6 +16,8 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
   const [creating, setCreating] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [qrModalReferrer, setQrModalReferrer] = useState<any>(null);
+  const [deleteModalReferrer, setDeleteModalReferrer] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -107,6 +109,30 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
       console.error(err);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDeleteReferrer = async () => {
+    if (!deleteModalReferrer) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch('/api/admin/referrals/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`
+        },
+        body: JSON.stringify({ id: deleteModalReferrer.id })
+      });
+      if (res.status === 401) return onUnauthorized();
+      if (res.ok) {
+        setDeleteModalReferrer(null);
+        await fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -211,6 +237,9 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                         </button>
                         <button onClick={() => setQrModalReferrer(referrer)} className="bg-[#3B2410] text-[#FFF9F2] px-2 py-1 rounded-md text-[10px] flex items-center gap-1 hover:bg-[#4a2e15] transition-colors" title="Show QR Code">
                           <QrCode size={12} /> QR
+                        </button>
+                        <button onClick={() => setDeleteModalReferrer(referrer)} className="text-red-400 hover:text-red-300 transition-colors ml-1" title="Delete Referrer">
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
@@ -339,6 +368,39 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                 className="flex-1 bg-white border-2 border-[#3B2410] text-[#3B2410] py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#f5ece1] transition-colors shadow-md"
               >
                 <Share2 size={18} /> Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalReferrer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#1a1a1a] p-8 rounded-3xl max-w-sm w-full flex flex-col relative text-white shadow-2xl border border-red-500/20">
+            <div className="flex items-center gap-3 mb-4 text-red-400">
+              <Trash2 size={28} />
+              <h3 className="text-xl font-bold">Delete Referrer</h3>
+            </div>
+            
+            <p className="text-white/70 mb-8 leading-relaxed">
+              Are you sure you want to delete <strong className="text-white">{deleteModalReferrer.name}</strong>'s referral link? This will also permanently delete all their referral tracking data.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModalReferrer(null)}
+                className="flex-1 bg-white/10 text-white py-3 rounded-xl font-bold hover:bg-white/20 transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteReferrer}
+                disabled={isDeleting}
+                className="flex-1 bg-red-500/20 text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-500/30 transition-colors border border-red-500/50 disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
