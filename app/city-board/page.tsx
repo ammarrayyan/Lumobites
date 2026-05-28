@@ -8,15 +8,15 @@ import Navbar from '@/components/Navbar';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
-    'General': 'bg-gray-100 text-gray-800 border-gray-200',
-    'Vet Recommendations': 'bg-blue-100 text-blue-800 border-blue-200',
-    'Groomers': 'bg-pink-100 text-pink-800 border-pink-200',
-    'Pet Sitters': 'bg-green-100 text-green-800 border-green-200',
-    'Lost & Found': 'bg-red-100 text-red-800 border-red-200',
-    'Diet & Nutrition': 'bg-purple-100 text-purple-800 border-purple-200',
-    'Parks & Activities': 'bg-orange-100 text-orange-800 border-orange-200',
+    'General': 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20',
+    'Vet Recommendations': 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20',
+    'Groomers': 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20',
+    'Pet Sitters': 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20',
+    'Lost & Found': 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20',
+    'Diet & Nutrition': 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20',
+    'Parks & Activities': 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20',
   };
-  return colors[category] || 'bg-white text-[#3B2410] border-[#3B2410]/20';
+  return colors[category] || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
 };
 
 const CATEGORIES = [
@@ -358,7 +358,7 @@ export default function CityBoardPage() {
         ) : (
           <div className="space-y-4">
             {posts.map(post => (
-              <div key={post.id} className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 border border-[#3B2410]/10 shadow-sm hover:shadow-md transition-all relative group">
+              <div key={post.id} className="bg-[#F5F0E8] rounded-3xl p-6 md:p-8 border border-[#3B2410]/20 shadow-sm hover:shadow-md transition-all relative group">
                 {post.device_cookie === deviceCookie && (
                   <div className="absolute top-6 right-6 bg-[#3B2410] text-[#F5F0E8] text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full shadow-sm">
                     You
