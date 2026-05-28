@@ -14,32 +14,58 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ options: [] });
     }
 
-    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&components=country:US&key=${apiKey}`);
+    // Removed &components=country:US to support global search
+    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&key=${apiKey}`);
     const data = await res.json();
 
     if (data.results) {
-      // We want to return the full address for the dropdown, but also a clean city name for the DB
-      const options = data.results.map((r: any) => {
+      // 1. Only accept real cities
+      // 3. Validate it is actually a city (locality or administrative_area_level_2)
+      const validResults = data.results.filter((r: any) => {
+        return r.types.includes('locality') || 
+               r.types.includes('administrative_area_level_2') ||
+               r.types.includes('sublocality') ||
+               r.types.includes('administrative_area_level_3');
+      });
+
+      const options = validResults.map((r: any) => {
         let city = '';
         let state = '';
+        let country = '';
         
         for (const comp of (r.address_components || [])) {
           if (comp.types.includes('locality')) {
+            city = comp.long_name;
+          } else if (!city && comp.types.includes('administrative_area_level_2')) {
             city = comp.long_name;
           } else if (!city && comp.types.includes('sublocality')) {
             city = comp.long_name;
           } else if (!city && comp.types.includes('administrative_area_level_3')) {
             city = comp.long_name;
           }
+          
           if (comp.types.includes('administrative_area_level_1')) {
             state = comp.short_name;
           }
+          
+          if (comp.types.includes('country')) {
+            if (comp.short_name === 'US') country = 'USA';
+            else if (comp.short_name === 'GB') country = 'UK';
+            else if (comp.short_name === 'AE') country = 'UAE';
+            else country = comp.long_name;
+          }
         }
         
-        const clean_city = (city && state) ? `${city}, ${state}` : (city || r.formatted_address);
+        // 2. Consistent format for all cities
+        const parts = [];
+        if (city) parts.push(city);
+        if (state) parts.push(state);
+        if (country) parts.push(country);
+        
+        const clean_city = parts.join(', ');
         
         return { 
-          formatted_address: r.formatted_address,
+          formatted_address: clean_city, // Never show zip codes
           clean_city: clean_city
         };
       });

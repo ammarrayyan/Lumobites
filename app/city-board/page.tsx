@@ -52,6 +52,10 @@ export default function CityBoardPage() {
   const [newCityVerified, setNewCityVerified] = useState(false);
   const [newCityOptions, setNewCityOptions] = useState<any[]>([]);
   const [isLocatingNewCity, setIsLocatingNewCity] = useState(false);
+  
+  // Location Verification for Search
+  const [searchCityOptions, setSearchCityOptions] = useState<any[]>([]);
+  const [isLocatingSearchCity, setIsLocatingSearchCity] = useState(false);
 
   useEffect(() => {
     let cookie = localStorage.getItem('lumo_city_board_cookie');
@@ -63,37 +67,56 @@ export default function CityBoardPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (newCity && !newCityVerified) {
-        fetchLocationOptions(newCity);
-      } else if (!newCity) {
+    const fetchNewLocationOptions = async () => {
+      const trimmedInput = newCity.trim();
+      if (trimmedInput.length < 3 || newCityVerified) {
         setNewCityOptions([]);
+        return;
       }
-    }, 400); // 400ms debounce
-    return () => clearTimeout(timer);
+      setIsLocatingNewCity(true);
+      try {
+        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}`);
+        const data = await res.json();
+        if (data.options && data.options.length > 0) {
+          setNewCityOptions(data.options);
+        } else {
+          setNewCityOptions([]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLocatingNewCity(false);
+      }
+    };
+    const debounceNew = setTimeout(fetchNewLocationOptions, 500);
+    return () => clearTimeout(debounceNew);
   }, [newCity, newCityVerified]);
 
-  const fetchLocationOptions = async (input: string) => {
-    const trimmedInput = input.trim();
-    if (!trimmedInput) return;
-
-    setIsLocatingNewCity(true);
-    
-    try {
-      const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}`);
-      const data = await res.json();
-      
-      if (data.options && data.options.length > 0) {
-        setNewCityOptions(data.options);
-      } else {
-        setNewCityOptions([]);
+  useEffect(() => {
+    const fetchSearchLocationOptions = async () => {
+      const trimmedInput = searchCity.trim();
+      if (trimmedInput.length < 3) {
+        setSearchCityOptions([]);
+        return;
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLocatingNewCity(false);
-    }
-  };
+      setIsLocatingSearchCity(true);
+      try {
+        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}`);
+        const data = await res.json();
+        if (data.options && data.options.length > 0) {
+          setSearchCityOptions(data.options);
+        } else {
+          setSearchCityOptions([]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLocatingSearchCity(false);
+      }
+    };
+    const debounceSearch = setTimeout(fetchSearchLocationOptions, 500);
+    return () => clearTimeout(debounceSearch);
+  }, [searchCity]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -130,7 +153,7 @@ export default function CityBoardPage() {
       return;
     }
     if (!newCityVerified) {
-      setPostError('Please select a specific city from the dropdown options.');
+      setPostError('Please enter a specific city name — for example Louisville, Amman, or Dubai');
       return;
     }
     setIsPosting(true);
@@ -266,13 +289,40 @@ export default function CityBoardPage() {
               onChange={e => setSearchKeyword(e.target.value)}
               className="bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
             />
-            <input 
-              type="text" 
-              placeholder="📍 City..." 
-              value={searchCity}
-              onChange={e => setSearchCity(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
-            />
+            <div className="relative min-w-[160px]">
+              <input 
+                type="text" 
+                placeholder="📍 City..." 
+                value={searchCity}
+                onChange={e => {
+                  setSearchCity(e.target.value);
+                }}
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
+              />
+              {isLocatingSearchCity && (
+                <div className="absolute right-3 top-2.5">
+                  <svg className="animate-spin h-5 w-5 text-[#3B2410]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+              )}
+              {searchCityOptions.length > 0 && (
+                <div className="mt-1 p-2 bg-white border border-[#3B2410]/10 rounded-xl shadow-lg absolute z-20 w-[250px]">
+                  <p className="text-[10px] font-bold text-[#3B2410]/70 mb-1 px-2 uppercase tracking-wide">Did you mean:</p>
+                  {searchCityOptions.map((opt, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setSearchCity(opt.clean_city);
+                        setSearchCityOptions([]);
+                      }}
+                      className="block w-full text-left px-3 py-2 hover:bg-[#F5F0E8] rounded-lg text-sm text-[#3B2410] font-medium transition-colors"
+                    >
+                      📍 {opt.formatted_address}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <select 
               value={searchCategory}
               onChange={e => setSearchCategory(e.target.value)}
