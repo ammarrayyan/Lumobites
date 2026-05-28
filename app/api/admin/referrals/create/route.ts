@@ -9,10 +9,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    // Generate a unique code (slugify name + random string)
-    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const randomSuffix = Math.random().toString(36).substring(2, 6);
-    const code = `${slug}-${randomSuffix}`;
+    // Generate a unique code (slugify name, add number if exists)
+    const baseSlug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!baseSlug) {
+      return NextResponse.json({ error: 'Name must contain alphanumeric characters' }, { status: 400 });
+    }
+
+    let code = baseSlug;
+    let counter = 2;
+    let isUnique = false;
+
+    // We need the admin client to bypass RLS if it's reading the referrers table.
+    // Assuming `supabase` client is set up correctly (maybe falling back to anon which has select permissions based on RLS).
+    // The previous insert worked because we disabled RLS for referrers table.
+    while (!isUnique) {
+      const { data: existing, error: checkError } = await supabase
+        .from('referrers')
+        .select('id')
+        .eq('code', code)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (!existing) {
+        isUnique = true;
+      } else {
+        code = `${baseSlug}${counter}`;
+        counter++;
+      }
+    }
 
     const { data, error } = await supabase
       .from('referrers')
