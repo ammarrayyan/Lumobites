@@ -25,10 +25,11 @@ function setCache(key: string, data: AmazonProduct[]) {
 }
 
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const q = (searchParams.get('q') || '').trim();
+  const limit = Math.min(Number(searchParams.get('limit') || 4), 10);
+
   try {
-    const { searchParams } = new URL(req.url);
-    const q = (searchParams.get('q') || '').trim();
-    const limit = Math.min(Number(searchParams.get('limit') || 4), 10);
 
     if (!q) {
       return NextResponse.json({ error: 'Missing query parameter q' }, { status: 400 });
