@@ -105,9 +105,10 @@ export async function searchAmazonProducts(
       'images.primary.medium',
       'itemInfo.title',
       'offersV2.listings.price',
-      'offersV2.listings.deliveryInfo.isPrimeEligible',
       'customerReviews.starRating',
       'customerReviews.count',
+      'itemInfo.byLineInfo',
+      'itemInfo.productInfo'
     ],
   };
 
