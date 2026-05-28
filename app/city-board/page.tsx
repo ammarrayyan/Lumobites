@@ -197,7 +197,7 @@ export default function CityBoardPage() {
                         key={i}
                         type="button"
                         onClick={() => {
-                          setNewCity(opt.formatted_address);
+                          setNewCity(opt.clean_city);
                           setNewCityVerified(true);
                           setNewCityOptions([]);
                         }}

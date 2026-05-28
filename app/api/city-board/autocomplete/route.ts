@@ -18,14 +18,8 @@ export async function GET(req: NextRequest) {
     const data = await res.json();
 
     if (data.results) {
-      // Filter to only actual cities/towns
-      const validResults = data.results.filter((r: any) => {
-        return r.types.includes('locality') || 
-               r.types.includes('sublocality') || 
-               r.types.includes('administrative_area_level_3');
-      });
-
-      const options = validResults.map((r: any) => {
+      // We want to return the full address for the dropdown, but also a clean city name for the DB
+      const options = data.results.map((r: any) => {
         let city = '';
         let state = '';
         
@@ -42,20 +36,24 @@ export async function GET(req: NextRequest) {
           }
         }
         
-        let formatted = r.formatted_address;
-        if (city && state) {
-          formatted = `${city}, ${state}`;
-        }
+        const clean_city = (city && state) ? `${city}, ${state}` : (city || r.formatted_address);
         
-        return { formatted_address: formatted };
+        return { 
+          formatted_address: r.formatted_address,
+          clean_city: clean_city
+        };
       });
 
-      // Filter out any empty results and remove duplicates
-      const validOptions = options.filter(o => o.formatted_address && o.formatted_address.includes(','));
-      const uniqueOptions = Array.from(new Set(validOptions.map((o: any) => o.formatted_address)))
-        .map(address => ({ formatted_address: address }));
+      // Filter out invalid ones, and remove duplicates by formatted_address
+      const validOptions = options.filter(o => o.formatted_address && o.clean_city);
+      const uniqueOptionsMap = new Map();
+      validOptions.forEach((o: any) => {
+        if (!uniqueOptionsMap.has(o.formatted_address)) {
+          uniqueOptionsMap.set(o.formatted_address, o);
+        }
+      });
         
-      return NextResponse.json({ options: uniqueOptions });
+      return NextResponse.json({ options: Array.from(uniqueOptionsMap.values()) });
     }
 
     return NextResponse.json({ options: [] });
