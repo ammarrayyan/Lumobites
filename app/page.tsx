@@ -156,7 +156,7 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold text-xl">Pet Food & Safety</h3>
             </div>
             <p className="text-[#666666] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Find the perfect food for your pet, scan any label for hidden toxins and get instant FDA recall alerts — all in one place.
+              Upload a photo of any pet food label, scan a barcode, or paste ingredients for instant safety analysis and live FDA recall alerts.
             </p>
             <div className="mt-auto flex flex-col gap-2 relative z-10">
               <Link href="/chat" className="block w-full py-2.5 rounded-xl border-2 border-[#8B5E3C] text-[#8B5E3C] font-bold text-center hover:bg-[#8B5E3C] hover:text-white transition-all text-sm" style={{ textDecoration: 'none' }}>
