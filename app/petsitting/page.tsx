@@ -1323,19 +1323,45 @@ export default function PetSitting() {
                 <button type="button" onClick={() => setSitterAuthMode('email')} className="text-[#8B5E3C] text-sm font-bold hover:underline">Change</button>
               </div>
 
+              {sitterApprovalStatus === 'approved' && (
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-6 flex gap-3 text-sm text-[#666666]">
+                  <span className="text-[#8B5E3C] text-lg leading-none mt-0.5">🔒</span>
+                  <p>Some profile information is locked after verification to maintain trust and security. Contact support at <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a> if you need to make changes.</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name</label>
-                  <input required type="text" value={sitterFirstName} onChange={e => setSitterFirstName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['firstName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  {sitterApprovalStatus === 'approved' ? (
+                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
+                      {sitterFirstName}
+                    </div>
+                  ) : (
+                    <input required type="text" value={sitterFirstName} onChange={e => setSitterFirstName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['firstName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  )}
                   {formErrors['firstName'] && <p className="text-red-500 text-sm mt-1">{formErrors['firstName']}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name</label>
-                  <input required type="text" value={sitterLastName} onChange={e => setSitterLastName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['lastName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  {sitterApprovalStatus === 'approved' ? (
+                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
+                      {sitterLastName}
+                    </div>
+                  ) : (
+                    <input required type="text" value={sitterLastName} onChange={e => setSitterLastName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['lastName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
+                  )}
                   {formErrors['lastName'] && <p className="text-red-500 text-sm mt-1">{formErrors['lastName']}</p>}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Take a selfie or upload a recent photo of yourself <span className="text-red-500 ml-1">— required for verification</span></label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
+                    Take a selfie or upload a recent photo of yourself 
+                    {sitterApprovalStatus === 'approved' ? (
+                      <span className="ml-2" title="Locked after verification">🔒</span>
+                    ) : (
+                      <span className="text-red-500 ml-1">— required for verification</span>
+                    )}
+                  </label>
                   {formErrors['photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['photo']}</p>}
                   <div className="flex items-center gap-4 p-2 rounded-xl">
                     {sitterPhoto ? (
@@ -1345,66 +1371,80 @@ export default function PetSitting() {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
                     )}
-                    <div className="flex-1 flex flex-col gap-2">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="user"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 4 * 1024 * 1024) {
-                              setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
-                              return;
-                            } else {
-                              setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
-                            }
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const img = new window.Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                const MAX_WIDTH = 800;
-                                const MAX_HEIGHT = 800;
-                                if (width > height) {
-                                  if (width > MAX_WIDTH) {
-                                    height *= MAX_WIDTH / width;
-                                    width = MAX_WIDTH;
+                    {sitterApprovalStatus === 'approved' ? (
+                      <div className="flex-1 text-sm text-gray-500 italic">Photo is verified and locked</div>
+                    ) : (
+                      <div className="flex-1 flex flex-col gap-2">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          capture="user"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 4 * 1024 * 1024) {
+                                setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
+                                return;
+                              } else {
+                                setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
+                              }
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const img = new window.Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  let width = img.width;
+                                  let height = img.height;
+                                  const MAX_WIDTH = 800;
+                                  const MAX_HEIGHT = 800;
+                                  if (width > height) {
+                                    if (width > MAX_WIDTH) {
+                                      height *= MAX_WIDTH / width;
+                                      width = MAX_WIDTH;
+                                    }
+                                  } else {
+                                    if (height > MAX_HEIGHT) {
+                                      width *= MAX_HEIGHT / height;
+                                      height = MAX_HEIGHT;
+                                    }
                                   }
-                                } else {
-                                  if (height > MAX_HEIGHT) {
-                                    width *= MAX_HEIGHT / height;
-                                    height = MAX_HEIGHT;
-                                  }
-                                }
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx?.drawImage(img, 0, 0, width, height);
-                                setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  ctx?.drawImage(img, 0, 0, width, height);
+                                  setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                                };
+                                img.src = reader.result as string;
                               };
-                              img.src = reader.result as string;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }} 
-                        className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
-                      />
-                      <button 
-                        type="button" 
-                        onClick={() => startCamera('selfie')}
-                        className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
-                      >
-                        📷 Take Photo with Webcam
-                      </button>
-                    </div>
+                              reader.readAsDataURL(file);
+                            }
+                          }} 
+                          className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => startCamera('selfie')}
+                          className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          📷 Take Photo with Webcam
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Upload a photo of your ID (passport, driver's license) <span className="text-red-500 font-bold ml-1">*Required</span> <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span></label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
+                    Upload a photo of your ID (passport, driver's license) 
+                    {sitterApprovalStatus === 'approved' ? (
+                      <span className="ml-2" title="Locked after verification">🔒</span>
+                    ) : (
+                      <>
+                        <span className="text-red-500 font-bold ml-1">*Required</span> 
+                        <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span>
+                      </>
+                    )}
+                  </label>
                   {formErrors['id_photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['id_photo']}</p>}
                   <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
                     {sitterIdPhoto ? (
@@ -1416,111 +1456,123 @@ export default function PetSitting() {
                         🪪
                       </div>
                     )}
-                    <div className="flex-1 flex flex-col gap-2">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="environment"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 4 * 1024 * 1024) {
-                              alert('Your ID photo is too large. Please use a photo under 4MB');
-                              return;
-                            }
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              const img = new window.Image();
-                              img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                const MAX_WIDTH = 1200; // slightly larger for ID text clarity
-                                const MAX_HEIGHT = 1200;
-                                if (width > height) {
-                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                } else {
-                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                                }
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx?.drawImage(img, 0, 0, width, height);
-                                setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                    {sitterApprovalStatus === 'approved' ? (
+                      <div className="flex-1 text-sm text-gray-500 italic">ID photo is verified and securely stored</div>
+                    ) : (
+                      <div className="flex-1 flex flex-col gap-2">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          capture="environment"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 4 * 1024 * 1024) {
+                                alert('Your ID photo is too large. Please use a photo under 4MB');
+                                return;
+                              }
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                const img = new window.Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  let width = img.width;
+                                  let height = img.height;
+                                  const MAX_WIDTH = 1200; // slightly larger for ID text clarity
+                                  const MAX_HEIGHT = 1200;
+                                  if (width > height) {
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                  } else {
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                  }
+                                  canvas.width = width;
+                                  canvas.height = height;
+                                  const ctx = canvas.getContext('2d');
+                                  ctx?.drawImage(img, 0, 0, width, height);
+                                  setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                                };
+                                img.src = reader.result as string;
                               };
-                              img.src = reader.result as string;
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }} 
-                        className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
-                      />
-                      <button 
-                        type="button" 
-                        onClick={() => startCamera('id')}
-                        className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
-                      >
-                        📷 Take Photo with Webcam
-                      </button>
-                    </div>
+                              reader.readAsDataURL(file);
+                            }
+                          }} 
+                          className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => startCamera('id')}
+                          className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          📷 Take Photo with Webcam
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Location (City or Zip Code)</label>
-                  <div className="relative">
-                    <input 
-                      required 
-                      type="text" 
-                      value={sitterLocationInput} 
-                      onChange={e => {
-                        setSitterLocationInput(e.target.value);
-                        setSitterLocationVerified(false);
-                        setSitterSelectedLocation(null);
-                        setSitterLocationOptions([]);
-                      }} 
-                      onBlur={handleSitterLocationBlur}
-                      className={`w-full bg-[#FAF6F4] border ${sitterLocationVerified ? 'border-green-500' : !!formErrors['location'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
-                      placeholder="Enter city name OR 5-digit zip code..." 
-                    />
-                    {sitterIsLocating && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
-                    )}
-                    {sitterLocationVerified && !sitterIsLocating && sitterSelectedLocation && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {formErrors['location'] && <p className="text-red-500 text-sm mt-1">{formErrors['location']}</p>}
-                  
-                  {sitterSelectedLocation && (
-                    <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 animate-fade-in">
-                      ✅ {sitterSelectedLocation.formatted_address}
-                    </p>
-                  )}
-                  
-                  {sitterLocationOptions.length > 1 && !sitterSelectedLocation && (
-                    <div className="mt-3 p-4 bg-white border border-[#E8DDD4] rounded-xl shadow-sm absolute z-10 w-full left-0 right-0 max-h-60 overflow-y-auto">
-                      <p className="text-sm font-bold text-[#4A3E3D] mb-2">Multiple locations found. Please select one:</p>
-                      <div className="flex flex-col gap-2">
-                        {sitterLocationOptions.map((opt, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => {
-                              setSitterSelectedLocation(opt);
-                              setSitterCity(opt.formatted_address);
-                              setSitterLocationVerified(true);
-                              setSitterLocationInput(opt.formatted_address);
-                            }}
-                            className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D] text-sm"
-                          >
-                            📍 {opt.formatted_address}
-                          </button>
-                        ))}
-                      </div>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Location (City or Zip Code) {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  {sitterApprovalStatus === 'approved' ? (
+                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium flex items-center gap-2">
+                      <span>📍</span> {sitterCity || sitterLocationInput}
                     </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <input 
+                          required 
+                          type="text" 
+                          value={sitterLocationInput} 
+                          onChange={e => {
+                            setSitterLocationInput(e.target.value);
+                            setSitterLocationVerified(false);
+                            setSitterSelectedLocation(null);
+                            setSitterLocationOptions([]);
+                          }} 
+                          onBlur={handleSitterLocationBlur}
+                          className={`w-full bg-[#FAF6F4] border ${sitterLocationVerified ? 'border-green-500' : !!formErrors['location'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
+                          placeholder="Enter city name OR 5-digit zip code..." 
+                        />
+                        {sitterIsLocating && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                        {sitterLocationVerified && !sitterIsLocating && sitterSelectedLocation && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {formErrors['location'] && <p className="text-red-500 text-sm mt-1">{formErrors['location']}</p>}
+                      
+                      {sitterSelectedLocation && (
+                        <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 animate-fade-in">
+                          ✅ {sitterSelectedLocation.formatted_address}
+                        </p>
+                      )}
+                      
+                      {sitterLocationOptions.length > 1 && !sitterSelectedLocation && (
+                        <div className="mt-3 p-4 bg-white border border-[#E8DDD4] rounded-xl shadow-sm absolute z-10 w-full left-0 right-0 max-h-60 overflow-y-auto">
+                          <p className="text-sm font-bold text-[#4A3E3D] mb-2">Multiple locations found. Please select one:</p>
+                          <div className="flex flex-col gap-2">
+                            {sitterLocationOptions.map((opt, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => {
+                                  setSitterSelectedLocation(opt);
+                                  setSitterCity(opt.formatted_address);
+                                  setSitterLocationVerified(true);
+                                  setSitterLocationInput(opt.formatted_address);
+                                }}
+                                className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D] text-sm"
+                              >
+                                📍 {opt.formatted_address}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div>
@@ -1532,14 +1584,20 @@ export default function PetSitting() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Gender (Optional)</label>
-                  <select value={sitterGender} onChange={e => setSitterGender(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Non-binary">Non-binary</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
-                  </select>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Gender (Optional) {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  {sitterApprovalStatus === 'approved' ? (
+                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
+                      {sitterGender || 'Not specified'}
+                    </div>
+                  ) : (
+                    <select value={sitterGender} onChange={e => setSitterGender(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
