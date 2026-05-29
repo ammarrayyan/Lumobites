@@ -83,13 +83,10 @@ export default function ShareButton() {
 
       {/* Dropdown */}
       {open && (
-        <div style={{
-          position: 'absolute', top: '52px', right: 0,
-          backgroundColor: '#FFFFFF', borderRadius: '20px',
-          border: '1px solid #E8DDD4', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          padding: '20px', minWidth: '240px', zIndex: 100,
-          animation: 'fadeDown 0.15s ease-out',
-        }}>
+        <div 
+          className="absolute top-[52px] -right-[80px] sm:-right-[20px] md:right-0 bg-white rounded-[20px] border border-[#E8DDD4] shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-4 sm:p-5 w-[260px] z-[100]"
+          style={{ animation: 'fadeDown 0.15s ease-out' }}
+        >
           <p style={{ fontSize: '13px', fontWeight: 800, color: '#191919', marginBottom: '4px' }}>Share Lumo Bites</p>
           <p style={{ fontSize: '11px', color: '#999', marginBottom: '16px', lineHeight: 1.4 }}>
             Help other pet owners keep their pets safe 🐾
