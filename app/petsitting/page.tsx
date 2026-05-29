@@ -90,6 +90,7 @@ export default function PetSitting() {
   const sitterName = `${sitterFirstName} ${sitterLastName}`.trim();
   const [sitterPhoto, setSitterPhoto] = useState('');
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
+  const [hasExistingIdPhoto, setHasExistingIdPhoto] = useState(false);
   const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
   const [sitterCity, setSitterCity] = useState('');
   const [sitterLocationInput, setSitterLocationInput] = useState('');
@@ -260,6 +261,7 @@ export default function PetSitting() {
           setSitterFirstName(nameParts[0] || '');
           setSitterLastName(nameParts.slice(1).join(' ') || '');
           setSitterPhoto(data.photo_url || '');
+          setHasExistingIdPhoto(!!data.id_photo_url);
           setSitterCity(data.city || '');
           setSitterLocationInput(data.city || '');
           setSitterLocationVerified(!!data.city);
@@ -347,6 +349,8 @@ export default function PetSitting() {
         setSitterFirstName('');
         setSitterLastName('');
         setSitterPhoto('');
+        setSitterIdPhoto('');
+        setHasExistingIdPhoto(false);
         setSitterCity('');
         setSitterLocationInput('');
         setSitterLocationVerified(false);
@@ -446,7 +450,7 @@ export default function PetSitting() {
     if (!sitterLastName.trim()) errors['lastName'] = 'Please enter your last name';
     if (!sitterLocationInput.trim() || !sitterLocationVerified) errors['location'] = 'Please enter and verify your location';
     if (!sitterPhoto) errors['photo'] = 'A profile photo is required';
-    if (!sitterIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
+    if (!sitterIdPhoto && !hasExistingIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     
@@ -466,7 +470,7 @@ export default function PetSitting() {
           email: sitterEmail,
           name: sitterName,
           photo_url: sitterPhoto,
-          id_photo_url: sitterIdPhoto,
+          ...(sitterIdPhoto ? { id_photo_url: sitterIdPhoto } : {}),
           city: sitterCity || sitterLocationInput,
           zip: '',
           country: (() => {
@@ -885,7 +889,7 @@ export default function PetSitting() {
       filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
-  const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && sitterIdPhoto && sitterLocationInput.trim() && sitterLocationVerified && sitterRate && sitterBio.trim();
+  const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && (sitterIdPhoto || hasExistingIdPhoto) && sitterLocationInput.trim() && sitterLocationVerified && sitterRate && sitterBio.trim();
 
   // Auto-set isProSitter to true on load/save to bypass sitter paywall UI.
   useEffect(() => {
@@ -1356,25 +1360,25 @@ export default function PetSitting() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
-                    Take a selfie or upload a recent photo of yourself 
-                    {sitterApprovalStatus === 'approved' ? (
-                      <span className="ml-2" title="Locked after verification">🔒</span>
-                    ) : (
-                      <span className="text-red-500 ml-1">— required for verification</span>
-                    )}
+                    📸 Profile Selfie
+                    {!sitterPhoto && <span className="text-red-500 ml-1">— required for verification</span>}
                   </label>
                   {formErrors['photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['photo']}</p>}
-                  <div className="flex items-center gap-4 p-2 rounded-xl">
-                    {sitterPhoto ? (
-                      <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[#E8DDD4]" />
-                    ) : (
+                  {sitterPhoto ? (
+                    // Already has a photo (new upload or loaded from DB)
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 border border-green-200">
+                      <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-green-300" />
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-green-700">✅ Already verified</p>
+                        <p className="text-xs text-green-600 mt-0.5">Your selfie is on file. No need to re-upload.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    // New sitter — needs to upload
+                    <div className="flex items-center gap-4 p-2 rounded-xl">
                       <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-gray-400">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
-                    )}
-                    {sitterApprovalStatus === 'approved' ? (
-                      <div className="flex-1 text-sm text-gray-500 italic">Photo is verified and locked</div>
-                    ) : (
                       <div className="flex-1 flex flex-col gap-2">
                         <input 
                           type="file" 
@@ -1399,15 +1403,9 @@ export default function PetSitting() {
                                   const MAX_WIDTH = 800;
                                   const MAX_HEIGHT = 800;
                                   if (width > height) {
-                                    if (width > MAX_WIDTH) {
-                                      height *= MAX_WIDTH / width;
-                                      width = MAX_WIDTH;
-                                    }
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                                   } else {
-                                    if (height > MAX_HEIGHT) {
-                                      width *= MAX_HEIGHT / height;
-                                      height = MAX_HEIGHT;
-                                    }
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                                   }
                                   canvas.width = width;
                                   canvas.height = height;
@@ -1430,36 +1428,35 @@ export default function PetSitting() {
                           📷 Take Photo with Webcam
                         </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
-                    Upload a photo of your ID (passport, driver's license) 
-                    {sitterApprovalStatus === 'approved' ? (
-                      <span className="ml-2" title="Locked after verification">🔒</span>
-                    ) : (
-                      <>
-                        <span className="text-red-500 font-bold ml-1">*Required</span> 
-                        <span className="text-gray-400 font-normal text-xs ml-1">— used for verification only, never shown publicly</span>
-                      </>
+                    🪪 Government ID
+                    {!hasExistingIdPhoto && !sitterIdPhoto && (
+                      <> <span className="text-red-500 font-bold ml-1">*Required</span> <span className="text-gray-400 font-normal text-xs">— used for verification only, never shown publicly</span></>
                     )}
                   </label>
                   {formErrors['id_photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['id_photo']}</p>}
-                  <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
-                    {sitterIdPhoto ? (
-                      <div className="w-16 h-12 rounded bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs border border-green-200">
-                        Uploaded
+                  {(hasExistingIdPhoto || sitterIdPhoto) ? (
+                    // Already submitted
+                    <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 border border-green-200">
+                      <div className="w-16 h-12 rounded bg-green-100 flex items-center justify-center text-green-700 font-bold text-xl border border-green-200">
+                        🪪
                       </div>
-                    ) : (
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-green-700">✅ Already submitted</p>
+                        <p className="text-xs text-green-600 mt-0.5">Your ID is securely on file. No need to re-upload.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    // New sitter — needs to upload
+                    <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
                       <div className="w-16 h-12 rounded bg-[#E8DDD4] flex items-center justify-center text-gray-400">
                         🪪
                       </div>
-                    )}
-                    {sitterApprovalStatus === 'approved' ? (
-                      <div className="flex-1 text-sm text-gray-500 italic">ID photo is verified and securely stored</div>
-                    ) : (
                       <div className="flex-1 flex flex-col gap-2">
                         <input 
                           type="file" 
@@ -1479,7 +1476,7 @@ export default function PetSitting() {
                                   const canvas = document.createElement('canvas');
                                   let width = img.width;
                                   let height = img.height;
-                                  const MAX_WIDTH = 1200; // slightly larger for ID text clarity
+                                  const MAX_WIDTH = 1200;
                                   const MAX_HEIGHT = 1200;
                                   if (width > height) {
                                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
@@ -1507,8 +1504,8 @@ export default function PetSitting() {
                           📷 Take Photo with Webcam
                         </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Location (City or Zip Code) {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
