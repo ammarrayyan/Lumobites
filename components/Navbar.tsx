@@ -7,8 +7,17 @@ import ShareButton from './ShareButton';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [proEmail, setProEmail] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
+  const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [signInStep, setSignInStep] = useState<'email' | 'code'>('email');
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInCode, setSignInCode] = useState('');
+  const [signInError, setSignInError] = useState('');
+  const [signInLoading, setSignInLoading] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
 
   const syncStatus = () => {
     if (typeof window === 'undefined') return;
@@ -18,12 +27,15 @@ export default function Navbar() {
     
     if (isAdminBypass || isOwnerEmail) {
       setIsPro(true);
+      setIsSignedIn(true);
       setProEmail(cachedEmail || 'admin@lumobites.com');
     } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
-      setIsPro(true);
+      setIsSignedIn(true);
       setProEmail(cachedEmail);
+      // isPro state will be handled by the API call in useEffect
     } else {
       setIsPro(false);
+      setIsSignedIn(false);
       setProEmail('');
     }
   };
@@ -62,7 +74,7 @@ export default function Navbar() {
           setIsPro(true);
         } else {
           setIsPro(false);
-          localStorage.removeItem('lumo_pro_email');
+          // Do NOT remove lumo_pro_email because they could be a free sitter signed in
           window.dispatchEvent(new Event('lumo-pro-update'));
         }
       })
@@ -83,6 +95,7 @@ export default function Navbar() {
       localStorage.removeItem('lumo_admin_bypass');
     }
     setIsPro(false);
+    setIsSignedIn(false);
     setProEmail('');
     setShowProMenu(false);
     
@@ -93,7 +106,105 @@ export default function Navbar() {
     window.location.reload();
   };
 
+  const handleUpgradeCheckout = async () => {
+    let email = localStorage.getItem('lumo_pro_email');
+    if (!email) {
+      email = window.prompt("Enter your email to continue to Stripe checkout:");
+      if (!email) return;
+    }
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert('Checkout failed. Please try again.');
+    }
+  };
+
+  const handleSignInSendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignInLoading(true);
+    setSignInError('');
+    try {
+      // Try PRO table first
+      let res = await fetch('/api/stripe/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signInEmail })
+      });
+      
+      // If not PRO, try Sitters table
+      if (!res.ok) {
+        res = await fetch('/api/petsitting/auth/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: signInEmail }) // checks sitters
+        });
+      }
+
+      if (!res.ok) {
+        throw new Error('Account not found. Please ensure you are a PRO member or have a Sitter profile.');
+      }
+      
+      setSignInStep('code');
+    } catch(err: any) {
+      setSignInError(err.message);
+    } finally {
+      setSignInLoading(false);
+    }
+  };
+
+  const handleSignInVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignInLoading(true);
+    setSignInError('');
+    try {
+      const res = await fetch('/api/stripe/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signInEmail, code: signInCode })
+      });
+      
+      if (!res.ok) {
+        throw new Error('Invalid or expired verification code.');
+      }
+
+      localStorage.setItem('lumo_pro_email', signInEmail);
+      syncStatus();
+      setShowSignInModal(false);
+      setSignInStep('email');
+      setSignInCode('');
+      setSignInEmail('');
+      
+      // Force status re-check
+      const statusRes = await fetch('/api/stripe/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signInEmail })
+      });
+      const data = await statusRes.json();
+      if (data.isPro) {
+        setIsPro(true);
+      } else {
+        setIsPro(false);
+      }
+      setIsSignedIn(true);
+      setProEmail(signInEmail);
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      
+    } catch(err: any) {
+      setSignInError(err.message);
+    } finally {
+      setSignInLoading(false);
+    }
+  };
+
   return (
+    <>
     <nav className="bg-white border-b border-[#EEEEEE] relative z-50">
       {/* Desktop & Mobile Header Container */}
       <div className="px-6 md:px-[48px] h-[72px] flex items-center justify-between">
@@ -166,15 +277,50 @@ export default function Navbar() {
           <div className="pl-4 border-l border-[#EEEEEE] flex items-center gap-4">
             <ShareButton />
             
-            {isPro ? (
+            {!isPro && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                  className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                >
+                  Go PRO ✨
+                </button>
+                {showUpgradeMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
+                    <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                      <button 
+                        onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
+                        className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
+                      >
+                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
+                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
+                        <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {!isSignedIn ? (
+              <button
+                onClick={() => setShowSignInModal(true)}
+                className="text-[#666666] hover:text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-full border border-transparent hover:border-[#E8D5C0] hover:bg-[#FDF9F5] transition-all"
+              >
+                Sign In
+              </button>
+            ) : (
               <div className="relative">
                 <button
                   onClick={() => setShowProMenu(!showProMenu)}
                   className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                 >
-                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-serif italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
-                    Pro ✨
-                  </div>
+                  {isPro && (
+                    <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
+                      PRO ✅
+                    </div>
+                  )}
                   <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
                     Account
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
@@ -185,16 +331,14 @@ export default function Navbar() {
 
                 {showProMenu && (
                   <>
-                    {/* Click outside to close backdrop */}
                     <div 
                       className="fixed inset-0 z-40 bg-transparent cursor-default" 
                       onClick={() => setShowProMenu(false)}
                     />
                     
-                    {/* Floating Premium Menu */}
                     <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
                       <div className="px-3 py-2 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                        {proEmail || "Pro Member"}
+                        {proEmail || "User Account"}
                       </div>
                       <Link 
                         href="/account"
@@ -214,30 +358,6 @@ export default function Navbar() {
                   </>
                 )}
               </div>
-            ) : (
-              <button
-                onClick={async () => {
-                  let email = localStorage.getItem('lumo_pro_email');
-                  if (!email) {
-                    email = window.prompt("Enter your email to continue to Stripe checkout:");
-                    if (!email) return;
-                  }
-                  try {
-                    const res = await fetch('/api/stripe/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: email.trim() })
-                    });
-                    const data = await res.json();
-                    if (data.url) window.location.href = data.url;
-                  } catch (e) {
-                    alert('Checkout failed. Please try again.');
-                  }
-                }}
-                className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors"
-              >
-                Go PRO ✨
-              </button>
             )}
           </div>
         </div>
@@ -246,15 +366,53 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2 ml-auto">
           <ShareButton />
           
-          {isPro ? (
+          {!isPro && (
+            <div className="relative">
+              <button
+                onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                className="bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+              >
+                Go PRO ✨
+              </button>
+              {showUpgradeMenu && (
+                <>
+                  <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
+                  <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                    <button 
+                      onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
+                      className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
+                    >
+                      <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
+                      <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
+                      <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {!isSignedIn ? (
+            <button
+              onClick={() => setShowSignInModal(true)}
+              className="text-[#666666] hover:text-[#8B5E3C] text-[11px] font-bold px-2 py-1.5 rounded-full transition-all"
+            >
+              Sign In
+            </button>
+          ) : (
             <div className="relative">
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
                 className="flex items-center gap-2 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] px-3 py-1.5 rounded-full transition-all cursor-pointer select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               >
-                <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-serif italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
-                  Pro ✨
-                </div>
+                {isPro && (
+                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
+                    PRO ✅
+                  </div>
+                )}
+                {!isPro && (
+                  <span className="text-[11px] text-[#4A3E3D] font-bold">Account</span>
+                )}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
                   <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                 </svg>
@@ -262,16 +420,14 @@ export default function Navbar() {
 
               {showProMenu && (
                 <>
-                  {/* Click outside to close backdrop */}
                   <div 
                     className="fixed inset-0 z-40 bg-transparent cursor-default" 
                     onClick={() => setShowProMenu(false)}
                   />
                   
-                  {/* Floating Premium Menu */}
                   <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
                     <div className="px-3 py-2 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                      {proEmail || "Pro Member"}
+                      {proEmail || "User Account"}
                     </div>
                     <Link 
                       href="/account"
@@ -291,30 +447,6 @@ export default function Navbar() {
                 </>
               )}
             </div>
-          ) : (
-            <button
-              onClick={async () => {
-                let email = localStorage.getItem('lumo_pro_email');
-                if (!email) {
-                  email = window.prompt("Enter your email to continue to Stripe checkout:");
-                  if (!email) return;
-                }
-                try {
-                  const res = await fetch('/api/stripe/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email.trim() })
-                  });
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
-                } catch (e) {
-                  alert('Checkout failed. Please try again.');
-                }
-              }}
-              className="bg-[#D97706] hover:bg-[#B45309] text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors"
-            >
-              Go PRO ✨
-            </button>
           )}
 
           <button 
@@ -432,5 +564,77 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+      {showSignInModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
+          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
+            <button 
+              onClick={() => { setShowSignInModal(false); setSignInStep('email'); setSignInError(''); }}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <h2 className="text-2xl font-black text-[#3B2410] mb-2 text-center">
+              {signInStep === 'email' ? 'Sign In' : 'Verify Code'}
+            </h2>
+            <p className="text-center text-[#666666] text-sm mb-6">
+              {signInStep === 'email' ? 'Enter your email to access your account.' : `We sent a code to ${signInEmail}`}
+            </p>
+
+            {signInError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center">
+                {signInError}
+              </div>
+            )}
+
+            {signInStep === 'email' ? (
+              <form onSubmit={handleSignInSendCode} className="flex flex-col gap-4">
+                <input
+                  type="email"
+                  value={signInEmail}
+                  onChange={e => setSignInEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={signInLoading}
+                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                >
+                  {signInLoading ? 'Sending...' : 'Send Code'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  value={signInCode}
+                  onChange={e => setSignInCode(e.target.value)}
+                  placeholder="6-digit code"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-center text-lg tracking-[0.2em] font-bold"
+                  maxLength={6}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={signInLoading}
+                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                >
+                  {signInLoading ? 'Verifying...' : 'Verify & Sign In'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSignInStep('email'); setSignInCode(''); setSignInError(''); }}
+                  className="text-sm font-bold text-[#8B5E3C] hover:underline text-center mt-2"
+                >
+                  Use a different email
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

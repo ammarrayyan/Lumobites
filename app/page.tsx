@@ -120,44 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRO BANNER SECTION */}
-      <section className="w-full bg-[#FDFAF7] px-6 pb-6">
-        <div className="max-w-[1200px] mx-auto bg-[#3B2410] rounded-2xl px-5 py-4 md:px-6 md:py-3 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-          
-          <div className="flex-1 relative z-10 text-center md:text-left text-[#F5F0E8] leading-tight">
-            <span className="font-black text-white text-base md:text-sm">🌟 Unlock Lumo Bites PRO</span>
-            <span className="hidden md:inline text-[#F5F0E8]/50 mx-2 font-light">—</span>
-            <span className="block md:inline text-sm font-medium text-[#F5F0E8]/80 mt-1 md:mt-0">
-              Contact sitters + unlimited scans <span className="text-white font-bold ml-1">· $2.99/mo</span>
-            </span>
-          </div>
-          
-          <button
-            onClick={async () => {
-              let email = localStorage.getItem('lumo_pro_email');
-              if (!email) {
-                email = window.prompt("Enter your email to continue to Stripe checkout:");
-                if (!email) return;
-              }
-              try {
-                const res = await fetch('/api/stripe/checkout', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: email.trim() })
-                });
-                const data = await res.json();
-                if (data.url) window.location.href = data.url;
-              } catch (e) {
-                alert('Checkout failed. Please try again.');
-              }
-            }}
-            className="relative z-10 bg-[#D97706] hover:bg-[#B45309] text-white font-bold px-5 py-2 rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95 text-sm whitespace-nowrap w-full md:w-auto flex items-center justify-center gap-1.5"
-          >
-            Upgrade &rarr;
-          </button>
-        </div>
-      </section>
+      {/* Removed PRO BANNER SECTION */}
 
       {/* SERVICES GRID SECTION */}
       <section className="w-full bg-[#FDFAF7] px-6 pb-16">
