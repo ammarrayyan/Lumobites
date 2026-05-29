@@ -1316,11 +1316,12 @@ export default function PetSitting() {
                 )}
 
             <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
-              <div className="flex justify-between items-center mb-2 border-b border-[#E8DDD4] pb-4">
-                <div className="text-sm font-bold text-[#8B7E7D]">
-                  {sitterName ? 'Editing Profile:' : 'Creating Profile:'} {sitterEmail}
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span title="Locked after signup">🔒</span></label>
+                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
+                  {sitterEmail}
                 </div>
-                <button type="button" onClick={() => setSitterAuthMode('email')} className="text-[#8B5E3C] text-sm font-bold hover:underline">Change</button>
+                <p className="text-xs text-gray-500 mt-2">Email cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a> for help.</p>
               </div>
 
               {sitterApprovalStatus === 'approved' && (

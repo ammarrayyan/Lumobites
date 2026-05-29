@@ -9,12 +9,14 @@ type Step = 'email' | 'verification' | 'dashboard';
 export default function AccountPage() {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
         setEmail(cachedEmail);
+        setIsLocked(true);
       }
     }
   }, []);
@@ -191,17 +193,28 @@ export default function AccountPage() {
               <form onSubmit={handleSendCode} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5 text-left">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    Pro Subscription Email
+                    Pro Subscription Email {isLocked && <span title="Locked after signup">🔒</span>}
                   </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
-                  />
+                  {isLocked ? (
+                    <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
+                      {email}
+                    </div>
+                  ) : (
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      disabled={loading}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
+                    />
+                  )}
+                  {isLocked && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Email cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a> for help.
+                    </p>
+                  )}
                 </div>
 
                 {error && (
@@ -276,18 +289,20 @@ export default function AccountPage() {
                 </button>
 
                 <div className="flex justify-between items-center mt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep('email');
-                      setError(null);
-                      setMessage(null);
-                      setVerificationCode('');
-                    }}
-                    className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    ← Change Email
-                  </button>
+                  {!isLocked && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep('email');
+                        setError(null);
+                        setMessage(null);
+                        setVerificationCode('');
+                      }}
+                      className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                    >
+                      ← Change Email
+                    </button>
+                  )}
 
                   <button
                     type="button"
