@@ -370,41 +370,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COMING SOON SECTION */}
-      <section className="w-full bg-[#FDFAF7] px-6 py-[80px]">
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-12">
-            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">More features coming soon 🐾</h3>
-            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(18px, 2.5vw, 26px)' }}>
-              We&apos;re constantly building new ways to help you and your pet
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
-              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>🏥</span>
-              <h3 className="text-[#191919] font-bold text-lg mb-1">Pet Insurance</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Find the best pet insurance plans tailored to your pet&apos;s breed and age.</p>
-            </div>
-
-            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
-              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>⭐</span>
-              <h3 className="text-[#191919] font-bold text-lg mb-1">Sitter Reviews</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Verified reviews from real pet owners about their sitter experience.</p>
-            </div>
-
-            <div className="bg-[#F5EDE4] rounded-[20px] p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex flex-col gap-3 relative overflow-hidden border border-[#E8D5C0] hover:-translate-y-1 transition-transform">
-              <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full z-10">Coming Soon</div>
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '10px', display: 'block' }}>💊</span>
-              <h3 className="text-[#191919] font-bold text-lg mb-1">Pet Health Tracker</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Track your pet&apos;s health, vaccinations and vet visits all in one place.</p>
-            </div>
-
-          </div>
-        </div>
-      </section>
+      {/* REMOVED COMING SOON SECTION */}
 
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
