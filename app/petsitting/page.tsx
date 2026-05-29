@@ -1585,20 +1585,14 @@ export default function PetSitting() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Gender (Optional) {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
-                  {sitterApprovalStatus === 'approved' ? (
-                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
-                      {sitterGender || 'Not specified'}
-                    </div>
-                  ) : (
-                    <select value={sitterGender} onChange={e => setSitterGender(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Non-binary">Non-binary</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  )}
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Gender (Optional)</label>
+                  <select value={sitterGender} onChange={e => setSitterGender(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
