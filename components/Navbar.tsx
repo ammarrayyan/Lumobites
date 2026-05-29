@@ -207,7 +207,7 @@ export default function Navbar() {
     <>
     <nav className="bg-white border-b border-[#EEEEEE] relative z-50">
       {/* Desktop & Mobile Header Container */}
-      <div className="px-6 md:px-[48px] h-[72px] flex items-center justify-between">
+      <div className="px-4 md:px-6 xl:px-[48px] h-[72px] flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
@@ -217,10 +217,10 @@ export default function Navbar() {
         </Link>
 
         {/* Right: Desktop Links & Share */}
-        <div className="hidden md:flex items-center gap-6 ml-auto">
+        <div className="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6 ml-auto">
 
           {/* Pet Sitting */}
-          <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
@@ -228,7 +228,7 @@ export default function Navbar() {
           </Link>
 
           {/* Safety Check */}
-          <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -236,19 +236,19 @@ export default function Navbar() {
           </Link>
 
           {/* Lost Pets */}
-          <Link href="/lost-pets" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/lost-pets" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <span className="text-[14px] leading-none mr-1.5">🐾</span>
             Lost Pets
           </Link>
 
           {/* City Board */}
-          <Link href="/city-board" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/city-board" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <span className="text-[14px] leading-none mr-1.5">💬</span>
             City Board
           </Link>
 
           {/* Recalls */}
-          <Link href="/recalls" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/recalls" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
@@ -256,7 +256,7 @@ export default function Navbar() {
           </Link>
 
           {/* Pet Supplies */}
-          <Link href="/supplies" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/supplies" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#666666] hover:text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
               <circle cx="4.5" cy="11.5" r="2.5" />
               <circle cx="9.5" cy="7.5" r="2.5" />
@@ -268,13 +268,13 @@ export default function Navbar() {
           </Link>
 
           {/* Pet Twin */}
-          <Link href="/twin" className="text-[#8B5E3C] font-bold hover:underline transition-all flex items-center nav-link" style={{ fontSize: 'var(--text-nav)' }}>
+          <Link href="/twin" className="text-[#8B5E3C] font-bold hover:underline transition-all flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
             </svg>
             Pet Twin
           </Link>
-          <div className="pl-4 border-l border-[#EEEEEE] flex items-center gap-4">
+          <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
             
             {!isPro && (
