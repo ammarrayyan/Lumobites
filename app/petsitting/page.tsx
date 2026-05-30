@@ -1053,23 +1053,18 @@ export default function PetSitting() {
                 <div className="flex-1 order-2 lg:order-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
-                      <div key={sitter.id} onClick={() => handleViewReviews(sitter)} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow relative cursor-pointer">
-                        {sitter.approval_status === 'approved' && (
-                          <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                            ✅ Identity Verified
-                          </div>
-                        )}
+                      <div key={sitter.id} onClick={() => handleViewReviews(sitter)} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                         
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-start gap-4 mb-4">
                           {sitter.photo_url ? (
-                            <img src={sitter.photo_url} alt={sitter.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4]" />
+                            <img src={sitter.photo_url} alt={sitter.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0" />
                           ) : (
-                            <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl">
+                            <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl flex-shrink-0">
                               {sitter.name.charAt(0)}
                             </div>
                           )}
-                          <div>
-                             <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex-1 min-w-0">
+                             <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
                                {sitter.gender && (
                                  <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
@@ -1077,7 +1072,12 @@ export default function PetSitting() {
                                  </span>
                                )}
                              </div>
-                             <div className="text-sm mt-0.5 mb-1">
+                             {sitter.approval_status === 'approved' && (
+                               <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1">
+                                 ✅ Identity Verified
+                               </div>
+                             )}
+                             <div className="text-sm mb-1">
                                {sitter.review_count ? (
                                  <span className="text-[#D97706] font-bold">⭐ {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span></span>
                                ) : (
