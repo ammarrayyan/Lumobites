@@ -146,7 +146,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
           <p className="text-white/60 text-center py-12">No sitters found.</p>
         ) : (
           filteredSitters.map(sitter => (
-            <div key={sitter.id} className="bg-black/40 border border-white/5 rounded-xl p-6 flex flex-col lg:flex-row gap-6 items-start">
+            <div key={sitter.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 flex flex-col lg:flex-row gap-6 items-start">
               {/* Profile Image */}
               <div className="w-24 h-24 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
                 {sitter.photo_url ? (
@@ -159,8 +159,8 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
               {/* Details */}
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-lg font-bold text-white">{sitter.name}</h3>
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                    <h3 className="text-xl font-extrabold text-white">{sitter.name}</h3>
                     <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
                       sitter.approval_status === 'approved' ? 'bg-green-500/20 text-green-400' :
                       sitter.approval_status === 'rejected' ? 'bg-red-500/20 text-red-400' :

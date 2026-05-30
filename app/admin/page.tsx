@@ -74,8 +74,8 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#111] text-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#c2e59c] to-[#64b3f4]">
-            Lumo Bites Admin
+          <h1 className="text-3xl font-bold text-white">
+            ⚙️ Lumo Bites Admin
           </h1>
           <button
             onClick={handleLogout}
