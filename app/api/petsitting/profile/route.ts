@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         bio,
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
-        availability: availability !== undefined ? availability : true,
+        availability: true,
         available_days: available_days || [],
         available_times: available_times || [],
         service_types: service_types || [],

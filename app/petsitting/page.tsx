@@ -279,7 +279,7 @@ export default function PetSitting() {
           setSitterRate(data.rate_per_night?.toString() || '');
           setSitterPhone(data.phone_number || '');
           setSitterPhoneVisible(data.phone_visible || false);
-          setSitterAvailable(data.availability);
+          setSitterAvailable(data.availability === true || data.availability === 'true' || !!data.availability);
           setSitterAvailableDays(data.available_days || []);
           setSitterAvailableTimes(data.available_times || []);
           setSitterServiceTypes(data.service_types || []);
