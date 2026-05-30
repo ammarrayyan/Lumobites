@@ -126,7 +126,8 @@ export default function CityBoardPage() {
       if (searchCity) params.append('city', searchCity);
       if (searchCategory !== 'All') params.append('category', searchCategory);
       if (searchPostId) params.append('post_id', searchPostId);
-      if (showMyPosts && deviceCookie) params.append('device_cookie', deviceCookie);
+      if (deviceCookie) params.append('device_cookie', deviceCookie);
+      if (showMyPosts) params.append('my_posts_only', 'true');
 
       const res = await fetch(`/api/city-board/posts?${params.toString()}`);
       if (res.ok) {
@@ -184,6 +185,100 @@ export default function CityBoardPage() {
       setPostError('An unexpected error occurred.');
     } finally {
       setIsPosting(false);
+    }
+  };
+
+  // Modals & States for Helpful, Report, and Follow features
+  const [followPostId, setFollowPostId] = useState<string | null>(null);
+  const [followEmail, setFollowEmail] = useState('');
+  const [submittingFollow, setSubmittingFollow] = useState(false);
+
+  const [reportPostId, setReportPostId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('Spam');
+  const [submittingReport, setSubmittingReport] = useState(false);
+
+  const handleMarkHelpful = async (postId: string) => {
+    if (!deviceCookie) return;
+    try {
+      const res = await fetch('/api/city-board/helpful', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, device_cookie: deviceCookie })
+      });
+      if (res.ok) {
+        setPosts(prevPosts =>
+          prevPosts.map(p =>
+            p.post_id === postId
+              ? { ...p, helpful_count: (p.helpful_count || 0) + 1, voted_helpful: true }
+              : p
+          )
+        );
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to vote helpful');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const openFollowModal = (postId: string) => {
+    setFollowPostId(postId);
+    setFollowEmail('');
+  };
+
+  const handleFollowSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!followPostId || !followEmail.trim()) return;
+    setSubmittingFollow(true);
+    try {
+      const res = await fetch('/api/city-board/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: followPostId, email: followEmail.trim() })
+      });
+      if (res.ok) {
+        alert('You are now following this post. You will receive email notifications for replies.');
+        setFollowPostId(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to follow post');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred.');
+    } finally {
+      setSubmittingFollow(false);
+    }
+  };
+
+  const openReportModal = (postId: string) => {
+    setReportPostId(postId);
+    setReportReason('Spam');
+  };
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportPostId || !deviceCookie) return;
+    setSubmittingReport(true);
+    try {
+      const res = await fetch('/api/city-board/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: reportPostId, reason: reportReason, device_cookie: deviceCookie })
+      });
+      if (res.ok) {
+        alert('Thank you. This post has been reported and will be reviewed by our admin team.');
+        setReportPostId(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to report post');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred.');
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -372,18 +467,44 @@ export default function CityBoardPage() {
                 </div>
                 <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed">{post.content}</p>
                 
-                <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-4 mt-2">
-                  <Link href={`/city-board/${post.post_id}`} className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] hover:text-[#3B2410]/70 transition-colors bg-white border border-[#3B2410]/10 px-4 py-2 rounded-xl hover:shadow-sm">
-                    💬 {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
-                  </Link>
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-4 mt-2 flex-wrap gap-4">
+                  <div className="flex items-center gap-3">
+                    <Link href={`/city-board/${post.post_id}`} className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] hover:text-[#3B2410]/70 transition-colors bg-white border border-[#3B2410]/10 px-4 py-2 rounded-xl hover:shadow-sm">
+                      💬 {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
+                    </Link>
+                    
+                    <button
+                      onClick={() => handleMarkHelpful(post.post_id)}
+                      disabled={post.voted_helpful}
+                      className={`inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl border transition-all ${
+                        post.voted_helpful 
+                          ? 'bg-[#E8DDD4] text-gray-400 border-gray-200 cursor-not-allowed'
+                          : 'bg-white text-[#3B2410] border-[#3B2410]/10 hover:bg-[#FAF6F4] hover:shadow-sm cursor-pointer'
+                      }`}
+                    >
+                      👍 Helpful ({post.helpful_count || 0})
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <button
+                      onClick={() => openFollowModal(post.post_id)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer"
+                    >
+                      🔔 Follow Post
+                    </button>
+                    <button
+                      onClick={() => openReportModal(post.post_id)}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-red-600/70 hover:text-red-600 hover:underline cursor-pointer"
+                    >
+                      ⚠️ Report
+                    </button>
                     <span className="text-xs text-[#3B2410]/50 sm:hidden">{formatDistanceToNow(new Date(post.created_at))} ago</span>
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
                         alert('Link copied to clipboard!');
                       }}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#3B2410]/60 hover:text-[#3B2410] transition-colors p-2 rounded-xl hover:bg-white"
+                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#3B2410]/60 hover:text-[#3B2410] transition-colors p-2 rounded-xl hover:bg-white cursor-pointer"
                       title="Copy link to post"
                     >
                       🔗 Share
@@ -396,6 +517,68 @@ export default function CityBoardPage() {
         )}
 
       </main>
+
+      {/* FOLLOW MODAL */}
+      {followPostId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setFollowPostId(null)}>
+          <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setFollowPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
+            <h3 className="text-xl font-black text-[#3B2410] mb-2 flex items-center gap-2">
+              <span>🔔</span> Follow this post
+            </h3>
+            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Enter your email below. We will send you an email notification as soon as someone replies to this thread.</p>
+            <form onSubmit={handleFollowSubmit} className="space-y-4">
+              <input
+                type="email"
+                required
+                value={followEmail}
+                onChange={e => setFollowEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
+              />
+              <button
+                type="submit"
+                disabled={submittingFollow}
+                className="w-full bg-[#3B2410] hover:bg-[#3B2410]/90 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
+              >
+                {submittingFollow ? 'Following...' : 'Follow Post'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REPORT MODAL */}
+      {reportPostId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReportPostId(null)}>
+          <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
+            <h3 className="text-xl font-black text-red-700 mb-2 flex items-center gap-2">
+              <span>⚠️</span> Report post
+            </h3>
+            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Help us keep Lumo Bites clean and safe. Please select a reason for reporting this post:</p>
+            <form onSubmit={handleReportSubmit} className="space-y-4">
+              <select
+                value={reportReason}
+                onChange={e => setReportReason(e.target.value)}
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
+              >
+                <option value="Spam">Spam</option>
+                <option value="Inappropriate">Inappropriate content</option>
+                <option value="Wrong category">Wrong category</option>
+                <option value="Other">Other</option>
+              </select>
+              <button
+                type="submit"
+                disabled={submittingReport}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
+              >
+                {submittingReport ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

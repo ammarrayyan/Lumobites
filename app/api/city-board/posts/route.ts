@@ -10,7 +10,10 @@ export async function GET(req: NextRequest) {
     const postId = searchParams.get('post_id');
     const deviceCookie = searchParams.get('device_cookie');
     const keyword = searchParams.get('keyword');
-    const sort = searchParams.get('sort') || 'newest';
+    const sort = searchParams.get('sort') || 'helpful';
+
+    const adminKey = req.headers.get('x-admin-key');
+    const isAdmin = adminKey === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
 
     let query = supabaseAdmin
       .from('city_board_posts')
@@ -19,7 +22,6 @@ export async function GET(req: NextRequest) {
     if (keyword) {
       query = query.or(`city.ilike.%${keyword}%,content.ilike.%${keyword}%`);
     } else if (city) {
-      // Basic text search for city. We can use ilike for case-insensitive.
       query = query.ilike('city', `%${city}%`);
     }
     
@@ -31,27 +33,59 @@ export async function GET(req: NextRequest) {
       query = query.ilike('post_id', `%${postId}%`);
     }
 
-    if (deviceCookie) {
+    const myPostsOnly = searchParams.get('my_posts_only') === 'true';
+    if (myPostsOnly && deviceCookie) {
       query = query.eq('device_cookie', deviceCookie);
     }
 
     if (sort === 'popular') {
-      // Can't sort by joined count easily in standard Supabase REST without a view.
-      // We will sort in JS for 'popular' if it's not a huge dataset, or just return newest for now.
-      // Since it's hidden, let's sort by created_at.
       query = query.order('created_at', { ascending: false });
     } else {
-      query = query.order('created_at', { ascending: false });
+      query = query.order('helpful_count', { ascending: false }).order('created_at', { ascending: false });
     }
 
     const { data, error } = await query.limit(50);
 
     if (error) throw error;
 
-    // Format reply counts
-    const formattedData = data.map((post: any) => ({
-      ...post,
-      reply_count: post.city_board_replies?.[0]?.count || 0
+    let myHelpfulPostIds: string[] = [];
+    if (deviceCookie) {
+      const { data: myHelpful } = await supabaseAdmin
+        .from('city_board_helpful')
+        .select('post_id')
+        .eq('device_cookie', deviceCookie);
+      
+      myHelpfulPostIds = (myHelpful || []).map((vote: any) => vote.post_id);
+    }
+
+    const formattedData = await Promise.all(data.map(async (post: any) => {
+      let reports: any[] = [];
+      let report_count = 0;
+
+      if (isAdmin) {
+        const { data: postReports } = await supabaseAdmin
+          .from('city_board_reports')
+          .select('*')
+          .eq('post_id', post.post_id);
+        
+        reports = postReports || [];
+        report_count = reports.length;
+      } else {
+        const { count } = await supabaseAdmin
+          .from('city_board_reports')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_id', post.post_id);
+        
+        report_count = count || 0;
+      }
+
+      return {
+        ...post,
+        reply_count: post.city_board_replies?.[0]?.count || 0,
+        reports,
+        report_count,
+        voted_helpful: myHelpfulPostIds.includes(post.post_id)
+      };
     }));
 
     if (sort === 'popular') {
@@ -74,7 +108,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Generate unique post ID LB-XXXX
     const randomChars = crypto.randomBytes(2).toString('hex').toUpperCase();
     const post_id = `LB-${randomChars}`;
 
@@ -115,8 +148,10 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
     }
 
-    // Delete replies first to satisfy foreign key (unless ON DELETE CASCADE is set)
     await supabaseAdmin.from('city_board_replies').delete().eq('post_id', post_id);
+    await supabaseAdmin.from('city_board_reports').delete().eq('post_id', post_id);
+    await supabaseAdmin.from('city_board_followers').delete().eq('post_id', post_id);
+    await supabaseAdmin.from('city_board_helpful').delete().eq('post_id', post_id);
     
     const { error } = await supabaseAdmin
       .from('city_board_posts')

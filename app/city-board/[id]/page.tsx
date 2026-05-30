@@ -33,15 +33,15 @@ export default function CityBoardPostPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch post details (by post_id)
-      const postRes = await fetch(`/api/city-board/posts?post_id=${postId}`);
+      // Fetch post details (by post_id) with device_cookie passed for helpful vote check
+      const postRes = await fetch(`/api/city-board/posts?post_id=${postId}&device_cookie=${deviceCookie}`);
       if (postRes.ok) {
         const postData = await postRes.json();
         const foundPost = postData.posts.find((p: any) => p.post_id === postId);
         if (foundPost) {
           setPost(foundPost);
         } else {
-          setPost(null); // Not found
+          setPost(null);
         }
       }
 
@@ -59,10 +59,10 @@ export default function CityBoardPostPage() {
   };
 
   useEffect(() => {
-    if (postId) {
+    if (postId && deviceCookie) {
       fetchData();
     }
-  }, [postId]);
+  }, [postId, deviceCookie]);
 
   const handleCreateReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +92,98 @@ export default function CityBoardPostPage() {
       setReplyError('An unexpected error occurred.');
     } finally {
       setIsReplying(false);
+    }
+  };
+
+  // States & Modals for Helpful, Report, and Follow features
+  const [followPostId, setFollowPostId] = useState<string | null>(null);
+  const [followEmail, setFollowEmail] = useState('');
+  const [submittingFollow, setSubmittingFollow] = useState(false);
+
+  const [reportPostId, setReportPostId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('Spam');
+  const [submittingReport, setSubmittingReport] = useState(false);
+
+  const handleMarkHelpful = async (postIdToVote: string) => {
+    if (!deviceCookie) return;
+    try {
+      const res = await fetch('/api/city-board/helpful', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postIdToVote, device_cookie: deviceCookie })
+      });
+      if (res.ok) {
+        setPost((prev: any) => ({
+          ...prev,
+          helpful_count: (prev.helpful_count || 0) + 1,
+          voted_helpful: true
+        }));
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to vote helpful');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const openFollowModal = (postIdToFollow: string) => {
+    setFollowPostId(postIdToFollow);
+    setFollowEmail('');
+  };
+
+  const handleFollowSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!followPostId || !followEmail.trim()) return;
+    setSubmittingFollow(true);
+    try {
+      const res = await fetch('/api/city-board/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: followPostId, email: followEmail.trim() })
+      });
+      if (res.ok) {
+        alert('You are now following this post. You will receive email notifications for replies.');
+        setFollowPostId(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to follow post');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred.');
+    } finally {
+      setSubmittingFollow(false);
+    }
+  };
+
+  const openReportModal = (postIdToReport: string) => {
+    setReportPostId(postIdToReport);
+    setReportReason('Spam');
+  };
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportPostId || !deviceCookie) return;
+    setSubmittingReport(true);
+    try {
+      const res = await fetch('/api/city-board/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: reportPostId, reason: reportReason, device_cookie: deviceCookie })
+      });
+      if (res.ok) {
+        alert('Thank you. This post has been reported and will be reviewed by our admin team.');
+        setReportPostId(null);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to report post');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred.');
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -139,17 +231,46 @@ export default function CityBoardPostPage() {
             <span className="text-sm text-[#3B2410]/50 ml-auto font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
           </div>
           <p className="text-[#3B2410] whitespace-pre-wrap text-lg md:text-xl font-medium leading-relaxed">{post.content}</p>
-          <div className="flex items-center justify-end border-t border-[#3B2410]/10 pt-5 mt-6">
-            <button 
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
-                alert('Link copied to clipboard!');
-              }}
-              className="inline-flex items-center gap-2 text-sm font-bold text-[#8B5E3C] hover:bg-[#F5F0E8] transition-colors bg-white px-4 py-2 rounded-xl border border-[#3B2410]/10 shadow-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-              Copy Share Link
-            </button>
+          
+          <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-5 mt-6 flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleMarkHelpful(post.post_id)}
+                disabled={post.voted_helpful}
+                className={`inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl border transition-all ${
+                  post.voted_helpful 
+                    ? 'bg-[#E8DDD4] text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-[#3B2410] border-[#3B2410]/10 hover:bg-[#FAF6F4] hover:shadow-sm cursor-pointer'
+                }`}
+              >
+                👍 Helpful ({post.helpful_count || 0})
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-4 flex-wrap">
+              <button
+                onClick={() => openFollowModal(post.post_id)}
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer"
+              >
+                🔔 Follow Post
+              </button>
+              <button
+                onClick={() => openReportModal(post.post_id)}
+                className="inline-flex items-center gap-1 text-xs font-bold text-red-600/70 hover:text-red-600 hover:underline cursor-pointer"
+              >
+                ⚠️ Report
+              </button>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
+                  alert('Link copied to clipboard!');
+                }}
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#8B5E3C] hover:bg-[#F5F0E8] transition-colors bg-white px-4 py-2 rounded-xl border border-[#3B2410]/10 shadow-sm cursor-pointer"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                Copy Share Link
+              </button>
+            </div>
           </div>
         </div>
 
@@ -216,6 +337,68 @@ export default function CityBoardPostPage() {
         </div>
 
       </main>
+
+      {/* FOLLOW MODAL */}
+      {followPostId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setFollowPostId(null)}>
+          <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setFollowPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
+            <h3 className="text-xl font-black text-[#3B2410] mb-2 flex items-center gap-2">
+              <span>🔔</span> Follow this post
+            </h3>
+            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Enter your email below. We will send you an email notification as soon as someone replies to this thread.</p>
+            <form onSubmit={handleFollowSubmit} className="space-y-4">
+              <input
+                type="email"
+                required
+                value={followEmail}
+                onChange={e => setFollowEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
+              />
+              <button
+                type="submit"
+                disabled={submittingFollow}
+                className="w-full bg-[#3B2410] hover:bg-[#3B2410]/90 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
+              >
+                {submittingFollow ? 'Following...' : 'Follow Post'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REPORT MODAL */}
+      {reportPostId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReportPostId(null)}>
+          <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
+            <h3 className="text-xl font-black text-red-700 mb-2 flex items-center gap-2">
+              <span>⚠️</span> Report post
+            </h3>
+            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Help us keep Lumo Bites clean and safe. Please select a reason for reporting this post:</p>
+            <form onSubmit={handleReportSubmit} className="space-y-4">
+              <select
+                value={reportReason}
+                onChange={e => setReportReason(e.target.value)}
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
+              >
+                <option value="Spam">Spam</option>
+                <option value="Inappropriate">Inappropriate content</option>
+                <option value="Wrong category">Wrong category</option>
+                <option value="Other">Other</option>
+              </select>
+              <button
+                type="submit"
+                disabled={submittingReport}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
+              >
+                {submittingReport ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

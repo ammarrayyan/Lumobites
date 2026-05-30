@@ -20,7 +20,11 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/city-board/posts');
+      const res = await fetch('/api/city-board/posts', {
+        headers: {
+          'x-admin-key': adminKey
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
@@ -62,7 +66,7 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
   };
 
   const deletePost = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post? This will also delete all its replies.')) return;
+    if (!confirm('Are you sure you want to delete this post? This will also delete all its replies, helpful votes, followers, and reports.')) return;
     
     try {
       const res = await fetch('/api/city-board/posts', {
@@ -115,8 +119,33 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
     }
   };
 
-  if (loading) return <div className="text-white/70">Loading posts...</div>;
-  if (error) return <div className="text-red-400">{error}</div>;
+  const dismissReports = async (postId: string) => {
+    if (!confirm('Are you sure you want to dismiss all reports for this post?')) return;
+    
+    try {
+      const res = await fetch('/api/admin/dismiss-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ post_id: postId })
+      });
+      
+      if (res.ok) {
+        setPosts(posts.map(p => p.post_id === postId ? { ...p, report_count: 0, reports: [] } : p));
+      } else if (res.status === 401) {
+        onUnauthorized();
+      } else {
+        alert('Failed to dismiss reports');
+      }
+    } catch (e) {
+      alert('An error occurred');
+    }
+  };
+
+  if (loading) return <div className="text-white/70 text-center py-8">Loading posts...</div>;
+  if (error) return <div className="text-red-400 text-center py-8">{error}</div>;
 
   return (
     <div>
@@ -128,60 +157,95 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
       </div>
 
       <div className="space-y-4">
-        {posts.map(post => (
-          <div key={post.id} className="bg-black/40 border border-white/10 rounded-xl p-4">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="bg-[#c2e59c] text-black text-xs font-bold px-2 py-0.5 rounded">{post.post_id}</span>
-                  <span className="text-white/70 text-sm">{post.city} • {post.category}</span>
-                </div>
-                <div className="text-xs text-white/50">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => toggleReplies(post.post_id)}
-                  className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 px-3 py-1 rounded text-sm transition-colors"
-                >
-                  Replies ({post.reply_count})
-                </button>
-                <button 
-                  onClick={() => deletePost(post.post_id)}
-                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1 rounded text-sm transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-            <div className="text-white bg-white/5 p-3 rounded-lg text-sm whitespace-pre-wrap">{post.content}</div>
+        {posts.map(post => {
+          const isReported = post.report_count > 0;
+          const reportReasons = isReported
+            ? Array.from(new Set(post.reports?.map((r: any) => r.reason) || [])).join(', ')
+            : '';
 
-            {expandedPostId === post.post_id && (
-              <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
-                <h4 className="text-sm font-bold text-white/70">Replies</h4>
-                {loadingReplies ? (
-                  <div className="text-white/50 text-sm">Loading replies...</div>
-                ) : replies.length === 0 ? (
-                  <div className="text-white/50 text-sm">No replies yet.</div>
-                ) : (
-                  replies.map(reply => (
-                    <div key={reply.id} className="bg-white/5 rounded-lg p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="text-xs text-white/50">Device: {reply.device_cookie} • {new Date(reply.created_at).toLocaleString()}</div>
-                        <button 
-                          onClick={() => deleteReply(reply.id)}
-                          className="text-red-400 hover:text-red-300 text-xs transition-colors"
-                        >
-                          Delete Reply
-                        </button>
-                      </div>
-                      <div className="text-white/90 text-sm whitespace-pre-wrap">{reply.content}</div>
+          return (
+            <div 
+              key={post.id} 
+              className={`border rounded-xl p-4 transition-colors ${
+                isReported 
+                  ? 'bg-red-950/20 border-red-500/30' 
+                  : 'bg-black/40 border-white/10'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-3 flex-wrap gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="bg-[#c2e59c] text-black text-xs font-bold px-2 py-0.5 rounded">{post.post_id}</span>
+                    <span className="text-white/70 text-sm">{post.city} • {post.category}</span>
+                    {isReported && (
+                      <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                        ⚠️ Reported ({post.report_count})
+                      </span>
+                    )}
+                    <span className="text-white text-xs font-semibold px-2 py-0.5 bg-white/10 rounded border border-white/5 ml-2">
+                      👍 {post.helpful_count || 0} helpful
+                    </span>
+                  </div>
+                  <div className="text-xs text-white/50">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>
+                  {isReported && (
+                    <div className="text-xs text-red-400 font-semibold mt-1">
+                      Report Reasons: <span className="text-red-300 italic">{reportReasons || 'None'}</span>
                     </div>
-                  ))
-                )}
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => toggleReplies(post.post_id)}
+                    className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 px-3 py-1 rounded text-sm transition-colors cursor-pointer"
+                  >
+                    Replies ({post.reply_count})
+                  </button>
+                  {isReported && (
+                    <button 
+                      onClick={() => dismissReports(post.post_id)}
+                      className="bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3 py-1 rounded text-sm transition-colors border border-green-500/20 cursor-pointer font-semibold"
+                    >
+                      Dismiss Reports
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => deletePost(post.post_id)}
+                    className="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1 rounded text-sm transition-colors cursor-pointer"
+                  >
+                    Delete Post
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+              <div className="text-white bg-white/5 p-3 rounded-lg text-sm whitespace-pre-wrap">{post.content}</div>
+
+              {expandedPostId === post.post_id && (
+                <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
+                  <h4 className="text-sm font-bold text-white/70">Replies</h4>
+                  {loadingReplies ? (
+                    <div className="text-white/50 text-sm">Loading replies...</div>
+                  ) : replies.length === 0 ? (
+                    <div className="text-white/50 text-sm">No replies yet.</div>
+                  ) : (
+                    replies.map(reply => (
+                      <div key={reply.id} className="bg-white/5 rounded-lg p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="text-xs text-white/50">Device: {reply.device_cookie} • {new Date(reply.created_at).toLocaleString()}</div>
+                          <button 
+                            onClick={() => deleteReply(reply.id)}
+                            className="text-red-400 hover:text-red-300 text-xs transition-colors cursor-pointer"
+                          >
+                            Delete Reply
+                          </button>
+                        </div>
+                        <div className="text-white/90 text-sm whitespace-pre-wrap">{reply.content}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
         {posts.length === 0 && (
           <div className="text-white/50 text-center py-8">No posts found.</div>
         )}
