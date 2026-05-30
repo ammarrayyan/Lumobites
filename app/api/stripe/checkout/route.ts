@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const stripe = new Stripe(stripeSecretKey);
 
     const body = await request.json();
-    const { email } = body;
+    const { email, successUrl, cancelUrl } = body;
     const referralCode = request.cookies.get('lumobites_ref')?.value;
 
     if (!email) {
@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
       ],
       mode: 'subscription',
       customer_email: email.toLowerCase().trim(),
-      success_url: `${origin}/scan?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`,
-      cancel_url: `${origin}/scan`,
+      success_url: successUrl || `${origin}/scan?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`,
+      cancel_url: cancelUrl || `${origin}/scan`,
       metadata: {
         email: email.toLowerCase().trim(),
         service: 'safety-scanner-pro',

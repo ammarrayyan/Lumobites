@@ -41,6 +41,17 @@ export default function TwinPage() {
   const [modalError, setModalError] = useState('');
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
 
+  // Stripe & subscription state
+  const [isPro, setIsPro] = useState(false);
+  const [proEmail, setProEmail] = useState('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [modalEmail, setModalEmail] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [verifyingSession, setVerifyingSession] = useState(false);
+  const [modalStep, setModalStep] = useState<'paywall' | 'upgrade_email' | 'restore_email' | 'verification'>('paywall');
+  const [verificationCode, setVerificationCode] = useState('');
+
   const [cameraActive, setCameraActive] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,16 +64,326 @@ export default function TwinPage() {
   const storyCardRef = useRef<HTMLDivElement>(null);
   const twitterCardRef = useRef<HTMLDivElement>(null);
 
-  // Cycle loading messages
+  // Load and verify Pro status on page mount
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (step === 'analyzing') {
-      interval = setInterval(() => {
-        setLoadingIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
-      }, 2000);
+    const syncStatus = () => {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      
+      if (isAdminBypass || isOwnerEmail) {
+        setIsPro(true);
+        setProEmail(cachedEmail || 'admin@lumobites.com');
+      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+        setIsPro(true);
+        setProEmail(cachedEmail);
+      } else {
+        setIsPro(false);
+        setProEmail('');
+      }
+    };
+
+    syncStatus();
+    window.addEventListener('lumo-pro-update', syncStatus);
+    window.addEventListener('storage', syncStatus);
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const sessionId = searchParams.get('session_id');
+    const emailParam = searchParams.get('email');
+    const adminParam = searchParams.get('admin');
+
+    console.log('[Lumo Twin Pro] Page mounted. Checking subscription status...');
+
+    if (adminParam === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
+      console.log('[Lumo Twin Pro] Admin bypass activated via URL parameter.');
+      setIsPro(true);
+      setProEmail('admin@lumobites.com');
+      localStorage.setItem('lumo_pro_email', 'admin@lumobites.com');
+      localStorage.setItem('lumo_admin_bypass', 'true');
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      
+      try {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+      
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (sessionId) {
+      console.log('[Lumo Twin Pro] Found Stripe session_id in URL:', sessionId);
+      setVerifyingSession(true);
+      fetch(`/api/stripe/verify-session?session_id=${sessionId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.isPro) {
+            console.log('[Lumo Twin Pro] Session verified. User email:', data.email);
+            setIsPro(true);
+            const userEmail = data.email || emailParam || '';
+            setProEmail(userEmail);
+            localStorage.setItem('lumo_pro_email', userEmail);
+            localStorage.removeItem('lumo_admin_bypass');
+            window.dispatchEvent(new Event('lumo-pro-update'));
+            
+            try {
+              confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+              });
+            } catch (e) {}
+          } else {
+            console.warn('[Lumo Twin Pro] Session verification returned not pro or failed:', data);
+          }
+        })
+        .catch(err => console.error('[Lumo Twin Pro] Verification error:', err))
+        .finally(() => {
+          setVerifyingSession(false);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    } else {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      console.log('[Lumo Twin Pro] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
+      
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      
+      if (isAdminBypass || isOwnerEmail) {
+        console.log('[Lumo Twin Pro] Admin/Owner bypass detected in localStorage. Activating Pro status.');
+        setIsPro(true);
+        setProEmail(cachedEmail || 'admin@lumobites.com');
+      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+        console.log('[Lumo Twin Pro] Active cached email found. Activating optimistic Pro state.');
+        setProEmail(cachedEmail);
+        setIsPro(true);
+        
+        console.log('[Lumo Twin Pro] Syncing status with database for email:', cachedEmail);
+        fetch('/api/stripe/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cachedEmail })
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log('[Lumo Twin Pro] Database status reply:', data);
+          if (data.isPro) {
+            setIsPro(true);
+            window.dispatchEvent(new Event('lumo-pro-update'));
+            console.log('[Lumo Twin Pro] Pro status confirmed by Supabase.');
+          } else {
+            setIsPro(false);
+            localStorage.removeItem('lumo_pro_email');
+            window.dispatchEvent(new Event('lumo-pro-update'));
+            console.log('[Lumo Twin Pro] Pro status rejected by Supabase. Downgraded to free tier.');
+          }
+        })
+        .catch((err) => {
+          console.error('[Lumo Twin Pro] Failed to sync status with Supabase:', err);
+        });
+      } else {
+        setIsPro(false);
+      }
     }
-    return () => clearInterval(interval);
-  }, [step]);
+
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('storage', syncStatus);
+    };
+  }, []);
+
+  // Limit checker: returns true if allowed to match, false if blocked (shows modal)
+  const checkTwinLimit = (): boolean => {
+    console.log('[Lumo Twin Limit] Evaluating checkTwinLimit. Current isPro state:', isPro);
+    if (isPro) {
+      console.log('[Lumo Twin Limit] User is PRO. Bypassing limit.');
+      return true;
+    }
+
+    try {
+      const countStr = localStorage.getItem('lumo_twin_count');
+      const dateStr = localStorage.getItem('lumo_twin_date');
+      
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      let count = countStr ? parseInt(countStr, 10) : 0;
+      console.log(`[Lumo Twin Limit] Read from localStorage - count: ${count}, date: ${dateStr}, today: ${today}`);
+
+      if (dateStr !== today) {
+        console.log('[Lumo Twin Limit] Midnight reset triggered (date mismatch). Resetting count to 0.');
+        count = 0;
+      }
+
+      if (count >= 1) {
+        console.log('[Lumo Twin Limit] Limit exceeded! Displaying the Pro Upgrade Modal.');
+        setShowUpgradeModal(true);
+        return false;
+      }
+
+      console.log('[Lumo Twin Limit] Under limit. Access granted.');
+      return true;
+    } catch (err) {
+      console.error('[Lumo Twin Limit] Error reading limit from localStorage:', err);
+      return true;
+    }
+  };
+
+  // Record twin match usage
+  const recordTwinUsage = () => {
+    if (isPro) {
+      console.log('[Lumo Twin Limit] Pro user, skipping usage recording.');
+      return;
+    }
+
+    try {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      const countStr = localStorage.getItem('lumo_twin_count');
+      let count = countStr ? parseInt(countStr, 10) : 0;
+      const dateStr = localStorage.getItem('lumo_twin_date');
+
+      if (dateStr !== today) {
+        count = 0;
+      }
+
+      const newCount = count + 1;
+      localStorage.setItem('lumo_twin_count', newCount.toString());
+      localStorage.setItem('lumo_twin_date', today);
+      console.log(`[Lumo Twin Limit] Recorded twin match. New count: ${newCount}, date: ${today}`);
+    } catch (err) {
+      console.error('[Lumo Twin Limit] Error writing limit to localStorage:', err);
+    }
+  };
+
+  const handleUpgrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modalEmail.trim()) {
+      setModalMessage({ text: 'Please enter a valid email address.', isError: true });
+      return;
+    }
+    
+    setModalLoading(true);
+    setModalMessage(null);
+    
+    try {
+      const origin = window.location.origin;
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: modalEmail,
+          successUrl: `${origin}/twin?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(modalEmail)}`,
+          cancelUrl: `${origin}/twin`
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Something went wrong. Please try again.', isError: true });
+      setModalLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!modalEmail.trim()) {
+      setModalMessage({ text: 'Please enter your email to restore your subscription.', isError: true });
+      return;
+    }
+    
+    setModalLoading(true);
+    setModalMessage(null);
+    
+    try {
+      const res = await fetch('/api/stripe/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: modalEmail })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send verification code');
+      }
+      
+      setModalStep('verification');
+      setModalMessage({ text: 'Verification code sent! Please check your email.', isError: false });
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Could not send verification code. Try again later.', isError: true });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationCode.trim() || verificationCode.length !== 6) {
+      setModalMessage({ text: 'Please enter a valid 6-digit verification code.', isError: true });
+      return;
+    }
+
+    setModalLoading(true);
+    setModalMessage(null);
+
+    try {
+      const res = await fetch('/api/stripe/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: modalEmail, code: verificationCode })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to verify code');
+      }
+
+      if (data.isPro) {
+        setIsPro(true);
+        setProEmail(modalEmail);
+        localStorage.setItem('lumo_pro_email', modalEmail);
+        localStorage.removeItem('lumo_admin_bypass');
+        window.dispatchEvent(new Event('lumo-pro-update'));
+        
+        try {
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 }
+          });
+        } catch (e) {}
+
+        setShowUpgradeModal(false);
+        setModalMessage(null);
+        setVerificationCode('');
+        setModalStep('paywall');
+      } else {
+        throw new Error('This email does not have active PRO access.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setModalMessage({ text: err.message || 'Could not verify code. Try again.', isError: true });
+    } finally {
+      setModalLoading(false);
+    }
+  };
 
   // Handle active webcam stream
   useEffect(() => {
@@ -161,6 +482,10 @@ export default function TwinPage() {
   };
 
   const processFile = async (selectedFile: File) => {
+    if (!checkTwinLimit()) {
+      return;
+    }
+
     setFile(selectedFile);
     setPreviewUrl(URL.createObjectURL(selectedFile));
     setStep('analyzing');
@@ -184,6 +509,7 @@ export default function TwinPage() {
       console.log("[Twin Client] Received match response data:", data);
 
       if (data.success) {
+        recordTwinUsage();
         setResult(data);
         setStep('result');
         const emailCaptured = localStorage.getItem('lumo_twin_email_captured') === 'true';
@@ -522,7 +848,7 @@ export default function TwinPage() {
       {/* NAVBAR */}
       <Navbar />
 
-      <main className={`flex-1 flex flex-col items-center py-12 px-6 ${showEmailModal ? 'blur-md pointer-events-none select-none' : ''}`}>
+      <main className={`flex-1 flex flex-col items-center py-12 px-6 ${(showEmailModal || showUpgradeModal) ? 'blur-md pointer-events-none select-none' : ''}`}>
         <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 relative overflow-hidden">
           
           {/* HEADER */}
@@ -890,6 +1216,7 @@ export default function TwinPage() {
                   </button>
                   <button 
                     onClick={() => {
+                      if (!checkTwinLimit()) return;
                       setResult(null);
                       setFile(null);
                       setPreviewUrl(null);
@@ -909,6 +1236,304 @@ export default function TwinPage() {
 
         </div>
       </main>
+
+      {/* ── UPGRADE TO PRO MODAL ── */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in pointer-events-auto">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
+            
+            {!modalLoading && (
+              <button 
+                onClick={() => {
+                  setShowUpgradeModal(false);
+                  setModalStep('paywall');
+                  setModalMessage(null);
+                  setVerificationCode('');
+                }}
+                className="absolute right-5 top-5 text-gray-400 hover:text-gray-600 font-extrabold text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+
+            {isPro ? (
+              <div className="flex flex-col gap-5 py-4">
+                <div>
+                  <div className="text-4xl mb-3">✨</div>
+                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
+                    You are a Pro Member!
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
+                    Thank you for supporting Lumo Bites. You have unlimited Pet Twin matches and Pro benefits active.
+                  </p>
+                </div>
+                <Link
+                  href="/account"
+                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer text-center"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Manage Subscription
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <div className="text-4xl mb-3">🐾</div>
+                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
+                    Want to try again?
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-3 font-medium text-center leading-relaxed">
+                    Upgrade to PRO for unlimited Pet Twin matches — plus contact verified pet sitters and unlimited food scans, all for $2.99/month.
+                  </p>
+                </div>
+
+                <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
+                  <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">$2.99/month — cancel anytime</span>
+                </div>
+
+                <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
+                  <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Unlimited Pet Twin matches
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Contact verified pet sitters directly
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
+                    </li>
+                  </ul>
+                </div>
+
+                {modalStep === 'paywall' && (
+                  <div className="flex flex-col gap-4 mt-2">
+                    <button
+                      onClick={() => {
+                        setModalStep('upgrade_email');
+                        setModalMessage(null);
+                      }}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      Upgrade for $2.99/month
+                    </button>
+
+                    <div className="flex flex-col gap-2.5">
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('restore_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Already subscribed? Restore subscription
+                      </button>
+                      <span className="text-[11px] text-gray-400 text-center">
+                        Come back tomorrow for your free match
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {modalStep === 'upgrade_email' && (
+                  <>
+                    <div className="text-left mt-2">
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Upgrade to Pro</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter your email to proceed to secure Stripe checkout.</p>
+                    </div>
+
+                    <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Enter Your Email
+                        </label>
+                        <input
+                          type="email"
+                          value={modalEmail}
+                          onChange={(e) => setModalEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          autoFocus
+                        />
+                      </div>
+
+                      {modalMessage && (
+                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {modalMessage.text}
+                        </p>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={modalLoading}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {modalLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : 'Proceed to Checkout 🚀'}
+                      </button>
+                    </form>
+
+                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('paywall');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('restore_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Restore subscription
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {modalStep === 'restore_email' && (
+                  <>
+                    <div className="text-left mt-2">
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Restore Subscription</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter the email you subscribed with to receive a 2-step verification code.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Enter Your Email
+                        </label>
+                        <input
+                          type="email"
+                          value={modalEmail}
+                          onChange={(e) => setModalEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          autoFocus
+                        />
+                      </div>
+
+                      {modalMessage && (
+                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {modalMessage.text}
+                        </p>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleRestore}
+                        disabled={modalLoading}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {modalLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : 'Send Verification Code 📩'}
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('paywall');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setModalStep('upgrade_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Upgrade to Pro
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {modalStep === 'verification' && (
+                  <form onSubmit={handleVerifyCode} className="flex flex-col gap-3 mt-2">
+                    <div className="flex flex-col gap-1.5 text-left">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        Enter 6-Digit Verification Code
+                      </label>
+                      <p className="text-xs text-gray-500 font-medium">
+                        We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 10 minutes.
+                      </p>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="123456"
+                        required
+                        className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
+                        autoFocus
+                      />
+                    </div>
+
+                    {modalMessage && (
+                      <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                        {modalMessage.text}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={modalLoading}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {modalLoading ? (
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      ) : 'Verify Code'}
+                    </button>
+
+                    <div className="flex justify-between items-center mt-1 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('restore_email');
+                          setModalMessage(null);
+                          setVerificationCode('');
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back to Email
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleRestore}
+                        disabled={modalLoading}
+                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        Resend Code
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ========================================================
           1080x1080 INSTAGRAM SQUARE SHARE CARD TEMPLATE (OFF-SCREEN)
