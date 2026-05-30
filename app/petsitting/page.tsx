@@ -44,6 +44,23 @@ function getDistanceInMiles(lat1: number, lon1: number, lat2: number, lon2: numb
 
 export default function PetSitting() {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
+
+  const inviteMessageText = "Hey! I just signed up as a pet sitter on Lumo Bites — a free platform where you can earn money sitting pets in your neighborhood. No commission ever! Check it out and create your profile: lumobites.net/petsitting";
+
+  const handleWhatsAppShare = () => {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteMessageText)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleCopyMessage = () => {
+    navigator.clipboard.writeText(inviteMessageText);
+    alert('Invitation message copied to clipboard!');
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText('lumobites.net/petsitting');
+    alert('Link copied to clipboard!');
+  };
   
   // Find Sitter State
   const [sitters, setSitters] = useState<Sitter[]>([]);
@@ -1188,6 +1205,42 @@ export default function PetSitting() {
                     <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
                       Your profile has been submitted for review. We will notify you by email within 24 hours once approved.
                     </p>
+
+                    {/* Share & Invite Section */}
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mb-8 max-w-md mx-auto text-left shadow-sm">
+                      <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                        <span>🐾</span> Know someone who'd make a great sitter? Invite them!
+                      </h4>
+                      <p className="text-xs text-[#8B7E7D] mb-4">Share Lumo Bites with your friends and help them start earning money pet sitting in their neighborhood with no commissions ever!</p>
+                      
+                      <div className="bg-white border border-[#E8DDD4] rounded-2xl p-4 mb-4 text-xs text-[#4A3E3D] font-medium leading-relaxed select-all">
+                        "Hey! I just signed up as a pet sitter on Lumo Bites — a free platform where you can earn money sitting pets in your neighborhood. No commission ever! Check it out and create your profile: lumobites.net/petsitting"
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={handleWhatsAppShare}
+                          className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>💬</span> WhatsApp
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCopyMessage}
+                          className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>📋</span> Copy Msg
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="bg-white border border-[#E8DDD4] text-[#4A3E3D] hover:bg-[#FAF6F4] font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>🔗</span> Copy Link
+                        </button>
+                      </div>
+                    </div>
                   </>
                 )}
                 {sitterApprovalStatus === 'rejected' && (
@@ -1264,6 +1317,39 @@ export default function PetSitting() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
                     </button>
+                  )}
+                  
+                  {sitterApprovalStatus !== 'pending' && (
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
+                      <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                        <span>🐾</span> Invite a Friend
+                      </h4>
+                      <p className="text-xs text-[#8B7E7D] mb-4">Know someone who'd make a great pet sitter? Invite them to join Lumo Bites!</p>
+                      
+                      <div className="grid grid-cols-1 gap-2">
+                        <button
+                          type="button"
+                          onClick={handleWhatsAppShare}
+                          className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>💬</span> Share on WhatsApp
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCopyMessage}
+                          className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>📋</span> Copy Message
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="bg-white border border-[#E8DDD4] text-[#4A3E3D] hover:bg-[#FAF6F4] font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                          <span>🔗</span> Copy Share Link
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
