@@ -7,6 +7,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import Navbar from '@/components/Navbar';
 
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    'General': 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20',
+    'Vet Recommendations': 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20',
+    'Groomers': 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20',
+    'Pet Sitters': 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20',
+    'Lost & Found': 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20',
+    'Diet & Nutrition': 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20',
+    'Parks & Activities': 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20',
+  };
+  return colors[category] || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+};
+
 export default function CityBoardPostPage() {
   const params = useParams();
   const router = useRouter();
@@ -188,15 +201,15 @@ export default function CityBoardPostPage() {
         </div>
         
         {/* OP Post */}
-        <div className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 border border-[#3B2410]/10 shadow-sm mb-8 relative">
+        <div className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl p-6 md:p-8 border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] mb-8 relative">
           {post.device_cookie === deviceCookie && (
-            <div className="absolute top-4 right-4 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-2.5 py-1 rounded-full shadow-sm">
+            <div className="absolute top-4 right-4 bg-[#3B2410] text-[#FFFDF9] text-[10px] font-black uppercase tracking-[0.15em] px-3.5 py-1 rounded-full shadow-sm">
               You
             </div>
           )}
           <div className="flex items-center gap-2 mb-5 flex-wrap">
-            <span className="text-sm font-black text-white bg-[#3B2410] px-3 py-1.5 rounded-xl shadow-sm">📍 {post.city}</span>
-            <span className="text-sm font-bold text-[#8B5E3C] bg-[#F5F0E8] px-3 py-1.5 rounded-xl border border-[#3B2410]/10">{post.category}</span>
+            <span className="text-sm font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-xl shadow-sm">📍 {post.city}</span>
+            <span className={`text-sm font-black px-3 py-1.5 rounded-xl border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
             <span className="text-sm text-[#3B2410]/50 ml-auto font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
           </div>
           <p className="text-[#3B2410] whitespace-pre-wrap text-lg md:text-xl font-medium leading-relaxed">{post.content}</p>
@@ -206,10 +219,10 @@ export default function CityBoardPostPage() {
               <button
                 onClick={() => handleMarkHelpful(post.post_id)}
                 disabled={post.voted_helpful}
-                className={`inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl border transition-all ${
+                className={`inline-flex items-center gap-1.5 text-sm px-5 py-2.5 rounded-full border shadow-sm transition-all ${
                   post.voted_helpful 
-                    ? 'bg-[#E8DDD4] text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-[#3B2410] border-[#3B2410]/10 hover:bg-[#FAF6F4] hover:shadow-sm cursor-pointer'
+                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-inner font-extrabold cursor-not-allowed'
+                    : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-bold'
                 }`}
               >
                 👍 Helpful ({post.helpful_count || 0})
@@ -219,16 +232,16 @@ export default function CityBoardPostPage() {
             <div className="flex items-center gap-4 flex-wrap">
               <button
                 onClick={() => openReportModal(post.post_id)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-red-600/70 hover:text-red-600 hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
               >
-                ⚠️ Report
+                ⚠️ Flag Post
               </button>
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
                   alert('Link copied to clipboard!');
                 }}
-                className="inline-flex items-center gap-2 text-sm font-bold text-[#8B5E3C] hover:bg-[#F5F0E8] transition-colors bg-white px-4 py-2 rounded-xl border border-[#3B2410]/10 shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                 Copy Share Link

@@ -423,32 +423,35 @@ export default function CityBoardPage() {
         ) : (
           <div className="space-y-4">
             {posts.map(post => (
-              <div key={post.id} className="bg-[#F5F0E8] rounded-3xl p-6 md:p-8 border border-[#3B2410]/20 shadow-sm hover:shadow-md transition-all relative group">
+              <div key={post.id} className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl p-6 md:p-8 border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] hover:shadow-[0_8px_30px_rgba(59,36,16,0.08)] hover:-translate-y-0.5 transition-all duration-300 relative group">
                 {post.device_cookie === deviceCookie && (
-                  <div className="absolute top-6 right-6 bg-[#3B2410] text-[#F5F0E8] text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full shadow-sm">
+                  <div className="absolute top-6 right-6 bg-[#3B2410] text-[#FFFDF9] text-[10px] uppercase tracking-[0.15em] font-black px-3.5 py-1 rounded-full shadow-sm">
                     You
                   </div>
                 )}
                 <div className="flex items-center gap-2 mb-4 flex-wrap pr-12">
-                  <span className="text-xs font-bold text-white bg-[#3B2410] px-3 py-1.5 rounded-full shadow-sm">📍 {post.city}</span>
-                  <span className={`text-xs font-bold px-3 py-1.5 rounded-full border ${getCategoryColor(post.category)}`}>{post.category}</span>
-                  <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block">ID: {post.post_id} • {formatDistanceToNow(new Date(post.created_at))} ago</span>
+                  <span className="text-xs font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-full shadow-sm">📍 {post.city}</span>
+                  <span className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
+                  <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block font-medium">ID: {post.post_id} • {formatDistanceToNow(new Date(post.created_at))} ago</span>
                 </div>
-                <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed">{post.content}</p>
+                <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed font-medium">{post.content}</p>
                 
                 <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-4 mt-2 flex-wrap gap-4">
                   <div className="flex items-center gap-3">
-                    <Link href={`/city-board/${post.post_id}`} className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] hover:text-[#3B2410]/70 transition-colors bg-white border border-[#3B2410]/10 px-4 py-2 rounded-xl hover:shadow-sm">
+                    <Link 
+                      href={`/city-board/${post.post_id}`} 
+                      className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
                       💬 {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
                     </Link>
                     
                     <button
                       onClick={() => handleMarkHelpful(post.post_id)}
                       disabled={post.voted_helpful}
-                      className={`inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl border transition-all ${
+                      className={`inline-flex items-center gap-1.5 text-sm px-5 py-2.5 rounded-full border shadow-sm transition-all ${
                         post.voted_helpful 
-                          ? 'bg-[#E8DDD4] text-gray-400 border-gray-200 cursor-not-allowed'
-                          : 'bg-white text-[#3B2410] border-[#3B2410]/10 hover:bg-[#FAF6F4] hover:shadow-sm cursor-pointer'
+                          ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-inner font-extrabold cursor-not-allowed'
+                          : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-bold'
                       }`}
                     >
                       👍 Helpful ({post.helpful_count || 0})
@@ -457,20 +460,20 @@ export default function CityBoardPage() {
                   <div className="flex items-center gap-4 flex-wrap">
                     <button
                       onClick={() => openReportModal(post.post_id)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-red-600/70 hover:text-red-600 hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
                     >
-                      ⚠️ Report
+                      ⚠️ Flag Post
                     </button>
-                    <span className="text-xs text-[#3B2410]/50 sm:hidden">{formatDistanceToNow(new Date(post.created_at))} ago</span>
+                    <span className="text-xs text-[#3B2410]/50 sm:hidden font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
                         alert('Link copied to clipboard!');
                       }}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#3B2410]/60 hover:text-[#3B2410] transition-colors p-2 rounded-xl hover:bg-white cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                       title="Copy link to post"
                     >
-                      🔗 Share
+                      🔗 Copy Link
                     </button>
                   </div>
                 </div>
