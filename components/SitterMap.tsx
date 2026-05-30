@@ -127,6 +127,10 @@ export default function SitterMap({ sitters, searchCoords, onSelectSitter }: Sit
           .addTo(map)
           .bindPopup(popup);
 
+        marker.on('click', () => {
+          onSelectSitter(sitter);
+        });
+
         marker.on('popupopen', () => {
           setTimeout(() => {
             const btn = document.getElementById(`sitter-btn-${sitter.id}`);

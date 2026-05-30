@@ -88,6 +88,7 @@ export default function PetSitting() {
   const [selectedSitterForReviews, setSelectedSitterForReviews] = useState<Sitter | null>(null);
   const [sitterReviews, setSitterReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [highlightedSitterId, setHighlightedSitterId] = useState<string | null>(null);
   
   // Request Form State
   const [reqEmail, setReqEmail] = useState('');
@@ -248,6 +249,7 @@ export default function PetSitting() {
   };
 
   const handleViewReviews = async (sitter: Sitter) => {
+    setHighlightedSitterId(sitter.id);
     setSelectedSitterForReviews(sitter);
     setReviewsModalOpen(true);
     setLoadingReviews(true);
@@ -265,6 +267,16 @@ export default function PetSitting() {
     } finally {
       setLoadingReviews(false);
     }
+  };
+
+  const handleSelectSitterFromMap = (sitter: Sitter) => {
+    handleViewReviews(sitter);
+    setTimeout(() => {
+      const el = document.getElementById(`sitter-card-${sitter.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const loadSitterProfile = async (email: string) => {
@@ -1066,11 +1078,20 @@ export default function PetSitting() {
               </div>
             ) : (
               <div className="flex flex-col lg:flex-row gap-8">
-                {/* Sitters List (Bottom on mobile, Left on desktop) */}
-                <div className="flex-1 order-2 lg:order-1">
+                {/* Sitters List (Left on desktop, Above on mobile) */}
+                <div className="flex-1 order-1 lg:order-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
-                      <div key={sitter.id} onClick={() => handleViewReviews(sitter)} className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                      <div
+                        key={sitter.id}
+                        id={`sitter-card-${sitter.id}`}
+                        onClick={() => handleViewReviews(sitter)}
+                        className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
+                          highlightedSitterId === sitter.id 
+                            ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
+                            : 'border-[#E8DDD4] shadow-sm hover:shadow-md'
+                        }`}
+                      >
                         
                         <div className="flex items-start gap-4 mb-4">
                           {sitter.photo_url ? (
@@ -1171,19 +1192,12 @@ export default function PetSitting() {
                   </div>
                 </div>
 
-                {/* Map (Top on mobile, Right on desktop) */}
-                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                {/* Map (Right on desktop, Below on mobile) */}
+                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-2 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
-                    onSelectSitter={(sitter) => {
-                      if (!isOwnerPro) {
-                        setUnlockModalOpen(true);
-                      } else {
-                        setSelectedSitter(sitter);
-                        setRequestModalOpen(true);
-                      }
-                    }}
+                    onSelectSitter={handleSelectSitterFromMap}
                   />
                 </div>
               </div>
@@ -2083,9 +2097,9 @@ export default function PetSitting() {
             <div className="p-6 border-b border-[#E8DDD4] flex items-start justify-between sticky top-0 bg-white z-10">
               <div className="flex items-start gap-4">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-20 h-20 rounded-full object-cover border-2 border-[#FAF6F4] shadow-sm flex-shrink-0" />
+                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-3xl flex-shrink-0 shadow-sm">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-4xl flex-shrink-0 shadow-md">
                     {selectedSitterForReviews.name.charAt(0)}
                   </div>
                 )}
