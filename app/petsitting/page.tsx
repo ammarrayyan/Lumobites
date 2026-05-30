@@ -1193,7 +1193,7 @@ export default function PetSitting() {
                 </div>
 
                 {/* Map (Right on desktop, Below on mobile) */}
-                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-2 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-2 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
@@ -2092,8 +2092,8 @@ export default function PetSitting() {
       {/* REVIEWS MODAL */}
       {/* REVIEWS MODAL */}
       {reviewsModalOpen && selectedSitterForReviews && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
+          <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-6 border-b border-[#E8DDD4] flex items-start justify-between sticky top-0 bg-white z-10">
               <div className="flex items-start gap-4">
                 {selectedSitterForReviews.photo_url ? (
@@ -2118,7 +2118,7 @@ export default function PetSitting() {
                       ✅ Identity Verified
                     </div>
                   )}
-
+ 
                   <div className="text-sm">
                     {selectedSitterForReviews.review_count ? (
                       <span className="text-[#D97706] font-bold">
@@ -2128,7 +2128,7 @@ export default function PetSitting() {
                       <span className="text-[#8B7E7D]">No reviews yet</span>
                     )}
                   </div>
-
+ 
                   <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
                     📍 {selectedSitterForReviews.city ? (
                       (selectedSitterForReviews.country && (
@@ -2140,7 +2140,7 @@ export default function PetSitting() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setReviewsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer flex-shrink-0">
+              <button onClick={() => setReviewsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer flex-shrink-0 text-lg font-bold">
                 ✕
               </button>
             </div>
