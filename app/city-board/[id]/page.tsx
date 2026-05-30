@@ -95,10 +95,7 @@ export default function CityBoardPostPage() {
     }
   };
 
-  // States & Modals for Helpful, Report, and Follow features
-  const [followPostId, setFollowPostId] = useState<string | null>(null);
-  const [followEmail, setFollowEmail] = useState('');
-  const [submittingFollow, setSubmittingFollow] = useState(false);
+  // States & Modals for Helpful and Report features
 
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('Spam');
@@ -127,35 +124,7 @@ export default function CityBoardPostPage() {
     }
   };
 
-  const openFollowModal = (postIdToFollow: string) => {
-    setFollowPostId(postIdToFollow);
-    setFollowEmail('');
-  };
 
-  const handleFollowSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!followPostId || !followEmail.trim()) return;
-    setSubmittingFollow(true);
-    try {
-      const res = await fetch('/api/city-board/follow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: followPostId, email: followEmail.trim() })
-      });
-      if (res.ok) {
-        alert('You are now following this post. You will receive email notifications for replies.');
-        setFollowPostId(null);
-      } else {
-        const err = await res.json();
-        alert(err.error || 'Failed to follow post');
-      }
-    } catch (e) {
-      console.error(e);
-      alert('An error occurred.');
-    } finally {
-      setSubmittingFollow(false);
-    }
-  };
 
   const openReportModal = (postIdToReport: string) => {
     setReportPostId(postIdToReport);
@@ -249,12 +218,6 @@ export default function CityBoardPostPage() {
             
             <div className="flex items-center gap-4 flex-wrap">
               <button
-                onClick={() => openFollowModal(post.post_id)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer"
-              >
-                🔔 Follow Post
-              </button>
-              <button
                 onClick={() => openReportModal(post.post_id)}
                 className="inline-flex items-center gap-1 text-xs font-bold text-red-600/70 hover:text-red-600 hover:underline cursor-pointer"
               >
@@ -338,35 +301,7 @@ export default function CityBoardPostPage() {
 
       </main>
 
-      {/* FOLLOW MODAL */}
-      {followPostId && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setFollowPostId(null)}>
-          <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setFollowPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
-            <h3 className="text-xl font-black text-[#3B2410] mb-2 flex items-center gap-2">
-              <span>🔔</span> Follow this post
-            </h3>
-            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Enter your email below. We will send you an email notification as soon as someone replies to this thread.</p>
-            <form onSubmit={handleFollowSubmit} className="space-y-4">
-              <input
-                type="email"
-                required
-                value={followEmail}
-                onChange={e => setFollowEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
-              />
-              <button
-                type="submit"
-                disabled={submittingFollow}
-                className="w-full bg-[#3B2410] hover:bg-[#3B2410]/90 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
-              >
-                {submittingFollow ? 'Following...' : 'Follow Post'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       {/* REPORT MODAL */}
       {reportPostId && (
