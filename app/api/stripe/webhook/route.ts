@@ -186,6 +186,15 @@ export async function POST(request: NextRequest) {
         }
         break;
       }
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const email = invoice.customer_email;
+        if (email) {
+          const cleanEmail = email.toLowerCase().trim();
+          console.log(`[Stripe Webhook] Invoice payment failed for email: ${cleanEmail}. Keeping PRO access active during retry period.`);
+        }
+        break;
+      }
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         // In order to find the email, we retrieve the customer from Stripe
@@ -202,12 +211,44 @@ export async function POST(request: NextRequest) {
               // Remove PRO from both owner and sitter tables
               await supabase.from('emails').update({ is_pro: false }).eq('email', cleanEmail);
               await supabase.from('sitters').update({ is_pro: false }).eq('email', cleanEmail);
-
+ 
               // Mark referral as cancelled
               await supabase.from('referred_users').update({
                 cancelled: true,
                 cancelled_date: new Date().toISOString(),
               }).eq('referred_email', cleanEmail).eq('cancelled', false);
+
+              // Check if cancelled due to payment failure
+              const isPaymentFailed = subscription.cancellation_details?.reason === 'payment_failed';
+              if (isPaymentFailed) {
+                console.log(`[Stripe Webhook] Subscription for ${cleanEmail} was cancelled due to failed payment. Sending notification email.`);
+                try {
+                  const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+                  await resend.emails.send({
+                    from: fromEmail,
+                    to: cleanEmail,
+                    subject: '⚠️ Your Lumo Bites PRO subscription was cancelled due to a payment issue',
+                    html: brandedEmail({
+                      subject: '⚠️ Lumo Bites PRO Cancellation Warning',
+                      preheader: 'Your Lumo Bites PRO subscription was cancelled due to a payment issue.',
+                      body: `
+    <h1 style="${emailStyles.h1}">Your PRO Subscription has been Cancelled</h1>
+    <p style="${emailStyles.p}">Your Lumo Bites PRO subscription was cancelled due to a payment issue. Update your payment method to restore access: <a href="https://lumobites.net/account" style="color: #8B5E3C; font-weight: bold; text-decoration: underline;">lumobites.net/account</a></p>
+    ${emailStyles.infoBox(`
+      <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">❌ <strong>Status:</strong> Cancelled (Unpaid)</p>
+      <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">⚠️ <strong>Reason:</strong> Payment failure after multiple retry attempts</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;">🔗 <strong>Action Required:</strong> Update billing details at <a href="https://lumobites.net/account" style="color: #8B5E3C; font-weight: bold;">lumobites.net/account</a></p>
+    `)}
+    ${emailStyles.button('https://lumobites.net/account', 'Update Payment Method')}
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+                    })
+                  });
+                } catch (emailErr) {
+                  console.error('[Stripe Webhook] Failed to send payment failed cancellation email:', emailErr);
+                }
+              }
             }
           }
         }
