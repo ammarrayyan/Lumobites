@@ -1990,70 +1990,177 @@ export default function PetSitting() {
       )}
 
       {/* REVIEWS MODAL */}
+      {/* REVIEWS MODAL */}
       {reviewsModalOpen && selectedSitterForReviews && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-[#E8DDD4] flex items-center justify-between sticky top-0 bg-white z-10">
-              <div className="flex items-center gap-3">
+          <div className="bg-white rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-[#E8DDD4] flex items-start justify-between sticky top-0 bg-white z-10">
+              <div className="flex items-start gap-4">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#FAF6F4]" />
+                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-20 h-20 rounded-full object-cover border-2 border-[#FAF6F4] shadow-sm flex-shrink-0" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-lg">
+                  <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-3xl flex-shrink-0 shadow-sm">
                     {selectedSitterForReviews.name.charAt(0)}
                   </div>
                 )}
                 <div>
-                  <h3 className="text-xl font-black text-[#4A3E3D]">{selectedSitterForReviews.name}</h3>
-                  <div className="text-sm mt-0.5">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="text-2xl font-black text-[#4A3E3D]">{selectedSitterForReviews.name}</h3>
+                    {selectedSitterForReviews.gender && (
+                      <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4]">
+                        {selectedSitterForReviews.gender}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {selectedSitterForReviews.approval_status === 'approved' && (
+                    <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#A7F3D0] mb-2">
+                      ✅ Identity Verified
+                    </div>
+                  )}
+
+                  <div className="text-sm">
                     {selectedSitterForReviews.review_count ? (
-                      <span className="text-[#D97706] font-bold">⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span></span>
+                      <span className="text-[#D97706] font-bold">
+                        ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
+                      </span>
                     ) : (
                       <span className="text-[#8B7E7D]">No reviews yet</span>
                     )}
                   </div>
+
+                  <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
+                    📍 {selectedSitterForReviews.city ? (
+                      (selectedSitterForReviews.country && (
+                        selectedSitterForReviews.city.toLowerCase().includes(selectedSitterForReviews.country.toLowerCase()) ||
+                        (selectedSitterForReviews.country.toLowerCase() === 'united states' && (selectedSitterForReviews.city.toLowerCase().includes('usa') || selectedSitterForReviews.city.toLowerCase().includes('u.s.a.'))) ||
+                        (selectedSitterForReviews.country.toLowerCase() === 'united kingdom' && (selectedSitterForReviews.city.toLowerCase().includes('uk') || selectedSitterForReviews.city.toLowerCase().includes('u.k.')))
+                      )) ? selectedSitterForReviews.city : `${selectedSitterForReviews.city}${selectedSitterForReviews.country ? `, ${selectedSitterForReviews.country}` : ''}`
+                    ) : ''}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setReviewsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer">
+              <button onClick={() => setReviewsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer flex-shrink-0">
                 ✕
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1 bg-[#FDFAF7]">
-              {loadingReviews ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B5E3C] mb-4"></div>
-                  <p className="text-[#8B7E7D] text-sm">Loading reviews...</p>
+            <div className="p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
+              {/* Bio Section */}
+              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider mb-2">About Me</h4>
+                <p className="text-[#555555] text-base leading-relaxed whitespace-pre-wrap">{selectedSitterForReviews.bio}</p>
+              </div>
+
+              {/* Service & Rate Details Section */}
+              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Nightly Rate</h4>
+                  <p className="text-lg font-black text-[#4A3E3D]">${selectedSitterForReviews.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span></p>
                 </div>
-              ) : sitterReviews.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="text-4xl mb-4 block">🐾</span>
-                  <p className="text-[#8B7E7D] font-medium">No reviews yet for {selectedSitterForReviews.name}.</p>
+                <div>
+                  <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pets Allowed</h4>
+                  <p className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-2.5 py-1 rounded-lg inline-block">
+                    {selectedSitterForReviews.pet_types === 'both' ? '🐶 Dogs & 🐱 Cats' : selectedSitterForReviews.pet_types === 'dog' ? '🐶 Dogs Only' : '🐱 Cats Only'}
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {sitterReviews.map(review => (
-                    <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#E8DDD4] shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-[#4A3E3D]">{review.owner_name}</span>
-                        <span className="text-xs text-[#8B7E7D]">{new Date(review.created_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex text-[#D97706] text-sm mb-3">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i}>{i < review.rating ? '★' : '☆'}</span>
-                        ))}
-                      </div>
-                      <p className="text-[#555555] text-sm leading-relaxed">{review.review_text}</p>
+              </div>
+
+              {/* Services & Availability Details */}
+              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm space-y-4">
+                {/* Service Types */}
+                {(selectedSitterForReviews.service_types?.length || 0) > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-2">Offered Services</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSitterForReviews.service_types?.map(st => (
+                        <span key={st} className="text-xs font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-xl border border-[#E8DDD4]">
+                          {st === 'Home visits' ? '🏠 Drop-in visits' : st === 'Overnight stays' ? '🌙 Overnight stays' : st === 'Dog walking' ? '🚶 Dog walking' : '🏡 Boarding'}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                )}
+
+                {/* Available Days */}
+                {(selectedSitterForReviews.available_days?.length || 0) > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Available Days</h4>
+                    <p className="text-sm text-[#4A3E3D] font-semibold">
+                      📅 {selectedSitterForReviews.available_days?.length === 7 ? 'All Week' : selectedSitterForReviews.available_days?.includes('Saturday') && selectedSitterForReviews.available_days?.includes('Sunday') && selectedSitterForReviews.available_days?.length === 2 ? 'Weekends Only' : selectedSitterForReviews.available_days?.join(', ')}
+                    </p>
+                  </div>
+                )}
+
+                {/* Available Times */}
+                {(selectedSitterForReviews.available_times?.length || 0) > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Available Times</h4>
+                    <p className="text-sm text-[#4A3E3D] font-semibold">
+                      ⏰ {selectedSitterForReviews.available_times?.join(', ')}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Reviews Section */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider px-1">
+                  Reviews ({selectedSitterForReviews.review_count || 0})
+                </h4>
+                
+                {loadingReviews ? (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B5E3C] mb-4"></div>
+                    <p className="text-[#8B7E7D] text-xs">Loading reviews...</p>
+                  </div>
+                ) : sitterReviews.length === 0 ? (
+                  <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] text-center shadow-sm">
+                    <span className="text-3xl mb-2 block">🐾</span>
+                    <p className="text-[#8B7E7D] text-sm font-medium">No reviews yet for {selectedSitterForReviews.name}.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {sitterReviews.map(review => (
+                      <div key={review.id} className="bg-white p-5 rounded-2xl border border-[#E8DDD4] shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-[#4A3E3D] text-sm">{review.owner_name}</span>
+                          <span className="text-[10px] text-[#8B7E7D]">{new Date(review.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex text-[#D97706] text-xs mb-3">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i}>{i < review.rating ? '★' : '☆'}</span>
+                          ))}
+                        </div>
+                        <p className="text-[#555555] text-xs leading-relaxed">{review.review_text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0">
-               <button 
+            
+            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0 flex gap-3">
+              <button 
                 onClick={() => setReviewsModalOpen(false)} 
-                className="w-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+                className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold px-5 py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
               >
                 Close
+              </button>
+              <button
+                onClick={() => {
+                  setReviewsModalOpen(false);
+                  if (!isOwnerPro) {
+                    setUnlockModalOpen(true);
+                  } else {
+                    setSelectedSitter(selectedSitterForReviews);
+                    setRequestModalOpen(true);
+                  }
+                }}
+                className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {!isOwnerPro && <span className="text-xs">🔒</span>}
+                <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
               </button>
             </div>
           </div>
