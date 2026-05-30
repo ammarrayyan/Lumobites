@@ -1198,6 +1198,7 @@ export default function PetSitting() {
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
                     onSelectSitter={handleSelectSitterFromMap}
+                    highlightedSitterId={highlightedSitterId}
                   />
                 </div>
               </div>
