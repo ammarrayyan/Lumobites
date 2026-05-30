@@ -8,12 +8,13 @@ import LostPetsManagement from '@/components/admin/LostPetsManagement';
 import ReviewsManagement from '@/components/admin/ReviewsManagement';
 import ReferralsManagement from '@/components/admin/ReferralsManagement';
 import CityBoardManagement from '@/components/admin/CityBoardManagement';
+import RequestsManagement from '@/components/admin/RequestsManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals' | 'city-board'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals' | 'city-board'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -108,6 +109,16 @@ export default function AdminPage() {
             Sitter Management
           </button>
           <button
+            onClick={() => setActiveTab('requests')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'requests'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Sitting Requests
+          </button>
+          <button
             onClick={() => setActiveTab('accounts')}
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'accounts'
@@ -163,6 +174,7 @@ export default function AdminPage() {
         <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 min-h-[500px]">
           {activeTab === 'stats' && <StatisticsDashboard adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'sitters' && <SitterManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'requests' && <RequestsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'accounts' && <AccountManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'lost-pets' && <LostPetsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'reviews' && <ReviewsManagement adminKey={password} onUnauthorized={handleLogout} />}
