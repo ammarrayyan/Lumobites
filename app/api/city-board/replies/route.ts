@@ -52,12 +52,13 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error;
 
-    // Send email notifications to followers in the background
+    // Send email notifications to followers in the background (limit to 1 notification per follower per post)
     try {
       const { data: followers } = await supabaseAdmin
         .from('city_board_followers')
-        .select('email')
-        .eq('post_id', post_id);
+        .select('id, email, notifications_sent')
+        .eq('post_id', post_id)
+        .or('notifications_sent.is.null,notifications_sent.lt.1');
 
       if (followers && followers.length > 0) {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
@@ -67,27 +68,27 @@ export async function POST(req: NextRequest) {
             await resend.emails.send({
               from: fromEmail,
               to: follower.email,
-              subject: '💬 New reply on followed City Board post!',
+              subject: 'Someone replied to your post on Lumo Bites City Board! 💬',
               html: brandedEmail({
-                subject: '💬 New reply on followed City Board post!',
-                preheader: 'Someone just replied to a post you are following on Lumo Bites City Board.',
+                subject: 'Someone replied to your post on Lumo Bites City Board! 💬',
+                preheader: 'Click to see the reply to your followed post on Lumo Bites City Board.',
                 body: `
-                  <h1 style="${emailStyles.h1}">New Reply! 💬</h1>
-                  <p style="${emailStyles.p}">Hi there,</p>
-                  <p style="${emailStyles.p}">Someone just posted a new reply on a post you followed (Post ID: <strong>${post_id}</strong>).</p>
+                  <h1 style="${emailStyles.h1}">Someone replied to your post! 💬</h1>
+                  <p style="${emailStyles.p}">Someone replied to your post on Lumo Bites City Board! Click below to see the reply:</p>
                   ${emailStyles.divider}
-                  ${emailStyles.highlightBox(`
-                    <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;font-style:italic;">
-                      "${content}"
-                    </p>
-                  `)}
+                  ${emailStyles.button(`https://lumobites.net/city-board/${post_id}`, 'Click to see the reply')}
                   ${emailStyles.divider}
-                  <p style="${emailStyles.p}">Click below to view the full discussion thread:</p>
-                  ${emailStyles.button(`https://lumobites.net/city-board/${post_id}`, 'View Full Thread')}
+                  <p style="${emailStyles.pSmall}">No further email notifications will be sent for this post.</p>
                   ${emailStyles.signoff}
                 `
               })
             });
+
+            // Mark notification as sent for this follower (set notifications_sent to 1)
+            await supabaseAdmin
+              .from('city_board_followers')
+              .update({ notifications_sent: 1 })
+              .eq('id', follower.id);
           } catch (emailErr) {
             console.error(`[Replies Notify] Resend error for ${follower.email}:`, emailErr);
           }
