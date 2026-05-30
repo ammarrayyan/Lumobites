@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 
 export interface MapPet {
   id: string;
@@ -23,154 +24,42 @@ interface LostPetsMapProps {
   searchCoords?: { lat: number, lng: number } | null;
 }
 
+const getMarkerIcon = (type: string, status: string) => {
+  const isLost = type === 'lost';
+  const isResolved = status === 'resolved';
+  
+  let color = '%233B82F6'; // Blue for found
+  if (isLost) color = '%23EF4444'; // Red for lost
+  if (isResolved) color = '%2310B981'; // Green for resolved
+
+  const pinSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="${color}" stroke="%23FFFFFF" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle fill="%23FFFFFF" cx="12" cy="9" r="3"/></svg>`;
+  return `data:image/svg+xml;utf-8,${pinSvg}`;
+};
+
+function MapHandler({ searchCoords }: { searchCoords?: { lat: number, lng: number } | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!map) return;
+    if (searchCoords) {
+      map.setCenter({ lat: searchCoords.lat, lng: searchCoords.lng });
+      map.setZoom(11);
+    } else {
+      map.setCenter({ lat: 39.8283, lng: -98.5795 });
+      map.setZoom(4);
+    }
+  }, [map, searchCoords]);
+  return null;
+}
+
 export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
   const router = useRouter();
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [activePet, setActivePet] = useState<MapPet | null>(null);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // Initialize map
-  useEffect(() => {
-    if (!isClient || !mapRef.current) return;
-
-    let L: any;
-    let map: any;
-
-    const initMap = async () => {
-      // Dynamically import Leaflet
-      L = (await import('leaflet')).default;
-      await import('leaflet/dist/leaflet.css');
-
-      // Fix default marker icon paths broken by webpack
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      });
-
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-
-      const defaultCenter: [number, number] = searchCoords
-        ? [searchCoords.lat, searchCoords.lng]
-        : [39.8283, -98.5795]; // Default center (USA)
-      
-      const defaultZoom = searchCoords ? 11 : 4;
-
-      map = L.map(mapRef.current!, {
-        center: defaultCenter,
-        zoom: defaultZoom,
-        zoomControl: true,
-      });
-
-      mapInstanceRef.current = map;
-
-      // OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map);
-
-      // Add markers
-      markersRef.current = [];
-      pets.forEach((pet) => {
-        if (!pet.latitude || !pet.longitude) return;
-
-        const isLost = pet.type === 'lost';
-        const isResolved = pet.status === 'resolved';
-        
-        let markerColor = '#3B82F6'; // Blue for found
-        if (isLost) markerColor = '#EF4444'; // Red for lost
-        if (isResolved) markerColor = '#10B981'; // Green for resolved
-
-        const customIcon = L.divIcon({
-          className: '',
-          html: `
-            <div style="
-              width: 32px;
-              height: 32px;
-              background: ${markerColor};
-              border: 3px solid white;
-              border-radius: 50% 50% 50% 0;
-              transform: rotate(-45deg);
-              box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            "></div>
-          `,
-          iconSize: [32, 32],
-          iconAnchor: [16, 32],
-          popupAnchor: [0, -36],
-        });
-
-        const popup = L.popup({
-          maxWidth: 220,
-          className: 'lumo-popup',
-        }).setContent(`
-          <div style="font-family: inherit; padding: 4px 2px;">
-            ${pet.photo_url ? `<img src="${pet.photo_url}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-              <div style="font-weight: 800; font-size: 15px; color: #4A3E3D; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pet.pet_name || 'Unknown Pet'}</div>
-              <span style="font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: ${markerColor}; color: white; text-transform: uppercase;">${isResolved ? 'Resolved' : pet.type}</span>
-            </div>
-            <div style="font-size: 13px; font-weight: 600; color: #8B7E7D; margin-bottom: 8px;">📍 ${pet.city}</div>
-            <button
-              id="pet-btn-${pet.id}"
-              style="
-                width: 100%;
-                background: #8B5E3C;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 8px 12px;
-                font-size: 12px;
-                font-weight: 700;
-                cursor: pointer;
-              "
-            >View Details</button>
-          </div>
-        `);
-
-        const marker = L.marker([pet.latitude, pet.longitude], { icon: customIcon })
-          .addTo(map)
-          .bindPopup(popup);
-
-        marker.on('popupopen', () => {
-          setTimeout(() => {
-            const btn = document.getElementById(`pet-btn-${pet.id}`);
-            if (btn) {
-              btn.onclick = () => {
-                window.location.href = `/lost-pets/${pet.id}`;
-              };
-            }
-          }, 100);
-        });
-
-        markersRef.current.push(marker);
-      });
-    };
-
-    initMap();
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [isClient, pets]); // Re-initialize when pets change to update markers
-
-  // Re-center map when searchCoords change
-  useEffect(() => {
-    if (!mapInstanceRef.current || !searchCoords) return;
-    mapInstanceRef.current.setView([searchCoords.lat, searchCoords.lng], 11);
-  }, [searchCoords]);
 
   if (!isClient) {
     return (
@@ -180,22 +69,101 @@ export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
     );
   }
 
+  if (!apiKey) {
+    return (
+      <div className="w-full h-full bg-[#F5EDE4] flex flex-col items-center justify-center p-6 rounded-2xl border border-[#E8D5C0] text-center">
+        <span className="text-[#8B5E3C] font-black text-base mb-1">Google Maps API Key Missing</span>
+        <span className="text-[#8B7E7D] text-xs">Please set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to render the interactive lost pets map.</span>
+      </div>
+    );
+  }
+
+  const defaultCenter = searchCoords
+    ? { lat: searchCoords.lat, lng: searchCoords.lng }
+    : { lat: 39.8283, lng: -98.5795 };
+  
+  const defaultZoom = searchCoords ? 11 : 4;
+
   return (
     <div className="w-full h-full relative rounded-2xl overflow-hidden border border-[#E8D5C0] shadow-sm">
-      <div ref={mapRef} className="w-full h-full min-h-[400px]" />
-      <style>{`
-        .lumo-popup .leaflet-popup-content-wrapper {
-          border-radius: 12px;
-          box-shadow: 0 8px 24px rgba(59,36,16,0.15);
-          border: 1px solid #E8D5C0;
-        }
-        .lumo-popup .leaflet-popup-tip {
-          background: white;
-        }
-        .leaflet-control-attribution {
-          font-size: 10px !important;
-        }
-      `}</style>
+      <APIProvider apiKey={apiKey}>
+        <Map
+          defaultCenter={defaultCenter}
+          defaultZoom={defaultZoom}
+          gestureHandling="cooperative"
+          disableDefaultUI={false}
+          className="w-full h-full"
+        >
+          <MapHandler searchCoords={searchCoords} />
+          {pets.map((pet) => {
+            if (!pet.latitude || !pet.longitude) return null;
+            return (
+              <Marker
+                key={pet.id}
+                position={{ lat: pet.latitude, lng: pet.longitude }}
+                onClick={() => setActivePet(pet)}
+                icon={{
+                  url: getMarkerIcon(pet.type, pet.status),
+                  scaledSize: { width: 32, height: 32 } as any,
+                  anchor: { x: 16, y: 32 } as any,
+                }}
+              />
+            );
+          })}
+
+          {activePet && activePet.latitude && activePet.longitude && (
+            <InfoWindow
+              position={{ lat: activePet.latitude, lng: activePet.longitude }}
+              onCloseClick={() => setActivePet(null)}
+            >
+              <div style={{ fontFamily: 'inherit', padding: '4px 2px', maxWidth: 200 }}>
+                {activePet.photo_url && (
+                  <img
+                    src={activePet.photo_url}
+                    alt={activePet.pet_name}
+                    style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }}
+                  />
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: '#3B2410', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
+                    {activePet.pet_name || 'Unknown Pet'}
+                  </div>
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    background: activePet.status === 'resolved' ? '#10B981' : activePet.type === 'lost' ? '#EF4444' : '#3B82F6',
+                    color: 'white',
+                    textTransform: 'uppercase'
+                  }}>
+                    {activePet.status === 'resolved' ? 'Resolved' : activePet.type}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#4A3E3D', marginBottom: 8 }}>
+                  📍 {activePet.city}
+                </div>
+                <button
+                  onClick={() => router.push(`/lost-pets/${activePet.id}`)}
+                  style={{
+                    width: '100%',
+                    background: '#8B5E3C',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  View Details
+                </button>
+              </div>
+            </InfoWindow>
+          )}
+        </Map>
+      </APIProvider>
     </div>
   );
 }
