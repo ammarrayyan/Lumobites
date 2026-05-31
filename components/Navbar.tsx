@@ -281,11 +281,6 @@ export default function Navbar() {
             Pet Twin
           </Link>
 
-          {/* Earn / Affiliate */}
-          <Link href="/affiliate" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
-            <span className="text-[14px] leading-none mr-1.5">💰</span>
-            Earn
-          </Link>
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
             
@@ -549,14 +544,7 @@ export default function Navbar() {
               </svg>
               Pet Twin
             </Link>
-            <Link 
-              href="/affiliate" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-[16px] leading-none mr-2.5">💰</span>
-              Earn
-            </Link>
+
             
             {isPro && (
               <div className="mt-2 pt-2 border-t border-gray-100 flex flex-col gap-1 animate-fade-in">
