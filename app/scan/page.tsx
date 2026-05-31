@@ -1395,6 +1395,16 @@ export default function ScanPage() {
                       >
                         Already subscribed? Restore subscription
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUpgradeModal(false);
+                          window.dispatchEvent(new Event('lumo-open-signin'));
+                        }}
+                        className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer mt-0.5"
+                      >
+                        Already a member? Sign in here
+                      </button>
                       <span className="text-[11px] text-gray-400 text-center">
                         Come back tomorrow for your free scan
                       </span>
@@ -1440,6 +1450,20 @@ export default function ScanPage() {
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                         ) : 'Proceed to Checkout 🚀'}
                       </button>
+                      
+                      <p className="text-[11px] text-gray-400 text-center mt-2">
+                        Already a member?{" "}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowUpgradeModal(false);
+                            window.dispatchEvent(new Event('lumo-open-signin'));
+                          }}
+                          className="text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
+                        >
+                          Sign in here
+                        </button>
+                      </p>
                     </form>
 
                     <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">

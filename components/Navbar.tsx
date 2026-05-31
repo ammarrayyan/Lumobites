@@ -83,9 +83,15 @@ export default function Navbar() {
       });
     }
 
+    const handleOpenSignIn = () => {
+      setShowSignInModal(true);
+    };
+    window.addEventListener('lumo-open-signin', handleOpenSignIn);
+
     return () => {
       window.removeEventListener('lumo-pro-update', syncStatus);
       window.removeEventListener('storage', syncStatus);
+      window.removeEventListener('lumo-open-signin', handleOpenSignIn);
     };
   }, []);
 
@@ -297,6 +303,14 @@ export default function Navbar() {
                         <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
                         <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                       </button>
+                      <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
+                        <button
+                          onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
+                          className="text-[11px] text-gray-400 hover:text-[#8B5E3C] font-bold transition-all bg-transparent border-none cursor-pointer"
+                        >
+                          Already a member? <span className="underline">Sign in here</span>
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
@@ -386,6 +400,14 @@ export default function Navbar() {
                       <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
                       <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                     </button>
+                    <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
+                      <button
+                        onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
+                        className="text-[11px] text-gray-400 hover:text-[#8B5E3C] font-bold transition-all bg-transparent border-none cursor-pointer"
+                      >
+                        Already a member? <span className="underline">Sign in here</span>
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
