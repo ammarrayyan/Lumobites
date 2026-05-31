@@ -135,10 +135,11 @@ export async function GET(req: NextRequest) {
     const formattedShares = data.map((post: any) => {
       try {
         const payload = JSON.parse(post.content);
+        const { email, removal_token, ...safePayload } = payload;
         return {
           id: post.post_id,
           created_at: post.created_at,
-          ...payload
+          ...safePayload
         };
       } catch (e) {
         return null;
