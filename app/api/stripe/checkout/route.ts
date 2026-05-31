@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { supabase } from '@/lib/supabase';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -18,6 +19,27 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required to checkout.' }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Check if the user is already a PRO member to prevent duplicate subscriptions
+    if (cleanEmail === 'premierpetnutritionllc@gmail.com') {
+      return NextResponse.json({ isPro: true });
+    }
+
+    const { data: existingUser, error: dbError } = await supabase
+      .from('emails')
+      .select('is_pro')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (dbError) {
+      console.error('[Stripe Checkout API] Supabase check error:', dbError);
+    }
+
+    if (existingUser?.is_pro) {
+      return NextResponse.json({ isPro: true });
     }
 
     // 1. Get or create product
