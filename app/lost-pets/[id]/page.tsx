@@ -201,7 +201,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         <div className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm mb-12">
           <div className="flex flex-col md:flex-row">
             {/* Photo Gallery Column */}
-            <div className="md:w-1/2 relative bg-[#FAF6F4] flex flex-col justify-between border-r border-[#E8DDD4] min-h-[350px] md:min-h-[450px]">
+            <div className="md:w-[58%] relative bg-[#FAF6F4] flex flex-col justify-between border-r border-[#E8DDD4] min-h-[400px] md:min-h-[550px]">
               
               {/* Main Image Slideshow Container */}
               <div 
@@ -220,7 +220,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   <img 
                     src={photosList[activePhotoIndex]} 
                     alt={`${pet.pet_name || 'Pet'} - Image ${activePhotoIndex + 1}`} 
-                    className="w-full h-full object-contain max-h-[400px] transition-all duration-300"
+                    className="w-full h-full object-contain max-h-[500px] transition-all duration-300"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo Available</div>
@@ -290,7 +290,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
             </div>
 
             {/* Details Column */}
-            <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
+            <div className="md:w-[42%] p-8 md:p-10 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-black text-[#4A3E3D]">{pet.pet_name || 'Unknown Pet'}</h1>
                 <span className="text-sm font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-3 py-1 rounded-lg capitalize">

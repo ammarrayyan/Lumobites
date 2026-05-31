@@ -12,7 +12,7 @@ export default function LostPetsPreview() {
   useEffect(() => {
     const fetchPets = async () => {
       try {
-        const res = await fetch('/api/lost-pets?status=active');
+        const res = await fetch('/api/lost-pets');
         const data = await res.json();
         
         if (res.ok) {
@@ -91,12 +91,18 @@ export default function LostPetsPreview() {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xl">📷</div>
                       )}
-                      <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${pet.pet_type === 'lost' ? 'bg-red-500' : 'bg-blue-500'}`}></span>
+                      <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                        pet.status === 'resolved' ? 'bg-green-500' :
+                        pet.pet_type === 'lost' ? 'bg-red-500' : 'bg-blue-500'
+                      }`}></span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${pet.pet_type === 'lost' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                          {pet.pet_type}
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          pet.status === 'resolved' ? 'bg-green-50 text-green-600' :
+                          pet.pet_type === 'lost' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                        }`}>
+                          {pet.status === 'resolved' ? 'Resolved 🎉' : pet.pet_type}
                         </span>
                         <h4 className="font-bold text-[#191919] text-sm truncate">{pet.pet_name || 'Unknown'}</h4>
                       </div>
