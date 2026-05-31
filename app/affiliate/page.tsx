@@ -66,6 +66,9 @@ export default function AffiliateSignupPage() {
           <p className="text-base text-gray-500 leading-relaxed">
             Share your love for Lumo Bites and get paid for it! Earn <strong className="text-gray-700">$1.00 every single month</strong> for every PRO member you bring in — for as long as they stay subscribed.
           </p>
+          <p className="text-xs text-gray-400 leading-relaxed italic font-bold">
+            💵 Payouts are sent via PayPal once you reach $50 in earnings.
+          </p>
 
           <div className="pt-4 space-y-4 text-left hidden lg:block">
             <div className="flex items-start gap-3.5">
@@ -86,7 +89,7 @@ export default function AffiliateSignupPage() {
               <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm">💰</div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">3. Earn Monthly Residuals</h4>
-                <p className="text-xs text-gray-400 leading-normal mt-0.5">Earn recurring commissions paid out monthly directly to your PayPal account.</p>
+                <p className="text-xs text-gray-400 leading-normal mt-0.5">Earn recurring commissions. Payouts are sent via PayPal once you reach $50 in earnings.</p>
               </div>
             </div>
           </div>
@@ -122,7 +125,7 @@ export default function AffiliateSignupPage() {
                   Join our affiliate program
                 </h3>
                 <p className="text-xs text-gray-400 mt-1 leading-normal">
-                  Fill out the form below. Our team reviews all applications to ensure high-quality partnerships.
+                  Fill out the form below. Payouts are sent via PayPal once you reach $50 in earnings.
                 </p>
               </div>
 

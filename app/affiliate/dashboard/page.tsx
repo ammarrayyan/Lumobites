@@ -406,6 +406,56 @@ export default function AffiliateDashboard() {
 
               </div>
 
+              {/* Payout Progress Section */}
+              <div className="bg-white border border-[#EEEEEE] p-6 rounded-3xl shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div>
+                    <h3 className="font-[900] text-[#191919] text-base flex items-center gap-2">
+                      💵 Payout Progress Tracker
+                    </h3>
+                    <p className="text-xs text-gray-400">
+                      Payouts are automatically processed once you reach the minimum threshold of **$50.00** in earnings.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-gray-400 uppercase">Current Unpaid: </span>
+                    <span className="text-base font-[950] text-[#8B5E3C]">${stats.unpaidBalance.toFixed(2)}</span>
+                    <span className="text-xs text-gray-400"> / $50.00</span>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                {(() => {
+                  const balance = stats.unpaidBalance || 0;
+                  const threshold = 50.00;
+                  const percent = Math.min(100, (balance / threshold) * 100);
+                  const remaining = Math.max(0, threshold - balance);
+
+                  return (
+                    <div className="space-y-2">
+                      <div className="w-full bg-[#FAF6F4] rounded-full h-3 border border-[#E8DDD4] overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-[#8B5E3C] to-[#a3704c] h-full rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        {remaining > 0 ? (
+                          <span className="text-amber-700 font-bold">
+                            ⚠️ You need <strong className="text-amber-800">${remaining.toFixed(2)} more</strong> to reach your next payout!
+                          </span>
+                        ) : (
+                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            🎉 Eligible for next payout! You have reached the minimum threshold.
+                          </span>
+                        )}
+                        <span className="text-gray-400 font-bold">{percent.toFixed(0)}% complete</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
               {/* Referrals Breakdown Directory */}
               <div className="bg-white border border-[#EEEEEE] rounded-3xl shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-[#F5EDE4] flex justify-between items-center bg-[#FDFAF7]">

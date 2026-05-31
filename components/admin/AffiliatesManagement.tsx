@@ -351,9 +351,12 @@ export default function AffiliatesManagement({ adminKey, onUnauthorized }: Affil
                         </>
                       )}
                       
-                      {affiliate.status === 'approved' && (
+                      {affiliate.status === 'approved' && (affiliate.stats?.unpaidBalance || 0) >= 50 && (
                         <button
-                          onClick={() => setPayModalAffiliate(affiliate)}
+                          onClick={() => {
+                            setPayModalAffiliate(affiliate);
+                            setPaymentAmount((affiliate.stats?.unpaidBalance || 0).toFixed(2));
+                          }}
                           className="bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] hover:opacity-90 text-black text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-0.5"
                         >
                           <DollarSign size={12} /> Pay
