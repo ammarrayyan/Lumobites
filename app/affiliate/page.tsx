@@ -29,8 +29,9 @@ export default function AffiliateSignupPage() {
     if (val.trim()) setEmailError(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
+    if (loading) return;
     
     let hasError = false;
     if (!fullName.trim()) {
@@ -68,14 +69,20 @@ export default function AffiliateSignupPage() {
         }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Server returned an invalid response. Please try again.');
+      }
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to submit application.');
       }
 
       setSubmitted(true);
     } catch (err: any) {
-      console.error(err);
+      console.error('[Affiliate Form]', err);
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -264,6 +271,7 @@ export default function AffiliateSignupPage() {
               <button
                 type="submit"
                 disabled={loading}
+                onClick={handleSubmit}
                 className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
