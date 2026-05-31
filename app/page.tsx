@@ -7,6 +7,7 @@ import BrandMarquee from '@/components/BrandMarquee';
 import Navbar from '@/components/Navbar';
 import LostPetsPreview from '@/components/LostPetsPreview';
 import PetSittingPreview from '@/components/PetSittingPreview';
+import CityBoardPreview from '@/components/CityBoardPreview';
 
 export default function Home() {
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
@@ -206,6 +207,9 @@ export default function Home() {
 
       {/* PET SITTING PREVIEW SECTION */}
       <PetSittingPreview />
+
+      {/* CITY BOARD PREVIEW SECTION */}
+      <CityBoardPreview />
 
       {/* STATS BAR */}
       <section className="w-full bg-[#F5EDE4] border-y border-[#E8D5C0] py-5">
