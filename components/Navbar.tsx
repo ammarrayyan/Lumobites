@@ -280,6 +280,12 @@ export default function Navbar() {
             </svg>
             Pet Twin
           </Link>
+
+          {/* Earn / Affiliate */}
+          <Link href="/affiliate" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
+            <span className="text-[14px] leading-none mr-1.5">💰</span>
+            Earn
+          </Link>
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
             
@@ -556,6 +562,14 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
               </svg>
               Pet Twin
+            </Link>
+            <Link 
+              href="/affiliate" 
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="text-[16px] leading-none mr-2.5">💰</span>
+              Earn
             </Link>
             
             {isPro && (

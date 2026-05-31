@@ -90,11 +90,19 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
       {/* FOOTER */}
       <footer className="bg-[#191919] py-16 px-6 text-center text-white">
         <div className="max-w-[800px] mx-auto">
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <img src="/Logo.png" alt="Lumo Bites" className="h-12 invert brightness-0" />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              <img src="/Logo.png" alt="Lumo Bites" className="h-12 invert brightness-0" />
+              <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+            </div>
+          </Link>
+          <p className="text-gray-500 text-sm mb-6 mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Finding the best for your pets.</p>
+          <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-400">
+            <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
+            <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>
+            <Link href="/chat" className="hover:text-white transition-colors">Find Food</Link>
+            <Link href="/affiliate" className="hover:text-white transition-colors">Affiliate Program</Link>
           </div>
-          <p className="text-gray-500 text-sm mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Finding the best for your pets.</p>
         </div>
       </footer>
     </div>

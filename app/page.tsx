@@ -305,6 +305,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AFFILIATE SECTION */}
+      <section className="w-full py-16 px-6 text-center border-t border-[#E8D5C0]" style={{ backgroundColor: '#FAF6F4' }}>
+        <div className="max-w-[700px] mx-auto flex flex-col items-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
+            🐾 Public Affiliate Program
+          </div>
+          <h2 className="font-[900] text-[#191919] tracking-[-0.02em] leading-tight mb-4 animate-fade-in" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
+            Earn money sharing Lumo Bites 🐾
+          </h2>
+          <p className="text-gray-600 mb-8 max-w-[540px] leading-relaxed text-sm md:text-base">
+            Join our affiliate program and earn <strong className="text-[#8B5E3C]">$1 for every PRO member</strong> you refer — every month they stay subscribed. Payouts via PayPal once you reach $50.
+          </p>
+          <Link
+            href="/affiliate"
+            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:scale-[1.02] hover:shadow-lg transition-all text-sm cursor-pointer"
+            style={{ textDecoration: 'none' }}
+          >
+            Apply Now &rarr;
+          </Link>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', maxWidth: '1200px', margin: '0 auto', marginBottom: '48px' }}>
@@ -337,6 +359,7 @@ export default function Home() {
             <ul className="space-y-3 text-sm" style={{ color: '#AAAAAA', listStyle: 'none', padding: 0, margin: 0 }}>
               <li><Link href="/contact" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Help Center</Link></li>
               <li><Link href="/contact" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Contact Us</Link></li>
+              <li><Link href="/affiliate" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Affiliate Program</Link></li>
             </ul>
           </div>
           <div style={{ flex: '1 1 150px' }}>

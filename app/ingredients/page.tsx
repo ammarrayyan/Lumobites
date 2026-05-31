@@ -272,11 +272,12 @@ export default function IngredientsPage() {
             <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
           </div>
         </Link>
-        <p className="text-gray-500 text-sm mb-4 mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Every pet deserves safe food.</p>
-        <div className="flex justify-center gap-6 text-sm font-bold text-gray-400">
+        <p className="text-gray-500 text-sm mb-6 mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Every pet deserves safe food.</p>
+        <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-400">
           <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
           <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>
           <Link href="/chat" className="hover:text-white transition-colors">Find Food</Link>
+          <Link href="/affiliate" className="hover:text-white transition-colors">Affiliate Program</Link>
         </div>
       </footer>
     </div>
