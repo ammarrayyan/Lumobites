@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         promotion_method,
         bio,
         status: 'pending',
+        referral_code: 'pending-' + Math.floor(100000 + Math.random() * 900000).toString(),
       });
 
     if (insertError) throw insertError;

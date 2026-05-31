@@ -15,9 +15,42 @@ export default function AffiliateSignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  // Field-specific validation errors
+  const [fullNameError, setFullNameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+
+  const handleFullNameChange = (val: string) => {
+    setFullName(val);
+    if (val.trim()) setFullNameError(false);
+  };
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    if (val.trim()) setEmailError(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) return;
+    
+    let hasError = false;
+    if (!fullName.trim()) {
+      setFullNameError(true);
+      hasError = true;
+    } else {
+      setFullNameError(false);
+    }
+
+    if (!email.trim()) {
+      setEmailError(true);
+      hasError = true;
+    } else {
+      setEmailError(false);
+    }
+
+    if (hasError) {
+      setError('Please fill in all required fields.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -105,11 +138,14 @@ export default function AffiliateSignupPage() {
                 Application Submitted!
               </h2>
               <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-5 text-left text-xs text-gray-500 leading-relaxed max-w-[360px]">
-                <p className="mb-2">Your application has been received and is currently under review by our team.</p>
-                <p>We review applications within 24-48 hours. You will receive an email at <strong>{email.toLowerCase()}</strong> once your application has been processed.</p>
+                <p className="mb-2 font-bold text-[#8B5E3C]">
+                  Thank you for applying! We will review your application and get back to you within 48 hours. Check your email for confirmation.
+                </p>
+                <p className="mt-2">Your application has been received and is currently under review by our team.</p>
+                <p className="mt-1">We review applications within 24-48 hours. You will receive an email at <strong>{email.toLowerCase()}</strong> once your application has been processed.</p>
               </div>
               <p className="text-xs text-gray-400 mt-2 font-medium">
-                Thank you for partner with Lumo Bites! 🐾
+                Thank you for partnering with Lumo Bites! 🐾
               </p>
               <Link
                 href="/"
@@ -119,7 +155,7 @@ export default function AffiliateSignupPage() {
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
               <div>
                 <h3 className="text-xl font-[950] text-[#191919] tracking-tight">
                   Join our affiliate program
@@ -137,12 +173,20 @@ export default function AffiliateSignupPage() {
                   <input
                     type="text"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => handleFullNameChange(e.target.value)}
                     placeholder="Jane Doe"
-                    required
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
+                    className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 text-sm text-[#191919] bg-white transition-all disabled:opacity-50 ${
+                      fullNameError 
+                        ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' 
+                        : 'border-[#E8DDD4] focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C]'
+                    }`}
                   />
+                  {fullNameError && (
+                    <span className="text-[10px] text-red-500 font-semibold mt-0.5">
+                      ⚠️ Full name is required
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -152,12 +196,20 @@ export default function AffiliateSignupPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => handleEmailChange(e.target.value)}
                     placeholder="jane@example.com"
-                    required
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
+                    className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 text-sm text-[#191919] bg-white transition-all disabled:opacity-50 ${
+                      emailError 
+                        ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' 
+                        : 'border-[#E8DDD4] focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C]'
+                    }`}
                   />
+                  {emailError && (
+                    <span className="text-[10px] text-red-500 font-semibold mt-0.5">
+                      ⚠️ Email address is required
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -211,11 +263,14 @@ export default function AffiliateSignupPage() {
 
               <button
                 type="submit"
-                disabled={loading || !fullName.trim() || !email.trim()}
+                disabled={loading}
                 className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Submitting...</span>
+                  </div>
                 ) : 'Submit Application →'}
               </button>
 
