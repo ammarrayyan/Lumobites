@@ -136,13 +136,12 @@ export default function PetTwinPreview() {
             >
               Find Your Twin &rarr;
             </NextLink>
-            <NextLink 
-              href="/twin" 
-              className="bg-white hover:bg-[#F5EDE4] border-2 border-[#E8DDD4] text-[#4A3E3D] font-bold py-3 px-6 rounded-xl transition-all shadow-sm text-center text-decoration-none"
-              style={{ textDecoration: 'none' }}
+            <button
+              onClick={() => setExpanded(true)}
+              className="bg-white hover:bg-[#F5EDE4] border-2 border-[#E8DDD4] text-[#4A3E3D] font-bold py-3 px-6 rounded-xl transition-all shadow-sm text-center cursor-pointer"
             >
-              View Full Gallery &rarr;
-            </NextLink>
+              See All Matches &rarr;
+            </button>
           </div>
         </div>
 
