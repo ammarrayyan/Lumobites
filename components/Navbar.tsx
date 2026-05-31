@@ -323,14 +323,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {!isSignedIn ? (
-              <button
-                onClick={() => setShowSignInModal(true)}
-                className="text-[#666666] hover:text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-full border border-transparent hover:border-[#E8D5C0] hover:bg-[#FDF9F5] transition-all"
-              >
-                Sign In
-              </button>
-            ) : (
+            {isSignedIn && (
               <div className="relative">
                 <button
                   onClick={() => setShowProMenu(!showProMenu)}
@@ -420,14 +413,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {!isSignedIn ? (
-            <button
-              onClick={() => setShowSignInModal(true)}
-              className="text-[#666666] hover:text-[#8B5E3C] text-[11px] font-bold px-2 py-1.5 rounded-full transition-all"
-            >
-              Sign In
-            </button>
-          ) : (
+          {isSignedIn && (
             <div className="relative">
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
