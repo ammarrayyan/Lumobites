@@ -17,6 +17,7 @@ export default function Navbar() {
   const [signInCode, setSignInCode] = useState('');
   const [signInError, setSignInError] = useState('');
   const [signInLoading, setSignInLoading] = useState(false);
+  const [alreadyProMsg, setAlreadyProMsg] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
 
   const syncStatus = () => {
@@ -125,6 +126,15 @@ export default function Navbar() {
         body: JSON.stringify({ email: email.trim() })
       });
       const data = await res.json();
+      if (data.isPro) {
+        setShowUpgradeMenu(false);
+        setSignInEmail(email.trim());
+        setSignInError('');
+        setAlreadyProMsg(true);
+        setSignInStep('email');
+        setShowSignInModal(true);
+        return;
+      }
       if (data.url) window.location.href = data.url;
     } catch (e) {
       alert('Checkout failed. Please try again.');
@@ -578,7 +588,7 @@ export default function Navbar() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
             <button 
-              onClick={() => { setShowSignInModal(false); setSignInStep('email'); setSignInError(''); }}
+              onClick={() => { setShowSignInModal(false); setSignInStep('email'); setSignInError(''); setAlreadyProMsg(false); }}
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -590,6 +600,13 @@ export default function Navbar() {
             <p className="text-center text-[#666666] text-sm mb-6">
               {signInStep === 'email' ? 'Enter your email to access your account.' : `We sent a code to ${signInEmail}`}
             </p>
+
+            {alreadyProMsg && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-center">
+                <p className="text-green-700 font-bold text-sm mb-1">✅ You are already a PRO member!</p>
+                <p className="text-green-600 text-xs">Sign in below to access your account.</p>
+              </div>
+            )}
 
             {signInError && (
               <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center">
