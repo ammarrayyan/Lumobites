@@ -26,7 +26,7 @@ export default function PostLostPet() {
   const [dateLostFound, setDateLostFound] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   const handleLocationBlur = async () => {
     const input = locationInput.trim();
@@ -82,12 +82,22 @@ export default function PostLostPet() {
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (photoUrls.length + files.length > 5) {
+      setError('You can upload up to 5 photos total.');
+      return;
+    }
+
+    setError('');
+
+    files.forEach(file => {
       if (file.size > 5 * 1024 * 1024) {
-        setError('Photo must be under 5MB');
+        setError('Each photo must be under 5MB');
         return;
       }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new window.Image();
@@ -106,12 +116,13 @@ export default function PostLostPet() {
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
-          setPhotoUrl(canvas.toDataURL('image/jpeg', 0.8));
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
+          setPhotoUrls(prev => [...prev, base64].slice(0, 5));
         };
         img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,8 +133,8 @@ export default function PostLostPet() {
     const finalLat = selectedLocation ? selectedLocation.lat : null;
     const finalLng = selectedLocation ? selectedLocation.lng : null;
 
-    if (!photoUrl) {
-      setError('A photo is required so others can identify the pet.');
+    if (photoUrls.length === 0) {
+      setError('At least one photo is required so others can identify the pet.');
       return;
     }
     if (!contactEmail) {
@@ -144,7 +155,7 @@ export default function PostLostPet() {
           type, species, pet_name: petName, description,
           city: finalCity, zip_code: zipCode, date_lost_found: dateLostFound,
           contact_email: contactEmail, contact_phone: contactPhone,
-          photo_url: photoUrl,
+          photo_urls: photoUrls,
           latitude: finalLat, longitude: finalLng
         })
       });
@@ -290,14 +301,38 @@ export default function PostLostPet() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pet Photo <span className="text-red-500">*Required</span></label>
-                <div className="flex items-center gap-4 p-4 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4]">
-                  {photoUrl ? (
-                    <img src={photoUrl} alt="Preview" className="w-24 h-24 rounded-lg object-cover shadow-sm border border-[#E8DDD4]" />
-                  ) : (
-                    <div className="w-24 h-24 rounded-lg bg-[#E8DDD4] flex items-center justify-center text-3xl">📷</div>
+                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pet Photos (up to 5) <span className="text-red-500">*At least 1 required</span></label>
+                <div className="flex flex-col gap-4 p-4 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4]">
+                  {photoUrls.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      {photoUrls.map((url, index) => (
+                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-[#E8DDD4] bg-white shadow-sm group">
+                          <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setPhotoUrls(prev => prev.filter((_, i) => i !== index))}
+                            className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-black text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all shadow-md cursor-pointer hover:scale-105"
+                            title="Remove photo"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <input required type="file" accept="image/*" onChange={handlePhotoUpload} className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-white file:text-[#8B5E3C] file:border file:border-[#E8DDD4] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" />
+                  <div>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      multiple 
+                      onChange={handlePhotoUpload} 
+                      disabled={photoUrls.length >= 5}
+                      className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-white file:text-[#8B5E3C] file:border file:border-[#E8DDD4] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <p className="text-[11px] text-[#8B7E7D] mt-2 font-medium">
+                      Select up to 5 photos. You have added {photoUrls.length}/5 photos.
+                    </p>
+                  </div>
                 </div>
               </div>
 

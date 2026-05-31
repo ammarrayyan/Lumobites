@@ -185,9 +185,9 @@ export default function LostPetsFeed() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {pets.map((pet) => (
               <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
-                <div className="relative h-64 overflow-hidden bg-gray-100">
+                <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                   {pet.photo_url ? (
-                    <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" />
+                    <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
                   )}

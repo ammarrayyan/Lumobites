@@ -24,6 +24,30 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [editToken, setEditToken] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent, photosLength: number) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    if (diff > 50) {
+      setActivePhotoIndex(prev => (prev + 1) % photosLength);
+    } else if (diff < -50) {
+      setActivePhotoIndex(prev => (prev - 1 + photosLength) % photosLength);
+    }
+    setTouchStart(null);
+  };
+
+  const photosList = pet?.photos || (pet?.photo_url ? [pet.photo_url] : []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('token')) {
@@ -176,21 +200,93 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
         <div className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm mb-12">
           <div className="flex flex-col md:flex-row">
-            {/* Photo Column */}
-            <div className="md:w-1/2 relative bg-gray-100 min-h-[300px]">
-              {pet.photo_url ? (
-                <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover absolute inset-0" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 absolute inset-0">No Photo</div>
-              )}
-              <div className="absolute top-4 left-4">
-                <span className={`px-4 py-2 rounded-full text-sm font-black tracking-wider uppercase shadow-lg ${
-                  pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                  pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                }`}>
-                  {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
-                </span>
+            {/* Photo Gallery Column */}
+            <div className="md:w-1/2 relative bg-[#FAF6F4] flex flex-col justify-between border-r border-[#E8DDD4] min-h-[350px] md:min-h-[450px]">
+              
+              {/* Main Image Slideshow Container */}
+              <div 
+                className="flex-1 relative flex items-center justify-center overflow-hidden cursor-pointer"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, photosList.length)}
+                onClick={() => {
+                  if (photosList.length > 0) {
+                    setLightboxIndex(activePhotoIndex);
+                    setLightboxOpen(true);
+                  }
+                }}
+                title="Click to zoom in"
+              >
+                {photosList.length > 0 ? (
+                  <img 
+                    src={photosList[activePhotoIndex]} 
+                    alt={`${pet.pet_name || 'Pet'} - Image ${activePhotoIndex + 1}`} 
+                    className="w-full h-full object-contain max-h-[400px] transition-all duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo Available</div>
+                )}
+
+                {/* Left/Right Click Navs */}
+                {photosList.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex(prev => (prev - 1 + photosList.length) % photosList.length);
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-lg transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                    >
+                      &#8249;
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex(prev => (prev + 1) % photosList.length);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-lg transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                    >
+                      &#8250;
+                    </button>
+                  </>
+                )}
+
+                {/* Badge Overlay */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className={`px-4 py-2 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
+                    pet.status === 'resolved' ? 'bg-green-500 text-white' :
+                    pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                  }`}>
+                    {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
+                  </span>
+                </div>
+
+                {/* Click to Zoom indicator */}
+                {photosList.length > 0 && (
+                  <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide uppercase flex items-center gap-1 shadow-sm transition-all hover:bg-black">
+                    🔍 Click to Zoom
+                  </div>
+                )}
               </div>
+
+              {/* Gallery Thumbnails List */}
+              {photosList.length > 1 && (
+                <div className="p-4 bg-white border-t border-[#E8DDD4] flex justify-center gap-2 overflow-x-auto">
+                  {photosList.map((url: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setActivePhotoIndex(index)}
+                      className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                        activePhotoIndex === index ? 'border-[#8B5E3C] scale-105 shadow-sm' : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
             </div>
 
             {/* Details Column */}
@@ -305,6 +401,56 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           </div>
         </div>
       </main>
+
+      {/* Lightbox / Zoom Overlay */}
+      {lightboxOpen && photosList.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-4 animate-fade-in"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-6 right-6 text-white/80 hover:text-white text-4xl font-bold transition-colors cursor-pointer bg-white/10 hover:bg-white/20 rounded-full w-12 h-12 flex items-center justify-center border border-white/10"
+            title="Close Lightbox"
+          >
+            &times;
+          </button>
+
+          {/* Lightbox Main Image */}
+          <div className="relative max-w-4xl max-h-[80vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={photosList[lightboxIndex]} 
+              alt={`Zoomed Pet ${lightboxIndex + 1}`} 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-scale-up"
+            />
+
+            {/* Lightbox Navigation Arrows */}
+            {photosList.length > 1 && (
+              <>
+                <button
+                  onClick={() => setLightboxIndex(prev => (prev - 1 + photosList.length) % photosList.length)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center font-bold text-3xl transition-all cursor-pointer border border-white/5"
+                >
+                  &#8249;
+                </button>
+                <button
+                  onClick={() => setLightboxIndex(prev => (prev + 1) % photosList.length)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center font-bold text-3xl transition-all cursor-pointer border border-white/5"
+                >
+                  &#8250;
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Indicator Info */}
+          <div className="text-white/60 text-sm font-semibold mt-4">
+            Photo {lightboxIndex + 1} of {photosList.length}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

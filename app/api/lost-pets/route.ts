@@ -47,14 +47,45 @@ export async function GET(request: NextRequest) {
       return R * c;
     };
 
-    // Filter out the edit_token from public responses, and calculate distance if lat/lng are provided
+    // Filter out the edit_token from public responses, calculate distance, and format photos
     let sanitizedData = data.map(pet => {
       const { edit_token, pet_type, ...safePet } = pet;
       let distance = null;
       if (lat !== null && lng !== null && pet.latitude && pet.longitude) {
         distance = getDistanceInMiles(lat, lng, pet.latitude, pet.longitude);
       }
-      return { ...safePet, type: pet_type, distance };
+
+      // Format photos array with fallback parsing
+      let photos = pet.photos;
+      let cleanDesc = pet.description;
+      
+      if (!Array.isArray(photos) || photos.length === 0) {
+        if (pet.description && pet.description.startsWith('{"photos":')) {
+          try {
+            const dividerIndex = pet.description.indexOf(' || ');
+            if (dividerIndex !== -1) {
+              const jsonStr = pet.description.substring(0, dividerIndex);
+              const payload = JSON.parse(jsonStr);
+              if (Array.isArray(payload.photos)) {
+                photos = payload.photos;
+              }
+              cleanDesc = pet.description.substring(dividerIndex + 4);
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!Array.isArray(photos) || photos.length === 0) {
+        photos = pet.photo_url ? [pet.photo_url] : [];
+      }
+
+      return { 
+        ...safePet, 
+        type: pet_type, 
+        distance,
+        photos,
+        description: cleanDesc
+      };
     });
 
     if (lat !== null && lng !== null && radius) {
@@ -73,73 +104,118 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('[Lost Pets POST] Received body:', { ...body, photo_url: body.photo_url ? '[TRUNCATED_BASE64]' : undefined });
+    console.log('[Lost Pets POST] Received body elements...');
     
     const {
-      type, pet_name, species, photo_url, description,
+      type, pet_name, species, photo_url, photo_urls, description,
       city, zip_code, contact_email, contact_phone, date_lost_found,
       latitude, longitude
     } = body;
 
-    if (!type || !species || !photo_url || !description || !city || (!contact_email && !contact_phone)) {
+    // Parse incoming photo targets: supports single and array formats
+    const incomingUrls = Array.isArray(photo_urls)
+      ? photo_urls
+      : photo_url 
+        ? [photo_url]
+        : [];
+
+    if (!type || !species || incomingUrls.length === 0 || !description || !city || (!contact_email && !contact_phone)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Upload photo if base64
-    let finalPhotoUrl = photo_url;
-    if (photo_url && photo_url.startsWith('data:image/')) {
-      try {
-        const matches = photo_url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-          const base64Data = matches[2];
-          const buffer = Buffer.from(base64Data, 'base64');
-          
-          const fileName = `lost_${Date.now()}_${randomUUID()}.${fileExt}`;
-          
-          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-            .from('lost-pets')
-            .upload(fileName, buffer, {
-              contentType: `image/${matches[1]}`,
-              upsert: true
-            });
+    // 1. Upload all base64 photos to lost-pets bucket
+    const finalPhotoUrls: string[] = [];
+    for (const url of incomingUrls) {
+      if (url && url.startsWith('data:image/')) {
+        try {
+          const matches = url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+          if (matches && matches.length === 3) {
+            const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+            const base64Data = matches[2];
+            const buffer = Buffer.from(base64Data, 'base64');
+            const fileName = `lost_${Date.now()}_${randomUUID()}.${fileExt}`;
             
-          if (uploadError) throw uploadError;
-          
-          const { data: publicUrlData } = supabaseAdmin.storage
-            .from('lost-pets')
-            .getPublicUrl(fileName);
+            const { error: uploadError } = await supabaseAdmin.storage
+              .from('lost-pets')
+              .upload(fileName, buffer, {
+                contentType: `image/${matches[1]}`,
+                upsert: true
+              });
+              
+            if (uploadError) throw uploadError;
             
-          finalPhotoUrl = publicUrlData.publicUrl;
+            const { data: publicUrlData } = supabaseAdmin.storage
+              .from('lost-pets')
+              .getPublicUrl(fileName);
+              
+            finalPhotoUrls.push(publicUrlData.publicUrl);
+          }
+        } catch (uploadEx) {
+          console.error('[Lost Pets] Failed to upload photo:', uploadEx);
+          throw uploadEx;
         }
-      } catch (uploadEx) {
-        console.error('[Lost Pets] Failed to upload photo:', uploadEx);
-        throw uploadEx;
+      } else if (url) {
+        finalPhotoUrls.push(url);
       }
     }
 
     // 2. Generate edit token
     const editToken = randomUUID();
 
-    // 3. Insert into DB
-    const { data, error } = await supabaseAdmin.from('lost_pets').insert({
-      pet_type: type,
-      pet_name,
-      species,
-      photo_url: finalPhotoUrl,
-      description,
-      city,
-      zip_code,
-      latitude,
-      longitude,
-      contact_email: contact_email || null,
-      contact_phone: contact_phone || null,
-      date_lost_found,
-      status: 'active',
-      edit_token: editToken
-    }).select().single();
+    // 3. Insert into DB with self-healing fallback
+    let data = null;
+    let dbError = null;
 
-    if (error) throw error;
+    try {
+      const response = await supabaseAdmin.from('lost_pets').insert({
+        pet_type: type,
+        pet_name,
+        species,
+        photo_url: finalPhotoUrls[0] || '',
+        photos: finalPhotoUrls,
+        description,
+        city,
+        zip_code,
+        latitude,
+        longitude,
+        contact_email: contact_email || null,
+        contact_phone: contact_phone || null,
+        date_lost_found,
+        status: 'active',
+        edit_token: editToken
+      }).select().single();
+      
+      data = response.data;
+      dbError = response.error;
+    } catch (err) {
+      dbError = err;
+    }
+
+    // Fallback: Store the array inside the description field if native photos column is not in DB yet
+    if (dbError) {
+      console.log('📦 Supabase direct photos column failed. Falling back to structured description encoding...');
+      const encodedDesc = JSON.stringify({ photos: finalPhotoUrls }) + ' || ' + description;
+      
+      const response = await supabaseAdmin.from('lost_pets').insert({
+        pet_type: type,
+        pet_name,
+        species,
+        photo_url: finalPhotoUrls[0] || '',
+        description: encodedDesc,
+        city,
+        zip_code,
+        latitude,
+        longitude,
+        contact_email: contact_email || null,
+        contact_phone: contact_phone || null,
+        date_lost_found,
+        status: 'active',
+        edit_token: editToken
+      }).select().single();
+      
+      if (response.error) throw response.error;
+      data = response.data;
+    }
 
     // 4. Send email if provided
     if (contact_email && process.env.RESEND_API_KEY) {
@@ -153,7 +229,6 @@ export async function POST(request: NextRequest) {
       try {
         const textContent = `Your post for ${pet_name || 'them'} has been shared!\n\nUse the links below to manage your post. Please do not share these secure links.\n\nManage Your Post:\nMark as Resolved: ${manageUrl}\nDelete My Post: ${manageUrl}\n\nYou can also manage your post directly on its page by visiting this secure link: ${siteUrl}/lost-pets/${data.id}?token=${editToken}`;
 
-        // Instantiate resend locally to ensure process.env.RESEND_API_KEY is available
         const localResend = new Resend(process.env.RESEND_API_KEY);
 
         const resendResponse = await localResend.emails.send({
@@ -174,19 +249,41 @@ export async function POST(request: NextRequest) {
         });
         
         console.log('[Lost Pets POST] Resend called, response:', JSON.stringify(resendResponse, null, 2));
-        
-        if (resendResponse?.error) {
-           console.error('[Lost Pets POST] Resend returned an error object:', resendResponse.error);
-        }
       } catch (emailError) {
         console.error('[Lost Pets POST] Resend threw an exception:', emailError);
       }
-    } else {
-      console.log(`[Lost Pets POST] Not sending email. Has contact_email: ${!!contact_email}, Has RESEND_API_KEY: ${!!process.env.RESEND_API_KEY}`);
     }
 
     const { edit_token, pet_type, ...safePet } = data;
-    return NextResponse.json({ pet: { ...safePet, type: pet_type } });
+    
+    // Parse formatting for immediate response
+    let finalPhotos = data.photos;
+    let finalDesc = data.description;
+    if (!Array.isArray(finalPhotos) || finalPhotos.length === 0) {
+      if (data.description && data.description.startsWith('{"photos":')) {
+        try {
+          const dividerIndex = data.description.indexOf(' || ');
+          if (dividerIndex !== -1) {
+            const jsonStr = data.description.substring(0, dividerIndex);
+            const payload = JSON.parse(jsonStr);
+            finalPhotos = payload.photos;
+            finalDesc = data.description.substring(dividerIndex + 4);
+          }
+        } catch (e) {}
+      }
+    }
+    if (!Array.isArray(finalPhotos) || finalPhotos.length === 0) {
+      finalPhotos = data.photo_url ? [data.photo_url] : [];
+    }
+
+    return NextResponse.json({ 
+      pet: { 
+        ...safePet, 
+        type: pet_type,
+        photos: finalPhotos,
+        description: finalDesc
+      } 
+    });
   } catch (err: any) {
     console.error('[Lost Pets POST]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
