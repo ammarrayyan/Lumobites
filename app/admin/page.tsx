@@ -9,12 +9,13 @@ import ReviewsManagement from '@/components/admin/ReviewsManagement';
 import ReferralsManagement from '@/components/admin/ReferralsManagement';
 import CityBoardManagement from '@/components/admin/CityBoardManagement';
 import RequestsManagement from '@/components/admin/RequestsManagement';
+import TwinGalleryManagement from '@/components/admin/TwinGalleryManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals' | 'city-board'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'referrals' | 'city-board' | 'twin-gallery'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -168,6 +169,16 @@ export default function AdminPage() {
           >
             City Board
           </button>
+          <button
+            onClick={() => setActiveTab('twin-gallery')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'twin-gallery'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Pet Twin Gallery
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -180,6 +191,7 @@ export default function AdminPage() {
           {activeTab === 'reviews' && <ReviewsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'referrals' && <ReferralsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'city-board' && <CityBoardManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'twin-gallery' && <TwinGalleryManagement adminKey={password} onUnauthorized={handleLogout} />}
         </div>
       </div>
     </div>
