@@ -203,6 +203,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PET TWIN PREVIEW SECTION */}
+      <PetTwinPreview />
+
       {/* LOST PETS PREVIEW SECTION */}
       <LostPetsPreview />
 
@@ -211,9 +214,6 @@ export default function Home() {
 
       {/* CITY BOARD PREVIEW SECTION */}
       <CityBoardPreview />
-
-      {/* PET TWIN PREVIEW SECTION */}
-      <PetTwinPreview />
 
       {/* STATS BAR */}
       <section className="w-full bg-[#F5EDE4] border-y border-[#E8D5C0] py-5">
