@@ -35,6 +35,7 @@ export default function TwinPage() {
   const [isSharing, setIsSharing] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [agreedToShare, setAgreedToShare] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
   const [publicShareStatus, setPublicShareStatus] = useState<'idle' | 'sharing' | 'shared' | 'error'>('idle');
 
   // States for email capture modal
@@ -507,7 +508,8 @@ export default function TwinPage() {
           petPhoto: result.unsplashImageUrl,
           matchScore: result.matchScore,
           traits: result.traits,
-          quote: result.quote
+          quote: result.quote,
+          email: shareEmail
         })
       });
 
@@ -1252,8 +1254,8 @@ export default function TwinPage() {
                       checked={agreedToShare}
                       onChange={(e) => {
                         setAgreedToShare(e.target.checked);
-                        if (e.target.checked) {
-                          handlePublicShare();
+                        if (!e.target.checked) {
+                          setPublicShareStatus('idle');
                         }
                       }}
                       disabled={publicShareStatus === 'shared' || publicShareStatus === 'sharing'}
@@ -1268,6 +1270,32 @@ export default function TwinPage() {
                       </p>
                     </div>
                   </div>
+
+                  {agreedToShare && publicShareStatus !== 'shared' && (
+                    <div className="mt-1.5 flex flex-col gap-2 pl-7.5 animate-fade-in w-full">
+                      <label className="text-[11px] font-bold text-[#666] leading-relaxed">
+                        Email (optional) — we'll send you a link to remove your result anytime
+                      </label>
+                      <div className="flex gap-2 w-full">
+                        <input
+                          type="email"
+                          value={shareEmail}
+                          onChange={(e) => setShareEmail(e.target.value)}
+                          disabled={publicShareStatus === 'sharing'}
+                          placeholder="your@email.com"
+                          className="flex-1 bg-white border border-[#D9C0A8] rounded-xl px-3 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/10 transition-all"
+                        />
+                        <button
+                          onClick={() => handlePublicShare()}
+                          disabled={publicShareStatus === 'sharing'}
+                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer disabled:bg-gray-400 flex items-center gap-1 shrink-0"
+                        >
+                          {publicShareStatus === 'sharing' ? 'Sharing...' : 'Share Now 🐾'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {publicShareStatus === 'sharing' && (
                     <p className="text-xs text-[#8B5E3C] font-semibold animate-pulse flex items-center gap-1.5 pl-7">
                       <span className="w-3.5 h-3.5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
@@ -1309,6 +1337,7 @@ export default function TwinPage() {
                       setPreviewUrl(null);
                       setImageError(false);
                       setAgreedToShare(false);
+                      setShareEmail('');
                       setPublicShareStatus('idle');
                       setStep('upload');
                     }}
