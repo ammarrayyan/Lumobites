@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
     
     if (category && category !== 'All') {
       query = query.eq('category', category);
+    } else {
+      query = query.neq('category', 'Pet Twin');
     }
 
     if (postId) {

@@ -34,6 +34,8 @@ export default function TwinPage() {
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [agreedToShare, setAgreedToShare] = useState(false);
+  const [publicShareStatus, setPublicShareStatus] = useState<'idle' | 'sharing' | 'shared' | 'error'>('idle');
 
   // States for email capture modal
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -478,6 +480,48 @@ export default function TwinPage() {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handlePublicShare = async (forceSharedState = false) => {
+    if (!result) return;
+    setPublicShareStatus('sharing');
+    try {
+      let base64Photo = '';
+      if (file) {
+        base64Photo = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const res = await fetch('/api/twin/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userPhoto: base64Photo,
+          petBreed: result.breed,
+          petType: result.petType,
+          petPhoto: result.unsplashImageUrl,
+          matchScore: result.matchScore,
+          traits: result.traits,
+          quote: result.quote
+        })
+      });
+
+      if (res.ok) {
+        setPublicShareStatus('shared');
+        setAgreedToShare(true);
+      } else {
+        setPublicShareStatus('error');
+        setAgreedToShare(false);
+      }
+    } catch (err) {
+      console.error('Failed to share publicly:', err);
+      setPublicShareStatus('error');
+      setAgreedToShare(false);
     }
   };
 
@@ -1199,6 +1243,49 @@ export default function TwinPage() {
                   </div>
                 </div>
 
+                {/* Public Gallery Opt-In Share Card */}
+                <div className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 flex flex-col gap-3 text-left mb-2">
+                  <div className="flex items-start gap-3">
+                    <input 
+                      type="checkbox"
+                      id="share-gallery-optin"
+                      checked={agreedToShare}
+                      onChange={(e) => {
+                        setAgreedToShare(e.target.checked);
+                        if (e.target.checked) {
+                          handlePublicShare();
+                        }
+                      }}
+                      disabled={publicShareStatus === 'shared' || publicShareStatus === 'sharing'}
+                      className="mt-1 w-4.5 h-4.5 rounded border-[#D9C0A8] text-[#8B5E3C] focus:ring-[#8B5E3C]/20 cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="share-gallery-optin" className="text-sm font-bold text-[#4A3E3D] cursor-pointer">
+                        Share on Lumo Bites Public Gallery 🐾
+                      </label>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                        Optional: Tick this box to share your selfie and matched pet twin in our public directory for other pet lovers to see!
+                      </p>
+                    </div>
+                  </div>
+                  {publicShareStatus === 'sharing' && (
+                    <p className="text-xs text-[#8B5E3C] font-semibold animate-pulse flex items-center gap-1.5 pl-7">
+                      <span className="w-3.5 h-3.5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+                      Posting to public gallery...
+                    </p>
+                  )}
+                  {publicShareStatus === 'shared' && (
+                    <p className="text-xs text-emerald-600 font-bold flex items-center gap-1 pl-7">
+                      ✅ Shared successfully! Thank you for sharing your pet twin!
+                    </p>
+                  )}
+                  {publicShareStatus === 'error' && (
+                    <p className="text-xs text-red-500 font-semibold pl-7">
+                      ❌ Failed to share. Please check your connection and try again.
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex gap-3 w-full">
                   <button 
                     onClick={shareMyTwin}
@@ -1221,6 +1308,8 @@ export default function TwinPage() {
                       setFile(null);
                       setPreviewUrl(null);
                       setImageError(false);
+                      setAgreedToShare(false);
+                      setPublicShareStatus('idle');
                       setStep('upload');
                     }}
                     className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer"
