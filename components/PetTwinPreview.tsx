@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import { Sparkles, Lock, Mail, AlertTriangle } from 'lucide-react';
 
 interface SharedTwin {
   id: string;
@@ -122,8 +123,8 @@ export default function PetTwinPreview() {
           <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-4">
             AI Pet Twin Matcher
           </div>
-          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4">
-            ✨ Discover Your Perfect Pet Twin Match
+          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2 flex-wrap">
+            <Sparkles className="w-8 h-8 text-amber-500 shrink-0" /> Discover Your Perfect Pet Twin Match
           </h2>
           <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Upload a selfie to find which dog or cat breed matches your personality and facial features. Check out real matches shared by our community!
@@ -262,13 +263,13 @@ export default function PetTwinPreview() {
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🔐</span>
+              <Lock className="w-8 h-8 text-[#8B5E3C] shrink-0" />
               <h3 className="text-xl font-black text-[#4A3E3D]">Remove My Result</h3>
             </div>
 
             {removeStatus === 'success' ? (
               <div className="text-center py-4">
-                <span className="text-5xl mb-3 block">📩</span>
+                <Mail className="w-12 h-12 text-[#8B5E3C] mx-auto mb-3" />
                 <p className="text-sm text-emerald-600 font-bold mb-4">{removeMessage}</p>
                 <p className="text-xs text-[#8B7E7D] leading-relaxed mb-6">
                   We've sent a secure deletion link to your email. Click the link in that email to permanently remove your result from the gallery.
@@ -287,8 +288,8 @@ export default function PetTwinPreview() {
                 </p>
 
                 {removeStatus === 'error' && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-semibold p-3 rounded-xl">
-                    ⚠️ {removeMessage}
+                  <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-semibold p-3 rounded-xl flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> {removeMessage}
                   </div>
                 )}
 
@@ -325,7 +326,9 @@ export default function PetTwinPreview() {
                         Verifying...
                       </>
                     ) : (
-                      'Send Link 📩'
+                      <span className="flex items-center gap-1.5">
+                        Send Link <Mail className="w-4 h-4" />
+                      </span>
                     )}
                   </button>
                 </div>

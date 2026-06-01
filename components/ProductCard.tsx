@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { ScoredProduct } from '@/lib/types';
+import { Sparkles, ShoppingCart, Footprints, MapPin, DollarSign } from 'lucide-react';
 
 export default function ProductCard({ product, profile }: { product: ScoredProduct, profile?: any }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -82,14 +83,14 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
       </div>
       
       <div style={{ marginBottom: '16px' }}>
-         <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
-             <p style={{ fontSize: 'var(--text-desc)', color: '#78350F', fontWeight: 500, margin: 0, lineHeight: 1.4 }}>✨ {whyText}</p>
-             {product.budget_relaxed && (
-               <p style={{ fontSize: 'var(--text-small)', color: '#92400E', fontWeight: 700, margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                 <span style={{ fontSize: 'var(--text-desc)' }}>💰</span> Slightly above your budget
-               </p>
-             )}
-         </div>
+          <div style={{ backgroundColor: '#FEF3C7', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
+              <p style={{ fontSize: 'var(--text-desc)', color: '#78350F', fontWeight: 500, margin: 0, lineHeight: 1.4, display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles className="w-4 h-4 text-amber-600 shrink-0" /> {whyText}</p>
+              {product.budget_relaxed && (
+                <p style={{ fontSize: 'var(--text-small)', color: '#92400E', fontWeight: 700, margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <DollarSign className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Slightly above your budget
+                </p>
+              )}
+          </div>
         
         <div style={{ fontSize: 'var(--text-desc)', color: '#555555' }}>
           <p style={{ margin: '0 0 4px 0' }}><span style={{ fontWeight: 600, color: '#191919' }}>Key Ingredients:</span> <span>{product.ingredients.split(',').slice(0,3).join(', ')}</span></p>
@@ -126,9 +127,9 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
             <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#191919', marginBottom: '2px', paddingRight: '24px', margin: 0 }}>Where to buy</h3>
             <p style={{ fontSize: 'var(--text-small)', color: '#888888', marginBottom: '20px', marginTop: '2px', margin: 0 }}>{product.brand} - {product.product_name}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
-              <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
-              <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
+              <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><ShoppingCart className="w-4 h-4 shrink-0" /> Amazon</a>
+              <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><Footprints className="w-4 h-4 shrink-0" /> Chewy</a>
+              <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: 'var(--text-btn)', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}><MapPin className="w-4 h-4 shrink-0" /> Find a store near me</a>
             </div>
           </div>
         </div>
