@@ -52,7 +52,7 @@ export default function TwinPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [verifyingSession, setVerifyingSession] = useState(false);
-  const [modalStep, setModalStep] = useState<'paywall' | 'upgrade_email' | 'restore_email' | 'verification'>('paywall');
+  const [modalStep, setModalStep] = useState<'paywall' | 'upgrade_email' | 'restore_email' | 'verification' | 'already_pro'>('paywall');
   const [verificationCode, setVerificationCode] = useState('');
 
   const [cameraActive, setCameraActive] = useState(false);
@@ -293,7 +293,10 @@ export default function TwinPage() {
         throw new Error(data.error || 'Failed to create checkout session');
       }
       
-      if (data.url) {
+      if (data.isPro) {
+        setModalStep('already_pro');
+        setModalLoading(false);
+      } else if (data.url) {
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL returned');
@@ -1538,6 +1541,46 @@ export default function TwinPage() {
                         className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
                       >
                         Restore subscription
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {modalStep === 'already_pro' && (
+                  <>
+                    <div className="text-left mt-2 flex flex-col items-center text-center">
+                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] text-2xl mb-3">
+                        🐾
+                      </div>
+                      <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Pro Membership Found</h4>
+                      <p className="text-sm text-gray-600 font-medium max-w-sm mb-4">
+                        We found an active PRO subscription for <strong>{modalEmail}</strong>. You don't need to purchase another subscription!
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUpgradeModal(false);
+                          window.dispatchEvent(new Event('lumo-open-signin'));
+                        }}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        Sign in to Your Pro Account 🐾
+                      </button>
+                    </div>
+
+                    <div className="flex justify-center items-center mt-4 border-t border-gray-150/40 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModalStep('upgrade_email');
+                          setModalMessage(null);
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Back
                       </button>
                     </div>
                   </>

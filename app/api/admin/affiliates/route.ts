@@ -244,16 +244,34 @@ export async function POST(req: NextRequest) {
       }
 
     } else if (action === 'mark-paid') {
-      const paymentAmount = Number(amount || 0);
-      if (isNaN(paymentAmount) || paymentAmount <= 0) {
-        return NextResponse.json({ error: 'Valid payment amount is required.' }, { status: 400 });
+      let allTimeEarnings = 0;
+      if (affiliate.referral_code) {
+        const { data: referrer } = await supabaseAdmin
+          .from('referrers')
+          .select('id')
+          .eq('code', affiliate.referral_code)
+          .maybeSingle();
+
+        if (referrer) {
+          const { data: referredUsers } = await supabaseAdmin
+            .from('referred_users')
+            .select('*')
+            .eq('referrer_id', referrer.id);
+
+          if (referredUsers) {
+            const subscribedUsers = referredUsers.filter((u: any) => u.subscribed);
+            subscribedUsers.forEach((u: any) => {
+              const months = Number(u.active_months || 1);
+              allTimeEarnings += months * 1.0;
+            });
+          }
+        }
       }
 
-      const currentPaid = Number(affiliate.total_paid || 0);
       const { error: updateError } = await supabaseAdmin
         .from('affiliates')
         .update({
-          total_paid: currentPaid + paymentAmount
+          total_paid: allTimeEarnings
         })
         .eq('id', affiliateId);
 
