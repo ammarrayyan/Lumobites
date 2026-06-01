@@ -6,7 +6,7 @@ export default function TermsPage() {
         <Navbar />
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '8px', color: '#191919' }}>Terms of Service</h1>
-          <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: May 23, 2026</p>
+          <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: June 1, 2026</p>
           
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>1. Acceptance of Terms</h2>
           <p className="mt-2">By signing up or using Lumo Bites, you agree to abide by these Terms of Service.</p>
@@ -18,7 +18,7 @@ export default function TermsPage() {
           <p className="mt-2">While Lumo Bites conducts basic government-issued ID verification for pet sitters, we do not perform criminal background checks, background screenings, or reference checks on pet sitters or pet owners. Sitters and owners interact entirely at their own risk. It is the responsibility of both parties to vet each other appropriately.</p>
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Membership Fees & Refunds</h2>
-          <p className="mt-2">Membership and subscription fees (including Lumo Bites PRO and Lumo Sitter Pro) are non-refundable after 7 days from the initial charge date.</p>
+          <p className="mt-2">Membership and subscription fees (including Lumo Bites PRO and Lumo Sitter Pro) are non-refundable. However, upon cancellation, members retain full access to all PRO features until the end of their current billing period. No partial refunds are issued for unused days within a billing cycle.</p>
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. Account Removal</h2>
           <p className="mt-2">We reserve the right to suspend or permanently remove any profile or account that violates our standards, engages in fraudulent activity, or demonstrates unsafe behavior, at our sole discretion.</p>
@@ -58,6 +58,9 @@ export default function TermsPage() {
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Changes to Terms</h2>
           <p className="mt-2">We reserve the right to update these Terms at any time. Users will be notified of significant changes via email. Continued use after changes constitutes acceptance.</p>
+          
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>18. Data Collection & Cookies</h2>
+          <p className="mt-2">Lumo Bites collects personal information including email addresses and government-issued ID documents as described in our Privacy Policy. By using the platform you consent to this data collection. For full details visit <a href="/privacy" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>lumobites.net/privacy</a>.</p>
         </div>
       </div>
     );
