@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import { HelpCircle, Star, Footprints, MessageSquare, Megaphone, MapPin, ThumbsUp } from 'lucide-react';
 
 interface CityPostPreview {
   post_id: string;
@@ -70,10 +71,14 @@ export default function CityBoardPreview() {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Question': return '❓';
-      case 'Recommendation': return '⭐';
-      case 'Lost Pet': return '🐾';
-      default: return '💬';
+      case 'Question':
+        return <HelpCircle className="w-5 h-5 text-blue-500" />;
+      case 'Recommendation':
+        return <Star className="w-5 h-5 text-amber-500 fill-amber-500" />;
+      case 'Lost Pet':
+        return <Footprints className="w-5 h-5 text-rose-500" />;
+      default:
+        return <MessageSquare className="w-5 h-5 text-[#8B5E3C]" />;
     }
   };
 
@@ -95,8 +100,8 @@ export default function CityBoardPreview() {
           <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-4">
             City Discussion Board
           </div>
-          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4">
-            📢 Join Your Local Neighborhood Discussion
+          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2.5">
+            <Megaphone className="w-8 h-8 text-[#8B5E3C] flex-shrink-0" /> Join Your Local Neighborhood Discussion
           </h2>
           <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Connect with local pet lovers in your area. Ask questions, get advice, share recommendations, report sightings of lost pets, and participate in community discussions.
@@ -142,7 +147,7 @@ export default function CityBoardPreview() {
               <div className="space-y-4">
                 {posts.map(post => (
                   <NextLink href={`/city-board/${post.post_id}`} key={post.post_id} className="flex gap-4 items-start group text-decoration-none" style={{ textDecoration: 'none' }}>
-                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                       {getCategoryIcon(post.category)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -150,15 +155,17 @@ export default function CityBoardPreview() {
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getCategoryColor(post.category)}`}>
                           {post.category}
                         </span>
-                        <span className="text-[#8B7E7D] text-xs font-semibold">
-                          📍 {post.city}
+                        <span className="text-[#8B7E7D] text-xs font-semibold flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#8B7E7D]" /> {post.city}
                         </span>
                       </div>
                       <p className="text-sm font-bold text-[#191919] leading-tight truncate group-hover:text-[#8B5E3C] transition-colors mb-1">
                         {post.content}
                       </p>
-                      <p className="text-xs text-[#8B7E7D] font-medium">
-                        👍 {post.helpful_count || 0} helpful &bull; 💬 {post.reply_count || 0} {post.reply_count === 1 ? 'reply' : 'replies'}
+                      <p className="text-xs text-[#8B7E7D] font-medium flex items-center gap-1.5 flex-wrap">
+                        <ThumbsUp className="w-3 h-3 text-[#8B7E7D]" /> {post.helpful_count || 0} helpful
+                        <span>&bull;</span>
+                        <MessageSquare className="w-3 h-3 text-[#8B7E7D]" /> {post.reply_count || 0} {post.reply_count === 1 ? 'reply' : 'replies'}
                       </p>
                     </div>
                   </NextLink>

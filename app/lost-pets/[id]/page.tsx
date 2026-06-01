@@ -4,6 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { Search, MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
 
 export default function LostPetDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -264,8 +265,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
                 {/* Click to Zoom indicator */}
                 {photosList.length > 0 && (
-                  <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide uppercase flex items-center gap-1 shadow-sm transition-all hover:bg-black">
-                    🔍 Click to Zoom
+                  <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide uppercase flex items-center gap-1.5 shadow-sm transition-all hover:bg-black">
+                    <Search className="w-3.5 h-3.5 text-white" /> Click to Zoom
                   </div>
                 )}
               </div>
@@ -299,7 +300,10 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
               </div>
               
               <div className="flex items-center gap-2 text-[#8B7E7D] font-medium mb-6">
-                <span>📍 {pet.city}, {pet.zip_code}</span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  {pet.city}, {pet.zip_code}
+                </span>
                 <span>•</span>
                 <span>{pet.type === 'lost' ? 'Lost on' : 'Found on'}: {new Date(pet.date_lost_found).toLocaleDateString()}</span>
               </div>
@@ -317,13 +321,24 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                         onClick={() => setShowContact(true)}
                         className="w-full bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold py-4 rounded-xl transition-all shadow-md text-lg flex items-center justify-center gap-2"
                       >
-                        <span className="text-xl">📞</span> Contact {pet.type === 'lost' ? 'Owner' : 'Finder'}
+                        <Phone className="w-5 h-5 text-white" /> Contact {pet.type === 'lost' ? 'Owner' : 'Finder'}
                       </button>
                     ) : (
                       <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-center animate-fade-in">
                         <h4 className="font-bold text-blue-900 mb-2">Contact Info</h4>
-                        {pet.contact_phone && <p className="text-blue-800 text-lg font-bold mb-1">📞 {pet.contact_phone}</p>}
-                        {pet.contact_email && <p className="text-blue-800 text-lg font-bold">✉️ <a href={`mailto:${pet.contact_email}`} className="hover:underline">{pet.contact_email}</a></p>}
+                        {pet.contact_phone && (
+                          <p className="text-blue-800 text-lg font-bold mb-1 flex items-center justify-center gap-1.5">
+                            <Phone className="w-4 h-4 text-blue-800" /> {pet.contact_phone}
+                          </p>
+                        )}
+                        {pet.contact_email && (
+                          <p className="text-blue-800 text-lg font-bold flex items-center justify-center gap-1.5">
+                            <Mail className="w-4 h-4 text-blue-800" />{' '}
+                            <a href={`mailto:${pet.contact_email}`} className="hover:underline">
+                              {pet.contact_email}
+                            </a>
+                          </p>
+                        )}
                       </div>
                     )}
                   </>
@@ -333,13 +348,13 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   onClick={handleShare}
                   className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-4 rounded-xl transition-all text-lg flex items-center justify-center gap-2"
                 >
-                  <span className="text-xl">🔗</span> {copied ? 'Link Copied!' : 'Share this post'}
+                  <Share2 className="w-5 h-5 text-[#8B5E3C]" /> {copied ? 'Link Copied!' : 'Share this post'}
                 </button>
 
                 {editToken && (
                   <div className="mt-6 border-t border-[#E8DDD4] pt-6">
                     <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
-                      <span className="text-lg">⚙️</span> Manage Your Post
+                      <Settings className="w-5 h-5 text-gray-500" /> Manage Your Post
                     </h4>
                     <div className="flex flex-col gap-3">
                       {pet.status === 'active' && (

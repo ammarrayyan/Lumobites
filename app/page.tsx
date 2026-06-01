@@ -9,6 +9,7 @@ import LostPetsPreview from '@/components/LostPetsPreview';
 import PetSittingPreview from '@/components/PetSittingPreview';
 import CityBoardPreview from '@/components/CityBoardPreview';
 import PetTwinPreview from '@/components/PetTwinPreview';
+import { Star, Home as HomeIcon, Utensils, Footprints, Target, Search, AlertTriangle, Sparkles, ShoppingBag } from 'lucide-react';
 
 export default function Home() {
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
@@ -130,12 +131,12 @@ export default function Home() {
           
           {/* 1. Pet Sitting */}
           <div className="bg-[#F5EDE4] border-2 border-[#8B5E3C] rounded-3xl p-6 flex flex-col gap-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm">
-              ⭐ Most Popular
+            <div className="absolute top-0 right-0 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm flex items-center gap-1">
+              <Star className="w-3 h-3 text-white fill-white" /> Most Popular
             </div>
             <div className="flex items-center gap-3 relative z-10 mt-2">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                <span className="text-[#8B5E3C] text-2xl leading-none">🏠</span>
+                <HomeIcon className="w-6 h-6 text-[#8B5E3C]" />
               </div>
               <h3 className="text-[#191919] font-bold text-xl">Pet Sitting</h3>
             </div>
@@ -148,12 +149,12 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
+ 
           {/* 2. Pet Food & Safety */}
           <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                <span className="text-[#8B5E3C] text-2xl leading-none">🍽️</span>
+                <Utensils className="w-6 h-6 text-[#8B5E3C]" />
               </div>
               <h3 className="text-[#191919] font-bold text-xl">Pet Food & Safety</h3>
             </div>
@@ -172,12 +173,12 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
+ 
           {/* 3. Pet Community */}
           <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                <span className="text-[#8B5E3C] text-2xl leading-none">🐾</span>
+                <Footprints className="w-6 h-6 text-[#8B5E3C]" />
               </div>
               <h3 className="text-[#191919] font-bold text-xl">Pet Community</h3>
             </div>
@@ -255,41 +256,41 @@ export default function Home() {
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🎯</span>
+              <Target className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">Matched to your pet</h3>
               <p className="text-[#666666] text-base leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🔍</span>
+              <Search className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">Ingredient Safety Check</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>⚠️</span>
+              <AlertTriangle className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts, no spam.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>✨</span>
+              <Sparkles className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <span style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🛍️</span>
+              <ShoppingBag className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
               <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet's needs.</p>
             </div>
             <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
-              <span className="relative z-10" style={{ fontSize: '36px', lineHeight: 1, marginBottom: '20px', display: 'block' }}>🏡</span>
+              <HomeIcon className="w-9 h-9 text-[#8B5E3C] mb-5 relative z-10" />
               <h3 className="text-[#191919] font-bold text-xl mb-2 relative z-10">Sitting & Community</h3>
               <p className="text-[#666666] text-base leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
             </Link>
           </div>
         </div>
       </section>
-
+ 
       {/* REMOVED COMING SOON SECTION */}
-
+ 
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
         <div className="max-w-[700px] mx-auto">
@@ -304,12 +305,12 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
+ 
       {/* AFFILIATE SECTION */}
       <section className="w-full py-16 px-6 text-center border-t border-[#E8D5C0]" style={{ backgroundColor: '#FAF6F4' }}>
         <div className="max-w-[700px] mx-auto flex flex-col items-center">
           <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
-            🐾 Public Affiliate Program
+            <Footprints className="w-3.5 h-3.5" /> Public Affiliate Program
           </div>
           <h2 className="font-[900] text-[#191919] tracking-[-0.02em] leading-tight mb-4 animate-fade-in" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
             Earn money sharing Lumo Bites 🐾

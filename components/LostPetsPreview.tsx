@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
+import { Footprints, Camera, MapPin } from 'lucide-react';
 
 export default function LostPetsPreview() {
   const [pets, setPets] = useState<any[]>([]);
@@ -38,8 +39,8 @@ export default function LostPetsPreview() {
           <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-4">
             Community Board
           </div>
-          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4">
-            🐾 Lost a pet? Found one?
+          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2">
+            <Footprints className="w-8 h-8 text-[#8B5E3C] flex-shrink-0" /> Lost a pet? Found one?
           </h2>
           <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Help reunite pets with their families in your neighborhood — completely free. Post a listing instantly, share it to your local groups, and join our alert network.
@@ -89,7 +90,9 @@ export default function LostPetsPreview() {
                       {pet.photo_url ? (
                         <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl">📷</div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-gray-400" />
+                        </div>
                       )}
                       <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
                         pet.status === 'resolved' ? 'bg-green-500' :
@@ -107,7 +110,7 @@ export default function LostPetsPreview() {
                         <h4 className="font-bold text-[#191919] text-sm truncate">{pet.pet_name || 'Unknown'}</h4>
                       </div>
                       <p className="text-xs text-[#666666] truncate flex items-center gap-1">
-                        📍 {pet.city}
+                        <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" /> {pet.city}
                       </p>
                       <p className="text-[10px] text-[#999999] mt-0.5">
                         {formatDistanceToNow(new Date(pet.created_at))} ago

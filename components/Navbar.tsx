@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ShareButton from './ShareButton';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -253,13 +254,13 @@ export default function Navbar() {
 
           {/* Lost Pets */}
           <Link href="/lost-pets" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
-            <span className="text-[14px] leading-none mr-1.5">🐾</span>
+            <Footprints className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
             Lost Pets
           </Link>
 
           {/* City Board */}
           <Link href="/city-board" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
-            <span className="text-[14px] leading-none mr-1.5">💬</span>
+            <MessageSquare className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
             City Board
           </Link>
 
@@ -300,7 +301,7 @@ export default function Navbar() {
                   onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
                   className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
                 >
-                  Go PRO ✨
+                  Go PRO <Sparkles className="w-3 h-3" />
                 </button>
                 {showUpgradeMenu && (
                   <>
@@ -364,13 +365,13 @@ export default function Navbar() {
                         className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
                         style={{ textDecoration: 'none' }}
                       >
-                        ⚙️ Manage Subscription
+                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
                       </Link>
                       <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
                       >
-                        🚪 Sign Out
+                        <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
                       </button>
                     </div>
                   </>
@@ -390,7 +391,7 @@ export default function Navbar() {
                 onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
                 className="bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
               >
-                Go PRO ✨
+                Go PRO <Sparkles className="w-3 h-3" />
               </button>
               {showUpgradeMenu && (
                 <>
@@ -454,13 +455,13 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
                       style={{ textDecoration: 'none' }}
                     >
-                      ⚙️ Manage Subscription
+                      <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
                     </Link>
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
                     >
-                      🚪 Sign Out
+                      <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
                     </button>
                   </div>
                 </>
@@ -510,13 +511,13 @@ export default function Navbar() {
 
             {/* Lost Pets */}
             <Link href="/lost-pets" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
-              <span className="text-[16px] leading-none">🐾</span>
+              <Footprints className="w-4 h-4 text-[#8B5E3C]" strokeWidth={2.5} />
               Lost Pets
             </Link>
 
             {/* City Board */}
             <Link href="/city-board" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] transition-colors flex items-center gap-2 rounded-xl text-decoration-none">
-              <span className="text-[16px] leading-none">💬</span>
+              <MessageSquare className="w-4 h-4 text-[#8B5E3C]" strokeWidth={2.5} />
               City Board
             </Link>
 
@@ -564,19 +565,19 @@ export default function Navbar() {
                 <Link 
                   href="/account"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-3 text-[#555555] font-bold hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in"
+                  className="px-4 py-3 text-[#555555] font-bold hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in gap-2"
                   style={{ textDecoration: 'none' }}
                 >
-                  ⚙️ Manage Subscription
+                  <Settings className="w-4 h-4 text-[#8B5E3C]" /> Manage Subscription
                 </Link>
                 <button
                   onClick={() => {
                     setIsOpen(false);
                     handleSignOut();
                   }}
-                  className="w-full px-4 py-3 text-left text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center bg-transparent border-none cursor-pointer animate-fade-in"
+                  className="w-full px-4 py-3 text-left text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center bg-transparent border-none cursor-pointer animate-fade-in gap-2"
                 >
-                  🚪 Sign Out
+                  <LogOut className="w-4 h-4 text-red-600" /> Sign Out
                 </button>
               </div>
             )}

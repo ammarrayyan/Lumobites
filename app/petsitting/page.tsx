@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2 } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -1065,7 +1066,7 @@ export default function PetSitting() {
             {!isOwnerPro && (
               <div className="bg-gradient-to-r from-[#FFB703]/10 to-[#FB8500]/10 border border-[#FB8500]/30 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in shadow-sm">
                 <div className="text-left flex items-start gap-4">
-                  <span className="text-4xl">👑</span>
+                  <Crown className="w-10 h-10 text-amber-500 flex-shrink-0" />
                   <div>
                     <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
                       Unlock Full Directory Access with Lumo Bites PRO
@@ -1089,7 +1090,7 @@ export default function PetSitting() {
               <div className="text-center text-[#8B5E3C] py-12">Loading trusted sitters...</div>
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
-                <span className="text-4xl mb-4 block">🐾</span>
+                <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No active sitters found in this area yet.</h3>
                 <p className="text-[#8B7E7D] mb-4">Try expanding your search distance, or be the first to join!</p>
                 <button 
@@ -1135,18 +1136,21 @@ export default function PetSitting() {
                              </div>
                              {sitter.approval_status === 'approved' && (
                                <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1">
-                                 ✅ Identity Verified
+                                 <ShieldCheck className="w-3.5 h-3.5" /> Identity Verified
                                </div>
                              )}
                              <div className="text-sm mb-1">
                                {sitter.review_count ? (
-                                 <span className="text-[#D97706] font-bold">⭐ {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span></span>
+                                 <span className="text-[#D97706] font-bold flex items-center gap-1">
+                                   <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
+                                   {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
+                                 </span>
                                ) : (
                                  <span className="text-[#8B7E7D]">No reviews yet</span>
                                )}
                              </div>
                             <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
-                              📍 {sitter.city ? (
+                              <MapPin className="w-3.5 h-3.5 text-gray-400" /> {sitter.city ? (
                                 (sitter.country && (
                                   sitter.city.toLowerCase().includes(sitter.country.toLowerCase()) ||
                                   (sitter.country.toLowerCase() === 'united states' && (sitter.city.toLowerCase().includes('usa') || sitter.city.toLowerCase().includes('u.s.a.'))) ||
@@ -1156,7 +1160,7 @@ export default function PetSitting() {
                             </p>
                             {sitter.phone_number && (
                               <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
-                                📞 <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
+                                <Phone className="w-3.5 h-3.5 text-gray-400" /> <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
                               </p>
                             )}
                             {sitter.distance !== undefined && (
@@ -1171,15 +1175,23 @@ export default function PetSitting() {
 
                         <div className="flex flex-col gap-2 mb-4">
                           {(sitter.available_days?.length || 0) > 0 && (
-                            <p className="text-xs text-[#8B7E7D]">
-                              📅 <span className="font-semibold text-[#4A3E3D]">Available:</span> {sitter.available_days?.length === 7 ? 'All Week' : sitter.available_days?.includes('Saturday') && sitter.available_days?.includes('Sunday') && sitter.available_days?.length === 2 ? 'Weekends Only' : sitter.available_days?.join(', ')}
+                            <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-gray-400" /> <span className="font-semibold text-[#4A3E3D]">Available:</span> {sitter.available_days?.length === 7 ? 'All Week' : sitter.available_days?.includes('Saturday') && sitter.available_days?.includes('Sunday') && sitter.available_days?.length === 2 ? 'Weekends Only' : sitter.available_days?.join(', ')}
                             </p>
                           )}
                           {(sitter.service_types?.length || 0) > 0 && (
                             <div className="flex flex-wrap gap-1.5">
                               {sitter.service_types?.map(st => (
-                                <span key={st} className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4]">
-                                  {st === 'Home visits' ? '🏠 Drop-in' : st === 'Overnight stays' ? '🌙 Overnight' : st === 'Dog walking' ? '🚶 Walking' : '🏡 Boarding'}
+                                <span key={st} className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4] inline-flex items-center gap-1">
+                                  {st === 'Home visits' ? (
+                                    <><Home className="w-3 h-3" /> Drop-in</>
+                                  ) : st === 'Overnight stays' ? (
+                                    <><Moon className="w-3 h-3" /> Overnight</>
+                                  ) : st === 'Dog walking' ? (
+                                    <><Footprints className="w-3 h-3" /> Walking</>
+                                  ) : (
+                                    <><Home className="w-3 h-3" /> Boarding</>
+                                  )}
                                 </span>
                               ))}
                             </div>
@@ -1207,7 +1219,7 @@ export default function PetSitting() {
                           }}
                           className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          {!isOwnerPro && <span className="text-xs">🔒</span>}
+                          {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
                           <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
                         </button>
                       </div>
@@ -1247,7 +1259,7 @@ export default function PetSitting() {
                     {/* Share & Invite Section */}
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mb-8 max-w-md mx-auto text-left shadow-sm">
                       <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                        <span>🐾</span> Know someone who'd make a great sitter? Invite them!
+                        <Footprints className="w-4 h-4 text-[#8B5E3C]" /> Know someone who'd make a great sitter? Invite them!
                       </h4>
                       <p className="text-xs text-[#8B7E7D] mb-4">Share Lumo Bites with your friends and help them start earning money pet sitting in their neighborhood with no commissions ever!</p>
                       
@@ -1261,21 +1273,21 @@ export default function PetSitting() {
                           onClick={handleWhatsAppShare}
                           className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>💬</span> WhatsApp
+                          <MessageSquare className="w-4 h-4" /> WhatsApp
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyMessage}
                           className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>📋</span> Copy Msg
+                          <Clipboard className="w-4 h-4" /> Copy Msg
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyLink}
                           className="bg-white border border-[#E8DDD4] text-[#4A3E3D] hover:bg-[#FAF6F4] font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>🔗</span> Copy Link
+                          <Share2 className="w-4 h-4" /> Copy Link
                         </button>
                       </div>
                     </div>
@@ -1284,7 +1296,7 @@ export default function PetSitting() {
                 {sitterApprovalStatus === 'rejected' && (
                   <>
                     <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100 text-red-600">
-                      <span className="text-3xl">❌</span>
+                      <AlertTriangle className="w-8 h-8 text-red-600" />
                     </div>
                     <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Not Approved</h2>
                     <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
@@ -1298,7 +1310,7 @@ export default function PetSitting() {
                       {isProSitter ? (
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                       ) : (
-                        <span className="text-3xl">⚠️</span>
+                        <AlertTriangle className="w-8 h-8 text-red-600" />
                       )}
                     </div>
                     <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Sitter Profile Active</h2>
@@ -1360,7 +1372,7 @@ export default function PetSitting() {
                   {sitterApprovalStatus !== 'pending' && (
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
                       <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                        <span>🐾</span> Invite a Friend
+                        <Footprints className="w-4 h-4 text-[#8B5E3C]" /> Invite a Friend
                       </h4>
                       <p className="text-xs text-[#8B7E7D] mb-4">Know someone who'd make a great pet sitter? Invite them to join Lumo Bites!</p>
                       
@@ -1370,21 +1382,21 @@ export default function PetSitting() {
                           onClick={handleWhatsAppShare}
                           className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>💬</span> Share on WhatsApp
+                          <MessageSquare className="w-4 h-4" /> Share on WhatsApp
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyMessage}
                           className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>📋</span> Copy Message
+                          <Clipboard className="w-4 h-4" /> Copy Message
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyLink}
                           className="bg-white border border-[#E8DDD4] text-[#4A3E3D] hover:bg-[#FAF6F4] font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>🔗</span> Copy Share Link
+                          <Share2 className="w-4 h-4" /> Copy Share Link
                         </button>
                       </div>
                     </div>
@@ -1414,7 +1426,7 @@ export default function PetSitting() {
             {sitterAuthMode === 'otp' && (
               <form onSubmit={handleSitterOtpSubmit} className="space-y-4 max-w-sm mx-auto animate-fade-in">
                 <div className="text-center mb-4">
-                  <span className="text-3xl mb-2 block">🔐</span>
+                  <Key className="w-8 h-8 text-[#8B5E3C] mx-auto mb-2" />
                   <p className="text-sm text-[#8B7E7D]">Enter the 6-digit code we sent to <strong>{sitterEmail}</strong></p>
                 </div>
                 <div>
@@ -1435,7 +1447,7 @@ export default function PetSitting() {
               <div className="animate-fade-in">
                 {!isProSitter && profileMessage === '' && (
                   <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start">
-                    <span className="text-xl">⚠️</span>
+                    <AlertTriangle className="w-5 h-5 text-red-500 inline-block mr-1.5 flex-shrink-0" />
                     <div>
                       <h4 className="font-bold text-red-800 text-sm">Profile Inactive & Hidden</h4>
                       <p className="text-red-700 text-xs mt-1">Your sitter profile is hidden from search results. Subscribe for $9.99/mo to go live.</p>
@@ -1445,7 +1457,7 @@ export default function PetSitting() {
 
             <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
               <div className="mb-6">
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span title="Locked after signup">🔒</span></label>
+                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" /></label>
                 <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
                   {sitterEmail}
                 </div>
@@ -1454,14 +1466,14 @@ export default function PetSitting() {
 
               {sitterApprovalStatus === 'approved' && (
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-6 flex gap-3 text-sm text-[#666666]">
-                  <span className="text-[#8B5E3C] text-lg leading-none mt-0.5">🔒</span>
+                  <Lock className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                   <p>Some profile information is locked after verification to maintain trust and security. Contact support at <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a> if you need to make changes.</p>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name {sitterApprovalStatus === 'approved' && <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" />}</label>
                   {sitterApprovalStatus === 'approved' ? (
                     <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
                       {sitterFirstName}
@@ -1472,7 +1484,7 @@ export default function PetSitting() {
                   {formErrors['firstName'] && <p className="text-red-500 text-sm mt-1">{formErrors['firstName']}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name {sitterApprovalStatus === 'approved' && <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" />}</label>
                   {sitterApprovalStatus === 'approved' ? (
                     <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
                       {sitterLastName}
@@ -1483,9 +1495,9 @@ export default function PetSitting() {
                   {formErrors['lastName'] && <p className="text-red-500 text-sm mt-1">{formErrors['lastName']}</p>}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
-                    📸 Profile Selfie
-                    {!sitterPhoto && <span className="text-red-500 ml-1">— required for verification</span>}
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2 flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-gray-500" /> Profile Selfie
+                    {!sitterPhoto && <span className="text-red-500 ml-1 text-xs font-normal">— required for verification</span>}
                   </label>
                   {formErrors['photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['photo']}</p>}
                   {sitterPhoto ? (
@@ -1493,7 +1505,7 @@ export default function PetSitting() {
                     <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 border border-green-200">
                       <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-green-300" />
                       <div className="flex-1">
-                        <p className="text-sm font-bold text-green-700">✅ Already verified</p>
+                        <p className="text-sm font-bold text-green-700 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Already verified</p>
                         <p className="text-xs text-green-600 mt-0.5">Your selfie is on file. No need to re-upload.</p>
                       </div>
                     </div>
@@ -1549,7 +1561,7 @@ export default function PetSitting() {
                           onClick={() => startCamera('selfie')}
                           className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
                         >
-                          📷 Take Photo with Webcam
+                          <Camera className="w-3.5 h-3.5" /> Take Photo with Webcam
                         </button>
                       </div>
                     </div>
@@ -1557,10 +1569,10 @@ export default function PetSitting() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">
-                    🪪 Government ID
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-gray-500" /> Government ID
                     {!hasExistingIdPhoto && !sitterIdPhoto && (
-                      <> <span className="text-red-500 font-bold ml-1">*Required</span> <span className="text-gray-400 font-normal text-xs">— used for verification only, never shown publicly</span></>
+                      <> <span className="text-red-500 font-bold ml-1 text-xs">*Required</span> <span className="text-gray-400 font-normal text-xs">— used for verification only, never shown publicly</span></>
                     )}
                   </label>
                   {formErrors['id_photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['id_photo']}</p>}
@@ -1568,10 +1580,10 @@ export default function PetSitting() {
                     // Already submitted
                     <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 border border-green-200">
                       <div className="w-16 h-12 rounded bg-green-100 flex items-center justify-center text-green-700 font-bold text-xl border border-green-200">
-                        🪪
+                        <ShieldCheck className="w-6 h-6" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-bold text-green-700">✅ Already submitted</p>
+                        <p className="text-sm font-bold text-green-700 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Already submitted</p>
                         <p className="text-xs text-green-600 mt-0.5">Your ID is securely on file. No need to re-upload.</p>
                       </div>
                     </div>

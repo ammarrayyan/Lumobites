@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
+import { Megaphone, Footprints, MapPin } from 'lucide-react';
 
 export default function LostPetsFeed() {
   const [pets, setPets] = useState<any[]>([]);
@@ -104,10 +105,10 @@ export default function LostPetsFeed() {
             <p className="text-[#8B5E3C] font-medium text-lg">Help reunite lost pets with their families in your neighborhood.</p>
           </div>
           <Link href="/lost-pets/post" className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0">
-            <span className="text-xl">📢</span> Report Lost/Found Pet
+            <Megaphone className="w-5 h-5" /> Report Lost/Found Pet
           </Link>
         </div>
-
+ 
         {/* Search & Filters */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 sticky top-4 z-10">
           <div className="flex-1 relative">
@@ -167,12 +168,12 @@ export default function LostPetsFeed() {
             <option value="other">Other</option>
           </select>
         </div>
-
+ 
         {loading ? (
           <div className="text-center py-20 text-[#8B5E3C] font-bold text-lg animate-pulse">Loading pets...</div>
         ) : pets.length === 0 ? (
           <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm">
-            <span className="text-5xl mb-4 block">🐾</span>
+            <Footprints className="w-12 h-12 text-[#8B5E3C] mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">
               {searchCoords && searchRadius !== 'any' ? `No pets found within ${searchRadius} miles of this location` : 'No pets found'}
             </h3>
@@ -212,7 +213,7 @@ export default function LostPetsFeed() {
                   </div>
                   
                   <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
-                    <span className="flex items-center gap-1">📍 {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
                     {pet.distance !== undefined && pet.distance !== null && (
                       <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
                         {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}

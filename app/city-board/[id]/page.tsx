@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -208,7 +209,9 @@ export default function CityBoardPostPage() {
             </div>
           )}
           <div className="flex items-center gap-2 mb-5 flex-wrap">
-            <span className="text-sm font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-xl shadow-sm">📍 {post.city}</span>
+            <span className="text-sm font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#3B2410]/70" /> {post.city}
+            </span>
             <span className={`text-sm font-black px-3 py-1.5 rounded-xl border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
             <span className="text-sm text-[#3B2410]/50 ml-auto font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
           </div>
@@ -225,7 +228,7 @@ export default function CityBoardPostPage() {
                     : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-bold'
                 }`}
               >
-                👍 Helpful ({post.helpful_count || 0})
+                <ThumbsUp className={`w-4 h-4 ${post.voted_helpful ? 'text-white' : 'text-[#3B2410]'}`} /> Helpful ({post.helpful_count || 0})
               </button>
             </div>
             
@@ -234,7 +237,7 @@ export default function CityBoardPostPage() {
                 onClick={() => openReportModal(post.post_id)}
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
               >
-                ⚠️ Flag Post
+                <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
               </button>
               <button 
                 onClick={() => {
@@ -243,15 +246,14 @@ export default function CityBoardPostPage() {
                 }}
                 className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                Copy Share Link
+                <Share2 className="w-4 h-4 text-[#3B2410]" /> Copy Share Link
               </button>
             </div>
           </div>
         </div>
 
         <h3 className="text-xl font-black text-[#3B2410] mb-5 pl-2 flex items-center gap-2">
-          <span>💬</span> Replies ({replies.length})
+          <MessageSquare className="w-5 h-5 text-[#3B2410]" /> Replies ({replies.length})
         </h3>
 
         {/* Replies List */}
@@ -278,8 +280,8 @@ export default function CityBoardPostPage() {
             </div>
           ))}
           {replies.length === 0 && (
-            <div className="bg-[#FFFBF5] rounded-2xl p-8 border border-[#3B2410]/10 shadow-sm text-center ml-4 md:ml-8">
-              <span className="text-3xl mb-3 block">✍️</span>
+            <div className="bg-[#FFFBF5] rounded-2xl p-8 border border-[#3B2410]/10 shadow-sm text-center ml-4 md:ml-8 flex flex-col items-center justify-center">
+              <PenLine className="w-8 h-8 text-[#3B2410]/40 mb-3" />
               <p className="text-[#3B2410]/60 font-bold">No replies yet. Be the first to jump in!</p>
             </div>
           )}
@@ -299,7 +301,12 @@ export default function CityBoardPostPage() {
               className="w-full bg-white border border-[#3B2410]/10 rounded-2xl px-5 py-4 text-[#3B2410] focus:outline-none focus:border-[#8B5E3C] focus:ring-1 focus:ring-[#8B5E3C] transition-all mb-3 font-medium placeholder:text-[#3B2410]/40"
               required
             />
-            {replyError && <div className="text-red-500 text-sm font-bold mb-3 px-2">⚠️ {replyError}</div>}
+            {replyError && (
+              <div className="text-red-500 text-sm font-bold mb-3 px-2 flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                {replyError}
+              </div>
+            )}
             <div className="flex justify-end">
               <button 
                 type="submit" 
@@ -322,7 +329,7 @@ export default function CityBoardPostPage() {
           <div className="bg-[#FFFBF5] rounded-3xl p-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
             <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
             <h3 className="text-xl font-black text-red-700 mb-2 flex items-center gap-2">
-              <span>⚠️</span> Report post
+              <AlertTriangle className="w-5 h-5 text-red-700" /> Report post
             </h3>
             <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Help us keep Lumo Bites clean and safe. Please select a reason for reporting this post:</p>
             <form onSubmit={handleReportSubmit} className="space-y-4">
