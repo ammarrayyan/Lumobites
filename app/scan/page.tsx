@@ -7,6 +7,7 @@ import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import confetti from 'canvas-confetti';
 import Navbar from '@/components/Navbar';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
+import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
 
 export default function ScanPage() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
@@ -884,7 +885,7 @@ export default function ScanPage() {
             {/* Sparkle Badge */}
             {isPro ? (
               <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 border border-amber-400 text-white text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-md">
-                ✨ Lumo Bites Pro Member
+                <Sparkles className="w-3.5 h-3.5 text-white" /> Lumo Bites Pro Member
               </div>
             ) : (
               <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
@@ -1059,8 +1060,13 @@ export default function ScanPage() {
           {(loading || ocrLoading) && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-              <h3 className="text-[#191919] font-bold text-lg mb-2">
-                {ocrLoading ? 'Reading Label...' : '🔍 Analyzing ingredients with AI...'}
+              <h3 className="text-[#191919] font-bold text-lg mb-2 flex items-center justify-center gap-1.5">
+                {ocrLoading ? 'Reading Label...' : (
+                  <>
+                    <Search className="w-5 h-5 text-[#8B5E3C] animate-pulse" />
+                    Analyzing ingredients with AI...
+                  </>
+                )}
               </h3>
               <p className="text-gray-500 text-sm max-w-[280px] mx-auto leading-relaxed">
                 {ocrLoading 
@@ -1075,7 +1081,7 @@ export default function ScanPage() {
         {ocrReviewText && !product && !loading && !ocrLoading && (
           <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm p-6 space-y-4 animate-fade-in-up">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">🔍</span>
+              <Search className="w-5 h-5 text-[#8B5E3C]" />
               <p className="text-[11px] font-bold text-[#8B5E3C] uppercase tracking-widest">Text Extracted — Review Before Analysis</p>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">Check the text below matches what&apos;s on the label. Edit anything that looks wrong, then tap <strong>Analyze</strong>.</p>
@@ -1087,9 +1093,10 @@ export default function ScanPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => { processOCRResult(ocrReviewText); }}
-                className="flex-1 bg-[#8B5E3C] text-white py-3 rounded-xl font-bold text-sm"
+                className="flex-1 bg-[#8B5E3C] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5"
               >
-                ✅ Analyze These Ingredients
+                <Check className="w-4 h-4" />
+                Analyze These Ingredients
               </button>
               <button
                 onClick={() => { setOcrReviewText(''); resetScanner(); }}
@@ -1115,7 +1122,7 @@ export default function ScanPage() {
             {hasRecall ? (
               <div className="bg-[#FEE2E2] border-2 border-[#EF4444] rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">⚠️</span>
+                    <AlertTriangle className="w-8 h-8 text-red-600 shrink-0" />
                     <h3 className="text-[#991B1B] text-xl font-black leading-tight uppercase">WARNING: Recall Active</h3>
                 </div>
                 <p className="text-[#B91C1C] font-bold mb-4">This product or brand has an active FDA recall!</p>
@@ -1125,8 +1132,8 @@ export default function ScanPage() {
                 </div>
               </div>
             ) : product.product_name !== 'Unknown Product' && (
-              <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center">
-                <div className="text-4xl mb-2">✅</div>
+              <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center flex flex-col items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 mb-2" />
                 <h3 className="text-[#166534] text-xl font-black uppercase">Safety Verified</h3>
                 <p className="text-[#14532D] font-medium mt-1">No active recalls found for this product</p>
               </div>
@@ -1167,7 +1174,8 @@ export default function ScanPage() {
                     {safetyResults.dangerous.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="text-sm leading-none">🔴</span> Dangerous Ingredients ({safetyResults.dangerous.length})
+                          <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                          Dangerous Ingredients ({safetyResults.dangerous.length})
                         </h5>
                         <div className="space-y-1.5">
                           {safetyResults.dangerous.map((item, i) => (
@@ -1184,7 +1192,8 @@ export default function ScanPage() {
                     {safetyResults.concerning.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="text-sm leading-none">⚠️</span> Concerning Ingredients ({safetyResults.concerning.length})
+                          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                          Concerning Ingredients ({safetyResults.concerning.length})
                         </h5>
                         <div className="space-y-1.5">
                           {safetyResults.concerning.map((item, i) => (
@@ -1201,7 +1210,8 @@ export default function ScanPage() {
                     {safetyResults.safe.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="text-sm leading-none">🌱</span> Safe & Beneficial ({safetyResults.safe.length})
+                          <Leaf className="w-4 h-4 text-emerald-500 shrink-0" />
+                          Safe & Beneficial ({safetyResults.safe.length})
                         </h5>
                         <div className="flex flex-wrap gap-1.5 p-3 bg-emerald-50/30 border border-emerald-100/30 rounded-xl max-h-40 overflow-y-auto">
                           {safetyResults.safe.map((item, i) => (
@@ -1237,7 +1247,10 @@ export default function ScanPage() {
 
 
             <div className="bg-[#191919] rounded-2xl p-6 text-white">
-              <h4 className="font-bold mb-2">🔔 Stay Protected</h4>
+              <h4 className="font-bold mb-2 flex items-center gap-1.5">
+                <Bell className="w-4 h-4 text-[#8B5E3C]" />
+                Stay Protected
+              </h4>
               <p className="text-xs text-gray-400 mb-4">
                 We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'this product')} has a new FDA recall. Free service.
               </p>
@@ -1329,7 +1342,7 @@ export default function ScanPage() {
             {isPro ? (
               <div className="flex flex-col gap-5 py-4">
                 <div>
-                  <div className="text-4xl mb-3">✨</div>
+                  <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-3" />
                   <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
                     You are a Pro Member!
                   </h3>
@@ -1348,9 +1361,9 @@ export default function ScanPage() {
             ) : (
               <>
                 <div>
-                  <div className="text-4xl mb-3">🔍</div>
+                  <Search className="w-10 h-10 text-[#8B5E3C] mx-auto mb-3" />
                   <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                    You&apos;ve used your free scan today 🔍
+                    You&apos;ve used your free scan today
                   </h3>
                   <p className="text-sm text-gray-500 mt-2 font-medium text-center">
                     Upgrade to Lumo Bites Pro for unlimited scans
@@ -1364,13 +1377,13 @@ export default function ScanPage() {
                 <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
                   <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited ingredient scans
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Detailed AI safety reports
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Detailed AI safety reports
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Priority AI analysis
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Priority AI analysis
                     </li>
                   </ul>
                 </div>
@@ -1451,7 +1464,12 @@ export default function ScanPage() {
                       >
                         {modalLoading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : 'Proceed to Checkout 🚀'}
+                        ) : (
+                          <>
+                            Proceed to Checkout
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                       
                       <p className="text-[11px] text-gray-400 text-center mt-2">
@@ -1498,8 +1516,8 @@ export default function ScanPage() {
                 {modalStep === 'already_pro' && (
                   <>
                     <div className="text-left mt-2 flex flex-col items-center text-center">
-                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] text-2xl mb-3">
-                        🐾
+                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] mb-3">
+                        <Footprints className="w-6 h-6" />
                       </div>
                       <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Pro Membership Found</h4>
                       <p className="text-sm text-gray-600 font-medium max-w-sm mb-4">
@@ -1516,7 +1534,8 @@ export default function ScanPage() {
                         }}
                         className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Sign in to Your Pro Account 🐾
+                        Sign in to Your Pro Account
+                        <Footprints className="w-4 h-4" />
                       </button>
                     </div>
 
@@ -1572,7 +1591,12 @@ export default function ScanPage() {
                       >
                         {modalLoading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : 'Send Verification Code 📩'}
+                        ) : (
+                          <>
+                            Send Verification Code
+                            <Mail className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                     </div>
 

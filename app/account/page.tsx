@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw } from 'lucide-react';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -180,8 +181,8 @@ export default function AccountPage() {
           {/* STEP 1: ENTER PRO EMAIL */}
           {step === 'email' && (
             <div className="flex flex-col gap-6">
-              <div className="text-center">
-                <div className="text-4xl mb-3">⚙️</div>
+              <div className="text-center flex flex-col items-center">
+                <Settings className="w-10 h-10 text-[#8B5E3C] mb-3" />
                 <h1 className="text-3xl font-[900] text-[#191919] tracking-tight mb-2">
                   Manage Subscription
                 </h1>
@@ -192,8 +193,8 @@ export default function AccountPage() {
 
               <form onSubmit={handleSendCode} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5 text-left">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    Pro Subscription Email {isLocked && <span title="Locked after signup">🔒</span>}
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                    Pro Subscription Email {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
                   </label>
                   {isLocked ? (
                     <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
@@ -239,8 +240,8 @@ export default function AccountPage() {
           {/* STEP 2: ENTER CODE */}
           {step === 'verification' && (
             <div className="flex flex-col gap-6 animate-fade-in">
-              <div className="text-center">
-                <div className="text-4xl mb-3">✉️</div>
+              <div className="text-center flex flex-col items-center">
+                <Mail className="w-10 h-10 text-[#8B5E3C] mb-3" />
                 <h1 className="text-2xl font-[900] text-[#191919] tracking-tight mb-2">
                   Verify Identity
                 </h1>
@@ -322,12 +323,12 @@ export default function AccountPage() {
             <div className="flex flex-col gap-6 animate-fade-in">
               {isCancelled ? (
                 // Cancellation Success Screen
-                <div className="flex flex-col gap-5 text-center py-4">
-                  <div className="text-5xl mb-2">📅</div>
+                <div className="flex flex-col gap-5 text-center py-4 items-center">
+                  <Calendar className="w-12 h-12 text-[#8B5E3C] mb-2" />
                   <h2 className="text-2xl font-[900] text-gray-900 leading-tight">
                     Cancellation Scheduled
                   </h2>
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left flex flex-col gap-2">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left flex flex-col gap-2 w-full">
                     <p className="text-sm text-amber-900 leading-relaxed">
                       Your Pro subscription has been cancelled. You will continue to have <strong>full access</strong> until{' '}
                       <strong>{cancelEndDate}</strong>{' '}({cancelDaysRemaining} days remaining). After that your account will return to the free plan.
@@ -344,7 +345,7 @@ export default function AccountPage() {
                   </div>
                   <button
                     onClick={() => setIsCancelled(false)}
-                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer"
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer w-full"
                   >
                     Back to Dashboard
                   </button>
@@ -352,8 +353,8 @@ export default function AccountPage() {
               ) : (
                 // Active Subscription Status Dashboard
                 <div className="flex flex-col gap-5">
-                  <div className="text-center">
-                    <div className="text-4xl mb-3">✨</div>
+                  <div className="text-center flex flex-col items-center">
+                    <Sparkles className="w-10 h-10 text-amber-500 mb-3" />
                     <h2 className="text-2xl font-[900] text-[#191919] tracking-tight">
                       Your Pro Dashboard
                     </h2>
@@ -366,12 +367,12 @@ export default function AccountPage() {
                     <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
                       {subDetails.cancelAtPeriodEnd ? (
-                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs">
-                          Scheduled to Cancel ⚠️
+                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                          Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                         </span>
                       ) : (
-                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs">
-                          Active ✅
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                          Active <Check className="w-3.5 h-3.5 text-emerald-600" />
                         </span>
                       )}
                     </div>
@@ -425,9 +426,14 @@ export default function AccountPage() {
                             }
                           }}
                           disabled={loading}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
                         >
-                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '🔄 Reactivate Subscription'}
+                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                            <>
+                              <RefreshCw className="w-4 h-4" />
+                              Reactivate Subscription
+                            </>
+                          )}
                         </button>
                       ) : (
                         <button
@@ -452,9 +458,14 @@ export default function AccountPage() {
                             }
                           }}
                           disabled={loading}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center"
+                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
                         >
-                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : '✨ Upgrade to PRO — $2.99/mo'}
+                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-white" />
+                              Upgrade to PRO — $2.99/mo
+                            </>
+                          )}
                         </button>
                       )}
                     </div>
@@ -468,42 +479,40 @@ export default function AccountPage() {
                   )}
                 </div>
               )}
-            </div>
-          )}
+              {showConfirmCancel && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
+                  <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <AlertTriangle className="w-10 h-10 text-red-500 mb-3" />
+                      <h3 className="text-xl font-black text-[#191919] leading-tight">
+                        Are you sure you want to cancel?
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                        Your Pro benefits and unlimited scans will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your subscription will end.
+                      </p>
+                    </div>
 
-          {/* CONFIRMATION CANCEL DIALOG MODAL */}
-          {showConfirmCancel && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
-              <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center">
-                <div>
-                  <div className="text-4xl mb-3">⚠️</div>
-                  <h3 className="text-xl font-black text-[#191919] leading-tight">
-                    Are you sure you want to cancel?
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                    Your Pro benefits and unlimited scans will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your subscription will end.
-                  </p>
+                    <div className="flex flex-col gap-2 w-full">
+                      <button
+                        onClick={handleCancelSubscription}
+                        disabled={loading}
+                        className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {loading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : "Yes, cancel subscription"}
+                      </button>
+                      <button
+                        onClick={() => setShowConfirmCancel(false)}
+                        disabled={loading}
+                        className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        Keep Pro Features <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={handleCancelSubscription}
-                    disabled={loading}
-                    className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    ) : "Yes, cancel subscription"}
-                  </button>
-                  <button
-                    onClick={() => setShowConfirmCancel(false)}
-                    disabled={loading}
-                    className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer"
-                  >
-                    Keep Pro Features ✨
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           )}
 

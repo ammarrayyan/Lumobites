@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, ChangeEvent, DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { Dog, Cat, Sparkles, Footprints } from 'lucide-react';
 
 type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'budget';
 
@@ -367,7 +368,7 @@ export default function PhotoPage() {
                       href="/twin" 
                       className="inline-flex items-center gap-1.5 text-[#8B5E3C] hover:underline font-bold text-sm mt-1.5 animate-pulse"
                     >
-                      Try our Pet Twin feature! 🐾
+                      Try our Pet Twin feature! <Footprints className="w-4 h-4 text-[#8B5E3C]" />
                     </Link>
                   </div>
                 </div>
@@ -388,15 +389,15 @@ export default function PhotoPage() {
                     <div className="flex gap-4 mt-3 mb-4">
                       <button 
                         onClick={() => setManualPetType('dog')}
-                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${manualPetType === 'dog' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
+                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-1.5 ${manualPetType === 'dog' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
                       >
-                        🐕 Dog
+                        <Dog className="w-5 h-5" /> Dog
                       </button>
                       <button 
                         onClick={() => setManualPetType('cat')}
-                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${manualPetType === 'cat' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
+                        className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-1.5 ${manualPetType === 'cat' ? 'border-[#8B5E3C] bg-[#FDF9F5] text-[#8B5E3C]' : 'border-[#EEEEEE] text-[#999999]'}`}
                       >
-                        🐱 Cat
+                        <Cat className="w-5 h-5" /> Cat
                       </button>
                     </div>
                     <div className="flex gap-3 mt-2">
@@ -589,9 +590,14 @@ export default function PhotoPage() {
                 <button 
                   onClick={() => submitFinal(budget)}
                   disabled={!budget.trim() || isSubmitting}
-                  className="bg-[#8B5E3C] text-white py-5 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-5 rounded-xl font-bold text-lg hover:bg-[#734A2E] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Finding food...' : 'Find Matches! 🐾'}
+                  {isSubmitting ? 'Finding food...' : (
+                    <>
+                      Find Matches!
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>

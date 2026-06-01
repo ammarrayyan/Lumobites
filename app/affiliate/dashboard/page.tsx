@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import QRCode from 'qrcode';
-import { Copy, QrCode, Download, Share2, Activity, Users, DollarSign, ArrowRight, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Copy, QrCode, Download, Share2, Activity, Users, DollarSign, ArrowRight, ShieldCheck, HelpCircle, Lock, Mail, Footprints, AlertTriangle, CheckCircle2, XCircle, Lightbulb, X } from 'lucide-react';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -180,8 +180,8 @@ export default function AffiliateDashboard() {
           {/* STEP 1: EMAIL ACCESS INPUT */}
           {step === 'email' && (
             <div className="w-full max-w-[460px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 text-center animate-fade-in">
-              <div>
-                <div className="text-5xl mb-4">🔐</div>
+              <div className="flex flex-col items-center">
+                <Lock className="w-12 h-12 text-[#8B5E3C] mb-4" />
                 <h1 className="text-3xl font-[900] text-[#191919] tracking-tight mb-2">
                   Affiliate Dashboard
                 </h1>
@@ -237,8 +237,8 @@ export default function AffiliateDashboard() {
           {/* STEP 2: VERIFICATION OTP CODE */}
           {step === 'verification' && (
             <div className="w-full max-w-[460px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 text-center animate-fade-in">
-              <div>
-                <div className="text-5xl mb-4">✉️</div>
+              <div className="flex flex-col items-center">
+                <Mail className="w-12 h-12 text-[#8B5E3C] mb-4" />
                 <h1 className="text-2xl font-[900] text-[#191919] tracking-tight mb-2">
                   Verify Your Identity
                 </h1>
@@ -318,8 +318,8 @@ export default function AffiliateDashboard() {
               {/* Header Section */}
               <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-[#EEEEEE] p-6 rounded-3xl shadow-sm">
                 <div>
-                  <h1 className="text-2xl font-[900] text-[#191919] tracking-tight">
-                    Affiliate Partner Portal 🐾
+                  <h1 className="text-2xl font-[900] text-[#191919] tracking-tight flex items-center justify-center md:justify-start gap-1.5">
+                    Affiliate Partner Portal <Footprints className="w-5 h-5 text-[#8B5E3C]" />
                   </h1>
                   <p className="text-xs text-gray-400 font-bold mt-1">
                     Partner: <span className="text-[#8B5E3C]">{affiliate.full_name}</span> &middot; {affiliate.email}
@@ -401,7 +401,7 @@ export default function AffiliateDashboard() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div>
                     <h3 className="font-[900] text-[#191919] text-base flex items-center gap-2">
-                      💵 Payout Progress Tracker
+                      <DollarSign className="w-5 h-5 text-[#8B5E3C]" /> Payout Progress Tracker
                     </h3>
                     <p className="text-xs text-gray-400">
                       Payouts are automatically processed once you reach the minimum threshold of **$50.00** in earnings.
@@ -431,12 +431,14 @@ export default function AffiliateDashboard() {
                       </div>
                       <div className="flex justify-between items-center text-xs">
                         {remaining > 0 ? (
-                          <span className="text-amber-700 font-bold">
-                            ⚠️ You need <strong className="text-amber-800">${remaining.toFixed(2)} more</strong> to reach your next payout!
+                          <span className="text-amber-700 font-bold flex items-center gap-1.5">
+                            <AlertTriangle className="w-4 h-4 text-amber-500" />
+                            You need <strong className="text-amber-800">${remaining.toFixed(2)} more</strong> to reach your next payout!
                           </span>
                         ) : (
-                          <span className="text-emerald-700 font-bold flex items-center gap-1">
-                            🎉 Eligible for next payout! You have reached the minimum threshold.
+                          <span className="text-emerald-700 font-bold flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-bounce" />
+                            Eligible for next payout! You have reached the minimum threshold.
                           </span>
                         )}
                         <span className="text-gray-400 font-bold">{percent.toFixed(0)}% complete</span>
@@ -496,11 +498,11 @@ export default function AffiliateDashboard() {
                           <td className="p-4">
                             {user.cancelled ? (
                               <span className="inline-flex items-center gap-1 text-red-500 font-bold">
-                                ❌ Cancelled
+                                <XCircle className="w-3.5 h-3.5" /> Cancelled
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
-                                🟢 Active
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Active
                               </span>
                             )}
                           </td>
@@ -521,7 +523,9 @@ export default function AffiliateDashboard() {
 
               {/* Commission Details FAQ banner */}
               <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col md:flex-row gap-5 items-start">
-                <div className="bg-white border border-[#E8DDD4] w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm flex-none">💡</div>
+                <div className="bg-white border border-[#E8DDD4] w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm flex-none">
+                  <Lightbulb className="w-6 h-6 text-amber-500" />
+                </div>
                 <div className="space-y-1.5">
                   <h4 className="font-bold text-[#191919] text-sm">How Commissions Work & Payout Terms</h4>
                   <p className="text-xs text-gray-500 leading-relaxed">
@@ -545,9 +549,9 @@ export default function AffiliateDashboard() {
           <div className="bg-[#FFF9F2] p-8 rounded-3xl max-w-sm w-full flex flex-col items-center relative text-[#3B2410] shadow-2xl border border-[#E8DDD4]">
             <button 
               onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 text-[#3B2410]/50 hover:text-[#3B2410] font-bold bg-transparent border-none cursor-pointer"
+              className="absolute top-4 right-4 text-[#3B2410]/50 hover:text-[#3B2410] font-bold bg-transparent border-none cursor-pointer flex items-center justify-center"
             >
-              ❌
+              <X className="w-4 h-4" />
             </button>
             
             <h3 className="text-lg font-[900] mb-5 text-center">Your Branded QR Code</h3>

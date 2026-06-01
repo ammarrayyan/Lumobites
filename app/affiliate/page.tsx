@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { Footprints, DollarSign, Award, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 
 export default function AffiliateSignupPage() {
   const [fullName, setFullName] = useState('');
@@ -96,37 +97,45 @@ export default function AffiliateSignupPage() {
       <main className="flex-1 max-w-[1000px] mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
         
         {/* Left Side: Pitch Copy */}
-        <div className="flex-1 space-y-6 lg:max-w-[460px] text-center lg:text-left">
-          <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            🐾 Lumo Bites Affiliate Program
+        <div className="flex-1 space-y-6 lg:max-w-[460px] text-center lg:text-left flex flex-col items-center lg:items-start">
+          <div className="inline-flex bg-[#8B5E3C]/10 text-[#8B5E3C] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider items-center gap-1.5 w-fit">
+            <Footprints className="w-3.5 h-3.5" />
+            Lumo Bites Affiliate Program
           </div>
-          <h1 className="text-4xl md:text-5xl font-[900] text-[#191919] tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-5xl font-[900] text-[#191919] tracking-tight leading-tight text-center lg:text-left">
             Earn money sharing <span className="text-[#8B5E3C]">Lumo Bites</span>
           </h1>
-          <p className="text-base text-gray-500 leading-relaxed">
+          <p className="text-base text-gray-500 leading-relaxed text-center lg:text-left">
             Share your love for Lumo Bites and get paid for it! Earn <strong className="text-gray-700">$1.00 every single month</strong> for every PRO member you bring in — for as long as they stay subscribed.
           </p>
-          <p className="text-xs text-gray-400 leading-relaxed italic font-bold">
-            💵 Payouts are sent via PayPal once you reach $50 in earnings.
-          </p>
+          <div className="flex items-center gap-1 justify-center lg:justify-start text-xs text-gray-400 leading-relaxed italic font-bold">
+            <DollarSign className="w-3.5 h-3.5 text-gray-400" />
+            Payouts are sent via PayPal once you reach $50 in earnings.
+          </div>
 
           <div className="pt-4 space-y-4 text-left hidden lg:block">
             <div className="flex items-start gap-3.5">
-              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm">🔗</div>
+              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center shadow-sm">
+                <LinkIcon className="w-5 h-5 text-[#8B5E3C]" />
+              </div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">1. Share Your Link</h4>
                 <p className="text-xs text-gray-400 leading-normal mt-0.5">Post on your blog, social media, or share directly with pet parent groups.</p>
               </div>
             </div>
             <div className="flex items-start gap-3.5">
-              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm">💎</div>
+              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center shadow-sm">
+                <Award className="w-5 h-5 text-[#8B5E3C]" />
+              </div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">2. Promote Premium</h4>
                 <p className="text-xs text-gray-400 leading-normal mt-0.5">Users unlock unlimited ingredient safety scans, priority recall alerts, and sitter contacts.</p>
               </div>
             </div>
             <div className="flex items-start gap-3.5">
-              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm">💰</div>
+              <div className="bg-[#FFF9F2] border border-[#E8DDD4] w-10 h-10 rounded-xl flex items-center justify-center shadow-sm">
+                <DollarSign className="w-5 h-5 text-[#8B5E3C]" />
+              </div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">3. Earn Monthly Residuals</h4>
                 <p className="text-xs text-gray-400 leading-normal mt-0.5">Earn recurring commissions. Payouts are sent via PayPal once you reach $50 in earnings.</p>
@@ -151,12 +160,12 @@ export default function AffiliateSignupPage() {
                 <p className="mt-2">Your application has been received and is currently under review by our team.</p>
                 <p className="mt-1">We review applications within 24-48 hours. You will receive an email at <strong>{email.toLowerCase()}</strong> once your application has been processed.</p>
               </div>
-              <p className="text-xs text-gray-400 mt-2 font-medium">
-                Thank you for partnering with Lumo Bites! 🐾
+              <p className="text-xs text-gray-400 mt-2 font-medium flex items-center gap-1 justify-center">
+                Thank you for partnering with Lumo Bites! <Footprints className="w-4 h-4 text-gray-400" />
               </p>
               <Link
                 href="/"
-                className="mt-4 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer"
+                className="mt-4 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer w-full text-center"
               >
                 Back to Homepage
               </Link>
@@ -190,8 +199,8 @@ export default function AffiliateSignupPage() {
                     }`}
                   />
                   {fullNameError && (
-                    <span className="text-[10px] text-red-500 font-semibold mt-0.5">
-                      ⚠️ Full name is required
+                    <span className="text-[10px] text-red-500 font-semibold mt-0.5 flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Full name is required
                     </span>
                   )}
                 </div>
@@ -213,8 +222,8 @@ export default function AffiliateSignupPage() {
                     }`}
                   />
                   {emailError && (
-                    <span className="text-[10px] text-red-500 font-semibold mt-0.5">
-                      ⚠️ Email address is required
+                    <span className="text-[10px] text-red-500 font-semibold mt-0.5 flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Email address is required
                     </span>
                   )}
                 </div>
@@ -263,8 +272,8 @@ export default function AffiliateSignupPage() {
               </div>
 
               {error && (
-                <p className="text-xs text-red-500 font-semibold text-center mt-1">
-                  ⚠️ {error}
+                <p className="text-xs text-red-500 font-semibold text-center mt-1 flex items-center justify-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" /> {error}
                 </p>
               )}
 

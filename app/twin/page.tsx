@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
+import { AlertTriangle, Star, Camera, Footprints, Dog, Cat, CheckCircle2, XCircle, UploadCloud, Sparkles, Check, ArrowRight, Mail, RefreshCw, X } from 'lucide-react';
 
 const LOADING_MESSAGES = [
   "Sniffing out your twin... 🐽",
@@ -917,8 +918,9 @@ export default function TwinPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-center font-medium">
-              ⚠️ {error}
+            <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl flex items-center justify-center gap-1.5 font-medium">
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+              {error}
             </div>
           )}
 
@@ -941,7 +943,7 @@ export default function TwinPage() {
                     onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
                     className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white text-xs font-bold px-3.5 py-2 rounded-full flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer"
                   >
-                    🔄 Switch Camera
+                    <RefreshCw className="w-4 h-4 animate-spin-slow" /> Switch Camera
                   </button>
                 </div>
                 
@@ -950,13 +952,13 @@ export default function TwinPage() {
                     onClick={captureSelfie}
                     className="flex-1 bg-[#8B5E3C] text-white py-3.5 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                   >
-                    📸 Capture Photo
+                    <Camera className="w-4 h-4" /> Capture Photo
                   </button>
                   <button 
                     onClick={stopCamera}
                     className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3.5 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    ✕ Cancel
+                    <X className="w-4 h-4" /> Cancel
                   </button>
                 </div>
               </div>
@@ -1079,11 +1081,11 @@ export default function TwinPage() {
                     <span className="absolute bottom-1.5 right-3.5 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">You</span>
                   </div>
                   
-                  <div className="text-3xl text-gray-300">🐾</div>
+                  <Footprints className="w-8 h-8 text-gray-350 shrink-0" />
 
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_12px_28px_rgba(0,0,0,0.08)] relative shrink-0 bg-[#F9F7F5] flex items-center justify-center">
                     {imageError ? (
-                      <span className="text-4xl">🐕</span>
+                      <Dog className="w-12 h-12 text-gray-300" />
                     ) : (
                       <img 
                         src={result.unsplashImageUrl} 
@@ -1138,20 +1140,20 @@ export default function TwinPage() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href={`/results?breed=${encodeURIComponent(result.breed)}`}
-                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-base text-center hover:bg-[#734A2E] transition-colors shadow-sm"
+                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-base text-center hover:bg-[#734A2E] transition-colors shadow-sm flex items-center justify-center gap-1.5"
                     style={{ textDecoration: 'none' }}
                   >
-                    🍖 Find Best Food for {result.breed}
+                    <Dog className="w-5 h-5" /> Find Best Food for {result.breed}
                   </Link>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href="/petsitting"
-                    className="flex-1 bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md"
+                    className="flex-1 bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md flex items-center justify-center gap-1.5"
                     style={{ textDecoration: 'none' }}
                   >
-                    🐕 Find a pet sitter who loves your breed! Search sitters near you &rarr;
+                    <Footprints className="w-5 h-5 text-white" /> Find a pet sitter who loves your breed! Search sitters near you &rarr;
                   </Link>
                 </div>
 
@@ -1160,19 +1162,19 @@ export default function TwinPage() {
                     onClick={downloadSquareCard}
                     className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
                   >
-                    📸 Square (1:1)
+                    <Camera className="w-4 h-4 text-gray-500" /> Square (1:1)
                   </button>
                   <button 
                     onClick={downloadStoryCard}
                     className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
                   >
-                    📱 Story (9:16)
+                    <Camera className="w-4 h-4 text-gray-500" /> Story (9:16)
                   </button>
                   <button 
                     onClick={downloadTwitterCard}
                     className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
                   >
-                    🐦 Twitter/X (16:9)
+                    <Camera className="w-4 h-4 text-gray-500" /> Twitter/X (16:9)
                   </button>
                 </div>
 
@@ -1265,8 +1267,8 @@ export default function TwinPage() {
                       className="mt-1 w-4.5 h-4.5 rounded border-[#D9C0A8] text-[#8B5E3C] focus:ring-[#8B5E3C]/20 cursor-pointer"
                     />
                     <div className="flex-1">
-                      <label htmlFor="share-gallery-optin" className="text-sm font-bold text-[#4A3E3D] cursor-pointer">
-                        Share on Lumo Bites Public Gallery 🐾
+                      <label htmlFor="share-gallery-optin" className="text-sm font-bold text-[#4A3E3D] cursor-pointer flex items-center gap-1.5">
+                        Share on Lumo Bites Public Gallery <Footprints className="w-4 h-4 text-gray-500" />
                       </label>
                       <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
                         Optional: Tick this box to share your selfie and matched pet twin in our public directory for other pet lovers to see!
@@ -1291,9 +1293,14 @@ export default function TwinPage() {
                         <button
                           onClick={() => handlePublicShare()}
                           disabled={publicShareStatus === 'sharing'}
-                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer disabled:bg-gray-400 flex items-center gap-1 shrink-0"
+                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer disabled:bg-gray-400 flex items-center gap-1 shrink-0 justify-center"
                         >
-                          {publicShareStatus === 'sharing' ? 'Sharing...' : 'Share Now 🐾'}
+                          {publicShareStatus === 'sharing' ? 'Sharing...' : (
+                            <>
+                              Share Now
+                              <Footprints className="w-3.5 h-3.5" />
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -1306,13 +1313,13 @@ export default function TwinPage() {
                     </p>
                   )}
                   {publicShareStatus === 'shared' && (
-                    <p className="text-xs text-emerald-600 font-bold flex items-center gap-1 pl-7">
-                      ✅ Shared successfully! Thank you for sharing your pet twin!
+                    <p className="text-xs text-emerald-600 font-bold flex items-center gap-1.5 pl-7">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Shared successfully! Thank you for sharing your pet twin!
                     </p>
                   )}
                   {publicShareStatus === 'error' && (
-                    <p className="text-xs text-red-500 font-semibold pl-7">
-                      ❌ Failed to share. Please check your connection and try again.
+                    <p className="text-xs text-red-500 font-semibold pl-7 flex items-center gap-1.5">
+                      <XCircle className="w-4 h-4 text-red-500 shrink-0" /> Failed to share. Please check your connection and try again.
                     </p>
                   )}
                 </div>
@@ -1329,7 +1336,9 @@ export default function TwinPage() {
                         Generating Card...
                       </>
                     ) : (
-                      <>📤 Share My Twin</>
+                      <>
+                        <UploadCloud className="w-4 h-4" /> Share My Twin
+                      </>
                     )}
                   </button>
                   <button 
@@ -1344,9 +1353,9 @@ export default function TwinPage() {
                       setPublicShareStatus('idle');
                       setStep('upload');
                     }}
-                    className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer"
+                    className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    🔄 Try Again
+                    <RefreshCw className="w-4 h-4" /> Try Again
                   </button>
                 </div>
 
@@ -1380,7 +1389,7 @@ export default function TwinPage() {
             {isPro ? (
               <div className="flex flex-col gap-5 py-4">
                 <div>
-                  <div className="text-4xl mb-3">✨</div>
+                  <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-3" />
                   <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
                     You are a Pro Member!
                   </h3>
@@ -1399,7 +1408,7 @@ export default function TwinPage() {
             ) : (
               <>
                 <div>
-                  <div className="text-4xl mb-3">🐾</div>
+                  <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-3" />
                   <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
                     Want to try again?
                   </h3>
@@ -1415,13 +1424,13 @@ export default function TwinPage() {
                 <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
                   <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Unlimited Pet Twin matches
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited Pet Twin matches
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Contact verified pet sitters directly
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Contact verified pet sitters directly
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="text-emerald-500 text-sm">✅</span> Unlimited ingredient scans
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited ingredient scans
                     </li>
                   </ul>
                 </div>
@@ -1502,7 +1511,12 @@ export default function TwinPage() {
                       >
                         {modalLoading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : 'Proceed to Checkout 🚀'}
+                        ) : (
+                          <>
+                            Proceed to Checkout
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                       
                       <p className="text-[11px] text-gray-400 text-center mt-2">
@@ -1549,8 +1563,8 @@ export default function TwinPage() {
                 {modalStep === 'already_pro' && (
                   <>
                     <div className="text-left mt-2 flex flex-col items-center text-center">
-                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] text-2xl mb-3">
-                        🐾
+                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] mb-3">
+                        <Footprints className="w-6 h-6" />
                       </div>
                       <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Pro Membership Found</h4>
                       <p className="text-sm text-gray-600 font-medium max-w-sm mb-4">
@@ -1567,7 +1581,8 @@ export default function TwinPage() {
                         }}
                         className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Sign in to Your Pro Account 🐾
+                        Sign in to Your Pro Account
+                        <Footprints className="w-4 h-4" />
                       </button>
                     </div>
 
@@ -1623,7 +1638,12 @@ export default function TwinPage() {
                       >
                         {modalLoading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : 'Send Verification Code 📩'}
+                        ) : (
+                          <>
+                            Send Verification Code
+                            <Mail className="w-4 h-4" />
+                          </>
+                        )}
                       </button>
                     </div>
 

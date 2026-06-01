@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
+import { Calendar, MapPin, ClipboardList, Bell, CheckCircle2, AlertTriangle, Dog, Cat } from 'lucide-react';
 
 
 interface Recall {
@@ -126,10 +127,10 @@ function RecallCard({ r }: { r: Recall }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-4 text-[12px] text-[#999]">
-          {r.date && <span className="flex items-center gap-1"><span>📅</span>{formatDate(r.date)}</span>}
-          {r.state && <span className="flex items-center gap-1"><span>📍</span>{r.state}</span>}
-          {r.voluntary && <span className="flex items-center gap-1"><span>📋</span>{r.voluntary}</span>}
+        <div className="flex flex-wrap gap-4 text-[12px] text-[#999] items-center">
+          {r.date && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-[#99A] shrink-0" />{formatDate(r.date)}</span>}
+          {r.state && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#99A] shrink-0" />{r.state}</span>}
+          {r.voluntary && <span className="flex items-center gap-1"><ClipboardList className="w-3.5 h-3.5 text-[#99A] shrink-0" />{r.voluntary}</span>}
         </div>
         <ShareRecallButton recall={r} />
       </div>
@@ -240,15 +241,15 @@ export default function RecallsPage() {
                 className="flex-1 px-5 py-3 rounded-full border border-[#DDD] bg-white text-[#191919] text-base outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
               />
               <button type="submit" disabled={submitting}
-                className="px-6 py-3 rounded-full font-[700] text-white text-base transition-all"
+                className="px-6 py-3 rounded-full font-[700] text-white text-base transition-all flex items-center justify-center gap-1.5"
                 style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1, whiteSpace: 'nowrap' }}
               >
-                {submitting ? 'Saving…' : '🔔 Get Alerts'}
+                {submitting ? 'Saving…' : <><Bell className="w-4 h-4 text-white" /> Get Alerts</>}
               </button>
             </form>
           ) : (
             <div className="inline-flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-6 py-3 rounded-full font-[600] text-base">
-              ✅ You&apos;re subscribed! We&apos;ll alert you of new recalls.
+              <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> You&apos;re subscribed! We&apos;ll alert you of new recalls.
             </div>
           )}
           {subError && <p className="text-[#EF4444] text-sm mt-3">{subError}</p>}
@@ -266,8 +267,8 @@ export default function RecallsPage() {
         )}
 
         {error && !loading && (
-          <div className="text-center py-16">
-            <span className="text-4xl block mb-3">⚠️</span>
+          <div className="text-center py-16 flex flex-col items-center justify-center">
+            <AlertTriangle className="w-12 h-12 text-red-500 mb-3" />
             <p className="text-[#666]">{error}</p>
           </div>
         )}
@@ -297,9 +298,14 @@ export default function RecallsPage() {
                       background: petFilter === f ? '#8B5E3C' : '#FFFFFF',
                       color: petFilter === f ? '#FFFFFF' : '#8B5E3C',
                       border: `1.5px solid ${petFilter === f ? '#8B5E3C' : '#E8D5C0'}`,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                     }}
                   >
-                    {f === 'all' ? 'All' : f === 'dogs' ? '🐕 Dogs' : '🐈 Cats'}
+                    {f === 'all' ? 'All' : f === 'dogs' ? (
+                      <><Dog className="w-3.5 h-3.5" /> Dogs</>
+                    ) : (
+                      <><Cat className="w-3.5 h-3.5" /> Cats</>
+                    )}
                   </button>
                 ))}
               </div>
@@ -316,7 +322,7 @@ export default function RecallsPage() {
             {/* ── ACTIVE RECALLS ─────────────────────────────────────── */}
             {filteredActive.length === 0 ? (
               <div className="bg-[#DCFCE7] border border-[#86EFAC] rounded-[20px] p-8 text-center mb-8">
-                <div className="text-4xl mb-3">✅</div>
+                <CheckCircle2 className="w-12 h-12 text-[#166534] mx-auto mb-3" />
                 <h3 className="font-[800] text-[#166534] text-xl mb-2">No Active Pet Food Recalls</h3>
                 <p className="text-[#166534]/80 text-sm">
                   {search || petFilter !== 'all'
@@ -345,7 +351,7 @@ export default function RecallsPage() {
                   className="w-full flex items-center justify-between px-6 py-4 bg-[#FDFAF7] hover:bg-[#F5EDE4] transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">📋</span>
+                    <ClipboardList className="w-5 h-5 text-[#8B5E3C] shrink-0" />
                     <div className="text-left">
                       <p className="font-[700] text-[#191919] text-sm">View Historical Recalls</p>
                       <p className="text-xs text-[#999]">{filteredHistorical.length} completed or terminated recalls</p>
@@ -436,7 +442,7 @@ function AmazonSafeAlternatives({ recall }: { recall: Recall }) {
       ) : (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[12px] font-bold text-[#166534] uppercase tracking-wide">✅ Safe Alternatives</p>
+            <p className="text-[12px] font-bold text-[#166534] uppercase tracking-wide flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-[#166534]" /> Safe Alternatives</p>
             <span className="text-[9px] text-gray-400">Powered by Amazon</span>
           </div>
           {loading ? (

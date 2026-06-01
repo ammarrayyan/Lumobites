@@ -8,6 +8,7 @@ import BudgetSlider from '@/components/BudgetSlider';
 import Link from 'next/link';
 import { isBrandMatch } from '@/lib/brand-matcher';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
+import { ShieldCheck, Bell, CheckCircle2, ShoppingBag, Sparkles, Lightbulb, AlertTriangle, Frown } from 'lucide-react';
 
 export default function ResultsPage() {
   const [profile, setProfile] = useState<PetProfile | null>(null);
@@ -202,7 +203,7 @@ export default function ResultsPage() {
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}
               style={{ fontSize: 'var(--text-btn)', padding: '8px 20px', textDecoration: 'none', color: '#8B5E3C', border: '1px solid #F0E6DD', display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}
             >
-              <span>🐾</span> Is this food safe?
+              <ShieldCheck className="w-4 h-4 text-[#8B5E3C] shrink-0" /> Is this food safe?
             </Link>
           </div>
         )}
@@ -295,14 +296,14 @@ export default function ResultsPage() {
         {/* Notices */}
         {budgetRelaxed && !fallback && (
           <div style={{ backgroundColor: '#EFF6FF', color: '#1E40AF', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: 'var(--text-desc)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-             <span style={{ fontSize: '18px' }}>💡</span>
+             <Lightbulb className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
              <p style={{ margin: 0 }}>We expanded your budget slightly to find these perfect matches.</p>
           </div>
         )}
         
         {fallback && (
           <div style={{ backgroundColor: '#FFFBEB', color: '#92400E', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: 'var(--text-desc)', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-             <span style={{ fontSize: '18px' }}>⚠️</span>
+             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
              <p style={{ margin: 0 }}>These are slightly above your budget but represent the absolute best options for {profile?.pet_name || 'your pet'}'s specific health needs.</p>
           </div>
         )}
@@ -326,7 +327,7 @@ export default function ResultsPage() {
             })
           ) : (
             <div className="text-center py-10 bg-white rounded-2xl p-6 shadow-sm">
-              <span className="text-4xl mb-4 block">😔</span>
+              <Frown className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="font-bold text-gray-900 mb-2">No results found, try different filters</h3>
               <p className="text-gray-500 text-sm">We couldn't find any real US pet foods matching all your exact constraints.</p>
             </div>
@@ -382,7 +383,7 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
       <div className="p-8 flex flex-col md:flex-row gap-6 items-center">
         <div className="flex-1 text-center md:text-left">
           <div className="inline-flex items-center gap-2 bg-[#FEE2E2] text-[#991B1B] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-full mb-3">
-            <span className="w-1.5 h-1.5 bg-[#EF4444] rounded-full animate-pulse"></span>
+            <Bell className="w-3.5 h-3.5 text-red-600 animate-pulse" />
             FDA Recall Alerts
           </div>
           <h3 className="font-[800] text-[#191919] text-xl mb-2 leading-tight">
@@ -395,7 +396,7 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
         <div className="w-full md:w-auto md:min-w-[300px]">
           {done ? (
             <div className="flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-5 py-4 rounded-[16px] font-[600] text-sm">
-              ✅ You&apos;re subscribed! We&apos;ll alert you if recalls happen.
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> You&apos;re subscribed! We&apos;ll alert you if recalls happen.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -413,7 +414,12 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
                 className="w-full py-3.5 rounded-[14px] font-[700] text-white text-sm transition-all hover:opacity-90"
                 style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1 }}
               >
-                {submitting ? 'Saving…' : '🔔 Save & Get Alerts'}
+                {submitting ? 'Saving…' : (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <Bell className="w-4 h-4 text-white shrink-0" />
+                    Save & Get Alerts
+                  </span>
+                )}
               </button>
               {err && <p className="text-[#EF4444] text-xs text-center">{err}</p>}
               <p className="text-[#BBB] text-[11px] text-center">No spam. Unsubscribe anytime. <a href="/recalls" className="underline hover:text-[#8B5E3C]">View current recalls →</a></p>
@@ -456,8 +462,8 @@ function AmazonPicks({ profile, topResult }: { profile: PetProfile | null; topRe
   return (
     <div className="mt-10 mb-2">
       <div className="flex items-center justify-between mb-1">
-        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', lineHeight: 1.2 }}>
-          🛒 {brand ? `${brand} on Amazon` : `Top ${petLabel} Food on Amazon`}
+        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', lineHeight: 1.2 }} className="flex items-center gap-1.5">
+          <ShoppingBag className="w-5 h-5 text-[#191919] shrink-0" /> {brand ? `${brand} on Amazon` : `Top ${petLabel} Food on Amazon`}
         </h3>
         <span className="text-[10px] text-gray-400">Powered by Amazon</span>
       </div>
@@ -550,8 +556,8 @@ function ToyRecommendations({ profile }: { profile: PetProfile | null }) {
 
   return (
     <div className="mt-10 mb-2">
-      <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', marginBottom: '4px', lineHeight: 1.2 }}>
-        🎾 Top Toys for your {displayBreed}
+      <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#191919', marginBottom: '4px', lineHeight: 1.2 }} className="flex items-center gap-1.5">
+        <Sparkles className="w-5 h-5 text-[#191919] shrink-0" /> Top Toys for your {displayBreed}
       </h3>
       <p className="text-sm text-gray-500 mb-6">Recommended for your pet&apos;s breed and size.</p>
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
+import { Footprints, Gamepad2, Inbox, HeartPulse } from 'lucide-react';
 
 export default function SuppliesPage() {
   // Toys State
@@ -91,13 +92,19 @@ export default function SuppliesPage() {
 
       <main className="max-w-[800px] mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-[800] text-[#191919] mb-4">🐾 Pet Supplies</h1>
+          <h1 className="text-4xl md:text-5xl font-[800] text-[#191919] mb-4 flex items-center justify-center gap-2">
+            <Footprints className="w-8 h-8 text-[#8B5E3C]" />
+            Pet Supplies
+          </h1>
           <p className="text-lg text-[#666666]">Find the best toys, litter, and supplements for your pet</p>
         </div>
 
         {/* SECTION 1: TOYS */}
         <section className="bg-white border border-[#E8DDD4] rounded-3xl p-6 md:p-10 mb-12 shadow-sm">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">🎾 Toys</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Gamepad2 className="w-6 h-6 text-[#8B5E3C]" />
+            Toys
+          </h2>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="flex-1">
@@ -137,7 +144,10 @@ export default function SuppliesPage() {
 
         {/* SECTION 2: LITTER */}
         <section className="bg-white border border-[#E8DDD4] rounded-3xl p-6 md:p-10 mb-12 shadow-sm">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">🪣 Cat Litter</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Inbox className="w-6 h-6 text-[#8B5E3C]" />
+            Cat Litter
+          </h2>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="flex-[2]">
@@ -177,7 +187,10 @@ export default function SuppliesPage() {
 
         {/* SECTION 3: SUPPLEMENTS */}
         <section className="bg-white border border-[#E8DDD4] rounded-3xl p-6 md:p-10 mb-12 shadow-sm">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">💊 Supplements</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <HeartPulse className="w-6 h-6 text-[#8B5E3C]" />
+            Supplements
+          </h2>
           
           <div className="flex flex-col gap-6 mb-8">
             <div>

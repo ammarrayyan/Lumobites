@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ChatBubble from '@/components/ChatBubble';
 import { ChatMessage, ParsedPetInfo } from '@/lib/types';
+import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight } from 'lucide-react';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
@@ -56,22 +57,22 @@ export default function ChatPage() {
   // Health Chips State
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const healthOptions = [
-    { id: 'anxiety', label: '😰 Anxiety or stress' },
-    { id: 'sensitive_stomach', label: '🤢 Sensitive stomach' },
-    { id: 'allergies', label: '🌾 Food allergies' },
-    { id: 'picky_eater', label: '🍽️ Picky eater' },
-    { id: 'weight_control', label: '⚖️ Weight management' },
-    { id: 'joint', label: '🦴 Joint issues' },
-    { id: 'none', label: '✅ None of the above' }
+    { id: 'anxiety', label: 'Anxiety or stress', icon: Brain },
+    { id: 'sensitive_stomach', label: 'Sensitive stomach', icon: Smile },
+    { id: 'allergies', label: 'Food allergies', icon: Wheat },
+    { id: 'picky_eater', label: 'Picky eater', icon: Sparkles },
+    { id: 'weight_control', label: 'Weight management', icon: Scale },
+    { id: 'joint', label: 'Joint issues', icon: Activity },
+    { id: 'none', label: 'None of the above', icon: CheckCircle2 }
   ];
 
   // Food Type Chips State
   const [selectedFoodType, setSelectedFoodType] = useState<string>('');
   const foodOptions = [
-    { id: 'dry', label: '🥩 Dry food (kibble)' },
-    { id: 'wet', label: '🍖 Wet food (canned)' },
-    { id: 'treats', label: '🦴 Treats & snacks' },
-    { id: 'both', label: '🔀 All / No preference' }
+    { id: 'dry', label: 'Dry food (kibble)', icon: Inbox },
+    { id: 'wet', label: 'Wet food (canned)', icon: Inbox },
+    { id: 'treats', label: 'Treats & snacks', icon: Inbox },
+    { id: 'both', label: 'All / No preference', icon: ChevronRight }
   ];
 
   const scrollToBottom = () => {
@@ -477,6 +478,7 @@ export default function ChatPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                    {healthOptions.map(opt => {
                      const isSelected = selectedChips.includes(opt.id);
+                     const Icon = opt.icon;
                      return (
                        <button
                          key={opt.id}
@@ -495,7 +497,10 @@ export default function ChatPage() {
                            color: isSelected ? '#FFFFFF' : '#8B5E3C',
                          }}
                        >
-                         {opt.label}
+                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                           <Icon size={16} />
+                           {opt.label}
+                         </span>
                        </button>
                      );
                    })}
@@ -505,7 +510,7 @@ export default function ChatPage() {
                     onClick={() => submitInput('', true)}
                     style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
                   >
-                    Continue →
+                    Continue <ChevronRight size={16} />
                   </button>
                 )}
              </div>
@@ -517,6 +522,7 @@ export default function ChatPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                    {foodOptions.map(opt => {
                      const isSelected = selectedFoodType === opt.id;
+                     const Icon = opt.icon;
                      return (
                        <button
                          key={opt.id}
@@ -535,19 +541,22 @@ export default function ChatPage() {
                            color: isSelected ? '#FFFFFF' : '#8B5E3C',
                          }}
                        >
-                         {opt.label}
+                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                           <Icon size={16} />
+                           {opt.label}
+                         </span>
                        </button>
                      );
                    })}
                 </div>
-                {selectedFoodType !== '' && (
-                  <button 
-                    onClick={() => submitInput('', true)}
-                    style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
-                  >
-                    Continue →
-                  </button>
-                )}
+                 {selectedFoodType !== '' && (
+                   <button 
+                     onClick={() => submitInput('', true)}
+                     style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
+                   >
+                     Continue <ChevronRight size={16} />
+                   </button>
+                 )}
              </div>
           )}
           

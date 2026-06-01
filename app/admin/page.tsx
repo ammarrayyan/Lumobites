@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Settings } from 'lucide-react';
 import SitterManagement from '@/components/admin/SitterManagement';
 import StatisticsDashboard from '@/components/admin/StatisticsDashboard';
 import AccountManagement from '@/components/admin/AccountManagement';
@@ -77,8 +78,9 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#111] text-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-white">
-            ⚙️ Lumo Bites Admin
+          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+            <Settings className="w-8 h-8 text-[#64b3f4]" />
+            Lumo Bites Admin
           </h1>
           <button
             onClick={handleLogout}
