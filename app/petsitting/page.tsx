@@ -1133,12 +1133,12 @@ export default function PetSitting() {
                                    {sitter.gender}
                                  </span>
                                )}
+                               {sitter.approval_status === 'approved' && (
+                                 <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1">
+                                   <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
+                                 </div>
+                               )}
                              </div>
-                             {sitter.approval_status === 'approved' && (
-                               <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1">
-                                 <ShieldCheck className="w-3.5 h-3.5" /> Identity Verified
-                               </div>
-                             )}
                              <div className="text-sm mb-1">
                                {sitter.review_count ? (
                                  <span className="text-[#D97706] font-bold flex items-center gap-1">
@@ -2151,7 +2151,7 @@ export default function PetSitting() {
                   
                   {selectedSitterForReviews.approval_status === 'approved' && (
                     <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#A7F3D0] mb-2">
-                      ✅ Identity Verified
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID Verified
                     </div>
                   )}
  

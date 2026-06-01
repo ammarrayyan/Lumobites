@@ -117,7 +117,7 @@ export default function PetSittingPreview() {
         <div className="flex-1 w-full md:w-auto mt-8 md:mt-0 flex flex-col gap-4">
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E8DDD4]">
             <h3 className="text-sm font-bold text-[#8B7E7D] uppercase tracking-wider mb-4 border-b border-[#F0E8E0] pb-2">
-              Verified Sitters
+              ID Verified Sitters
             </h3>
             
             {loading ? (
@@ -154,7 +154,7 @@ export default function PetSittingPreview() {
                           </span>
                         )}
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-600 border border-green-200">
-                          ✓ Verified
+                          ✓ ID Verified
                         </span>
                       </div>
                       <p className="text-xs text-[#666666] truncate flex items-center gap-1">
