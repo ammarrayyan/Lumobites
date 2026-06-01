@@ -6,7 +6,7 @@ export default function PrivacyPage() {
         <Navbar />
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '8px', color: '#191919' }}>Privacy Policy</h1>
-          <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: May 23, 2026</p>
+          <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: June 1, 2026</p>
           
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>1. Information We Collect</h2>
           <p className="mt-2">We collect the information you provide to us, including your name, email address, location (city/zip code), and pet information (such as type, age, weight, and health needs). This includes data provided when creating a Pet Sitter profile or making a request. For pet sitters, we also collect government-issued ID documents for identity verification purposes.</p>
@@ -37,6 +37,9 @@ export default function PrivacyPage() {
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>10. Data Deletion Requests</h2>
           <p className="mt-2">You have the right to request the deletion of your account and all associated personal data. To request data deletion, please email us at <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>info@lumobitespet.com</a>.</p>
+
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>11. Cookies & Local Storage</h2>
+          <p className="mt-2">Lumo Bites uses browser cookies and local storage to maintain your session, remember your preferences, and track referral links. We do not use cookies for advertising or tracking across third party websites. You can clear cookies and local storage at any time through your browser settings.</p>
         </div>
       </div>
     );
