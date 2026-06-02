@@ -144,7 +144,7 @@ export default function Home() {
               Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join.
             </p>
             <div className="mt-auto relative z-10">
-              <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5E3C] to-[#B58D5C] text-white font-bold text-center hover:from-[#734A2E] hover:to-[#9E774A] transition-all shadow-md text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#3B5947] to-[#253D30] text-white font-bold text-center hover:from-[#2C4436] hover:to-[#1B2C22] transition-all shadow-md text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Sitters &rarr;
               </Link>
             </div>
@@ -162,7 +162,7 @@ export default function Home() {
               Post a lost or found pet in seconds and reach your whole neighborhood instantly. Free, no account needed.
             </p>
             <div className="mt-auto relative z-10">
-              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#A05C46] to-[#834330] text-white font-bold text-center hover:from-[#8A4A35] hover:to-[#6E3322] transition-all shadow-md text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#82242D] to-[#5C161C] text-white font-bold text-center hover:from-[#6C1D24] hover:to-[#4A1015] transition-all shadow-md text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Post Lost Pet &rarr;
               </Link>
             </div>
