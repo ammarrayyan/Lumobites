@@ -1630,9 +1630,24 @@ export default function ScanPage() {
                       </div>
 
                       {modalMessage && (
-                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                          {modalMessage.text}
-                        </p>
+                        <div className="flex flex-col gap-2 items-center">
+                          <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {modalMessage.text}
+                          </p>
+                          {modalMessage.isError && modalMessage.text.includes('No active Pro subscription') && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setModalStep('upgrade_email');
+                                setModalMessage(null);
+                              }}
+                              className="mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-2 px-4 rounded-xl font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 text-white shrink-0 animate-pulse" />
+                              Become PRO instead ✨
+                            </button>
+                          )}
+                        </div>
                       )}
 
                       <button

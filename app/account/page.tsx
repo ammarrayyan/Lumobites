@@ -219,9 +219,48 @@ export default function AccountPage() {
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                    ⚠️ {error}
-                  </p>
+                  <div className="flex flex-col gap-3 items-center">
+                    <p className="text-xs text-red-500 font-semibold text-center leading-normal">
+                      ⚠️ {error}
+                    </p>
+                    {error.toLowerCase().includes('no active pro subscription') && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setLoading(true);
+                          setError(null);
+                          try {
+                            const res = await fetch('/api/stripe/checkout', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ email: email.trim() })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              window.location.href = data.url;
+                            } else {
+                              throw new Error(data.error || 'Failed to start checkout');
+                            }
+                          } catch (err: any) {
+                            setError(err.message || 'Failed to start checkout. Please try again.');
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={loading}
+                        className="w-full mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? (
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
+                            Become PRO — $2.99/mo ✨
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 <button
