@@ -353,9 +353,39 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState('');
+  const [isPro, setIsPro] = useState(false);
+  const [proEmail, setProEmail] = useState('');
+
+  useEffect(() => {
+    const cachedEmail = localStorage.getItem('lumo_pro_email');
+    if (cachedEmail) {
+      setIsPro(true);
+      setProEmail(cachedEmail);
+    } else {
+      setIsPro(false);
+      setProEmail('');
+    }
+
+    const syncStatus = () => {
+      const emailVal = localStorage.getItem('lumo_pro_email');
+      if (emailVal) {
+        setIsPro(true);
+        setProEmail(emailVal);
+      } else {
+        setIsPro(false);
+        setProEmail('');
+      }
+    };
+    window.addEventListener('lumo-pro-update', syncStatus);
+    return () => window.removeEventListener('lumo-pro-update', syncStatus);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isPro) {
+      setErr("Email recall alerts are a PRO feature. Upgrade to PRO for $2.99/month to get instant alerts when your pet's food is recalled.");
+      return;
+    }
     setSubmitting(true);
     setErr('');
     try {
@@ -390,7 +420,7 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
             Get notified if your pet&apos;s food is recalled
           </h3>
           <p className="text-[#7A6050] text-sm leading-relaxed max-w-[380px]">
-            We&apos;ll monitor the FDA database and email you instantly if any of the foods above get recalled. Free, no spam.
+            We&apos;ll monitor the FDA database and email you instantly if any of the foods above get recalled. PRO members get instant alerts.
           </p>
         </div>
         <div className="w-full md:w-auto md:min-w-[300px]">
@@ -421,8 +451,21 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
                   </span>
                 )}
               </button>
-              {err && <p className="text-[#EF4444] text-xs text-center">{err}</p>}
-              <p className="text-[#BBB] text-[11px] text-center">No spam. Unsubscribe anytime. <a href="/recalls" className="underline hover:text-[#8B5E3C]">View current recalls →</a></p>
+              {err && (
+                <div className="text-center">
+                  <p className="text-[#EF4444] text-xs font-semibold leading-relaxed">{err}</p>
+                  {!isPro && err.includes('PRO feature') && (
+                    <Link
+                      href="/account"
+                      className="inline-block mt-2.5 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-1.5 px-4 rounded-full text-xs font-bold transition-all shadow-sm"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      Upgrade to PRO ✨
+                    </Link>
+                  )}
+                </div>
+              )}
+              <p className="text-[#BBB] text-[11px] text-center">Unsubscribe anytime. <a href="/recalls" className="underline hover:text-[#8B5E3C]">View current recalls →</a></p>
             </form>
           )}
         </div>

@@ -41,6 +41,11 @@ export default function ScanPage() {
   const [verificationCode, setVerificationCode] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
 
+  // Recall subscription states inside scan results
+  const [recallSubscribed, setRecallSubscribed] = useState(false);
+  const [recallSubmitting, setRecallSubmitting] = useState(false);
+  const [recallSubError, setRecallSubError] = useState('');
+
   const getGradeColor = (grade: string) => {
     switch (grade) {
       case 'A': return '#10B981';
@@ -836,6 +841,8 @@ export default function ScanPage() {
     setOcrReviewText('');
     setLoading(false);
     setOcrLoading(false);
+    setRecallSubscribed(false);
+    setRecallSubError('');
 
     const stopAllTracks = () => {
       try {
@@ -1246,42 +1253,87 @@ export default function ScanPage() {
             </div>
 
 
-            <div className="bg-[#191919] rounded-2xl p-6 text-white">
+            <div className="bg-[#191919] rounded-2xl p-6 text-white border border-[#333]">
               <h4 className="font-bold mb-2 flex items-center gap-1.5">
                 <Bell className="w-4 h-4 text-[#8B5E3C]" />
                 Stay Protected
               </h4>
               <p className="text-xs text-gray-400 mb-4">
-                We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'this product')} has a new FDA recall. Free service.
+                We&apos;ll email you instantly if {product.product_name && product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'this product')} has a new FDA recall. PRO members get instant alerts.
               </p>
-              <form 
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const email = (e.target as any).email.value;
-                  const res = await fetch('/api/recall-subscribe', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                      email, 
-                      pet_type: product.pet_type || 'both', 
-                      product_names: [product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'Unknown Product')].filter(Boolean)
-                    })
-                  });
-                  const data = await res.json();
-                  if (res.ok) alert("You're subscribed to recall alerts!");
-                  else alert(data.error || "Something went wrong. Please try again.");
-                }}
-                className="flex gap-2"
-              >
-                <input 
-                  name="email"
-                  type="email" 
-                  placeholder="your@email.com" 
-                  required
-                  className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-sm outline-none focus:border-white/40"
-                />
-                <button type="submit" className="bg-[#8B5E3C] text-white px-4 py-2 rounded-lg text-sm font-bold">Alert Me</button>
-              </form>
+              {!recallSubscribed ? (
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!isPro) {
+                      setRecallSubError("Email recall alerts are a PRO feature. Upgrade to PRO for $2.99/month to get instant alerts when your pet's food is recalled.");
+                      return;
+                    }
+                    setRecallSubmitting(true);
+                    setRecallSubError('');
+                    try {
+                      const email = (e.target as any).email.value;
+                      const res = await fetch('/api/recall-subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                          email, 
+                          pet_type: product.pet_type || 'both', 
+                          product_names: [product.product_name !== 'Unknown Product' ? product.product_name : (product.brand || 'Unknown Product')].filter(Boolean)
+                        })
+                      });
+                      const data = await res.json();
+                      if (res.ok && data.success) {
+                        setRecallSubscribed(true);
+                      } else {
+                        setRecallSubError(data.error || "Something went wrong. Please try again.");
+                      }
+                    } catch {
+                      setRecallSubError("Network error. Please try again.");
+                    } finally {
+                      setRecallSubmitting(false);
+                    }
+                  }}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="flex gap-2">
+                    <input 
+                      name="email"
+                      type="email" 
+                      placeholder="your@email.com" 
+                      required
+                      disabled={recallSubmitting}
+                      className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-sm outline-none focus:border-white/40 text-white"
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={recallSubmitting} 
+                      className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-4 py-2 rounded-lg text-sm font-bold shrink-0 transition-colors"
+                    >
+                      {recallSubmitting ? 'Saving…' : 'Alert Me'}
+                    </button>
+                  </div>
+                  {recallSubError && (
+                    <div className="mt-2">
+                      <p className="text-red-400 text-xs font-semibold leading-relaxed">{recallSubError}</p>
+                      {!isPro && recallSubError.includes('PRO feature') && (
+                        <Link
+                          href="/account"
+                          className="inline-block mt-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-1.5 px-4 rounded-full text-[11px] font-bold transition-all shadow-sm"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          Upgrade to PRO ✨
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </form>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-800/35 px-3 py-2 rounded-lg font-semibold text-xs w-full justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Successfully subscribed to recall alerts!
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-3">
