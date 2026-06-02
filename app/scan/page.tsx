@@ -1380,10 +1380,10 @@ export default function ScanPage() {
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited ingredient scans
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Detailed AI safety reports
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Instant FDA email recall alerts
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Priority AI analysis
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Detailed AI safety reports
                     </li>
                   </ul>
                 </div>

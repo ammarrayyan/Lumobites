@@ -1413,7 +1413,7 @@ export default function TwinPage() {
                     Want to try again?
                   </h3>
                   <p className="text-sm text-gray-500 mt-3 font-medium text-center leading-relaxed">
-                    Upgrade to PRO for unlimited Pet Twin matches — plus contact verified pet sitters and unlimited food scans, all for $2.99/month.
+                    Upgrade to PRO for unlimited Pet Twin matches — plus contact verified pet sitters, email recall alerts, and unlimited food scans, all for $2.99/month.
                   </p>
                 </div>
 
@@ -1427,10 +1427,10 @@ export default function TwinPage() {
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited Pet Twin matches
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Contact verified pet sitters directly
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Instant FDA email recall alerts
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited ingredient scans
+                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Contact verified pet sitters directly
                     </li>
                   </ul>
                 </div>

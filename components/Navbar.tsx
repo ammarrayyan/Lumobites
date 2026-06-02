@@ -312,7 +312,7 @@ export default function Navbar() {
                         className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
                       >
                         <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
-                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
+                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
                         <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                       </button>
                       <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
@@ -402,7 +402,7 @@ export default function Navbar() {
                       className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
                     >
                       <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
-                      <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Contact verified sitters + unlimited scans</span>
+                      <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
                       <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                     </button>
                     <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
