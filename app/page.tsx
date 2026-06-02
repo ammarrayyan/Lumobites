@@ -180,20 +180,11 @@ export default function Home() {
               <h3 className="text-[#191919] font-bold text-xl">Pet Community</h3>
             </div>
             <p className="text-[#666666] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Your neighborhood pet community — post lost pets, join city discussions, discover your Pet Twin and find the best supplies.
+              Your neighborhood pet community — post lost pets, report sightings, and help reunite pets with their owners.
             </p>
-            <div className="mt-auto grid grid-cols-2 gap-2 relative z-10">
-              <Link href="/lost-pets" className="col-span-1 py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
+            <div className="mt-auto relative z-10">
+              <Link href="/lost-pets" className="block w-full py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
                 Lost Pets &rarr;
-              </Link>
-              <Link href="/city-board" className="col-span-1 py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
-                City Board &rarr;
-              </Link>
-              <Link href="/twin" className="col-span-1 py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
-                Pet Twin &rarr;
-              </Link>
-              <Link href="/supplies" className="col-span-1 py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
-                Pet Supplies &rarr;
               </Link>
             </div>
           </div>
