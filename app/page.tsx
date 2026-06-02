@@ -127,10 +127,10 @@ export default function Home() {
 
       {/* SERVICES GRID SECTION */}
       <section className="w-full bg-[#FDFAF7] px-6 pb-16">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
           
           {/* 1. Pet Sitting */}
-          <div className="bg-[#F5EDE4] border-2 border-[#8B5E3C] rounded-3xl p-6 flex flex-col gap-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 lg:col-span-5 bg-[#F5EDE4] border-2 border-[#8B5E3C] rounded-3xl p-6 flex flex-col gap-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 relative overflow-hidden">
             <div className="absolute top-0 right-0 bg-[#8B5E3C] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm flex items-center gap-1">
               <Star className="w-3 h-3 text-white fill-white" /> Most Popular
             </div>
@@ -150,8 +150,26 @@ export default function Home() {
             </div>
           </div>
  
-          {/* 2. Pet Food & Safety */}
-          <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
+          {/* 2. Lost Pets */}
+          <div className="col-span-12 lg:col-span-4 bg-[#F5EDE4] border border-[#8B5E3C]/60 rounded-3xl p-6 flex flex-col gap-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 relative overflow-hidden">
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                <Footprints className="w-6 h-6 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-bold text-xl">Lost Pets</h3>
+            </div>
+            <p className="text-[#666666] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
+              Post a lost or found pet in seconds and reach your whole neighborhood instantly. Free, no account needed.
+            </p>
+            <div className="mt-auto relative z-10">
+              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#8B5E3C] text-white font-bold text-center hover:bg-[#7A5234] transition-all shadow-sm text-sm" style={{ textDecoration: 'none' }}>
+                Post Lost Pet &rarr;
+              </Link>
+            </div>
+          </div>
+ 
+          {/* 3. Pet Food & Safety */}
+          <div className="col-span-12 lg:col-span-3 bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
                 <Utensils className="w-6 h-6 text-[#8B5E3C]" />
@@ -167,24 +185,6 @@ export default function Home() {
               </Link>
               <Link href="/scan" className="block w-full py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-sm" style={{ textDecoration: 'none' }}>
                 Scan Label &rarr;
-              </Link>
-            </div>
-          </div>
- 
-          {/* 3. Pet Community */}
-          <div className="bg-[#F5EDE4] border border-[#E8D5C0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
-                <Footprints className="w-6 h-6 text-[#8B5E3C]" />
-              </div>
-              <h3 className="text-[#191919] font-bold text-xl">Pet Community</h3>
-            </div>
-            <p className="text-[#666666] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Your neighborhood pet community — post lost pets, report sightings, and help reunite pets with their owners.
-            </p>
-            <div className="mt-auto relative z-10">
-              <Link href="/lost-pets" className="block w-full py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-[13px]" style={{ textDecoration: 'none' }}>
-                Lost Pets &rarr;
               </Link>
             </div>
           </div>
