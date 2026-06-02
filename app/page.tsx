@@ -256,7 +256,7 @@ export default function Home() {
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <AlertTriangle className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. Free email alerts, no spam.</p>
+              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <Sparkles className="w-9 h-9 text-[#8B5E3C] mb-5" />
