@@ -168,9 +168,6 @@ export default function Home() {
               <Link href="/scan" className="block w-full py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-sm" style={{ textDecoration: 'none' }}>
                 Scan Label &rarr;
               </Link>
-              <Link href="/recalls" className="block w-full py-2.5 rounded-xl border border-[#8B5E3C]/30 text-[#8B5E3C] font-bold text-center hover:bg-[#E8D5C0] transition-all text-sm" style={{ textDecoration: 'none' }}>
-                Recall Alerts &rarr;
-              </Link>
             </div>
           </div>
  
