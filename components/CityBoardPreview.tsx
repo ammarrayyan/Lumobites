@@ -51,7 +51,7 @@ export default function CityBoardPreview() {
   useEffect(() => {
     const fetchPreviewPosts = async () => {
       try {
-        const res = await fetch('/api/city-board/posts?sort=popular');
+        const res = await fetch('/api/city-board/posts?sort=latest');
         const data = await res.json();
         
         if (res.ok && data.posts && data.posts.length > 0) {

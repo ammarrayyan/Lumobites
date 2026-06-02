@@ -40,7 +40,9 @@ export async function GET(req: NextRequest) {
       query = query.eq('device_cookie', deviceCookie);
     }
 
-    if (sort === 'popular') {
+    if (sort === 'latest') {
+      query = query.order('created_at', { ascending: false });
+    } else if (sort === 'popular') {
       query = query.order('created_at', { ascending: false });
     } else {
       query = query.order('helpful_count', { ascending: false }).order('created_at', { ascending: false });
@@ -92,6 +94,8 @@ export async function GET(req: NextRequest) {
 
     if (sort === 'popular') {
       formattedData.sort((a: any, b: any) => b.reply_count - a.reply_count);
+    } else if (sort === 'latest') {
+      formattedData.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
 
     return NextResponse.json({ posts: formattedData });
