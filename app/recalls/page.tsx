@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
-import { Calendar, MapPin, ClipboardList, Bell, CheckCircle2, AlertTriangle, Dog, Cat } from 'lucide-react';
+import { Calendar, MapPin, ClipboardList, Bell, CheckCircle2, AlertTriangle, Dog, Cat, Sparkles } from 'lucide-react';
 
 
 interface Recall {
@@ -154,6 +154,32 @@ export default function RecallsPage() {
   const [search, setSearch] = useState('');
   const [showHistorical, setShowHistorical] = useState(false);
   const [checkedAt, setCheckedAt] = useState('');
+  const [isPro, setIsPro] = useState(false);
+  const [proEmail, setProEmail] = useState('');
+
+  useEffect(() => {
+    const cachedEmail = localStorage.getItem('lumo_pro_email');
+    if (cachedEmail) {
+      setIsPro(true);
+      setProEmail(cachedEmail);
+    } else {
+      setIsPro(false);
+      setProEmail('');
+    }
+
+    const syncStatus = () => {
+      const emailVal = localStorage.getItem('lumo_pro_email');
+      if (emailVal) {
+        setIsPro(true);
+        setProEmail(emailVal);
+      } else {
+        setIsPro(false);
+        setProEmail('');
+      }
+    };
+    window.addEventListener('lumo-pro-update', syncStatus);
+    return () => window.removeEventListener('lumo-pro-update', syncStatus);
+  }, []);
 
   useEffect(() => {
     const now = new Date();
@@ -173,6 +199,10 @@ export default function RecallsPage() {
 
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
+    if (!isPro) {
+      setSubError("Email recall alerts are a PRO feature. Upgrade to PRO for $2.99/month to get instant alerts when your pet's food is recalled.");
+      return;
+    }
     setSubmitting(true);
     setSubError('');
     try {
@@ -230,9 +260,12 @@ export default function RecallsPage() {
           <h1 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4" style={{ fontSize: 'clamp(32px, 5vw, 52px)' }}>
             Pet Food Recall Alerts
           </h1>
-          <p className="text-[18px] text-[#666] leading-[1.65] max-w-[500px] mx-auto mb-8">
+          <p className="text-[18px] text-[#666] leading-[1.65] max-w-[500px] mx-auto mb-6">
             Live recalls sourced directly from the FDA. Updated hourly. Know what&apos;s in your pet&apos;s bowl.
           </p>
+          <div className="text-sm text-[#8B5E3C] font-semibold max-w-[480px] mx-auto mb-8 bg-[#8B5E3C]/5 border border-[#8B5E3C]/20 px-4 py-2.5 rounded-2xl flex items-center justify-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" /> Get instant email alerts the moment your pet&apos;s food is recalled — upgrade to PRO for $2.99/month.
+          </div>
           {!subscribed ? (
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-[480px] mx-auto">
               <input
@@ -252,7 +285,20 @@ export default function RecallsPage() {
               <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> You&apos;re subscribed! We&apos;ll alert you of new recalls.
             </div>
           )}
-          {subError && <p className="text-[#EF4444] text-sm mt-3">{subError}</p>}
+          {subError && (
+            <div className="mt-4 max-w-[480px] mx-auto">
+              <p className="text-[#EF4444] text-sm font-semibold">{subError}</p>
+              {!isPro && subError.includes('PRO feature') && (
+                <Link
+                  href="/account"
+                  className="inline-block mt-3 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-2 px-5 rounded-full text-xs font-bold transition-all shadow-sm"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Upgrade to PRO ✨
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
