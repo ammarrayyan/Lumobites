@@ -310,7 +310,7 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number between 85 and 99, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
               }
             ]
           }
@@ -408,11 +408,21 @@ const DOG_BREED_SLUGS: Record<string, string> = {
       console.error('Pet breed search API failed:', err);
     }
 
+    const finalMatchScore = (() => {
+      if (result.matchScore && typeof result.matchScore === 'number') {
+        return result.matchScore;
+      }
+      const rand = Math.random();
+      if (rand < 0.75) return Math.floor(Math.random() * 21) + 65; // 65-85
+      if (rand < 0.95) return Math.floor(Math.random() * 10) + 86; // 86-95
+      return Math.floor(Math.random() * 4) + 96; // 96-99
+    })();
+
     return NextResponse.json({
       success: true,
       breed: result.breed,
       petType: result.petType,
-      matchScore: result.matchScore || Math.floor(Math.random() * 15) + 85,
+      matchScore: finalMatchScore,
       traits: cleanTraits.length >= 3 ? cleanTraits : ["Charming", "Friendly", "Warm"],
       quote: result.quote || "A perfect match for your one-of-a-kind personality!",
       reason: result.reason || '',
