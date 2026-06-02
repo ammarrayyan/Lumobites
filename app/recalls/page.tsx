@@ -149,6 +149,7 @@ export default function RecallsPage() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
   const [subError, setSubError] = useState('');
   const [petFilter, setPetFilter] = useState<'all' | 'dogs' | 'cats'>('all');
   const [search, setSearch] = useState('');
@@ -212,8 +213,10 @@ export default function RecallsPage() {
         body: JSON.stringify({ email, pet_type: 'all', product_names: [] }),
       });
       const data = await res.json();
-      if (res.ok && data.success) setSubscribed(true);
-      else setSubError(data.error || 'Something went wrong. Please try again.');
+      if (res.ok && data.success) {
+        setSubscribed(true);
+        setSuccessMsg(data.message || "You're subscribed! We'll alert you of new recalls.");
+      } else setSubError(data.error || 'Something went wrong. Please try again.');
     } catch {
       setSubError('Network error. Please try again.');
     } finally {
@@ -282,7 +285,7 @@ export default function RecallsPage() {
             </form>
           ) : (
             <div className="inline-flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-6 py-3 rounded-full font-[600] text-base">
-              <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> You&apos;re subscribed! We&apos;ll alert you of new recalls.
+              <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> {successMsg}
             </div>
           )}
           {subError && (

@@ -45,6 +45,7 @@ export default function ScanPage() {
   const [recallSubscribed, setRecallSubscribed] = useState(false);
   const [recallSubmitting, setRecallSubmitting] = useState(false);
   const [recallSubError, setRecallSubError] = useState('');
+  const [recallSuccessMsg, setRecallSuccessMsg] = useState('');
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -843,6 +844,7 @@ export default function ScanPage() {
     setOcrLoading(false);
     setRecallSubscribed(false);
     setRecallSubError('');
+    setRecallSuccessMsg('');
 
     const stopAllTracks = () => {
       try {
@@ -1285,6 +1287,7 @@ export default function ScanPage() {
                       const data = await res.json();
                       if (res.ok && data.success) {
                         setRecallSubscribed(true);
+                        setRecallSuccessMsg(data.message || "Successfully subscribed to recall alerts!");
                       } else {
                         setRecallSubError(data.error || "Something went wrong. Please try again.");
                       }
@@ -1331,7 +1334,7 @@ export default function ScanPage() {
               ) : (
                 <div className="inline-flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-800/35 px-3 py-2 rounded-lg font-semibold text-xs w-full justify-center">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  Successfully subscribed to recall alerts!
+                  {recallSuccessMsg}
                 </div>
               )}
             </div>

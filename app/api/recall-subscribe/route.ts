@@ -19,17 +19,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
-    const { error: dbError } = await supabase
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Check if subscription already exists
+    const { data: existingSub, error: checkError } = await supabase
       .from('recall_subscriptions')
-      .upsert(
-        {
-          email: email.toLowerCase().trim(),
+      .select('email')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Supabase check error:', checkError);
+    }
+
+    if (existingSub) {
+      // Update preferences on existing subscription without sending another welcome email
+      const { error: updateError } = await supabase
+        .from('recall_subscriptions')
+        .update({
           pet_type: pet_type || 'both',
           product_names: product_names || [],
-          created_at: new Date().toISOString(),
-        },
-        { onConflict: 'email' }
-      );
+        })
+        .eq('email', cleanEmail);
+
+      if (updateError) {
+        console.error('Supabase update error:', updateError);
+        return NextResponse.json({ error: updateError.message || 'Database update error' }, { status: 500 });
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        message: 'You are already subscribed to the FDA recall alerts service.' 
+      });
+    }
+
+    // Insert new subscription
+    const { error: dbError } = await supabase
+      .from('recall_subscriptions')
+      .insert({
+        email: cleanEmail,
+        pet_type: pet_type || 'both',
+        product_names: product_names || [],
+        created_at: new Date().toISOString(),
+      });
 
     if (dbError) {
       console.error('Supabase error:', dbError);

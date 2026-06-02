@@ -352,6 +352,7 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
   const [err, setErr] = useState('');
   const [isPro, setIsPro] = useState(false);
   const [proEmail, setProEmail] = useState('');
@@ -399,8 +400,10 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
         }),
       });
       const data = await res.json();
-      if (res.ok && data.success) setDone(true);
-      else setErr(data.error || 'Something went wrong.');
+      if (res.ok && data.success) {
+        setDone(true);
+        setSuccessMsg(data.message || "You're subscribed! We'll alert you if recalls happen.");
+      } else setErr(data.error || 'Something went wrong.');
     } catch {
       setErr('Network error. Please try again.');
     } finally {
@@ -426,7 +429,7 @@ function RecallSubscribeWidget({ profile, results }: { profile: PetProfile | nul
         <div className="w-full md:w-auto md:min-w-[300px]">
           {done ? (
             <div className="flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-5 py-4 rounded-[16px] font-[600] text-sm">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> You&apos;re subscribed! We&apos;ll alert you if recalls happen.
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> {successMsg}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
