@@ -952,12 +952,14 @@ export default function PetSitting() {
             </div>
           </div>
 
-          <button
-            onClick={() => setActiveTab('become')}
-            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold px-5 py-3 rounded-xl transition-all shadow-sm shrink-0 flex items-center gap-1 cursor-pointer"
-          >
-            Join Free <span>&rarr;</span>
-          </button>
+          {activeTab !== 'become' && (
+            <button
+              onClick={() => setActiveTab('become')}
+              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold px-5 py-3 rounded-xl transition-all shadow-sm shrink-0 flex items-center gap-1 cursor-pointer"
+            >
+              Join Free <span>&rarr;</span>
+            </button>
+          )}
         </div>
 
         <div className="text-center mb-10">
