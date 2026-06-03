@@ -149,6 +149,86 @@ const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: st
     quote: "You were born to take care of others — a natural hero!",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Saint-Bernard-Wikicommons.jpg"
   },
+  "shiba inu": {
+    traits: ["🦊 Alert and bold", "🧠 Highly independent", "✨ Proud posture"],
+    quote: "Independent and spirited — you march to the beat of your own drum!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Taka_Shiba.jpg"
+  },
+  "basenji": {
+    traits: ["🤫 Quietly clever", "⚡ High-energy athlete", "🧐 Alert observer"],
+    quote: "Expressive but quiet — you show your brilliance through actions, not words!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Basenji_dog.jpg"
+  },
+  "saluki": {
+    traits: ["👑 Graceful royalty", "🏃 Built for speed", "😌 Gentle spirit"],
+    quote: "Elegant and dignified — you possess a timeless, majestic charm!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Saluki_Portrait.jpg"
+  },
+  "borzoi": {
+    traits: ["🦒 Elegantly tall", "😌 Calm and aristocratic", "🎨 Artistic profile"],
+    quote: "Quietly dramatic and beautifully unique — you carry yourself like art!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Borzoi_standard.jpg"
+  },
+  "whippet": {
+    traits: ["⚡ Lightning speed", "🤗 Sweet and gentle", "🛋️ Expert cuddler"],
+    quote: "Fast on your feet but a total sweetheart who loves to relax!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Whippet_in_the_park.jpg"
+  },
+  "papillon": {
+    traits: ["🦋 Butterfly ears", "🧠 Extremely bright", "🎉 Playful entertainer"],
+    quote: "Tiny, brilliant, and full of lively, beautiful energy!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Papillon_600.jpg"
+  },
+  "schipperke": {
+    traits: ["🖤 Little black devil", "🧐 Highly curious", "💪 Fearless protector"],
+    quote: "Small, dark, and full of clever mischief and brave curiosity!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Schipperke_in_profile.jpg"
+  },
+  "xoloitzcuintli": {
+    traits: ["🗿 Ancient soul", "🛡️ Loyal guardian", "😌 Calm and quiet"],
+    quote: "Mysterious, noble, and deeply connected to ancient vibes!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Xoloitzcuintle_mexicano.jpg"
+  },
+  "azawakh": {
+    traits: ["🌍 Elegant traveler", "🛡️ Intensely loyal", "🏃 Sleek runner"],
+    quote: "Rare, refined, and fiercely devoted to your inner circle!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/da/Azawakh_Fawn.jpg"
+  },
+  "otterhound": {
+    traits: ["💦 Water lover", "🐻 Big shaggy bear", "👃 Incredible nose"],
+    quote: "Happy-go-lucky, friendly, and always ready to make a splash!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Otterhound_2.jpg"
+  },
+  "bergamasco": {
+    traits: ["🧶 Flocked coat", "🧠 Patient planner", "🛡️ Caring guardian"],
+    quote: "Unique and rugged — you are a reliable protector with a huge heart!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/82/Bergamasco_Shepherd_Dog.jpg"
+  },
+  "puli": {
+    traits: ["🧶 Corded acrobat", "⚡ Boundless energy", "😜 Fun and playful"],
+    quote: "A bouncing bundle of cords and joy — you keep everyone smiling!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/23/Puli_sitting.jpg"
+  },
+  "komondor": {
+    traits: ["👑 Majestic cords", "🛡️ Powerful guardian", "😌 Calm authority"],
+    quote: "An imposing, beautiful protector who commands respect silently!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Komondor_in_winter.jpg"
+  },
+  "norwegian lundehund": {
+    traits: ["🧗 Super flexible", "🧐 Natural explorer", "🐾 Unique traits"],
+    quote: "Able to climb any obstacle — your agility and flexibility are unmatched!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/75/Norsk_Lundehund.jpg"
+  },
+  "catalburun": {
+    traits: ["👃 Split-nose tracker", "🎯 Extremely focused", "🤝 Deeply loyal"],
+    quote: "Rare and uniquely gifted — you see and smell details others miss!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Catalburun_puppy.jpg"
+  },
+  "peruvian inca orchid": {
+    traits: ["✨ Elegant silhouette", "🤗 Affectionate family member", "😎 Sleek style"],
+    quote: "Distinctive, classy, and deeply devoted to those you love!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/cd/Peruvian_Hairless_Dog_standing.jpg"
+  },
 
   // Cats
   "siamese": {
@@ -255,11 +335,81 @@ const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: st
     traits: ["🐆 Mini panther energy", "😎 Effortlessly cool", "🌙 Mysterious and magnetic"],
     quote: "Dark, mysterious, and magnetically attractive — a true night creature!",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Bombay_cat.jpg"
+  },
+  "siberian": {
+    traits: ["❄️ Winter champion", "🤗 Highly affectionate", "🧗 Bold climber"],
+    quote: "Hypoallergenic charm and absolute warmth — you melt every heart!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/df/Siberian_Cat_looking_up.jpg"
+  },
+  "turkish van": {
+    traits: ["🏊 Swimming cat", "⚡ High energy", "👀 Bright expression"],
+    quote: "A true original who loves water and lives life at full speed!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Turkish_Van_Cat.jpg"
+  },
+  "sokoke": {
+    traits: ["🐾 Forest camo", "🏃 Incredibly fast", "💬 Very talkative"],
+    quote: "A rare wild look with a deeply social and active personality!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Sokoke_cat.jpg"
+  },
+  "ocicat": {
+    traits: ["🐆 Wild spots", "🧠 Dog-like smarts", "🎉 Outgoing nature"],
+    quote: "A beautiful spotted look with a friendly, trainable mind!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ocicat_-_chocolate_spotted.jpg"
+  },
+  "colorpoint shorthair": {
+    traits: ["🗣️ Expressive talker", "🤗 Warm companion", "👀 Highly active"],
+    quote: "Elegant, colorful, and always sharing your bright opinions!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Colorpoint_Shorthair.jpg"
+  },
+  "selkirk rex": {
+    traits: ["🧶 Curly teddy bear", "😌 Calm and patient", "🤗 Deeply loving"],
+    quote: "Loves to cuddle and sports a gorgeous, unique curly coat!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Selkirk_Rex_blue.jpg"
+  },
+  "laperm": {
+    traits: ["🌀 Soft waves", "🧐 Extremely curious", "💕 Gentle lap warmer"],
+    quote: "Wavy and wonderful — you bring a soft, loving warmth everywhere!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/74/LaPerm_cat_in_window.jpg"
+  },
+  "khao manee": {
+    traits: ["💎 Diamond eyes", "☀️ Pure white beauty", "🎉 Lively personality"],
+    quote: "A rare jewel with sparkling eyes and a heart of pure gold!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/79/Khao_Manee_portrait.jpg"
+  },
+  "minskin": {
+    traits: ["🐾 Short legs", "🤗 Extremely outgoing", "❤️ Warm and sweet"],
+    quote: "Compact, rare, and bursting with affectionate, friendly energy!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/78/Minskin_cat.jpg"
+  },
+  "peterbald": {
+    traits: ["😎 Hairless elegance", "🗣️ Highly vocal", "💕 Social companion"],
+    quote: "Graceful, sleek, and always the center of social interactions!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9a/Peterbald_cat.jpg"
+  },
+  "donskoy": {
+    traits: ["👽 Alien charm", "🤗 Soft skin", "❤️ Deeply affectionate"],
+    quote: "Strikingly unique appearance with a heart full of pure love!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Donskoy_cat_standing.jpg"
+  },
+  "ukrainian levkoy": {
+    traits: ["👂 Folded ears", "😌 Gentle temperament", "🧐 Curious observer"],
+    quote: "Fascinating folded ears and a calm, sweet disposition!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Ukrainian_Levkoy.jpg"
+  },
+  "raas": {
+    traits: ["🇮🇩 Rare islander", "💪 Strong and athletic", "🧐 Independent mind"],
+    quote: "Proud and rare — you possess a strong, mysterious independence!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Raas_cat.jpg"
+  },
+  "serengeti": {
+    traits: ["🐆 Tall silhouette", "⚡ High athletic jump", "👀 Wild grace"],
+    quote: "Brave, tall, and elegant — you capture the spirit of the wild!",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/df/Serengeti_cat_portrait.jpg"
   }
 };
 
-const DOG_BREEDS = Object.keys(BREED_DATA).slice(0, 29).map(b => b.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
-const CAT_BREEDS = Object.keys(BREED_DATA).slice(29).map(b => b.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+const DOG_BREEDS = Object.keys(BREED_DATA).slice(0, 45).map(b => b.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+const CAT_BREEDS = Object.keys(BREED_DATA).slice(45).map(b => b.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
 const ALL_BREEDS = [...DOG_BREEDS, ...CAT_BREEDS];
 
 export async function POST(req: Request) {
@@ -310,7 +460,7 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Base the breed match strictly on the person's facial features, expression, and energy, not on popularity. Avoid defaulting to the same common breeds repeatedly. Choose the most accurate match even if it is an uncommon breed. Consider all breeds in the list equally, including rare and diverse options. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
               }
             ]
           }
@@ -373,7 +523,23 @@ const DOG_BREED_SLUGS: Record<string, string> = {
   "irish setter": "setter/irish",
   "cocker spaniel": "spaniel/cocker",
   "vizsla": "vizsla",
-  "saint bernard": "stbernard"
+  "saint bernard": "stbernard",
+  "shiba inu": "shiba",
+  "basenji": "basenji",
+  "saluki": "saluki",
+  "borzoi": "borzoi",
+  "whippet": "whippet",
+  "papillon": "papillon",
+  "schipperke": "schipperke",
+  "xoloitzcuintli": "xoloitzcuintli",
+  "azawakh": "azawakh",
+  "otterhound": "otterhound",
+  "bergamasco": "bergamasco",
+  "puli": "puli",
+  "komondor": "komondor",
+  "norwegian lundehund": "lundehund",
+  "catalburun": "catalburun",
+  "peruvian inca orchid": "peruvianincaorchid"
 };
 
     // Use TheDogAPI or TheCatAPI or Dog CEO for the primary high quality breed image
