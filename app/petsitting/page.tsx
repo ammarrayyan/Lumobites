@@ -184,11 +184,32 @@ export default function PetSitting() {
   const [zipGeocoding, setZipGeocoding] = useState(false);
   const [zipError, setZipError] = useState('');
 
+  const loadOwnerProfile = async (email: string) => {
+    if (!email) return;
+    try {
+      const res = await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (res.ok && data.success && data.profile) {
+        const p = data.profile;
+        if (p.owner_name) setReqOwnerName(p.owner_name);
+        if (p.pet_name) setReqPetName(p.pet_name);
+        if (p.pet_type) setReqPetType(p.pet_type);
+        if (p.pet_age) setReqPetAge(p.pet_age);
+        if (p.special_notes) setReqNotes(p.special_notes);
+        if (p.phone_number) setReqPhone(p.phone_number);
+        setHasSavedInfo(true);
+      }
+    } catch (err) {
+      console.error('Failed to load owner profile:', err);
+    }
+  };
+
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     if (cachedEmail && cachedEmail !== 'undefined') {
       setReqEmail(cachedEmail);
       fetchSitters(cachedEmail);
+      loadOwnerProfile(cachedEmail);
     } else {
       fetchSitters();
     }
@@ -205,36 +226,11 @@ export default function PetSitting() {
     if (params.get('tab') === 'become' || window.location.hash === '#become') {
       setActiveTab('become');
     }
-
-    // Restore saved owner draft details
-    const savedOwnerName = localStorage.getItem('lumo_owner_name');
-    const savedPetName = localStorage.getItem('lumo_pet_name');
-    const savedPetType = localStorage.getItem('lumo_pet_type');
-    const savedPetAge = localStorage.getItem('lumo_pet_age');
-    const savedPetNotes = localStorage.getItem('lumo_pet_notes');
-    const savedOwnerPhone = localStorage.getItem('lumo_owner_phone');
-
-    if (savedOwnerName) setReqOwnerName(savedOwnerName);
-    if (savedPetName) setReqPetName(savedPetName);
-    if (savedPetType) setReqPetType(savedPetType);
-    if (savedPetAge) setReqPetAge(savedPetAge);
-    if (savedPetNotes) setReqNotes(savedPetNotes);
-    if (savedOwnerPhone) setReqPhone(savedOwnerPhone);
-
-    if (savedOwnerName || savedPetName || savedPetType || savedPetAge || savedPetNotes || savedOwnerPhone) {
-      setHasSavedInfo(true);
-    }
   }, []);
 
-  const handleClearSavedInfo = (e: React.MouseEvent) => {
+  const handleClearSavedInfo = async (e: React.MouseEvent) => {
     e.preventDefault();
-    localStorage.removeItem('lumo_owner_name');
-    localStorage.removeItem('lumo_pet_name');
-    localStorage.removeItem('lumo_pet_type');
-    localStorage.removeItem('lumo_pet_age');
-    localStorage.removeItem('lumo_pet_notes');
-    localStorage.removeItem('lumo_owner_phone');
-
+    
     setReqOwnerName('');
     setReqPetName('');
     setReqPetType('dog');
@@ -242,6 +238,17 @@ export default function PetSitting() {
     setReqNotes('');
     setReqPhone('');
     setHasSavedInfo(false);
+
+    const email = reqEmail || localStorage.getItem('lumo_pro_email');
+    if (email) {
+      try {
+        await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}`, {
+          method: 'DELETE'
+        });
+      } catch (err) {
+        console.error('Failed to delete owner profile:', err);
+      }
+    }
   };
 
   // Debounced geocoding effect
@@ -850,6 +857,7 @@ export default function PetSitting() {
           setOwnerAuthCode('');
           localStorage.setItem('lumo_pro_email', unlockEmail);
           setReqEmail(unlockEmail);
+          loadOwnerProfile(unlockEmail);
         } else {
           setReqError('Invalid or expired code.');
         }
@@ -1026,14 +1034,25 @@ export default function PetSitting() {
 
       const data = await res.json();
       if (res.ok) {
-        // Save fields to localStorage upon successful request submission
-        localStorage.setItem('lumo_owner_name', reqOwnerName);
-        localStorage.setItem('lumo_pet_name', reqPetName);
-        localStorage.setItem('lumo_pet_type', reqPetType);
-        localStorage.setItem('lumo_pet_age', reqPetAge);
-        localStorage.setItem('lumo_pet_notes', reqNotes);
-        localStorage.setItem('lumo_owner_phone', reqPhone);
-        setHasSavedInfo(true);
+        // Save owner profile details to Supabase upon successful request submission
+        try {
+          await fetch('/api/petsitting/owner-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: reqEmail,
+              owner_name: reqOwnerName,
+              pet_name: reqPetName,
+              pet_type: reqPetType,
+              pet_age: reqPetAge,
+              phone_number: reqPhone || null,
+              special_notes: reqNotes || null
+            })
+          });
+          setHasSavedInfo(true);
+        } catch (err) {
+          console.error('Failed to save owner profile:', err);
+        }
 
         setReqSuccess(true);
         if (data.whatsapp_link) {
