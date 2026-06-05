@@ -94,14 +94,17 @@ export default function PetSitting() {
   
   // Request Form State
   const [reqEmail, setReqEmail] = useState('');
+  const [reqOwnerName, setReqOwnerName] = useState('');
   const [reqPetName, setReqPetName] = useState('');
-  const [reqPetType, setReqPetType] = useState('Dog');
+  const [reqPetType, setReqPetType] = useState('dog');
+  const [reqPetAge, setReqPetAge] = useState('');
   const [reqStartDate, setReqStartDate] = useState('');
   const [reqEndDate, setReqEndDate] = useState('');
   const [reqNotes, setReqNotes] = useState('');
   const [reqLoading, setReqLoading] = useState(false);
   const [reqError, setReqError] = useState('');
   const [reqSuccess, setReqSuccess] = useState(false);
+  const [hasSavedInfo, setHasSavedInfo] = useState(false);
 
   // Become Sitter State
   const [sitterEmail, setSitterEmail] = useState('');
@@ -202,7 +205,44 @@ export default function PetSitting() {
     if (params.get('tab') === 'become' || window.location.hash === '#become') {
       setActiveTab('become');
     }
+
+    // Restore saved owner draft details
+    const savedOwnerName = localStorage.getItem('lumo_owner_name');
+    const savedPetName = localStorage.getItem('lumo_pet_name');
+    const savedPetType = localStorage.getItem('lumo_pet_type');
+    const savedPetAge = localStorage.getItem('lumo_pet_age');
+    const savedPetNotes = localStorage.getItem('lumo_pet_notes');
+    const savedOwnerPhone = localStorage.getItem('lumo_owner_phone');
+
+    if (savedOwnerName) setReqOwnerName(savedOwnerName);
+    if (savedPetName) setReqPetName(savedPetName);
+    if (savedPetType) setReqPetType(savedPetType);
+    if (savedPetAge) setReqPetAge(savedPetAge);
+    if (savedPetNotes) setReqNotes(savedPetNotes);
+    if (savedOwnerPhone) setReqPhone(savedOwnerPhone);
+
+    if (savedOwnerName || savedPetName || savedPetType || savedPetAge || savedPetNotes || savedOwnerPhone) {
+      setHasSavedInfo(true);
+    }
   }, []);
+
+  const handleClearSavedInfo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    localStorage.removeItem('lumo_owner_name');
+    localStorage.removeItem('lumo_pet_name');
+    localStorage.removeItem('lumo_pet_type');
+    localStorage.removeItem('lumo_pet_age');
+    localStorage.removeItem('lumo_pet_notes');
+    localStorage.removeItem('lumo_owner_phone');
+
+    setReqOwnerName('');
+    setReqPetName('');
+    setReqPetType('dog');
+    setReqPetAge('');
+    setReqNotes('');
+    setReqPhone('');
+    setHasSavedInfo(false);
+  };
 
   // Debounced geocoding effect
   useEffect(() => {
@@ -965,22 +1005,36 @@ export default function PetSitting() {
       const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
 
+      const finalNotes = reqPetAge.trim() 
+        ? `[Pet Age: ${reqPetAge.trim()}]${reqNotes ? ' ' + reqNotes : ''}` 
+        : reqNotes;
+
       const res = await fetch('/api/petsitting/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sitter_id: selectedSitter?.id,
           owner_email: reqEmail,
+          owner_name: reqOwnerName,
           pet_name: reqPetName,
           pet_type: reqPetType,
           dates: finalDates,
-          special_notes: reqNotes,
+          special_notes: finalNotes,
           phone_number: reqPhone || null
         })
       });
 
       const data = await res.json();
       if (res.ok) {
+        // Save fields to localStorage upon successful request submission
+        localStorage.setItem('lumo_owner_name', reqOwnerName);
+        localStorage.setItem('lumo_pet_name', reqPetName);
+        localStorage.setItem('lumo_pet_type', reqPetType);
+        localStorage.setItem('lumo_pet_age', reqPetAge);
+        localStorage.setItem('lumo_pet_notes', reqNotes);
+        localStorage.setItem('lumo_owner_phone', reqPhone);
+        setHasSavedInfo(true);
+
         setReqSuccess(true);
         if (data.whatsapp_link) {
           setLastWhatsappLink(data.whatsapp_link);
@@ -2360,37 +2414,58 @@ export default function PetSitting() {
               </div>
             ) : (
               <form onSubmit={submitRequest} className="space-y-4">
+                {hasSavedInfo && (
+                  <div className="bg-[#F6EFEA] border border-[#E4D5CA] rounded-2xl p-3.5 flex items-center justify-between text-xs text-[#8B5E3C] shadow-sm animate-fade-in">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span>✨</span> Your pet details were saved — update anytime
+                    </span>
+                    <button type="button" onClick={handleClearSavedInfo} className="underline font-bold hover:text-[#7A5234] transition-colors ml-2 shrink-0">
+                      Clear saved info
+                    </button>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
-                  <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
-                  <input type="tel" value={reqPhone} onChange={e => setReqPhone(e.target.value)} placeholder="(555) 555-5555" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Name</label>
+                  <input required type="text" value={reqOwnerName} onChange={e => setReqOwnerName(e.target.value)} placeholder="Jane Doe" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
+                    <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
+                    <input type="tel" value={reqPhone} onChange={e => setReqPhone(e.target.value)} placeholder="(555) 555-5555" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name</label>
-                    <input required type="text" value={reqPetName} onChange={e => setReqPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
+                    <input required type="text" value={reqPetName} onChange={e => setReqPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type</label>
-                    <select value={reqPetType} onChange={e => setReqPetType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]">
+                    <select value={reqPetType} onChange={e => setReqPetType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
                       <option value="dog">Dog</option>
                       <option value="cat">Cat</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Age</label>
+                    <input type="text" value={reqPetAge} onChange={e => setReqPetAge(e.target.value)} placeholder="e.g. 3 years" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
                   <div className="flex space-x-2">
-                    <input required type="date" value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
-                    <input required type="date" value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]" />
+                    <input required type="date" value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    <input required type="date" value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Special Notes (Optional)</label>
-                  <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D]"></textarea>
+                  <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"></textarea>
                 </div>
 
                 {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
