@@ -362,41 +362,17 @@ export default function PetSitting() {
     setSitterAuthError('');
     
     try {
-      // Check if profile exists
-      const res = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
-      const profileData = await res.json();
-      
-      if (res.ok && profileData && profileData.id) {
-        // Returning user, send OTP
-        const otpRes = await fetch('/api/petsitting/auth/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: sitterEmail })
-        });
-        if (otpRes.ok) {
-          setSitterAuthMode('otp');
-        } else {
-          setSitterAuthError('Failed to send verification code.');
-        }
+      // Send OTP to ANY sitter email
+      const otpRes = await fetch('/api/petsitting/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sitterEmail })
+      });
+      if (otpRes.ok) {
+        setSitterAuthMode('otp');
       } else {
-        // New user, go straight to signup form
-        // Pre-fill email, clear the rest
-        setSitterFirstName('');
-        setSitterLastName('');
-        setSitterPhoto('');
-        setSitterIdPhoto('');
-        setHasExistingIdPhoto(false);
-        setSitterCity('');
-        setSitterLocationInput('');
-        setSitterLocationVerified(false);
-        setSitterLocationOptions([]);
-        setSitterSelectedLocation(null);
-        setSitterIsLocating(false);
-        setSitterBio('');
-        setSitterGender('');
-        setSitterRate('');
-        setSelfDeclared(false);
-        setSitterAuthMode('form');
+        const data = await otpRes.json();
+        setSitterAuthError(data.error || 'Failed to send verification code.');
       }
     } catch (e) {
       setSitterAuthError('An error occurred.');
@@ -421,9 +397,37 @@ export default function PetSitting() {
       const data = await res.json();
 
       if (res.ok) {
-        await loadSitterProfile(sitterEmail);
-        setSitterAuthMode('form');
-        setProfilePreviewMode(true);
+        // Code verified! Now check if profile exists
+        const profileRes = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
+        const profileData = await profileRes.json();
+
+        if (profileRes.ok && profileData && profileData.id) {
+          // Returning user, load their profile
+          await loadSitterProfile(sitterEmail);
+          setSitterAuthMode('form');
+          setProfilePreviewMode(true);
+        } else {
+          // New user, clear form to create a new profile
+          setSitterFirstName('');
+          setSitterLastName('');
+          setSitterPhoto('');
+          setSitterIdPhoto('');
+          setHasExistingIdPhoto(false);
+          setSitterCity('');
+          setSitterLocationInput('');
+          setSitterLocationVerified(false);
+          setSitterLocationOptions([]);
+          setSitterSelectedLocation(null);
+          setSitterIsLocating(false);
+          setSitterBio('');
+          setSitterGender('');
+          setSitterRate('');
+          setSelfDeclared(false);
+          setNeedsReapproval(false);
+          
+          setSitterAuthMode('form');
+          setProfilePreviewMode(false);
+        }
       } else {
         setSitterAuthError(data.error || 'Invalid verification code.');
       }
