@@ -5,395 +5,395 @@ export const dynamic = 'force-dynamic';
 const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: string }> = {
   // Dogs
   "golden retriever": {
-    traits: ["😊 Warm and approachable", "🎉 Life of the party", "❤️ Loyal to the core"],
-    quote: "Everyone's best friend — you light up every room you enter!",
+    traits: ["☀️ Radiantly friendly", "🍔 Unabashed food-motivated opportunist", "❤️ Loyal to a fault"],
+    quote: "You think every stranger is just a best friend who hasn't given you a snack yet.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_Retriever_Dukedestiny01_drvd.jpg"
   },
   "labrador retriever": {
-    traits: ["🤗 Incredibly friendly", "💪 Always energetic", "🎯 Determined and focused"],
-    quote: "Enthusiastic, loving, and always ready for an adventure!",
+    traits: ["⚡ High-energy companion", "🌊 Irresistibly drawn to water", "🎯 Enthusiastically determined"],
+    quote: "Your enthusiasm levels are permanently set to 100%, especially if a tennis ball is involved.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/26/YellowLabradorLooking_new.jpg"
   },
   "german shepherd": {
-    traits: ["💪 Natural leader", "🧠 Incredibly smart", "🛡️ Protective of loved ones"],
-    quote: "A natural protector — loyal, brave, and always alert!",
+    traits: ["🛡️ Devoted protector", "🧠 Strategic planner", "📋 Loves having a job to do"],
+    quote: "You're not paranoid; you're just highly alert and keeping a detailed log of everyone's movements.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d0/German_Shepherd_-_DSC_0346_%2810096362833%29.jpg"
   },
   "french bulldog": {
-    traits: ["😄 Hilarious and fun", "🤗 Total people person", "😴 Expert napper"],
-    quote: "Small in size but huge in personality — you make everyone laugh!",
+    traits: ["🤡 Professional class clown", "😴 Snoring enthusiast", "🍕 Expert snack-beggar"],
+    quote: "A massive personality trapped in a compact, slightly dramatic body that refuses to walk in the rain.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/3b/French_bulldog2.jpg"
   },
   "poodle": {
-    traits: ["✨ Elegantly charming", "🎨 Creative soul", "👑 Always put together"],
-    quote: "Sophisticated and brilliant — you make everything look effortless!",
+    traits: ["🧠 Genius-level intellect", "✂️ High-maintenance standard", "✨ Naturally showy"],
+    quote: "You're secretly running calculations to take over the household, but doing it with impeccable style.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/f8/Full_attention_%288067543690%29.jpg"
   },
   "bulldog": {
-    traits: ["😤 Stubborn but loveable", "🛋️ Expert relaxer", "❤️ Deeply loyal"],
-    quote: "Tough on the outside, total softie on the inside!",
+    traits: ["😤 Stubbornly charming", "🛋️ Part of the furniture", "❤️ Fiercely affectionate"],
+    quote: "You have very strong opinions about moving from the couch, mostly involving 'no'.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/bf/Bulldog_inglese.jpg"
   },
   "beagle": {
-    traits: ["🔍 Incredibly curious", "🎵 Very vocal", "🤝 Friendly with everyone"],
-    quote: "Always following your nose to the next great adventure!",
+    traits: ["👃 Driven by scent", "🎵 Dramatic vocal range", "🤝 Universal friendly greeter"],
+    quote: "Your nose makes all your life decisions for you, and your voice lets the entire neighborhood know.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/000_Beagle_Molly.jpg"
   },
   "rottweiler": {
-    traits: ["💪 Powerfully confident", "🧠 Highly intelligent", "🛡️ Fiercely loyal"],
-    quote: "Commanding respect wherever you go — a true natural leader!",
+    traits: ["🛡️ Unshakeable protector", "🧠 Discerning intellectual", "🧸 Secretly a lap dog"],
+    quote: "You look like you're in charge, but you secretly just want to lean your entire body weight against the person you love.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/26/Rottweiler_standing_facing_left.jpg"
   },
   "siberian husky": {
-    traits: ["🌨️ Free spirit", "👀 Striking and memorable", "🗣️ Very expressive"],
-    quote: "Wild at heart — you were born to explore and stand out!",
+    traits: ["🗣️ Extremely dramatic debater", "❄️ Cold-weather fanatic", "🏃 Escape artist"],
+    quote: "You have a lot of feelings about everything, and you will express them at maximum volume.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a3/Black-Magic-Big-Boy.jpg"
   },
   "chihuahua": {
-    traits: ["👑 Big personality in small package", "😤 Feisty and fearless", "❤️ Deeply devoted"],
-    quote: "Don't let the size fool you — you have the heart of a lion!",
+    traits: ["🌶️ Spicy and fierce", "👑 Tiny tyrant", "💕 Devoted to one human"],
+    quote: "You operate on 99% attitude and 1% body mass, and you will fight a mailbox if it looks at you wrong.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Chihuahua1_bvdb.jpg"
   },
   "pomeranian": {
-    traits: ["⭐ Total star quality", "🎉 Always the center of attention", "😊 Infectiously happy"],
-    quote: "Fluffy, fabulous, and absolutely impossible to ignore!",
+    traits: ["⭐ Fluffy attention magnet", "🗣️ High-pitched commentator", "🎉 Bundles of sass"],
+    quote: "A cloud of pure confidence who believes the entire world is a stage set up for your benefit.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Pomeranian_orange_Darius.jpg"
   },
   "dachshund": {
-    traits: ["🎯 Incredibly determined", "😄 Great sense of humor", "🤗 Loving and devoted"],
-    quote: "Long on personality and even longer on stubbornness — in the best way!",
+    traits: ["📏 Uniquely long profile", "⛏️ Persistent badger hunter", "😤 Will not be ordered around"],
+    quote: "Your body is long, but your list of demands and stubborn refusal to listen is even longer.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Dackel_3.jpg"
   },
   "border collie": {
-    traits: ["🧠 Genius level smart", "⚡ Incredibly energetic", "🎯 Laser focused"],
-    quote: "The overachiever of the group — you make everyone else look lazy!",
+    traits: ["🧠 Hyper-focused workaholic", "⚡ Unexhausted battery", "👀 The intense stare"],
+    quote: "You have already solved three complex puzzles today and are currently herding the dust motes.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/1a/24701-nature-natural-beauty-border-collie.jpg"
   },
   "shih tzu": {
-    traits: ["👑 Born royalty", "😌 Calm and collected", "🤗 Loves being pampered"],
-    quote: "You carry yourself like royalty because you basically are!",
+    traits: ["👑 Pampered royalty", "😌 Completely unbothered", "🎀 Always camera-ready"],
+    quote: "You don't do chores, you don't do tricks; you simply exist to be admired.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Shih-Tzu.jpg"
   },
   "corgi": {
-    traits: ["😄 Perpetually cheerful", "🏃 Surprisingly athletic", "👑 Royal connections"],
-    quote: "Cheerful, charming, and fit for royalty — just like the Queen's favorites!",
+    traits: ["🍞 Low-riding bread loaf", "📣 Opinionated supervisor", "🏃 Surprisingly speedy"],
+    quote: "Splooting expert and self-appointed neighborhood watch captain, all on two-inch legs.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Welsh_Corgi_Pembroke_Portrait.jpg"
   },
   "doberman": {
-    traits: ["💎 Sleek and sophisticated", "⚡ Lightning fast thinker", "🛡️ Natural protector"],
-    quote: "Elegant, powerful, and always ten steps ahead of everyone else!",
+    traits: ["💎 Sleek security detail", "⚡ Sharp-witted observer", "🛡️ Deeply committed guardian"],
+    quote: "You look like a high-end bodyguard but you are secretly afraid of the vacuum cleaner.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Dobermann_handling.jpg"
   },
   "dalmatian": {
-    traits: ["🎨 Unique and distinctive", "⚡ High energy", "🎉 Always the life of the party"],
-    quote: "One of a kind — there is literally nobody else like you!",
+    traits: ["🎨 Eye-catching spotted print", "🏃 High-mileage runner", "🤪 Distinctively goofy grin"],
+    quote: "You stand out in every crowd, mostly because you have energy levels that defy physics.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/90/Flecky3.jpg"
   },
   "australian shepherd": {
-    traits: ["🌈 Uniquely stunning", "🧠 Brilliant problem solver", "⚡ Boundless energy"],
-    quote: "Stunning, smart, and always herding everyone in the right direction!",
+    traits: ["🌈 Eye-catching kaleidoscope look", "🧠 Mind-reading puzzle solver", "⚡ Needs a task ASAP"],
+    quote: "You are currently outsmarting your owners and organizing their closets by color.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Australian_Shepherd_600.jpg"
   },
   "samoyed": {
-    traits: ["😊 Permanent smile", "☀️ Radiates positivity", "🤗 Warms everyone's heart"],
-    quote: "Your smile is literally contagious — you make the world brighter!",
+    traits: ["😊 Permanent smile", "☁️ Fluffy white cloud", "☀️ Pure optimism"],
+    quote: "You are basically a talking marshmallow who believes everyone is a friend.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Samoyed_dog_Phoebe.jpg"
   },
   "boxer": {
-    traits: ["🥊 Playfully fierce", "😄 Hilarious and goofy", "❤️ Heart of gold"],
-    quote: "Tough exterior, total goofball inside — you keep everyone entertained!",
+    traits: ["🤪 Bounce-around goofball", "🥊 Expressive paw user", "❤️ Deeply affectionate partner"],
+    quote: "You walk with a wiggle, jump with joy, and have zero concept of personal space.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Boxer_female.jpg"
   },
   "great dane": {
-    traits: ["👑 Gentle giant", "😌 Surprisingly calm", "🤗 Loves cuddles despite the size"],
-    quote: "Majestic and imposing but secretly just wants a cuddle!",
+    traits: ["🏢 Couch-hogging giant", "😌 Surprisingly gentle soul", "👻 Easily startled by small things"],
+    quote: "A horse-sized companion who genuinely believes they can fit on your lap.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Great_Dane_002.jpg"
   },
   "maltese": {
-    traits: ["👼 Angelic appearance", "💕 Incredibly affectionate", "✨ Always elegant"],
-    quote: "Delicate, charming, and absolutely impossible not to love!",
+    traits: ["✨ Silky white aristocrat", "💖 Sweet lap warmer", "👑 Loves luxury treatment"],
+    quote: "A tiny silk handkerchief of a dog who demands premium pillows and constant adoration.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/3b/Maltese_600.jpg"
   },
   "weimaraner": {
-    traits: ["🎨 Artistically inclined", "👁️ Soulful and deep", "🏃 Athletic and graceful"],
-    quote: "Hauntingly beautiful and deeply soulful — an artist at heart!",
+    traits: ["🎨 Ghostly grey beauty", "❤️ Intense velcro attachment", "🧠 Clever problem creator"],
+    quote: "You are a beautiful, shadowy figure who cannot handle being in a different room than your human.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Weimaraner_wb.jpg"
   },
   "akita": {
-    traits: ["🎌 Noble and dignified", "🛡️ Fiercely loyal", "😌 Quietly powerful"],
-    quote: "You don't need to say much — your presence alone commands respect!",
+    traits: ["🎌 Dignified noble spirit", "🛡️ Selective trust guardian", "😌 Quietly commanding presence"],
+    quote: "You don't need to bark; one look from you is enough to establish absolute boundaries.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/43/Akita_Inu.jpeg"
   },
   "chow chow": {
-    traits: ["👑 Regal and proud", "😏 Selective with trust", "🦁 Lion hearted"],
-    quote: "You don't need everyone's approval — only a chosen few earn yours!",
+    traits: ["🦁 Blue-tongued lion", "😏 Intensely private", "👑 Regal snobbery"],
+    quote: "You view human commands as polite suggestions that you will review at a later date.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e4/ChowChow.jpg"
   },
   "irish setter": {
-    traits: ["🍀 Charming and warm", "🎉 Naturally magnetic", "❤️ Enthusiastically loving"],
-    quote: "Effortlessly charming — people are just drawn to your warm energy!",
+    traits: ["🍀 Mahogany beauty", "🎉 Carefree party animal", "❤️ Loving and flighty"],
+    quote: "Bouncing through life with gorgeous red hair and not a single stressful thought in your head.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Irish_Setter.jpg/320px-Irish_Setter.jpg"
   },
   "cocker spaniel": {
-    traits: ["🎵 Sensitive and artistic", "👁️ Big beautiful soul", "🤗 Gentle and loving"],
-    quote: "Deep feeling, gentle soul — you experience life more beautifully than most!",
+    traits: ["🎵 Big-eyed gentle soul", "🌳 Enthusiastic flusher", "🤗 Loves family cuddles"],
+    quote: "Your soulful eyes can guilt anyone into sharing their dinner, and you know it.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b9/CockerSpaniel_simon.jpg"
   },
   "vizsla": {
-    traits: ["🏃 Athletic and graceful", "❤️ Velcro personality", "☀️ Golden warm energy"],
-    quote: "Active, affectionate, and absolutely glued to the people you love!",
+    traits: ["🏃 Athletic copper dynamo", "💖 Unconditional velcro clinger", "☀️ Warm helper"],
+    quote: "Your favorite place in the world is physically attached to the person next to you.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8e/Vizsla_show_dog.jpg"
   },
   "saint bernard": {
-    traits: ["🏔️ Gentle mountain giant", "🤗 Naturally nurturing", "❤️ Biggest heart in the room"],
-    quote: "You were born to take care of others — a natural hero!",
+    traits: ["🏔️ Shaggy rescue helper", "💦 Drool champion", "❤️ Giant warm heart"],
+    quote: "You bring comfort, safety, and a substantial amount of slobber to every interaction.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6e/Saint-Bernard-Wikicommons.jpg"
   },
   "shiba inu": {
-    traits: ["🦊 Alert and bold", "🧠 Highly independent", "✨ Proud posture"],
-    quote: "Independent and spirited — you march to the beat of your own drum!",
+    traits: ["🦊 Scream-prone dramatist", "🧠 Stubborn independent", "✨ Pristine self-groomer"],
+    quote: "You are part cat, part fox, and 100% convinced that you are the boss of this operation.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Taka_Shiba.jpg"
   },
   "basenji": {
-    traits: ["🤫 Quietly clever", "⚡ High-energy athlete", "🧐 Alert observer"],
-    quote: "Expressive but quiet — you show your brilliance through actions, not words!",
+    traits: ["🤫 Barkless yodeler", "🏃 Agile climber", "🧼 Cat-like cleaner"],
+    quote: "You don't bark, you yodel, and you groom yourself like a cat because you have high standards.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Basenji_dog.jpg"
   },
   "saluki": {
-    traits: ["👑 Graceful royalty", "🏃 Built for speed", "😌 Gentle spirit"],
-    quote: "Elegant and dignified — you possess a timeless, majestic charm!",
+    traits: ["👑 Feathered desert royalty", "🏃 Built for chasing", "😌 Aloof observer"],
+    quote: "You look like a high-fashion model who finds the concept of catching a ball beneath you.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Saluki_Portrait.jpg"
   },
   "borzoi": {
-    traits: ["🦒 Elegantly tall", "😌 Calm and aristocratic", "🎨 Artistic profile"],
-    quote: "Quietly dramatic and beautifully unique — you carry yourself like art!",
+    traits: ["🦒 Long-snooted aristocrat", "😌 Quietly dramatic", "🎨 Elegant model"],
+    quote: "Let me do it for you — a majestic creature who is mostly snoot and dramatic poses.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Borzoi_standard.jpg"
   },
   "whippet": {
-    traits: ["⚡ Lightning speed", "🤗 Sweet and gentle", "🛋️ Expert cuddler"],
-    quote: "Fast on your feet but a total sweetheart who loves to relax!",
+    traits: ["⚡ Couch potato speedster", "🤗 Gentle and polite", "🛋️ Shivering cuddle-seeker"],
+    quote: "A paper-thin racer who can run 35mph but prefers to sleep under the covers for 20 hours a day.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Whippet_in_the_park.jpg"
   },
   "papillon": {
-    traits: ["🦋 Butterfly ears", "🧠 Extremely bright", "🎉 Playful entertainer"],
-    quote: "Tiny, brilliant, and full of lively, beautiful energy!",
+    traits: ["🦋 Wing-eared marvel", "🧠 Lightning-fast learner", "🎉 Lively performer"],
+    quote: "A tiny butterfly-eared genius who learns tricks faster than you can teach them.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Papillon_600.jpg"
   },
   "schipperke": {
-    traits: ["🖤 Little black devil", "🧐 Highly curious", "💪 Fearless protector"],
-    quote: "Small, dark, and full of clever mischief and brave curiosity!",
+    traits: ["🖤 Curious little explorer", "🧐 Always on watch", "🔋 High-voltage engine"],
+    quote: "A small black captain who must supervise every cabinet opening and verify all deliveries.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Schipperke_in_profile.jpg"
   },
   "xoloitzcuintli": {
-    traits: ["🗿 Ancient soul", "🛡️ Loyal guardian", "😌 Calm and quiet"],
-    quote: "Mysterious, noble, and deeply connected to ancient vibes!",
+    traits: ["🗿 Ancient mohawk style", "🛡️ Watchful protector", "😌 Calm warm companion"],
+    quote: "A striking, hairless guardian who feels like a hot water bottle and acts like a wise ancient spirit.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Xoloitzcuintle_mexicano.jpg"
   },
   "azawakh": {
-    traits: ["🌍 Elegant traveler", "🛡️ Intensely loyal", "🏃 Sleek runner"],
-    quote: "Rare, refined, and fiercely devoted to your inner circle!",
+    traits: ["🌍 Slender desert runner", "🛡️ Intensely selective friend", "🏃 High-stance stride"],
+    quote: "An incredibly rare, statuesque runner who only offers their affection to a select VIP list.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/da/Azawakh_Fawn.jpg"
   },
   "otterhound": {
-    traits: ["💦 Water lover", "🐻 Big shaggy bear", "👃 Incredible nose"],
-    quote: "Happy-go-lucky, friendly, and always ready to make a splash!",
+    traits: ["💦 Shaggy swimming explorer", "👃 Scent-obsessed tracker", "🐻 Big friendly goofball"],
+    quote: "A giant shaggy water-dog who treats every puddle like a five-star spa.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Otterhound_2.jpg"
   },
   "bergamasco": {
-    traits: ["🧶 Flocked coat", "🧠 Patient planner", "🛡️ Caring guardian"],
-    quote: "Unique and rugged — you are a reliable protector with a huge heart!",
+    traits: ["🧶 Felted coat protector", "🧠 Calm logical thinker", "🛡️ Patient helper"],
+    quote: "Your hair naturally mats into protective mats, making you look like a walking rug with a heart of gold.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/82/Bergamasco_Shepherd_Dog.jpg"
   },
   "puli": {
-    traits: ["🧶 Corded acrobat", "⚡ Boundless energy", "😜 Fun and playful"],
-    quote: "A bouncing bundle of cords and joy — you keep everyone smiling!",
+    traits: ["🧶 Corded trampoline", "⚡ Boundless bouncing", "😜 Joyful jokester"],
+    quote: "A bouncing mop of cords who loves to leap into the air and make everyone laugh.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/23/Puli_sitting.jpg"
   },
   "komondor": {
-    traits: ["👑 Majestic cords", "🛡️ Powerful guardian", "😌 Calm authority"],
-    quote: "An imposing, beautiful protector who commands respect silently!",
+    traits: ["👑 Majestic corded giant", "🛡️ Serious security guard", "😌 Imposing stature"],
+    quote: "You look like a giant mop, but you take your guarding duties very, very seriously.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Komondor_in_winter.jpg"
   },
   "norwegian lundehund": {
-    traits: ["🧗 Super flexible", "🧐 Natural explorer", "🐾 Unique traits"],
-    quote: "Able to climb any obstacle — your agility and flexibility are unmatched!",
+    traits: ["🧗 Six-toed cliff climber", "🧐 Bendy explorer", "🐾 Unique anatomy"],
+    quote: "With six toes and a neck that bends backward, you are built for climbing cliffs and escaping trouble.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/75/Norsk_Lundehund.jpg"
   },
   "catalburun": {
-    traits: ["👃 Split-nose tracker", "🎯 Extremely focused", "🤝 Deeply loyal"],
-    quote: "Rare and uniquely gifted — you see and smell details others miss!",
+    traits: ["👃 Split-nose detector", "🎯 Laser-focused worker", "🤝 Intensely loyal"],
+    quote: "Your unique split nose gives you double the sniffing power to find things others miss.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Catalburun_puppy.jpg"
   },
   "peruvian inca orchid": {
-    traits: ["✨ Elegant silhouette", "🤗 Affectionate family member", "😎 Sleek style"],
-    quote: "Distinctive, classy, and deeply devoted to those you love!",
+    traits: ["✨ Statuesque mohawk look", "🤗 Warm sensitive friend", "😎 Chic minimalist style"],
+    quote: "Elegantly hairless with a stylish mohawk, you are a rare, sensitive work of art.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/cd/Peruvian_Hairless_Dog_standing.jpg"
   },
 
   // Cats
   "siamese": {
-    traits: ["🗣️ Very vocal and expressive", "😏 Mysterious and smart", "👀 Always watching"],
-    quote: "Elegant, opinionated, and absolutely impossible to ignore!",
+    traits: ["🗣️ Constant loud talker", "🧠 Highly demanding brain", "👀 Needs to supervise you"],
+    quote: "You have many loud opinions about everything, and you will share them at 3 AM.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg"
   },
   "persian": {
-    traits: ["😌 Calm and graceful", "👑 Royally elegant", "🛋️ Expert relaxer"],
-    quote: "You move through life with effortless grace and quiet confidence!",
+    traits: ["😌 Unbothered lounge expert", "👑 Fluffy luxury seeker", "🛋️ Premium nap-taker"],
+    quote: "You move through life with a serene presence, expecting the servants to handle the details.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/15/White_Persian_Cat.jpg"
   },
   "maine coon": {
-    traits: ["🦁 Majestic and mighty", "🤗 Surprisingly gentle", "🧠 Dog-like loyalty"],
-    quote: "The gentle giant — impressive on the outside, sweetheart on the inside!",
+    traits: ["🦁 Gentle giant hunter", "🤗 Chirpy communicator", "🧠 Dog-like fetch player"],
+    quote: "A massive fluffy companion who makes bird noises and likes playing in water.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Maine_coon_cat_mo_%281%29.jpg"
   },
   "bengal": {
-    traits: ["🐆 Wild at heart", "⚡ Incredibly energetic", "👀 Intensely focused"],
-    quote: "You have an untamed spirit that no one can contain!",
+    traits: ["🐆 Spotted jungle athlete", "⚡ High-voltage wildcat", "🌊 Water splash fan"],
+    quote: "You are 50% house cat, 50% wild leopard, and 100% likely to climb your curtains.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/ba/Paintedcats_Red_Star_standing.jpg"
   },
   "ragdoll": {
-    traits: ["😌 Goes with the flow", "🤗 Incredibly laid back", "💕 Melts in your arms"],
-    quote: "The most chill person in any room — nothing phases you!",
+    traits: ["😌 Floppy relaxation master", "🤗 Utterly trustful companion", "💕 Melts on contact"],
+    quote: "You go completely limp when held, showing the world how to truly do nothing.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Ragdoll_from_Gatil_Ragbelas.jpg"
   },
   "british shorthair": {
-    traits: ["🎩 Dignified and proper", "😌 Calm and collected", "🧠 Quietly observant"],
-    quote: "You observe everything, say little, and always know exactly what's going on!",
+    traits: ["🎩 Round-cheeked gentleman", "😌 Calm judge of character", "🧠 Quietly evaluating you"],
+    quote: "You judge everyone from a distance with round eyes and thick, plush dignity.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9d/Britishblue.jpg"
   },
   "british longhair": {
-    traits: ["👑 Quietly regal", "😌 Serene and peaceful", "🎨 Effortlessly beautiful"],
-    quote: "Serene, beautiful, and quietly ruling everything around you!",
+    traits: ["👑 Plush regal fluff", "😌 Calm palace ruler", "🎨 Majestic model"],
+    quote: "You rule your fluffy domain in complete peace, expecting others to admire you silently.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d9/British_Longhair.jpg"
   },
   "scottish fold": {
-    traits: ["🦉 Wise beyond years", "😊 Quietly cheerful", "🤔 Deep thinker"],
-    quote: "You see the world differently from everyone else — and you're usually right!",
+    traits: ["🦉 Owl-like folder", "😊 Soft-spoken observer", "🤔 Thinks in poses"],
+    quote: "Your folded ears and round eyes make you look like a wise little owl who knows your secrets.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5d/Scottish_Fold_Cat.jpg"
   },
   "sphynx": {
-    traits: ["😎 Fearlessly unique", "🎭 Total drama queen", "❤️ Surprisingly warm"],
-    quote: "You walk into a room and everyone stops — you were born to stand out!",
+    traits: ["😎 Naked and proud", "🎭 Attention-seeking gymnast", "❤️ Warm hot-pocket feel"],
+    quote: "You have no fur, zero shame, and a burning desire to sit on top of the warmest device in the house.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/af/Sphynx_cat_Quincy.jpg"
   },
   "abyssinian": {
-    traits: ["🏃 Always in motion", "🔍 Wildly curious", "⚡ Boundless energy"],
-    quote: "You never stop moving, exploring, and discovering new things!",
+    traits: ["🏃 High-speed investigator", "🔍 Wildly curious climber", "⚡ Unstoppable motor"],
+    quote: "You view high shelves as personal challenges and open cupboards as mysteries to solve.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9b/Gustav_chocolate.jpg"
   },
   "russian blue": {
-    traits: ["💎 Reserved and elegant", "🧠 Deeply intelligent", "😌 Quietly mysterious"],
-    quote: "You don't reveal yourself to just anyone — you are selectively wonderful!",
+    traits: ["💎 Emerald-eyed beauty", "🧠 Discerning intellectual", "😌 Highly selective socializer"],
+    quote: "You are a sophisticated, quiet companion who only reveals your sweet side to the chosen few.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d0/Russian_Blue_female.jpg"
   },
   "norwegian forest cat": {
-    traits: ["🌲 Nature lover", "💪 Quietly strong", "🤗 Warm and welcoming"],
-    quote: "Strong, independent, and completely at home in any environment!",
+    traits: ["🌲 Fluffy climber", "💪 Big-boned explorer", "🤗 Sweet family friend"],
+    quote: "Built for cold forests, you scale the tallest cat trees with absolute ease.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Norskskogkatt_Evita_3.jpg"
   },
   "birman": {
-    traits: ["🙏 Gentle and sacred", "💕 Deeply loving", "😌 Peacefully serene"],
-    quote: "You bring calm and peace to every situation — a true healer!",
+    traits: ["🙏 White-gloved beauty", "💕 Gentle lap snuggler", "😌 Soft purr engine"],
+    quote: "With your perfect white socks and gentle soul, you are the peacekeeper of the house.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Birman_cat.jpg"
   },
   "burmese": {
-    traits: ["🤗 People obsessed", "😄 Playfully mischievous", "❤️ Unconditionally loving"],
-    quote: "You absolutely need people around you — and honestly they need you more!",
+    traits: ["🤗 People-oriented shadow", "🎮 Playful acrobat", "❤️ High-volume purrer"],
+    quote: "You are a heavy little brick of love who insists on being involved in every single conversation.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b7/Birmankatze.jpg"
   },
   "exotic shorthair": {
-    traits: ["🧸 Living teddy bear", "😌 Ultra calm", "🤗 Loves being held"],
-    quote: "Soft, squishy, and absolutely irresistible — a real life teddy bear!",
+    traits: ["🧸 Flat-faced sweetie", "😌 Super-chill roommate", "🤗 Hug-loving companion"],
+    quote: "A plush Persian in a pajama suit who is too lazy to cause any trouble.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Exotic_shorthair.jpg"
   },
   "tonkinese": {
-    traits: ["🎭 Social butterfly", "🎮 Playfully fun", "💬 Great conversationalist"],
-    quote: "The social butterfly — you thrive when surrounded by energy and fun!",
+    traits: ["🎭 Playful extrovert", "🎮 Game player", "💬 Chatty companion"],
+    quote: "You combined the best of Siamese talkativeness and Burmese playfulness to create a 24/7 entertainment channel.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Tonkinese_cat.jpg"
   },
   "devon rex": {
-    traits: ["🧝 Elfin and magical", "😈 Mischievously playful", "⚡ Unpredictably fun"],
-    quote: "Magical, mischievous, and absolutely one of a kind!",
+    traits: ["🧝 Giant-eared pixie", "😈 Mischievous monkey", "⚡ Warm suede coat"],
+    quote: "You look like a little alien elf and spend your time riding on people's shoulders.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Devon_Rex_cat.jpg"
   },
   "turkish angora": {
-    traits: ["💃 Gracefully athletic", "👑 Naturally aristocratic", "🎨 Artistic soul"],
-    quote: "Grace and beauty come naturally to you — you make everything look like art!",
+    traits: ["💃 Silk-coated ballerina", "👑 Elegant acrobat", "🎨 Creative spirit"],
+    quote: "You are a beautiful white cloud of energy who expects to be treated like the queen you are.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Angora_cat.jpg"
   },
   "himalayan": {
-    traits: ["😌 Perfectly serene", "👑 Quietly majestic", "🛋️ Comfort expert"],
-    quote: "You have mastered the art of living beautifully and comfortably!",
+    traits: ["😌 Serene point-colored", "👑 Fluffy royalty", "🛋️ Cushion connoisseur"],
+    quote: "You look like a glamorous movie star and demand the absolute softest pillows.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/0/06/Himalayan_cat.jpg"
   },
   "chartreux": {
-    traits: ["🤫 Strong silent type", "🧠 Deeply wise", "😊 Quietly joyful"],
-    quote: "You don't need to say much — your wisdom speaks for itself!",
+    traits: ["🤫 Quiet blue hunter", "🧠 Smarter than you think", "😊 Permanent smile look"],
+    quote: "You have a silent meow, a sweet smile, and a very secret list of demands.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ad/Chartreux_cat.jpg"
   },
   "bombay": {
-    traits: ["🐆 Mini panther energy", "😎 Effortlessly cool", "🌙 Mysterious and magnetic"],
-    quote: "Dark, mysterious, and magnetically attractive — a true night creature!",
+    traits: ["🐆 Sleek black panther", "😎 Cool cuddler", "🌙 Shiny night hunter"],
+    quote: "A mini panther who is shiny, sleek, and obsessed with finding the warmest spot on your lap.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Bombay_cat.jpg"
   },
   "siberian": {
-    traits: ["❄️ Winter champion", "🤗 Highly affectionate", "🧗 Bold climber"],
-    quote: "Hypoallergenic charm and absolute warmth — you melt every heart!",
+    traits: ["❄️ Thick-coated jumper", "🤗 Hypoallergenic friend", "🧗 Great leap athlete"],
+    quote: "You are a fluffy powerhouse from the cold who can jump onto the top of the fridge in one bound.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/d/df/Siberian_Cat_looking_up.jpg"
   },
   "turkish van": {
-    traits: ["🏊 Swimming cat", "⚡ High energy", "👀 Bright expression"],
-    quote: "A true original who loves water and lives life at full speed!",
+    traits: ["🏊 Water-loving swimmer", "⚡ High-energy athlete", "👀 Active player"],
+    quote: "The 'swimming cat' who will gladly join you in the shower or splash in your water bowl.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Turkish_Van_Cat.jpg"
   },
   "sokoke": {
-    traits: ["🐾 Forest camo", "🏃 Incredibly fast", "💬 Very talkative"],
-    quote: "A rare wild look with a deeply social and active personality!",
+    traits: ["🐾 Ring-patterned tabby", "🏃 Lightning sprinter", "💬 Highly vocal"],
+    quote: "A rare, long-legged runner from Kenya who talks to you in a sweet, soft voice.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Sokoke_cat.jpg"
   },
   "ocicat": {
-    traits: ["🐆 Wild spots", "🧠 Dog-like smarts", "🎉 Outgoing nature"],
-    quote: "A beautiful spotted look with a friendly, trainable mind!",
+    traits: ["🐆 Spotted house leopard", "🧠 Highly trainable intellect", "🎉 Outgoing nature"],
+    quote: "You look wild and spotted, but you're actually a sweet, dog-like friend who knows how to fetch.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/2/29/Ocicat_-_chocolate_spotted.jpg"
   },
   "colorpoint shorthair": {
-    traits: ["🗣️ Expressive talker", "🤗 Warm companion", "👀 Highly active"],
-    quote: "Elegant, colorful, and always sharing your bright opinions!",
+    traits: ["🗣️ Opinionated talker", "🤗 Warm shadow friend", "👀 Extremely active"],
+    quote: "An elegant, talkative companion who has a comment for everything you do.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4e/Colorpoint_Shorthair.jpg"
   },
   "selkirk rex": {
-    traits: ["🧶 Curly teddy bear", "😌 Calm and patient", "🤗 Deeply loving"],
-    quote: "Loves to cuddle and sports a gorgeous, unique curly coat!",
+    traits: ["🧶 Bad-hair-day pride", "😌 Calm teddy bear", "🤗 Hugger"],
+    quote: "A gorgeous curly-coated cat who looks like they just woke up from a wild party.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Selkirk_Rex_blue.jpg"
   },
   "laperm": {
-    traits: ["🌀 Soft waves", "🧐 Extremely curious", "💕 Gentle lap warmer"],
-    quote: "Wavy and wonderful — you bring a soft, loving warmth everywhere!",
+    traits: ["🌀 Soft-waved explorer", "🧐 Extremely curious", "💕 Gentle lap warmer"],
+    quote: "With your unique curly coat and sweet personality, you are a walking Perm of joy.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/74/LaPerm_cat_in_window.jpg"
   },
   "khao manee": {
-    traits: ["💎 Diamond eyes", "☀️ Pure white beauty", "🎉 Lively personality"],
-    quote: "A rare jewel with sparkling eyes and a heart of pure gold!",
+    traits: ["💎 Odd-eyed treasure", "☀️ Pure white beauty", "🎉 Active player"],
+    quote: "A rare white beauty from Thailand who brings good luck and a lot of lively energy.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/79/Khao_Manee_portrait.jpg"
   },
   "minskin": {
-    traits: ["🐾 Short legs", "🤗 Extremely outgoing", "❤️ Warm and sweet"],
-    quote: "Compact, rare, and bursting with affectionate, friendly energy!",
+    traits: ["🐾 Hairless dwarf look", "🤗 Super friendly climber", "❤️ Warm snuggle buddy"],
+    quote: "With short legs and hairless skin, you look like a little sci-fi character but act like a sweet puppy.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/7/78/Minskin_cat.jpg"
   },
   "peterbald": {
-    traits: ["😎 Hairless elegance", "🗣️ Highly vocal", "💕 Social companion"],
-    quote: "Graceful, sleek, and always the center of social interactions!",
+    traits: ["😎 Hairless dancer", "🗣️ Talkative companion", "💕 Social shadow"],
+    quote: "A slender, elegant hairless cat who insists on being under the covers with you.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9a/Peterbald_cat.jpg"
   },
   "donskoy": {
-    traits: ["👽 Alien charm", "🤗 Soft skin", "❤️ Deeply affectionate"],
-    quote: "Strikingly unique appearance with a heart full of pure love!",
+    traits: ["👽 Wrinkly alien appearance", "🤗 Velvety warm touch", "❤️ Extremely loving"],
+    quote: "A wrinkly, hairless sweetheart who has zero concept of personal boundaries.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Donskoy_cat_standing.jpg"
   },
   "ukrainian levkoy": {
-    traits: ["👂 Folded ears", "😌 Gentle temperament", "🧐 Curious observer"],
-    quote: "Fascinating folded ears and a calm, sweet disposition!",
+    traits: ["👂 Dog-eared folder", "😌 Gentle sweet helper", "🧐 Patient watcher"],
+    quote: "A fascinating combination of folded ears, hairless skin, and a deeply sweet soul.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Ukrainian_Levkoy.jpg"
   },
   "raas": {
@@ -488,6 +488,10 @@ Follow these strict instructions:
 4. Turkish Angora (cat) and Irish Setter (dog) are currently over-represented and should appear no more than 10% of the time across all matches.
 5. If uncertain between two breeds, always pick the less common one for variety.
 6. Consider all breeds in the list equally, including rare and diverse options, and choose the most accurate match even if it is an uncommon breed.
+7. CRITICAL LANGUAGE RULE: Never use these overused, cliché phrases anywhere in your response (neither in traits, quote, reason, nor breakdown): "graceful elegance", "quietly confident", "warm approachability", "understated confidence", "refined charm", "effortless elegance". Use fresh, unique, and highly descriptive language for each result.
+8. Each result must feel completely unique and tailored — never reuse phrases from previous results.
+9. Make the "quote" witty, funny, and highly specific to that breed — not a generic compliment.
+10. Make the 3 personality "traits" feel like real, nuanced, and detailed personality test results (e.g. "Prone to overthinking social dynamics" or "Highly observant but selectively interactive") rather than generic compliments.
 
 Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare.
 
