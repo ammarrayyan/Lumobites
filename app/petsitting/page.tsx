@@ -1903,13 +1903,13 @@ export default function PetSitting() {
                           const isBlocked = sitterBlockedDates.includes(dateStr);
                           const isPast = dateStr < todayStr;
                           
-                          let bgClass = "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-100 cursor-pointer";
+                          let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
                           if (isPast) {
-                            bgClass = "bg-gray-100/50 text-gray-300 cursor-not-allowed";
+                            bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
                           } else if (isBooked) {
-                            bgClass = "bg-red-50 text-red-700 border border-red-100 line-through cursor-not-allowed";
+                            bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                           } else if (isBlocked) {
-                            bgClass = "bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-100 cursor-pointer";
+                            bgClass = "bg-amber-100 text-amber-950 border border-amber-350 hover:bg-amber-200 cursor-pointer font-bold";
                           }
                           
                           cells.push(
@@ -1930,15 +1930,15 @@ export default function PetSitting() {
                       })()}
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-4 pt-4 border-t border-[#E8DDD4] text-xs font-medium text-[#8B7E7D]">
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-4 pt-4 border-t border-[#E8DDD4] text-xs font-bold text-[#4A3E3D]">
                       <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded bg-emerald-50 border border-emerald-100 inline-block" /> Available
+                        <span className="w-3 h-3 rounded bg-emerald-500 inline-block shadow-sm" /> Available
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded bg-orange-50 border border-orange-100 inline-block" /> Blocked
+                        <span className="w-3 h-3 rounded bg-amber-500 inline-block shadow-sm" /> Blocked
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded bg-red-50 border border-red-100 inline-block" /> Booked
+                        <span className="w-3 h-3 rounded bg-rose-500 inline-block shadow-sm" /> Booked
                       </div>
                     </div>
                   </div>
@@ -2763,17 +2763,17 @@ export default function PetSitting() {
                           const isEnd = reqEndDate === dateStr;
                           const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
                           
-                          let bgClass = "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-100 cursor-pointer";
+                          let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
                           if (isPast) {
-                            bgClass = "bg-gray-100/50 text-gray-300 cursor-not-allowed";
+                            bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
                           } else if (isBooked) {
-                            bgClass = "bg-red-50 text-red-700 border border-red-100 line-through cursor-not-allowed";
+                            bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                           } else if (isBlocked) {
-                            bgClass = "bg-orange-50 text-orange-700 border border-orange-100 line-through cursor-not-allowed";
+                            bgClass = "bg-amber-100 text-amber-950 border border-amber-350 line-through cursor-not-allowed font-bold";
                           } else if (isStart || isEnd) {
                             bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
                           } else if (inRange) {
-                            bgClass = "bg-[#F4EDE6] text-[#8B5E3C] font-semibold cursor-pointer";
+                            bgClass = "bg-[#F6EFEA] text-[#8B5E3C] border-y border-[#E4D5CA] font-bold cursor-pointer";
                           }
                           
                           cells.push(
@@ -2792,18 +2792,18 @@ export default function PetSitting() {
                       })()}
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[10px] font-medium text-[#8B7E7D]">
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[11px] font-bold text-[#4A3E3D]">
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-emerald-50 border border-emerald-100 inline-block" /> Available
+                        <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block shadow-sm" /> Available
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-orange-50 border border-orange-100 inline-block" /> Sitter Busy
+                        <span className="w-2.5 h-2.5 rounded bg-amber-500 inline-block shadow-sm" /> Sitter Busy
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-red-50 border border-red-100 inline-block" /> Booked
+                        <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block shadow-sm" /> Booked
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block" /> Selected
+                        <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block shadow-sm" /> Selected
                       </div>
                     </div>
                   </div>
