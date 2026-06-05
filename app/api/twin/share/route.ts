@@ -11,7 +11,21 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userPhoto, petBreed, petType, petPhoto, matchScore, traits, quote, email } = body;
+    const { 
+      userPhoto, 
+      petBreed, 
+      petType, 
+      petPhoto, 
+      matchScore, 
+      traits, 
+      quote, 
+      email,
+      personalityBreakdown,
+      famousPets,
+      bothSection,
+      compatibility,
+      celebrityMatch
+    } = body;
 
     if (!userPhoto || !petBreed || !petType || !petPhoto || !matchScore) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -31,7 +45,12 @@ export async function POST(req: NextRequest) {
       traits,
       quote,
       email: email || null,
-      removal_token: removalToken
+      removal_token: removalToken,
+      personalityBreakdown: personalityBreakdown || '',
+      famousPets: famousPets || [],
+      bothSection: bothSection || [],
+      compatibility: compatibility || '',
+      celebrityMatch: celebrityMatch || ''
     });
 
     let data = null;

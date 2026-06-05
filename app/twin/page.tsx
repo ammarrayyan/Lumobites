@@ -579,7 +579,12 @@ export default function TwinPage() {
           matchScore: result.matchScore,
           traits: result.traits,
           quote: result.quote,
-          email: shareEmail
+          email: shareEmail,
+          personalityBreakdown: result.personalityBreakdown,
+          famousPets: result.famousPets,
+          bothSection: result.bothSection,
+          compatibility: result.compatibility,
+          celebrityMatch: result.celebrityMatch
         })
       });
 
