@@ -23,7 +23,6 @@ interface SharedTwin {
 
 export default function PetTwinPreview() {
   const [shares, setShares] = useState<SharedTwin[]>([]);
-  const [selectedShare, setSelectedShare] = useState<SharedTwin | null>(null);
   const [loading, setLoading] = useState(true);
 
   // States for Self-Service Deletion Modal
@@ -167,11 +166,7 @@ export default function PetTwinPreview() {
             ) : displayedShares.length > 0 ? (
               <div className="space-y-5">
                 {displayedShares.map(share => (
-                  <div 
-                    key={share.id} 
-                    onClick={() => setSelectedShare(share)}
-                    className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in cursor-pointer hover:bg-[#FAF6F4]/50 transition-colors p-2 -m-2 rounded-2xl"
-                  >
+                  <div key={share.id} className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in">
                     
                     {/* Double Face Avatar */}
                     <div className="flex items-center -space-x-4 shrink-0 mt-1">
@@ -217,15 +212,14 @@ export default function PetTwinPreview() {
                       {/* Small Remove Link */}
                       <div className="mt-2">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onClick={() => {
                             setRemovePostId(share.id);
                             setRemoveEmail('');
                             setRemoveStatus('idle');
                             setRemoveMessage('');
                             setRemoveModalOpen(true);
                           }}
-                          className="text-[10px] text-gray-400 hover:text-red-500 font-bold transition-colors cursor-pointer border-0 bg-transparent p-0 relative z-10"
+                          className="text-[10px] text-gray-400 hover:text-red-500 font-bold transition-colors cursor-pointer border-0 bg-transparent p-0"
                         >
                           Remove my result
                         </button>
@@ -326,179 +320,6 @@ export default function PetTwinPreview() {
                 </div>
               </form>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Full Result Details Modal */}
-      {selectedShare && (
-        <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setSelectedShare(null)}
-        >
-          <div 
-            className="bg-white rounded-3xl border border-[#E8DDD4] p-6 md:p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative animate-scale-up text-left"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedShare(null)}
-              className="absolute top-4 right-4 text-[#8B7E7D] hover:text-[#4A3E3D] text-2xl font-bold transition-colors cursor-pointer w-8 h-8 rounded-full bg-[#FAF6F4] flex items-center justify-center border-0"
-            >
-              &times;
-            </button>
-
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
-                Pet Twin Match Result
-              </span>
-            </div>
-            <h3 className="text-2xl font-black text-[#191919] tracking-tight">
-              Matched with {selectedShare.petBreed}! 🐾
-            </h3>
-
-            {/* Photos & Match % */}
-            <div className="flex items-center justify-center gap-4 my-6 relative">
-              {/* User Photo */}
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-[#F5EDE4]">
-                  {selectedShare.userPhoto ? (
-                    <img src={selectedShare.userPhoto} alt="You" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl bg-[#F5EDE4]">🧑</div>
-                  )}
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold text-[#8B7E7D] tracking-wider uppercase">You</span>
-              </div>
-
-              {/* Match Badge */}
-              <div className="flex flex-col items-center justify-center bg-[#8B5E3C] text-white w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-md z-10 -mx-3 shrink-0">
-                <span className="text-base sm:text-xl font-black">{selectedShare.matchScore}%</span>
-                <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider">Match</span>
-              </div>
-
-              {/* Breed Photo */}
-              <div className="flex flex-col items-center gap-1.5">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-[#F5EDE4]">
-                  {selectedShare.petPhoto ? (
-                    <img src={selectedShare.petPhoto} alt={selectedShare.petBreed} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl bg-[#F5EDE4]">🐕</div>
-                  )}
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold text-[#8B7E7D] tracking-wider uppercase">Twin</span>
-              </div>
-            </div>
-
-            {/* Traits */}
-            <div className="flex flex-wrap gap-1.5 justify-center mb-6">
-              {selectedShare.traits.map(trait => (
-                <span key={trait} className="text-xs bg-[#FAF6F4] text-[#8B5E3C] font-semibold px-2.5 py-1 rounded-full border border-[#E8DDD4]">
-                  {trait}
-                </span>
-              ))}
-            </div>
-
-            {/* Quote Block */}
-            <div className="bg-[#FAF6F4] border-l-4 border-[#8B5E3C] p-4 rounded-r-xl mb-6">
-              <p className="text-sm font-medium text-[#4A3E3D] italic">
-                &ldquo;{selectedShare.quote}&rdquo;
-              </p>
-            </div>
-
-            {/* Detailed Content Sections */}
-            <div className="space-y-5 text-sm text-[#4A3E3D] border-t border-[#F0E8E0] pt-5">
-              
-              {/* 1. Personality Breakdown */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-1.5">
-                  Personality Analysis
-                </h4>
-                <p className="text-xs leading-relaxed text-[#666666]">
-                  {selectedShare.personalityBreakdown || `A fascinating combination of traits! As a ${selectedShare.petBreed} match, you share a unique connection marked by these distinct qualities.`}
-                </p>
-              </div>
-
-              {/* 2. You and your Pet Twin both... */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-2">
-                  You & Your Pet Twin both...
-                </h4>
-                <ul className="space-y-1.5 text-xs text-[#666666] list-none pl-0">
-                  {(selectedShare.bothSection && selectedShare.bothSection.length > 0 ? selectedShare.bothSection : [
-                    "Share a warm and friendly presence that makes others feel welcome.",
-                    "Exhibit a natural loyalty and dedication to those you care about.",
-                    "Adapt beautifully to different situations and environments."
-                  ]).map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-[#8B5E3C] font-bold">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* 3. Famous Pets */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-1.5">
-                  Famous {selectedShare.petBreed} Pets
-                </h4>
-                <p className="text-xs leading-relaxed text-[#666666]">
-                  {(selectedShare.famousPets && selectedShare.famousPets.length > 0 ? selectedShare.famousPets : (
-                    selectedShare.petBreed.toLowerCase().includes('golden') ? ["Shadow (from Homeward Bound)", "Buddy (from Air Bud)", "Comet (from Full House)"] :
-                    selectedShare.petBreed.toLowerCase().includes('siamese') ? ["Si & Am (from Lady and the Tramp)", "DC (from That Darn Cat!)", "Tao (from The Incredible Journey)"] :
-                    selectedShare.petBreed.toLowerCase().includes('corgi') ? ["Susan (Queen Elizabeth II's first Corgi)", "Ein (from Cowboy Bebop)", "Bud (from Corgi Racing)"] :
-                    [`Famous representatives of the gorgeous ${selectedShare.petBreed} breed`]
-                  )).join(', ')}
-                </p>
-              </div>
-
-              {/* 4. Celebrity Match */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-1.5">
-                  Celebrity Twin Match
-                </h4>
-                <p className="text-xs leading-relaxed text-[#666666]">
-                  {selectedShare.celebrityMatch || (
-                    selectedShare.petBreed.toLowerCase().includes('golden') ? "Tom Hanks (warm, universally beloved, and loyal)" :
-                    selectedShare.petBreed.toLowerCase().includes('siamese') ? "Taylor Swift (elegant, expressive, and vocal)" :
-                    selectedShare.petBreed.toLowerCase().includes('corgi') ? "Queen Elizabeth II (royal, charming, and highly energetic)" :
-                    `A well-known public figure sharing your ${selectedShare.petBreed} charisma`
-                  )}
-                </p>
-              </div>
-
-              {/* 5. Compatibility */}
-              <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-1.5">
-                  Compatibility
-                </h4>
-                <p className="text-xs leading-relaxed text-slate-700 bg-emerald-50 text-emerald-800 font-medium px-3 py-2 rounded-lg border border-emerald-100">
-                  🐾 You are most compatible with{' '}
-                  <span className="font-bold">
-                    {selectedShare.compatibility || (
-                      selectedShare.petBreed.toLowerCase().includes('golden') ? "Husky and Labrador Retriever" :
-                      selectedShare.petBreed.toLowerCase().includes('siamese') ? "Ragdoll and Birman" :
-                      selectedShare.petBreed.toLowerCase().includes('corgi') ? "German Shepherd and Pembroke Corgi" :
-                      "Other friendly and highly compatible breeds"
-                    )}
-                  </span>{' '}
-                  owners!
-                </p>
-              </div>
-
-            </div>
-
-            {/* Action Footer */}
-            <div className="mt-8 pt-5 border-t border-[#F0E8E0] flex justify-end">
-              <button
-                onClick={() => setSelectedShare(null)}
-                className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-6 rounded-xl transition-all cursor-pointer border-0"
-              >
-                Done
-              </button>
-            </div>
           </div>
         </div>
       )}
