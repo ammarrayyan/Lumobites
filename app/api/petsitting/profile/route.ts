@@ -257,33 +257,58 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // Send admin notification email if re-approval is required
-    if (nextNeedsReapproval && (isNewPhoto || isNewId) && !isInitialSubmission) {
+    // Send admin notification email
+    if (isInitialSubmission || (isNewPhoto || isNewId)) {
       try {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
         const adminEmail = process.env.ADMIN_EMAIL || 'info@lumobitespet.com';
+        
+        let subject = '';
+        let bodyHtml = '';
+        
+        if (isInitialSubmission) {
+          subject = 'New Sitter Application — Review Required';
+          bodyHtml = `
+            <h1 style="${emailStyles.h1}">New Sitter Application 🐾</h1>
+            <p style="${emailStyles.p}">Hi Admin,</p>
+            <p style="${emailStyles.p}">A new sitter has submitted their profile for review.</p>
+            <p style="${emailStyles.p}"><strong>Sitter Name:</strong> ${name}</p>
+            <p style="${emailStyles.p}"><strong>Sitter Email:</strong> ${cleanEmail}</p>
+            ${emailStyles.button('https://lumobites.net/admin', 'Go to Admin Panel')}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `;
+        } else {
+          subject = 'Existing Sitter Updated Verification — Review Required';
+          bodyHtml = `
+            <h1 style="${emailStyles.h1}">Existing Sitter Updated Verification 🐾</h1>
+            <p style="${emailStyles.p}">Hi Admin,</p>
+            <p style="${emailStyles.p}">An existing verified sitter has updated their photo or ID and needs re-verification. This is NOT a new application.</p>
+            <p style="${emailStyles.p}"><strong>Sitter Name:</strong> ${name}</p>
+            <p style="${emailStyles.p}"><strong>Sitter Email:</strong> ${cleanEmail}</p>
+            <p style="${emailStyles.p}" style="color: #d97706; font-weight: bold;">⚠️ This sitter was previously approved. Please review their updated verification documents.</p>
+            ${emailStyles.button('https://lumobites.net/admin', 'Go to Admin Panel')}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `;
+        }
+
         const adminRes = await resend.emails.send({
           from: fromEmail,
           to: adminEmail,
-          subject: `Re-approval Required: ${name} updated their verification photo 🐾`,
+          subject,
           html: brandedEmail({
-            subject: `Re-approval Required: ${name} updated their verification photo 🐾`,
-            preheader: `Sitter ${name} has updated their verification photo and needs re-approval.`,
-            body: `
-              <h1 style="${emailStyles.h1}">Re-approval Required 🐾</h1>
-              <p style="${emailStyles.p}">Hi Admin,</p>
-              <p style="${emailStyles.p}">Sitter <strong>${name}</strong> (${cleanEmail}) has updated their verification photo/ID and needs re-approval.</p>
-              <p style="${emailStyles.p}">Their profile has been temporarily hidden and status set to pending. Please review the updated files in the admin panel.</p>
-              ${emailStyles.button('https://lumobites.net/admin', 'Go to Admin Panel')}
-              ${emailStyles.divider}
-              ${emailStyles.signoff}
-            `
+            subject,
+            preheader: isInitialSubmission 
+              ? `New sitter application from ${name}.`
+              : `Existing sitter ${name} updated their verification.`,
+            body: bodyHtml
           })
         });
         if (adminRes.error) {
           console.error('[PetSitting Profile API] Resend admin email error:', adminRes.error);
         } else {
-          console.log(`[PetSitting Profile API] Admin re-approval notification sent for: ${cleanEmail}`);
+          console.log(`[PetSitting Profile API] Admin review notification sent for: ${cleanEmail}`);
         }
       } catch (adminEmailErr) {
         console.error('[PetSitting Profile API] Failed to send admin notification email:', adminEmailErr);
@@ -301,11 +326,11 @@ export async function POST(request: NextRequest) {
           ? `
               <h1 style="${emailStyles.h1}">Updates Received 🐾</h1>
               <p style="${emailStyles.p}">Hi ${name},</p>
-              <p style="${emailStyles.p}">Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.</p>
+              <p style="${emailStyles.p}">Your updated verification has been submitted for review. Your profile remains active while we review.</p>
               ${emailStyles.highlightBox(`
                 <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
                 <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ RE-REVIEW PENDING</p>
-                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours. You will receive another email from us as soon as your profile is active again.</p>
+                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours.</p>
               `)}
               ${emailStyles.divider}
               ${emailStyles.signoff}

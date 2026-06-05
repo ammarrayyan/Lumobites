@@ -800,7 +800,7 @@ export default function PetSitting() {
         
         const isPhotoOrIdNew = (sitterPhoto && sitterPhoto.startsWith('data:image/')) || (sitterIdPhoto && sitterIdPhoto.startsWith('data:image/'));
         if (!isPhotoOrIdNew && updatedData.approval_status === 'approved') {
-          setProfileSuccessMessage('Your profile has been updated successfully');
+          setProfileSuccessMessage('Your profile has been updated successfully!');
         } else {
           setProfileSuccessMessage('');
         }
@@ -1700,9 +1700,9 @@ export default function PetSitting() {
                     </div>
                     {needsReapproval ? (
                       <>
-                        <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Under Re-Review</h2>
+                        <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Verification Under Review</h2>
                         <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                          Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.
+                          Your updated verification has been submitted for review. Your profile remains active while we review.
                         </p>
                       </>
                     ) : (
