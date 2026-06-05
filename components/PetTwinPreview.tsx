@@ -19,7 +19,6 @@ interface SharedTwin {
 export default function PetTwinPreview() {
   const [shares, setShares] = useState<SharedTwin[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
 
   // States for Self-Service Deletion Modal
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
@@ -112,7 +111,7 @@ export default function PetTwinPreview() {
     }
   };
 
-  const displayedShares = expanded ? shares : shares.slice(0, 3);
+  const displayedShares = shares.slice(0, 3);
 
   return (
     <section className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] px-6 py-16">
@@ -129,20 +128,14 @@ export default function PetTwinPreview() {
           <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Upload a selfie to find which dog or cat breed matches your personality and facial features. Check out real matches shared by our community!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <div className="flex justify-center md:justify-start">
             <NextLink 
               href="/twin" 
-              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md text-center text-decoration-none"
+              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-md text-center text-decoration-none"
               style={{ textDecoration: 'none' }}
             >
               Find Your Twin &rarr;
             </NextLink>
-            <button
-              onClick={() => setExpanded(true)}
-              className="bg-white hover:bg-[#F5EDE4] border-2 border-[#E8DDD4] text-[#4A3E3D] font-bold py-3 px-6 rounded-xl transition-all shadow-sm text-center cursor-pointer"
-            >
-              See All Matches &rarr;
-            </button>
           </div>
         </div>
 
@@ -230,18 +223,6 @@ export default function PetTwinPreview() {
 
                   </div>
                 ))}
-
-                {/* Smooth See More Expander */}
-                {shares.length > 3 && !expanded && (
-                  <div className="text-center border-t border-[#F0E8E0] pt-4 mt-2">
-                    <button
-                      onClick={() => setExpanded(true)}
-                      className="text-[#8B5E3C] hover:text-[#734A2E] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 mx-auto transition-colors cursor-pointer border-0 bg-transparent"
-                    >
-                      See more matches &rarr;
-                    </button>
-                  </div>
-                )}
               </div>
             ) : (
               <p className="text-sm text-[#8B7E7D] italic text-center py-4">No shared matches yet. Be the first!</p>
