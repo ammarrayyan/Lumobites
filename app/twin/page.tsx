@@ -8,10 +8,10 @@ import confetti from 'canvas-confetti';
 import { AlertTriangle, Star, Camera, Footprints, Dog, Cat, CheckCircle2, XCircle, UploadCloud, Sparkles, Check, ArrowRight, Mail, RefreshCw, X } from 'lucide-react';
 
 const LOADING_MESSAGES = [
-  "Sniffing out your twin... 🐽",
+  "Sniffing out your twin... 🐾",
   "Comparing whiskers... 🐱",
   "Consulting the pack... 🐕",
-  "Almost there... your twin is excited to meet you! 🎉"
+  "Almost there... your twin is excited to meet you! ✨"
 ];
 
 interface TwinResult {
