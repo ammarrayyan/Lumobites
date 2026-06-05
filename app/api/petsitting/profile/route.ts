@@ -196,6 +196,7 @@ export async function POST(request: NextRequest) {
     let nextApprovalStatus = 'pending';
     let nextIsApproved = false;
     let nextNeedsReapproval = false;
+    let isInitialSubmission = true;
 
     try {
       const { data: existingSitter } = await supabaseAdmin
@@ -205,20 +206,15 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (existingSitter) {
-        if (existingSitter.approval_status === 'approved') {
-          if (isNewPhoto || isNewId) {
-            nextApprovalStatus = 'pending';
-            nextIsApproved = false;
-            nextNeedsReapproval = true;
-          } else {
-            nextApprovalStatus = 'approved';
-            nextIsApproved = true;
-            nextNeedsReapproval = !!existingSitter.needs_reapproval;
-          }
-        } else {
+        isInitialSubmission = false;
+        if (isNewPhoto || isNewId) {
           nextApprovalStatus = 'pending';
           nextIsApproved = false;
-          nextNeedsReapproval = false;
+          nextNeedsReapproval = true;
+        } else {
+          nextApprovalStatus = existingSitter.approval_status || 'pending';
+          nextIsApproved = !!existingSitter.is_approved;
+          nextNeedsReapproval = !!existingSitter.needs_reapproval;
         }
       }
     } catch (dbErr) {
@@ -262,7 +258,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
 
     // Send admin notification email if re-approval is required
-    if (nextNeedsReapproval && (isNewPhoto || isNewId)) {
+    if (nextNeedsReapproval && (isNewPhoto || isNewId) && !isInitialSubmission) {
       try {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
         const adminEmail = process.env.ADMIN_EMAIL || 'info@lumobitespet.com';
@@ -294,58 +290,60 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send application confirmation email
-    try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      const subject = nextNeedsReapproval 
-        ? 'Your Updated Lumo Bites Profile is Under Review 🐾' 
-        : 'Your Lumo Bites Sitter Application is Under Review 🐾';
-      const bodyHtml = nextNeedsReapproval
-        ? `
-            <h1 style="${emailStyles.h1}">Updates Received 🐾</h1>
-            <p style="${emailStyles.p}">Hi ${name},</p>
-            <p style="${emailStyles.p}">Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.</p>
-            ${emailStyles.highlightBox(`
-              <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
-              <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ RE-REVIEW PENDING</p>
-              <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours. You will receive another email from us as soon as your profile is active again.</p>
-            `)}
-            ${emailStyles.divider}
-            ${emailStyles.signoff}
-          `
-        : `
-            <h1 style="${emailStyles.h1}">Application Received 🐾</h1>
-            <p style="${emailStyles.p}">Hi ${name},</p>
-            <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our safety team is currently reviewing your application.</p>
-            ${emailStyles.highlightBox(`
-              <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
-              <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ PENDING REVIEW</p>
-              <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review applications in the order they are received, usually within 24 to 48 hours. You will receive another email from us as soon as your status is updated.</p>
-            `)}
-            <p style="${emailStyles.p}">While you wait, feel free to visit the Lumo Bites community board or manage your settings.</p>
-            ${emailStyles.divider}
-            ${emailStyles.signoff}
-          `;
+    // Send application confirmation email ONLY if it's initial submission OR a new photo/ID is uploaded for re-approval
+    if (isInitialSubmission || isNewPhoto || isNewId) {
+      try {
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+        const subject = nextNeedsReapproval 
+          ? 'Your Updated Lumo Bites Profile is Under Review 🐾' 
+          : 'Your Lumo Bites Sitter Application is Under Review 🐾';
+        const bodyHtml = nextNeedsReapproval
+          ? `
+              <h1 style="${emailStyles.h1}">Updates Received 🐾</h1>
+              <p style="${emailStyles.p}">Hi ${name},</p>
+              <p style="${emailStyles.p}">Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.</p>
+              ${emailStyles.highlightBox(`
+                <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
+                <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ RE-REVIEW PENDING</p>
+                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours. You will receive another email from us as soon as your profile is active again.</p>
+              `)}
+              ${emailStyles.divider}
+              ${emailStyles.signoff}
+            `
+          : `
+              <h1 style="${emailStyles.h1}">Application Received 🐾</h1>
+              <p style="${emailStyles.p}">Hi ${name},</p>
+              <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our safety team is currently reviewing your application.</p>
+              ${emailStyles.highlightBox(`
+                <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
+                <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ PENDING REVIEW</p>
+                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review applications in the order they are received, usually within 24 to 48 hours. You will receive another email from us as soon as your status is updated.</p>
+              `)}
+              <p style="${emailStyles.p}">While you wait, feel free to visit the Lumo Bites community board or manage your settings.</p>
+              ${emailStyles.divider}
+              ${emailStyles.signoff}
+            `;
 
-      const confirmRes = await resend.emails.send({
-        from: fromEmail,
-        to: cleanEmail,
-        subject,
-        html: brandedEmail({
+        const confirmRes = await resend.emails.send({
+          from: fromEmail,
+          to: cleanEmail,
           subject,
-          preheader: nextNeedsReapproval 
-            ? 'Your profile photo update is being reviewed by our safety team.'
-            : 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
-          body: bodyHtml
-        })
-      });
-      if (confirmRes.error) {
-        console.error('[PetSitting Profile API] Resend confirmation email error:', confirmRes.error);
-      } else {
-        console.log(`[PetSitting Profile API] Application confirmation email sent to: ${cleanEmail}`);
+          html: brandedEmail({
+            subject,
+            preheader: nextNeedsReapproval 
+              ? 'Your profile photo update is being reviewed by our safety team.'
+              : 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
+            body: bodyHtml
+          })
+        });
+        if (confirmRes.error) {
+          console.error('[PetSitting Profile API] Resend confirmation email error:', confirmRes.error);
+        } else {
+          console.log(`[PetSitting Profile API] Application confirmation email sent to: ${cleanEmail}`);
+        }
+      } catch (emailErr) {
+        console.error('[PetSitting Profile API] Failed to send confirmation email:', emailErr);
       }
-    } catch (emailErr) {
-      console.error('[PetSitting Profile API] Failed to send confirmation email:', emailErr);
     }
 
     return NextResponse.json(data);

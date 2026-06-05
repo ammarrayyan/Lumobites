@@ -158,6 +158,7 @@ export default function PetSitting() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
+  const [profileSuccessMessage, setProfileSuccessMessage] = useState('');
   const [profilePreviewMode, setProfilePreviewMode] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -796,6 +797,14 @@ export default function PetSitting() {
         const updatedData = await res.json();
         setSitterApprovalStatus(updatedData.approval_status || 'pending');
         setNeedsReapproval(!!updatedData.needs_reapproval);
+        
+        const isPhotoOrIdNew = (sitterPhoto && sitterPhoto.startsWith('data:image/')) || (sitterIdPhoto && sitterIdPhoto.startsWith('data:image/'));
+        if (!isPhotoOrIdNew && updatedData.approval_status === 'approved') {
+          setProfileSuccessMessage('Your profile has been updated successfully');
+        } else {
+          setProfileSuccessMessage('');
+        }
+        
         // FREE LAUNCH: Automatically treat saved profile as PRO
         setIsProSitter(true);
         setProfilePreviewMode(true);
@@ -1679,6 +1688,11 @@ export default function PetSitting() {
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
             {profilePreviewMode ? (
               <div className="animate-fade-in text-center">
+                {profileSuccessMessage && (
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 mb-6 text-sm font-semibold animate-fade-in max-w-sm mx-auto">
+                    ✨ {profileSuccessMessage}
+                  </div>
+                )}
                 {sitterApprovalStatus === 'pending' && (
                   <>
                     <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-yellow-100 text-yellow-600">
@@ -1795,7 +1809,7 @@ export default function PetSitting() {
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
                 <div className="flex flex-col gap-3 max-w-sm mx-auto">
-                  <button onClick={() => setProfilePreviewMode(false)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm">
+                  <button onClick={() => { setProfilePreviewMode(false); setProfileSuccessMessage(''); }} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm">
                     Edit Profile
                   </button>
                   
