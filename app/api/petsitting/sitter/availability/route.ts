@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'sitter_id or email is required' }, { status: 400 });
     }
 
-    let query = supabaseAdmin.from('sitters').select('id, blocked_dates');
+    let query = supabaseAdmin.from('sitters').select('id, blocked_dates, available_days');
     if (sitterId) {
       query = query.eq('id', sitterId);
     } else {
@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       blocked_dates: sitter.blocked_dates || [],
+      available_days: sitter.available_days || [],
       accepted_bookings
     });
   } catch (error: any) {

@@ -274,6 +274,9 @@ export default function PetSitting() {
       const data = await res.json();
       if (res.ok && data.success) {
         setSitterBlockedDates(data.blocked_dates || []);
+        if (Array.isArray(data.available_days)) {
+          setSitterAvailableDays(data.available_days);
+        }
         
         // Compile all accepted booking dates into a flat array
         const booked: string[] = [];
@@ -1132,7 +1135,12 @@ export default function PetSitting() {
         }
 
         const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
-        const hasOverlap = rangeDates.some(d => sitterBlockedDates.includes(d) || sitterBookedDates.includes(d));
+        const hasOverlap = rangeDates.some(d => {
+          const dateObj = new Date(d + 'T00:00:00');
+          const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+          return sitterBlockedDates.includes(d) || sitterBookedDates.includes(d) || isScheduleUnavailable;
+        });
         if (hasOverlap) {
           setReqError('Selected date range overlaps with dates the sitter is unavailable or already booked');
           setReqLoading(false);
@@ -1903,6 +1911,10 @@ export default function PetSitting() {
                           const isBlocked = sitterBlockedDates.includes(dateStr);
                           const isPast = dateStr < todayStr;
                           
+                          const dayOfWeek = new Date(calYear, calMonth, d).getDay();
+                          const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+                          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
+                          
                           let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
                           if (isPast) {
                             bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
@@ -1910,13 +1922,15 @@ export default function PetSitting() {
                             bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                           } else if (isBlocked) {
                             bgClass = "bg-amber-100 text-amber-950 border border-amber-350 hover:bg-amber-200 cursor-pointer font-bold";
+                          } else if (isScheduleUnavailable) {
+                            bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
                           }
                           
                           cells.push(
                             <button
                               key={`day-${d}`}
                               type="button"
-                              disabled={isPast || isBooked}
+                              disabled={isPast || isBooked || isScheduleUnavailable}
                               onClick={() => {
                                 handleSitterBlockedDateToggle(dateStr);
                               }}
@@ -2763,6 +2777,10 @@ export default function PetSitting() {
                           const isEnd = reqEndDate === dateStr;
                           const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
                           
+                          const dayOfWeek = new Date(calYear, calMonth, d).getDay();
+                          const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+                          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
+                          
                           let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
                           if (isPast) {
                             bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
@@ -2770,6 +2788,8 @@ export default function PetSitting() {
                             bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                           } else if (isBlocked) {
                             bgClass = "bg-amber-100 text-amber-950 border border-amber-350 line-through cursor-not-allowed font-bold";
+                          } else if (isScheduleUnavailable) {
+                            bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
                           } else if (isStart || isEnd) {
                             bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
                           } else if (inRange) {
@@ -2780,7 +2800,7 @@ export default function PetSitting() {
                             <button
                               key={`day-${d}`}
                               type="button"
-                              disabled={isPast || isBooked || isBlocked}
+                              disabled={isPast || isBooked || isBlocked || isScheduleUnavailable}
                               onClick={() => handleOwnerCalendarDayClick(dateStr)}
                               className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all ${bgClass}`}
                             >
