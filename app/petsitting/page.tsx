@@ -250,6 +250,18 @@ export default function PetSitting() {
     }
   };
 
+  const parseSpecialNotes = (specialNotes: string) => {
+    if (!specialNotes) return { petAge: null, cleanNotes: null };
+    const match = specialNotes.match(/^\[Pet Age:\s*([^\]]+)\](?:\s*(.*))?$/i);
+    if (match) {
+      return {
+        petAge: match[1].trim(),
+        cleanNotes: match[2] ? match[2].trim() : null
+      };
+    }
+    return { petAge: null, cleanNotes: specialNotes };
+  };
+
   // Debounced geocoding effect
   useEffect(() => {
     if (!searchZip.trim()) {
@@ -1008,6 +1020,12 @@ export default function PetSitting() {
     setReqSuccess(false);
 
     try {
+      if (reqStartDate && reqEndDate && new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
+        setReqError('End date must be after start date');
+        setReqLoading(false);
+        return;
+      }
+
       const startFmt = reqStartDate ? new Date(reqStartDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
@@ -1778,16 +1796,26 @@ export default function PetSitting() {
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                               <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
                               <div><strong>Dates:</strong> {req.dates}</div>
-                              {req.created_at && (
-                                <div className="col-span-1 sm:col-span-2">
-                                  <strong>Requested On:</strong> {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </div>
-                              )}
-                              {req.special_notes && (
-                                <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
-                                  <strong>Notes:</strong> {req.special_notes}
-                                </div>
-                              )}
+                              {(() => {
+                                const { petAge, cleanNotes } = parseSpecialNotes(req.special_notes);
+                                return (
+                                  <>
+                                    {petAge && (
+                                      <div><strong>Pet Age:</strong> {petAge}</div>
+                                    )}
+                                    {req.created_at && (
+                                      <div className={petAge ? "" : "col-span-1 sm:col-span-2"}>
+                                        <strong>Requested On:</strong> {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                      </div>
+                                    )}
+                                    {cleanNotes && (
+                                      <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
+                                        <strong>Notes:</strong> {cleanNotes}
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </div>
 
                             {/* Contact Details (Step 5) */}
