@@ -73,7 +73,15 @@ export async function POST(request: NextRequest) {
     // 5. Send email via Resend
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      await resend.emails.send({
+      const hasRealKey = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_dummy';
+
+      if (!hasRealKey) {
+        console.warn(`\n[Sitter Auth Send Code] Missing or mock RESEND_API_KEY. Skipping Resend email delivery.`);
+        console.warn(`[AUTH CODE] OTP for ${cleanEmail} is: ${code}\n`);
+        return NextResponse.json({ success: true });
+      }
+
+      const emailResult = await resend.emails.send({
         from: fromEmail,
         to: cleanEmail,
         subject: '🔐 Your Lumo Bites Verification Code',
@@ -90,7 +98,13 @@ export async function POST(request: NextRequest) {
   `
         })
       });
-      console.log(`[Sitter Auth Send Code] Sent code to: ${cleanEmail}`);
+
+      if (emailResult.error) {
+        console.error('[Sitter Auth Send Code] Resend error details:', emailResult.error);
+        return NextResponse.json({ error: emailResult.error.message || 'Failed to deliver verification email.' }, { status: 500 });
+      }
+
+      console.log(`[Sitter Auth Send Code] Sent code to: ${cleanEmail}`, emailResult.data);
     } catch (emailErr) {
       console.error('[Sitter Auth Send Code] Resend failed:', emailErr);
       return NextResponse.json({ error: 'Failed to deliver verification email.' }, { status: 500 });
