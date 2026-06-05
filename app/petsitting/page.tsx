@@ -128,6 +128,7 @@ export default function PetSitting() {
   const [sitterAvailable, setSitterAvailable] = useState(true);
   const [sitterGender, setSitterGender] = useState('');
   const [isProSitter, setIsProSitter] = useState(false);
+  const [selfDeclared, setSelfDeclared] = useState(false);
 
   // Sitter Sub Details
   const [sitterSubCancelAtPeriodEnd, setSitterSubCancelAtPeriodEnd] = useState(false);
@@ -314,6 +315,7 @@ export default function PetSitting() {
           setSitterAvailableTimes(data.available_times || []);
           setSitterServiceTypes(data.service_types || []);
           setSitterApprovalStatus(data.approval_status || 'pending');
+          setSelfDeclared(!!data.self_declared);
           
           // FREE LAUNCH: Automatically treat any loaded profile as PRO
           setIsProSitter(true);
@@ -390,6 +392,7 @@ export default function PetSitting() {
         setSitterBio('');
         setSitterGender('');
         setSitterRate('');
+        setSelfDeclared(false);
         setSitterAuthMode('form');
       }
     } catch (e) {
@@ -455,6 +458,7 @@ export default function PetSitting() {
         setSitterRate('');
         setSitterPhone('');
         setSitterPhoneVisible(false);
+        setSelfDeclared(false);
         setIsProSitter(false);
         setDeleteModalOpen(false);
       } else {
@@ -483,6 +487,7 @@ export default function PetSitting() {
     if (!sitterIdPhoto && !hasExistingIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
+    if (!selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -517,7 +522,8 @@ export default function PetSitting() {
           available_days: sitterAvailableDays,
           available_times: sitterAvailableTimes,
           service_types: sitterServiceTypes,
-          gender: sitterGender
+          gender: sitterGender,
+          self_declared: selfDeclared
         })
       });
 
@@ -1812,6 +1818,31 @@ export default function PetSitting() {
               <div className="flex items-center gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
                 <input type="checkbox" id="avail" checked={sitterAvailable} onChange={e => setSitterAvailable(e.target.checked)} className="w-5 h-5 accent-[#8B5E3C]" />
                 <label htmlFor="avail" className="text-[#4A3E3D] font-bold cursor-pointer">I am currently accepting new requests</label>
+              </div>
+
+              {/* Self-Declaration Checkbox & Terms of Service Note */}
+              <div className="flex flex-col gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
+                <label className="flex items-start gap-3 text-sm text-[#4A3E3D] font-medium cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={selfDeclared} 
+                    onChange={e => setSelfDeclared(e.target.checked)} 
+                    className="w-5 h-5 accent-[#8B5E3C] mt-0.5 shrink-0" 
+                  />
+                  <span>
+                    I confirm that I have no criminal convictions or history that would affect my ability to safely and responsibly care for pets. I understand that providing false information may result in immediate removal from the platform.
+                  </span>
+                </label>
+                {formErrors['self_declared'] && (
+                  <p className="text-red-500 text-xs font-semibold pl-8 mt-0.5">
+                    {formErrors['self_declared']}
+                  </p>
+                )}
+                
+                {/* Terms of Service Note */}
+                <p className="text-xs text-gray-500 pl-8 leading-relaxed">
+                  By submitting this form you agree to our Terms of Service and confirm the above declaration is true and accurate.
+                </p>
               </div>
 
               {profileMessage && (

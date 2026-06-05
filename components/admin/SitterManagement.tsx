@@ -168,6 +168,11 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     }`}>
                       {sitter.approval_status || 'pending'}
                     </span>
+                    {sitter.self_declared && (
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        Self Declared ✅
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-white/60 mb-2">{sitter.email}</p>
                   <p className="text-sm text-white/80">

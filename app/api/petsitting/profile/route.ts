@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, availability, phone_number, phone_visible,
-      gender, available_days, available_times, service_types
+      gender, available_days, available_times, service_types, self_declared
     } = body;
 
     if (!email || !name) {
@@ -195,6 +195,8 @@ export async function POST(request: NextRequest) {
         available_times: available_times || [],
         service_types: service_types || [],
         gender: gender || null,
+        self_declared: self_declared || false,
+        self_declared_at: self_declared ? new Date().toISOString() : null,
         // Reset approval status upon submission/resubmission
         approval_status: 'pending',
         is_approved: false,
