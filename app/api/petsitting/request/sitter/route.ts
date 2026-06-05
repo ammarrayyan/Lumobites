@@ -21,13 +21,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Mask owner details if the request status is not accepted or completed
+    // Restrict owner details: owner_email & phone_number only visible if accepted. owner_name visible if accepted or completed.
     const requests = (data || []).map((req: any) => {
-      const isVisible = req.status === 'accepted' || req.status === 'completed';
+      const isAccepted = req.status === 'accepted';
+      const isCompleted = req.status === 'completed';
       return {
         ...req,
-        owner_email: isVisible ? req.owner_email : req.owner_email.replace(/(..)(.*)(@.*)/, '$1***$3'),
-        phone_number: isVisible ? req.phone_number : null
+        owner_name: (isAccepted || isCompleted) ? req.owner_name : null,
+        owner_email: isAccepted ? req.owner_email : null,
+        phone_number: isAccepted ? req.phone_number : null
       };
     });
 

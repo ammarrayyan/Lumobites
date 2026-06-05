@@ -1775,9 +1775,14 @@ export default function PetSitting() {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                               <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
                               <div><strong>Dates:</strong> {req.dates}</div>
+                              {req.created_at && (
+                                <div className="col-span-1 sm:col-span-2">
+                                  <strong>Requested On:</strong> {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </div>
+                              )}
                               {req.special_notes && (
                                 <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
                                   <strong>Notes:</strong> {req.special_notes}
@@ -1786,11 +1791,19 @@ export default function PetSitting() {
                             </div>
 
                             {/* Contact Details (Step 5) */}
-                            {(isAccepted || isCompleted) && (
+                            {isAccepted && (
                               <div className="text-xs bg-white p-2.5 rounded-xl border border-[#E8DDD4] space-y-1">
                                 <div className="font-bold text-[#3B2410] mb-0.5">Owner Contact Info:</div>
+                                {req.owner_name && <div>Name: <strong>{req.owner_name}</strong></div>}
                                 <div>Email: <strong>{req.owner_email}</strong></div>
                                 {req.phone_number && <div>Phone: <strong>{req.phone_number}</strong></div>}
+                              </div>
+                            )}
+
+                            {isCompleted && req.owner_name && (
+                              <div className="text-xs bg-white p-2.5 rounded-xl border border-[#E8DDD4] space-y-1">
+                                <div className="font-bold text-[#3B2410] mb-0.5">Owner Details:</div>
+                                <div>Name: <strong>{req.owner_name}</strong></div>
                               </div>
                             )}
 
