@@ -495,6 +495,7 @@ export default function PetSitting() {
     if (!sitterRate || parseInt(sitterRate) <= 0) errors['rate'] = 'Please enter a valid rate';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     if (!selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
+    if (!sitterAvailable) errors['availability'] = 'You must confirm that you are currently accepting new requests to save your profile.';
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -1864,9 +1865,12 @@ export default function PetSitting() {
                 {formErrors['bio'] && <p className="text-red-500 text-sm mt-1">{formErrors['bio']}</p>}
               </div>
 
-              <div className="flex items-center gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
-                <input type="checkbox" id="avail" checked={sitterAvailable} onChange={e => setSitterAvailable(e.target.checked)} className="w-5 h-5 accent-[#8B5E3C]" />
-                <label htmlFor="avail" className="text-[#4A3E3D] font-bold cursor-pointer">I am currently accepting new requests</label>
+              <div className="flex flex-col gap-1.5 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
+                <label className="flex items-center gap-3 text-sm text-[#4A3E3D] font-bold cursor-pointer">
+                  <input type="checkbox" id="avail" required checked={sitterAvailable} onChange={e => setSitterAvailable(e.target.checked)} className="w-5 h-5 accent-[#8B5E3C] shrink-0" />
+                  <span>I am currently accepting new requests</span>
+                </label>
+                {formErrors['availability'] && <p className="text-red-500 text-sm mt-1">{formErrors['availability']}</p>}
               </div>
 
               {/* Self-Declaration Checkbox & Terms of Service Note */}
