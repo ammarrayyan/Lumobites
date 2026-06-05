@@ -144,8 +144,7 @@ export default function PetSitting() {
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryEmail, setOwnerHistoryEmail] = useState('');
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
-  const [lastWhatsappLink, setLastWhatsappLink] = useState('');
-  const [lastBookingNumber, setLastBookingNumber] = useState('');
+
   const [completedBookings, setCompletedBookings] = useState(0);
 
   // Sitter Sub Details
@@ -1055,15 +1054,10 @@ export default function PetSitting() {
         }
 
         setReqSuccess(true);
-        if (data.whatsapp_link) {
-          setLastWhatsappLink(data.whatsapp_link);
-          setLastBookingNumber(data.booking_number || '');
-        } else {
-          setTimeout(() => {
-            setRequestModalOpen(false);
-            setReqSuccess(false);
-          }, 3000);
-        }
+        setTimeout(() => {
+          setRequestModalOpen(false);
+          setReqSuccess(false);
+        }, 3000);
         if (ownerHistoryEmail) {
           fetchOwnerRequests(ownerHistoryEmail);
         }
@@ -1522,15 +1516,7 @@ export default function PetSitting() {
                                           <p className="font-bold text-[#3B2410] mb-1">🐾 Contact Info Shared</p>
                                           <p className="text-gray-600">Email: <strong>{req.sitter_email}</strong> {req.sitter_phone ? ` | Phone: ` : ''}<strong>{req.sitter_phone}</strong></p>
                                         </div>
-                                        {req.sitter_phone && (
-                                          <a
-                                            href={`https://wa.me/${req.sitter_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${req.sitter_name}, I'm the owner for ${req.booking_number}!`)}`}
-                                            target="_blank"
-                                            className="self-start sm:self-auto bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
-                                          >
-                                            Chat on WhatsApp
-                                          </a>
-                                        )}
+
                                       </div>
                                     </td>
                                   </tr>
@@ -1757,13 +1743,7 @@ export default function PetSitting() {
                           canSendReminder = Date.now() - completedTime >= twoHoursInMs;
                         }
 
-                        // Generate WA click to chat for reminder
-                        let reminderWaLink = '';
-                        if (canSendReminder && req.phone_number) {
-                          const cleanPhone = req.phone_number.replace(/\D/g, '');
-                          const msg = `Please leave a review for your sitter — link sent to your email!`;
-                          reminderWaLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-                        }
+
 
                         return (
                           <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 space-y-3">
@@ -1842,15 +1822,7 @@ export default function PetSitting() {
                                 </button>
                               )}
 
-                              {isCompleted && canSendReminder && req.phone_number && (
-                                <a
-                                  href={reminderWaLink}
-                                  target="_blank"
-                                  className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer text-center"
-                                >
-                                  Send WhatsApp Review Reminder
-                                </a>
-                              )}
+
                             </div>
                           </div>
                         );
@@ -2403,33 +2375,15 @@ export default function PetSitting() {
                 <h4 className="text-xl font-bold text-green-600 mb-2">Request Sent!</h4>
                 <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
                 
-                {lastWhatsappLink ? (
-                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] p-5 rounded-2xl text-left shadow-sm">
-                    <p className="text-xs font-bold text-[#8B5E3C] uppercase mb-1">🐾 Notify Sitter via WhatsApp</p>
-                    <p className="text-xs text-[#8B7E7D] mb-4">Click below to send a WhatsApp notification to the sitter to discuss details faster!</p>
-                    <a
-                      href={lastWhatsappLink}
-                      target="_blank"
-                      onClick={() => {
-                        setRequestModalOpen(false);
-                        setReqSuccess(false);
-                      }}
-                      className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm text-center"
-                    >
-                      Notify Sitter on WhatsApp
-                    </a>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setRequestModalOpen(false);
-                      setReqSuccess(false);
-                    }}
-                    className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
-                  >
-                    Close
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    setRequestModalOpen(false);
+                    setReqSuccess(false);
+                  }}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+                >
+                  Close
+                </button>
               </div>
             ) : (
               <form onSubmit={submitRequest} className="space-y-4">

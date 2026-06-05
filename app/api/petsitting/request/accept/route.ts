@@ -80,15 +80,7 @@ export async function GET(request: NextRequest) {
       })
     });
 
-    // 6. Generate WhatsApp Link for owner
-    let whatsappLink = '';
-    if (reqRow.phone_number) {
-      const cleanPhone = reqRow.phone_number.replace(/\D/g, '');
-      const msg = `Your sitter accepted your booking on Lumo Bites! Check your email for full details.`;
-      whatsappLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-    }
-
-    // 7. Return gorgeous html page
+    // 6. Return gorgeous html page
     const html = `
       <!DOCTYPE html>
       <html>
@@ -105,8 +97,6 @@ export async function GET(request: NextRequest) {
           .info-title { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #8B5E3C; margin-bottom: 12px; }
           .info-item { font-size: 14px; margin-bottom: 8px; color: #4A3E3D; }
           .info-item:last-child { margin-bottom: 0; }
-          .btn-wa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background-color: #25D366; color: white; font-weight: bold; font-size: 15px; text-decoration: none; padding: 14px 28px; border-radius: 14px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; margin-bottom: 12px; border: none; cursor: pointer; }
-          .btn-wa:hover { background-color: #20BA56; }
           .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; }
           .btn-secondary:hover { background-color: #F3EAE3; }
         </style>
@@ -122,14 +112,6 @@ export async function GET(request: NextRequest) {
             <div class="info-item"><strong>Owner Email:</strong> ${reqRow.owner_email}</div>
             <div class="info-item"><strong>Owner Phone:</strong> ${reqRow.phone_number || 'Not provided'}</div>
           </div>
-
-          ${whatsappLink ? `
-            <p style="font-size:13px;color:#8B7E7D;margin-bottom:12px;">Notify the owner instantly on WhatsApp:</p>
-            <a href="${whatsappLink}" target="_blank" class="btn-wa">
-              <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.022-.08-.115-.188-.416-.34-.3-.15-1.772-.875-2.04-.973-.269-.099-.465-.148-.659.15-.19.3-.734.924-.899 1.113-.165.19-.328.21-.629.06-.3-.15-1.258-.462-2.393-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.3-.347.45-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.66-1.59-.904-2.179-.238-.574-.479-.496-.659-.505-.17-.008-.364-.01-.557-.01-.19 0-.501.071-.762.349-.261.279-1 .974-1 2.375s1.017 2.751 1.159 2.948c.142.197 2.002 3.057 4.847 4.285.677.293 1.205.467 1.619.599.681.217 1.3.187 1.79.114.545-.081 1.673-.684 1.905-1.344.232-.66.232-1.226.162-1.344zM12.164 1.956c-5.524 0-10.016 4.49-10.016 10.012 0 1.916.538 3.784 1.56 5.422L2.05 23.3l6.082-1.596c1.583.864 3.36 1.319 5.166 1.319 5.522 0 10.012-4.49 10.012-10.012.001-5.524-4.488-10.055-10.146-10.055z"/></svg>
-              Send WhatsApp Message
-            </a>
-          ` : ''}
 
           <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
         </div>

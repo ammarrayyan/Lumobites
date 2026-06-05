@@ -110,15 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: emailRes.error.message || 'Email service error' }, { status: 500 });
     }
 
-    // 6. Generate WhatsApp Link if sitter phone exists
-    let whatsapp_link = null;
-    if (sitter.phone_number) {
-      const cleanPhone = sitter.phone_number.replace(/\D/g, '');
-      const msg = `You have a new booking request on Lumo Bites! Check your email or visit lumobites.net/petsitting to accept or decline.`;
-      whatsapp_link = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-    }
-
-    return NextResponse.json({ success: true, booking_number, whatsapp_link });
+    return NextResponse.json({ success: true, booking_number });
   } catch (error: any) {
     console.error('[PetSitting Request API] Unhandled Error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
