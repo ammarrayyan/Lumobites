@@ -416,6 +416,23 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const image = formData.get('image') as File | null;
+    const quizAnswersStr = formData.get('quizAnswers') as string | null;
+    let quizAnswersText = "";
+    if (quizAnswersStr) {
+      try {
+        const qa = JSON.parse(quizAnswersStr);
+        quizAnswersText = `Additionally, the user completed a personality quiz with these responses:
+- Ideal weekend: ${qa.weekend || 'N/A'}
+- Energy level: ${qa.energy || 'N/A'}
+- Handling strangers: ${qa.strangers || 'N/A'}
+- Friends describe as: ${qa.friends || 'N/A'}
+- Biggest trait: ${qa.trait || 'N/A'}
+
+Combine the facial features analysis (60% weight) and these personality quiz answers (40% weight) to select the perfect breed match. Choose a breed that is a genuine match for both their physical vibe and their personality profile.`;
+      } catch (e) {
+        console.error('Failed to parse quizAnswers:', e);
+      }
+    }
 
     if (!image) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
@@ -462,6 +479,8 @@ export async function POST(req: Request) {
                 type: 'text',
                 text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}].
 
+${quizAnswersText}
+
 Follow these strict instructions:
 1. Never default to the same breed repeatedly — each person must get a unique match based solely on their individual facial features, expression, and energy.
 2. Base the match purely on facial structure, eye shape, expression, energy, and personality cues visible in the photo.
@@ -470,7 +489,21 @@ Follow these strict instructions:
 5. If uncertain between two breeds, always pick the less common one for variety.
 6. Consider all breeds in the list equally, including rare and diverse options, and choose the most accurate match even if it is an uncommon breed.
 
-Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare.
+
+Respond in JSON only: {
+  petType: "cat" or "dog",
+  breed: string,
+  matchScore: number,
+  traits: array of 3 fun traits,
+  quote: one fun sentence,
+  reason: one sentence explaining the visual match,
+  personalityBreakdown: string (detailed 2-3 sentence breakdown combining facial features and quiz answers),
+  famousPets: array of 2-3 famous pets (real or fictional) of this breed,
+  bothSection: array of 3 fun points starting with "You and your Pet Twin both...",
+  compatibility: string (e.g. "Golden Retriever and Husky owners"),
+  celebrityMatch: string (e.g. "Keanu Reeves (calm, loyal, and quietly mysterious)")
+}`
               }
             ]
           }
@@ -602,7 +635,12 @@ const DOG_BREED_SLUGS: Record<string, string> = {
       traits: cleanTraits.length >= 3 ? cleanTraits : ["Charming", "Friendly", "Warm"],
       quote: result.quote || "A perfect match for your one-of-a-kind personality!",
       reason: result.reason || '',
-      unsplashImageUrl
+      unsplashImageUrl,
+      personalityBreakdown: result.personalityBreakdown || "A beautiful combination of features and personality traits.",
+      famousPets: result.famousPets || [],
+      bothSection: result.bothSection || [],
+      compatibility: result.compatibility || "other pet owners",
+      celebrityMatch: result.celebrityMatch || "A well-known figure with a matching vibe"
     });
 
   } catch (error: any) {

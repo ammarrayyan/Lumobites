@@ -22,10 +22,76 @@ interface TwinResult {
   quote: string;
   reason: string;
   unsplashImageUrl: string;
+  personalityBreakdown: string;
+  famousPets: string[];
+  bothSection: string[];
+  compatibility: string;
+  celebrityMatch: string;
 }
 
+const QUIZ_QUESTIONS = [
+  {
+    key: 'weekend',
+    question: 'Your ideal weekend:',
+    options: [
+      { value: 'Hiking and adventures', label: 'Hiking and adventures' },
+      { value: 'Netflix and couch', label: 'Netflix and couch' },
+      { value: 'Social gathering with friends', label: 'Social gathering with friends' },
+      { value: 'Exploring somewhere new', label: 'Exploring somewhere new' }
+    ]
+  },
+  {
+    key: 'energy',
+    question: 'Your energy level:',
+    options: [
+      { value: 'Always on the go', label: 'Always on the go' },
+      { value: 'Balanced — active but love rest', label: 'Balanced — active but love rest' },
+      { value: 'Pretty chill and relaxed', label: 'Pretty chill and relaxed' },
+      { value: 'Depends on my mood', label: 'Depends on my mood' }
+    ]
+  },
+  {
+    key: 'strangers',
+    question: 'How do you handle strangers:',
+    options: [
+      { value: 'Warm and friendly immediately', label: 'Warm and friendly immediately' },
+      { value: 'Takes time to warm up', label: 'Takes time to warm up' },
+      { value: 'Observe first then engage', label: 'Observe first then engage' },
+      { value: 'Selective — only certain people', label: 'Selective — only certain people' }
+    ]
+  },
+  {
+    key: 'friends',
+    question: 'Your friends describe you as:',
+    options: [
+      { value: 'Loyal and dependable', label: 'Loyal and dependable' },
+      { value: 'Independent and unique', label: 'Independent and unique' },
+      { value: 'Playful and spontaneous', label: 'Playful and spontaneous' },
+      { value: 'Calm and wise', label: 'Calm and wise' }
+    ]
+  },
+  {
+    key: 'trait',
+    question: 'Your biggest trait:',
+    options: [
+      { value: 'Protective and loving', label: 'Protective and loving' },
+      { value: 'Curious and adventurous', label: 'Curious and adventurous' },
+      { value: 'Elegant and graceful', label: 'Elegant and graceful' },
+      { value: 'Goofy and fun loving', label: 'Goofy and fun loving' }
+    ]
+  }
+];
+
 export default function TwinPage() {
-  const [step, setStep] = useState<'upload' | 'analyzing' | 'result'>('upload');
+  const [step, setStep] = useState<'quiz' | 'upload' | 'analyzing' | 'result'>('quiz');
+  const [quizAnswers, setQuizAnswers] = useState({
+    weekend: '',
+    energy: '',
+    strangers: '',
+    friends: '',
+    trait: ''
+  });
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingIndex, setLoadingIndex] = useState(0);
@@ -549,6 +615,7 @@ export default function TwinPage() {
     try {
       const formData = new FormData();
       formData.append('image', selectedFile);
+      formData.append('quizAnswers', JSON.stringify(quizAnswers));
 
       const res = await fetch(`/api/twin?t=${Date.now()}`, {
         method: 'POST',
@@ -809,6 +876,13 @@ export default function TwinPage() {
     sharePlatformWithDownloadOnly(squareCardRef, filename, shareText, successToastMessage);
   };
 
+  const shareToInstagramStory = () => {
+    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_story.png`;
+    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
+    const successToastMessage = "Story image saved! Open Instagram → swipe right to create a Story → select this image from your gallery.";
+    sharePlatformWithDownloadOnly(storyCardRef, filename, shareText, successToastMessage);
+  };
+
   const copyPageLink = async () => {
     try {
       await navigator.clipboard.writeText("https://lumobites.net/twin");
@@ -927,6 +1001,61 @@ export default function TwinPage() {
           {shareStatus && (
             <div className="mb-6 p-4 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-xl text-center font-bold animate-bounce flex items-center justify-center gap-2 shadow-xs">
               🎉 {shareStatus}
+            </div>
+          )}
+
+          {/* STEP 0: QUIZ */}
+          {step === 'quiz' && (
+            <div className="flex flex-col gap-6 w-full text-left">
+              {/* Progress indicator */}
+              <div className="w-full flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">
+                <span>Personality Quiz</span>
+                <span>Question {currentQuizQuestion + 1} of 5</span>
+              </div>
+              <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4 border border-gray-150/40">
+                <div 
+                  className="bg-[#8B5E3C] h-full transition-all duration-300"
+                  style={{ width: `${(currentQuizQuestion + 1) * 20}%` }}
+                ></div>
+              </div>
+
+              <h2 className="text-xl font-black text-[#191919] leading-tight mb-4">
+                {QUIZ_QUESTIONS[currentQuizQuestion].question}
+              </h2>
+
+              <div className="flex flex-col gap-3.5">
+                {QUIZ_QUESTIONS[currentQuizQuestion].options.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      const key = QUIZ_QUESTIONS[currentQuizQuestion].key as keyof typeof quizAnswers;
+                      setQuizAnswers(prev => ({
+                        ...prev,
+                        [key]: option.value
+                      }));
+                      
+                      if (currentQuizQuestion < 4) {
+                        setCurrentQuizQuestion(prev => prev + 1);
+                      } else {
+                        setStep('upload');
+                      }
+                    }}
+                    className="w-full bg-[#FCFBF9]/60 hover:bg-[#FAF6F4] text-gray-700 font-bold py-4 px-6 rounded-2xl border border-gray-200 hover:border-[#8B5E3C] transition-all text-left shadow-xs flex items-center justify-between group cursor-pointer text-sm"
+                  >
+                    <span>{option.label}</span>
+                    <span className="text-[#8B5E3C] opacity-0 group-hover:opacity-100 transition-opacity font-extrabold text-base">&rarr;</span>
+                  </button>
+                ))}
+              </div>
+
+              {currentQuizQuestion > 0 && (
+                <button
+                  onClick={() => setCurrentQuizQuestion(prev => prev - 1)}
+                  className="mt-6 text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer self-start"
+                >
+                  &larr; Back to previous question
+                </button>
+              )}
             </div>
           )}
 
@@ -1074,18 +1203,24 @@ export default function TwinPage() {
                   </h2>
                 </div>
 
-                {/* Side-by-Side Images */}
-                <div className="flex items-center gap-6 my-2">
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_12px_28px_rgba(0,0,0,0.08)] relative shrink-0">
+                {/* Redesigned Side-by-Side Images with Match % in Middle */}
+                <div className="flex items-center justify-between w-full my-4 relative max-w-[480px]">
+                  {/* YOU Photo */}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-md relative shrink-0">
                     {previewUrl && <img src={previewUrl} alt="You" className="w-full h-full object-cover" />}
-                    <span className="absolute bottom-1.5 right-3.5 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">You</span>
+                    <span className="absolute bottom-1 right-2 text-[9px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">You</span>
                   </div>
                   
-                  <Footprints className="w-8 h-8 text-gray-350 shrink-0" />
+                  {/* Big Match Percentage Badge in Middle */}
+                  <div className="flex flex-col items-center justify-center bg-[#8B5E3C] text-white w-20 h-20 rounded-full border-4 border-white shadow-md shrink-0 z-10">
+                    <span className="text-xl sm:text-2xl font-black">{result.matchScore}%</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider">Match</span>
+                  </div>
 
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-[0_12px_28px_rgba(0,0,0,0.08)] relative shrink-0 bg-[#F9F7F5] flex items-center justify-center">
+                  {/* TWIN Photo */}
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-md relative shrink-0 bg-[#F9F7F5] flex items-center justify-center">
                     {imageError ? (
-                      <Dog className="w-12 h-12 text-gray-300" />
+                      <span className="text-4xl">🐕</span>
                     ) : (
                       <img 
                         src={result.unsplashImageUrl} 
@@ -1094,8 +1229,13 @@ export default function TwinPage() {
                         onError={() => setImageError(true)}
                       />
                     )}
-                    <span className="absolute bottom-1.5 right-3.5 text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">Twin</span>
+                    <span className="absolute bottom-1 right-2 text-[9px] bg-black/60 text-white px-2 py-0.5 rounded-full font-bold">Twin</span>
                   </div>
+                </div>
+
+                {/* Compatibility sentence */}
+                <div className="w-full bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 text-center mt-1 text-sm font-bold text-[#8B5E3C] leading-normal shadow-xs">
+                  Your Pet Twin is a {result.breed} &mdash; you are most compatible with {result.compatibility}!
                 </div>
 
                 {/* Personality Traits */}
@@ -1120,6 +1260,64 @@ export default function TwinPage() {
                   </p>
                 </div>
 
+                {/* Rich Details Section */}
+                <div className="w-full flex flex-col gap-5 border-t border-[#F2ECE6] pt-5 mt-2 text-left text-sm text-[#444444]">
+                  {/* Personality Breakdown */}
+                  <div>
+                    <h4 className="text-xs font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                      ✨ Personality Breakdown
+                    </h4>
+                    <p className="text-gray-600 leading-relaxed font-semibold">
+                      {result.personalityBreakdown}
+                    </p>
+                  </div>
+
+                  {/* You and Your Pet Twin Both */}
+                  {result.bothSection && result.bothSection.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-black text-[#8B5E3C] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        🤝 You & Your Twin Both...
+                      </h4>
+                      <ul className="space-y-1.5">
+                        {result.bothSection.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-gray-600 font-bold">
+                            <span className="text-[#8B5E3C] shrink-0 font-extrabold">&#10003;</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Famous Pets */}
+                    {result.famousPets && result.famousPets.length > 0 && (
+                      <div className="bg-[#FAF6F4]/50 border border-[#E8DDD4]/65 rounded-xl p-3.5">
+                        <h4 className="text-[11px] font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          🎬 Famous {result.breed}s
+                        </h4>
+                        <ul className="space-y-1 text-xs text-gray-500 font-medium">
+                          {result.famousPets.map((pet, idx) => (
+                            <li key={idx}>&bull; {pet}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Celebrity Match */}
+                    {result.celebrityMatch && (
+                      <div className="bg-[#FAF6F4]/50 border border-[#E8DDD4]/65 rounded-xl p-3.5">
+                        <h4 className="text-[11px] font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          🌟 Celebrity Match
+                        </h4>
+                        <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                          {result.celebrityMatch}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Footer branding */}
                 <div className="w-full flex justify-between items-center bg-[#F9F7F5] rounded-2xl p-4 mt-6 border border-[#EBEBEB] box-border">
                   <div className="flex items-center gap-3">
@@ -1137,6 +1335,15 @@ export default function TwinPage() {
               {/* CTAs & Options */}
               <div className="w-full flex flex-col gap-3 mt-4">
                 
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <button 
+                    onClick={shareToInstagramStory}
+                    className="flex-1 bg-gradient-to-r from-[#ee2a7b] to-[#6228d7] hover:from-[#d6246e] hover:to-[#551ec0] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer border-0"
+                  >
+                    <Camera className="w-5 h-5 text-white animate-pulse" /> Share to Instagram Stories 📸
+                  </button>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href={`/results?breed=${encodeURIComponent(result.breed)}`}
@@ -1351,7 +1558,15 @@ export default function TwinPage() {
                       setAgreedToShare(false);
                       setShareEmail('');
                       setPublicShareStatus('idle');
-                      setStep('upload');
+                      setQuizAnswers({
+                        weekend: '',
+                        energy: '',
+                        strangers: '',
+                        friends: '',
+                        trait: ''
+                      });
+                      setCurrentQuizQuestion(0);
+                      setStep('quiz');
                     }}
                     className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
@@ -1780,23 +1995,9 @@ export default function TwinPage() {
             boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
           }}
         >
-          {/* Top Badge and Header */}
+          {/* Top Header */}
           <div style={{ textAlign: 'center', width: '100%' }}>
-            <div style={{
-              display: 'inline-block',
-              background: '#1E1E1E',
-              color: '#FFFFFF',
-              fontWeight: 800,
-              fontSize: '24px',
-              padding: '12px 30px',
-              borderRadius: '50px',
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              marginBottom: '30px'
-            }}>
-              {result.matchScore}% Match
-            </div>
-            <div style={{ fontSize: '20px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#999999', marginBottom: '8px' }}>
+            <div style={{ fontSize: '20px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#8B5E3C', marginBottom: '8px' }}>
               Your Pet Twin Match
             </div>
             <h2 style={{
@@ -1811,21 +2012,22 @@ export default function TwinPage() {
             </h2>
           </div>
 
-          {/* Double Photos Side-by-Side */}
+          {/* Double Photos Side-by-Side with Match % in Middle */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '40px',
+            gap: '30px',
             margin: '20px 0',
-            width: '100%'
+            width: '100%',
+            position: 'relative'
           }}>
             {/* YOU photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
               <div style={{
-                width: '280px',
-                height: '280px',
-                borderRadius: '50%',
+                width: '260px',
+                height: '260px',
+                borderRadius: '40px',
                 overflow: 'hidden',
                 border: '10px solid #FFFFFF',
                 boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
@@ -1840,14 +2042,32 @@ export default function TwinPage() {
               }}>YOU</span>
             </div>
 
-            <div style={{ fontSize: '60px', paddingBottom: '30px', color: '#CCCCCC' }}>🐾</div>
+            {/* Match Score Badge (in the middle) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#8B5E3C',
+              color: 'white',
+              width: '140px',
+              height: '140px',
+              borderRadius: '50%',
+              border: '8px solid white',
+              boxShadow: '0 12px 30px rgba(139,94,60,0.25)',
+              margin: '0 -20px 30px -20px',
+              zIndex: 10
+            }}>
+              <span style={{ fontSize: '38px', fontWeight: 900 }}>{result.matchScore}%</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Match</span>
+            </div>
 
             {/* TWIN photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
               <div style={{
-                width: '280px',
-                height: '280px',
-                borderRadius: '50%',
+                width: '260px',
+                height: '260px',
+                borderRadius: '40px',
                 overflow: 'hidden',
                 border: '10px solid #FFFFFF',
                 boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
@@ -1975,25 +2195,9 @@ export default function TwinPage() {
             boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
           }}
         >
-          {/* Top Badge & Header */}
+          {/* Top Header */}
           <div style={{ textAlign: 'center', width: '100%' }}>
-            <div style={{
-              display: 'inline-block',
-              background: '#1E1E1E',
-              color: '#FFFFFF',
-              fontWeight: 900,
-              fontSize: '34px',
-              padding: '16px 48px',
-              borderRadius: '50px',
-              letterSpacing: '1.5px',
-              textTransform: 'uppercase',
-              marginBottom: '40px',
-              boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
-            }}>
-              {result.matchScore}% Match
-            </div>
-            
-            <div style={{ fontSize: '28px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', color: '#666666', marginBottom: '15px' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', color: '#8B5E3C', marginBottom: '15px' }}>
               My Pet Twin is a
             </div>
             <h2 style={{
@@ -2008,21 +2212,22 @@ export default function TwinPage() {
             </h2>
           </div>
 
-          {/* Double circular photos - side-by-side with 🐾 between */}
+          {/* Double Photos Side-by-Side with Match % in Middle */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '50px',
+            gap: '30px',
             margin: '40px 0',
-            width: '100%'
+            width: '100%',
+            position: 'relative'
           }}>
             {/* YOU photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
               <div style={{
                 width: '320px',
                 height: '320px',
-                borderRadius: '50%',
+                borderRadius: '40px',
                 overflow: 'hidden',
                 border: '12px solid #FFFFFF',
                 boxShadow: '0 24px 48px rgba(0,0,0,0.1)'
@@ -2037,14 +2242,32 @@ export default function TwinPage() {
               }}>YOU</span>
             </div>
 
-            <div style={{ fontSize: '70px', paddingBottom: '40px', color: '#CCCCCC' }}>🐾</div>
+            {/* Match Score Badge (in the middle) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#8B5E3C',
+              color: 'white',
+              width: '160px',
+              height: '160px',
+              borderRadius: '50%',
+              border: '10px solid white',
+              boxShadow: '0 12px 30px rgba(139,94,60,0.25)',
+              margin: '0 -30px 40px -30px',
+              zIndex: 10
+            }}>
+              <span style={{ fontSize: '42px', fontWeight: 900 }}>{result.matchScore}%</span>
+              <span style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Match</span>
+            </div>
 
             {/* TWIN photo column */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
               <div style={{
                 width: '320px',
                 height: '320px',
-                borderRadius: '50%',
+                borderRadius: '40px',
                 overflow: 'hidden',
                 border: '12px solid #FFFFFF',
                 boxShadow: '0 24px 48px rgba(0,0,0,0.1)',
@@ -2174,72 +2397,89 @@ export default function TwinPage() {
             boxShadow: '0 20px 50px rgba(0,0,0,0.05)'
           }}
         >
-          {/* Top Row: Header & Badge */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div>
-              <div style={{ fontSize: '18px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#999999', marginBottom: '4px' }}>
-                Your Pet Twin Match
-              </div>
-              <h2 style={{ fontSize: '56px', fontWeight: 900, margin: 0, color: '#191919', letterSpacing: '-1.5px', lineHeight: 1 }}>
-                {result.breed}
-              </h2>
+          {/* Top Header */}
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <div style={{ fontSize: '16px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: '#8B5E3C', marginBottom: '4px' }}>
+              Your Pet Twin Match
             </div>
-            <div style={{
-              background: '#1E1E1E',
-              color: '#FFFFFF',
-              fontWeight: 800,
-              fontSize: '22px',
-              padding: '12px 28px',
-              borderRadius: '50px',
-              letterSpacing: '1px',
-              textTransform: 'uppercase'
+            <h2 style={{
+              fontSize: '52px',
+              fontWeight: 900,
+              margin: 0,
+              color: '#191919',
+              letterSpacing: '-1.5px',
+              lineHeight: 1.1
             }}>
-              {result.matchScore}% Match
-            </div>
+              {result.breed}
+            </h2>
           </div>
 
-          {/* Middle Row: Two Photos side by side */}
+          {/* Middle Row: Two Photos side by side with Match % in Middle */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '30px',
-            margin: '10px 0',
-            width: '100%'
+            gap: '24px',
+            margin: '15px 0',
+            width: '100%',
+            position: 'relative'
           }}>
-            {/* YOU photo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <span style={{ color: '#888888', fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px' }}>YOU</span>
+            {/* YOU photo column */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
+                width: '180px',
+                height: '180px',
+                borderRadius: '30px',
                 overflow: 'hidden',
                 border: '8px solid #FFFFFF',
-                boxShadow: '0 15px 30px rgba(0,0,0,0.1)'
+                boxShadow: '0 12px 24px rgba(0,0,0,0.1)'
               }}>
                 {previewUrl && <img src={previewUrl} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
+              <span style={{
+                color: '#888888',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                letterSpacing: '2px'
+              }}>YOU</span>
             </div>
 
-            <div style={{ fontSize: '48px', color: '#CCCCCC' }}>🐾</div>
+            {/* Match Score Badge (in the middle) */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#8B5E3C',
+              color: 'white',
+              width: '110px',
+              height: '110px',
+              borderRadius: '50%',
+              border: '6px solid white',
+              boxShadow: '0 10px 24px rgba(139,94,60,0.25)',
+              margin: '0 -15px 20px -15px',
+              zIndex: 10
+            }}>
+              <span style={{ fontSize: '28px', fontWeight: 900 }}>{result.matchScore}%</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Match</span>
+            </div>
 
-            {/* TWIN photo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {/* TWIN photo column */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
+                width: '180px',
+                height: '180px',
+                borderRadius: '30px',
                 overflow: 'hidden',
                 border: '8px solid #FFFFFF',
-                boxShadow: '0 15px 30px rgba(0,0,0,0.1)',
+                boxShadow: '0 12px 24px rgba(0,0,0,0.1)',
                 background: '#F9F7F5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '70px' }}>🐕</span>
+                  <span style={{ fontSize: '65px' }}>🐕</span>
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -2249,7 +2489,12 @@ export default function TwinPage() {
                   />
                 )}
               </div>
-              <span style={{ color: '#888888', fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px' }}>TWIN</span>
+              <span style={{
+                color: '#888888',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                letterSpacing: '2px'
+              }}>TWIN</span>
             </div>
           </div>
 
