@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2 } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -160,6 +160,7 @@ export default function PetSitting() {
   const [cameraError, setCameraError] = useState('');
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
 
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
@@ -1519,15 +1520,16 @@ export default function PetSitting() {
                     </div>
                   ) : (
                     // New sitter — needs to upload
-                    <div className="flex items-center gap-4 p-2 rounded-xl">
-                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-gray-400">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 p-2 rounded-xl">
+                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-gray-400 shrink-0">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
-                      <div className="flex-1 flex flex-col gap-2">
+                      <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input 
                           type="file" 
-                          accept="image/*" 
-                          capture="user"
+                          ref={profilePhotoInputRef}
+                          className="hidden"
+                          accept="image/*"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -1562,14 +1564,22 @@ export default function PetSitting() {
                               reader.readAsDataURL(file);
                             }
                           }} 
-                          className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
                         />
                         <button 
                           type="button" 
                           onClick={() => startCamera('selfie')}
-                          className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
+                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
                         >
-                          <Camera className="w-3.5 h-3.5" /> Take Photo with Webcam
+                          <Camera className="w-4 h-4 shrink-0" />
+                          <span>Take Selfie</span>
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => profilePhotoInputRef.current?.click()}
+                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                        >
+                          <Upload className="w-4 h-4 shrink-0" />
+                          <span>Upload Photo</span>
                         </button>
                       </div>
                     </div>
