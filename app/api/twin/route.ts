@@ -460,7 +460,17 @@ export async function POST(req: Request) {
               },
               {
                 type: 'text',
-                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}]. Base the breed match strictly on the person's facial features, expression, and energy, not on popularity. Avoid defaulting to the same common breeds repeatedly. Choose the most accurate match even if it is an uncommon breed. Consider all breeds in the list equally, including rare and diverse options. Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
+                text: `Look at this person's photo. [Request ID: ${uniqueId}] Which dog or cat breed do they most resemble in terms of facial features, expression, and energy? Consider face shape, eye size, expression, and overall vibe. Pick ONE breed from this list: [${ALL_BREEDS.join(', ')}].
+
+Follow these strict instructions:
+1. Never default to the same breed repeatedly — each person must get a unique match based solely on their individual facial features, expression, and energy.
+2. Base the match purely on facial structure, eye shape, expression, energy, and personality cues visible in the photo.
+3. Actively avoid the most recently common matches — prioritize breeds that haven't been matched recently.
+4. Turkish Angora (cat) and Irish Setter (dog) are currently over-represented and should appear no more than 10% of the time across all matches.
+5. If uncertain between two breeds, always pick the less common one for variety.
+6. Consider all breeds in the list equally, including rare and diverse options, and choose the most accurate match even if it is an uncommon breed.
+
+Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare. Respond in JSON only: {petType: "cat" or "dog", breed: string, matchScore: number, traits: array of 3 fun traits, quote: one fun sentence, reason: one sentence explaining the visual match}`
               }
             ]
           }
