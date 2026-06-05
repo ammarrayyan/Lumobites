@@ -66,7 +66,8 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
             ...s,
             is_approved: action === 'approve',
             approval_status: action === 'approve' ? 'approved' : 'rejected',
-            rejection_reason: action === 'reject' ? rejectionReason : null
+            rejection_reason: action === 'reject' ? rejectionReason : null,
+            needs_reapproval: false
           };
         }
         return s;
@@ -168,6 +169,11 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     }`}>
                       {sitter.approval_status || 'pending'}
                     </span>
+                    {sitter.needs_reapproval && (
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
+                        Re-review ⚠️
+                      </span>
+                    )}
                     {sitter.self_declared && (
                       <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                         Self Declared ✅

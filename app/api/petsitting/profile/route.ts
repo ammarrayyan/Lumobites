@@ -173,6 +173,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const isNewPhoto = photo_url && photo_url.startsWith('data:image/');
+    const isNewId = id_photo_url && id_photo_url.startsWith('data:image/');
+
+    let nextApprovalStatus = 'pending';
+    let nextIsApproved = false;
+    let nextNeedsReapproval = false;
+
+    try {
+      const { data: existingSitter } = await supabaseAdmin
+        .from('sitters')
+        .select('approval_status, is_approved, needs_reapproval')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (existingSitter) {
+        if (existingSitter.approval_status === 'approved') {
+          if (isNewPhoto || isNewId) {
+            nextApprovalStatus = 'pending';
+            nextIsApproved = false;
+            nextNeedsReapproval = true;
+          } else {
+            nextApprovalStatus = 'approved';
+            nextIsApproved = true;
+            nextNeedsReapproval = !!existingSitter.needs_reapproval;
+          }
+        } else {
+          nextApprovalStatus = 'pending';
+          nextIsApproved = false;
+          nextNeedsReapproval = false;
+        }
+      }
+    } catch (dbErr) {
+      console.error('[PetSitting Profile] Failed to fetch existing sitter:', dbErr);
+    }
+
     const { data, error } = await supabaseAdmin
       .from('sitters')
       .upsert({
@@ -197,9 +232,9 @@ export async function POST(request: NextRequest) {
         gender: gender || null,
         self_declared: self_declared || false,
         self_declared_at: self_declared ? new Date().toISOString() : null,
-        // Reset approval status upon submission/resubmission
-        approval_status: 'pending',
-        is_approved: false,
+        approval_status: nextApprovalStatus,
+        is_approved: nextIsApproved,
+        needs_reapproval: nextNeedsReapproval,
         submitted_at: new Date().toISOString(),
         ...(cleanEmail === 'premierpetnutritionllc@gmail.com' ? { is_pro: true } : {})
       }, { onConflict: 'email', ignoreDuplicates: false })
@@ -208,17 +243,55 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Send admin notification email if re-approval is required
+    if (nextNeedsReapproval && (isNewPhoto || isNewId)) {
+      try {
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+        const adminEmail = process.env.ADMIN_EMAIL || 'info@lumobitespet.com';
+        await resend.emails.send({
+          from: fromEmail,
+          to: adminEmail,
+          subject: `Re-approval Required: ${name} updated their verification photo 🐾`,
+          html: brandedEmail({
+            subject: `Re-approval Required: ${name} updated their verification photo 🐾`,
+            preheader: `Sitter ${name} has updated their verification photo and needs re-approval.`,
+            body: `
+              <h1 style="${emailStyles.h1}">Re-approval Required 🐾</h1>
+              <p style="${emailStyles.p}">Hi Admin,</p>
+              <p style="${emailStyles.p}">Sitter <strong>${name}</strong> (${cleanEmail}) has updated their verification photo/ID and needs re-approval.</p>
+              <p style="${emailStyles.p}">Their profile has been temporarily hidden and status set to pending. Please review the updated files in the admin panel.</p>
+              ${emailStyles.button('https://lumobites.net/admin', 'Go to Admin Panel')}
+              ${emailStyles.divider}
+              ${emailStyles.signoff}
+            `
+          })
+        });
+        console.log(`[PetSitting Profile API] Admin re-approval notification sent for: ${cleanEmail}`);
+      } catch (adminEmailErr) {
+        console.error('[PetSitting Profile API] Failed to send admin notification email:', adminEmailErr);
+      }
+    }
+
     // Send application confirmation email
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      await resend.emails.send({
-        from: fromEmail,
-        to: cleanEmail,
-        subject: 'Your Lumo Bites Sitter Application is Under Review 🐾',
-        html: brandedEmail({
-          subject: 'Your Lumo Bites Sitter Application is Under Review 🐾',
-          preheader: 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
-          body: `
+      const subject = nextNeedsReapproval 
+        ? 'Your Updated Lumo Bites Profile is Under Review 🐾' 
+        : 'Your Lumo Bites Sitter Application is Under Review 🐾';
+      const bodyHtml = nextNeedsReapproval
+        ? `
+            <h1 style="${emailStyles.h1}">Updates Received 🐾</h1>
+            <p style="${emailStyles.p}">Hi ${name},</p>
+            <p style="${emailStyles.p}">Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.</p>
+            ${emailStyles.highlightBox(`
+              <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
+              <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ RE-REVIEW PENDING</p>
+              <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours. You will receive another email from us as soon as your profile is active again.</p>
+            `)}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `
+        : `
             <h1 style="${emailStyles.h1}">Application Received 🐾</h1>
             <p style="${emailStyles.p}">Hi ${name},</p>
             <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our safety team is currently reviewing your application.</p>
@@ -230,7 +303,18 @@ export async function POST(request: NextRequest) {
             <p style="${emailStyles.p}">While you wait, feel free to visit the Lumo Bites community board or manage your settings.</p>
             ${emailStyles.divider}
             ${emailStyles.signoff}
-          `
+          `;
+
+      await resend.emails.send({
+        from: fromEmail,
+        to: cleanEmail,
+        subject,
+        html: brandedEmail({
+          subject,
+          preheader: nextNeedsReapproval 
+            ? 'Your profile photo update is being reviewed by our safety team.'
+            : 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
+          body: bodyHtml
         })
       });
       console.log(`[PetSitting Profile API] Application confirmation email sent to: ${cleanEmail}`);

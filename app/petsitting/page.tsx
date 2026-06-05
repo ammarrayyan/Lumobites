@@ -129,6 +129,7 @@ export default function PetSitting() {
   const [sitterGender, setSitterGender] = useState('');
   const [isProSitter, setIsProSitter] = useState(false);
   const [selfDeclared, setSelfDeclared] = useState(false);
+  const [needsReapproval, setNeedsReapproval] = useState(false);
 
   // Sitter Sub Details
   const [sitterSubCancelAtPeriodEnd, setSitterSubCancelAtPeriodEnd] = useState(false);
@@ -316,6 +317,7 @@ export default function PetSitting() {
           setSitterAvailableTimes(data.available_times || []);
           setSitterServiceTypes(data.service_types || []);
           setSitterApprovalStatus(data.approval_status || 'pending');
+          setNeedsReapproval(!!data.needs_reapproval);
           setSelfDeclared(!!data.self_declared);
           
           // FREE LAUNCH: Automatically treat any loaded profile as PRO
@@ -531,6 +533,7 @@ export default function PetSitting() {
       if (res.ok) {
         const updatedData = await res.json();
         setSitterApprovalStatus(updatedData.approval_status || 'pending');
+        setNeedsReapproval(!!updatedData.needs_reapproval);
         // FREE LAUNCH: Automatically treat saved profile as PRO
         setIsProSitter(true);
         setProfilePreviewMode(true);
@@ -1260,10 +1263,21 @@ export default function PetSitting() {
                     <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-yellow-100 text-yellow-600">
                       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Submitted for Review</h2>
-                    <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                      Your profile has been submitted for review. We will notify you by email within 24 hours once approved.
-                    </p>
+                    {needsReapproval ? (
+                      <>
+                        <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Under Re-Review</h2>
+                        <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                          Your updated photo has been submitted for review. Your profile will be temporarily hidden until our team approves it — usually within 24 hours.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Profile Submitted for Review</h2>
+                        <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
+                          Your profile has been submitted for review. We will notify you by email within 24 hours once approved.
+                        </p>
+                      </>
+                    )}
 
                     {/* Share & Invite Section */}
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mb-8 max-w-md mx-auto text-left shadow-sm">
@@ -1524,7 +1538,7 @@ export default function PetSitting() {
                         onClick={() => setSitterPhoto('')}
                         className="w-full sm:w-auto text-xs font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] px-4 py-2 rounded-xl transition-colors shadow-sm cursor-pointer shrink-0"
                       >
-                        Change Photo
+                        Update Photo
                       </button>
                     </div>
                   ) : (
@@ -1623,7 +1637,7 @@ export default function PetSitting() {
                         }}
                         className="w-full sm:w-auto text-xs font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] px-4 py-2 rounded-xl transition-colors shadow-sm cursor-pointer shrink-0"
                       >
-                        Change ID
+                        Update ID
                       </button>
                     </div>
                   ) : (

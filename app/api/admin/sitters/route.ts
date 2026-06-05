@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
         .update({
           is_approved: true,
           approval_status: 'approved',
-          rejection_reason: null
+          rejection_reason: null,
+          needs_reapproval: false
         })
         .eq('id', id);
 
@@ -117,7 +118,8 @@ export async function POST(req: NextRequest) {
         .update({
           is_approved: false,
           approval_status: 'rejected',
-          rejection_reason: reason
+          rejection_reason: reason,
+          needs_reapproval: false
         })
         .eq('id', id);
 
