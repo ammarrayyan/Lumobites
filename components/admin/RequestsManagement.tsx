@@ -73,6 +73,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   const totalRequests = requests.length;
   const pendingCount = requests.filter(r => !r.status || r.status.toLowerCase() === 'pending').length;
   const acceptedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'accepted').length;
+  const completedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'completed').length;
   const declinedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'declined').length;
   const reviewEmailsCount = requests.filter(r => r.review_sent).length;
 
@@ -84,6 +85,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
     if (statusFilter !== 'All') {
       if (statusFilter.toLowerCase() === 'pending' && status.toLowerCase() !== 'pending') return false;
       if (statusFilter.toLowerCase() === 'accepted' && status.toLowerCase() !== 'accepted') return false;
+      if (statusFilter.toLowerCase() === 'completed' && status.toLowerCase() !== 'completed') return false;
       if (statusFilter.toLowerCase() === 'declined' && status.toLowerCase() !== 'declined') return false;
     }
     
@@ -134,7 +136,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       </h2>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Total Requests</span>
           <span className="text-3xl font-black text-purple-400">{totalRequests}</span>
@@ -147,13 +149,17 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Accepted</span>
           <span className="text-3xl font-black text-green-400">{acceptedCount}</span>
         </div>
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
+          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Completed</span>
+          <span className="text-3xl font-black text-blue-400">{completedCount}</span>
+        </div>
         <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Declined</span>
           <span className="text-3xl font-black text-red-400">{declinedCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Review Emails Sent</span>
-          <span className="text-3xl font-black text-blue-400">{reviewEmailsCount}</span>
+        <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
+          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Review Sent</span>
+          <span className="text-3xl font-black text-cyan-400">{reviewEmailsCount}</span>
         </div>
       </div>
 
@@ -171,6 +177,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
               <option value="All">All Requests</option>
               <option value="Pending">Pending</option>
               <option value="Accepted">Accepted</option>
+              <option value="Completed">Completed</option>
               <option value="Declined">Declined</option>
             </select>
           </div>
@@ -227,9 +234,10 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                           {new Date(request.created_at).toLocaleDateString()}
                         </td>
 
-                        {/* Owner Email */}
+                        {/* Owner Email & Booking # */}
                         <td className="p-4 text-sm font-semibold text-white">
-                          {request.owner_email}
+                          <div>{request.owner_email}</div>
+                          <div className="text-xs text-white/50 font-normal">{request.booking_number || 'No Booking #'}</div>
                         </td>
 
                         {/* Sitter Name & Email */}
@@ -249,13 +257,15 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         {/* Requested Dates */}
                         <td className="p-4 text-sm text-white/80 max-w-[200px] truncate" title={request.dates}>
                           {request.dates}
-                        </td>
-
-                        {/* Status Badge */}
+                                        {/* Status Badge */}
                         <td className="p-4 whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' ? (
                             <span className="bg-green-500/20 text-green-400 border border-green-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🟢 Accepted
+                            </span>
+                          ) : status.toLowerCase() === 'completed' ? (
+                            <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                              🔵 Completed
                             </span>
                           ) : status.toLowerCase() === 'declined' ? (
                             <span className="bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
@@ -267,17 +277,19 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                             </span>
                           )}
                         </td>
-
-                        {/* Action Date (Accepted/Declined) */}
+ 
+                        {/* Action Date (Accepted/Declined/Completed) */}
                         <td className="p-4 text-sm text-white/70 whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' && request.accepted_at ? (
                             new Date(request.accepted_at).toLocaleDateString()
+                          ) : status.toLowerCase() === 'completed' && request.completed_at ? (
+                            new Date(request.completed_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'declined' ? (
                             'N/A'
                           ) : (
                             '—'
                           )}
-                        </td>
+                        </td>                     </td>
 
                         {/* Review Sent Column */}
                         <td className="p-4 text-sm text-center whitespace-nowrap">
@@ -301,6 +313,12 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                                 {request.special_notes || 'No message or special notes provided by the owner.'}
                               </p>
                               <div className="flex gap-6 text-xs text-white/40">
+                                <div>
+                                  <strong className="text-white/60">Booking Number:</strong> {request.booking_number || 'N/A'}
+                                </div>
+                                <div>
+                                  <strong className="text-white/60">Owner Phone:</strong> {request.phone_number || 'N/A'}
+                                </div>
                                 <div>
                                   <strong className="text-white/60">Request ID:</strong> {request.id}
                                 </div>

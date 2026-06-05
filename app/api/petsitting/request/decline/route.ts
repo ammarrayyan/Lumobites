@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         body: `
           <h1 style="${emailStyles.h1}">Sitting Request Update 🐾</h1>
           <p style="${emailStyles.p}">Hi there,</p>
-          <p style="${emailStyles.p}">Thank you for using Lumo Bites. We wanted to let you know that <strong>${sitterNameStr}</strong> is unfortunately unavailable for your requested dates (<strong>${reqRow.dates || 'your requested dates'}</strong>) for <strong>${reqRow.pet_name || 'your pet'}</strong>.</p>
+          <p style="${emailStyles.p}">Your sitter was unable to accept your request. Please search for another sitter at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
           ${emailStyles.divider}
           <p style="${emailStyles.p}">Don't worry! We have many other amazing sitters in your community. You can find another sitter easily:</p>
           ${emailStyles.button('https://lumobites.net/petsitting', 'Find Another Sitter')}
@@ -73,7 +73,15 @@ export async function GET(request: NextRequest) {
       })
     });
 
-    // 6. Return confirmation html page
+    // 6. Generate WhatsApp Link for owner
+    let whatsappLink = '';
+    if (reqRow.phone_number) {
+      const cleanPhone = reqRow.phone_number.replace(/\D/g, '');
+      const msg = `Your booking was declined. Visit lumobites.net/petsitting to find another sitter.`;
+      whatsappLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+    }
+
+    // 7. Return confirmation html page
     const html = `
       <!DOCTYPE html>
       <html>
@@ -81,20 +89,33 @@ export async function GET(request: NextRequest) {
         <title>Request Declined - Lumo Bites</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: -apple-system, sans-serif; background-color: #FDFAF7; color: #4A3E3D; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-          .card { background: white; border: 1px solid #E8DDD4; border-radius: 24px; padding: 40px; text-align: center; max-width: 480px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
-          h1 { color: #EF4444; font-size: 28px; font-weight: 800; margin-top: 0; }
-          p { font-size: 16px; line-height: 1.6; color: #666; margin-bottom: 24px; }
-          .logo { margin-bottom: 20px; font-size: 24px; font-weight: 900; color: #8B5E3C; }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #FDFAF7; color: #4A3E3D; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: white; border: 1px solid #E8DDD4; border-radius: 24px; padding: 40px; text-align: center; max-width: 520px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+          h1 { color: #EF4444; font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 16px; }
+          p { font-size: 15px; line-height: 1.6; color: #666; margin-bottom: 24px; }
+          .logo { margin-bottom: 24px; font-size: 24px; font-weight: 900; color: #8B5E3C; text-decoration: none; display: inline-block; }
+          .btn-wa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background-color: #25D366; color: white; font-weight: bold; font-size: 15px; text-decoration: none; padding: 14px 28px; border-radius: 14px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; margin-bottom: 12px; border: none; cursor: pointer; }
+          .btn-wa:hover { background-color: #20BA56; }
+          .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; }
+          .btn-secondary:hover { background-color: #F3EAE3; }
         </style>
       </head>
       <body>
         <div class="card">
-          <div class="logo">🐾 Lumo Bites</div>
+          <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
           <h1>Request Declined</h1>
           <p>You have successfully declined the pet sitting request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
           <p>We have notified the owner that you are unavailable for these dates.</p>
-          <p style="font-size:14px;color:#999;margin-bottom:0;">Thank you! 🐾</p>
+
+          ${whatsappLink ? `
+            <p style="font-size:13px;color:#8B7E7D;margin-bottom:12px;">Notify the owner instantly on WhatsApp:</p>
+            <a href="${whatsappLink}" target="_blank" class="btn-wa">
+              <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.022-.08-.115-.188-.416-.34-.3-.15-1.772-.875-2.04-.973-.269-.099-.465-.148-.659.15-.19.3-.734.924-.899 1.113-.165.19-.328.21-.629.06-.3-.15-1.258-.462-2.393-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.3-.347.45-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.66-1.59-.904-2.179-.238-.574-.479-.496-.659-.505-.17-.008-.364-.01-.557-.01-.19 0-.501.071-.762.349-.261.279-1 .974-1 2.375s1.017 2.751 1.159 2.948c.142.197 2.002 3.057 4.847 4.285.677.293 1.205.467 1.619.599.681.217 1.3.187 1.79.114.545-.081 1.673-.684 1.905-1.344.232-.66.232-1.226.162-1.344zM12.164 1.956c-5.524 0-10.016 4.49-10.016 10.012 0 1.916.538 3.784 1.56 5.422L2.05 23.3l6.082-1.596c1.583.864 3.36 1.319 5.166 1.319 5.522 0 10.012-4.49 10.012-10.012.001-5.524-4.488-10.055-10.146-10.055z"/></svg>
+              Send WhatsApp Message
+            </a>
+          ` : ''}
+
+          <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
         </div>
       </body>
       </html>

@@ -15,16 +15,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate timestamp for 7 days ago
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    // Calculate timestamp for 2 hours ago
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
-    // 2. Fetch accepted requests older than 7 days that haven't received a review email
+    // 2. Fetch completed requests older than 2 hours that haven't received a review email
     const { data: requests, error: fetchError } = await supabase
       .from('sitting_requests')
-      .select('id, owner_email, sitter_id, pet_name, dates, accepted_at')
-      .eq('status', 'accepted')
+      .select('id, owner_email, sitter_id, pet_name, dates, completed_at')
+      .eq('status', 'completed')
       .eq('review_sent', false)
-      .lte('accepted_at', sevenDaysAgo);
+      .lte('completed_at', twoHoursAgo);
 
     if (fetchError) {
       console.error('[Cron Reviews] Supabase Fetch Error:', fetchError);
@@ -60,8 +60,7 @@ export async function GET(request: NextRequest) {
             body: `
               <h1 style="${emailStyles.h1}">How was your experience? ⭐</h1>
               <p style="${emailStyles.p}">Hi there,</p>
-              <p style="${emailStyles.p}">It has been a week since <strong>${sitterName}</strong> accepted your pet sitting request for <strong>${reqRow.pet_name || 'your pet'}</strong>.</p>
-              <p style="${emailStyles.p}">We would love to hear how your experience went! Leaving a rating and review helps other pet owners in the Lumo Bites community find trusted local care.</p>
+              <p style="${emailStyles.p}">How was your experience with <strong>${sitterName}</strong>? Leave a review to help other pet owners: <a href="https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${reqRow.sitter_id}</a></p>
               ${emailStyles.divider}
               ${emailStyles.button(`https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`, 'Write a Review ⭐')}
               ${emailStyles.divider}

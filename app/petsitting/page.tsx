@@ -28,6 +28,7 @@ interface Sitter {
   available_days?: string[];
   available_times?: string[];
   service_types?: string[];
+  completed_bookings?: number;
 }
 
 // Haversine formula to calculate distance between two coordinates in miles
@@ -131,6 +132,19 @@ export default function PetSitting() {
   const [selfDeclared, setSelfDeclared] = useState(false);
   const [needsReapproval, setNeedsReapproval] = useState(false);
 
+  // Bookings Flow State
+  const [reqPhone, setReqPhone] = useState('');
+  const [sitterId, setSitterId] = useState('');
+  const [sitterRequests, setSitterRequests] = useState<any[]>([]);
+  const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
+  const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
+  const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
+  const [ownerHistoryEmail, setOwnerHistoryEmail] = useState('');
+  const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
+  const [lastWhatsappLink, setLastWhatsappLink] = useState('');
+  const [lastBookingNumber, setLastBookingNumber] = useState('');
+  const [completedBookings, setCompletedBookings] = useState(0);
+
   // Sitter Sub Details
   const [sitterSubCancelAtPeriodEnd, setSitterSubCancelAtPeriodEnd] = useState(false);
   const [sitterSubDaysRemaining, setSitterSubDaysRemaining] = useState(0);
@@ -174,6 +188,13 @@ export default function PetSitting() {
       fetchSitters(cachedEmail);
     } else {
       fetchSitters();
+    }
+
+    // Restore owner booking history if they tracked it previously
+    const cachedHistoryEmail = localStorage.getItem('lumo_owner_history_email') || cachedEmail;
+    if (cachedHistoryEmail && cachedHistoryEmail !== 'undefined') {
+      setOwnerHistoryEmail(cachedHistoryEmail);
+      fetchOwnerRequests(cachedHistoryEmail);
     }
 
     // Set activeTab from URL search params or hash
@@ -283,6 +304,74 @@ export default function PetSitting() {
     }, 100);
   };
 
+  const fetchSitterRequests = async (id: string) => {
+    if (!id) return;
+    setLoadingSitterRequests(true);
+    try {
+      const res = await fetch(`/api/petsitting/request/sitter?sitter_id=${id}`);
+      const data = await res.json();
+      if (res.ok && data.requests) {
+        setSitterRequests(data.requests);
+      }
+    } catch (e) {
+      console.error('Failed to fetch sitter requests');
+    } finally {
+      setLoadingSitterRequests(false);
+    }
+  };
+
+  const fetchOwnerRequests = async (email: string) => {
+    if (!email) return;
+    setLoadingOwnerRequests(true);
+    try {
+      const res = await fetch(`/api/petsitting/request/owner?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (res.ok && data.requests) {
+        setOwnerRequests(data.requests);
+        setOwnerHistoryFetched(true);
+        localStorage.setItem('lumo_owner_history_email', email);
+      }
+    } catch (e) {
+      console.error('Failed to fetch owner requests');
+    } finally {
+      setLoadingOwnerRequests(false);
+    }
+  };
+
+  const handleSitterResponse = async (id: string, action: 'accept' | 'decline', token: string) => {
+    window.open(`/api/petsitting/request/${action}?id=${id}&token=${token}`, '_blank');
+    setTimeout(() => {
+      if (sitterId) {
+        fetchSitterRequests(sitterId);
+      }
+    }, 2000);
+  };
+
+  const handleMarkAsCompleted = async (id: string) => {
+    if (!confirm('Are you sure you want to mark this booking as completed? This will increase your completed bookings counter.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/petsitting/request/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, sitter_id: sitterId })
+      });
+      if (res.ok) {
+        alert('Booking marked as completed! Great job! 🎉');
+        if (sitterId) {
+          fetchSitterRequests(sitterId);
+          loadSitterProfile(sitterEmail);
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to complete booking.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
   const loadSitterProfile = async (email: string) => {
     setProfileLoading(true);
     try {
@@ -290,6 +379,9 @@ export default function PetSitting() {
       if (res.ok) {
         const data = await res.json();
         if (data) {
+          setSitterId(data.id || '');
+          fetchSitterRequests(data.id || '');
+          setCompletedBookings(data.completed_bookings || 0);
           const nameParts = (data.name || '').trim().split(/\s+/);
           setSitterFirstName(nameParts[0] || '');
           setSitterLastName(nameParts.slice(1).join(' ') || '');
@@ -882,17 +974,26 @@ export default function PetSitting() {
           pet_name: reqPetName,
           pet_type: reqPetType,
           dates: finalDates,
-          special_notes: reqNotes
+          special_notes: reqNotes,
+          phone_number: reqPhone || null
         })
       });
 
       const data = await res.json();
       if (res.ok) {
         setReqSuccess(true);
-        setTimeout(() => {
-          setRequestModalOpen(false);
-          setReqSuccess(false);
-        }, 3000);
+        if (data.whatsapp_link) {
+          setLastWhatsappLink(data.whatsapp_link);
+          setLastBookingNumber(data.booking_number || '');
+        } else {
+          setTimeout(() => {
+            setRequestModalOpen(false);
+            setReqSuccess(false);
+          }, 3000);
+        }
+        if (ownerHistoryEmail) {
+          fetchOwnerRequests(ownerHistoryEmail);
+        }
       } else {
         if (data.error === 'requires_pro') {
           setReqError('requires_pro');
@@ -1151,10 +1252,15 @@ export default function PetSitting() {
                                  </span>
                                )}
                                {sitter.approval_status === 'approved' && (
-                                 <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1">
+                                 <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-green-200">
                                    <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
                                  </div>
                                )}
+                               {sitter.completed_bookings && sitter.completed_bookings > 0 ? (
+                                 <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-[#8B5E3C]/20">
+                                   🐾 {sitter.completed_bookings} {sitter.completed_bookings === 1 ? 'booking' : 'bookings'} completed
+                                 </div>
+                               ) : null}
                              </div>
                              <div className="text-sm mb-1">
                                {sitter.review_count ? (
@@ -1255,6 +1361,117 @@ export default function PetSitting() {
                 </div>
               </div>
             )}
+            {/* Owner Booking History Section */}
+            <div className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+              <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                📋 Your Booking History
+              </h3>
+              <p className="text-[#8B7E7D] text-sm mb-6">
+                Enter your email address to track the status of your requested pet sitting bookings.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-md">
+                <input
+                  type="email"
+                  placeholder="Enter your email address..."
+                  value={ownerHistoryEmail}
+                  onChange={(e) => setOwnerHistoryEmail(e.target.value)}
+                  className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
+                />
+                <button
+                  onClick={() => fetchOwnerRequests(ownerHistoryEmail)}
+                  disabled={loadingOwnerRequests}
+                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {loadingOwnerRequests ? 'Searching...' : 'Track Bookings'}
+                </button>
+              </div>
+
+              {ownerHistoryFetched && (
+                <div className="space-y-4">
+                  {ownerRequests.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
+                      No bookings found for this email address.
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden border border-[#E8DDD4] rounded-2xl bg-[#FAF6F4]">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-[#E8DDD4]/20 border-b border-[#E8DDD4]">
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Booking #</th>
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Sitter</th>
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Pet</th>
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Dates</th>
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#E8DDD4]/50">
+                            {ownerRequests.map((req) => (
+                              <React.Fragment key={req.id}>
+                                <tr className="hover:bg-white/50 transition-colors">
+                                  <td className="p-3 text-sm font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 4)}`}</td>
+                                  <td className="p-3 text-sm">
+                                    <div className="font-bold text-[#4A3E3D]">{req.sitter_name}</div>
+                                  </td>
+                                  <td className="p-3 text-sm">
+                                    <span className="font-semibold text-[#4A3E3D]">{req.pet_name}</span>
+                                    <span className="ml-1.5 text-[10px] font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase">
+                                      {req.pet_type === 'dog' ? '🐶' : '🐱'}
+                                    </span>
+                                  </td>
+                                  <td className="p-3 text-sm text-[#8B7E7D]">{req.dates}</td>
+                                  <td className="p-3 text-sm">
+                                    {req.status === 'accepted' ? (
+                                      <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200">
+                                        🟢 Accepted
+                                      </span>
+                                    ) : req.status === 'completed' ? (
+                                      <span className="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-200">
+                                        🔵 Completed
+                                      </span>
+                                    ) : req.status === 'declined' ? (
+                                      <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200">
+                                        🔴 Declined
+                                      </span>
+                                    ) : (
+                                      <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">
+                                        🟡 Pending
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                                {(req.status === 'accepted' || req.status === 'completed') && (
+                                  <tr className="bg-green-50/30">
+                                    <td colSpan={5} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
+                                      <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div>
+                                          <p className="font-bold text-[#3B2410] mb-1">🐾 Contact Info Shared</p>
+                                          <p className="text-gray-600">Email: <strong>{req.sitter_email}</strong> {req.sitter_phone ? ` | Phone: ` : ''}<strong>{req.sitter_phone}</strong></p>
+                                        </div>
+                                        {req.sitter_phone && (
+                                          <a
+                                            href={`https://wa.me/${req.sitter_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${req.sitter_name}, I'm the owner for ${req.booking_number}!`)}`}
+                                            target="_blank"
+                                            className="self-start sm:self-auto bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-sm"
+                                          >
+                                            Chat on WhatsApp
+                                          </a>
+                                        )}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1361,6 +1578,11 @@ export default function PetSitting() {
                     )}
                     <div>
                       <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
+                      {completedBookings > 0 && (
+                        <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
+                          🐾 {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
+                        </div>
+                      )}
                       <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
                         {sitterCity || sitterLocationInput || 'Location'}
@@ -1427,6 +1649,139 @@ export default function PetSitting() {
                           <Share2 className="w-4 h-4" /> Copy Share Link
                         </button>
                       </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sitter Booking Tracker Section */}
+                <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
+                  <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                    📋 Your Booking Requests
+                  </h3>
+                  <p className="text-[#8B7E7D] text-xs mb-6">
+                    Manage requests and track booking statuses submitted by pet owners.
+                  </p>
+
+                  {loadingSitterRequests ? (
+                    <div className="text-center py-6 text-gray-500">Loading your bookings...</div>
+                  ) : sitterRequests.length === 0 ? (
+                    <div className="text-center py-6 text-[#8B7E7D] bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
+                      No booking requests received yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {sitterRequests.map((req) => {
+                        const isPending = req.status === 'pending';
+                        const isAccepted = req.status === 'accepted';
+                        const isCompleted = req.status === 'completed';
+                        const isDeclined = req.status === 'declined';
+                        
+                        // Check if completed at least 2 hours ago
+                        let canSendReminder = false;
+                        if (isCompleted && req.completed_at) {
+                          const completedTime = new Date(req.completed_at).getTime();
+                          const twoHoursInMs = 2 * 60 * 60 * 1000;
+                          canSendReminder = Date.now() - completedTime >= twoHoursInMs;
+                        }
+
+                        // Generate WA click to chat for reminder
+                        let reminderWaLink = '';
+                        if (canSendReminder && req.phone_number) {
+                          const cleanPhone = req.phone_number.replace(/\D/g, '');
+                          const msg = `Please leave a review for your sitter — link sent to your email!`;
+                          reminderWaLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+                        }
+
+                        return (
+                          <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 space-y-3">
+                            <div className="flex justify-between items-center flex-wrap gap-2">
+                              <span className="font-bold text-sm text-[#4A3E3D]">
+                                {req.booking_number || `Booking #${req.id.substring(0, 4)}`}
+                              </span>
+                              <div>
+                                {isAccepted && (
+                                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200">
+                                    🟢 Accepted
+                                  </span>
+                                )}
+                                {isCompleted && (
+                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200">
+                                    🔵 Completed
+                                  </span>
+                                )}
+                                {isDeclined && (
+                                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200">
+                                    🔴 Declined
+                                  </span>
+                                )}
+                                {isPending && (
+                                  <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse">
+                                    🟡 Pending
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
+                              <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
+                              <div><strong>Dates:</strong> {req.dates}</div>
+                              {req.special_notes && (
+                                <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
+                                  <strong>Notes:</strong> {req.special_notes}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Contact Details (Step 5) */}
+                            {(isAccepted || isCompleted) && (
+                              <div className="text-xs bg-white p-2.5 rounded-xl border border-[#E8DDD4] space-y-1">
+                                <div className="font-bold text-[#3B2410] mb-0.5">Owner Contact Info:</div>
+                                <div>Email: <strong>{req.owner_email}</strong></div>
+                                {req.phone_number && <div>Phone: <strong>{req.phone_number}</strong></div>}
+                              </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-2 flex-wrap">
+                              {isPending && (
+                                <>
+                                  <button
+                                    onClick={() => handleSitterResponse(req.id, 'accept', req.secure_token)}
+                                    className="bg-[#10B981] hover:bg-[#059669] text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-colors cursor-pointer"
+                                  >
+                                    Accept Request
+                                  </button>
+                                  <button
+                                    onClick={() => handleSitterResponse(req.id, 'decline', req.secure_token)}
+                                    className="bg-[#EF4444] hover:bg-[#DC2626] text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-colors cursor-pointer"
+                                  >
+                                    Decline Request
+                                  </button>
+                                </>
+                              )}
+
+                              {isAccepted && (
+                                <button
+                                  onClick={() => handleMarkAsCompleted(req.id)}
+                                  className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-1.5 px-4 rounded-lg text-xs transition-colors cursor-pointer"
+                                >
+                                  Mark as Completed
+                                </button>
+                              )}
+
+                              {isCompleted && canSendReminder && req.phone_number && (
+                                <a
+                                  href={reminderWaLink}
+                                  target="_blank"
+                                  className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1 transition-colors cursor-pointer text-center"
+                                >
+                                  Send WhatsApp Review Reminder
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1973,13 +2328,45 @@ export default function PetSitting() {
               <div className="text-center py-8">
                 <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <h4 className="text-xl font-bold text-green-600 mb-2">Request Sent!</h4>
-                <p className="text-gray-600">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
+                <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
+                
+                {lastWhatsappLink ? (
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] p-5 rounded-2xl text-left shadow-sm">
+                    <p className="text-xs font-bold text-[#8B5E3C] uppercase mb-1">🐾 Notify Sitter via WhatsApp</p>
+                    <p className="text-xs text-[#8B7E7D] mb-4">Click below to send a WhatsApp notification to the sitter to discuss details faster!</p>
+                    <a
+                      href={lastWhatsappLink}
+                      target="_blank"
+                      onClick={() => {
+                        setRequestModalOpen(false);
+                        setReqSuccess(false);
+                      }}
+                      className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm text-center"
+                    >
+                      Notify Sitter on WhatsApp
+                    </a>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setRequestModalOpen(false);
+                      setReqSuccess(false);
+                    }}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
+                  >
+                    Close
+                  </button>
+                )}
               </div>
             ) : (
               <form onSubmit={submitRequest} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
                   <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
+                  <input type="tel" value={reqPhone} onChange={e => setReqPhone(e.target.value)} placeholder="(555) 555-5555" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
