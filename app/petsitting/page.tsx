@@ -49,11 +49,6 @@ export default function PetSitting() {
 
   const inviteMessageText = "Hey! I just signed up as a pet sitter on Lumo Bites — a free platform where you can earn money sitting pets in your neighborhood. No commission ever! Check it out and create your profile: lumobites.net/petsitting";
 
-  const handleWhatsAppShare = () => {
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(inviteMessageText)}`;
-    window.open(url, '_blank');
-  };
-
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(inviteMessageText);
     alert('Invitation message copied to clipboard!');
@@ -146,6 +141,12 @@ export default function PetSitting() {
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
 
   const [completedBookings, setCompletedBookings] = useState(0);
+
+  // Calendar Availability States
+  const [sitterBlockedDates, setSitterBlockedDates] = useState<string[]>([]);
+  const [sitterBookedDates, setSitterBookedDates] = useState<string[]>([]);
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
 
   // Sitter Sub Details
   const [sitterSubCancelAtPeriodEnd, setSitterSubCancelAtPeriodEnd] = useState(false);
@@ -261,6 +262,108 @@ export default function PetSitting() {
     }
     return { petAge: null, cleanNotes: specialNotes };
   };
+
+  const fetchSitterAvailability = async (sitterId: string, email?: string) => {
+    if (!sitterId && !email) return;
+    try {
+      const url = sitterId 
+        ? `/api/petsitting/sitter/availability?sitter_id=${encodeURIComponent(sitterId)}`
+        : `/api/petsitting/sitter/availability?email=${encodeURIComponent(email || '')}`;
+        
+      const res = await fetch(url);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSitterBlockedDates(data.blocked_dates || []);
+        
+        // Compile all accepted booking dates into a flat array
+        const booked: string[] = [];
+        if (Array.isArray(data.accepted_bookings)) {
+          data.accepted_bookings.forEach((booking: any) => {
+            if (Array.isArray(booking.dates_in_range)) {
+              booked.push(...booking.dates_in_range);
+            }
+          });
+        }
+        setSitterBookedDates(booked);
+      }
+    } catch (err) {
+      console.error('Failed to fetch sitter availability:', err);
+    }
+  };
+
+  const handleSitterBlockedDateToggle = async (dateStr: string) => {
+    let newBlocked = [...sitterBlockedDates];
+    if (newBlocked.includes(dateStr)) {
+      newBlocked = newBlocked.filter(d => d !== dateStr);
+    } else {
+      newBlocked.push(dateStr);
+    }
+    setSitterBlockedDates(newBlocked);
+    try {
+      const body: any = { blocked_dates: newBlocked };
+      if (sitterId) {
+        body.sitter_id = sitterId;
+      } else if (sitterEmail) {
+        body.email = sitterEmail;
+      }
+      const res = await fetch('/api/petsitting/sitter/availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        fetchSitterAvailability(sitterId, sitterEmail);
+      }
+    } catch (err) {
+      console.error(err);
+      fetchSitterAvailability(sitterId, sitterEmail);
+    }
+  };
+
+  const getDatesBetween = (startStr: string, endStr: string) => {
+    const dates: string[] = [];
+    if (!startStr || !endStr) return dates;
+    const start = new Date(startStr + 'T00:00:00');
+    const end = new Date(endStr + 'T00:00:00');
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return dates;
+    let current = new Date(start);
+    while (current <= end) {
+      dates.push(current.toISOString().split('T')[0]);
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  };
+
+  const handleOwnerCalendarDayClick = (dateStr: string) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (dateStr < todayStr) return;
+    if (sitterBookedDates.includes(dateStr) || sitterBlockedDates.includes(dateStr)) return;
+
+    if (!reqStartDate || (reqStartDate && reqEndDate)) {
+      setReqStartDate(dateStr);
+      setReqEndDate('');
+    } else {
+      if (dateStr < reqStartDate) {
+        setReqStartDate(dateStr);
+      } else {
+        const intermediate = getDatesBetween(reqStartDate, dateStr);
+        const hasOverlap = intermediate.some(d => sitterBlockedDates.includes(d) || sitterBookedDates.includes(d));
+        if (hasOverlap) {
+          setReqStartDate(dateStr);
+        } else {
+          setReqEndDate(dateStr);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (requestModalOpen && selectedSitter?.id) {
+      setReqStartDate('');
+      setReqEndDate('');
+      fetchSitterAvailability(selectedSitter.id);
+    }
+  }, [requestModalOpen, selectedSitter]);
 
   // Debounced geocoding effect
   useEffect(() => {
@@ -439,6 +542,7 @@ export default function PetSitting() {
         if (data) {
           setSitterId(data.id || '');
           fetchSitterRequests(data.id || '');
+          fetchSitterAvailability('', email);
           setCompletedBookings(data.completed_bookings || 0);
           const nameParts = (data.name || '').trim().split(/\s+/);
           setSitterFirstName(nameParts[0] || '');
@@ -1020,10 +1124,20 @@ export default function PetSitting() {
     setReqSuccess(false);
 
     try {
-      if (reqStartDate && reqEndDate && new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
-        setReqError('End date must be after start date');
-        setReqLoading(false);
-        return;
+      if (reqStartDate && reqEndDate) {
+        if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
+          setReqError('End date must be after start date');
+          setReqLoading(false);
+          return;
+        }
+
+        const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
+        const hasOverlap = rangeDates.some(d => sitterBlockedDates.includes(d) || sitterBookedDates.includes(d));
+        if (hasOverlap) {
+          setReqError('Selected date range overlaps with dates the sitter is unavailable or already booked');
+          setReqLoading(false);
+          return;
+        }
       }
 
       const startFmt = reqStartDate ? new Date(reqStartDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
@@ -1589,14 +1703,7 @@ export default function PetSitting() {
                         "Hey! I just signed up as a pet sitter on Lumo Bites — a free platform where you can earn money sitting pets in your neighborhood. No commission ever! Check it out and create your profile: lumobites.net/petsitting"
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <button
-                          type="button"
-                          onClick={handleWhatsAppShare}
-                          className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                        >
-                          <MessageSquare className="w-4 h-4" /> WhatsApp
-                        </button>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
                           type="button"
                           onClick={handleCopyMessage}
@@ -1706,13 +1813,6 @@ export default function PetSitting() {
                       <div className="grid grid-cols-1 gap-2">
                         <button
                           type="button"
-                          onClick={handleWhatsAppShare}
-                          className="bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                        >
-                          <MessageSquare className="w-4 h-4" /> Share on WhatsApp
-                        </button>
-                        <button
-                          type="button"
                           onClick={handleCopyMessage}
                           className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
@@ -1728,6 +1828,120 @@ export default function PetSitting() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Sitter Availability Calendar Section */}
+                <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
+                  <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                    📅 Manage Your Availability
+                  </h3>
+                  <p className="text-[#8B7E7D] text-xs mb-6">
+                    Block out days you are unavailable. Your accepted bookings (shown in red) are automatically marked as busy.
+                  </p>
+
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 shadow-sm max-w-md mx-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-bold text-[#4A3E3D]">
+                        {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][calMonth]} {calYear}
+                      </h4>
+                      <div className="flex space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (calMonth === 0) {
+                              setCalMonth(11);
+                              setCalYear(prev => prev - 1);
+                            } else {
+                              setCalMonth(calMonth - 1);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (calMonth === 11) {
+                              setCalMonth(0);
+                              setCalYear(prev => prev + 1);
+                            } else {
+                              setCalMonth(calMonth + 1);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-[#8B6A50] mb-2 uppercase tracking-wider">
+                      <div>Su</div>
+                      <div>Mo</div>
+                      <div>Tu</div>
+                      <div>We</div>
+                      <div>Th</div>
+                      <div>Fr</div>
+                      <div>Sa</div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1.5">
+                      {(() => {
+                        const firstDay = new Date(calYear, calMonth, 1).getDay();
+                        const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        
+                        const cells = [];
+                        for (let i = 0; i < firstDay; i++) {
+                          cells.push(<div key={`empty-${i}`} className="aspect-square" />);
+                        }
+                        
+                        for (let d = 1; d <= totalDays; d++) {
+                          const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                          const isBooked = sitterBookedDates.includes(dateStr);
+                          const isBlocked = sitterBlockedDates.includes(dateStr);
+                          const isPast = dateStr < todayStr;
+                          
+                          let bgClass = "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-100 cursor-pointer";
+                          if (isPast) {
+                            bgClass = "bg-gray-100/50 text-gray-300 cursor-not-allowed";
+                          } else if (isBooked) {
+                            bgClass = "bg-red-50 text-red-700 border border-red-100 line-through cursor-not-allowed";
+                          } else if (isBlocked) {
+                            bgClass = "bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-100 cursor-pointer";
+                          }
+                          
+                          cells.push(
+                            <button
+                              key={`day-${d}`}
+                              type="button"
+                              disabled={isPast || isBooked}
+                              onClick={() => {
+                                handleSitterBlockedDateToggle(dateStr);
+                              }}
+                              className={`aspect-square rounded-xl flex items-center justify-center text-sm transition-all font-semibold ${bgClass}`}
+                            >
+                              {d}
+                            </button>
+                          );
+                        }
+                        return cells;
+                      })()}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-4 pt-4 border-t border-[#E8DDD4] text-xs font-medium text-[#8B7E7D]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-emerald-50 border border-emerald-100 inline-block" /> Available
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-orange-50 border border-orange-100 inline-block" /> Blocked
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-red-50 border border-red-100 inline-block" /> Booked
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Sitter Booking Tracker Section */}
@@ -2472,9 +2686,126 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
-                  <div className="flex space-x-2">
-                    <input required type="date" value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                    <input required type="date" value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  <div className="flex space-x-2 mb-2">
+                    <input required type="date" min={new Date().toISOString().split('T')[0]} value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    <input required type="date" min={reqStartDate || new Date().toISOString().split('T')[0]} value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  </div>
+
+                  {/* Availability Calendar */}
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 mt-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-xs font-bold text-[#4A3E3D]">Availability Calendar</span>
+                        <div className="text-[10px] text-[#8B7E7D] mt-0.5">Click dates to select your booking range</div>
+                      </div>
+                      <div className="flex items-center space-x-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (calMonth === 0) {
+                              setCalMonth(11);
+                              setCalYear(prev => prev - 1);
+                            } else {
+                              setCalMonth(calMonth - 1);
+                            }
+                          }}
+                          className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <span className="text-xs font-bold text-[#4A3E3D] min-w-[75px] text-center">
+                          {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][calMonth]} {calYear}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (calMonth === 11) {
+                              setCalMonth(0);
+                              setCalYear(prev => prev + 1);
+                            } else {
+                              setCalMonth(calMonth + 1);
+                            }
+                          }}
+                          className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-[#8B6A50] mb-1.5 uppercase tracking-wider">
+                      <div>Su</div>
+                      <div>Mo</div>
+                      <div>Tu</div>
+                      <div>We</div>
+                      <div>Th</div>
+                      <div>Fr</div>
+                      <div>Sa</div>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1">
+                      {(() => {
+                        const firstDay = new Date(calYear, calMonth, 1).getDay();
+                        const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        
+                        const cells = [];
+                        for (let i = 0; i < firstDay; i++) {
+                          cells.push(<div key={`empty-${i}`} className="aspect-square" />);
+                        }
+                        
+                        for (let d = 1; d <= totalDays; d++) {
+                          const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                          const isBooked = sitterBookedDates.includes(dateStr);
+                          const isBlocked = sitterBlockedDates.includes(dateStr);
+                          const isPast = dateStr < todayStr;
+                          const isStart = reqStartDate === dateStr;
+                          const isEnd = reqEndDate === dateStr;
+                          const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
+                          
+                          let bgClass = "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-100 cursor-pointer";
+                          if (isPast) {
+                            bgClass = "bg-gray-100/50 text-gray-300 cursor-not-allowed";
+                          } else if (isBooked) {
+                            bgClass = "bg-red-50 text-red-700 border border-red-100 line-through cursor-not-allowed";
+                          } else if (isBlocked) {
+                            bgClass = "bg-orange-50 text-orange-700 border border-orange-100 line-through cursor-not-allowed";
+                          } else if (isStart || isEnd) {
+                            bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
+                          } else if (inRange) {
+                            bgClass = "bg-[#F4EDE6] text-[#8B5E3C] font-semibold cursor-pointer";
+                          }
+                          
+                          cells.push(
+                            <button
+                              key={`day-${d}`}
+                              type="button"
+                              disabled={isPast || isBooked || isBlocked}
+                              onClick={() => handleOwnerCalendarDayClick(dateStr)}
+                              className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all ${bgClass}`}
+                            >
+                              <span>{d}</span>
+                            </button>
+                          );
+                        }
+                        return cells;
+                      })()}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[10px] font-medium text-[#8B7E7D]">
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded bg-emerald-50 border border-emerald-100 inline-block" /> Available
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded bg-orange-50 border border-orange-100 inline-block" /> Sitter Busy
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded bg-red-50 border border-red-100 inline-block" /> Booked
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block" /> Selected
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div>

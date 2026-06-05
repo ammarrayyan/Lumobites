@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, availability, phone_number, phone_visible,
-      gender, available_days, available_times, service_types, self_declared
+      gender, available_days, available_times, service_types, self_declared, blocked_dates
     } = body;
 
     if (!email || !name) {
@@ -253,6 +253,7 @@ export async function POST(request: NextRequest) {
         is_approved: nextIsApproved,
         needs_reapproval: nextNeedsReapproval,
         submitted_at: new Date().toISOString(),
+        blocked_dates: blocked_dates || [],
         ...(cleanEmail === 'premierpetnutritionllc@gmail.com' ? { is_pro: true } : {})
       }, { onConflict: 'email', ignoreDuplicates: false })
       .select()
