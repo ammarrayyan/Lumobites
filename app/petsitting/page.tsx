@@ -1436,8 +1436,8 @@ export default function PetSitting() {
               </div>
             ) : (
               <div className="flex flex-col lg:flex-row gap-8">
-                {/* Sitters List (Left on desktop, Above on mobile) */}
-                <div className="flex-1 order-1 lg:order-1">
+                {/* Sitters List (Left on desktop, Below on mobile) */}
+                <div className="flex-1 order-2 lg:order-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
                       <div
@@ -1566,8 +1566,8 @@ export default function PetSitting() {
                   </div>
                 </div>
 
-                {/* Map (Right on desktop, Below on mobile) */}
-                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-2 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
+                {/* Map (Right on desktop, Above on mobile) */}
+                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[300px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
@@ -3057,42 +3057,42 @@ export default function PetSitting() {
       {reviewsModalOpen && selectedSitterForReviews && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-[#E8DDD4] flex items-start justify-between sticky top-0 bg-white z-10">
-              <div className="flex items-start gap-4">
+            <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10">
+              <div className="flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
+                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
                 ) : (
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-4xl flex-shrink-0 shadow-md">
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-2xl sm:text-4xl flex-shrink-0 shadow-md">
                     {selectedSitterForReviews.name.charAt(0)}
                   </div>
                 )}
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-2xl font-black text-[#4A3E3D]">{selectedSitterForReviews.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{selectedSitterForReviews.name}</h3>
                     {selectedSitterForReviews.gender && (
-                      <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4]">
+                      <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4] whitespace-nowrap">
                         {selectedSitterForReviews.gender}
                       </span>
                     )}
                   </div>
                   
                   {selectedSitterForReviews.approval_status === 'approved' && (
-                    <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#A7F3D0] mb-2">
+                    <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#A7F3D0] mb-2 whitespace-nowrap">
                       <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID Verified
                     </div>
                   )}
  
                   <div className="text-sm">
                     {selectedSitterForReviews.review_count ? (
-                      <span className="text-[#D97706] font-bold">
+                      <span className="text-[#D97706] font-bold whitespace-nowrap">
                         ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
                       </span>
                     ) : (
-                      <span className="text-[#8B7E7D]">No reviews yet</span>
+                      <span className="text-[#8B7E7D] whitespace-nowrap">No reviews yet</span>
                     )}
                   </div>
  
-                  <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
+                  <p className="text-[#8B7E7D] text-xs sm:text-sm flex flex-wrap items-center gap-1 mt-1">
                     📍 {selectedSitterForReviews.city ? (
                       (selectedSitterForReviews.country && (
                         selectedSitterForReviews.city.toLowerCase().includes(selectedSitterForReviews.country.toLowerCase()) ||
@@ -3103,20 +3103,23 @@ export default function PetSitting() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setReviewsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer flex-shrink-0 text-lg font-bold">
+              <button 
+                onClick={() => setReviewsModalOpen(false)} 
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer text-lg font-bold z-20"
+              >
                 ✕
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
               {/* Bio Section */}
-              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm">
                 <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider mb-2">About Me</h4>
                 <p className="text-[#555555] text-base leading-relaxed whitespace-pre-wrap">{selectedSitterForReviews.bio}</p>
               </div>
 
               {/* Service & Rate Details Section */}
-              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm grid grid-cols-2 gap-4">
+              <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Nightly Rate</h4>
                   <p className="text-lg font-black text-[#4A3E3D]">${selectedSitterForReviews.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span></p>
@@ -3130,7 +3133,7 @@ export default function PetSitting() {
               </div>
 
               {/* Services & Availability Details */}
-              <div className="bg-white p-5 rounded-3xl border border-[#E8DDD4] shadow-sm space-y-4">
+              <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm space-y-4">
                 {/* Service Types */}
                 {(selectedSitterForReviews.service_types?.length || 0) > 0 && (
                   <div>
@@ -3203,10 +3206,10 @@ export default function PetSitting() {
               </div>
             </div>
             
-            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0 flex gap-3">
+            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0 flex flex-col-reverse sm:flex-row gap-3">
               <button 
                 onClick={() => setReviewsModalOpen(false)} 
-                className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold px-5 py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+                className="w-full sm:w-auto bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold px-5 py-3 rounded-xl transition-colors shadow-sm cursor-pointer text-center"
               >
                 Close
               </button>
@@ -3220,7 +3223,7 @@ export default function PetSitting() {
                     setRequestModalOpen(true);
                   }
                 }}
-                className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full sm:flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer text-center"
               >
                 {!isOwnerPro && <span className="text-xs">🔒</span>}
                 <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
