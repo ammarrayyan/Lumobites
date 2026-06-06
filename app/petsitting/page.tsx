@@ -137,7 +137,6 @@ export default function PetSitting() {
   const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
-  const [ownerHistoryEmail, setOwnerHistoryEmail] = useState('');
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
 
   const [completedBookings, setCompletedBookings] = useState(0);
@@ -215,19 +214,19 @@ export default function PetSitting() {
       fetchSitters();
     }
 
-    // Restore owner booking history if they tracked it previously
-    const cachedHistoryEmail = localStorage.getItem('lumo_owner_history_email') || cachedEmail;
-    if (cachedHistoryEmail && cachedHistoryEmail !== 'undefined') {
-      setOwnerHistoryEmail(cachedHistoryEmail);
-      fetchOwnerRequests(cachedHistoryEmail);
-    }
-
     // Set activeTab from URL search params or hash
     const params = new URLSearchParams(window.location.search);
     if (params.get('tab') === 'become' || window.location.hash === '#become') {
       setActiveTab('become');
     }
   }, []);
+
+  // Automatically fetch owner's booking history whenever their email is authenticated
+  useEffect(() => {
+    if (reqEmail) {
+      fetchOwnerRequests(reqEmail);
+    }
+  }, [reqEmail]);
 
   const handleClearSavedInfo = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -532,7 +531,7 @@ export default function PetSitting() {
 
   const handleRequestAgain = async (req: any) => {
     // Fill in the details from owner profile
-    const emailToUse = req.owner_email || ownerHistoryEmail || reqEmail;
+    const emailToUse = req.owner_email || reqEmail;
     let profile = null;
     if (emailToUse) {
       setReqEmail(emailToUse);
@@ -1352,8 +1351,8 @@ export default function PetSitting() {
           setRequestModalOpen(false);
           setReqSuccess(false);
         }, 3000);
-        if (ownerHistoryEmail) {
-          fetchOwnerRequests(ownerHistoryEmail);
+        if (reqEmail) {
+          fetchOwnerRequests(reqEmail);
         }
       } else {
         if (data.error === 'requires_pro') {
@@ -1734,15 +1733,16 @@ export default function PetSitting() {
               <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-md">
                 <input
                   type="email"
-                  placeholder="Enter your email address..."
-                  value={ownerHistoryEmail}
-                  onChange={(e) => setOwnerHistoryEmail(e.target.value)}
-                  className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
+                  placeholder="Unlock Lumo Bites PRO or request a sitter to view history..."
+                  value={reqEmail}
+                  readOnly
+                  disabled
+                  className="flex-1 bg-[#FAF6F4]/60 border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] text-sm cursor-not-allowed opacity-75 focus:outline-none"
                 />
                 <button
-                  onClick={() => fetchOwnerRequests(ownerHistoryEmail)}
-                  disabled={loadingOwnerRequests}
-                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
+                  onClick={() => fetchOwnerRequests(reqEmail)}
+                  disabled={loadingOwnerRequests || !reqEmail}
+                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loadingOwnerRequests ? 'Searching...' : 'Track Bookings'}
                 </button>
