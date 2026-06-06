@@ -184,6 +184,56 @@ export async function POST(req: NextRequest) {
           console.error('[Admin Sitters] Failed to send deletion email:', emailErr);
         }
       }
+    } else if (action === 'reset_id') {
+      // Clear file from storage if present
+      if (sitter.id_photo_url) {
+        try {
+          if (!sitter.id_photo_url.startsWith('http')) {
+            await supabaseAdmin.storage
+              .from('sitter-ids')
+              .remove([sitter.id_photo_url]);
+          }
+        } catch (storageErr) {
+          console.error('[Admin Reset ID] Failed to remove file from storage:', storageErr);
+        }
+      }
+
+      const { error: updateErr } = await supabaseAdmin
+        .from('sitters')
+        .update({
+          id_photo_url: null,
+          is_approved: false,
+          approval_status: 'pending',
+          rejection_reason: null,
+          needs_reapproval: false
+        })
+        .eq('id', id);
+
+      if (updateErr) throw updateErr;
+
+      // Send reset email
+      if (sitter.email) {
+        try {
+          await resend.emails.send({
+            from: fromEmail,
+            to: sitter.email,
+            subject: 'Your ID verification has been reset',
+            html: brandedEmail({
+              subject: 'Your ID verification has been reset',
+              preheader: 'Please log in and resubmit your ID to verify your profile.',
+              body: `
+                <h1 style="${emailStyles.h1}">Verification Reset Needed 🪪</h1>
+                <p style="${emailStyles.p}">Hi ${sitter.name},</p>
+                <p style="${emailStyles.p}">Your ID verification has been reset. Please log in and resubmit your ID at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a> to reactivate your profile.</p>
+                ${emailStyles.divider}
+                ${emailStyles.signoff}
+              `
+            })
+          });
+        } catch (emailErr) {
+          console.error('[Admin Reset ID] Failed to send email to sitter:', emailErr);
+        }
+      }
     } else {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }

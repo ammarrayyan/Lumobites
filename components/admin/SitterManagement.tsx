@@ -117,6 +117,52 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
     }
   };
 
+  const handleResetID = async (id: string) => {
+    const confirmed = window.confirm("Are you sure you want to reset this sitter's ID verification? This will delete their ID document, reset their status to pending, and send them an email notification.");
+    if (!confirmed) return;
+
+    setProcessingId(id);
+    try {
+      const res = await fetch('/api/admin/sitters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ id, action: 'reset_id' })
+      });
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to reset ID verification');
+      }
+
+      // Update local state: clear id_photo_url, set status back to pending, not approved
+      setSitters(sitters.map(s => {
+        if (s.id === id) {
+          return {
+            ...s,
+            id_photo_url: null,
+            is_approved: false,
+            approval_status: 'pending',
+            rejection_reason: null,
+            needs_reapproval: false
+          };
+        }
+        return s;
+      }));
+
+      alert('ID verification reset successfully!');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const filteredSitters = sitters.filter(s => filter === 'all' || s.approval_status === filter);
 
   if (loading) {
@@ -280,6 +326,17 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                       </button>
                     )}
                   </>
+                )}
+
+                {/* Reset ID Verification button */}
+                {sitter.id_photo_url && (
+                  <button
+                    onClick={() => handleResetID(sitter.id)}
+                    disabled={processingId === sitter.id}
+                    className="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+                  >
+                    {processingId === sitter.id ? 'Processing...' : '🪪 Reset ID Verification'}
+                  </button>
                 )}
 
                 {/* Delete Button — always visible */}

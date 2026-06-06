@@ -201,13 +201,19 @@ export async function POST(request: NextRequest) {
     try {
       const { data: existingSitter } = await supabaseAdmin
         .from('sitters')
-        .select('approval_status, is_approved, needs_reapproval')
+        .select('approval_status, is_approved, needs_reapproval, id_photo_url')
         .eq('email', cleanEmail)
         .maybeSingle();
 
       if (existingSitter) {
         isInitialSubmission = false;
-        if (isNewPhoto || isNewId) {
+
+        // Prevent changing ID if it's already on file
+        if (existingSitter.id_photo_url) {
+          finalIdUrl = existingSitter.id_photo_url;
+        }
+
+        if (isNewPhoto || (isNewId && !existingSitter.id_photo_url)) {
           nextApprovalStatus = 'pending';
           nextIsApproved = false;
           nextNeedsReapproval = true;
