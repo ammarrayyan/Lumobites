@@ -106,7 +106,13 @@ export default function LostPetsFeed() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
-      <Navbar />
+      {/* Fixed Navbar wrapper on mobile to prevent gaps when filter bar is fixed */}
+      <div 
+        className="w-full z-[10000] md:relative"
+        style={isMobile ? { position: 'fixed', top: 0, left: 0, right: 0 } : undefined}
+      >
+        <Navbar />
+      </div>
 
       {/* ── Filter bar ── fixed on mobile, normal flow on desktop ── */}
       <div 
@@ -175,7 +181,7 @@ export default function LostPetsFeed() {
 
       <main 
         className="max-w-6xl mx-auto px-4 pb-8 md:pt-12 md:pb-12"
-        style={isMobile ? { paddingTop: '150px' } : undefined}
+        style={isMobile ? { paddingTop: '320px' } : undefined}
       >
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
           <div className="text-center md:text-left">
