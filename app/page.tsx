@@ -130,60 +130,60 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
           
           {/* 1. Pet Sitting */}
-          <div className="col-span-12 lg:col-span-5 bg-gradient-to-b from-[#FAF7F2] to-[#F3EDE4] border border-[#E5D7CA] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CBB9A8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#B25329] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm flex items-center gap-1">
+          <div className="col-span-12 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-[#C27353] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm flex items-center gap-1">
               <Star className="w-3 h-3 text-white fill-white" /> Most Popular
             </div>
             <div className="flex items-center gap-3 relative z-10 mt-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#F1E4D8] flex items-center justify-center shadow-inner">
-                <HomeIcon className="w-6 h-6 text-[#B25329]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
+                <HomeIcon className="w-6 h-6 text-[#C27353]" />
               </div>
-              <h3 className="text-[#4A2711] font-extrabold text-xl">Pet Sitting</h3>
+              <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
             </div>
-            <p className="text-[#6E594F] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
+            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
               Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join.
             </p>
             <div className="mt-auto relative z-10">
-              <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#B25329] to-[#913F1B] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Sitters &rarr;
               </Link>
             </div>
           </div>
  
           {/* 2. Lost Pets */}
-          <div className="col-span-12 lg:col-span-4 bg-gradient-to-b from-[#F2F5F6] to-[#E5ECEE] border border-[#D2DCE0] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#B3C4CB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 lg:col-span-4 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#DFECEF] flex items-center justify-center shadow-inner">
-                <Footprints className="w-6 h-6 text-[#3F5E6B]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
+                <Footprints className="w-6 h-6 text-[#517685]" />
               </div>
-              <h3 className="text-[#263C46] font-extrabold text-xl">Lost Pets</h3>
+              <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
             </div>
-            <p className="text-[#536B75] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
+            <p className="text-[#627985] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
               Post a lost or found pet in seconds and reach your whole neighborhood instantly. Free, no account needed.
             </p>
             <div className="mt-auto relative z-10">
-              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#3F5E6B] to-[#2E4752] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#517685] to-[#426270] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Post Lost Pet &rarr;
               </Link>
             </div>
           </div>
  
           {/* 3. Pet Food & Safety */}
-          <div className="col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F3F5F1] to-[#E7ECE2] border border-[#D1DBCB] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#B3C3AD] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#DEE7DB] flex items-center justify-center shadow-inner">
-                <Utensils className="w-6 h-6 text-[#4D6749]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
+                <Utensils className="w-6 h-6 text-[#63825D]" />
               </div>
-              <h3 className="text-[#2A3B27] font-extrabold text-xl">Pet Food & Safety</h3>
+              <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food & Safety</h3>
             </div>
-            <p className="text-[#546851] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
+            <p className="text-[#61755E] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
               Find the safest food for your pet, scan ingredient labels, and browse live FDA recalls. PRO members get instant email alerts.
             </p>
             <div className="mt-auto flex flex-col gap-2 relative z-10">
-              <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#4D6749] to-[#394E36] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#63825D] to-[#516E4C] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Food &rarr;
               </Link>
-              <Link href="/scan" className="block w-full py-2.5 rounded-xl border border-[#4D6749]/30 text-[#4D6749] font-bold text-center hover:bg-[#DEE7DB] hover:border-[#4D6749]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
+              <Link href="/scan" className="block w-full py-2.5 rounded-xl border border-[#63825D]/30 text-[#63825D] font-bold text-center hover:bg-[#F2F6F1] hover:border-[#63825D]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
                 Scan Label &rarr;
               </Link>
             </div>
