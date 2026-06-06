@@ -110,7 +110,7 @@ export default function LostPetsFeed() {
         </div>
  
         {/* Search & Filters */}
-        <div className="bg-white p-4 rounded-2xl shadow-md border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 sticky top-0 z-50">
+        <div className="bg-white p-4 shadow-md border-[#E8DDD4] flex flex-col md:flex-row gap-4 fixed top-[72px] left-0 right-0 z-50 border-b rounded-none md:relative md:top-auto md:left-auto md:right-auto md:z-10 md:rounded-2xl md:border md:shadow-sm md:mb-8">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -169,88 +169,91 @@ export default function LostPetsFeed() {
           </select>
         </div>
  
-        {loading ? (
-          <div className="text-center py-20 text-[#8B5E3C] font-bold text-lg animate-pulse">Loading pets...</div>
-        ) : pets.length === 0 ? (
-          <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm">
-            <Footprints className="w-12 h-12 text-[#8B5E3C] mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">
-              {searchCoords && searchRadius !== 'any' ? `No pets found within ${searchRadius} miles of this location` : 'No pets found'}
-            </h3>
-            <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            {/* Pets Grid */}
-            <div className="flex-1 order-2 lg:order-1 w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {pets.map((pet) => (
-              <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
-                <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
-                  {pet.photo_url ? (
-                    <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
-                  )}
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
-                      pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                      pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                    }`}>
-                      {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="p-6 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">
-                      {pet.pet_name || 'Unknown Pet'}
-                    </h3>
-                    <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">
-                      {pet.species}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
-                    {pet.distance !== undefined && pet.distance !== null && (
-                      <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
-                        {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
-                      </span>
+        {/* Content Area offset on mobile to account for fixed height */}
+        <div className="pt-[290px] md:pt-0">
+          {loading ? (
+            <div className="text-center py-20 text-[#8B5E3C] font-bold text-lg animate-pulse">Loading pets...</div>
+          ) : pets.length === 0 ? (
+            <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <Footprints className="w-12 h-12 text-[#8B5E3C] mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">
+                {searchCoords && searchRadius !== 'any' ? `No pets found within ${searchRadius} miles of this location` : 'No pets found'}
+              </h3>
+              <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {/* Pets Grid */}
+              <div className="flex-1 order-2 lg:order-1 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {pets.map((pet) => (
+                <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
+                  <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
+                    {pet.photo_url ? (
+                      <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
                     )}
-                  </p>
-                  
-                  <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">
-                    {pet.description}
-                  </p>
-
-                  <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xs font-semibold text-[#8B7E7D]">
-                        {pet.type === 'lost' ? 'Lost on:' : 'Found on:'} {new Date(pet.date_lost_found).toLocaleDateString()}
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
+                        pet.status === 'resolved' ? 'bg-green-500 text-white' :
+                        pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                      }`}>
+                        {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
                       </span>
-                      <span className="text-xs text-[#8B7E7D]">
-                        Posted {formatDistanceToNow(new Date(pet.created_at))} ago
+                    </div>
+                  </div>
+                  
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">
+                        {pet.pet_name || 'Unknown Pet'}
+                      </h3>
+                      <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">
+                        {pet.species}
                       </span>
                     </div>
                     
-                    <Link href={`/lost-pets/${pet.id}`} className="block w-full text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors">
-                      View Details & Help
-                    </Link>
+                    <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                      {pet.distance !== undefined && pet.distance !== null && (
+                        <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
+                          {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+                        </span>
+                      )}
+                    </p>
+                    
+                    <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">
+                      {pet.description}
+                    </p>
+  
+                    <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-xs font-semibold text-[#8B7E7D]">
+                          {pet.type === 'lost' ? 'Lost on:' : 'Found on:'} {new Date(pet.date_lost_found).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-[#8B7E7D]">
+                          Posted {formatDistanceToNow(new Date(pet.created_at))} ago
+                        </span>
+                      </div>
+                      
+                      <Link href={`/lost-pets/${pet.id}`} className="block w-full text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors">
+                        View Details & Help
+                      </Link>
+                    </div>
                   </div>
                 </div>
+              ))}
+                </div>
               </div>
-            ))}
+  
+              {/* Interactive Map */}
+              <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                <LostPetsMap pets={pets} searchCoords={searchCoords} />
               </div>
             </div>
-
-            {/* Interactive Map */}
-            <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
-              <LostPetsMap pets={pets} searchCoords={searchCoords} />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
