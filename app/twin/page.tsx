@@ -8,10 +8,10 @@ import confetti from 'canvas-confetti';
 import { AlertTriangle, Star, Camera, Footprints, Dog, Cat, CheckCircle2, XCircle, UploadCloud, Sparkles, Check, ArrowRight, Mail, RefreshCw, X } from 'lucide-react';
 
 const LOADING_MESSAGES = [
-  "Sniffing out your twin... 🐾",
-  "Comparing whiskers... 🐱",
-  "Consulting the pack... 🐕",
-  "Almost there... your twin is excited to meet you! ✨"
+  "Analyzing your features...",
+  "Consulting the breed database...",
+  "Finding your perfect match...",
+  "Almost there..."
 ];
 
 interface TwinResult {
@@ -95,6 +95,7 @@ export default function TwinPage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loadingIndex, setLoadingIndex] = useState(0);
+  const [analysisTimeout, setAnalysisTimeout] = useState(false);
   const [result, setResult] = useState<TwinResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -133,6 +134,18 @@ export default function TwinPage() {
   const squareCardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
   const twitterCardRef = useRef<HTMLDivElement>(null);
+  // Rotate loading messages every 2 seconds
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (step === 'analyzing' && !analysisTimeout) {
+      interval = setInterval(() => {
+        setLoadingIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+      }, 2000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [step, analysisTimeout]);
 
   // Load and verify Pro status on page mount
   useEffect(() => {
@@ -602,6 +615,55 @@ export default function TwinPage() {
     }
   };
 
+  const resizeAndCompressImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Maintain aspect ratio and resize to max 800x800
+        const maxDim = 800;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context not available'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Canvas toBlob returned null'));
+            }
+          },
+          'image/jpeg',
+          0.8 // 80% quality compression
+        );
+      };
+      img.onerror = (err) => {
+        reject(err);
+      };
+    });
+  };
+
   const processFile = async (selectedFile: File) => {
     if (!checkTwinLimit()) {
       return;
@@ -611,20 +673,38 @@ export default function TwinPage() {
     setPreviewUrl(URL.createObjectURL(selectedFile));
     setStep('analyzing');
     setLoadingIndex(0);
+    setAnalysisTimeout(false);
     setError(null);
     setImageError(false);
     setResult(null);
 
     console.log(`[Twin Client] Initiating fresh API match. File: ${selectedFile.name}, size: ${selectedFile.size} bytes`);
 
+    let uploadBlob: Blob = selectedFile;
+    try {
+      console.log(`[Twin Client] Compressing image: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(1)} KB)`);
+      const compressed = await resizeAndCompressImage(selectedFile);
+      uploadBlob = compressed;
+      console.log(`[Twin Client] Compression complete. New size: ${(compressed.size / 1024).toFixed(1)} KB`);
+    } catch (compressErr) {
+      console.warn('[Twin Client] Image compression failed, falling back to original file:', compressErr);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.warn('[Twin Client] Request exceeded 30s limit. Aborting fetch...');
+      controller.abort();
+    }, 30000);
+
     try {
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('image', uploadBlob, selectedFile.name || 'image.jpg');
       formData.append('quizAnswers', JSON.stringify(quizAnswers));
 
       const res = await fetch(`/api/twin?t=${Date.now()}`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
 
       const data = await res.json();
@@ -643,10 +723,29 @@ export default function TwinPage() {
         setStep('upload');
       }
     } catch (err: any) {
-      console.error("[Twin Client] Analysis request failed:", err);
-      setError('An error occurred during matching.');
-      setStep('upload');
+      if (err.name === 'AbortError') {
+        console.error("[Twin Client] Analysis request timed out.");
+        setAnalysisTimeout(true);
+      } else {
+        console.error("[Twin Client] Analysis request failed:", err);
+        setError(err.message || 'An error occurred during matching.');
+        setStep('upload');
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
+  };
+
+  const handleRetry = () => {
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleCancel = () => {
+    setStep('upload');
+    setAnalysisTimeout(false);
+    setError(null);
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -1174,18 +1273,48 @@ export default function TwinPage() {
 
           {/* STEP 2: ANALYZING */}
           {step === 'analyzing' && (
-            <div className="flex flex-col items-center justify-center py-20 gap-8">
-              {previewUrl && (
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F5EDE4] shadow-md relative">
-                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-[#8B5E3C] bg-opacity-20 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex flex-col items-center justify-center py-20 gap-8 w-full">
+              {analysisTimeout ? (
+                <div className="flex flex-col items-center justify-center max-w-md w-full bg-white border border-[#EBEBEB] rounded-3xl p-8 text-center shadow-md gap-6 animate-fade-in">
+                  <div className="w-16 h-16 bg-[#FFF2F2] border border-[#FFE0E0] rounded-2xl flex items-center justify-center shadow-xs animate-bounce">
+                    <AlertTriangle className="w-8 h-8 text-[#FF3E6C]" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-xl font-extrabold text-[#191919]">Analysis Taking Too Long</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">
+                      This is taking longer than usual. Please try again.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+                    <button
+                      onClick={handleRetry}
+                      className="flex-1 bg-[#8B5E3C] text-white py-3.5 px-4 rounded-xl font-bold hover:bg-[#734A2E] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                    >
+                      <RefreshCw className="w-4 h-4" /> Retry Match
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="flex-1 bg-white border-2 border-[#D9C0A8] text-[#8B5E3C] py-3.5 px-4 rounded-xl font-bold hover:bg-[#FDF9F5] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" /> Cancel
+                    </button>
                   </div>
                 </div>
+              ) : (
+                <>
+                  {previewUrl && (
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F5EDE4] shadow-md relative">
+                      <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-[#8B5E3C] bg-opacity-20 flex items-center justify-center">
+                        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-[#8B5E3C] animate-pulse text-center">
+                    {LOADING_MESSAGES[loadingIndex]}
+                  </h3>
+                </>
               )}
-              <h3 className="text-xl font-bold text-[#8B5E3C] animate-pulse text-center">
-                {LOADING_MESSAGES[loadingIndex]}
-              </h3>
             </div>
           )}
 
