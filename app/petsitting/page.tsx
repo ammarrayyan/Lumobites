@@ -2815,217 +2815,223 @@ export default function PetSitting() {
 
       {/* REQUEST MODAL */}
       {requestModalOpen && selectedSitter && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-fade-in">
-            <button onClick={() => setRequestModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setRequestModalOpen(false)}>
+          <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-md sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
+              <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {selectedSitter.name}</h3>
+              <p className="text-[#8B7E7D] text-xs sm:text-sm">The sitter will reply to you directly via email to coordinate details.</p>
+              <button 
+                onClick={() => setRequestModalOpen(false)} 
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 text-gray-400 hover:text-gray-600 w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] z-20"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
             
-            <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Request {selectedSitter.name}</h3>
-            <p className="text-[#8B7E7D] text-sm mb-6">The sitter will reply to you directly via email to coordinate details.</p>
-
-            {reqSuccess ? (
-              <div className="text-center py-8">
-                <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <h4 className="text-xl font-bold text-green-600 mb-2">Request Sent!</h4>
-                <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
-                
-                <button
-                  onClick={() => {
-                    setRequestModalOpen(false);
-                    setReqSuccess(false);
-                  }}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
-                >
-                  Close
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={submitRequest} className="space-y-4">
-                {hasSavedInfo && (
-                  <div className="bg-[#F6EFEA] border border-[#E4D5CA] rounded-2xl p-3.5 flex items-center justify-between text-xs text-[#8B5E3C] shadow-sm animate-fade-in">
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <span>✨</span> Your pet details were saved — update anytime
-                    </span>
-                    <button type="button" onClick={handleClearSavedInfo} className="underline font-bold hover:text-[#7A5234] transition-colors ml-2 shrink-0">
-                      Clear saved info
-                    </button>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Name</label>
-                  <input required type="text" value={reqOwnerName} onChange={e => setReqOwnerName(e.target.value)} placeholder="Jane Doe" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+            <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-[#FDFAF7]">
+              {reqSuccess ? (
+                <div className="text-center py-8">
+                  <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <h4 className="text-xl font-bold text-green-600 mb-2">Request Sent!</h4>
+                  <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
+                  
+                  <button
+                    onClick={() => {
+                      setRequestModalOpen(false);
+                      setReqSuccess(false);
+                    }}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
+                  >
+                    Close
+                  </button>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
-                    <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
-                    <input type="tel" value={reqPhone} onChange={e => setReqPhone(e.target.value)} placeholder="(555) 555-5555" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name</label>
-                    <input required type="text" value={reqPetName} onChange={e => setReqPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type</label>
-                    <select value={reqPetType} onChange={e => setReqPetType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
-                      <option value="dog">Dog</option>
-                      <option value="cat">Cat</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Age</label>
-                    <input type="text" value={reqPetAge} onChange={e => setReqPetAge(e.target.value)} placeholder="e.g. 3 years" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
-                  <div className="flex space-x-2 mb-2">
-                    <input required type="date" min={new Date().toISOString().split('T')[0]} value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                    <input required type="date" min={reqStartDate || new Date().toISOString().split('T')[0]} value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                  </div>
-
-                  {/* Availability Calendar */}
-                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 mt-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="text-xs font-bold text-[#4A3E3D]">Availability Calendar</span>
-                        <div className="text-[10px] text-[#8B7E7D] mt-0.5">Click dates to select your booking range</div>
-                      </div>
-                      <div className="flex items-center space-x-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (calMonth === 0) {
-                              setCalMonth(11);
-                              setCalYear(prev => prev - 1);
-                            } else {
-                              setCalMonth(calMonth - 1);
-                            }
-                          }}
-                          className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" /></svg>
-                        </button>
-                        <span className="text-xs font-bold text-[#4A3E3D] min-w-[75px] text-center">
-                          {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][calMonth]} {calYear}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (calMonth === 11) {
-                              setCalMonth(0);
-                              setCalYear(prev => prev + 1);
-                            } else {
-                              setCalMonth(calMonth + 1);
-                            }
-                          }}
-                          className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M9 5l7 7-7 7" /></svg>
-                        </button>
-                      </div>
+              ) : (
+                <form onSubmit={submitRequest} className="space-y-4">
+                  {hasSavedInfo && (
+                    <div className="bg-[#F6EFEA] border border-[#E4D5CA] rounded-2xl p-3.5 flex items-center justify-between text-xs text-[#8B5E3C] shadow-sm animate-fade-in">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <span>✨</span> Your pet details were saved — update anytime
+                      </span>
+                      <button type="button" onClick={handleClearSavedInfo} className="underline font-bold hover:text-[#7A5234] transition-colors ml-2 shrink-0">
+                        Clear saved info
+                      </button>
                     </div>
-
-                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-[#8B6A50] mb-1.5 uppercase tracking-wider">
-                      <div>Su</div>
-                      <div>Mo</div>
-                      <div>Tu</div>
-                      <div>We</div>
-                      <div>Th</div>
-                      <div>Fr</div>
-                      <div>Sa</div>
+                  )}
+ 
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Name</label>
+                    <input required type="text" value={reqOwnerName} onChange={e => setReqOwnerName(e.target.value)} placeholder="Jane Doe" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
+                      <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                     </div>
-
-                    <div className="grid grid-cols-7 gap-1">
-                      {(() => {
-                        const firstDay = new Date(calYear, calMonth, 1).getDay();
-                        const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
-                        const todayStr = new Date().toISOString().split('T')[0];
-                        
-                        const cells = [];
-                        for (let i = 0; i < firstDay; i++) {
-                          cells.push(<div key={`empty-${i}`} className="aspect-square" />);
-                        }
-                        
-                        for (let d = 1; d <= totalDays; d++) {
-                          const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                          const isBooked = sitterBookedDates.includes(dateStr);
-                          const isBlocked = sitterBlockedDates.includes(dateStr);
-                          const isPast = dateStr < todayStr;
-                          const isStart = reqStartDate === dateStr;
-                          const isEnd = reqEndDate === dateStr;
-                          const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
+                      <input type="tel" value={reqPhone} onChange={e => setReqPhone(e.target.value)} placeholder="(555) 555-5555" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name</label>
+                      <input required type="text" value={reqPetName} onChange={e => setReqPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type</label>
+                      <select value={reqPetType} onChange={e => setReqPetType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Age</label>
+                      <input type="text" value={reqPetAge} onChange={e => setReqPetAge(e.target.value)} placeholder="e.g. 3 yrs" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
+                    <div className="flex space-x-2 mb-2">
+                      <input required type="date" min={new Date().toISOString().split('T')[0]} value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                      <input required type="date" min={reqStartDate || new Date().toISOString().split('T')[0]} value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                    </div>
+ 
+                    {/* Availability Calendar */}
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-3 sm:p-4 mt-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <span className="text-xs font-bold text-[#4A3E3D]">Availability Calendar</span>
+                          <div className="text-[10px] text-[#8B7E7D] mt-0.5">Click dates to select booking range</div>
+                        </div>
+                        <div className="flex items-center space-x-1.5 font-bold">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (calMonth === 0) {
+                                setCalMonth(11);
+                                setCalYear(prev => prev - 1);
+                              } else {
+                                setCalMonth(calMonth - 1);
+                              }
+                            }}
+                            className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" /></svg>
+                          </button>
+                          <span className="text-xs font-bold text-[#4A3E3D] min-w-[75px] text-center">
+                            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][calMonth]} {calYear}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (calMonth === 11) {
+                                setCalMonth(0);
+                                setCalYear(prev => prev + 1);
+                              } else {
+                                setCalMonth(calMonth + 1);
+                              }
+                            }}
+                            className="p-1 rounded-lg hover:bg-[#F6EFEA] text-[#8B5E3C] transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M9 5l7 7-7 7" /></svg>
+                          </button>
+                        </div>
+                      </div>
+ 
+                      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-[#8B6A50] mb-1.5 uppercase tracking-wider">
+                        <div>Su</div>
+                        <div>Mo</div>
+                        <div>Tu</div>
+                        <div>We</div>
+                        <div>Th</div>
+                        <div>Fr</div>
+                        <div>Sa</div>
+                      </div>
+ 
+                      <div className="grid grid-cols-7 gap-1">
+                        {(() => {
+                          const firstDay = new Date(calYear, calMonth, 1).getDay();
+                          const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+                          const todayStr = new Date().toISOString().split('T')[0];
                           
-                          const dayOfWeek = new Date(calYear, calMonth, d).getDay();
-                          const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
-                          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
-                          
-                          let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
-                          if (isPast) {
-                            bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
-                          } else if (isBooked) {
-                            bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
-                          } else if (isBlocked) {
-                            bgClass = "bg-amber-100 text-amber-950 border border-amber-350 line-through cursor-not-allowed font-bold";
-                          } else if (isScheduleUnavailable) {
-                            bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
-                          } else if (isStart || isEnd) {
-                            bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
-                          } else if (inRange) {
-                            bgClass = "bg-[#F6EFEA] text-[#8B5E3C] border-y border-[#E4D5CA] font-bold cursor-pointer";
+                          const cells = [];
+                          for (let i = 0; i < firstDay; i++) {
+                            cells.push(<div key={`empty-${i}`} className="aspect-square" />);
                           }
                           
-                          cells.push(
-                            <button
-                              key={`day-${d}`}
-                              type="button"
-                              disabled={isPast || isBooked || isBlocked || isScheduleUnavailable}
-                              onClick={() => handleOwnerCalendarDayClick(dateStr)}
-                              className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all ${bgClass}`}
-                            >
-                              <span>{d}</span>
-                            </button>
-                          );
-                        }
-                        return cells;
-                      })()}
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[11px] font-bold text-[#4A3E3D]">
-                      <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block shadow-sm" /> Available
+                          for (let d = 1; d <= totalDays; d++) {
+                            const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                            const isBooked = sitterBookedDates.includes(dateStr);
+                            const isBlocked = sitterBlockedDates.includes(dateStr);
+                            const isPast = dateStr < todayStr;
+                            const isStart = reqStartDate === dateStr;
+                            const isEnd = reqEndDate === dateStr;
+                            const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
+                            
+                            const dayOfWeek = new Date(calYear, calMonth, d).getDay();
+                            const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+                            const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
+                            
+                            let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
+                            if (isPast) {
+                              bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
+                            } else if (isBooked) {
+                              bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
+                            } else if (isBlocked) {
+                              bgClass = "bg-amber-100 text-amber-950 border border-amber-350 line-through cursor-not-allowed font-bold";
+                            } else if (isScheduleUnavailable) {
+                              bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
+                            } else if (isStart || isEnd) {
+                              bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
+                            } else if (inRange) {
+                              bgClass = "bg-[#F6EFEA] text-[#8B5E3C] border-y border-[#E4D5CA] font-bold cursor-pointer";
+                            }
+                            
+                            cells.push(
+                              <button
+                                key={`day-${d}`}
+                                type="button"
+                                disabled={isPast || isBooked || isBlocked || isScheduleUnavailable}
+                                onClick={() => handleOwnerCalendarDayClick(dateStr)}
+                                className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all ${bgClass}`}
+                              >
+                                <span>{d}</span>
+                              </button>
+                            );
+                          }
+                          return cells;
+                        })()}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-amber-500 inline-block shadow-sm" /> Sitter Busy
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block shadow-sm" /> Booked
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block shadow-sm" /> Selected
+ 
+                      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[11px] font-bold text-[#4A3E3D]">
+                        <div className="flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block shadow-sm" /> Available
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded bg-amber-500 inline-block shadow-sm" /> Sitter Busy
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block shadow-sm" /> Booked
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block shadow-sm" /> Selected
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Special Notes (Optional)</label>
-                  <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"></textarea>
-                </div>
-
-                {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
-
-                <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm">
-                  {reqLoading ? 'Sending...' : 'Send Request'}
-                </button>
-              </form>
-            )}
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Special Notes (Optional)</label>
+                    <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"></textarea>
+                  </div>
+ 
+                  {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
+ 
+                  <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm cursor-pointer">
+                    {reqLoading ? 'Sending...' : 'Send Request'}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}
