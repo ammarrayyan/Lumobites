@@ -19,6 +19,16 @@ export default function LostPetsFeed() {
   const [searchLocationName, setSearchLocationName] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -99,7 +109,10 @@ export default function LostPetsFeed() {
       <Navbar />
 
       {/* ── Filter bar ── fixed on mobile, normal flow on desktop ── */}
-      <div className="lost-pets-filter-bar fixed top-[72px] left-0 right-0 z-[100] bg-white border-b border-[#E8DDD4] shadow-md md:hidden">
+      <div 
+        className="bg-white border-b border-[#E8DDD4] shadow-md md:hidden"
+        style={{ position: 'fixed', top: '72px', left: 0, right: 0, zIndex: 9999 }}
+      >
         <div className="px-4 py-3 flex flex-col gap-3">
           <div className="flex-1 relative">
             <input
@@ -160,7 +173,10 @@ export default function LostPetsFeed() {
         </div>
       </div>
 
-      <main className="lost-pets-content max-w-6xl mx-auto px-4 pt-[228px] pb-8 md:pt-12 md:pb-12">
+      <main 
+        className="max-w-6xl mx-auto px-4 pb-8 md:pt-12 md:pb-12"
+        style={isMobile ? { paddingTop: '150px' } : undefined}
+      >
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
           <div className="text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>

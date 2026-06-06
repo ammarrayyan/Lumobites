@@ -161,20 +161,3 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-@media (max-width: 768px) {
-  .lost-pets-filter-bar {
-    position: fixed !important;
-    top: 72px !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 999 !important;
-    background: white !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-    padding: 12px 16px !important;
-  }
-  
-  .lost-pets-content {
-    padding-top: 140px !important;
-  }
-}
-
