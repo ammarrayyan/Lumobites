@@ -1366,7 +1366,7 @@ export default function ScanPage() {
 
       {/* ── VERIFYING SESSION SPINNER ── */}
       {verifyingSession && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
+        <div className="modal-overlay fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col items-center justify-center gap-4 text-center">
             <div className="w-12 h-12 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-2"></div>
             <h3 className="text-lg font-black text-[#191919]">Verifying Subscription...</h3>
@@ -1377,7 +1377,7 @@ export default function ScanPage() {
 
       {/* ── UPGRADE TO PRO MODAL ── */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in">
+        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
             
             {!modalLoading && (

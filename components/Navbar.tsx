@@ -586,7 +586,7 @@ export default function Navbar() {
       )}
     </nav>
       {showSignInModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
+        <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
             <button 
               onClick={() => { setShowSignInModal(false); setSignInStep('email'); setSignInError(''); setAlreadyProMsg(false); }}

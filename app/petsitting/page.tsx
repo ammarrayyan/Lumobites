@@ -3104,7 +3104,7 @@ export default function PetSitting() {
 
       {/* REQUEST MODAL */}
       {requestModalOpen && selectedSitter && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setRequestModalOpen(false)}>
+        <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setRequestModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-md sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
               <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {selectedSitter.name}</h3>
@@ -3327,7 +3327,7 @@ export default function PetSitting() {
 
       {/* CAMERA CAPTURE MODAL */}
       {cameraModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+        <div className="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <div className="bg-[#FAF6F4] rounded-3xl p-6 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
             <button onClick={stopCamera} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -3389,7 +3389,7 @@ export default function PetSitting() {
 
       {/* PREMIUM UNLOCK MODAL */}
       {unlockModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
             <button 
               onClick={() => {
@@ -3522,7 +3522,7 @@ export default function PetSitting() {
       {/* REVIEWS MODAL */}
       {/* REVIEWS MODAL */}
       {reviewsModalOpen && selectedSitterForReviews && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
+        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10">
               <div className="flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
@@ -3702,7 +3702,7 @@ export default function PetSitting() {
 
       {/* DELETE MODAL */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
             <span className="text-5xl mb-4 block">⚠️</span>
             <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Are you sure?</h3>

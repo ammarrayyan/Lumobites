@@ -1598,7 +1598,7 @@ export default function TwinPage() {
 
       {/* ── UPGRADE TO PRO MODAL ── */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in pointer-events-auto">
+        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in pointer-events-auto">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
             
             {!modalLoading && (
@@ -2575,7 +2575,7 @@ export default function TwinPage() {
 
       {/* EMAIL CAPTURE MODAL OVERLAY */}
       {showEmailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
           <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 md:p-8 flex flex-col items-center text-center animate-scale-up relative">
             
             {/* Lumo Bites logo + trademark at the top */}

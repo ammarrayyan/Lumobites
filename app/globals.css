@@ -112,3 +112,52 @@ h1, h2, h3, h4, h5, h6 {
 .animate-pulse-soft {
   animation: pulse-soft 2s infinite ease-in-out;
 }
+
+/* ==========================================
+   MOBILE VIEWPORT & KEYBOARD FOCUS FIXES
+   ========================================== */
+
+/* 1. Prevent iOS auto-zoom on input focus */
+@media (max-width: 767px) {
+  input, textarea, select, [contenteditable="true"] {
+    font-size: 16px !important;
+  }
+}
+
+/* 2. Scroll margin & dynamic bottom padding to keep focused inputs visible above keyboard */
+@media (max-width: 767px) {
+  input, textarea, select {
+    scroll-margin-bottom: 120px !important;
+  }
+
+  /* Dynamically expand body scroll height only when keyboard is active (an input is focused) */
+  body:has(input:focus, textarea:focus, select:focus) {
+    padding-bottom: 280px !important;
+  }
+
+  /* Dynamically expand modal inner scroll height when an input is focused inside the modal */
+  .overflow-y-auto:has(input:focus, textarea:focus, select:focus) {
+    padding-bottom: 200px !important;
+  }
+}
+
+/* 3. Modal mobile overlay scroll behavior */
+@media (max-width: 767px) {
+  .modal-overlay {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 1rem !important;
+  }
+  
+  /* Prevent modal content from shrinking or getting cut off on small viewport heights */
+  .modal-overlay > div {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    max-height: none !important;
+    flex-shrink: 0 !important;
+  }
+}
+
