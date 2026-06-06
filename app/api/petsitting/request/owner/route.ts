@@ -24,27 +24,47 @@ export async function GET(request: NextRequest) {
     const isBookingDateActive = (datesStr: string): boolean => {
       if (!datesStr) return false;
       try {
-        let endDateStr = datesStr;
-        if (datesStr.includes('→')) {
-          endDateStr = datesStr.split('→')[1].trim();
-        } else if (datesStr.includes('->')) {
-          endDateStr = datesStr.split('->')[1].trim();
-        } else if (datesStr.includes('-')) {
-          const parts = datesStr.split('-');
-          endDateStr = parts[parts.length - 1].trim();
+        let startDateStr = '';
+        let endDateStr = '';
+        
+        const cleanDates = datesStr.replace(/\s+/g, ' ');
+        if (cleanDates.includes('→')) {
+          const parts = cleanDates.split('→');
+          startDateStr = parts[0].trim();
+          endDateStr = parts[1].trim();
+        } else if (cleanDates.includes('->')) {
+          const parts = cleanDates.split('->');
+          startDateStr = parts[0].trim();
+          endDateStr = parts[1].trim();
+        } else if (cleanDates.includes('-')) {
+          const parts = cleanDates.split('-');
+          if (parts.length === 2 && parts[0].length > 4) {
+            startDateStr = parts[0].trim();
+            endDateStr = parts[1].trim();
+          } else {
+            startDateStr = cleanDates.trim();
+            endDateStr = cleanDates.trim();
+          }
         } else {
-          endDateStr = datesStr.trim();
+          startDateStr = cleanDates.trim();
+          endDateStr = cleanDates.trim();
         }
+        
+        const startDate = new Date(startDateStr);
         const endDate = new Date(endDateStr);
-        if (isNaN(endDate.getTime())) {
-          return true;
+        
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          return false;
         }
+        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        startDate.setHours(0, 0, 0, 0);
         endDate.setHours(0, 0, 0, 0);
-        return endDate >= today;
+        
+        return today >= startDate && today <= endDate;
       } catch (e) {
-        return true;
+        return false;
       }
     };
 
