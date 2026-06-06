@@ -98,19 +98,9 @@ export default function LostPetsFeed() {
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>
-            <p className="text-[#8B5E3C] font-medium text-lg">Help reunite lost pets with their families in your neighborhood.</p>
-          </div>
-          <Link href="/lost-pets/post" className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0">
-            <Megaphone className="w-5 h-5" /> Report Lost/Found Pet
-          </Link>
-        </div>
- 
-        {/* Search & Filters */}
-        <div className="bg-white p-4 shadow-md border-[#E8DDD4] flex flex-col md:flex-row gap-4 fixed top-[72px] left-0 right-0 z-50 border-b rounded-none md:relative md:top-auto md:left-auto md:right-auto md:z-10 md:rounded-2xl md:border md:shadow-sm md:mb-8">
+      {/* ── Filter bar ── fixed on mobile, normal flow on desktop ── */}
+      <div className="fixed top-[72px] left-0 right-0 z-[100] bg-white border-b border-[#E8DDD4] shadow-md md:hidden">
+        <div className="px-4 py-3 flex flex-col gap-3">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -168,9 +158,81 @@ export default function LostPetsFeed() {
             <option value="other">Other</option>
           </select>
         </div>
- 
-        {/* Content Area offset on mobile to account for fixed height */}
-        <div className="pt-[290px] md:pt-0">
+      </div>
+
+      <main className="max-w-6xl mx-auto px-4 pt-[228px] pb-8 md:pt-12 md:pb-12">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>
+            <p className="text-[#8B5E3C] font-medium text-lg">Help reunite lost pets with their families in your neighborhood.</p>
+          </div>
+          <Link href="/lost-pets/post" className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0">
+            <Megaphone className="w-5 h-5" /> Report Lost/Found Pet
+          </Link>
+        </div>
+
+        {/* Desktop filter bar — normal flow, hidden on mobile (mobile version is fixed above) */}
+        <div className="hidden md:flex flex-row gap-4 bg-white border border-[#E8DDD4] rounded-2xl p-4 shadow-sm mb-8">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search by city or zip code..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setLocationVerified(false);
+              }}
+              className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
+            />
+            {isGeocoding && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+            )}
+            {locationVerified && !isGeocoding && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+              </div>
+            )}
+            {locationVerified && !isGeocoding && searchCoords && (
+               <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 absolute -bottom-6 left-1">
+                 ✅ {searchLocationName}
+               </p>
+            )}
+          </div>
+          <select
+            value={searchRadius}
+            onChange={(e) => setSearchRadius(e.target.value)}
+            className={`bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!searchCoords && !!searchQuery}
+          >
+            <option value="10">Within 10 miles</option>
+            <option value="25">Within 25 miles</option>
+            <option value="50">Within 50 miles</option>
+            <option value="100">Within 100 miles</option>
+            <option value="any">Any distance</option>
+          </select>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold"
+          >
+            <option value="all">All Types</option>
+            <option value="lost">Lost Pets</option>
+            <option value="found">Found Pets</option>
+          </select>
+          <select
+            value={filterSpecies}
+            onChange={(e) => setFilterSpecies(e.target.value)}
+            className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold"
+          >
+            <option value="all">All Species</option>
+            <option value="dog">Dogs</option>
+            <option value="cat">Cats</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        {/* Content — no extra offset needed on desktop; mobile offset handled by padding-top on the outer wrapper */}
+        <div>
           {loading ? (
             <div className="text-center py-20 text-[#8B5E3C] font-bold text-lg animate-pulse">Loading pets...</div>
           ) : pets.length === 0 ? (
