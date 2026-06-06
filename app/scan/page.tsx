@@ -1455,26 +1455,27 @@ export default function ScanPage() {
                       Upgrade for $2.99/month
                     </button>
 
-                    <div className="flex flex-col gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUpgradeModal(false);
+                        window.dispatchEvent(new Event('lumo-open-signin'));
+                      }}
+                      className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                    >
+                      Already a PRO member? Sign in to access your account →
+                    </button>
+
+                    <div className="flex flex-col gap-2.5 mt-1">
                       <button 
                         type="button"
                         onClick={() => {
                           setModalStep('restore_email');
                           setModalMessage(null);
                         }}
-                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                        className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-semibold hover:underline bg-transparent border-none cursor-pointer"
                       >
                         Already subscribed? Restore subscription
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowUpgradeModal(false);
-                          window.dispatchEvent(new Event('lumo-open-signin'));
-                        }}
-                        className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer mt-0.5"
-                      >
-                        Already a member? Sign in here
                       </button>
                       <span className="text-[11px] text-gray-400 text-center">
                         Come back tomorrow for your free scan
@@ -1528,7 +1529,7 @@ export default function ScanPage() {
                       </button>
                       
                       <p className="text-[11px] text-gray-400 text-center mt-2">
-                        Already a member?{" "}
+                        Already a PRO member?{" "}
                         <button
                           type="button"
                           onClick={() => {
@@ -1537,7 +1538,7 @@ export default function ScanPage() {
                           }}
                           className="text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
                         >
-                          Sign in here
+                          Sign in to access your account
                         </button>
                       </p>
                     </form>

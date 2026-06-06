@@ -224,14 +224,22 @@ export default function PetSitting() {
   };
 
   useEffect(() => {
-    const cachedEmail = localStorage.getItem('lumo_pro_email');
-    if (cachedEmail && cachedEmail !== 'undefined') {
-      setReqEmail(cachedEmail);
-      fetchSitters(cachedEmail);
-      loadOwnerProfile(cachedEmail);
-    } else {
-      fetchSitters();
-    }
+    const syncStatus = () => {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail.trim() !== '') {
+        setReqEmail(cachedEmail);
+        fetchSitters(cachedEmail);
+        loadOwnerProfile(cachedEmail);
+      } else {
+        setReqEmail('');
+        setIsOwnerPro(false);
+        fetchSitters();
+      }
+    };
+
+    syncStatus();
+    window.addEventListener('lumo-pro-update', syncStatus);
+    window.addEventListener('storage', syncStatus);
 
     // Restore sitter persistent session if valid
     const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
@@ -267,6 +275,11 @@ export default function PetSitting() {
     if (params.get('tab') === 'become' || window.location.hash === '#become') {
       setActiveTab('become');
     }
+
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('storage', syncStatus);
+    };
   }, []);
 
   // Automatically fetch owner's booking history whenever their email is authenticated
@@ -3515,6 +3528,19 @@ export default function PetSitting() {
                 )}
               </button>
             </form>
+            
+            {ownerAuthMode === 'email' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setUnlockModalOpen(false);
+                  window.dispatchEvent(new Event('lumo-open-signin'));
+                }}
+                className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs mt-3"
+              >
+                Already a PRO member? Sign in to access your account →
+              </button>
+            )}
           </div>
         </div>
       )}

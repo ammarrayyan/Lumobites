@@ -315,12 +315,18 @@ export default function Navbar() {
                         <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
                         <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                       </button>
-                      <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
+                      <div className="flex items-center my-2 px-3">
+                        <div className="flex-grow border-t border-gray-150"></div>
+                        <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
+                        <div className="flex-grow border-t border-gray-150"></div>
+                      </div>
+                      <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
+                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already a PRO member?</span>
                         <button
                           onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
-                          className="text-[11px] text-gray-400 hover:text-[#8B5E3C] font-bold transition-all bg-transparent border-none cursor-pointer"
+                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                         >
-                          Already a member? <span className="underline">Sign in here</span>
+                          Sign in to access your account →
                         </button>
                       </div>
                     </div>
@@ -405,12 +411,18 @@ export default function Navbar() {
                       <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
                       <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
                     </button>
-                    <div className="px-3 py-2 text-center border-t border-[#F0E6DD]/30 mt-1">
+                    <div className="flex items-center my-2 px-3">
+                      <div className="flex-grow border-t border-gray-150"></div>
+                      <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
+                      <div className="flex-grow border-t border-gray-150"></div>
+                    </div>
+                    <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
+                      <span className="text-[11px] text-gray-500 font-bold leading-tight">Already a PRO member?</span>
                       <button
                         onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
-                        className="text-[11px] text-gray-400 hover:text-[#8B5E3C] font-bold transition-all bg-transparent border-none cursor-pointer"
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                       >
-                        Already a member? <span className="underline">Sign in here</span>
+                        Sign in to access your account →
                       </button>
                     </div>
                   </div>
