@@ -503,6 +503,33 @@ export default function PetSitting() {
     }
   };
 
+  const isBookingDateActive = (datesStr: string): boolean => {
+    if (!datesStr) return false;
+    try {
+      let endDateStr = datesStr;
+      if (datesStr.includes('→')) {
+        endDateStr = datesStr.split('→')[1].trim();
+      } else if (datesStr.includes('->')) {
+        endDateStr = datesStr.split('->')[1].trim();
+      } else if (datesStr.includes('-')) {
+        const parts = datesStr.split('-');
+        endDateStr = parts[parts.length - 1].trim();
+      } else {
+        endDateStr = datesStr.trim();
+      }
+      const endDate = new Date(endDateStr);
+      if (isNaN(endDate.getTime())) {
+        return true;
+      }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+      return endDate >= today;
+    } catch (e) {
+      return true;
+    }
+  };
+
   const handleRequestAgain = async (req: any) => {
     // Fill in the details from owner profile
     const emailToUse = req.owner_email || ownerHistoryEmail || reqEmail;
@@ -1802,7 +1829,7 @@ export default function PetSitting() {
                                     )}
                                   </td>
                                 </tr>
-                                {req.status === 'accepted' && (
+                                {req.status === 'accepted' && isBookingDateActive(req.dates) && (
                                   <tr className="bg-green-50/30">
                                     <td colSpan={6} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
                                       <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

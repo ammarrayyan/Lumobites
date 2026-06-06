@@ -21,9 +21,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const isBookingDateActive = (datesStr: string): boolean => {
+      if (!datesStr) return false;
+      try {
+        let endDateStr = datesStr;
+        if (datesStr.includes('→')) {
+          endDateStr = datesStr.split('→')[1].trim();
+        } else if (datesStr.includes('->')) {
+          endDateStr = datesStr.split('->')[1].trim();
+        } else if (datesStr.includes('-')) {
+          const parts = datesStr.split('-');
+          endDateStr = parts[parts.length - 1].trim();
+        } else {
+          endDateStr = datesStr.trim();
+        }
+        const endDate = new Date(endDateStr);
+        if (isNaN(endDate.getTime())) {
+          return true;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate >= today;
+      } catch (e) {
+        return true;
+      }
+    };
+
     const requests = (data || []).map((req: any) => {
       const sitter = req.sitters || {};
-      const isVisible = req.status === 'accepted';
+      const isVisible = req.status === 'accepted' && isBookingDateActive(req.dates);
       return {
         ...req,
         sitter_name: sitter.name || 'Local Sitter',
