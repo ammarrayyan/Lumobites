@@ -55,8 +55,27 @@ export default function PetSitting() {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText('lumobites.net/petsitting');
+    navigator.clipboard.writeText('https://lumobites.net/petsitting');
     alert('Link copied to clipboard!');
+  };
+
+  const handleShareInvite = async () => {
+    const shareData = {
+      title: 'Lumo Bites Pet Sitting',
+      text: inviteMessageText,
+      url: 'https://lumobites.net/petsitting'
+    };
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        console.log('Share canceled or failed:', err);
+      }
+    }
+    
+    // Fallback: Copy message to clipboard
+    handleCopyMessage();
   };
   
   // Find Sitter State
@@ -1924,17 +1943,17 @@ export default function PetSitting() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
                           type="button"
-                          onClick={handleCopyMessage}
+                          onClick={handleShareInvite}
                           className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <Clipboard className="w-4 h-4" /> Copy Msg
+                          <Share2 className="w-4 h-4" /> Share Invite
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyLink}
                           className="bg-white border border-[#E8DDD4] text-[#4A3E3D] hover:bg-[#FAF6F4] font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <Share2 className="w-4 h-4" /> Copy Link
+                          <Share2 className="w-4 h-4" /> Copy Share Link
                         </button>
                       </div>
                     </div>
@@ -2009,21 +2028,12 @@ export default function PetSitting() {
                     Edit Profile
                   </button>
                   
-                  {sitterApprovalStatus === 'approved' && isProSitter && (
-                    <button type="button" onClick={() => window.location.href = '/account'} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 rounded-xl transition-all shadow-sm">
-                      Manage Subscription
-                    </button>
-                  )}
                   {sitterApprovalStatus === 'approved' && !isProSitter && (
                     <button type="button" onClick={handleStripeCheckout} disabled={profileLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
                     </button>
                   )}
-                  
-                  <button type="button" onClick={() => setActiveTab('find')} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
-                    &larr; Back to Find a Sitter
-                  </button>
                   
                   {sitterApprovalStatus !== 'pending' && (
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
@@ -2035,10 +2045,10 @@ export default function PetSitting() {
                       <div className="grid grid-cols-1 gap-2">
                         <button
                           type="button"
-                          onClick={handleCopyMessage}
+                          onClick={handleShareInvite}
                           className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <Clipboard className="w-4 h-4" /> Copy Message
+                          <Share2 className="w-4 h-4" /> Share Invite
                         </button>
                         <button
                           type="button"
