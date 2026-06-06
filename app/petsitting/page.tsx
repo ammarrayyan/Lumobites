@@ -164,6 +164,8 @@ export default function PetSitting() {
   // Calendar Availability States
   const [sitterBlockedDates, setSitterBlockedDates] = useState<string[]>([]);
   const [sitterBookedDates, setSitterBookedDates] = useState<string[]>([]);
+  const [sitterBookedSlots, setSitterBookedSlots] = useState<{ [date: string]: string[] }>({});
+  const [loadedSitterAvailableTimes, setLoadedSitterAvailableTimes] = useState<string[]>([]);
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const [calYear, setCalYear] = useState(new Date().getFullYear());
 
@@ -339,21 +341,92 @@ export default function PetSitting() {
         if (Array.isArray(data.available_days)) {
           setSitterAvailableDays(data.available_days);
         }
+        if (Array.isArray(data.available_times)) {
+          setLoadedSitterAvailableTimes(data.available_times);
+        } else {
+          setLoadedSitterAvailableTimes([]);
+        }
         
-        // Compile all accepted booking dates into a flat array
+        // Compile all accepted booking dates into a flat array and a slot-based map
         const booked: string[] = [];
+        const bookedSlotsMap: { [date: string]: string[] } = {};
+        
         if (Array.isArray(data.accepted_bookings)) {
           data.accepted_bookings.forEach((booking: any) => {
             if (Array.isArray(booking.dates_in_range)) {
               booked.push(...booking.dates_in_range);
+              booking.dates_in_range.forEach((dateStr: string) => {
+                if (!bookedSlotsMap[dateStr]) {
+                  bookedSlotsMap[dateStr] = [];
+                }
+                bookedSlotsMap[dateStr].push(booking.time_slot || 'all');
+              });
             }
           });
         }
         setSitterBookedDates(booked);
+        setSitterBookedSlots(bookedSlotsMap);
       }
     } catch (err) {
       console.error('Failed to fetch sitter availability:', err);
     }
+  };
+
+  const getSitterActiveSlots = (availableTimes: string[]) => {
+    const allTimeSlots = [
+      'Morning (8am - 12pm)',
+      'Afternoon (12pm - 5pm)',
+      'Evening (5pm - 9pm)',
+      'Full Day (8am - 9pm)',
+      'Overnight (9pm - 8am)'
+    ];
+    return allTimeSlots.filter(slot => {
+      if (availableTimes.includes(slot)) return true;
+      // Fallback mapper for legacy database strings
+      if (slot.startsWith('Morning') && (availableTimes.includes('Morning') || availableTimes.includes('Morning (6am-12pm)'))) return true;
+      if (slot.startsWith('Afternoon') && (availableTimes.includes('Afternoon') || availableTimes.includes('Afternoon (12pm-6pm)'))) return true;
+      if (slot.startsWith('Evening') && (availableTimes.includes('Evening') || availableTimes.includes('Evening (6pm-10pm)'))) return true;
+      if (slot.startsWith('Overnight') && (availableTimes.includes('Overnight') || availableTimes.includes('Overnight (9pm-8am)'))) return true;
+      if (slot.startsWith('Full Day') && (availableTimes.includes('Full Day') || availableTimes.includes('Flexible'))) return true;
+      return false;
+    });
+  };
+
+  const slotsOverlap = (slotA: string | null, slotB: string | null) => {
+    if (!slotA || !slotB) return true; // Legacy bookings block everything
+    
+    const normalize = (slot: string) => {
+      const lower = slot.toLowerCase();
+      if (lower.includes('morning')) return 'morning';
+      if (lower.includes('afternoon')) return 'afternoon';
+      if (lower.includes('evening')) return 'evening';
+      if (lower.includes('overnight')) return 'overnight';
+      if (lower.includes('full day') || lower === 'flexible') return 'full day';
+      return lower;
+    };
+
+    const nA = normalize(slotA);
+    const nB = normalize(slotB);
+    if (nA === 'full day' && nB !== 'overnight') return true;
+    if (nB === 'full day' && nA !== 'overnight') return true;
+    return nA === nB;
+  };
+
+  const isSlotBooked = (dateStr: string, slot: string) => {
+    const booked = sitterBookedSlots[dateStr] || [];
+    if (booked.includes('all')) return true;
+    return booked.some(bSlot => slotsOverlap(bSlot, slot));
+  };
+
+  const isDateFullyBooked = (dateStr: string, availableTimes: string[]) => {
+    if (sitterBlockedDates.includes(dateStr)) return true;
+    
+    const activeSlots = getSitterActiveSlots(availableTimes);
+    if (activeSlots.length === 0) {
+      return (sitterBookedSlots[dateStr] || []).length > 0;
+    }
+    
+    return activeSlots.every(slot => isSlotBooked(dateStr, slot));
   };
 
   const handleSitterBlockedDateToggle = async (dateStr: string) => {
@@ -402,7 +475,7 @@ export default function PetSitting() {
   const handleOwnerCalendarDayClick = (dateStr: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
     if (dateStr < todayStr) return;
-    if (sitterBookedDates.includes(dateStr) || sitterBlockedDates.includes(dateStr)) return;
+    if (isDateFullyBooked(dateStr, loadedSitterAvailableTimes) || sitterBlockedDates.includes(dateStr)) return;
 
     if (!reqStartDate || (reqStartDate && reqEndDate)) {
       setReqStartDate(dateStr);
@@ -412,7 +485,7 @@ export default function PetSitting() {
         setReqStartDate(dateStr);
       } else {
         const intermediate = getDatesBetween(reqStartDate, dateStr);
-        const hasOverlap = intermediate.some(d => sitterBlockedDates.includes(d) || sitterBookedDates.includes(d));
+        const hasOverlap = intermediate.some(d => sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes));
         if (hasOverlap) {
           setReqStartDate(dateStr);
         } else {
@@ -1538,12 +1611,22 @@ export default function PetSitting() {
           const dateObj = new Date(d + 'T00:00:00');
           const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
           const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
-          return sitterBlockedDates.includes(d) || sitterBookedDates.includes(d) || isScheduleUnavailable;
+          return sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes) || isScheduleUnavailable;
         });
         if (hasOverlap) {
-          setReqError('Selected date range overlaps with dates the sitter is unavailable or already booked');
+          setReqError('Selected date range overlaps with dates the sitter is unavailable or fully booked');
           setReqLoading(false);
           return;
+        }
+
+        // If a time slot is selected, also validate it's free across all dates in range
+        if (reqTimeSlot) {
+          const slotConflict = rangeDates.some(d => isSlotBooked(d, reqTimeSlot));
+          if (slotConflict) {
+            setReqError(`The ${reqTimeSlot} slot is already booked on one or more of the selected dates — please choose another slot or adjust your dates`);
+            setReqLoading(false);
+            return;
+          }
         }
       }
 
@@ -2395,44 +2478,72 @@ export default function PetSitting() {
                         const firstDay = new Date(calYear, calMonth, 1).getDay();
                         const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
                         const todayStr = new Date().toISOString().split('T')[0];
-                        
+
+                        const SLOT_ABBRS = [
+                          { key: 'Morning (8am - 12pm)',    abbr: 'M' },
+                          { key: 'Afternoon (12pm - 5pm)', abbr: 'A' },
+                          { key: 'Evening (5pm - 9pm)',     abbr: 'E' },
+                          { key: 'Full Day (8am - 9pm)',    abbr: 'F' },
+                          { key: 'Overnight (9pm - 8am)',   abbr: 'O' },
+                        ];
+
                         const cells = [];
                         for (let i = 0; i < firstDay; i++) {
                           cells.push(<div key={`empty-${i}`} className="aspect-square" />);
                         }
-                        
+
                         for (let d = 1; d <= totalDays; d++) {
                           const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                          const isBooked = sitterBookedDates.includes(dateStr);
                           const isBlocked = sitterBlockedDates.includes(dateStr);
                           const isPast = dateStr < todayStr;
-                          
+
                           const dayOfWeek = new Date(calYear, calMonth, d).getDay();
-                          const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+                          const dayOfWeekName = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dayOfWeek];
                           const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
-                          
-                          let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
+
+                          const activeSlots = getSitterActiveSlots(sitterAvailableTimes);
+                          const fullyBooked = !isBlocked && isDateFullyBooked(dateStr, sitterAvailableTimes);
+
+                          let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-200 cursor-pointer font-bold";
                           if (isPast) {
                             bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
-                          } else if (isBooked) {
-                            bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                           } else if (isBlocked) {
-                            bgClass = "bg-amber-100 text-amber-950 border border-amber-350 hover:bg-amber-200 cursor-pointer font-bold";
+                            bgClass = "bg-amber-100 text-amber-950 border border-amber-300 hover:bg-amber-200 cursor-pointer font-bold";
                           } else if (isScheduleUnavailable) {
-                            bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
+                            bgClass = "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed font-medium";
+                          } else if (fullyBooked) {
+                            bgClass = "bg-rose-100 text-rose-950 border border-rose-300 cursor-not-allowed font-bold";
                           }
-                          
+
+                          // Build dot indicators for active slots
+                          const dots = activeSlots.length > 0 && !isPast && !isBlocked && !isScheduleUnavailable
+                            ? SLOT_ABBRS.filter(s => activeSlots.includes(s.key)).map(s => {
+                                const slotBooked = isSlotBooked(dateStr, s.key);
+                                return (
+                                  <span
+                                    key={s.key}
+                                    title={`${s.key}: ${slotBooked ? 'Booked' : 'Available'}`}
+                                    className={`inline-block rounded-full ${slotBooked ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                                    style={{ width: '5px', height: '5px' }}
+                                  />
+                                );
+                              })
+                            : null;
+
                           cells.push(
                             <button
                               key={`day-${d}`}
                               type="button"
-                              disabled={isPast || isBooked || isScheduleUnavailable}
-                              onClick={() => {
-                                handleSitterBlockedDateToggle(dateStr);
-                              }}
-                              className={`aspect-square rounded-xl flex items-center justify-center text-sm transition-all font-semibold ${bgClass}`}
+                              disabled={isPast || fullyBooked || isScheduleUnavailable}
+                              onClick={() => { handleSitterBlockedDateToggle(dateStr); }}
+                              className={`aspect-square rounded-xl flex flex-col items-center justify-center text-xs transition-all font-semibold ${bgClass}`}
                             >
-                              {d}
+                              <span>{d}</span>
+                              {dots && dots.length > 0 && (
+                                <div className="flex gap-[2px] mt-0.5 flex-wrap justify-center">
+                                  {dots}
+                                </div>
+                              )}
                             </button>
                           );
                         }
@@ -2448,7 +2559,10 @@ export default function PetSitting() {
                         <span className="w-3 h-3 rounded bg-amber-500 inline-block shadow-sm" /> Blocked
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded bg-rose-500 inline-block shadow-sm" /> Booked
+                        <span className="w-3 h-3 rounded bg-rose-500 inline-block shadow-sm" /> Slot Booked
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-[#8B7E7D] font-normal">
+                        Dots = M A E F O slots
                       </div>
                     </div>
                   </div>
@@ -3286,28 +3400,28 @@ export default function PetSitting() {
                     >
                       <option value="">Select a time slot</option>
                       {(() => {
-                        const allTimeSlots = [
-                          'Morning (8am - 12pm)',
-                          'Afternoon (12pm - 5pm)',
-                          'Evening (5pm - 9pm)',
-                          'Full Day (8am - 9pm)',
-                          'Overnight (9pm - 8am)'
-                        ];
-                        const sitterAvailable = selectedSitter.available_times || [];
-                        return allTimeSlots.filter(slot => {
-                          if (sitterAvailable.includes(slot)) return true;
-                          // Fallback mapper for legacy database strings
-                          if (slot.startsWith('Morning') && (sitterAvailable.includes('Morning') || sitterAvailable.includes('Morning (6am-12pm)'))) return true;
-                          if (slot.startsWith('Afternoon') && (sitterAvailable.includes('Afternoon') || sitterAvailable.includes('Afternoon (12pm-6pm)'))) return true;
-                          if (slot.startsWith('Evening') && (sitterAvailable.includes('Evening') || sitterAvailable.includes('Evening (6pm-10pm)'))) return true;
-                          if (slot.startsWith('Overnight') && (sitterAvailable.includes('Overnight') || sitterAvailable.includes('Overnight (9pm-8am)'))) return true;
-                          if (slot.startsWith('Full Day') && (sitterAvailable.includes('Full Day') || sitterAvailable.includes('Flexible'))) return true;
-                          return false;
-                        }).map(slot => (
-                          <option key={slot} value={slot}>{slot}</option>
-                        ));
+                        // Get sitter's active slots (using loaded available_times from API)
+                        const activeSlots = getSitterActiveSlots(loadedSitterAvailableTimes.length > 0 ? loadedSitterAvailableTimes : (selectedSitter.available_times || []));
+
+                        // Get all dates in the currently selected range
+                        const rangeDates = reqStartDate && reqEndDate ? getDatesBetween(reqStartDate, reqEndDate) : (reqStartDate ? [reqStartDate] : []);
+
+                        return activeSlots.map(slot => {
+                          // Check if this slot is booked on any date in the selected range
+                          const slotConflict = rangeDates.some(d => isSlotBooked(d, slot));
+                          return (
+                            <option key={slot} value={slot} disabled={slotConflict}>
+                              {slot}{slotConflict ? ' — Booked on selected dates' : ''}
+                            </option>
+                          );
+                        });
                       })()}
                     </select>
+                    {reqStartDate && reqEndDate && (
+                      <p className="text-[10px] text-[#8B7E7D] mt-1">
+                        🔴 Slots marked as &ldquo;Booked&rdquo; are unavailable on one or more of your selected dates.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -3376,68 +3490,102 @@ export default function PetSitting() {
                           const firstDay = new Date(calYear, calMonth, 1).getDay();
                           const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
                           const todayStr = new Date().toISOString().split('T')[0];
-                          
+
+                          const SLOT_ABBRS = [
+                            { key: 'Morning (8am - 12pm)',    abbr: 'M' },
+                            { key: 'Afternoon (12pm - 5pm)', abbr: 'A' },
+                            { key: 'Evening (5pm - 9pm)',     abbr: 'E' },
+                            { key: 'Full Day (8am - 9pm)',    abbr: 'F' },
+                            { key: 'Overnight (9pm - 8am)',   abbr: 'O' },
+                          ];
+
                           const cells = [];
                           for (let i = 0; i < firstDay; i++) {
                             cells.push(<div key={`empty-${i}`} className="aspect-square" />);
                           }
-                          
+
                           for (let d = 1; d <= totalDays; d++) {
                             const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                            const isBooked = sitterBookedDates.includes(dateStr);
                             const isBlocked = sitterBlockedDates.includes(dateStr);
                             const isPast = dateStr < todayStr;
                             const isStart = reqStartDate === dateStr;
                             const isEnd = reqEndDate === dateStr;
                             const inRange = reqStartDate && reqEndDate && dateStr > reqStartDate && dateStr < reqEndDate;
-                            
+
                             const dayOfWeek = new Date(calYear, calMonth, d).getDay();
-                            const dayOfWeekName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayOfWeek];
+                            const dayOfWeekName = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dayOfWeek];
                             const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayOfWeekName);
-                            
-                            let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-250 cursor-pointer font-bold";
+
+                            const activeSlots = getSitterActiveSlots(loadedSitterAvailableTimes);
+                            const fullyBooked = isDateFullyBooked(dateStr, loadedSitterAvailableTimes);
+                            const isDisabled = isPast || isBlocked || isScheduleUnavailable || fullyBooked;
+
+                            let bgClass = "bg-emerald-50 text-emerald-950 hover:bg-emerald-100 border border-emerald-200 cursor-pointer font-bold";
                             if (isPast) {
                               bgClass = "bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed";
-                            } else if (isBooked) {
-                              bgClass = "bg-rose-100 text-rose-950 border border-rose-350 line-through cursor-not-allowed font-bold";
                             } else if (isBlocked) {
-                              bgClass = "bg-amber-100 text-amber-950 border border-amber-350 line-through cursor-not-allowed font-bold";
+                              bgClass = "bg-amber-100 text-amber-950 border border-amber-300 cursor-not-allowed font-bold";
                             } else if (isScheduleUnavailable) {
-                              bgClass = "bg-gray-100 text-gray-400 border border-gray-200 line-through cursor-not-allowed font-medium";
+                              bgClass = "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed font-medium";
+                            } else if (fullyBooked) {
+                              bgClass = "bg-rose-100 text-rose-950 border border-rose-300 cursor-not-allowed font-bold";
                             } else if (isStart || isEnd) {
                               bgClass = "bg-[#8B5E3C] text-white font-bold border border-[#8B5E3C] cursor-pointer";
                             } else if (inRange) {
                               bgClass = "bg-[#F6EFEA] text-[#8B5E3C] border-y border-[#E4D5CA] font-bold cursor-pointer";
                             }
-                            
+
+                            // Build dot indicators for active slots
+                            const dots = activeSlots.length > 0 && !isPast && !isBlocked && !isScheduleUnavailable
+                              ? SLOT_ABBRS.filter(s => activeSlots.includes(s.key)).map(s => {
+                                  const slotBooked = isSlotBooked(dateStr, s.key);
+                                  return (
+                                    <span
+                                      key={s.key}
+                                      title={`${s.key}: ${slotBooked ? 'Booked' : 'Available'}`}
+                                      className={`inline-block rounded-full ${slotBooked ? 'bg-rose-500' : (isStart || isEnd ? 'bg-white/60' : 'bg-emerald-500')}`}
+                                      style={{ width: '4px', height: '4px' }}
+                                    />
+                                  );
+                                })
+                              : null;
+
                             cells.push(
                               <button
                                 key={`day-${d}`}
                                 type="button"
-                                disabled={isPast || isBooked || isBlocked || isScheduleUnavailable}
+                                disabled={isDisabled}
                                 onClick={() => handleOwnerCalendarDayClick(dateStr)}
                                 className={`aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all ${bgClass}`}
                               >
                                 <span>{d}</span>
+                                {dots && dots.length > 0 && (
+                                  <div className="flex gap-[2px] mt-0.5 flex-wrap justify-center">
+                                    {dots}
+                                  </div>
+                                )}
                               </button>
                             );
                           }
                           return cells;
                         })()}
                       </div>
- 
-                      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[11px] font-bold text-[#4A3E3D]">
+
+                      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[10px] font-bold text-[#4A3E3D]">
                         <div className="flex items-center gap-1">
                           <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block shadow-sm" /> Available
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block shadow-sm" /> Slot Booked
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="w-2.5 h-2.5 rounded bg-amber-500 inline-block shadow-sm" /> Sitter Busy
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block shadow-sm" /> Booked
-                        </div>
-                        <div className="flex items-center gap-1">
                           <span className="w-2.5 h-2.5 rounded bg-[#8B5E3C] inline-block shadow-sm" /> Selected
+                        </div>
+                        <div className="flex items-center gap-1 font-normal text-[#8B7E7D]">
+                          Dots = M A E F O slots
                         </div>
                       </div>
                     </div>

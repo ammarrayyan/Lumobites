@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'sitter_id or email is required' }, { status: 400 });
     }
 
-    let query = supabaseAdmin.from('sitters').select('id, blocked_dates, available_days');
+    let query = supabaseAdmin.from('sitters').select('id, blocked_dates, available_days, available_times');
     if (sitterId) {
       query = query.eq('id', sitterId);
     } else {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     // Fetch accepted bookings
     const { data: bookings, error: bookingsError } = await supabaseAdmin
       .from('sitting_requests')
-      .select('booking_number, dates, status')
+      .select('booking_number, dates, status, time_slot')
       .eq('sitter_id', sitter.id)
       .eq('status', 'accepted');
 
@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
         booking_number: booking.booking_number,
         start_date: parsed ? parsed.start.toISOString().split('T')[0] : null,
         end_date: parsed ? parsed.end.toISOString().split('T')[0] : null,
-        dates_in_range
+        dates_in_range,
+        time_slot: booking.time_slot || null
       };
     });
 
@@ -83,6 +84,7 @@ export async function GET(request: NextRequest) {
       success: true,
       blocked_dates: sitter.blocked_dates || [],
       available_days: sitter.available_days || [],
+      available_times: sitter.available_times || [],
       accepted_bookings
     });
   } catch (error: any) {

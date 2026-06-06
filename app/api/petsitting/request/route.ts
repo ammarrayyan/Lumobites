@@ -57,6 +57,80 @@ export async function POST(request: NextRequest) {
       if (!isAvailable) {
         return NextResponse.json({ error: `This sitter is not available during ${time_slot} — please select another time` }, { status: 400 });
       }
+
+      // Check for slot overlaps with existing accepted bookings
+      const parseBookingDates = (dateStr: string) => {
+        if (!dateStr) return null;
+        const parts = dateStr.split(' → ');
+        if (parts.length === 2) {
+          const start = new Date(parts[0]);
+          const end = new Date(parts[1]);
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            return { start, end };
+          }
+        }
+        return null;
+      };
+
+      const getDatesInRange = (startDate: Date, endDate: Date) => {
+        const dates: string[] = [];
+        let current = new Date(startDate);
+        while (current <= endDate) {
+          dates.push(current.toISOString().split('T')[0]);
+          current.setDate(current.getDate() + 1);
+        }
+        return dates;
+      };
+
+      const parsedRequested = parseBookingDates(dates);
+      const requestedDatesInRange = parsedRequested ? getDatesInRange(parsedRequested.start, parsedRequested.end) : [];
+
+      if (requestedDatesInRange.length > 0) {
+        const { data: existingBookings, error: existingBookingsError } = await supabase
+          .from('sitting_requests')
+          .select('dates, time_slot')
+          .eq('sitter_id', sitter_id)
+          .eq('status', 'accepted');
+
+        if (existingBookingsError) {
+          console.error('[Request POST] Fetch Existing Bookings Error:', existingBookingsError);
+          return NextResponse.json({ error: 'Failed to validate availability' }, { status: 500 });
+        }
+
+        const slotsOverlap = (slotA: string | null, slotB: string | null) => {
+          if (!slotA || !slotB) return true; // Legacy bookings block everything
+
+          const normalize = (slot: string) => {
+            const lower = slot.toLowerCase();
+            if (lower.includes('morning')) return 'morning';
+            if (lower.includes('afternoon')) return 'afternoon';
+            if (lower.includes('evening')) return 'evening';
+            if (lower.includes('overnight')) return 'overnight';
+            if (lower.includes('full day') || lower === 'flexible') return 'full day';
+            return lower;
+          };
+
+          const nA = normalize(slotA);
+          const nB = normalize(slotB);
+          if (nA === 'full day' && nB !== 'overnight') return true;
+          if (nB === 'full day' && nA !== 'overnight') return true;
+          return nA === nB;
+        };
+
+        const hasOverlap = (existingBookings || []).some((booking: any) => {
+          const parsedExisting = parseBookingDates(booking.dates);
+          const existingDatesInRange = parsedExisting ? getDatesInRange(parsedExisting.start, parsedExisting.end) : [];
+          const dateIntersection = requestedDatesInRange.some(d => existingDatesInRange.includes(d));
+          if (dateIntersection) {
+            return slotsOverlap(booking.time_slot, time_slot);
+          }
+          return false;
+        });
+
+        if (hasOverlap) {
+          return NextResponse.json({ error: `The time slot '${time_slot}' is already booked on one or more of the selected dates.` }, { status: 400 });
+        }
+      }
     }
 
     // 3. Generate sequential booking number
