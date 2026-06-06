@@ -2392,14 +2392,51 @@ export default function PetSitting() {
                                 </>
                               )}
 
-                              {isAccepted && (
-                                <button
-                                  onClick={() => handleMarkAsCompleted(req.id)}
-                                  className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-1.5 px-4 rounded-lg text-xs transition-colors cursor-pointer"
-                                >
-                                  Mark as Completed
-                                </button>
-                              )}
+                              {isAccepted && (() => {
+                                let endDateStr = '';
+                                let isBeforeEndDate = false;
+                                if (req.dates) {
+                                  try {
+                                    if (req.dates.includes('→')) {
+                                      endDateStr = req.dates.split('→')[1].trim();
+                                    } else if (req.dates.includes('->')) {
+                                      endDateStr = req.dates.split('->')[1].trim();
+                                    } else if (req.dates.includes('-')) {
+                                      const parts = req.dates.split('-');
+                                      if (parts.length === 2 && parts[0].length > 4) {
+                                        endDateStr = parts[1].trim();
+                                      } else {
+                                        endDateStr = req.dates.trim();
+                                      }
+                                    } else {
+                                      endDateStr = req.dates.trim();
+                                    }
+                                    const endDate = new Date(endDateStr);
+                                    if (!isNaN(endDate.getTime())) {
+                                      const today = new Date();
+                                      today.setHours(0, 0, 0, 0);
+                                      endDate.setHours(0, 0, 0, 0);
+                                      isBeforeEndDate = today < endDate;
+                                    }
+                                  } catch (e) {
+                                    isBeforeEndDate = false;
+                                  }
+                                }
+
+                                return (
+                                  <button
+                                    onClick={() => !isBeforeEndDate && handleMarkAsCompleted(req.id)}
+                                    disabled={isBeforeEndDate}
+                                    className={`font-bold py-1.5 px-4 rounded-lg text-xs transition-colors ${
+                                      isBeforeEndDate 
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-80' 
+                                        : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer'
+                                    }`}
+                                  >
+                                    {isBeforeEndDate ? `Available after ${endDateStr}` : 'Mark as Completed'}
+                                  </button>
+                                );
+                              })()}
 
 
                             </div>
