@@ -233,6 +233,35 @@ export default function PetSitting() {
       fetchSitters();
     }
 
+    // Restore sitter persistent session if valid
+    const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
+    const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
+    if (cachedSitterEmail && cachedSitterExpiry) {
+      const expiryTime = parseInt(cachedSitterExpiry, 10);
+      if (!isNaN(expiryTime) && Date.now() < expiryTime) {
+        setSitterEmail(cachedSitterEmail);
+        setSitterAuthMode('form');
+        // Check if profile exists and load details
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
+          .then(res => res.json())
+          .then(profileData => {
+            if (profileData && profileData.id) {
+              loadSitterProfile(cachedSitterEmail);
+              setProfilePreviewMode(true);
+            } else {
+              setProfilePreviewMode(false);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to auto-load sitter profile:', err);
+          });
+      } else {
+        // Expired, clean up
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_sitter_email_expiry');
+      }
+    }
+
     // Set activeTab from URL search params or hash
     const params = new URLSearchParams(window.location.search);
     if (params.get('tab') === 'become' || window.location.hash === '#become') {
@@ -838,7 +867,11 @@ export default function PetSitting() {
       const data = await res.json();
 
       if (res.ok) {
-        // Code verified! Now check if profile exists
+        // Code verified! Save persistent sitter session
+        const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+        localStorage.setItem('lumo_sitter_email', sitterEmail);
+        localStorage.setItem('lumo_sitter_email_expiry', expiry.toString());
+
         const profileRes = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
         const profileData = await profileRes.json();
 
@@ -920,6 +953,35 @@ export default function PetSitting() {
     } finally {
       setDeleteLoading(false);
     }
+  };
+
+  const handleSitterSignOut = () => {
+    localStorage.removeItem('lumo_sitter_email');
+    localStorage.removeItem('lumo_sitter_email_expiry');
+    
+    // Reset state
+    setSitterAuthMode('email');
+    setSitterEmail('');
+    setSitterFirstName('');
+    setSitterLastName('');
+    setSitterPhoto('');
+    setSitterCity('');
+    setSitterLocationInput('');
+    setSitterLocationVerified(false);
+    setSitterLocationOptions([]);
+    setSitterSelectedLocation(null);
+    setSitterIsLocating(false);
+    setSitterBio('');
+    setSitterGender('');
+    setSitterPetTypes('both');
+    setSitterRate('');
+    setSitterPhone('');
+    setSitterPhoneVisible(false);
+    setSelfDeclared(false);
+    setIsProSitter(false);
+    setProfilePreviewMode(false);
+    
+    alert('Signed out successfully.');
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -2055,6 +2117,10 @@ export default function PetSitting() {
                     </button>
                   )}
                   
+                  <button type="button" onClick={handleSitterSignOut} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer">
+                    Sign Out
+                  </button>
+
                   {sitterApprovalStatus !== 'pending' && (
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
                       <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
@@ -2858,6 +2924,9 @@ export default function PetSitting() {
                 )}
                 <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
                   Delete My Profile
+                </button>
+                <button type="button" onClick={handleSitterSignOut} className="text-gray-500 hover:text-gray-700 text-sm font-bold underline underline-offset-4">
+                  Sign Out
                 </button>
               </div>
 
