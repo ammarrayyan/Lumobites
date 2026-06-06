@@ -1623,8 +1623,8 @@ export default function ScanPage() {
                     <div className="flex flex-col gap-3">
                       {modalMessage?.text === 'not_pro' ? (
                         <div className="w-full flex flex-col gap-3 items-center mt-1 text-center">
-                          <p className="text-sm font-bold text-red-500">
-                            This account is not a PRO member.
+                          <p className="text-sm font-bold text-red-500 leading-relaxed">
+                            No PRO subscription found for this email. Please upgrade to PRO first.
                           </p>
                           <button
                             type="button"

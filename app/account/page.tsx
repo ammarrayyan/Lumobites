@@ -196,8 +196,8 @@ export default function AccountPage() {
 
               {error === 'not_pro' ? (
                 <div className="flex flex-col gap-4 text-center items-center w-full">
-                  <p className="text-red-500 font-bold text-sm">
-                    This account is not a PRO member.
+                  <p className="text-red-500 font-bold text-sm leading-relaxed">
+                    No PRO subscription found for this email. Please upgrade to PRO first.
                   </p>
                   <button
                     type="button"

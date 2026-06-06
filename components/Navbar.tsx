@@ -640,8 +640,8 @@ export default function Navbar() {
 
             {signInError === 'not_pro' ? (
               <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl flex flex-col items-center gap-3 text-center w-full">
-                <p className="text-red-600 font-bold text-sm">
-                  This account is not a PRO member.
+                <p className="text-red-600 font-bold text-sm leading-relaxed">
+                  No PRO subscription found for this email. Please upgrade to PRO first.
                 </p>
                 <button
                   type="button"
