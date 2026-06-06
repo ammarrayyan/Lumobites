@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
         <title>Request Accepted - Lumo Bites</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
@@ -94,22 +95,27 @@ export async function GET(request: NextRequest) {
           p { font-size: 15px; line-height: 1.6; color: #666; margin-bottom: 24px; }
           .logo { margin-bottom: 24px; font-size: 24px; font-weight: 900; color: #8B5E3C; text-decoration: none; display: inline-block; }
           .info-section { background-color: #FAF6F4; border: 1px solid #E8DDD4; border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 24px; }
-          .info-title { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #8B5E3C; margin-bottom: 12px; }
-          .info-item { font-size: 14px; margin-bottom: 8px; color: #4A3E3D; }
+          .info-title { font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #8B5E3C; margin-bottom: 10px; border-bottom: 1px dashed #E8DDD4; padding-bottom: 6px; }
+          .info-item { font-size: 14px; margin-bottom: 8px; color: #4A3E3D; line-height: 1.4; }
           .info-item:last-child { margin-bottom: 0; }
-          .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; }
+          .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; cursor: pointer; }
           .btn-secondary:hover { background-color: #F3EAE3; }
         </style>
       </head>
       <body>
         <div class="card">
           <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
-          <h1>Request Accepted!</h1>
-          <p>You have successfully accepted the pet sitting request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
+          <h1>Request Accepted! 🎉</h1>
+          <p>You have successfully accepted <strong>${reqRow.owner_name || 'the owner'}'s</strong> request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
           
           <div class="info-section">
-            <div class="info-title">Owner Contact Details</div>
-            <div class="info-item"><strong>Owner Email:</strong> ${reqRow.owner_email}</div>
+            <div class="info-title">📅 Booking Details</div>
+            <div class="info-item"><strong>Pet Name:</strong> ${reqRow.pet_name || 'Their pet'} ${reqRow.pet_type === 'dog' ? '🐶' : '🐱'}</div>
+            <div class="info-item"><strong>Dates:</strong> ${reqRow.dates}</div>
+            
+            <div class="info-title" style="margin-top: 20px;">👤 Owner Contact Information</div>
+            <div class="info-item"><strong>Owner Name:</strong> ${reqRow.owner_name || 'N/A'}</div>
+            <div class="info-item"><strong>Owner Email:</strong> <a href="mailto:${reqRow.owner_email}" style="color: #8B5E3C; font-weight: bold; text-decoration: underline;">${reqRow.owner_email}</a></div>
             <div class="info-item"><strong>Owner Phone:</strong> ${reqRow.phone_number || 'Not provided'}</div>
           </div>
 

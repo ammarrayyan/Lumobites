@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="UTF-8">
         <title>Request Declined - Lumo Bites</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
           h1 { color: #EF4444; font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 16px; }
           p { font-size: 15px; line-height: 1.6; color: #666; margin-bottom: 24px; }
           .logo { margin-bottom: 24px; font-size: 24px; font-weight: 900; color: #8B5E3C; text-decoration: none; display: inline-block; }
-          .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; }
+          .btn-secondary { display: inline-flex; align-items: center; justify-content: center; background-color: #FAF6F4; border: 1px solid #E8DDD4; color: #4A3E3D; font-weight: bold; font-size: 14px; text-decoration: none; padding: 12px 24px; border-radius: 12px; width: 100%; box-sizing: border-box; transition: background-color 0.2s; cursor: pointer; }
           .btn-secondary:hover { background-color: #F3EAE3; }
         </style>
       </head>
@@ -95,8 +96,8 @@ export async function GET(request: NextRequest) {
           <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
           <h1>Request Declined</h1>
           <p>You have successfully declined the pet sitting request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
-          <p>We have notified the owner that you are unavailable for these dates.</p>
-
+          <p>We've notified the owner that you are unavailable for these dates.</p>
+ 
           <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
         </div>
       </body>
