@@ -131,9 +131,6 @@ export default function Home() {
           
           {/* 1. Pet Sitting */}
           <div className="col-span-12 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#C27353] text-white text-[10px] font-black uppercase tracking-[0.12em] px-3 py-1.5 rounded-bl-xl z-10 shadow-sm flex items-center gap-1">
-              <Star className="w-3 h-3 text-white fill-white" /> Most Popular
-            </div>
             <div className="flex items-center gap-3 relative z-10 mt-2">
               <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
                 <HomeIcon className="w-6 h-6 text-[#C27353]" />
