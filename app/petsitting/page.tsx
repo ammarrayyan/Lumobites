@@ -92,6 +92,8 @@ export default function PetSitting() {
   const [searchLocationError, setSearchLocationError] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
   const [searchDay, setSearchDay] = useState('all');
+  const [searchTimeSlot, setSearchTimeSlot] = useState('');
+
   const [searchServiceType, setSearchServiceType] = useState('all');
   const [searchRadius, setSearchRadius] = useState('25');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -1701,8 +1703,24 @@ export default function PetSitting() {
 
   let filteredSitters = sitters.filter(s => {
     if (searchPetType !== 'all' && s.pet_types !== 'both' && s.pet_types !== searchPetType) return false;
+    if (searchTimeSlot) {
+      const normalize = (slot: string) => {
+        const lower = slot.toLowerCase();
+        if (lower.includes('morning')) return 'morning';
+        if (lower.includes('afternoon')) return 'afternoon';
+        if (lower.includes('evening')) return 'evening';
+        if (lower.includes('overnight')) return 'overnight';
+        if (lower.includes('full day') || lower === 'flexible') return 'full day';
+        return lower;
+      };
+      const wantedNorm = normalize(searchTimeSlot);
+      const sitterTimes: string[] = s.available_times || [];
+      const hasSlot = sitterTimes.some((t: string) => normalize(t) === wantedNorm);
+      if (!hasSlot) return false;
+    }
     return true;
   });
+
 
   if (searchZip.trim()) {
     if (isGeocoding || searchLocationError || !searchCoords) {
@@ -1839,6 +1857,18 @@ export default function PetSitting() {
                 <option value="Friday">Friday</option>
                 <option value="Saturday">Saturday</option>
                 <option value="Sunday">Sunday</option>
+              </select>
+              <select
+                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                value={searchTimeSlot}
+                onChange={(e) => setSearchTimeSlot(e.target.value)}
+              >
+                <option value="">All Time Slots</option>
+                <option value="Morning (8am - 12pm)">Morning (8am - 12pm)</option>
+                <option value="Afternoon (12pm - 5pm)">Afternoon (12pm - 5pm)</option>
+                <option value="Evening (5pm - 9pm)">Evening (5pm - 9pm)</option>
+                <option value="Full Day (8am - 9pm)">Full Day (8am - 9pm)</option>
+                <option value="Overnight (9pm - 8am)">Overnight (9pm - 8am)</option>
               </select>
               <select
                 className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
