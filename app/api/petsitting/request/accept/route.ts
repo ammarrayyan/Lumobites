@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           <div class="info-section">
             <div class="info-title">📅 Booking Details</div>
             <div class="info-item"><strong>Pet Name:</strong> ${reqRow.pet_name || 'Their pet'} ${reqRow.pet_type === 'dog' ? '🐶' : '🐱'}</div>
-            <div class="info-item"><strong>Dates:</strong> ${reqRow.dates}</div>
+            <div class="info-item"><strong>Dates:</strong> ${reqRow.dates} ${reqRow.time_slot ? `— ${reqRow.time_slot}` : ''}</div>
             
             <div class="info-title" style="margin-top: 20px;">👤 Owner Contact Information</div>
             <div class="info-item"><strong>Owner Name:</strong> ${reqRow.owner_name || 'N/A'}</div>

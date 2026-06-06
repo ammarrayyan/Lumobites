@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     // 4. Send Email Notification
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const petName = reqRow.pet_name || 'your pet';
-    const dates = reqRow.dates || 'the requested dates';
+    const dates = reqRow.dates ? `${reqRow.dates}${reqRow.time_slot ? ` — ${reqRow.time_slot}` : ''}` : 'the requested dates';
     const bookingNumber = reqRow.booking_number || `Booking #${reqRow.id.substring(0, 4)}`;
 
     if (by === 'owner') {

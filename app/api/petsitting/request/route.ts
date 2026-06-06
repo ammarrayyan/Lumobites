@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sitter_id, owner_email, pet_name, pet_type, dates, special_notes, phone_number, owner_name } = body;
+    const { sitter_id, owner_email, pet_name, pet_type, dates, special_notes, phone_number, owner_name, time_slot } = body;
 
     if (!sitter_id || !owner_email || !pet_name || !pet_type || !dates) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -28,12 +28,35 @@ export async function POST(request: NextRequest) {
     // 2. Get Sitter details
     const { data: sitter, error: sitterError } = await supabase
       .from('sitters')
-      .select('email, name, phone_number')
+      .select('email, name, phone_number, available_times')
       .eq('id', sitter_id)
       .single();
 
     if (sitterError || !sitter) {
       return NextResponse.json({ error: 'Sitter not found' }, { status: 404 });
+    }
+
+    // Validation: Check if requested time slot is in sitter's available times
+    if (time_slot) {
+      const sitterAvailable = sitter.available_times || [];
+      let isAvailable = sitterAvailable.includes(time_slot);
+      if (!isAvailable) {
+        // Fallback mapping for old/new values
+        const slotLower = time_slot.toLowerCase();
+        isAvailable = sitterAvailable.some((s: string) => {
+          const sLower = s.toLowerCase();
+          if (sLower === slotLower) return true;
+          if (slotLower.includes('morning') && (sLower === 'morning' || sLower.includes('6am-12pm'))) return true;
+          if (slotLower.includes('afternoon') && (sLower === 'afternoon' || sLower.includes('12pm-6pm'))) return true;
+          if (slotLower.includes('evening') && (sLower === 'evening' || sLower.includes('6pm-10pm'))) return true;
+          if (slotLower.includes('overnight') && (sLower === 'overnight' || sLower.includes('9pm-8am'))) return true;
+          if (slotLower.includes('full day') && (sLower === 'full day' || sLower === 'flexible')) return true;
+          return false;
+        });
+      }
+      if (!isAvailable) {
+        return NextResponse.json({ error: `This sitter is not available during ${time_slot} — please select another time` }, { status: 400 });
+      }
     }
 
     // 3. Generate sequential booking number
@@ -57,7 +80,8 @@ export async function POST(request: NextRequest) {
         special_notes,
         phone_number: phone_number || null,
         booking_number,
-        status: 'pending'
+        status: 'pending',
+        time_slot: time_slot || null
       })
       .select('id, secure_token')
       .single();
@@ -90,7 +114,7 @@ export async function POST(request: NextRequest) {
       ${phone_number ? `<p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Phone:</strong> ${phone_number}</p>` : ''}
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Name:</strong> ${pet_name}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Type:</strong> ${pet_type}</p>
-      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Dates Needed:</strong> ${dates}</p>
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Dates Needed:</strong> ${dates} ${time_slot ? `— ${time_slot}` : ''}</p>
       <p style="margin:0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Notes:</strong> ${special_notes || 'None'}</p>
     `)}
     ${emailStyles.divider}

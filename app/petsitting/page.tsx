@@ -115,6 +115,7 @@ export default function PetSitting() {
   const [reqStartDate, setReqStartDate] = useState('');
   const [reqEndDate, setReqEndDate] = useState('');
   const [reqNotes, setReqNotes] = useState('');
+  const [reqTimeSlot, setReqTimeSlot] = useState('');
   const [reqLoading, setReqLoading] = useState(false);
   const [reqError, setReqError] = useState('');
   const [reqSuccess, setReqSuccess] = useState(false);
@@ -675,7 +676,7 @@ export default function PetSitting() {
             pet_types: req.pet_type || 'both',
             rate_per_night: 0,
             available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            available_times: ['Morning', 'Afternoon', 'Evening'],
+            available_times: ['Morning (8am - 12pm)', 'Afternoon (12pm - 5pm)', 'Evening (5pm - 9pm)'],
             service_types: ['Home visits', 'Overnight stays']
           };
           setSelectedSitter(tempSitter);
@@ -689,7 +690,7 @@ export default function PetSitting() {
           pet_types: req.pet_type || 'both',
           rate_per_night: 0,
           available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-          available_times: ['Morning', 'Afternoon', 'Evening'],
+          available_times: ['Morning (8am - 12pm)', 'Afternoon (12pm - 5pm)', 'Evening (5pm - 9pm)'],
           service_types: ['Home visits', 'Overnight stays']
         };
         setSelectedSitter(tempSitter);
@@ -743,7 +744,7 @@ export default function PetSitting() {
             pet_types: req.pet_type || 'both',
             rate_per_night: 0,
             available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            available_times: ['Morning', 'Afternoon', 'Evening'],
+            available_times: ['Morning (8am - 12pm)', 'Afternoon (12pm - 5pm)', 'Evening (5pm - 9pm)'],
             service_types: ['Home visits', 'Overnight stays']
           };
           setSelectedSitterForReviews(tempSitter);
@@ -1565,7 +1566,8 @@ export default function PetSitting() {
           pet_type: reqPetType,
           dates: finalDates,
           special_notes: finalNotes,
-          phone_number: reqPhone || null
+          phone_number: reqPhone || null,
+          time_slot: reqTimeSlot
         })
       });
 
@@ -1592,6 +1594,7 @@ export default function PetSitting() {
         }
 
         setReqSuccess(true);
+        setReqTimeSlot('');
         setTimeout(() => {
           setRequestModalOpen(false);
           setReqSuccess(false);
@@ -2036,7 +2039,14 @@ export default function PetSitting() {
                                       {req.pet_type === 'dog' ? '🐶' : '🐱'}
                                     </span>
                                   </td>
-                                  <td className="p-3 text-sm text-[#8B7E7D]">{req.dates}</td>
+                                  <td className="p-3 text-sm text-[#8B7E7D]">
+                                    <div>{req.dates}</div>
+                                    {req.time_slot && (
+                                      <div className="text-[10px] font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase mt-1 inline-block">
+                                        ⏰ {req.time_slot}
+                                      </div>
+                                    )}
+                                  </td>
                                   <td className="p-3 text-sm">
                                     {req.status === 'accepted' ? (
                                       <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200">
@@ -2515,7 +2525,7 @@ export default function PetSitting() {
 
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                               <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
-                              <div><strong>Dates:</strong> {req.dates}</div>
+                              <div><strong>Dates:</strong> {req.dates} {req.time_slot ? `(${req.time_slot})` : ''}</div>
                               {(() => {
                                 const { petAge, cleanNotes } = parseSpecialNotes(req.special_notes);
                                 return (
@@ -3047,7 +3057,7 @@ export default function PetSitting() {
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-3">Times Available</label>
                   <div className="flex flex-wrap gap-3">
-                    {['Morning (6am-12pm)', 'Afternoon (12pm-6pm)', 'Evening (6pm-10pm)', 'Overnight', 'Flexible'].map(time => (
+                    {['Morning (8am - 12pm)', 'Afternoon (12pm - 5pm)', 'Evening (5pm - 9pm)', 'Full Day (8am - 9pm)', 'Overnight (9pm - 8am)'].map(time => (
                       <label key={time} className="flex items-center gap-2 text-sm text-[#4A3E3D] cursor-pointer">
                         <input type="checkbox" checked={sitterAvailableTimes.includes(time)} onChange={e => {
                           if (e.target.checked) setSitterAvailableTimes([...sitterAvailableTimes, time]);
@@ -3264,13 +3274,57 @@ export default function PetSitting() {
                       <input required type="date" min={new Date().toISOString().split('T')[0]} value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                       <input required type="date" min={reqStartDate || new Date().toISOString().split('T')[0]} value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                     </div>
- 
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Time Slot Needed</label>
+                    <select
+                      required
+                      value={reqTimeSlot}
+                      onChange={e => setReqTimeSlot(e.target.value)}
+                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                    >
+                      <option value="">Select a time slot</option>
+                      {(() => {
+                        const allTimeSlots = [
+                          'Morning (8am - 12pm)',
+                          'Afternoon (12pm - 5pm)',
+                          'Evening (5pm - 9pm)',
+                          'Full Day (8am - 9pm)',
+                          'Overnight (9pm - 8am)'
+                        ];
+                        const sitterAvailable = selectedSitter.available_times || [];
+                        return allTimeSlots.filter(slot => {
+                          if (sitterAvailable.includes(slot)) return true;
+                          // Fallback mapper for legacy database strings
+                          if (slot.startsWith('Morning') && (sitterAvailable.includes('Morning') || sitterAvailable.includes('Morning (6am-12pm)'))) return true;
+                          if (slot.startsWith('Afternoon') && (sitterAvailable.includes('Afternoon') || sitterAvailable.includes('Afternoon (12pm-6pm)'))) return true;
+                          if (slot.startsWith('Evening') && (sitterAvailable.includes('Evening') || sitterAvailable.includes('Evening (6pm-10pm)'))) return true;
+                          if (slot.startsWith('Overnight') && (sitterAvailable.includes('Overnight') || sitterAvailable.includes('Overnight (9pm-8am)'))) return true;
+                          if (slot.startsWith('Full Day') && (sitterAvailable.includes('Full Day') || sitterAvailable.includes('Flexible'))) return true;
+                          return false;
+                        }).map(slot => (
+                          <option key={slot} value={slot}>{slot}</option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
+
+                  <div>
                     {/* Availability Calendar */}
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-3 sm:p-4 mt-3">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <span className="text-xs font-bold text-[#4A3E3D]">Availability Calendar</span>
                           <div className="text-[10px] text-[#8B7E7D] mt-0.5">Click dates to select booking range</div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] text-[#8B5E3C] font-bold block">
+                            Available slots:
+                          </span>
+                          <span className="text-[10px] text-gray-600 block max-w-[150px] truncate" title={selectedSitter.available_times?.join(', ')}>
+                            {selectedSitter.available_times?.map(t => t.split(' ')[0]).join(', ') || 'Flexible'}
+                          </span>
                         </div>
                         <div className="flex items-center space-x-1.5 font-bold">
                           <button

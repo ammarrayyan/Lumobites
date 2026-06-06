@@ -300,7 +300,12 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
 
                         {/* Requested Dates */}
                         <td className="p-4 text-sm text-white/80 max-w-[200px] truncate" title={request.dates}>
-                          {request.dates}
+                          <div>{request.dates}</div>
+                          {request.time_slot && (
+                            <div className="text-[10px] font-semibold text-orange-400 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded uppercase mt-1 inline-block">
+                              ⏰ {request.time_slot}
+                            </div>
+                          )}
                         </td>
 
                         {/* Status Badge */}
