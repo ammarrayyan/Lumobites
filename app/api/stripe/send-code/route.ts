@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Generate a secure 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes from now
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes from now
 
     // 3. Clear any existing verification codes for this email to keep table clean
     await supabase
@@ -86,12 +86,12 @@ export async function POST(request: NextRequest) {
         subject: '🔐 Your Lumo Bites Verification Code',
         html: brandedEmail({
           subject: '🔐 Your Lumo Bites Verification Code',
-          preheader: `Your one-time verification code is ${code}. It expires in 10 minutes.`,
+          preheader: `Your one-time verification code is ${code}. It expires in 15 minutes.`,
           body: `
     <h1 style="${emailStyles.h1}">Verify Your Identity 🔐</h1>
     <p style="${emailStyles.p}">We received a request to access your Lumo Bites Pro account. Use the code below to confirm your identity:</p>
     ${emailStyles.codeBox(code)}
-    <p style="${emailStyles.pSmall}">This code expires in <strong>10 minutes</strong>. If you did not request this, you can safely ignore this email — your account remains secure.</p>
+    <p style="${emailStyles.pSmall}">This code expires in <strong>15 minutes</strong>. If you did not request this, you can safely ignore this email — your account remains secure.</p>
     ${emailStyles.divider}
     ${emailStyles.signoff}
   `

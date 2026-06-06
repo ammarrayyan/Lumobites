@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Generate a secure 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
     // 3. Clear existing codes
     await supabaseAdmin.from('verification_codes').delete().eq('email', cleanEmail);
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
             <p style="${emailStyles.p}">Hi ${affiliate.full_name},</p>
             <p style="${emailStyles.p}">Use the code below to verify your identity and login to your affiliate dashboard:</p>
             ${emailStyles.codeBox(code)}
-            <p style="${emailStyles.pSmall}">This code expires in <strong>10 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
+            <p style="${emailStyles.pSmall}">This code expires in <strong>15 minutes</strong>. If you did not request this, you can safely ignore this email.</p>
             ${emailStyles.divider}
             ${emailStyles.signoff}
           `

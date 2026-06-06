@@ -285,7 +285,7 @@ export default function AccountPage() {
                   Verify Identity
                 </h1>
                 <p className="text-sm text-gray-500 max-w-[340px] mx-auto leading-relaxed">
-                  We sent a 6-digit verification code to <strong className="text-gray-700">{email}</strong>. It expires in 10 minutes.
+                  We sent a 6-digit verification code to <strong className="text-gray-700">{email}</strong>. It expires in 15 minutes.
                 </p>
               </div>
 
@@ -313,9 +313,18 @@ export default function AccountPage() {
                 )}
 
                 {error && (
-                  <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                    ⚠️ {error}
-                  </p>
+                  <div className="text-xs text-red-500 font-semibold text-center leading-normal flex flex-col items-center gap-1">
+                    <span>⚠️ {error}</span>
+                    {error.includes('Code expired') && (
+                      <button
+                        type="button"
+                        onClick={() => handleSendCode({ preventDefault: () => {} } as React.FormEvent)}
+                        className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
+                      >
+                        Resend Code
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 <button

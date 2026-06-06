@@ -13,13 +13,12 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanCode = code.trim();
 
-    // 1. Check if the code is valid and not expired
+    // 1. Check if the code exists
     const { data: codeData, error: codeError } = await supabase
       .from('verification_codes')
       .select('*')
       .eq('email', cleanEmail)
       .eq('code', cleanCode)
-      .gt('expires_at', new Date().toISOString())
       .maybeSingle();
 
     if (codeError) {
@@ -29,16 +28,24 @@ export async function POST(request: NextRequest) {
 
     if (!codeData) {
       return NextResponse.json(
-        { error: 'Invalid or expired verification code.' },
+        { error: 'Invalid code — please check and try again' },
         { status: 400 }
       );
     }
 
-    // 2. Consume/delete the code immediately to prevent replay attacks
-    await supabase
-      .from('verification_codes')
-      .delete()
-      .eq('id', codeData.id);
+    // 2. Check expiration (JS-side UTC check)
+    const expiryTime = new Date(codeData.expires_at).getTime();
+    if (Date.now() > expiryTime) {
+      // Clean up the expired code
+      await supabase
+        .from('verification_codes')
+        .delete()
+        .eq('id', codeData.id);
+      return NextResponse.json(
+        { error: 'Code expired — please request a new one' },
+        { status: 400 }
+      );
+    }
 
     // 3. Confirm double-verify that the user has a PRO subscription in the emails table
     // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
@@ -69,6 +76,12 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // 4. Consume/delete the code immediately only AFTER successful verification
+    await supabase
+      .from('verification_codes')
+      .delete()
+      .eq('id', codeData.id);
 
     console.log(`[Verify Code API] Successfully verified email and granted Pro access: ${cleanEmail}`);
 

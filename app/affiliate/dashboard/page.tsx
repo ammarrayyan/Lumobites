@@ -243,7 +243,7 @@ export default function AffiliateDashboard() {
                   Verify Your Identity
                 </h1>
                 <p className="text-sm text-gray-500 max-w-[340px] mx-auto leading-relaxed">
-                  We sent a 6-digit verification code to <strong className="text-gray-700">{email}</strong>. Code is valid for 10 minutes.
+                  We sent a 6-digit verification code to <strong className="text-gray-700">{email}</strong>. Code is valid for 15 minutes.
                 </p>
               </div>
 

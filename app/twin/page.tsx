@@ -2054,7 +2054,7 @@ export default function TwinPage() {
                         Enter 6-Digit Verification Code
                       </label>
                       <p className="text-xs text-gray-500 font-medium">
-                        We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 10 minutes.
+                        We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 15 minutes.
                       </p>
                       <input
                         type="text"
@@ -2069,9 +2069,18 @@ export default function TwinPage() {
                     </div>
 
                     {modalMessage && (
-                      <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                        {modalMessage.text}
-                      </p>
+                      <div className={`text-xs font-semibold text-center flex flex-col items-center gap-1 ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                        <span>{modalMessage.text}</span>
+                        {modalMessage.isError && modalMessage.text.includes('Code expired') && (
+                          <button
+                            type="button"
+                            onClick={handleRestore}
+                            className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
+                          >
+                            Resend Code
+                          </button>
+                        )}
+                      </div>
                     )}
 
                     <button

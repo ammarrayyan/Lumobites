@@ -187,7 +187,8 @@ export default function Navbar() {
       });
       
       if (!res.ok) {
-        throw new Error('Invalid or expired verification code.');
+        const data = await res.json();
+        throw new Error(data.error || 'Invalid or expired verification code.');
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
@@ -622,8 +623,17 @@ export default function Navbar() {
             )}
 
             {signInError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center">
-                {signInError}
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center flex flex-col items-center gap-1">
+                <span>{signInError}</span>
+                {signInError.includes('Code expired') && (
+                  <button
+                    type="button"
+                    onClick={() => handleSignInSendCode({ preventDefault: () => {} } as React.FormEvent)}
+                    className="text-xs font-bold text-[#8B5E3C] hover:underline mt-1 cursor-pointer bg-transparent border-none"
+                  >
+                    Resend Code
+                  </button>
+                )}
               </div>
             )}
 
