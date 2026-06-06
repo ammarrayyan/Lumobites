@@ -597,6 +597,34 @@ export default function PetSitting() {
     }
   };
 
+  const getBookingEndDate = (datesStr: string): Date | null => {
+    if (!datesStr) return null;
+    try {
+      let endDateStr = '';
+      const cleanDates = datesStr.replace(/\s+/g, ' ');
+      if (cleanDates.includes('→')) {
+        endDateStr = cleanDates.split('→')[1].trim();
+      } else if (cleanDates.includes('->')) {
+        endDateStr = cleanDates.split('->')[1].trim();
+      } else if (cleanDates.includes('-')) {
+        const parts = cleanDates.split('-');
+        if (parts.length === 2 && parts[0].length > 4) {
+          endDateStr = parts[1].trim();
+        } else {
+          endDateStr = cleanDates.trim();
+        }
+      } else {
+        endDateStr = cleanDates.trim();
+      }
+      const endDate = new Date(endDateStr);
+      if (isNaN(endDate.getTime())) return null;
+      endDate.setHours(0, 0, 0, 0);
+      return endDate;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const handleRequestAgain = async (req: any) => {
     // Fill in the details from owner profile
     const emailToUse = req.owner_email || reqEmail;
@@ -1983,22 +2011,31 @@ export default function PetSitting() {
                                       >
                                         Request Again
                                       </button>
-                                    ) : (
-                                      <div className="flex gap-2 justify-end flex-wrap">
-                                        <button
-                                          onClick={() => handleViewBooking(req)}
-                                          className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                        >
-                                          View Booking
-                                        </button>
-                                        <button
-                                          onClick={() => handleCancelRequestByOwner(req.id)}
-                                          className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                        >
-                                          Cancel Request
-                                        </button>
-                                      </div>
-                                    )}
+                                    ) : (() => {
+                                      const endDate = getBookingEndDate(req.dates);
+                                      const today = new Date();
+                                      today.setHours(0, 0, 0, 0);
+                                      const isAfterEndDate = endDate ? today > endDate : false;
+
+                                      return (
+                                        <div className="flex gap-2 justify-end flex-wrap">
+                                          <button
+                                            onClick={() => handleViewBooking(req)}
+                                            className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                          >
+                                            View Booking
+                                          </button>
+                                          {!isAfterEndDate && (
+                                            <button
+                                              onClick={() => handleCancelRequestByOwner(req.id)}
+                                              className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                            >
+                                              Cancel Request
+                                            </button>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
                                   </td>
                                 </tr>
                                 {req.status === 'accepted' && isBookingDateActive(req.dates) && (
@@ -2458,55 +2495,58 @@ export default function PetSitting() {
                               )}
 
                               {isAccepted && (() => {
+                                  const endDate = getBookingEndDate(req.dates);
+                                  const today = new Date();
+                                  today.setHours(0, 0, 0, 0);
+                                  const isBeforeEndDate = endDate ? today < endDate : false;
+                                  const isAfterEndDate = endDate ? today > endDate : false;
+
                                   let endDateStr = '';
-                                  let isBeforeEndDate = false;
                                   if (req.dates) {
-                                    try {
-                                      if (req.dates.includes('→')) {
-                                        endDateStr = req.dates.split('→')[1].trim();
-                                      } else if (req.dates.includes('->')) {
-                                        endDateStr = req.dates.split('->')[1].trim();
-                                      } else if (req.dates.includes('-')) {
-                                        const parts = req.dates.split('-');
-                                        if (parts.length === 2 && parts[0].length > 4) {
-                                          endDateStr = parts[1].trim();
-                                        } else {
-                                          endDateStr = req.dates.trim();
-                                        }
+                                    if (req.dates.includes('→')) {
+                                      endDateStr = req.dates.split('→')[1].trim();
+                                    } else if (req.dates.includes('->')) {
+                                      endDateStr = req.dates.split('->')[1].trim();
+                                    } else if (req.dates.includes('-')) {
+                                      const parts = req.dates.split('-');
+                                      if (parts.length === 2 && parts[0].length > 4) {
+                                        endDateStr = parts[1].trim();
                                       } else {
                                         endDateStr = req.dates.trim();
                                       }
-                                      const endDate = new Date(endDateStr);
-                                      if (!isNaN(endDate.getTime())) {
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        endDate.setHours(0, 0, 0, 0);
-                                        isBeforeEndDate = today < endDate;
-                                      }
-                                    } catch (e) {
-                                      isBeforeEndDate = false;
+                                    } else {
+                                      endDateStr = req.dates.trim();
                                     }
                                   }
 
                                   return (
-                                    <div className="flex gap-2 flex-wrap items-center">
-                                      <button
-                                        onClick={() => !isBeforeEndDate && handleMarkAsCompleted(req.id)}
-                                        disabled={isBeforeEndDate}
-                                        className={`font-bold py-1.5 px-4 rounded-lg text-xs transition-colors ${
-                                          isBeforeEndDate 
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-80' 
-                                            : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer'
-                                        }`}
-                                      >
-                                        {isBeforeEndDate ? `Available after ${endDateStr}` : 'Mark as Completed'}
-                                      </button>
-                                      <button
-                                        onClick={() => handleCancelBookingBySitter(req.id)}
-                                        className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-1.5 px-4 rounded-lg text-xs transition-colors cursor-pointer"
-                                      >
-                                        Cancel Booking
-                                      </button>
+                                    <div className="flex flex-col gap-2 w-full">
+                                      {isAfterEndDate && (
+                                        <p className="text-amber-700 text-xs font-semibold bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
+                                          ⚠️ Service date has passed — please mark as completed or contact support
+                                        </p>
+                                      )}
+                                      <div className="flex gap-2 flex-wrap items-center">
+                                        <button
+                                          onClick={() => !isBeforeEndDate && handleMarkAsCompleted(req.id)}
+                                          disabled={isBeforeEndDate}
+                                          className={`font-bold py-1.5 px-4 rounded-lg text-xs transition-colors ${
+                                            isBeforeEndDate 
+                                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-80' 
+                                              : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer'
+                                          }`}
+                                        >
+                                          {isBeforeEndDate ? `Available after ${endDateStr}` : 'Mark as Completed'}
+                                        </button>
+                                        {!isAfterEndDate && (
+                                          <button
+                                            onClick={() => handleCancelBookingBySitter(req.id)}
+                                            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-1.5 px-4 rounded-lg text-xs transition-colors cursor-pointer"
+                                          >
+                                            Cancel Booking
+                                          </button>
+                                        )}
+                                      </div>
                                     </div>
                                   );
                                 })()}
