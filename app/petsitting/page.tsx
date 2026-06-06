@@ -503,6 +503,124 @@ export default function PetSitting() {
     }
   };
 
+  const handleRequestAgain = async (req: any) => {
+    // Fill in the details from owner profile
+    const emailToUse = req.owner_email || ownerHistoryEmail || reqEmail;
+    let profile = null;
+    if (emailToUse) {
+      setReqEmail(emailToUse);
+      profile = await loadOwnerProfile(emailToUse);
+    }
+    
+    // Fallback to request details if profile load yielded nothing
+    if (!profile) {
+      if (req.owner_name) setReqOwnerName(req.owner_name);
+      if (req.pet_name) setReqPetName(req.pet_name);
+      if (req.pet_type) setReqPetType(req.pet_type);
+    }
+    
+    // Set selected sitter
+    const existing = sitters.find(s => s.id === req.sitter_id);
+    if (existing) {
+      setSelectedSitter(existing);
+      setRequestModalOpen(true);
+    } else {
+      try {
+        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}`);
+        const data = await res.json();
+        const fetchedSitter = data.sitters?.find((s: any) => s.id === req.sitter_id);
+        if (fetchedSitter) {
+          setSelectedSitter(fetchedSitter);
+        } else {
+          const tempSitter: Sitter = {
+            id: req.sitter_id,
+            name: req.sitter_name,
+            photo_url: req.sitter_photo_url || '',
+            bio: '',
+            pet_types: req.pet_type || 'both',
+            rate_per_night: 0,
+            available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            available_times: ['Morning', 'Afternoon', 'Evening'],
+            service_types: ['Home visits', 'Overnight stays']
+          };
+          setSelectedSitter(tempSitter);
+        }
+      } catch (e) {
+        const tempSitter: Sitter = {
+          id: req.sitter_id,
+          name: req.sitter_name,
+          photo_url: req.sitter_photo_url || '',
+          bio: '',
+          pet_types: req.pet_type || 'both',
+          rate_per_night: 0,
+          available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          available_times: ['Morning', 'Afternoon', 'Evening'],
+          service_types: ['Home visits', 'Overnight stays']
+        };
+        setSelectedSitter(tempSitter);
+      }
+      setRequestModalOpen(true);
+    }
+  };
+
+  const handleViewBooking = async (req: any) => {
+    const existing = sitters.find(s => s.id === req.sitter_id);
+    if (existing) {
+      setSelectedSitterForReviews(existing);
+      setReviewsModalOpen(true);
+      setLoadingReviews(true);
+      try {
+        const res = await fetch(`/api/petsitting/reviews?sitter_id=${existing.id}`);
+        const data = await res.json();
+        if (res.ok && data.reviews) {
+          setSitterReviews(data.reviews);
+        } else {
+          setSitterReviews([]);
+        }
+      } catch (e) {
+        console.error('Failed to load reviews');
+      } finally {
+        setLoadingReviews(false);
+      }
+    } else {
+      try {
+        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}`);
+        const data = await res.json();
+        const fetchedSitter = data.sitters?.find((s: any) => s.id === req.sitter_id);
+        if (fetchedSitter) {
+          setSelectedSitterForReviews(fetchedSitter);
+          setReviewsModalOpen(true);
+          setLoadingReviews(true);
+          const rRes = await fetch(`/api/petsitting/reviews?sitter_id=${req.sitter_id}`);
+          const rData = await rRes.json();
+          if (rRes.ok && rData.reviews) {
+            setSitterReviews(rData.reviews);
+          } else {
+            setSitterReviews([]);
+          }
+          setLoadingReviews(false);
+        } else {
+          const tempSitter: Sitter = {
+            id: req.sitter_id,
+            name: req.sitter_name,
+            photo_url: req.sitter_photo_url || '',
+            bio: 'Active verified sitter.',
+            pet_types: req.pet_type || 'both',
+            rate_per_night: 0,
+            available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            available_times: ['Morning', 'Afternoon', 'Evening'],
+            service_types: ['Home visits', 'Overnight stays']
+          };
+          setSelectedSitterForReviews(tempSitter);
+          setReviewsModalOpen(true);
+          setSitterReviews([]);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const handleSitterResponse = async (id: string, action: 'accept' | 'decline', token: string) => {
     window.open(`/api/petsitting/request/${action}?id=${id}&token=${token}`, '_blank');
     setTimeout(() => {
@@ -1620,6 +1738,7 @@ export default function PetSitting() {
                               <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Pet</th>
                               <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Dates</th>
                               <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Status</th>
+                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase text-right">Action</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#E8DDD4]/50">
@@ -1628,7 +1747,16 @@ export default function PetSitting() {
                                 <tr className="hover:bg-white/50 transition-colors">
                                   <td className="p-3 text-sm font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 4)}`}</td>
                                   <td className="p-3 text-sm">
-                                    <div className="font-bold text-[#4A3E3D]">{req.sitter_name}</div>
+                                    <div className="flex items-center gap-2">
+                                      {req.sitter_photo_url ? (
+                                        <img src={req.sitter_photo_url} alt={req.sitter_name} className="w-8 h-8 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
+                                      ) : (
+                                        <div className="w-8 h-8 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xs flex-shrink-0">
+                                          {req.sitter_name.charAt(0)}
+                                        </div>
+                                      )}
+                                      <div className="font-bold text-[#4A3E3D]">{req.sitter_name}</div>
+                                    </div>
                                   </td>
                                   <td className="p-3 text-sm">
                                     <span className="font-semibold text-[#4A3E3D]">{req.pet_name}</span>
@@ -1656,16 +1784,33 @@ export default function PetSitting() {
                                       </span>
                                     )}
                                   </td>
+                                  <td className="p-3 text-sm text-right">
+                                    {(req.status === 'completed' || req.status === 'declined') ? (
+                                      <button
+                                        onClick={() => handleRequestAgain(req)}
+                                        className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                      >
+                                        Request Again
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleViewBooking(req)}
+                                        className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                      >
+                                        View Booking
+                                      </button>
+                                    )}
+                                  </td>
                                 </tr>
-                                {(req.status === 'accepted' || req.status === 'completed') && (
+                                {req.status === 'accepted' && (
                                   <tr className="bg-green-50/30">
-                                    <td colSpan={5} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
+                                    <td colSpan={6} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
                                       <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div>
                                           <p className="font-bold text-[#3B2410] mb-1">🐾 Contact Info Shared</p>
                                           <p className="text-gray-600">Email: <strong>{req.sitter_email}</strong> {req.sitter_phone ? ` | Phone: ` : ''}<strong>{req.sitter_phone}</strong></p>
+                                          <p className="text-[#8B7E7D] text-[10px] mt-1">Contact details visible while booking is active</p>
                                         </div>
-
                                       </div>
                                     </td>
                                   </tr>

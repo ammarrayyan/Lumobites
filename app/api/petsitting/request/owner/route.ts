@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const requests = (data || []).map((req: any) => {
       const sitter = req.sitters || {};
-      const isVisible = req.status === 'accepted' || req.status === 'completed';
+      const isVisible = req.status === 'accepted';
       return {
         ...req,
         sitter_name: sitter.name || 'Local Sitter',
