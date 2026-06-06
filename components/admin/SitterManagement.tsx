@@ -225,6 +225,14 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                         Self Declared ✅
                       </span>
                     )}
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/5 text-white/60 border border-white/10">
+                      No Shows: {sitter.no_show_count || 0}
+                    </span>
+                    {sitter.no_show_count >= 3 && (
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
+                        ⚠️ HIGH NO-SHOW RISK
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-white/60 mb-2">{sitter.email}</p>
                   <p className="text-sm text-white/80">

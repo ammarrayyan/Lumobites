@@ -20,6 +20,7 @@ interface SittingRequest {
   cancelled_at?: string;
   cancelled_by?: string;
   updated_at?: string;
+  no_show_at?: string;
 }
 
 interface RequestsManagementProps {
@@ -68,6 +69,32 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
     }
   };
 
+  const handleDismissNoShow = async (id: string) => {
+    if (!confirm('Are you sure you want to dismiss this no-show report? This will set the booking status back to accepted and decrement the sitter\'s no-show count.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        alert('No-show report dismissed successfully!');
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to dismiss no-show report.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+    }
+  };
+
   useEffect(() => {
     fetchRequests();
   }, [adminKey]);
@@ -79,6 +106,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   const completedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'completed').length;
   const declinedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'declined').length;
   const cancelledCount = requests.filter(r => r.status && r.status.toLowerCase() === 'cancelled').length;
+  const noShowCount = requests.filter(r => r.status && r.status.toLowerCase() === 'no_show').length;
   const reviewEmailsCount = requests.filter(r => r.review_sent).length;
 
   // Filter and search logic
@@ -92,6 +120,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       if (statusFilter.toLowerCase() === 'completed' && status.toLowerCase() !== 'completed') return false;
       if (statusFilter.toLowerCase() === 'declined' && status.toLowerCase() !== 'declined') return false;
       if (statusFilter.toLowerCase() === 'cancelled' && status.toLowerCase() !== 'cancelled') return false;
+      if (statusFilter.toLowerCase() === 'no_show' && status.toLowerCase() !== 'no_show') return false;
     }
     
     // Search Query (owner_email or sitter_email)
@@ -141,7 +170,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       </h2>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4">
         <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Total Requests</span>
           <span className="text-3xl font-black text-purple-400">{totalRequests}</span>
@@ -166,6 +195,10 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Cancelled</span>
           <span className="text-3xl font-black text-gray-400">{cancelledCount}</span>
         </div>
+        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
+          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">No Shows</span>
+          <span className="text-3xl font-black text-orange-400">{noShowCount}</span>
+        </div>
         <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Review Sent</span>
           <span className="text-3xl font-black text-cyan-400">{reviewEmailsCount}</span>
@@ -189,6 +222,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
               <option value="Completed">Completed</option>
               <option value="Declined">Declined</option>
               <option value="Cancelled">Cancelled</option>
+              <option value="No_Show">No Show</option>
             </select>
           </div>
         </div>
@@ -287,6 +321,10 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                             <span className="bg-white/10 text-white/60 border border-white/20 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               ⚪ Cancelled
                             </span>
+                          ) : status.toLowerCase() === 'no_show' ? (
+                            <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                              🟠 No Show
+                            </span>
                           ) : (
                             <span className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block animate-pulse">
                               🟡 Pending
@@ -302,6 +340,8 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                             new Date(request.completed_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'cancelled' && request.cancelled_at ? (
                             new Date(request.cancelled_at).toLocaleDateString()
+                          ) : status.toLowerCase() === 'no_show' && request.no_show_at ? (
+                            new Date(request.no_show_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'declined' ? (
                             'N/A'
                           ) : (
@@ -344,6 +384,19 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                                   <strong className="text-white/60">Sitter ID:</strong> {request.sitter_id}
                                 </div>
                               </div>
+                              {status.toLowerCase() === 'no_show' && (
+                                <div className="pt-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDismissNoShow(request.id);
+                                    }}
+                                    className="bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs py-1.5 px-4 rounded-lg transition-colors cursor-pointer"
+                                  >
+                                    Dismiss No Show Report
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>

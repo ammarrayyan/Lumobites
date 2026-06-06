@@ -812,6 +812,50 @@ export default function PetSitting() {
     }
   };
 
+  const handleConfirmCompletedByOwner = async (req: any) => {
+    if (!confirm('Did your sitter complete the sitting? Confirming will send them a review request.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/petsitting/request/confirm-completed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: req.id, email: reqEmail })
+      });
+      if (res.ok) {
+        alert('Booking marked as completed! Review request sent. 🎉');
+        fetchOwnerRequests(reqEmail);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to confirm booking completion.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
+  const handleReportNoShow = async (req: any) => {
+    if (!confirm('Are you sure you want to report this sitter as a no show? This will notify our team.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/petsitting/request/report-no-show', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: req.id, email: reqEmail })
+      });
+      if (res.ok) {
+        alert('No show reported. Our team has been notified.');
+        fetchOwnerRequests(reqEmail);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to report no show.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
   const handleCancelBookingBySitter = async (id: string) => {
     if (!confirm('Are you sure you want to cancel this booking? This will notify the owner and might affect your reputation.')) {
       return;
@@ -2010,6 +2054,10 @@ export default function PetSitting() {
                                       <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200">
                                         ⚪ Cancelled
                                       </span>
+                                    ) : req.status === 'no_show' ? (
+                                      <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-full border border-orange-200">
+                                        🟠 No Show
+                                      </span>
                                     ) : (
                                       <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">
                                         🟡 Pending
@@ -2017,7 +2065,7 @@ export default function PetSitting() {
                                     )}
                                   </td>
                                   <td className="p-3 text-sm text-right">
-                                    {(req.status === 'completed' || req.status === 'declined' || req.status === 'cancelled') ? (
+                                    {(req.status === 'completed' || req.status === 'declined' || req.status === 'cancelled' || req.status === 'no_show') ? (
                                       <button
                                         onClick={() => handleRequestAgain(req)}
                                         className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
@@ -2029,6 +2077,25 @@ export default function PetSitting() {
                                       const today = new Date();
                                       today.setHours(0, 0, 0, 0);
                                       const isAfterEndDate = endDate ? today > endDate : false;
+
+                                      if (req.status === 'accepted' && isAfterEndDate) {
+                                        return (
+                                          <div className="flex gap-2 justify-end flex-wrap">
+                                            <button
+                                              onClick={() => handleConfirmCompletedByOwner(req)}
+                                              className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                            >
+                                              Confirm Completed
+                                            </button>
+                                            <button
+                                              onClick={() => handleReportNoShow(req)}
+                                              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                            >
+                                              Report No Show
+                                            </button>
+                                          </div>
+                                        );
+                                      }
 
                                       return (
                                         <div className="flex gap-2 justify-end flex-wrap">

@@ -31,3 +31,73 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function POST(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing booking ID' }, { status: 400 });
+    }
+
+    // 1. Fetch current booking request
+    const { data: request, error: fetchError } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('status, sitter_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !request) {
+      return NextResponse.json({ error: 'Sitting request not found' }, { status: 404 });
+    }
+
+    if (request.status !== 'no_show') {
+      return NextResponse.json({ error: 'Only requests with no_show status can be dismissed' }, { status: 400 });
+    }
+
+    // 2. Revert request status to 'accepted' and clear no_show_at
+    const { error: updateError } = await supabaseAdmin
+      .from('sitting_requests')
+      .update({
+        status: 'accepted',
+        no_show_at: null
+      })
+      .eq('id', id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // 3. Fetch current sitter's no_show_count and decrement
+    const sitterId = request.sitter_id;
+    if (sitterId) {
+      const { data: sitter, error: sitterError } = await supabaseAdmin
+        .from('sitters')
+        .select('no_show_count')
+        .eq('id', sitterId)
+        .single();
+
+      if (!sitterError && sitter) {
+        const nextCount = Math.max(0, (sitter.no_show_count || 0) - 1);
+        const { error: sitterUpdateError } = await supabaseAdmin
+          .from('sitters')
+          .update({ no_show_count: nextCount })
+          .eq('id', sitterId);
+
+        if (sitterUpdateError) {
+          console.error('[Admin Requests Dismiss] Decrement Sitter Count Error:', sitterUpdateError);
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('[Admin Requests POST] Dismiss Error:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+  }
+}
