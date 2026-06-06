@@ -12,10 +12,13 @@ interface SittingRequest {
   pet_type: string;
   dates: string;
   special_notes?: string;
-  status?: string; // 'pending' | 'accepted' | 'declined'
+  status?: string; // 'pending' | 'accepted' | 'declined' | 'completed' | 'cancelled'
   review_sent?: boolean;
   created_at: string;
   accepted_at?: string;
+  completed_at?: string;
+  cancelled_at?: string;
+  cancelled_by?: string;
   updated_at?: string;
 }
 
@@ -75,6 +78,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   const acceptedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'accepted').length;
   const completedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'completed').length;
   const declinedCount = requests.filter(r => r.status && r.status.toLowerCase() === 'declined').length;
+  const cancelledCount = requests.filter(r => r.status && r.status.toLowerCase() === 'cancelled').length;
   const reviewEmailsCount = requests.filter(r => r.review_sent).length;
 
   // Filter and search logic
@@ -87,6 +91,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       if (statusFilter.toLowerCase() === 'accepted' && status.toLowerCase() !== 'accepted') return false;
       if (statusFilter.toLowerCase() === 'completed' && status.toLowerCase() !== 'completed') return false;
       if (statusFilter.toLowerCase() === 'declined' && status.toLowerCase() !== 'declined') return false;
+      if (statusFilter.toLowerCase() === 'cancelled' && status.toLowerCase() !== 'cancelled') return false;
     }
     
     // Search Query (owner_email or sitter_email)
@@ -136,7 +141,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       </h2>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
         <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Total Requests</span>
           <span className="text-3xl font-black text-purple-400">{totalRequests}</span>
@@ -156,6 +161,10 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
         <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Declined</span>
           <span className="text-3xl font-black text-red-400">{declinedCount}</span>
+        </div>
+        <div className="bg-gradient-to-br from-gray-500/10 to-gray-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
+          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Cancelled</span>
+          <span className="text-3xl font-black text-gray-400">{cancelledCount}</span>
         </div>
         <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
           <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Review Sent</span>
@@ -179,6 +188,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
               <option value="Accepted">Accepted</option>
               <option value="Completed">Completed</option>
               <option value="Declined">Declined</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
         </div>
@@ -257,7 +267,9 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         {/* Requested Dates */}
                         <td className="p-4 text-sm text-white/80 max-w-[200px] truncate" title={request.dates}>
                           {request.dates}
-                                        {/* Status Badge */}
+                        </td>
+
+                        {/* Status Badge */}
                         <td className="p-4 whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' ? (
                             <span className="bg-green-500/20 text-green-400 border border-green-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
@@ -271,6 +283,10 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                             <span className="bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🔴 Declined
                             </span>
+                          ) : status.toLowerCase() === 'cancelled' ? (
+                            <span className="bg-white/10 text-white/60 border border-white/20 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                              ⚪ Cancelled
+                            </span>
                           ) : (
                             <span className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block animate-pulse">
                               🟡 Pending
@@ -278,18 +294,20 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                           )}
                         </td>
  
-                        {/* Action Date (Accepted/Declined/Completed) */}
+                        {/* Action Date (Accepted/Declined/Completed/Cancelled) */}
                         <td className="p-4 text-sm text-white/70 whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' && request.accepted_at ? (
                             new Date(request.accepted_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'completed' && request.completed_at ? (
                             new Date(request.completed_at).toLocaleDateString()
+                          ) : status.toLowerCase() === 'cancelled' && request.cancelled_at ? (
+                            new Date(request.cancelled_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'declined' ? (
                             'N/A'
                           ) : (
                             '—'
                           )}
-                        </td>                     </td>
+                        </td>
 
                         {/* Review Sent Column */}
                         <td className="p-4 text-sm text-center whitespace-nowrap">

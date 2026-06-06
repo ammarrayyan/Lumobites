@@ -749,6 +749,53 @@ export default function PetSitting() {
     }
   };
 
+  const handleCancelRequestByOwner = async (id: string) => {
+    if (!confirm('Are you sure you want to cancel this booking request? This will notify the sitter and cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/petsitting/request/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, by: 'owner', email: reqEmail })
+      });
+      if (res.ok) {
+        alert('Your booking has been cancelled');
+        fetchOwnerRequests(reqEmail);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to cancel request.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
+  const handleCancelBookingBySitter = async (id: string) => {
+    if (!confirm('Are you sure you want to cancel this booking? This will notify the owner and might affect your reputation.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/petsitting/request/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, by: 'sitter', sitter_id: sitterId })
+      });
+      if (res.ok) {
+        alert('Booking cancelled successfully');
+        if (sitterId) {
+          fetchSitterRequests(sitterId);
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to cancel booking.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
+
   const loadSitterProfile = async (email: string) => {
     setProfileLoading(true);
     try {
@@ -1918,6 +1965,10 @@ export default function PetSitting() {
                                       <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200">
                                         🔴 Declined
                                       </span>
+                                    ) : req.status === 'cancelled' ? (
+                                      <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200">
+                                        ⚪ Cancelled
+                                      </span>
                                     ) : (
                                       <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">
                                         🟡 Pending
@@ -1925,7 +1976,7 @@ export default function PetSitting() {
                                     )}
                                   </td>
                                   <td className="p-3 text-sm text-right">
-                                    {(req.status === 'completed' || req.status === 'declined') ? (
+                                    {(req.status === 'completed' || req.status === 'declined' || req.status === 'cancelled') ? (
                                       <button
                                         onClick={() => handleRequestAgain(req)}
                                         className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
@@ -1933,12 +1984,20 @@ export default function PetSitting() {
                                         Request Again
                                       </button>
                                     ) : (
-                                      <button
-                                        onClick={() => handleViewBooking(req)}
-                                        className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                      >
-                                        View Booking
-                                      </button>
+                                      <div className="flex gap-2 justify-end flex-wrap">
+                                        <button
+                                          onClick={() => handleViewBooking(req)}
+                                          className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                        >
+                                          View Booking
+                                        </button>
+                                        <button
+                                          onClick={() => handleCancelRequestByOwner(req.id)}
+                                          className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                                        >
+                                          Cancel Request
+                                        </button>
+                                      </div>
                                     )}
                                   </td>
                                 </tr>
@@ -2290,6 +2349,7 @@ export default function PetSitting() {
                         const isAccepted = req.status === 'accepted';
                         const isCompleted = req.status === 'completed';
                         const isDeclined = req.status === 'declined';
+                        const isCancelled = req.status === 'cancelled';
                         
                         // Check if completed at least 2 hours ago
                         let canSendReminder = false;
@@ -2321,6 +2381,11 @@ export default function PetSitting() {
                                 {isDeclined && (
                                   <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200">
                                     🔴 Declined
+                                  </span>
+                                )}
+                                {isCancelled && (
+                                  <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200">
+                                    ⚪ Cancelled
                                   </span>
                                 )}
                                 {isPending && (
@@ -2393,50 +2458,58 @@ export default function PetSitting() {
                               )}
 
                               {isAccepted && (() => {
-                                let endDateStr = '';
-                                let isBeforeEndDate = false;
-                                if (req.dates) {
-                                  try {
-                                    if (req.dates.includes('→')) {
-                                      endDateStr = req.dates.split('→')[1].trim();
-                                    } else if (req.dates.includes('->')) {
-                                      endDateStr = req.dates.split('->')[1].trim();
-                                    } else if (req.dates.includes('-')) {
-                                      const parts = req.dates.split('-');
-                                      if (parts.length === 2 && parts[0].length > 4) {
-                                        endDateStr = parts[1].trim();
+                                  let endDateStr = '';
+                                  let isBeforeEndDate = false;
+                                  if (req.dates) {
+                                    try {
+                                      if (req.dates.includes('→')) {
+                                        endDateStr = req.dates.split('→')[1].trim();
+                                      } else if (req.dates.includes('->')) {
+                                        endDateStr = req.dates.split('->')[1].trim();
+                                      } else if (req.dates.includes('-')) {
+                                        const parts = req.dates.split('-');
+                                        if (parts.length === 2 && parts[0].length > 4) {
+                                          endDateStr = parts[1].trim();
+                                        } else {
+                                          endDateStr = req.dates.trim();
+                                        }
                                       } else {
                                         endDateStr = req.dates.trim();
                                       }
-                                    } else {
-                                      endDateStr = req.dates.trim();
+                                      const endDate = new Date(endDateStr);
+                                      if (!isNaN(endDate.getTime())) {
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        endDate.setHours(0, 0, 0, 0);
+                                        isBeforeEndDate = today < endDate;
+                                      }
+                                    } catch (e) {
+                                      isBeforeEndDate = false;
                                     }
-                                    const endDate = new Date(endDateStr);
-                                    if (!isNaN(endDate.getTime())) {
-                                      const today = new Date();
-                                      today.setHours(0, 0, 0, 0);
-                                      endDate.setHours(0, 0, 0, 0);
-                                      isBeforeEndDate = today < endDate;
-                                    }
-                                  } catch (e) {
-                                    isBeforeEndDate = false;
                                   }
-                                }
 
-                                return (
-                                  <button
-                                    onClick={() => !isBeforeEndDate && handleMarkAsCompleted(req.id)}
-                                    disabled={isBeforeEndDate}
-                                    className={`font-bold py-1.5 px-4 rounded-lg text-xs transition-colors ${
-                                      isBeforeEndDate 
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-80' 
-                                        : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer'
-                                    }`}
-                                  >
-                                    {isBeforeEndDate ? `Available after ${endDateStr}` : 'Mark as Completed'}
-                                  </button>
-                                );
-                              })()}
+                                  return (
+                                    <div className="flex gap-2 flex-wrap items-center">
+                                      <button
+                                        onClick={() => !isBeforeEndDate && handleMarkAsCompleted(req.id)}
+                                        disabled={isBeforeEndDate}
+                                        className={`font-bold py-1.5 px-4 rounded-lg text-xs transition-colors ${
+                                          isBeforeEndDate 
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-80' 
+                                            : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer'
+                                        }`}
+                                      >
+                                        {isBeforeEndDate ? `Available after ${endDateStr}` : 'Mark as Completed'}
+                                      </button>
+                                      <button
+                                        onClick={() => handleCancelBookingBySitter(req.id)}
+                                        className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold py-1.5 px-4 rounded-lg text-xs transition-colors cursor-pointer"
+                                      >
+                                        Cancel Booking
+                                      </button>
+                                    </div>
+                                  );
+                                })()}
 
 
                             </div>
