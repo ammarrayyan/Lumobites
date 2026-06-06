@@ -154,20 +154,36 @@ export default function Navbar() {
         body: JSON.stringify({ email: signInEmail })
       });
       
-      // If not PRO, try Sitters table
+      let isNotPro = false;
+      let stripeErr = '';
       if (!res.ok) {
-        res = await fetch('/api/petsitting/auth/send-code', {
+        const data = await res.json();
+        if (data.error === 'not_pro') {
+          isNotPro = true;
+        }
+        stripeErr = data.message || data.error || 'Failed to send code';
+        
+        // If not PRO, try Sitters table
+        const sitterRes = await fetch('/api/petsitting/auth/send-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: signInEmail }) // checks sitters
         });
+        
+        if (sitterRes.ok) {
+          setSignInStep('code');
+          return;
+        }
+        
+        if (isNotPro) {
+          setSignInError('not_pro');
+          return;
+        }
+        
+        throw new Error(stripeErr || 'Account not found. Please ensure you are a PRO member or have a Sitter profile.');
+      } else {
+        setSignInStep('code');
       }
-
-      if (!res.ok) {
-        throw new Error('Account not found. Please ensure you are a PRO member or have a Sitter profile.');
-      }
-      
-      setSignInStep('code');
     } catch(err: any) {
       setSignInError(err.message);
     } finally {
@@ -622,65 +638,89 @@ export default function Navbar() {
               </div>
             )}
 
-            {signInError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center flex flex-col items-center gap-1">
-                <span>{signInError}</span>
-                {signInError.includes('Code expired') && (
-                  <button
-                    type="button"
-                    onClick={() => handleSignInSendCode({ preventDefault: () => {} } as React.FormEvent)}
-                    className="text-xs font-bold text-[#8B5E3C] hover:underline mt-1 cursor-pointer bg-transparent border-none"
-                  >
-                    Resend Code
-                  </button>
-                )}
-              </div>
-            )}
-
-            {signInStep === 'email' ? (
-              <form onSubmit={handleSignInSendCode} className="flex flex-col gap-4">
-                <input
-                  type="email"
-                  value={signInEmail}
-                  onChange={e => setSignInEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
-                  required
-                />
+            {signInError === 'not_pro' ? (
+              <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-2xl flex flex-col items-center gap-3 text-center w-full">
+                <p className="text-red-600 font-bold text-sm">
+                  This account is not a PRO member.
+                </p>
                 <button
-                  type="submit"
-                  disabled={signInLoading}
-                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                  type="button"
+                  onClick={() => handleUpgradeCheckout(signInEmail)}
+                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  {signInLoading ? 'Sending...' : 'Send Code'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
-                <input
-                  type="text"
-                  value={signInCode}
-                  onChange={e => setSignInCode(e.target.value)}
-                  placeholder="6-digit code"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-center text-lg tracking-[0.2em] font-bold"
-                  maxLength={6}
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={signInLoading}
-                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
-                >
-                  {signInLoading ? 'Verifying...' : 'Verify & Sign In'}
+                  Upgrade to PRO →
                 </button>
                 <button
                   type="button"
                   onClick={() => { setSignInStep('email'); setSignInCode(''); setSignInError(''); }}
-                  className="text-sm font-bold text-[#8B5E3C] hover:underline text-center mt-2"
+                  className="text-xs text-gray-400 hover:text-gray-600 hover:underline font-bold"
                 >
-                  Use a different email
+                  Try another email
                 </button>
-              </form>
+              </div>
+            ) : (
+              <>
+                {signInError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center flex flex-col items-center gap-1">
+                    <span>{signInError}</span>
+                    {signInError.includes('Code expired') && (
+                      <button
+                        type="button"
+                        onClick={() => handleSignInSendCode({ preventDefault: () => {} } as React.FormEvent)}
+                        className="text-xs font-bold text-[#8B5E3C] hover:underline mt-1 cursor-pointer bg-transparent border-none"
+                      >
+                        Resend Code
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {signInStep === 'email' ? (
+                  <form onSubmit={handleSignInSendCode} className="flex flex-col gap-4">
+                    <input
+                      type="email"
+                      value={signInEmail}
+                      onChange={e => setSignInEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={signInLoading}
+                      className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                    >
+                      {signInLoading ? 'Sending...' : 'Send Code'}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
+                    <input
+                      type="text"
+                      value={signInCode}
+                      onChange={e => setSignInCode(e.target.value)}
+                      placeholder="6-digit code"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-center text-lg tracking-[0.2em] font-bold"
+                      maxLength={6}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={signInLoading}
+                      className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                    >
+                      {signInLoading ? 'Verifying...' : 'Verify & Sign In'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setSignInStep('email'); setSignInCode(''); setSignInError(''); }}
+                      className="text-sm font-bold text-[#8B5E3C] hover:underline text-center mt-2"
+                    >
+                      Use a different email
+                    </button>
+                  </form>
+                )}
+              </>
             )}
           </div>
         </div>

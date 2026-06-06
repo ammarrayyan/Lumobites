@@ -61,6 +61,9 @@ export default function AccountPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        if (data.error === 'not_pro') {
+          throw new Error('not_pro');
+        }
         throw new Error(data.error || 'Failed to send verification code');
       }
 
@@ -191,88 +194,130 @@ export default function AccountPage() {
                 </p>
               </div>
 
-              <form onSubmit={handleSendCode} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5 text-left">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                    Pro Subscription Email {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
-                  </label>
-                  {isLocked ? (
-                    <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
-                      {email}
-                    </div>
-                  ) : (
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      required
-                      disabled={loading}
-                      className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
-                    />
-                  )}
-                  {isLocked && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Email cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a> for help.
-                    </p>
-                  )}
+              {error === 'not_pro' ? (
+                <div className="flex flex-col gap-4 text-center items-center w-full">
+                  <p className="text-red-500 font-bold text-sm">
+                    This account is not a PRO member.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        const res = await fetch('/api/stripe/checkout', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email: email.trim() })
+                        });
+                        const data = await res.json();
+                        if (data.url) {
+                          window.location.href = data.url;
+                        } else {
+                          throw new Error(data.error || 'Failed to start checkout');
+                        }
+                      } catch (err: any) {
+                        setError(err.message || 'Failed to start checkout. Please try again.');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Upgrade to PRO →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setError(null); }}
+                    className="text-xs text-gray-400 hover:text-gray-600 hover:underline font-bold"
+                  >
+                    Try another email
+                  </button>
                 </div>
-
-                {error && (
-                  <div className="flex flex-col gap-3 items-center">
-                    <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                      ⚠️ {error}
-                    </p>
-                    {error.toLowerCase().includes('no active pro subscription') && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          setLoading(true);
-                          setError(null);
-                          try {
-                            const res = await fetch('/api/stripe/checkout', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ email: email.trim() })
-                            });
-                            const data = await res.json();
-                            if (data.url) {
-                              window.location.href = data.url;
-                            } else {
-                              throw new Error(data.error || 'Failed to start checkout');
-                            }
-                          } catch (err: any) {
-                            setError(err.message || 'Failed to start checkout. Please try again.');
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
+              ) : (
+                <form onSubmit={handleSendCode} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                      Pro Subscription Email {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
+                    </label>
+                    {isLocked ? (
+                      <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
+                        {email}
+                      </div>
+                    ) : (
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        required
                         disabled={loading}
-                        className="w-full mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? (
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
-                            Become PRO — $2.99/mo ✨
-                          </>
-                        )}
-                      </button>
+                        className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
+                      />
+                    )}
+                    {isLocked && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Email cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a> for help.
+                      </p>
                     )}
                   </div>
-                )}
 
-                <button
-                  type="submit"
-                  disabled={loading || !email.trim()}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : 'Send Verification Code'}
-                </button>
-              </form>
+                  {error && (
+                    <div className="flex flex-col gap-3 items-center">
+                      <p className="text-xs text-red-500 font-semibold text-center leading-normal">
+                        ⚠️ {error}
+                      </p>
+                      {error.toLowerCase().includes('no active pro subscription') && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setLoading(true);
+                            setError(null);
+                            try {
+                              const res = await fetch('/api/stripe/checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: email.trim() })
+                              });
+                              const data = await res.json();
+                              if (data.url) {
+                                window.location.href = data.url;
+                              } else {
+                                throw new Error(data.error || 'Failed to start checkout');
+                              }
+                            } catch (err: any) {
+                              setError(err.message || 'Failed to start checkout. Please try again.');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className="w-full mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loading ? (
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
+                              Become PRO — $2.99/mo ✨
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email.trim()}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : 'Send Verification Code'}
+                  </button>
+                </form>
+              )}
             </div>
           )}
 

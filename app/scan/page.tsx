@@ -768,6 +768,9 @@ export default function ScanPage() {
       
       const data = await res.json();
       if (!res.ok) {
+        if (data.error === 'not_pro') {
+          throw new Error('not_pro');
+        }
         throw new Error(data.error || 'Failed to send verification code');
       }
       
@@ -1618,57 +1621,81 @@ export default function ScanPage() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          Enter Your Email
-                        </label>
-                        <input
-                          type="email"
-                          value={modalEmail}
-                          onChange={(e) => setModalEmail(e.target.value)}
-                          placeholder="your@email.com"
-                          required
-                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                          autoFocus
-                        />
-                      </div>
-
-                      {modalMessage && (
-                        <div className="flex flex-col gap-2 items-center">
-                          <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                            {modalMessage.text}
+                      {modalMessage?.text === 'not_pro' ? (
+                        <div className="w-full flex flex-col gap-3 items-center mt-1 text-center">
+                          <p className="text-sm font-bold text-red-500">
+                            This account is not a PRO member.
                           </p>
-                          {modalMessage.isError && modalMessage.text.includes('No active Pro subscription') && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setModalStep('upgrade_email');
-                                setModalMessage(null);
-                              }}
-                              className="mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-2 px-4 rounded-xl font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-white shrink-0 animate-pulse" />
-                              Become PRO instead ✨
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={handleCheckout}
+                            className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            Upgrade to PRO →
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setModalMessage(null); }}
+                            className="text-xs text-gray-400 hover:text-gray-600 hover:underline font-bold"
+                          >
+                            Try another email
+                          </button>
                         </div>
-                      )}
+                      ) : (
+                        <>
+                          <div className="flex flex-col gap-1.5 text-left">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                              Enter Your Email
+                            </label>
+                            <input
+                              type="email"
+                              value={modalEmail}
+                              onChange={(e) => setModalEmail(e.target.value)}
+                              placeholder="your@email.com"
+                              required
+                              className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                              autoFocus
+                            />
+                          </div>
 
-                      <button
-                        type="button"
-                        onClick={handleRestore}
-                        disabled={modalLoading}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        {modalLoading ? (
-                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : (
-                          <>
-                            Send Verification Code
-                            <Mail className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
+                          {modalMessage && (
+                            <div className="flex flex-col gap-2 items-center">
+                              <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                                {modalMessage.text}
+                              </p>
+                              {modalMessage.isError && modalMessage.text.includes('No active Pro subscription') && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setModalStep('upgrade_email');
+                                    setModalMessage(null);
+                                  }}
+                                  className="mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-2 px-4 rounded-xl font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 text-white shrink-0 animate-pulse" />
+                                  Become PRO instead ✨
+                                </button>
+                              )}
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={handleRestore}
+                            disabled={modalLoading}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            {modalLoading ? (
+                              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            ) : (
+                              <>
+                                Send Verification Code
+                                <Mail className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">

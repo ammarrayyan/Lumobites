@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     if (!isProUser) {
       console.log(`[Send Code API] Restoration blocked. Email: ${cleanEmail} is not registered as PRO.`);
       return NextResponse.json(
-        { error: 'No active Pro subscription found for this email.' },
-        { status: 404 }
+        { error: 'not_pro', message: 'This email is not a PRO member. Please upgrade to PRO first.' },
+        { status: 400 }
       );
     }
 
