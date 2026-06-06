@@ -110,7 +110,7 @@ export default function LostPetsFeed() {
         </div>
  
         {/* Search & Filters */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 sticky top-4 z-10">
+        <div className="bg-white p-4 rounded-2xl shadow-md border border-[#E8DDD4] mb-8 flex flex-col md:flex-row gap-4 sticky top-0 z-50">
           <div className="flex-1 relative">
             <input
               type="text"
