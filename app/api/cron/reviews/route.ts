@@ -15,16 +15,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate timestamp for 2 hours ago
-    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    // Calculate timestamp for 10 minutes ago
+    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
-    // 2. Fetch completed requests older than 2 hours that haven't received a review email
+    // 2. Fetch completed requests older than 10 minutes that haven't received a review email
     const { data: requests, error: fetchError } = await supabase
       .from('sitting_requests')
       .select('id, owner_email, sitter_id, pet_name, dates, completed_at')
       .eq('status', 'completed')
       .eq('review_sent', false)
-      .lte('completed_at', twoHoursAgo);
+      .lte('completed_at', tenMinsAgo);
 
     if (fetchError) {
       console.error('[Cron Reviews] Supabase Fetch Error:', fetchError);
@@ -48,23 +48,25 @@ export async function GET(request: NextRequest) {
           .single();
 
         const sitterName = sitter?.name || 'your sitter';
+        const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
+        const subject = "How was your sitter? Leave a review 🐾";
 
         // Send review request email
         await resend.emails.send({
           from: fromEmail,
           to: reqRow.owner_email,
-          subject: `How was your experience with ${sitterName}? ⭐`,
+          subject: subject,
           html: brandedEmail({
-            subject: `How was your experience with ${sitterName}? ⭐`,
-            preheader: `Please leave a quick review to help the Lumo Bites community!`,
+            subject: subject,
+            preheader: `Leave a review for ${sitterName} 🐾`,
             body: `
-              <h1 style="${emailStyles.h1}">How was your experience? ⭐</h1>
+              <h1 style="${emailStyles.h1}">How was your sitter? 🐾</h1>
               <p style="${emailStyles.p}">Hi there,</p>
-              <p style="${emailStyles.p}">How was your experience with <strong>${sitterName}</strong>? Leave a review to help other pet owners: <a href="https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${reqRow.sitter_id}</a></p>
+              <p style="${emailStyles.p}">Your booking with <strong>${sitterName}</strong> has been marked as completed. We'd love to hear how it went! Leave a review to help other pet owners find great sitters:</p>
+              <p style="${emailStyles.p}"><a href="${reviewLink}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${reqRow.sitter_id}</a></p>
               ${emailStyles.divider}
-              ${emailStyles.button(`https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`, 'Write a Review ⭐')}
+              ${emailStyles.button(reviewLink, 'Leave a Review 🐾')}
               ${emailStyles.divider}
-              <p style="${emailStyles.pSmall}">It only takes 30 seconds and makes a big difference for our sitters.</p>
               ${emailStyles.signoff}
             `
           })

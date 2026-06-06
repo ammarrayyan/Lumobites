@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,7 @@ export async function POST(request: NextRequest) {
     // 1. Fetch current request status to prevent double completion
     const { data: reqRow, error: reqError } = await supabaseAdmin
       .from('sitting_requests')
-      .select('status')
+      .select('status, owner_email, sitter_id')
       .eq('id', id)
       .single();
 
@@ -57,6 +61,54 @@ export async function POST(request: NextRequest) {
 
       if (sitterUpdateError) {
         console.error('[Complete Booking] Increment Sitter Count Error:', sitterUpdateError);
+      }
+    }
+
+    // 5. Send review request email immediately to the owner
+    if (reqRow.owner_email && reqRow.sitter_id) {
+      try {
+        const { data: sitter } = await supabaseAdmin
+          .from('sitters')
+          .select('name')
+          .eq('id', reqRow.sitter_id)
+          .single();
+        const sitterName = sitter?.name || 'your sitter';
+        
+        const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
+        const subject = "How was your sitter? Leave a review 🐾";
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+        
+        await resend.emails.send({
+          from: fromEmail,
+          to: reqRow.owner_email,
+          subject: subject,
+          html: brandedEmail({
+            subject: subject,
+            preheader: `Leave a review for ${sitterName} 🐾`,
+            body: `
+              <h1 style="${emailStyles.h1}">How was your sitter? 🐾</h1>
+              <p style="${emailStyles.p}">Hi there,</p>
+              <p style="${emailStyles.p}">Your booking with <strong>${sitterName}</strong> has been marked as completed. We'd love to hear how it went! Leave a review to help other pet owners find great sitters:</p>
+              <p style="${emailStyles.p}"><a href="${reviewLink}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${reqRow.sitter_id}</a></p>
+              ${emailStyles.divider}
+              ${emailStyles.button(reviewLink, 'Leave a Review 🐾')}
+              ${emailStyles.divider}
+              ${emailStyles.signoff}
+            `
+          })
+        });
+
+        // 6. Update review_sent flag
+        const { error: emailSentUpdateError } = await supabaseAdmin
+          .from('sitting_requests')
+          .update({ review_sent: true })
+          .eq('id', id);
+
+        if (emailSentUpdateError) {
+          console.error('[Complete Booking] Failed to update review_sent status:', emailSentUpdateError);
+        }
+      } catch (emailErr) {
+        console.error('[Complete Booking] Failed to send review request email:', emailErr);
       }
     }
 
