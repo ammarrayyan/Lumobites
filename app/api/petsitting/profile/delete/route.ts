@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Delete associated sitting requests first to satisfy foreign key constraints
+    // 3. Delete associated sitting requests and reviews first to satisfy foreign key constraints
     if (sitter?.id) {
       const { error: reqDeleteError } = await supabaseAdmin
         .from('sitting_requests')
@@ -56,6 +56,16 @@ export async function POST(request: NextRequest) {
       if (reqDeleteError) {
         console.error('[Delete Sitter Profile] Failed to delete associated sitting requests:', reqDeleteError);
         return NextResponse.json({ error: 'Failed to delete sitting requests from database' }, { status: 500 });
+      }
+
+      const { error: reviewsDeleteError } = await supabaseAdmin
+        .from('sitter_reviews')
+        .delete()
+        .eq('sitter_id', sitter.id);
+      
+      if (reviewsDeleteError) {
+        console.error('[Delete Sitter Profile] Failed to delete associated sitter reviews:', reviewsDeleteError);
+        return NextResponse.json({ error: 'Failed to delete reviews from database' }, { status: 500 });
       }
     }
 

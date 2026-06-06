@@ -849,6 +849,7 @@ export default function PetSitting() {
         body: JSON.stringify({ email: sitterEmail })
       });
       if (res.ok) {
+        alert('Your sitter profile was successfully deleted.');
         // Reset state
         setSitterAuthMode('email');
         setSitterEmail('');
@@ -870,8 +871,10 @@ export default function PetSitting() {
         setSelfDeclared(false);
         setIsProSitter(false);
         setDeleteModalOpen(false);
+        setActiveTab('find');
       } else {
-        alert('Failed to delete profile. Please try again.');
+        const data = await res.json();
+        alert(data.error || 'Failed to delete profile. Please try again.');
       }
     } catch (e) {
       alert('An error occurred during deletion.');
@@ -1004,7 +1007,13 @@ export default function PetSitting() {
   };
 
   const handleCancelSitterSub = async () => {
-    if (!sitterSubId) return;
+    if (!sitterSubId) {
+      alert("No active Stripe subscription was found for this account (Lifetime / Promo status). No cancellation is needed!");
+      return;
+    }
+    if (!confirm("Are you sure you want to cancel your Lumo Bites Pro subscription? Your profile will remain active until the end of your billing cycle.")) {
+      return;
+    }
     setSitterSubActionLoading(true);
     setProfileMessage('');
     try {
@@ -1019,11 +1028,14 @@ export default function PetSitting() {
         if (data.endDate) setSitterSubEndDate(data.endDate);
         if (data.daysRemaining !== undefined) setSitterSubDaysRemaining(data.daysRemaining);
         setProfileMessage('Subscription cancelled successfully.');
+        alert('Subscription cancelled successfully. Your Pro access continues until the end of your billing cycle.');
       } else {
         setProfileMessage(data.error || 'Failed to cancel subscription.');
+        alert(data.error || 'Failed to cancel subscription.');
       }
     } catch (e) {
       setProfileMessage('Error connecting to subscription service.');
+      alert('Error connecting to subscription service.');
     } finally {
       setSitterSubActionLoading(false);
     }
@@ -1858,6 +1870,18 @@ export default function PetSitting() {
         {/* BECOME A SITTER TAB */}
         {activeTab === 'become' && (
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
+            {/* Back Button */}
+            <div className="mb-6 flex justify-start">
+              <button 
+                onClick={() => {
+                  setActiveTab('find');
+                  setProfilePreviewMode(true);
+                }} 
+                className="flex items-center gap-1.5 text-[#8B5E3C] hover:text-[#7A5234] font-bold text-sm transition-colors cursor-pointer"
+              >
+                &larr; Back to Find a Sitter
+              </button>
+            </div>
             {profilePreviewMode ? (
               <div className="animate-fade-in text-center">
                 {profileSuccessMessage && (
@@ -1996,6 +2020,10 @@ export default function PetSitting() {
                       {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
                     </button>
                   )}
+                  
+                  <button type="button" onClick={() => setActiveTab('find')} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5">
+                    &larr; Back to Find a Sitter
+                  </button>
                   
                   {sitterApprovalStatus !== 'pending' && (
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
