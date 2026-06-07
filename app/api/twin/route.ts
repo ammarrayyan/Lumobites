@@ -2,6 +2,32 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+let lastFallbackScore: number | null = null;
+let lastReturnedScore: number | null = null;
+
+function generateFallbackScore(): number {
+  const rand = Math.random();
+  let score: number;
+  if (rand < 0.40) {
+    score = Math.floor(Math.random() * 10) + 65; // 65-74
+  } else if (rand < 0.75) { // 40% + 35% = 75%
+    score = Math.floor(Math.random() * 10) + 75; // 75-84
+  } else if (rand < 0.95) { // 75% + 20% = 95%
+    score = Math.floor(Math.random() * 8) + 85; // 85-92
+  } else {
+    score = Math.floor(Math.random() * 4) + 93; // 93-96
+  }
+
+  if (lastFallbackScore !== null && score === lastFallbackScore) {
+    const offset = Math.random() < 0.5 ? 1 : -1;
+    score += offset;
+    if (score < 65) score = 66;
+    if (score > 96) score = 95;
+  }
+  lastFallbackScore = score;
+  return score;
+}
+
 const BREED_DATA: Record<string, { traits: string[]; quote: string; imageUrl: string }> = {
   // Dogs
   "golden retriever": {
@@ -502,7 +528,11 @@ Combine the facial features analysis (60% weight) and these personality quiz ans
   9. Make the "quote" witty, funny, and highly specific to that breed — not a generic compliment.
   10. Make the 3 personality "traits" feel like real, nuanced, and detailed personality test results (e.g. "Prone to overthinking social dynamics" or "Highly observant but selectively interactive") rather than generic compliments.
   
-  Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment: most scores should fall between 65 and 85, only exceptional matches should show 86 to 95, and scores above 95 should be extremely rare.
+  Generate 3 completely unique personality traits based specifically on what you observe in this person's facial features, expression, and energy. Make them feel personal and specific, not generic breed descriptions. The traits must be short plain text (no emojis). Generate a matchScore (integer percentage) representing the similarity and energy match. Make the scoring feel like a real, rigorous personality assessment:
+  - Scores must feel genuinely calculated based on facial analysis.
+  - Use the full range between 62% and 94% (scores above 94% should be extremely rare).
+  - Never round to the same number repeatedly or use the same percentage twice in a row.
+  - Avoid generic percentages. Examples of good, varied, and specific scores to return: 67%, 73%, 81%, 88%, 64%, 91%, 76%.
   
   Respond in JSON only: {
     petType: "cat" or "dog",
@@ -638,15 +668,21 @@ const DOG_BREED_SLUGS: Record<string, string> = {
       console.error('Pet breed search API failed:', err);
     }
 
-    const finalMatchScore = (() => {
+    let finalMatchScore = (() => {
       if (result.matchScore && typeof result.matchScore === 'number') {
         return result.matchScore;
       }
-      const rand = Math.random();
-      if (rand < 0.75) return Math.floor(Math.random() * 21) + 65; // 65-85
-      if (rand < 0.95) return Math.floor(Math.random() * 10) + 86; // 86-95
-      return Math.floor(Math.random() * 4) + 96; // 96-99
+      return generateFallbackScore();
     })();
+
+    // Ensure no two consecutive responses have the exact same score
+    if (lastReturnedScore !== null && finalMatchScore === lastReturnedScore) {
+      const offset = Math.random() < 0.5 ? 1 : -1;
+      finalMatchScore += offset;
+      if (finalMatchScore < 62) finalMatchScore = 63;
+      if (finalMatchScore > 96) finalMatchScore = 95;
+    }
+    lastReturnedScore = finalMatchScore;
 
     return NextResponse.json({
       success: true,
