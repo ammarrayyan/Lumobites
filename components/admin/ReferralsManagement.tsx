@@ -292,7 +292,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                                       <td className="p-3 text-white">{user.referred_email}</td>
                                       <td className="p-3">
                                         {user.subscription_type === 'pro_sitter' ? (
-                                          <span className="bg-[#64b3f4]/20 text-[#64b3f4] px-2 py-1 rounded text-xs">Sitter Pro ($9.99)</span>
+                                          <span className="bg-[#64b3f4]/20 text-[#64b3f4] px-2 py-1 rounded text-xs">Sitter Pro</span>
                                         ) : (
                                           <span className="bg-[#c2e59c]/20 text-[#c2e59c] px-2 py-1 rounded text-xs">PRO Owner ($2.99)</span>
                                         )}

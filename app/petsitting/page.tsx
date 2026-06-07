@@ -2840,22 +2840,35 @@ export default function PetSitting() {
             )}
 
             {sitterAuthMode === 'otp' && (
-              <form onSubmit={handleSitterOtpSubmit} className="space-y-4 max-w-sm mx-auto animate-fade-in">
-                <div className="text-center mb-4">
-                  <Key className="w-8 h-8 text-[#8B5E3C] mx-auto mb-2" />
-                  <p className="text-sm text-[#8B7E7D]">Enter the 6-digit code we sent to <strong>{sitterEmail}</strong></p>
+              <form onSubmit={handleSitterOtpSubmit} className="space-y-5 max-w-sm mx-auto animate-fade-in bg-white p-6 rounded-2xl border border-[#E8DDD4] shadow-sm">
+                <div className="text-center mb-2">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF6F4] mb-4">
+                    <Key className="w-6 h-6 text-[#8B5E3C]" />
+                  </div>
+                  <h3 className="text-lg font-black text-[#4A3E3D] mb-1">
+                    {sitterSignupIntent === 'new' ? 'Creating New Profile' : 'Signing In'}
+                  </h3>
+                  <p className="text-sm text-[#8B7E7D]">
+                    We sent a 6-digit code to<br/><strong>{sitterEmail}</strong>
+                  </p>
                 </div>
                 <div>
-                  <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-2xl tracking-[0.5em] font-bold text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="••••••" />
-                  <p className="text-xs text-[#8B7E7D] text-center mt-3">Didn't receive the code? Check your spam or junk folder. Still need help? Email us at <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a></p>
+                  <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-black text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] shadow-inner" placeholder="000000" />
                 </div>
-                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
-                <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm">
-                  {sitterAuthLoading ? 'Verifying...' : 'Verify & Login'}
+                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center bg-red-50 py-2 rounded-lg">{sitterAuthError}</div>}
+                
+                <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 rounded-xl transition-all shadow-md">
+                  {sitterAuthLoading ? 'Verifying...' : 'Verify Code'}
                 </button>
-                <button type="button" onClick={() => setSitterAuthMode('email')} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#8B5E3C] mt-2">
-                  &larr; Back
-                </button>
+                
+                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-[#E8DDD4]">
+                  <button type="button" onClick={e => handleSitterEmailSubmit(e as any, sitterSignupIntent || 'new')} disabled={sitterAuthLoading} className="w-full text-[#8B5E3C] text-sm font-bold hover:underline py-2">
+                    Didn't receive it? Resend Code
+                  </button>
+                  <button type="button" onClick={() => { setSitterAuthMode('email'); setSitterAuthCode(''); setSitterAuthError(''); }} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#4A3E3D] py-2 flex items-center justify-center gap-1">
+                    &larr; Back to start
+                  </button>
+                </div>
               </form>
             )}
 

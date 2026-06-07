@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     ${emailStyles.infoBox(`
       <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">✅ <strong>Status:</strong> Active & Visible</p>
       <p style="margin:0 0 6px 0;font-size:13px;color:#6B5040;">📩 <strong>Requests:</strong> Enabled — owners can now contact you</p>
-      <p style="margin:0;font-size:13px;color:#6B5040;">⭐ <strong>Plan:</strong> Lumo Sitter Pro ($9.99/mo)</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;">⭐ <strong>Plan:</strong> Lumo Sitter Pro</p>
     `)}
     ${emailStyles.button('https://lumobites.net/petsitting', 'View Your Profile')}
     ${emailStyles.divider}
