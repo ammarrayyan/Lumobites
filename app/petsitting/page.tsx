@@ -2415,12 +2415,7 @@ export default function PetSitting() {
                     Edit Profile
                   </button>
                   
-                  {sitterApprovalStatus === 'approved' && !isProSitter && (
-                    <button type="button" onClick={handleStripeCheckout} disabled={profileLoading} className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                      {profileLoading ? 'Redirecting...' : 'Go Live for $9.99/mo'}
-                    </button>
-                  )}
+
                   
                   <button type="button" onClick={handleSitterSignOut} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer">
                     Sign Out
@@ -2866,12 +2861,30 @@ export default function PetSitting() {
 
             {sitterAuthMode === 'form' && (
               <div className="animate-fade-in">
-                {!isProSitter && profileMessage === '' && (
+                {profileMessage === '' && sitterApprovalStatus === 'pending' && (
+                  <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3 items-start">
+                    <AlertTriangle className="w-5 h-5 text-blue-500 inline-block mr-1.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-blue-800 text-sm">Profile Under Review</h4>
+                      <p className="text-blue-700 text-xs mt-1">Your profile is under review. We'll notify you once approved.</p>
+                    </div>
+                  </div>
+                )}
+                {profileMessage === '' && sitterApprovalStatus === 'approved' && (
+                  <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 items-start">
+                    <svg className="w-5 h-5 text-green-500 inline-block mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                    <div>
+                      <h4 className="font-bold text-green-800 text-sm">Profile Active</h4>
+                      <p className="text-green-700 text-xs mt-1">Your profile is live and visible in search results!</p>
+                    </div>
+                  </div>
+                )}
+                {profileMessage === '' && sitterApprovalStatus === 'rejected' && (
                   <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 items-start">
                     <AlertTriangle className="w-5 h-5 text-red-500 inline-block mr-1.5 flex-shrink-0" />
                     <div>
-                      <h4 className="font-bold text-red-800 text-sm">Profile Inactive & Hidden</h4>
-                      <p className="text-red-700 text-xs mt-1">Your sitter profile is hidden from search results. Subscribe for $9.99/mo to go live.</p>
+                      <h4 className="font-bold text-red-800 text-sm">Profile Not Approved</h4>
+                      <p className="text-red-700 text-xs mt-1">Your profile was not approved. Contact info@lumobitespet.com for help.</p>
                     </div>
                   </div>
                 )}
