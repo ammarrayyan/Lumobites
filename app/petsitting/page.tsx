@@ -2854,7 +2854,7 @@ export default function PetSitting() {
                   </p>
                 </div>
                 <div>
-                  <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-black text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] shadow-inner" placeholder="000000" />
+                  <input required type="text" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-black text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] shadow-inner" placeholder="••••••" />
                 </div>
                 {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center bg-red-50 py-2 rounded-lg">{sitterAuthError}</div>}
                 
