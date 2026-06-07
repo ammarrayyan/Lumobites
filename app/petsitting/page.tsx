@@ -1137,11 +1137,19 @@ export default function PetSitting() {
       if (res.ok) {
         alert('Your sitter profile was successfully deleted.');
         // Reset state
+        // Clear local storage session
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_sitter_email_expiry');
+
+        // Reset all states
         setSitterAuthMode('email');
+        setSitterSignupIntent(null);
         setSitterEmail('');
         setSitterFirstName('');
         setSitterLastName('');
         setSitterPhoto('');
+        setSitterIdPhoto('');
+        setHasExistingIdPhoto(false);
         setSitterCity('');
         setSitterLocationInput('');
         setSitterLocationVerified(false);
@@ -1156,6 +1164,7 @@ export default function PetSitting() {
         setSitterPhoneVisible(false);
         setSelfDeclared(false);
         setIsProSitter(false);
+        setProfilePreviewMode(false);
         setDeleteModalOpen(false);
         setActiveTab('find');
       } else {
