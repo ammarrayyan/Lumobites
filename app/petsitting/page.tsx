@@ -1257,6 +1257,7 @@ export default function PetSitting() {
 
       if (res.ok) {
         const updatedData = await res.json();
+        setSitterId(updatedData.id || '');
         setSitterApprovalStatus(updatedData.approval_status || 'pending');
         setNeedsReapproval(!!updatedData.needs_reapproval);
         
@@ -2874,7 +2875,7 @@ export default function PetSitting() {
 
             {sitterAuthMode === 'form' && (
               <div className="animate-fade-in">
-                {profileMessage === '' && sitterApprovalStatus === 'pending' && (
+                {profileMessage === '' && sitterApprovalStatus === 'pending' && sitterId !== '' && (
                   <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3 items-start">
                     <AlertTriangle className="w-5 h-5 text-blue-500 inline-block mr-1.5 flex-shrink-0" />
                     <div>
