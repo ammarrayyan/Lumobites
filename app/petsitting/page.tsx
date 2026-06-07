@@ -190,6 +190,7 @@ export default function PetSitting() {
   const [sitterAuthCode, setSitterAuthCode] = useState('');
   const [sitterAuthLoading, setSitterAuthLoading] = useState(false);
   const [sitterAuthError, setSitterAuthError] = useState('');
+  const [sitterSignupIntent, setSitterSignupIntent] = useState<'new' | 'existing' | null>(null);
 
   // Delete Profile State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -1028,7 +1029,7 @@ export default function PetSitting() {
     }
   };
 
-  const handleSitterEmailSubmit = async (e: React.FormEvent) => {
+  const handleSitterEmailSubmit = async (e: React.FormEvent, intent: 'new' | 'existing') => {
     e.preventDefault();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!sitterEmail.trim() || !emailRegex.test(sitterEmail.trim())) {
@@ -1036,11 +1037,12 @@ export default function PetSitting() {
       return;
     }
     
+    setSitterSignupIntent(intent);
     setSitterAuthLoading(true);
     setSitterAuthError('');
     
     try {
-      // Send OTP to ANY sitter email
+      // Always send OTP — profile check happens after verification
       const otpRes = await fetch('/api/petsitting/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1084,12 +1086,16 @@ export default function PetSitting() {
         const profileData = await profileRes.json();
 
         if (profileRes.ok && profileData && profileData.id) {
-          // Returning user, load their profile
+          // Profile found — load it regardless of intent
           await loadSitterProfile(sitterEmail);
           setSitterAuthMode('form');
           setProfilePreviewMode(true);
+        } else if (sitterSignupIntent === 'existing') {
+          // "Sign In" intent but no profile found — show helpful error, go back to email screen
+          setSitterAuthMode('email');
+          setSitterAuthError('No sitter profile found for this email. If you\'re new here, click "Create New Profile" instead.');
         } else {
-          // New user, clear form to create a new profile
+          // New signup — clear form and open blank profile creation form
           setSitterFirstName('');
           setSitterLastName('');
           setSitterPhoto('');
@@ -2802,16 +2808,40 @@ export default function PetSitting() {
                 </div>
 
             {sitterAuthMode === 'email' && (
-              <form onSubmit={handleSitterEmailSubmit} className="space-y-4 max-w-sm mx-auto animate-fade-in">
+              <div className="space-y-5 max-w-sm mx-auto animate-fade-in">
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Enter your email</label>
-                  <input required type="email" value={sitterEmail} onChange={e => setSitterEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center" placeholder="your@email.com" />
+                  <input
+                    type="email"
+                    value={sitterEmail}
+                    onChange={e => { setSitterEmail(e.target.value); setSitterAuthError(''); }}
+                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center"
+                    placeholder="your@email.com"
+                  />
                 </div>
                 {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
-                <button type="submit" disabled={sitterAuthLoading || !sitterEmail} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm">
-                  {sitterAuthLoading ? 'Checking...' : 'Continue'}
+                <button
+                  type="button"
+                  disabled={sitterAuthLoading || !sitterEmail}
+                  onClick={e => handleSitterEmailSubmit(e as any, 'new')}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm"
+                >
+                  {sitterAuthLoading && sitterSignupIntent === 'new' ? 'Sending...' : '✨ Create New Profile'}
                 </button>
-              </form>
+                <div className="relative flex items-center gap-3">
+                  <div className="flex-1 h-px bg-[#E8DDD4]" />
+                  <span className="text-xs text-[#8B7E7D] font-semibold">or</span>
+                  <div className="flex-1 h-px bg-[#E8DDD4]" />
+                </div>
+                <button
+                  type="button"
+                  disabled={sitterAuthLoading || !sitterEmail}
+                  onClick={e => handleSitterEmailSubmit(e as any, 'existing')}
+                  className="w-full bg-white border border-[#8B5E3C] text-[#8B5E3C] font-bold py-3 rounded-xl transition-all hover:bg-[#FAF6F4]"
+                >
+                  {sitterAuthLoading && sitterSignupIntent === 'existing' ? 'Sending...' : '🔑 Sign In to Existing Profile'}
+                </button>
+              </div>
             )}
 
             {sitterAuthMode === 'otp' && (

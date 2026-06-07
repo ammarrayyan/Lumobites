@@ -26,18 +26,9 @@ export async function POST(request: NextRequest) {
       if (ownerError || !ownerData || !ownerData.is_pro) {
         return NextResponse.json({ error: 'No active PRO membership found for this email.' }, { status: 404 });
       }
-    } else {
-      // Check if email exists in sitters table
-      const { data: sitterData, error: sitterError } = await supabaseAdmin
-        .from('sitters')
-        .select('id')
-        .eq('email', cleanEmail)
-        .maybeSingle();
-
-      if (sitterError || !sitterData) {
-        return NextResponse.json({ error: 'No sitter profile found for this email.' }, { status: 404 });
-      }
     }
+    // For sitter type (new signup or existing login), we always send OTP.
+    // Profile existence check happens AFTER OTP verification in the client.
     // 1.5 Rate Limiting Check
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count, error: countError } = await supabaseAdmin
