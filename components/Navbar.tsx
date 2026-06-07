@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -267,6 +267,12 @@ export default function Navbar() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             Safety Check
+          </Link>
+
+          {/* Find Food */}
+          <Link href="/chat" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
+            <Utensils className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+            Find Food
           </Link>
 
           {/* Lost Pets */}
@@ -536,6 +542,16 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               Safety Check
+            </Link>
+
+            {/* Find Food */}
+            <Link 
+              href="/chat" 
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
+              onClick={() => setIsOpen(false)}
+            >
+              <Utensils className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+              Find Food
             </Link>
 
             {/* Lost Pets */}
