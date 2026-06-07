@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lumo-bites-cache-v1';
+const CACHE_NAME = 'lumo-bites-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
@@ -40,6 +40,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Only handle standard GET requests
   if (event.request.method !== 'GET') return;
+
+  // Always force network for /petsitting pages to ensure fresh data
+  const url = new URL(event.request.url);
+  if (url.pathname.startsWith('/petsitting')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
