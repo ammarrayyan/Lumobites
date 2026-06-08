@@ -41,7 +41,7 @@ export default function ChatModal({
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}`);
+      const res = await fetch(`/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);

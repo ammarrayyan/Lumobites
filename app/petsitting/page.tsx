@@ -2333,7 +2333,7 @@ export default function PetSitting() {
                                     })()}
                                   </td>
                                 </tr>
-                                {req.status === 'accepted' && isBookingDateActive(req.dates) && (
+                                {req.status === 'accepted' && (
                                   <tr className="bg-green-50/30">
                                     <td colSpan={6} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
                                       <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2347,7 +2347,7 @@ export default function PetSitting() {
                                             setActiveChatRole('owner');
                                             setChatModalOpen(true);
                                           }}
-                                          className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
+                                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
                                         >
                                           Message Sitter
                                         </button>
@@ -2830,7 +2830,7 @@ export default function PetSitting() {
                                     setActiveChatRole('sitter');
                                     setChatModalOpen(true);
                                   }}
-                                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
                                 >
                                   Message Owner
                                 </button>
