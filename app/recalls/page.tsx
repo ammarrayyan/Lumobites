@@ -158,6 +158,13 @@ export default function RecallsPage() {
   const [isPro, setIsPro] = useState(false);
   const [proEmail, setProEmail] = useState('');
 
+  const [authMode, setAuthMode] = useState<'upgrade' | 'signin' | 'verify'>('upgrade');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authCode, setAuthCode] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     if (cachedEmail) {
@@ -226,6 +233,83 @@ export default function RecallsPage() {
     }
   }
 
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authEmail.trim()) return;
+    setAuthLoading(true);
+    setAuthError('');
+    setAuthMessage('');
+
+    try {
+      if (authMode === 'verify') {
+        const res = await fetch('/api/stripe/verify-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: authEmail.trim(), code: authCode.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Invalid code');
+        
+        localStorage.setItem('lumo_pro_email', authEmail.trim());
+        window.dispatchEvent(new Event('lumo-pro-update'));
+        setIsPro(true);
+        setProEmail(authEmail.trim());
+        setEmail(authEmail.trim());
+      } else if (authMode === 'signin') {
+        const res = await fetch('/api/stripe/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: authEmail.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send code');
+        setAuthMode('verify');
+        setAuthMessage(`Code sent to ${authEmail.trim()}`);
+      } else if (authMode === 'upgrade') {
+        const res = await fetch('/api/stripe/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: authEmail.trim() })
+        });
+        const data = await res.json();
+        if (data.isPro) {
+          setAuthError('You are already PRO — sign in instead.');
+          setAuthMode('signin');
+          setAuthLoading(false);
+          return;
+        }
+        const checkoutRes = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: authEmail.trim(), returnUrl: `${window.location.origin}/recalls` })
+        });
+        const checkoutData = await checkoutRes.json();
+        if (checkoutData.url) {
+          window.location.href = checkoutData.url;
+          return;
+        } else {
+          throw new Error(checkoutData.error || 'Failed to initialize checkout');
+        }
+      }
+    } catch (err: any) {
+      setAuthError(err.message || 'Something went wrong.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('lumo_pro_email');
+    window.dispatchEvent(new Event('lumo-pro-update'));
+    setIsPro(false);
+    setProEmail('');
+    setEmail('');
+    setAuthMode('upgrade');
+    setAuthEmail('');
+    setAuthCode('');
+    setSubscribed(false);
+  };
+
   // Split active vs historical
   const activeRecalls = useMemo(() => recalls.filter(isActive), [recalls]);
   const historicalRecalls = useMemo(() => recalls.filter(r => !isActive(r)), [recalls]);
@@ -279,46 +363,107 @@ export default function RecallsPage() {
                 <h3 className="text-[#4A3E3D] font-bold text-lg">Instant Email Alerts</h3>
               </div>
               <p className="relative z-10 text-[#666] text-sm leading-relaxed mb-5">
-                Get instant email alerts the moment your pet&apos;s food is recalled. This is a PRO feature – upgrade for just $2.99/month to keep your pets safe.
+                {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled. This is a PRO feature – upgrade for just $2.99/month to keep your pets safe.`}
               </p>
-              <div className="relative z-10 flex flex-col gap-3">
-                <Link
-                  href="/account"
-                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center text-center text-decoration-none"
-                  style={{ textDecoration: 'none' }}
+              
+              <form onSubmit={handleAuthSubmit} className="relative z-10 flex flex-col gap-3">
+                {authMode !== 'verify' && (
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={e => setAuthEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] transition-all"
+                  />
+                )}
+                {authMode === 'verify' && (
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    maxLength={6}
+                    value={authCode}
+                    onChange={e => setAuthCode(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="••••••"
+                    className="w-full px-4 py-3 text-center text-xl tracking-widest font-mono rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] transition-all"
+                  />
+                )}
+                
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center disabled:opacity-70"
                 >
-                  Upgrade to PRO &rarr;
-                </Link>
-                <div className="text-center">
-                  <Link href="/account?redirect=/recalls" className="text-xs text-[#8B5E3C] hover:underline font-semibold text-decoration-none">
-                    Already PRO? Sign in here
-                  </Link>
-                </div>
-              </div>
+                  {authLoading ? 'Loading...' : authMode === 'upgrade' ? 'Upgrade to PRO →' : authMode === 'signin' ? 'Sign In →' : 'Verify & Continue'}
+                </button>
+                
+                {authError && <p className="text-red-500 text-xs font-semibold text-center">{authError}</p>}
+                {authMessage && <p className="text-emerald-600 text-xs font-semibold text-center">{authMessage}</p>}
+                
+                {authMode !== 'verify' && (
+                  <div className="text-center mt-2">
+                    {authMode === 'upgrade' ? (
+                      <button type="button" onClick={() => { setAuthMode('signin'); setAuthError(''); }} className="text-xs text-[#8B5E3C] hover:underline font-semibold cursor-pointer">
+                        Already PRO? Sign in here
+                      </button>
+                    ) : (
+                      <button type="button" onClick={() => { setAuthMode('upgrade'); setAuthError(''); }} className="text-xs text-[#8B5E3C] hover:underline font-semibold cursor-pointer">
+                        Not PRO yet? Upgrade here
+                      </button>
+                    )}
+                  </div>
+                )}
+                {authMode === 'verify' && (
+                  <div className="text-center mt-2">
+                    <button type="button" onClick={() => setAuthMode('signin')} className="text-xs text-gray-500 hover:text-gray-800 font-semibold cursor-pointer">
+                      &larr; Change Email
+                    </button>
+                  </div>
+                )}
+              </form>
             </div>
-          ) : !subscribed ? (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-[480px] mx-auto">
-              <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com" required
-                className="flex-1 px-5 py-3 rounded-full border border-[#DDD] bg-white text-[#191919] text-base outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
-              />
-              <button type="submit" disabled={submitting}
-                className="px-6 py-3 rounded-full font-[700] text-white text-base transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1, whiteSpace: 'nowrap' }}
-              >
-                {submitting ? 'Saving...' : <><Bell className="w-4 h-4 text-white" /> Subscribe</>}
-              </button>
-            </form>
           ) : (
-            <div className="inline-flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-6 py-3 rounded-full font-[600] text-base">
-              <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> {successMsg}
-            </div>
-          )}
-          
-          {isPro && subError && (
-            <div className="mt-4 max-w-[480px] mx-auto">
-              <p className="text-[#EF4444] text-sm font-semibold">{subError}</p>
+            <div className="max-w-[480px] mx-auto text-left bg-white border border-[#E8D5C0] rounded-3xl p-6 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#191919]">Welcome back!</h3>
+                    <p className="text-xs text-gray-500">Signed in as {proEmail}</p>
+                  </div>
+                </div>
+                <button onClick={handleSignOut} className="text-xs text-gray-400 hover:text-gray-700 font-semibold underline">
+                  Sign out
+                </button>
+              </div>
+              
+              {!subscribed ? (
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="your@email.com" required
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#DDD] bg-[#FAF6F4] text-[#191919] text-sm outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
+                  />
+                  <button type="submit" disabled={submitting}
+                    className="px-5 py-2.5 rounded-xl font-[700] text-white text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1, whiteSpace: 'nowrap' }}
+                  >
+                    {submitting ? 'Saving...' : <><Bell className="w-4 h-4 text-white" /> Subscribe</>}
+                  </button>
+                </form>
+              ) : (
+                <div className="inline-flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-4 py-2.5 rounded-xl font-[600] text-sm w-full justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#166534] shrink-0" /> {successMsg}
+                </div>
+              )}
+              {isPro && subError && (
+                <div className="mt-3">
+                  <p className="text-[#EF4444] text-xs font-semibold text-center">{subError}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
