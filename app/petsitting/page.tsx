@@ -80,7 +80,7 @@ export default function PetSitting() {
   
   // Find Sitter State
   const [sitters, setSitters] = useState<Sitter[]>([]);
-  const [loadingSitters, setLoadingSitters] = useState(true);
+  const [loadingSitters, setLoadingSitters] = useState(false);
   const [isOwnerPro, setIsOwnerPro] = useState(false);
   const [unlockModalOpen, setUnlockModalOpen] = useState(false);
   const [ownerAuthMode, setOwnerAuthMode] = useState<'email' | 'verify'>('email');
@@ -240,7 +240,6 @@ export default function PetSitting() {
       } else {
         setReqEmail('');
         setIsOwnerPro(false);
-        fetchSitters();
       }
     };
 
@@ -527,6 +526,7 @@ export default function PetSitting() {
             setSearchCoords({ lat: data.lat, lng: data.lng });
             setSearchLocationName(data.formatted_address || data.city || '');
             setSearchLocationError('');
+            if (sitters.length === 0) fetchSitters();
           } else {
             setSearchCoords(null);
             setSearchLocationName('');
@@ -552,6 +552,7 @@ export default function PetSitting() {
 
 
   const fetchSitters = async (email?: string, dayOverride?: string, serviceOverride?: string) => {
+    setLoadingSitters(true);
     try {
       const qEmail = email !== undefined ? email : reqEmail;
       const qDay = dayOverride !== undefined ? dayOverride : searchDay;
@@ -1954,11 +1955,21 @@ export default function PetSitting() {
             {/* Sitters & Map Layout */}
             {loadingSitters ? (
               <div className="text-center text-[#8B5E3C] py-12">Loading trusted sitters...</div>
+            ) : (!searchZip.trim() || !searchCoords) ? (
+              <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4] animate-fade-in shadow-sm">
+                <div className="w-16 h-16 bg-[#FAF6F4] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#E8DDD4]">
+                  <MapPin className="w-8 h-8 text-[#8B5E3C]" />
+                </div>
+                <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Enter your city to find trusted pet sitters near you 🐾</h3>
+                <p className="text-[#8B7E7D] max-w-md mx-auto">
+                  Type your city or zip code in the search bar above to see our network of local, loving sitters ready to help.
+                </p>
+              </div>
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
                 <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No active sitters found in this area yet.</h3>
-                <p className="text-[#8B7E7D] mb-4">Try expanding your search distance, or be the first to join!</p>
+                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in {searchLocationName || searchZip} yet.</h3>
+                <p className="text-[#8B7E7D] mb-4">Check back soon, try expanding your search distance, or become a sitter!</p>
                 <button 
                   onClick={() => setActiveTab('become')}
                   className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
