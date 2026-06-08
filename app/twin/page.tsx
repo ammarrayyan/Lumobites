@@ -11,7 +11,9 @@ const LOADING_MESSAGES = [
   "Analyzing your features...",
   "Consulting the breed database...",
   "Finding your perfect match...",
-  "Almost there..."
+  "Comparing 81 breeds...",
+  "Almost there...",
+  "Your Pet Twin is almost revealed..."
 ];
 
 interface TwinResult {
@@ -112,6 +114,9 @@ export default function TwinPage() {
   const [modalError, setModalError] = useState('');
   const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
 
+  // Progress bar state
+  const [progress, setProgress] = useState(0);
+
   // Stripe & subscription state
   const [isPro, setIsPro] = useState(false);
   const [proEmail, setProEmail] = useState('');
@@ -138,6 +143,10 @@ export default function TwinPage() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (step === 'analyzing' && !analysisTimeout) {
+      setProgress(0);
+      // Trigger progress animation
+      setTimeout(() => setProgress(90), 100);
+      
       interval = setInterval(() => {
         setLoadingIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
       }, 2000);
