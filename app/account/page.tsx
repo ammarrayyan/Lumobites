@@ -128,7 +128,14 @@ export default function AccountPage() {
         cancelAtPeriodEnd: data.cancelAtPeriodEnd,
         daysRemaining: data.daysRemaining,
       });
-      setStep('dashboard');
+      
+      const params = new URLSearchParams(window.location.search);
+      const redirectUrl = params.get('redirect');
+      if (redirectUrl && redirectUrl.startsWith('/')) {
+        window.location.href = redirectUrl;
+      } else {
+        setStep('dashboard');
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Could not retrieve subscription details.');

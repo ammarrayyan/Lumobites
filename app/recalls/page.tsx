@@ -290,7 +290,7 @@ export default function RecallsPage() {
                   Upgrade to PRO &rarr;
                 </Link>
                 <div className="text-center">
-                  <Link href="/account" className="text-xs text-[#8B5E3C] hover:underline font-semibold text-decoration-none">
+                  <Link href="/account?redirect=/recalls" className="text-xs text-[#8B5E3C] hover:underline font-semibold text-decoration-none">
                     Already PRO? Sign in here
                   </Link>
                 </div>
