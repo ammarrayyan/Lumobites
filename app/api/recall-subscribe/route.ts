@@ -123,3 +123,70 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const { data: existingSub, error } = await supabase
+      .from('recall_subscriptions')
+      .select('email')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Supabase check error:', error);
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    }
+
+    return NextResponse.json({ subscribed: !!existingSub });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    
+    // Verify PRO status
+    if (cleanEmail !== 'premierpetnutritionllc@gmail.com') {
+      const { data: proData, error: proError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (proError || !proData || !proData.is_pro) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+    }
+
+    const { error } = await supabase
+      .from('recall_subscriptions')
+      .delete()
+      .eq('email', cleanEmail);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+  }
+}
+

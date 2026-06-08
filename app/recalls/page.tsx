@@ -165,12 +165,41 @@ export default function RecallsPage() {
   const [authError, setAuthError] = useState('');
   const [authMessage, setAuthMessage] = useState('');
 
+  const checkAndAutoSubscribe = async (userEmail: string) => {
+    try {
+      const res = await fetch(`/api/recall-subscribe?email=${encodeURIComponent(userEmail)}`);
+      const data = await res.json();
+      if (res.ok) {
+        if (data.subscribed) {
+          setSubscribed(true);
+        } else {
+          const unsubbed = localStorage.getItem('lumo_unsubscribed_recalls');
+          if (unsubbed === 'true') {
+            setSubscribed(false);
+          } else {
+            const subRes = await fetch('/api/recall-subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail, pet_type: 'all', product_names: [] }),
+            });
+            if (subRes.ok) {
+              setSubscribed(true);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error checking subscription', e);
+    }
+  };
+
   useEffect(() => {
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     if (cachedEmail) {
       setIsPro(true);
       setProEmail(cachedEmail);
       setEmail(cachedEmail);
+      checkAndAutoSubscribe(cachedEmail);
     } else {
       setIsPro(false);
       setProEmail('');
@@ -182,9 +211,11 @@ export default function RecallsPage() {
         setIsPro(true);
         setProEmail(emailVal);
         setEmail(emailVal);
+        checkAndAutoSubscribe(emailVal);
       } else {
         setIsPro(false);
         setProEmail('');
+        setSubscribed(false);
       }
     };
     window.addEventListener('lumo-pro-update', syncStatus);
@@ -255,6 +286,8 @@ export default function RecallsPage() {
         setIsPro(true);
         setProEmail(authEmail.trim());
         setEmail(authEmail.trim());
+        localStorage.removeItem('lumo_unsubscribed_recalls');
+        checkAndAutoSubscribe(authEmail.trim());
       } else if (authMode === 'signin') {
         const res = await fetch('/api/stripe/send-code', {
           method: 'POST',
@@ -308,6 +341,21 @@ export default function RecallsPage() {
     setAuthEmail('');
     setAuthCode('');
     setSubscribed(false);
+  };
+
+  const handleUnsubscribe = async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/recall-subscribe?email=${encodeURIComponent(proEmail)}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSubscribed(false);
+        localStorage.setItem('lumo_unsubscribed_recalls', 'true');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Split active vs historical
@@ -440,28 +488,26 @@ export default function RecallsPage() {
                 </button>
               </div>
               
-              {!subscribed ? (
-                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email" value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="your@email.com" required
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-[#DDD] bg-[#FAF6F4] text-[#191919] text-sm outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
-                  />
-                  <button type="submit" disabled={submitting}
-                    className="px-5 py-2.5 rounded-xl font-[700] text-white text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1, whiteSpace: 'nowrap' }}
-                  >
-                    {submitting ? 'Saving...' : <><Bell className="w-4 h-4 text-white" /> Subscribe</>}
-                  </button>
-                </form>
-              ) : (
-                <div className="inline-flex items-center gap-2 bg-[#DCFCE7] text-[#166534] px-4 py-2.5 rounded-xl font-[600] text-sm w-full justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-[#166534] shrink-0" /> {successMsg}
+              {subscribed ? (
+                <div className="flex flex-col gap-3">
+                  <div className="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#DCFCE7] text-[#166534] px-4 py-3 rounded-xl font-[600] text-sm w-full">
+                    <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" />
+                    <span className="leading-snug">You are automatically subscribed to instant recall alerts as a PRO member. We will email you immediately when any pet food is recalled.</span>
+                  </div>
+                  <div className="flex justify-end mt-1">
+                    <button onClick={handleUnsubscribe} disabled={submitting} className="text-xs text-gray-400 hover:text-gray-700 font-semibold underline cursor-pointer disabled:opacity-50">
+                      Unsubscribe from alerts
+                    </button>
+                  </div>
                 </div>
-              )}
-              {isPro && subError && (
-                <div className="mt-3">
-                  <p className="text-[#EF4444] text-xs font-semibold text-center">{subError}</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-600">
+                    You are not currently subscribed to recall alerts.
+                  </div>
+                  <button onClick={() => checkAndAutoSubscribe(proEmail)} disabled={submitting} className="px-5 py-2.5 rounded-xl font-[700] text-white text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer max-w-[200px]" style={{ backgroundColor: '#8B5E3C' }}>
+                    {submitting ? 'Subscribing...' : 'Subscribe to alerts'}
+                  </button>
                 </div>
               )}
             </div>
