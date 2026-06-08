@@ -2084,11 +2084,12 @@ export default function TwinPage() {
                         We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 15 minutes.
                       </p>
                       <input
-                        type="text"
+                        type="password"
+                        inputMode="numeric"
                         maxLength={6}
                         value={verificationCode}
                         onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                        placeholder="123456"
+                        placeholder="••••••"
                         required
                         className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
                         autoFocus

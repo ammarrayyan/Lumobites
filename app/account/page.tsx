@@ -340,11 +340,12 @@ export default function AccountPage() {
                     Enter 6-Digit Code
                   </label>
                   <input
-                    type="text"
+                    type="password"
+                    inputMode="numeric"
                     maxLength={6}
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="123456"
+                    placeholder="••••••"
                     required
                     disabled={loading}
                     className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest text-[#191919] bg-white transition-all disabled:opacity-50"

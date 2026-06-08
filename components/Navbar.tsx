@@ -712,10 +712,11 @@ export default function Navbar() {
                 ) : (
                   <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
                     <input
-                      type="text"
+                      type="password"
+                      inputMode="numeric"
                       value={signInCode}
                       onChange={e => setSignInCode(e.target.value)}
-                      placeholder="6-digit code"
+                      placeholder="••••••"
                       className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-center text-lg tracking-[0.2em] font-bold"
                       maxLength={6}
                       required
