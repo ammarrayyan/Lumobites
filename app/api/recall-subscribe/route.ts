@@ -21,7 +21,20 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // Check if subscription already exists
+    // 1. Verify PRO Status
+    if (cleanEmail !== 'premierpetnutritionllc@gmail.com') {
+      const { data: proData, error: proError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (proError || !proData || !proData.is_pro) {
+        return NextResponse.json({ error: 'This is a PRO feature. Please upgrade to subscribe.' }, { status: 403 });
+      }
+    }
+
+    // 2. Check if subscription already exists
     const { data: existingSub, error: checkError } = await supabase
       .from('recall_subscriptions')
       .select('email')

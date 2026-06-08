@@ -163,6 +163,7 @@ export default function RecallsPage() {
     if (cachedEmail) {
       setIsPro(true);
       setProEmail(cachedEmail);
+      setEmail(cachedEmail);
     } else {
       setIsPro(false);
       setProEmail('');
@@ -173,6 +174,7 @@ export default function RecallsPage() {
       if (emailVal) {
         setIsPro(true);
         setProEmail(emailVal);
+        setEmail(emailVal);
       } else {
         setIsPro(false);
         setProEmail('');
@@ -201,7 +203,7 @@ export default function RecallsPage() {
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
     if (!isPro) {
-      setSubError("Email recall alerts are a PRO feature. Upgrade to PRO for $2.99/month to get instant alerts when your pet's food is recalled.");
+      setSubError("Email recall alerts are a PRO feature. Upgrade to PRO to subscribe.");
       return;
     }
     setSubmitting(true);
@@ -266,10 +268,35 @@ export default function RecallsPage() {
           <p className="text-[18px] text-[#666] leading-[1.65] max-w-[500px] mx-auto mb-6">
             Live recalls sourced directly from the FDA. Updated hourly. Know what&apos;s in your pet&apos;s bowl.
           </p>
-          <div className="text-sm text-[#8B5E3C] font-semibold max-w-[480px] mx-auto mb-8 bg-[#8B5E3C]/5 border border-[#8B5E3C]/20 px-4 py-2.5 rounded-2xl flex items-center justify-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" /> Get instant email alerts the moment your pet&apos;s food is recalled — upgrade to PRO for $2.99/month.
-          </div>
-          {!subscribed ? (
+          {!isPro ? (
+            <div className="bg-white border-2 border-[#E8D5C0] p-6 rounded-3xl shadow-sm max-w-[480px] mx-auto text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5E3C]/5 rounded-bl-full pointer-events-none -z-0"></div>
+              
+              <div className="relative z-10 flex items-center gap-3 mb-3">
+                <div className="bg-[#8B5E3C]/10 w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+                  <Bell className="w-5 h-5 text-[#8B5E3C]" />
+                </div>
+                <h3 className="text-[#4A3E3D] font-bold text-lg">Instant Email Alerts</h3>
+              </div>
+              <p className="relative z-10 text-[#666] text-sm leading-relaxed mb-5">
+                Get instant email alerts the moment your pet&apos;s food is recalled. This is a PRO feature – upgrade for just $2.99/month to keep your pets safe.
+              </p>
+              <div className="relative z-10 flex flex-col gap-3">
+                <Link
+                  href="/account"
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center text-center text-decoration-none"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Upgrade to PRO &rarr;
+                </Link>
+                <div className="text-center">
+                  <Link href="/account" className="text-xs text-[#8B5E3C] hover:underline font-semibold text-decoration-none">
+                    Already PRO? Sign in here
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : !subscribed ? (
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-[480px] mx-auto">
               <input
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -277,10 +304,10 @@ export default function RecallsPage() {
                 className="flex-1 px-5 py-3 rounded-full border border-[#DDD] bg-white text-[#191919] text-base outline-none focus:border-[#C17D3C] focus:ring-2 focus:ring-[#C17D3C]/20 transition-all"
               />
               <button type="submit" disabled={submitting}
-                className="px-6 py-3 rounded-full font-[700] text-white text-base transition-all flex items-center justify-center gap-1.5"
+                className="px-6 py-3 rounded-full font-[700] text-white text-base transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 style={{ backgroundColor: '#8B5E3C', opacity: submitting ? 0.7 : 1, whiteSpace: 'nowrap' }}
               >
-                {submitting ? 'Saving…' : <><Bell className="w-4 h-4 text-white" /> Get Alerts</>}
+                {submitting ? 'Saving...' : <><Bell className="w-4 h-4 text-white" /> Subscribe</>}
               </button>
             </form>
           ) : (
@@ -288,18 +315,10 @@ export default function RecallsPage() {
               <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" /> {successMsg}
             </div>
           )}
-          {subError && (
+          
+          {isPro && subError && (
             <div className="mt-4 max-w-[480px] mx-auto">
               <p className="text-[#EF4444] text-sm font-semibold">{subError}</p>
-              {!isPro && subError.includes('PRO feature') && (
-                <Link
-                  href="/account"
-                  className="inline-block mt-3 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-2 px-5 rounded-full text-xs font-bold transition-all shadow-sm"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Upgrade to PRO ✨
-                </Link>
-              )}
             </div>
           )}
         </div>
