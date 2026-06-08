@@ -2956,8 +2956,11 @@ export default function PetSitting() {
                 )}
                 
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-[#E8DDD4]">
+                  <div className="text-center text-xs text-[#8B7E7D] mb-1">
+                    Didn't receive the code? Check your spam or junk folder.
+                  </div>
                   <button type="button" onClick={e => handleSitterEmailSubmit(e as any, sitterSignupIntent || 'new')} disabled={sitterAuthLoading} className="w-full text-[#8B5E3C] text-sm font-bold hover:underline py-2">
-                    Didn't receive it? Resend Code
+                    Still nothing? Resend Code
                   </button>
                   <button type="button" onClick={() => { setSitterAuthMode('email'); setSitterAuthCode(''); setSitterAuthError(''); setSitterConflict(false); }} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#4A3E3D] py-2 flex items-center justify-center gap-1">
                     &larr; Back to start

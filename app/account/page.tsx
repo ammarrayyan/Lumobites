@@ -366,7 +366,7 @@ export default function AccountPage() {
                         onClick={() => handleSendCode({ preventDefault: () => {} } as React.FormEvent)}
                         className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
                       >
-                        Resend Code
+                        Still nothing? Resend Code
                       </button>
                     )}
                   </div>
@@ -382,30 +382,35 @@ export default function AccountPage() {
                   ) : 'Verify & Continue'}
                 </button>
 
-                <div className="flex justify-between items-center mt-2">
-                  {!isLocked && (
+                <div className="mt-6 flex flex-col gap-2">
+                  <div className="text-center text-xs text-[#8B7E7D]">
+                    Didn't receive the code? Check your spam or junk folder.
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    {!isLocked && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStep('email');
+                          setError(null);
+                          setMessage(null);
+                          setVerificationCode('');
+                        }}
+                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      >
+                        ← Change Email
+                      </button>
+                    )}
+
                     <button
                       type="button"
-                      onClick={() => {
-                        setStep('email');
-                        setError(null);
-                        setMessage(null);
-                        setVerificationCode('');
-                      }}
-                      className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      onClick={handleSendCode}
+                      disabled={loading}
+                      className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
                     >
-                      ← Change Email
+                      Still nothing? Resend Code
                     </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleSendCode}
-                    disabled={loading}
-                    className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    Resend Code
-                  </button>
+                  </div>
                 </div>
               </form>
             </div>

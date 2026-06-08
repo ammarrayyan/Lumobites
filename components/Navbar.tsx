@@ -685,7 +685,7 @@ export default function Navbar() {
                         onClick={() => handleSignInSendCode({ preventDefault: () => {} } as React.FormEvent)}
                         className="text-xs font-bold text-[#8B5E3C] hover:underline mt-1 cursor-pointer bg-transparent border-none"
                       >
-                        Resend Code
+                        Still nothing? Resend Code
                       </button>
                     )}
                   </div>
@@ -727,10 +727,24 @@ export default function Navbar() {
                     >
                       {signInLoading ? 'Verifying...' : 'Verify & Sign In'}
                     </button>
+
+                    <div className="mt-2 flex flex-col gap-2 border-t border-[#E8D5C0] pt-4">
+                      <div className="text-center text-xs text-[#8B7E7D]">
+                        Didn't receive the code? Check your spam or junk folder.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSignInSendCode({ preventDefault: () => {} } as React.FormEvent)}
+                        className="text-sm font-bold text-[#8B5E3C] hover:underline text-center"
+                      >
+                        Still nothing? Resend Code
+                      </button>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => { setSignInStep('email'); setSignInCode(''); setSignInError(''); }}
-                      className="text-sm font-bold text-[#8B5E3C] hover:underline text-center mt-2"
+                      className="text-sm font-bold text-gray-500 hover:text-gray-700 hover:underline text-center mt-2"
                     >
                       Use a different email
                     </button>

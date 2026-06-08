@@ -285,27 +285,31 @@ export default function AffiliateDashboard() {
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   ) : 'Verify & Enter Dashboard'}
                 </button>
-
-                <div className="flex justify-between items-center mt-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep('email');
-                      setError(null);
-                      setMessage(null);
-                      setVerificationCode('');
-                    }}
-                    className="text-gray-400 hover:text-gray-600 hover:underline font-bold bg-transparent border-none cursor-pointer"
-                  >
-                    ← Change Email
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSendCode}
-                    className="text-[#8B5E3C] hover:underline font-bold bg-transparent border-none cursor-pointer"
-                  >
-                    Resend Code
-                  </button>
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="text-center text-xs text-[#8B7E7D]">
+                    Didn't receive the code? Check your spam or junk folder.
+                  </div>
+                  <div className="flex justify-between items-center mt-1 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep('email');
+                        setError(null);
+                        setMessage(null);
+                        setVerificationCode('');
+                      }}
+                      className="text-gray-400 hover:text-gray-600 hover:underline font-bold bg-transparent border-none cursor-pointer"
+                    >
+                      ← Change Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSendCode}
+                      className="text-[#8B5E3C] hover:underline font-bold bg-transparent border-none cursor-pointer"
+                    >
+                      Still nothing? Resend Code
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

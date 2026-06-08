@@ -2104,7 +2104,7 @@ export default function TwinPage() {
                             onClick={handleRestore}
                             className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
                           >
-                            Resend Code
+                            Still nothing? Resend Code
                           </button>
                         )}
                       </div>
@@ -2120,27 +2120,32 @@ export default function TwinPage() {
                       ) : 'Verify Code'}
                     </button>
 
-                    <div className="flex justify-between items-center mt-1 border-t border-gray-150/40 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalStep('restore_email');
-                          setModalMessage(null);
-                          setVerificationCode('');
-                        }}
-                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        ← Back to Email
-                      </button>
+                    <div className="mt-4 flex flex-col gap-2 pt-3 border-t border-gray-150/40">
+                      <div className="text-center text-xs text-[#8B7E7D]">
+                        Didn't receive the code? Check your spam or junk folder.
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalStep('restore_email');
+                            setModalMessage(null);
+                            setVerificationCode('');
+                          }}
+                          className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
+                        >
+                          ← Back to Email
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={handleRestore}
-                        disabled={modalLoading}
-                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        Resend Code
-                      </button>
+                        <button
+                          type="button"
+                          onClick={handleRestore}
+                          disabled={modalLoading}
+                          className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                        >
+                          Still nothing? Resend Code
+                        </button>
+                      </div>
                     </div>
                   </form>
                 )}
