@@ -190,6 +190,7 @@ export default function PetSitting() {
   const [sitterAuthCode, setSitterAuthCode] = useState('');
   const [sitterAuthLoading, setSitterAuthLoading] = useState(false);
   const [sitterAuthError, setSitterAuthError] = useState('');
+  const [sitterConflict, setSitterConflict] = useState(false);
   const [sitterSignupIntent, setSitterSignupIntent] = useState<'new' | 'existing' | null>(null);
 
   // Delete Profile State
@@ -1040,6 +1041,7 @@ export default function PetSitting() {
     setSitterSignupIntent(intent);
     setSitterAuthLoading(true);
     setSitterAuthError('');
+    setSitterConflict(false);
     
     try {
       // Always send OTP — profile check happens after verification
@@ -1086,10 +1088,16 @@ export default function PetSitting() {
         const profileData = await profileRes.json();
 
         if (profileRes.ok && profileData && profileData.id) {
-          // Profile found — load it regardless of intent
-          await loadSitterProfile(sitterEmail);
-          setSitterAuthMode('form');
-          setProfilePreviewMode(true);
+          if (sitterSignupIntent === 'new') {
+            // Profile exists but intent was new signup -> Error!
+            setSitterConflict(true);
+            setSitterAuthError('A sitter profile already exists for this email. Please use Sign In to Existing Profile instead.');
+          } else {
+            // Profile found and intent is 'existing' -> load it
+            await loadSitterProfile(sitterEmail);
+            setSitterAuthMode('form');
+            setProfilePreviewMode(true);
+          }
         } else if (sitterSignupIntent === 'existing') {
           // "Sign In" intent but no profile found — show helpful error, go back to email screen
           setSitterAuthMode('email');
@@ -2870,15 +2878,26 @@ export default function PetSitting() {
                 </div>
                 {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center bg-red-50 py-2 rounded-lg">{sitterAuthError}</div>}
                 
-                <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 rounded-xl transition-all shadow-md">
-                  {sitterAuthLoading ? 'Verifying...' : 'Verify Code'}
-                </button>
+                {sitterConflict ? (
+                  <button type="button" onClick={() => {
+                    setSitterAuthMode('email');
+                    setSitterAuthCode('');
+                    setSitterConflict(false);
+                    setSitterAuthError('');
+                  }} className="w-full bg-[#4A3E3D] hover:bg-[#322A29] text-white font-bold py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                    Sign In Instead &rarr;
+                  </button>
+                ) : (
+                  <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 rounded-xl transition-all shadow-md">
+                    {sitterAuthLoading ? 'Verifying...' : 'Verify Code'}
+                  </button>
+                )}
                 
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-[#E8DDD4]">
                   <button type="button" onClick={e => handleSitterEmailSubmit(e as any, sitterSignupIntent || 'new')} disabled={sitterAuthLoading} className="w-full text-[#8B5E3C] text-sm font-bold hover:underline py-2">
                     Didn't receive it? Resend Code
                   </button>
-                  <button type="button" onClick={() => { setSitterAuthMode('email'); setSitterAuthCode(''); setSitterAuthError(''); }} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#4A3E3D] py-2 flex items-center justify-center gap-1">
+                  <button type="button" onClick={() => { setSitterAuthMode('email'); setSitterAuthCode(''); setSitterAuthError(''); setSitterConflict(false); }} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#4A3E3D] py-2 flex items-center justify-center gap-1">
                     &larr; Back to start
                   </button>
                 </div>
