@@ -85,7 +85,7 @@ export default function ReviewsManagement({ adminKey, onUnauthorized }: ReviewsM
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-white/70">Loading reviews...</div>;
+    return <div className="text-center py-12 text-[#555555]">Loading reviews...</div>;
   }
 
   if (error) {
@@ -94,49 +94,49 @@ export default function ReviewsManagement({ adminKey, onUnauthorized }: ReviewsM
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-6 text-white">Sitter Reviews Management</h2>
+      <h2 className="text-xl font-bold mb-6 text-[#191919]">Sitter Reviews Management</h2>
 
-      <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-white/40 border border-gray-200 rounded-2xl overflow-hidden">
         {reviews.length === 0 ? (
-          <div className="p-12 text-center text-white/50">
+          <div className="p-12 text-center text-gray-500">
             <p>No reviews found in the system.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white/5 border-b border-white/10">
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Date</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Sitter</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Reviewer</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Rating</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider max-w-md">Review</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider text-right">Actions</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Date</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Sitter</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Reviewer</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Rating</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider max-w-md">Review</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {reviews.map((review) => (
-                  <tr key={review.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-sm text-white/70 whitespace-nowrap">
+                  <tr key={review.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 text-sm text-[#555555] whitespace-nowrap">
                       {new Date(review.created_at).toLocaleDateString()}
                     </td>
-                    <td className="p-4 text-sm font-medium text-white">
+                    <td className="p-4 text-sm font-medium text-[#191919]">
                       {review.sitter_name}
                     </td>
-                    <td className="p-4 text-sm text-white/80">
+                    <td className="p-4 text-sm text-[#555555]">
                       <div>{review.owner_name}</div>
-                      <div className="text-xs text-white/50">{review.owner_email}</div>
+                      <div className="text-xs text-gray-500">{review.owner_email}</div>
                     </td>
-                    <td className="p-4 text-sm text-[#c2e59c]">
+                    <td className="p-4 text-sm text-emerald-700">
                       {review.rating} / 5
                     </td>
-                    <td className="p-4 text-sm text-white/70 max-w-md truncate" title={review.review_text}>
+                    <td className="p-4 text-sm text-[#555555] max-w-md truncate" title={review.review_text}>
                       {review.review_text}
                     </td>
                     <td className="p-4 text-right whitespace-nowrap">
                       <button
                         onClick={() => handleDelete(review.id, review.sitter_id)}
-                        className="text-xs font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:text-red-300 px-3 py-1.5 rounded-lg transition-colors border border-red-500/30"
+                        className="text-xs font-bold bg-red-500/20 text-red-600 hover:bg-red-500/30 hover:text-red-300 px-3 py-1.5 rounded-lg transition-colors border border-red-500/30"
                       >
                         Delete
                       </button>

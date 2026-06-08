@@ -142,8 +142,8 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
     alert('Copied to clipboard: ' + url);
   };
 
-  if (loading) return <div className="text-white/50 text-center py-12">Loading referrals data...</div>;
-  if (!data) return <div className="text-red-400 text-center py-12">Error loading data.</div>;
+  if (loading) return <div className="text-gray-500 text-center py-12">Loading referrals data...</div>;
+  if (!data) return <div className="text-red-600 text-center py-12">Error loading data.</div>;
 
   const { stats, referrers } = data;
 
@@ -151,48 +151,48 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
     <div className="space-y-8 animate-fade-in">
       {/* Top Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#222] p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Activity size={48} />
           </div>
-          <p className="text-sm text-white/50 mb-1">Total Link Clicks</p>
-          <p className="text-3xl font-bold text-white">{stats.totalClicks}</p>
+          <p className="text-sm text-gray-500 mb-1">Total Link Clicks</p>
+          <p className="text-3xl font-bold text-[#191919]">{stats.totalClicks}</p>
         </div>
-        <div className="bg-[#222] p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Users size={48} />
           </div>
-          <p className="text-sm text-white/50 mb-1">Total Subscribers</p>
-          <p className="text-3xl font-bold text-[#c2e59c]">{stats.totalSubscribers}</p>
-          <p className="text-xs text-white/40 mt-1">{stats.totalActive} active</p>
+          <p className="text-sm text-gray-500 mb-1">Total Subscribers</p>
+          <p className="text-3xl font-bold text-emerald-700">{stats.totalSubscribers}</p>
+          <p className="text-xs text-gray-500 mt-1">{stats.totalActive} active</p>
         </div>
-        <div className="bg-[#222] p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <DollarSign size={48} />
           </div>
-          <p className="text-sm text-white/50 mb-1">Monthly Revenue</p>
-          <p className="text-3xl font-bold text-[#64b3f4]">${stats.totalMonthlyRevenue.toFixed(2)}</p>
-          <p className="text-xs text-white/40 mt-1">From active referrals</p>
+          <p className="text-sm text-gray-500 mb-1">Monthly Revenue</p>
+          <p className="text-3xl font-bold text-blue-600">${stats.totalMonthlyRevenue.toFixed(2)}</p>
+          <p className="text-xs text-gray-500 mt-1">From active referrals</p>
         </div>
-        <div className="bg-[#222] p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl border border-gray-200 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <XCircle size={48} />
           </div>
-          <p className="text-sm text-white/50 mb-1">Total Cancelled</p>
-          <p className="text-3xl font-bold text-red-400">{stats.totalCancelled}</p>
+          <p className="text-sm text-gray-500 mb-1">Total Cancelled</p>
+          <p className="text-3xl font-bold text-red-600">{stats.totalCancelled}</p>
         </div>
       </div>
 
       {/* Create Referrer */}
-      <div className="bg-[#222] p-6 rounded-2xl border border-white/5">
-        <h3 className="text-lg font-bold text-white mb-4">Create New Referrer</h3>
+      <div className="bg-white p-6 rounded-2xl border border-gray-200">
+        <h3 className="text-lg font-bold text-[#191919] mb-4">Create New Referrer</h3>
         <form onSubmit={handleCreateReferrer} className="flex gap-4">
           <input
             type="text"
             value={newReferrerName}
             onChange={(e) => setNewReferrerName(e.target.value)}
             placeholder="Enter referrer name (e.g. Omar)"
-            className="flex-1 bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-[#c2e59c]"
+            className="flex-1 bg-white border border-gray-200 rounded-xl p-3 text-[#191919] focus:outline-none focus:border-[#c2e59c]"
             disabled={creating}
           />
           <button
@@ -207,13 +207,13 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
       </div>
 
       {/* Referrers Table */}
-      <div className="bg-[#222] rounded-2xl border border-white/5 overflow-hidden">
-        <div className="p-6 border-b border-white/5">
-          <h3 className="text-lg font-bold text-white">Referrers Directory</h3>
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-bold text-[#191919]">Referrers Directory</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-white/70">
-            <thead className="bg-black/20 text-white/50">
+          <table className="w-full text-left text-sm text-[#555555]">
+            <thead className="bg-gray-100 text-gray-500">
               <tr>
                 <th className="p-4 font-medium">Name & Link</th>
                 <th className="p-4 font-medium text-center">Clicks</th>
@@ -227,36 +227,36 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
             <tbody>
               {referrers.map((referrer: any) => (
                 <React.Fragment key={referrer.id}>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                  <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors group">
                     <td className="p-4">
-                      <div className="font-bold text-white mb-1">{referrer.name}</div>
+                      <div className="font-bold text-[#191919] mb-1">{referrer.name}</div>
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="text-[#64b3f4] truncate max-w-[200px]">lumobites.net?ref={referrer.code}</span>
-                        <button onClick={() => copyToClipboard(referrer.code)} className="text-white/40 hover:text-white transition-colors" title="Copy Link">
+                        <span className="text-blue-600 truncate max-w-[200px]">lumobites.net?ref={referrer.code}</span>
+                        <button onClick={() => copyToClipboard(referrer.code)} className="text-gray-500 hover:text-[#191919] transition-colors" title="Copy Link">
                           <Copy size={14} />
                         </button>
                         <button onClick={() => setQrModalReferrer(referrer)} className="bg-[#3B2410] text-[#FFF9F2] px-2 py-1 rounded-md text-[10px] flex items-center gap-1 hover:bg-[#4a2e15] transition-colors" title="Show QR Code">
                           <QrCode size={12} /> QR
                         </button>
-                        <button onClick={() => setDeleteModalReferrer(referrer)} className="text-red-400 hover:text-red-300 transition-colors ml-1" title="Delete Referrer">
+                        <button onClick={() => setDeleteModalReferrer(referrer)} className="text-red-600 hover:text-red-300 transition-colors ml-1" title="Delete Referrer">
                           <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
                     <td className="p-4 text-center">{referrer.stats.clicks}</td>
-                    <td className="p-4 text-center font-medium text-[#c2e59c]">{referrer.stats.subscribersCount}</td>
+                    <td className="p-4 text-center font-medium text-emerald-700">{referrer.stats.subscribersCount}</td>
                     <td className="p-4 text-center">{referrer.stats.activeCount}</td>
-                    <td className="p-4 text-center text-red-400">{referrer.stats.cancelledCount}</td>
-                    <td className="p-4 font-bold text-white">
+                    <td className="p-4 text-center text-red-600">{referrer.stats.cancelledCount}</td>
+                    <td className="p-4 font-bold text-[#191919]">
                       ${referrer.stats.totalValue.toFixed(2)}/mo
-                      <div className="text-[10px] text-white/40 font-normal mt-1">
+                      <div className="text-[10px] text-gray-500 font-normal mt-1">
                         {referrer.stats.breakdown.proOwners.count} PRO, {referrer.stats.breakdown.sitterPro.count} Sitter
                       </div>
                     </td>
                     <td className="p-4 text-right">
                       <button
                         onClick={() => setExpandedRow(expandedRow === referrer.id ? null : referrer.id)}
-                        className="text-white/40 hover:text-white transition-colors"
+                        className="text-gray-500 hover:text-[#191919] transition-colors"
                       >
                         {expandedRow === referrer.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </button>
@@ -266,18 +266,18 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                   {/* Expanded Row Details */}
                   {expandedRow === referrer.id && (
                     <tr>
-                      <td colSpan={7} className="p-0 border-b border-white/5">
-                        <div className="bg-black/30 p-6">
-                          <h4 className="text-white font-medium mb-4 flex items-center gap-2">
-                            <Users size={16} className="text-[#c2e59c]" />
+                      <td colSpan={7} className="p-0 border-b border-gray-200">
+                        <div className="bg-white/30 p-6">
+                          <h4 className="text-[#191919] font-medium mb-4 flex items-center gap-2">
+                            <Users size={16} className="text-emerald-700" />
                             Referred Users for {referrer.name}
                           </h4>
                           {referrer.users.filter((u:any) => u.subscribed).length === 0 ? (
-                            <p className="text-white/40 text-sm">No active or cancelled subscribers yet. ({referrer.stats.clicks} clicks only)</p>
+                            <p className="text-gray-500 text-sm">No active or cancelled subscribers yet. ({referrer.stats.clicks} clicks only)</p>
                           ) : (
-                            <div className="bg-[#111] rounded-xl border border-white/5 overflow-hidden">
-                              <table className="w-full text-left text-sm text-white/70">
-                                <thead className="bg-white/5 text-white/50 text-xs">
+                            <div className="bg-[#FDFAF7] rounded-xl border border-gray-200 overflow-hidden">
+                              <table className="w-full text-left text-sm text-[#555555]">
+                                <thead className="bg-gray-50 text-gray-500 text-xs">
                                   <tr>
                                     <th className="p-3">Email</th>
                                     <th className="p-3">Plan</th>
@@ -288,25 +288,25 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
                                 </thead>
                                 <tbody>
                                   {referrer.users.filter((u:any) => u.subscribed).map((user: any) => (
-                                    <tr key={user.id} className="border-t border-white/5">
-                                      <td className="p-3 text-white">{user.referred_email}</td>
+                                    <tr key={user.id} className="border-t border-gray-200">
+                                      <td className="p-3 text-[#191919]">{user.referred_email}</td>
                                       <td className="p-3">
                                         {user.subscription_type === 'pro_sitter' ? (
-                                          <span className="bg-[#64b3f4]/20 text-[#64b3f4] px-2 py-1 rounded text-xs">Sitter Pro</span>
+                                          <span className="bg-[#64b3f4]/20 text-blue-600 px-2 py-1 rounded text-xs">Sitter Pro</span>
                                         ) : (
-                                          <span className="bg-[#c2e59c]/20 text-[#c2e59c] px-2 py-1 rounded text-xs">PRO Owner ($2.99)</span>
+                                          <span className="bg-[#c2e59c]/20 text-emerald-700 px-2 py-1 rounded text-xs">PRO Owner ($2.99)</span>
                                         )}
                                       </td>
                                       <td className="p-3">{new Date(user.subscription_date).toLocaleDateString()}</td>
                                       <td className="p-3 text-center">{user.active_months}</td>
                                       <td className="p-3">
                                         {user.cancelled ? (
-                                          <div className="flex items-center gap-1 text-red-400">
+                                          <div className="flex items-center gap-1 text-red-600">
                                             <XCircle size={14} />
                                             <span className="text-xs">Cancelled {new Date(user.cancelled_date).toLocaleDateString()}</span>
                                           </div>
                                         ) : (
-                                          <div className="flex items-center gap-1 text-[#c2e59c]">
+                                          <div className="flex items-center gap-1 text-emerald-700">
                                             <CheckCircle size={14} />
                                             <span className="text-xs">Active</span>
                                           </div>
@@ -326,7 +326,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
               ))}
               {referrers.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-white/40">
+                  <td colSpan={7} className="p-8 text-center text-gray-500">
                     No referrers created yet. Create one above to get started!
                   </td>
                 </tr>
@@ -338,7 +338,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
 
       {/* QR Code Modal */}
       {qrModalReferrer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-[#FFF9F2] p-8 rounded-3xl max-w-sm w-full flex flex-col items-center relative text-[#3B2410] shadow-2xl">
             <button 
               onClick={() => setQrModalReferrer(null)}
@@ -376,21 +376,21 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
 
       {/* Delete Confirmation Modal */}
       {deleteModalReferrer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-[#1a1a1a] p-8 rounded-3xl max-w-sm w-full flex flex-col relative text-white shadow-2xl border border-red-500/20">
-            <div className="flex items-center gap-3 mb-4 text-red-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white p-8 rounded-3xl max-w-sm w-full flex flex-col relative text-[#191919] shadow-2xl border border-red-500/20">
+            <div className="flex items-center gap-3 mb-4 text-red-600">
               <Trash2 size={28} />
               <h3 className="text-xl font-bold">Delete Referrer</h3>
             </div>
             
-            <p className="text-white/70 mb-8 leading-relaxed">
-              Are you sure you want to delete <strong className="text-white">{deleteModalReferrer.name}</strong>'s referral link? This will also permanently delete all their referral tracking data.
+            <p className="text-[#555555] mb-8 leading-relaxed">
+              Are you sure you want to delete <strong className="text-[#191919]">{deleteModalReferrer.name}</strong>'s referral link? This will also permanently delete all their referral tracking data.
             </p>
             
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteModalReferrer(null)}
-                className="flex-1 bg-white/10 text-white py-3 rounded-xl font-bold hover:bg-white/20 transition-colors"
+                className="flex-1 bg-gray-100 text-[#191919] py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
                 disabled={isDeleting}
               >
                 Cancel
@@ -398,7 +398,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
               <button
                 onClick={handleDeleteReferrer}
                 disabled={isDeleting}
-                className="flex-1 bg-red-500/20 text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-500/30 transition-colors border border-red-500/50 disabled:opacity-50"
+                className="flex-1 bg-red-500/20 text-red-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-500/30 transition-colors border border-red-500/50 disabled:opacity-50"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>

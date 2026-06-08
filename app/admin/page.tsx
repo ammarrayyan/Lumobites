@@ -46,21 +46,21 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#111] flex flex-col items-center justify-center p-4">
-        <div className="bg-[#1a1a1a] p-8 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
-          <h1 className="text-2xl font-bold text-white mb-6 text-center">Admin Access</h1>
+      <div className="min-h-screen bg-[#FDFAF7] flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl w-full max-w-md border border-gray-200 shadow-2xl">
+          <h1 className="text-2xl font-bold text-[#191919] mb-6 text-center">Admin Access</h1>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-white/70 text-sm font-medium mb-2">Bypass Key</label>
+              <label className="block text-[#555555] text-sm font-medium mb-2">Bypass Key</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-[#c2e59c] transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-xl p-3 text-[#191919] focus:outline-none focus:border-[#c2e59c] transition-colors"
                 placeholder="Enter bypass key..."
               />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black font-bold py-3 px-4 rounded-xl hover:opacity-90 transition-opacity"
@@ -74,29 +74,29 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111] text-white p-6">
+    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <Settings className="w-8 h-8 text-[#64b3f4]" />
+          <h1 className="text-3xl font-bold text-[#191919] flex items-center gap-2">
+            <Settings className="w-8 h-8 text-blue-600" />
             Lumo Bites Admin
           </h1>
           <button
             onClick={handleLogout}
-            className="text-white/60 hover:text-white transition-colors text-sm font-medium"
+            className="text-gray-500 hover:text-[#191919] transition-colors text-sm font-medium"
           >
             Logout
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-2 bg-[#1a1a1a] p-1 rounded-xl mb-8 border border-white/10 overflow-x-auto">
+        <div className="flex space-x-2 bg-white p-1 rounded-xl mb-8 border border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab('stats')}
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'stats'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Statistics
@@ -106,7 +106,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'sitters'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Sitter Management
@@ -116,7 +116,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'requests'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Sitting Requests
@@ -126,7 +126,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'accounts'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             All Accounts
@@ -136,7 +136,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'lost-pets'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Lost Pets
@@ -146,7 +146,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'reviews'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Reviews
@@ -156,7 +156,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'city-board'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             City Board
@@ -166,7 +166,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'twin-gallery'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Pet Twin Gallery
@@ -176,7 +176,7 @@ export default function AdminPage() {
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'affiliates'
                 ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
             }`}
           >
             Affiliates
@@ -184,7 +184,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 min-h-[500px]">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
           {activeTab === 'stats' && <StatisticsDashboard adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'sitters' && <SitterManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'requests' && <RequestsManagement adminKey={password} onUnauthorized={handleLogout} />}

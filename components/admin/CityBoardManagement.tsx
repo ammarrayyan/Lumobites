@@ -144,14 +144,14 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
     }
   };
 
-  if (loading) return <div className="text-white/70 text-center py-8">Loading posts...</div>;
-  if (error) return <div className="text-red-400 text-center py-8">{error}</div>;
+  if (loading) return <div className="text-[#555555] text-center py-8">Loading posts...</div>;
+  if (error) return <div className="text-red-600 text-center py-8">{error}</div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white">City Board Management</h2>
-        <button onClick={fetchPosts} className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+        <h2 className="text-xl font-bold text-[#191919]">City Board Management</h2>
+        <button onClick={fetchPosts} className="bg-gray-100 hover:bg-gray-200 text-[#191919] px-4 py-2 rounded-lg text-sm transition-colors">
           Refresh
         </button>
       </div>
@@ -169,26 +169,26 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
               className={`border rounded-xl p-4 transition-colors ${
                 isReported 
                   ? 'bg-red-950/20 border-red-500/30' 
-                  : 'bg-black/40 border-white/10'
+                  : 'bg-white/40 border-gray-200'
               }`}
             >
               <div className="flex justify-between items-start mb-3 flex-wrap gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="bg-[#c2e59c] text-black text-xs font-bold px-2 py-0.5 rounded">{post.post_id}</span>
-                    <span className="text-white/70 text-sm">{post.city} • {post.category}</span>
+                    <span className="text-[#555555] text-sm">{post.city} • {post.category}</span>
                     {isReported && (
-                      <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                      <span className="bg-red-500/20 text-red-600 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">
                         ⚠️ Reported ({post.report_count})
                       </span>
                     )}
-                    <span className="text-white text-xs font-semibold px-2 py-0.5 bg-white/10 rounded border border-white/5 ml-2">
+                    <span className="text-[#191919] text-xs font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 ml-2">
                       👍 {post.helpful_count || 0} helpful
                     </span>
                   </div>
-                  <div className="text-xs text-white/50">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>
+                  <div className="text-xs text-gray-500">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>
                   {isReported && (
-                    <div className="text-xs text-red-400 font-semibold mt-1">
+                    <div className="text-xs text-red-600 font-semibold mt-1">
                       Report Reasons: <span className="text-red-300 italic">{reportReasons || 'None'}</span>
                     </div>
                   )}
@@ -203,41 +203,41 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
                   {isReported && (
                     <button 
                       onClick={() => dismissReports(post.post_id)}
-                      className="bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3 py-1 rounded text-sm transition-colors border border-green-500/20 cursor-pointer font-semibold"
+                      className="bg-green-500/20 text-green-600 hover:bg-green-500/30 px-3 py-1 rounded text-sm transition-colors border border-green-500/20 cursor-pointer font-semibold"
                     >
                       Dismiss Reports
                     </button>
                   )}
                   <button 
                     onClick={() => deletePost(post.post_id)}
-                    className="bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1 rounded text-sm transition-colors cursor-pointer"
+                    className="bg-red-500/20 text-red-600 hover:bg-red-500/30 px-3 py-1 rounded text-sm transition-colors cursor-pointer"
                   >
                     Delete Post
                   </button>
                 </div>
               </div>
-              <div className="text-white bg-white/5 p-3 rounded-lg text-sm whitespace-pre-wrap">{post.content}</div>
+              <div className="text-[#191919] bg-gray-50 p-3 rounded-lg text-sm whitespace-pre-wrap">{post.content}</div>
 
               {expandedPostId === post.post_id && (
-                <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
-                  <h4 className="text-sm font-bold text-white/70">Replies</h4>
+                <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-3">
+                  <h4 className="text-sm font-bold text-[#555555]">Replies</h4>
                   {loadingReplies ? (
-                    <div className="text-white/50 text-sm">Loading replies...</div>
+                    <div className="text-gray-500 text-sm">Loading replies...</div>
                   ) : replies.length === 0 ? (
-                    <div className="text-white/50 text-sm">No replies yet.</div>
+                    <div className="text-gray-500 text-sm">No replies yet.</div>
                   ) : (
                     replies.map(reply => (
-                      <div key={reply.id} className="bg-white/5 rounded-lg p-3">
+                      <div key={reply.id} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex justify-between items-start mb-2">
-                          <div className="text-xs text-white/50">Device: {reply.device_cookie} • {new Date(reply.created_at).toLocaleString()}</div>
+                          <div className="text-xs text-gray-500">Device: {reply.device_cookie} • {new Date(reply.created_at).toLocaleString()}</div>
                           <button 
                             onClick={() => deleteReply(reply.id)}
-                            className="text-red-400 hover:text-red-300 text-xs transition-colors cursor-pointer"
+                            className="text-red-600 hover:text-red-300 text-xs transition-colors cursor-pointer"
                           >
                             Delete Reply
                           </button>
                         </div>
-                        <div className="text-white/90 text-sm whitespace-pre-wrap">{reply.content}</div>
+                        <div className="text-gray-500 text-sm whitespace-pre-wrap">{reply.content}</div>
                       </div>
                     ))
                   )}
@@ -247,7 +247,7 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
           );
         })}
         {posts.length === 0 && (
-          <div className="text-white/50 text-center py-8">No posts found.</div>
+          <div className="text-gray-500 text-center py-8">No posts found.</div>
         )}
       </div>
     </div>

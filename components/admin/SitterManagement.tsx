@@ -166,20 +166,20 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
   const filteredSitters = sitters.filter(s => filter === 'all' || s.approval_status === filter);
 
   if (loading) {
-    return <div className="text-white/60 animate-pulse text-center py-12">Loading sitters...</div>;
+    return <div className="text-gray-500 animate-pulse text-center py-12">Loading sitters...</div>;
   }
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-white/10 pb-4">
-        <h2 className="text-xl font-semibold text-white">Sitter Management</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
+        <h2 className="text-xl font-semibold text-[#191919]">Sitter Management</h2>
         <div className="flex space-x-2">
           {['all', 'pending', 'approved', 'rejected'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f as any)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
-                filter === f ? 'bg-white text-black' : 'bg-white/5 text-white/70 hover:bg-white/10'
+                filter === f ? 'bg-white text-black' : 'bg-gray-50 text-[#555555] hover:bg-gray-100'
               }`}
             >
               {f}
@@ -190,16 +190,16 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
 
       <div className="space-y-4">
         {filteredSitters.length === 0 ? (
-          <p className="text-white/60 text-center py-12">No sitters found.</p>
+          <p className="text-gray-500 text-center py-12">No sitters found.</p>
         ) : (
           filteredSitters.map(sitter => (
-            <div key={sitter.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 flex flex-col lg:flex-row gap-6 items-start">
+            <div key={sitter.id} className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col lg:flex-row gap-6 items-start">
               {/* Profile Image */}
-              <div className="w-24 h-24 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
+              <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
                 {sitter.photo_url ? (
                   <img src={sitter.photo_url} alt={sitter.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/20">No Photo</div>
+                  <div className="w-full h-full flex items-center justify-center text-gray-500">No Photo</div>
                 )}
               </div>
 
@@ -207,35 +207,35 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1 flex-wrap">
-                    <h3 className="text-xl font-extrabold text-white">{sitter.name}</h3>
+                    <h3 className="text-xl font-extrabold text-[#191919]">{sitter.name}</h3>
                     <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
-                      sitter.approval_status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                      sitter.approval_status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                      sitter.approval_status === 'approved' ? 'bg-green-500/20 text-green-600' :
+                      sitter.approval_status === 'rejected' ? 'bg-red-500/20 text-red-600' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
                       {sitter.approval_status || 'pending'}
                     </span>
                     {sitter.needs_reapproval && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 animate-pulse">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-600 border border-orange-500/30 animate-pulse">
                         Re-review ⚠️
                       </span>
                     )}
                     {sitter.self_declared && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-600 border border-blue-500/30">
                         Self Declared ✅
                       </span>
                     )}
-                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-white/5 text-white/60 border border-white/10">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200">
                       No Shows: {sitter.no_show_count || 0}
                     </span>
                     {sitter.no_show_count >= 3 && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-600 border border-red-500/30 animate-pulse">
                         ⚠️ HIGH NO-SHOW RISK
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-white/60 mb-2">{sitter.email}</p>
-                  <p className="text-sm text-white/80">
+                  <p className="text-sm text-gray-500 mb-2">{sitter.email}</p>
+                  <p className="text-sm text-[#555555]">
                     <strong>Location:</strong> {sitter.city ? (() => {
                       let locStr = sitter.city;
                       const cityLower = sitter.city.toLowerCase();
@@ -255,32 +255,32 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                       return locStr;
                     })() : ''}
                   </p>
-                  <p className="text-sm text-white/80"><strong>Rate:</strong> ${sitter.daily_rate}/day</p>
-                  <p className="text-sm text-white/80"><strong>Phone:</strong> {sitter.phone || 'N/A'}</p>
+                  <p className="text-sm text-[#555555]"><strong>Rate:</strong> ${sitter.daily_rate}/day</p>
+                  <p className="text-sm text-[#555555]"><strong>Phone:</strong> {sitter.phone || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-white/80"><strong>Pets Accepted:</strong> {sitter.pets_accepted?.join(', ')}</p>
+                  <p className="text-sm text-[#555555]"><strong>Pets Accepted:</strong> {sitter.pets_accepted?.join(', ')}</p>
                   {sitter.social_link && (
-                    <p className="text-sm text-white/80 overflow-hidden text-ellipsis whitespace-nowrap">
-                      <strong>Social:</strong> <a href={sitter.social_link} target="_blank" className="text-blue-400 hover:underline">{sitter.social_link}</a>
+                    <p className="text-sm text-[#555555] overflow-hidden text-ellipsis whitespace-nowrap">
+                      <strong>Social:</strong> <a href={sitter.social_link} target="_blank" className="text-blue-600 hover:underline">{sitter.social_link}</a>
                     </p>
                   )}
                   {sitter.id_photo_url && (
                     <p className="text-sm mt-2">
-                      <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1 text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-white transition-colors">
+                      <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-[#191919] transition-colors">
                         🪪 View ID Photo
                       </a>
                     </p>
                   )}
-                  <p className="text-xs text-white/40 mt-3">Submitted: {new Date(sitter.submitted_at || sitter.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-gray-500 mt-3">Submitted: {new Date(sitter.submitted_at || sitter.created_at).toLocaleString()}</p>
                 </div>
                 <div className="md:col-span-2">
-                  <p className="text-sm text-white/70 bg-white/5 p-3 rounded-lg">{sitter.bio}</p>
+                  <p className="text-sm text-[#555555] bg-gray-50 p-3 rounded-lg">{sitter.bio}</p>
                 </div>
                 {sitter.approval_status === 'rejected' && sitter.rejection_reason && (
                   <div className="md:col-span-2 mt-2 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
-                    <p className="text-xs text-red-400 font-bold mb-1">Rejection Reason:</p>
-                    <p className="text-sm text-white/80">{sitter.rejection_reason}</p>
+                    <p className="text-xs text-red-600 font-bold mb-1">Rejection Reason:</p>
+                    <p className="text-sm text-[#555555]">{sitter.rejection_reason}</p>
                   </div>
                 )}
               </div>
@@ -300,25 +300,25 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                 {sitter.approval_status !== 'rejected' && (
                   <>
                     {rejectingId === sitter.id ? (
-                      <div className="bg-black/50 p-3 rounded-lg border border-red-500/30 space-y-2">
+                      <div className="bg-white p-3 rounded-lg border border-red-500/30 space-y-2">
                         <textarea
                           placeholder="Reason for rejection..."
                           value={rejectionReason}
                           onChange={(e) => setRejectionReason(e.target.value)}
-                          className="w-full bg-black border border-white/10 rounded p-2 text-sm text-white focus:border-red-500 outline-none"
+                          className="w-full bg-white border border-gray-200 rounded p-2 text-sm text-[#191919] focus:border-red-500 outline-none"
                           rows={3}
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleAction(sitter.id, 'reject')}
                             disabled={processingId === sitter.id}
-                            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-1.5 px-2 rounded transition-colors text-sm disabled:opacity-50"
+                            className="flex-1 bg-red-500 hover:bg-red-600 text-[#191919] font-bold py-1.5 px-2 rounded transition-colors text-sm disabled:opacity-50"
                           >
                             Submit
                           </button>
                           <button
                             onClick={() => { setRejectingId(null); setRejectionReason(''); }}
-                            className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium py-1.5 px-2 rounded transition-colors text-sm"
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#191919] font-medium py-1.5 px-2 rounded transition-colors text-sm"
                           >
                             Cancel
                           </button>
@@ -328,7 +328,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                       <button
                         onClick={() => setRejectingId(sitter.id)}
                         disabled={processingId === sitter.id}
-                        className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
+                        className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-600 border border-red-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
                       >
                         Reject
                       </button>
@@ -341,7 +341,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                   <button
                     onClick={() => handleResetID(sitter.id)}
                     disabled={processingId === sitter.id}
-                    className="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+                    className="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 border border-orange-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
                   >
                     {processingId === sitter.id ? 'Processing...' : '🪪 Reset ID Verification'}
                   </button>
@@ -351,7 +351,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                 <button
                   onClick={() => handleDelete(sitter.id)}
                   disabled={processingId === sitter.id || deletingId === sitter.id}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+                  className="w-full bg-red-600 hover:bg-red-700 text-[#191919] font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
                 >
                   {deletingId === sitter.id ? 'Deleting...' : '🗑️ Delete Profile'}
                 </button>

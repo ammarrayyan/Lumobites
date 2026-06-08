@@ -151,7 +151,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-white/70 animate-pulse">Loading sitting requests...</div>;
+    return <div className="text-center py-12 text-[#555555] animate-pulse">Loading sitting requests...</div>;
   }
 
   if (error) {
@@ -165,85 +165,85 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   return (
     <div className="space-y-8">
       {/* Page Title */}
-      <h2 className="text-xl font-semibold text-white border-b border-white/10 pb-4">
+      <h2 className="text-xl font-semibold text-[#191919] border-b border-gray-200 pb-4">
         Sitting Requests Management
       </h2>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4">
-        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Total Requests</span>
-          <span className="text-3xl font-black text-purple-400">{totalRequests}</span>
+        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Total Requests</span>
+          <span className="text-3xl font-black text-purple-600">{totalRequests}</span>
         </div>
-        <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Pending</span>
+        <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Pending</span>
           <span className="text-3xl font-black text-yellow-400">{pendingCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Accepted</span>
-          <span className="text-3xl font-black text-green-400">{acceptedCount}</span>
+        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Accepted</span>
+          <span className="text-3xl font-black text-green-600">{acceptedCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Completed</span>
-          <span className="text-3xl font-black text-blue-400">{completedCount}</span>
+        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Completed</span>
+          <span className="text-3xl font-black text-blue-600">{completedCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Declined</span>
-          <span className="text-3xl font-black text-red-400">{declinedCount}</span>
+        <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Declined</span>
+          <span className="text-3xl font-black text-red-600">{declinedCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-gray-500/10 to-gray-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Cancelled</span>
+        <div className="bg-gradient-to-br from-gray-500/10 to-gray-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Cancelled</span>
           <span className="text-3xl font-black text-gray-400">{cancelledCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">No Shows</span>
-          <span className="text-3xl font-black text-orange-400">{noShowCount}</span>
+        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">No Shows</span>
+          <span className="text-3xl font-black text-orange-600">{noShowCount}</span>
         </div>
-        <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 p-5 rounded-2xl border border-white/5 flex flex-col">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-2">Review Sent</span>
+        <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 p-5 rounded-2xl border border-gray-200 flex flex-col">
+          <span className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">Review Sent</span>
           <span className="text-3xl font-black text-cyan-400">{reviewEmailsCount}</span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-[#1a1a1a] p-5 rounded-2xl border border-white/10 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-white p-5 rounded-2xl border border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           {/* Status Filter */}
           <div className="flex flex-col">
-            <label className="text-xs text-white/50 font-semibold mb-1 uppercase tracking-wider">Status</label>
+            <label className="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wider">Status</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c2e59c]"
+              className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#191919] focus:outline-none focus:border-[#c2e59c]"
             >
-              <option className="bg-[#1a1a1a] text-white" value="All">All Requests</option>
-              <option className="bg-[#1a1a1a] text-white" value="Pending">Pending</option>
-              <option className="bg-[#1a1a1a] text-white" value="Accepted">Accepted</option>
-              <option className="bg-[#1a1a1a] text-white" value="Completed">Completed</option>
-              <option className="bg-[#1a1a1a] text-white" value="Declined">Declined</option>
-              <option className="bg-[#1a1a1a] text-white" value="Cancelled">Cancelled</option>
-              <option className="bg-[#1a1a1a] text-white" value="No_Show">No Show</option>
+              <option className="bg-white text-[#191919]" value="All">All Requests</option>
+              <option className="bg-white text-[#191919]" value="Pending">Pending</option>
+              <option className="bg-white text-[#191919]" value="Accepted">Accepted</option>
+              <option className="bg-white text-[#191919]" value="Completed">Completed</option>
+              <option className="bg-white text-[#191919]" value="Declined">Declined</option>
+              <option className="bg-white text-[#191919]" value="Cancelled">Cancelled</option>
+              <option className="bg-white text-[#191919]" value="No_Show">No Show</option>
             </select>
           </div>
         </div>
 
         {/* Search Input */}
         <div className="flex flex-col w-full md:w-96">
-          <label className="text-xs text-white/50 font-semibold mb-1 uppercase tracking-wider">Search</label>
+          <label className="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wider">Search</label>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by owner, sitter, pet or dates..."
-            className="bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c2e59c] w-full"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-[#191919] focus:outline-none focus:border-[#c2e59c] w-full"
           />
         </div>
       </div>
 
       {/* Table Card */}
-      <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-white/40 border border-gray-200 rounded-2xl overflow-hidden">
         {filteredRequests.length === 0 ? (
-          <div className="p-12 text-center text-white/50">
+          <div className="p-12 text-center text-gray-500">
             <span className="text-4xl mb-4 block">🐾</span>
             <p>No sitting requests match the current filters.</p>
           </div>
@@ -251,15 +251,15 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-white/5 border-b border-white/10">
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Submitted</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Owner Email</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Sitter</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Pet</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Dates</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Status</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider">Action Date</th>
-                  <th className="p-4 text-xs font-bold text-white/70 uppercase tracking-wider text-center">Review Sent</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Submitted</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Owner Email</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Sitter</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Pet</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Dates</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Status</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Action Date</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider text-center">Review Sent</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -271,38 +271,38 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                     <React.Fragment key={request.id}>
                       <tr 
                         onClick={() => toggleRow(request.id)}
-                        className={`hover:bg-white/5 transition-colors cursor-pointer ${isExpanded ? 'bg-white/5' : ''}`}
+                        className={`hover:bg-gray-50 transition-colors cursor-pointer ${isExpanded ? 'bg-gray-50' : ''}`}
                       >
                         {/* Submitted Date */}
-                        <td className="p-4 text-sm text-white/70 whitespace-nowrap">
+                        <td className="p-4 text-sm text-[#555555] whitespace-nowrap">
                           {new Date(request.created_at).toLocaleDateString()}
                         </td>
 
                         {/* Owner Email & Booking # */}
-                        <td className="p-4 text-sm font-semibold text-white">
+                        <td className="p-4 text-sm font-semibold text-[#191919]">
                           <div>{request.owner_email}</div>
-                          <div className="text-xs text-white/50 font-normal">{request.booking_number || 'No Booking #'}</div>
+                          <div className="text-xs text-gray-500 font-normal">{request.booking_number || 'No Booking #'}</div>
                         </td>
 
                         {/* Sitter Name & Email */}
                         <td className="p-4 text-sm">
-                          <div className="font-semibold text-white">{request.sitter_name}</div>
-                          <div className="text-xs text-white/50">{request.sitter_email}</div>
+                          <div className="font-semibold text-[#191919]">{request.sitter_name}</div>
+                          <div className="text-xs text-gray-500">{request.sitter_email}</div>
                         </td>
 
                         {/* Pet Name & Type */}
                         <td className="p-4 text-sm">
-                          <span className="font-semibold text-white">{request.pet_name}</span>
-                          <span className="ml-1.5 text-xs text-white/60 bg-white/5 px-2 py-0.5 rounded border border-white/10 uppercase font-bold tracking-wider">
+                          <span className="font-semibold text-[#191919]">{request.pet_name}</span>
+                          <span className="ml-1.5 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200 uppercase font-bold tracking-wider">
                             {request.pet_type === 'both' ? '🐱 & 🐶' : request.pet_type === 'dog' ? '🐶 Dog' : '🐱 Cat'}
                           </span>
                         </td>
 
                         {/* Requested Dates */}
-                        <td className="p-4 text-sm text-white/80 max-w-[200px] truncate" title={request.dates}>
+                        <td className="p-4 text-sm text-[#555555] max-w-[200px] truncate" title={request.dates}>
                           <div>{request.dates}</div>
                           {request.time_slot && (
-                            <div className="text-[10px] font-semibold text-orange-400 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded uppercase mt-1 inline-block">
+                            <div className="text-[10px] font-semibold text-orange-600 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded uppercase mt-1 inline-block">
                               ⏰ {request.time_slot}
                             </div>
                           )}
@@ -311,23 +311,23 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         {/* Status Badge */}
                         <td className="p-4 whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' ? (
-                            <span className="bg-green-500/20 text-green-400 border border-green-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                            <span className="bg-green-500/20 text-green-600 border border-green-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🟢 Accepted
                             </span>
                           ) : status.toLowerCase() === 'completed' ? (
-                            <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                            <span className="bg-blue-500/20 text-blue-600 border border-blue-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🔵 Completed
                             </span>
                           ) : status.toLowerCase() === 'declined' ? (
-                            <span className="bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                            <span className="bg-red-500/20 text-red-600 border border-red-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🔴 Declined
                             </span>
                           ) : status.toLowerCase() === 'cancelled' ? (
-                            <span className="bg-white/10 text-white/60 border border-white/20 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                            <span className="bg-gray-100 text-gray-500 border border-gray-300 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               ⚪ Cancelled
                             </span>
                           ) : status.toLowerCase() === 'no_show' ? (
-                            <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
+                            <span className="bg-orange-500/20 text-orange-600 border border-orange-500/30 font-bold text-xs px-2.5 py-1 rounded-full inline-block">
                               🟠 No Show
                             </span>
                           ) : (
@@ -338,7 +338,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         </td>
  
                         {/* Action Date (Accepted/Declined/Completed/Cancelled) */}
-                        <td className="p-4 text-sm text-white/70 whitespace-nowrap">
+                        <td className="p-4 text-sm text-[#555555] whitespace-nowrap">
                           {status.toLowerCase() === 'accepted' && request.accepted_at ? (
                             new Date(request.accepted_at).toLocaleDateString()
                           ) : status.toLowerCase() === 'completed' && request.completed_at ? (
@@ -357,36 +357,36 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         {/* Review Sent Column */}
                         <td className="p-4 text-sm text-center whitespace-nowrap">
                           {request.review_sent ? (
-                            <span className="text-green-400 font-semibold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Yes</span>
+                            <span className="text-green-600 font-semibold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Yes</span>
                           ) : (
-                            <span className="text-white/40 bg-white/5 px-2 py-0.5 rounded border border-white/5">No</span>
+                            <span className="text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">No</span>
                           )}
                         </td>
                       </tr>
 
                       {/* Expanded Section showing Owner Message/Notes */}
                       {isExpanded && (
-                        <tr className="bg-black/20">
-                          <td colSpan={8} className="p-5 border-b border-white/10">
+                        <tr className="bg-gray-100">
+                          <td colSpan={8} className="p-5 border-b border-gray-200">
                             <div className="space-y-3">
-                              <h4 className="text-xs font-bold text-[#c2e59c] uppercase tracking-wider">
+                              <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
                                 Message / Special Notes from Owner:
                               </h4>
-                              <p className="text-sm text-white/80 bg-black/40 p-4 rounded-xl border border-white/5 whitespace-pre-wrap leading-relaxed">
+                              <p className="text-sm text-[#555555] bg-white/40 p-4 rounded-xl border border-gray-200 whitespace-pre-wrap leading-relaxed">
                                 {request.special_notes || 'No message or special notes provided by the owner.'}
                               </p>
-                              <div className="flex gap-6 text-xs text-white/40">
+                              <div className="flex gap-6 text-xs text-gray-500">
                                 <div>
-                                  <strong className="text-white/60">Booking Number:</strong> {request.booking_number || 'N/A'}
+                                  <strong className="text-gray-500">Booking Number:</strong> {request.booking_number || 'N/A'}
                                 </div>
                                 <div>
-                                  <strong className="text-white/60">Owner Phone:</strong> {request.phone_number || 'N/A'}
+                                  <strong className="text-gray-500">Owner Phone:</strong> {request.phone_number || 'N/A'}
                                 </div>
                                 <div>
-                                  <strong className="text-white/60">Request ID:</strong> {request.id}
+                                  <strong className="text-gray-500">Request ID:</strong> {request.id}
                                 </div>
                                 <div>
-                                  <strong className="text-white/60">Sitter ID:</strong> {request.sitter_id}
+                                  <strong className="text-gray-500">Sitter ID:</strong> {request.sitter_id}
                                 </div>
                               </div>
                               {status.toLowerCase() === 'no_show' && (

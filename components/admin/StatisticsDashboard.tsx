@@ -44,34 +44,34 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
   };
 
   if (loading) {
-    return <div className="text-white/60 animate-pulse text-center py-12">Loading statistics...</div>;
+    return <div className="text-gray-500 animate-pulse text-center py-12">Loading statistics...</div>;
   }
 
   if (!stats) {
-    return <div className="text-red-400 text-center py-12">Error loading statistics.</div>;
+    return <div className="text-red-600 text-center py-12">Error loading statistics.</div>;
   }
 
   const statCards = [
-    { label: 'Total Sitters', value: stats.totalSitters, color: 'from-blue-500/20 to-blue-600/20 text-blue-400' },
+    { label: 'Total Sitters', value: stats.totalSitters, color: 'from-blue-500/20 to-blue-600/20 text-blue-600' },
     { label: 'Pending Approval', value: stats.pendingSitters, color: 'from-yellow-500/20 to-yellow-600/20 text-yellow-400' },
-    { label: 'Approved', value: stats.approvedSitters, color: 'from-green-500/20 to-green-600/20 text-green-400' },
-    { label: 'Rejected', value: stats.rejectedSitters, color: 'from-red-500/20 to-red-600/20 text-red-400' },
-    { label: 'PRO Owners', value: stats.proOwners, color: 'from-purple-500/20 to-purple-600/20 text-purple-400' },
-    { label: 'PRO Sitters', value: stats.proSitters, color: 'from-pink-500/20 to-pink-600/20 text-pink-400' },
-    { label: 'New Signups (7d)', value: stats.newSignups, color: 'from-[#c2e59c]/20 to-[#64b3f4]/20 text-[#c2e59c]' },
-    { label: 'Total Lost Pets', value: stats.totalLostPets, color: 'from-orange-500/20 to-orange-600/20 text-orange-400' },
-    { label: 'Active Lost Pets', value: stats.activeLostPets, color: 'from-red-500/20 to-red-600/20 text-red-400' },
-    { label: 'Resolved Pets', value: stats.resolvedLostPets, color: 'from-emerald-500/20 to-emerald-600/20 text-emerald-400' },
-    { label: 'Lost Pets (7d)', value: stats.weeklyLostPets, color: 'from-indigo-500/20 to-indigo-600/20 text-indigo-400' },
+    { label: 'Approved', value: stats.approvedSitters, color: 'from-green-500/20 to-green-600/20 text-green-600' },
+    { label: 'Rejected', value: stats.rejectedSitters, color: 'from-red-500/20 to-red-600/20 text-red-600' },
+    { label: 'PRO Owners', value: stats.proOwners, color: 'from-purple-500/20 to-purple-600/20 text-purple-600' },
+    { label: 'PRO Sitters', value: stats.proSitters, color: 'from-pink-500/20 to-pink-600/20 text-pink-600' },
+    { label: 'New Signups (7d)', value: stats.newSignups, color: 'from-[#c2e59c]/20 to-[#64b3f4]/20 text-emerald-700' },
+    { label: 'Total Lost Pets', value: stats.totalLostPets, color: 'from-orange-500/20 to-orange-600/20 text-orange-600' },
+    { label: 'Active Lost Pets', value: stats.activeLostPets, color: 'from-red-500/20 to-red-600/20 text-red-600' },
+    { label: 'Resolved Pets', value: stats.resolvedLostPets, color: 'from-emerald-500/20 to-emerald-600/20 text-emerald-600' },
+    { label: 'Lost Pets (7d)', value: stats.weeklyLostPets, color: 'from-indigo-500/20 to-indigo-600/20 text-indigo-600' },
   ];
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6 text-white border-b border-white/10 pb-4">Platform Overview</h2>
+      <h2 className="text-xl font-semibold mb-6 text-[#191919] border-b border-gray-200 pb-4">Platform Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {statCards.map((card, idx) => (
-          <div key={idx} className={`bg-gradient-to-br ${card.color.split(' ').slice(0, 2).join(' ')} p-6 rounded-2xl border border-white/5 flex flex-col items-start justify-center`}>
-            <span className="text-white/60 text-sm font-medium mb-2">{card.label}</span>
+          <div key={idx} className={`bg-gradient-to-br ${card.color.split(' ').slice(0, 2).join(' ')} p-6 rounded-2xl border border-gray-200 flex flex-col items-start justify-center`}>
+            <span className="text-gray-500 text-sm font-medium mb-2">{card.label}</span>
             <span className={`text-4xl font-bold ${card.color.split(' ').pop()}`}>{card.value}</span>
           </div>
         ))}

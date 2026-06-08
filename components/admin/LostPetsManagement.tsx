@@ -80,27 +80,27 @@ export default function LostPetsManagement({ adminKey, onUnauthorized }: { admin
   });
 
   if (loading) {
-    return <div className="text-white/60 animate-pulse text-center py-12">Loading lost pets...</div>;
+    return <div className="text-gray-500 animate-pulse text-center py-12">Loading lost pets...</div>;
   }
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-white/10 pb-4">
-        <h2 className="text-xl font-semibold text-white">Lost Pets Management</h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
+        <h2 className="text-xl font-semibold text-[#191919]">Lost Pets Management</h2>
         <div className="w-full md:w-64">
           <input
             type="text"
             placeholder="Search by name, city, or species..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-[#c2e59c] transition-colors"
+            className="w-full bg-white border border-gray-200 rounded-lg p-2 text-sm text-[#191919] focus:outline-none focus:border-[#c2e59c] transition-colors"
           />
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-white/80">
-          <thead className="bg-white/5 text-white">
+        <table className="w-full text-left text-sm text-[#555555]">
+          <thead className="bg-gray-50 text-[#191919]">
             <tr>
               <th className="p-4 font-semibold rounded-tl-xl">Pet Info</th>
               <th className="p-4 font-semibold">Location & Type</th>
@@ -113,14 +113,14 @@ export default function LostPetsManagement({ adminKey, onUnauthorized }: { admin
           <tbody className="divide-y divide-white/10">
             {filteredPets.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-white/50 italic border-b border-white/10">No posts found.</td>
+                <td colSpan={6} className="p-8 text-center text-gray-500 italic border-b border-gray-200">No posts found.</td>
               </tr>
             ) : (
               filteredPets.map(pet => (
-                <tr key={pet.id} className="hover:bg-white/5 transition-colors border-b border-white/10">
+                <tr key={pet.id} className="hover:bg-gray-50 transition-colors border-b border-gray-200">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                         {pet.photo_url ? (
                           <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" />
                         ) : (
@@ -128,29 +128,29 @@ export default function LostPetsManagement({ adminKey, onUnauthorized }: { admin
                         )}
                       </div>
                       <div>
-                        <p className="font-bold text-white text-base">{pet.pet_name || 'Unknown'}</p>
-                        <p className="text-xs text-white/60 capitalize">{pet.species}</p>
+                        <p className="font-bold text-[#191919] text-base">{pet.pet_name || 'Unknown'}</p>
+                        <p className="text-xs text-gray-500 capitalize">{pet.species}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <p className="mb-1"><span className="font-semibold text-white/60">City:</span> {pet.city}</p>
-                    <p><span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${pet.pet_type === 'lost' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                    <p className="mb-1"><span className="font-semibold text-gray-500">City:</span> {pet.city}</p>
+                    <p><span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${pet.pet_type === 'lost' ? 'bg-red-500/20 text-red-600' : 'bg-blue-500/20 text-blue-600'}`}>
                       {pet.pet_type === 'lost' ? 'Lost' : 'Found'}
                     </span></p>
                   </td>
                   <td className="p-4">
                     {pet.contact_email && <p className="text-xs mb-1 break-all">{pet.contact_email}</p>}
                     {pet.contact_phone && <p className="text-xs">{pet.contact_phone}</p>}
-                    {!pet.contact_email && !pet.contact_phone && <p className="text-xs text-white/40">N/A</p>}
+                    {!pet.contact_email && !pet.contact_phone && <p className="text-xs text-gray-500">N/A</p>}
                   </td>
                   <td className="p-4 text-xs">
                     {new Date(pet.created_at).toLocaleDateString()}
                     <br/>
-                    <span className="text-white/50">{formatDistanceToNow(new Date(pet.created_at))} ago</span>
+                    <span className="text-gray-500">{formatDistanceToNow(new Date(pet.created_at))} ago</span>
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${pet.status === 'resolved' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                    <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${pet.status === 'resolved' ? 'bg-green-500/20 text-green-600' : 'bg-yellow-500/20 text-yellow-400'}`}>
                       {pet.status}
                     </span>
                   </td>
@@ -168,7 +168,7 @@ export default function LostPetsManagement({ adminKey, onUnauthorized }: { admin
                       <button
                         onClick={() => handleAction(pet.id, 'delete')}
                         disabled={processingId === pet.id}
-                        className="w-full bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold py-1.5 px-2 rounded-lg border border-red-500/30 text-xs transition-colors disabled:opacity-50"
+                        className="w-full bg-red-500/20 hover:bg-red-500/40 text-red-600 font-bold py-1.5 px-2 rounded-lg border border-red-500/30 text-xs transition-colors disabled:opacity-50"
                       >
                         {processingId === pet.id ? '...' : 'Delete Post'}
                       </button>

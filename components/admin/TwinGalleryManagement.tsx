@@ -79,16 +79,16 @@ export default function TwinGalleryManagement({ adminKey, onUnauthorized }: Twin
     }
   };
 
-  if (loading) return <div className="text-white/70 text-center py-8">Loading shared twins...</div>;
-  if (error) return <div className="text-red-400 text-center py-8">{error}</div>;
+  if (loading) return <div className="text-[#555555] text-center py-8">Loading shared twins...</div>;
+  if (error) return <div className="text-red-600 text-center py-8">{error}</div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white">Pet Twin Gallery Management</h2>
+        <h2 className="text-xl font-bold text-[#191919]">Pet Twin Gallery Management</h2>
         <button 
           onClick={fetchShares} 
-          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer"
+          className="bg-gray-100 hover:bg-gray-200 text-[#191919] px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer"
         >
           Refresh
         </button>
@@ -96,34 +96,34 @@ export default function TwinGalleryManagement({ adminKey, onUnauthorized }: Twin
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="bg-[#222]/80 border border-white/5 p-5 rounded-2xl">
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider mb-1">Total Shared Results</div>
-          <div className="text-3xl font-extrabold text-white">{stats.total}</div>
+        <div className="bg-white/80 border border-gray-200 p-5 rounded-2xl">
+          <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Shared Results</div>
+          <div className="text-3xl font-extrabold text-[#191919]">{stats.total}</div>
         </div>
-        <div className="bg-[#222]/80 border border-white/5 p-5 rounded-2xl">
-          <div className="text-xs text-white/50 font-bold uppercase tracking-wider mb-1">Results This Week</div>
-          <div className="text-3xl font-extrabold text-[#c2e59c]">{stats.weekly}</div>
+        <div className="bg-white/80 border border-gray-200 p-5 rounded-2xl">
+          <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Results This Week</div>
+          <div className="text-3xl font-extrabold text-emerald-700">{stats.weekly}</div>
         </div>
       </div>
 
       {/* Gallery List */}
       <div className="space-y-4">
         {shares.map(share => (
-          <div key={share.id} className="border border-white/10 bg-black/40 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:border-white/20">
+          <div key={share.id} className="border border-gray-200 bg-white/40 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all hover:border-gray-300">
             
             {/* Side-by-Side Images & Info */}
             <div className="flex items-center gap-5 flex-1 min-w-0">
               
               {/* Photo Avatars */}
               <div className="flex items-center -space-x-5 shrink-0">
-                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg bg-[#222] flex items-center justify-center text-xl z-10 relative">
+                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg bg-white flex items-center justify-center text-xl z-10 relative">
                   {share.userPhoto ? (
                     <img src={share.userPhoto} alt="User selfie" className="w-full h-full object-cover" />
                   ) : (
                     <span>🧑</span>
                   )}
                 </div>
-                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg bg-[#222] flex items-center justify-center text-xl z-0 relative">
+                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg bg-white flex items-center justify-center text-xl z-0 relative">
                   {share.petPhoto ? (
                     <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover" />
                   ) : (
@@ -135,30 +135,30 @@ export default function TwinGalleryManagement({ adminKey, onUnauthorized }: Twin
               {/* Match Description */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h4 className="font-bold text-white text-base truncate">{share.petBreed}</h4>
+                  <h4 className="font-bold text-[#191919] text-base truncate">{share.petBreed}</h4>
                   <span className="bg-[#c2e59c] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">
                     {share.matchScore}% Match
                   </span>
-                  <span className="text-white/40 text-xs font-semibold px-2 py-0.5 bg-white/5 rounded border border-white/5">
+                  <span className="text-gray-500 text-xs font-semibold px-2 py-0.5 bg-gray-50 rounded border border-gray-200">
                     {share.petType === 'cat' ? '🐱 Cat' : '🐶 Dog'}
                   </span>
                 </div>
                 
-                <div className="text-xs text-white/50 mb-2">
+                <div className="text-xs text-gray-500 mb-2">
                   ID: {share.id} • Shared on {new Date(share.created_at).toLocaleString()}
                 </div>
 
                 {share.traits && share.traits.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
                     {share.traits.map(trait => (
-                      <span key={trait} className="text-[10px] bg-white/5 text-white/70 px-2 py-0.5 rounded border border-white/5">
+                      <span key={trait} className="text-[10px] bg-gray-50 text-[#555555] px-2 py-0.5 rounded border border-gray-200">
                         {trait}
                       </span>
                     ))}
                   </div>
                 )}
 
-                <p className="text-xs text-white/60 italic truncate max-w-lg">
+                <p className="text-xs text-gray-500 italic truncate max-w-lg">
                   &ldquo;{share.quote}&rdquo;
                 </p>
               </div>
@@ -169,7 +169,7 @@ export default function TwinGalleryManagement({ adminKey, onUnauthorized }: Twin
             <div className="shrink-0 flex items-center">
               <button 
                 onClick={() => deleteShare(share.id)}
-                className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/10 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-red-500/20 text-red-600 hover:bg-red-500/30 border border-red-500/10 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
                 Delete Entry
               </button>
@@ -179,7 +179,7 @@ export default function TwinGalleryManagement({ adminKey, onUnauthorized }: Twin
         ))}
 
         {shares.length === 0 && (
-          <div className="text-white/50 text-center py-12 bg-black/20 rounded-xl border border-dashed border-white/10">
+          <div className="text-gray-500 text-center py-12 bg-gray-100 rounded-xl border border-dashed border-gray-200">
             No shared Pet Twin matches found.
           </div>
         )}
