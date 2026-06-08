@@ -4321,16 +4321,14 @@ export default function PetSitting() {
       {chatModalOpen && activeChatBooking && (
         <ChatModal
           bookingId={activeChatBooking.id}
-          bookingNumber={activeChatBooking.booking_number || activeChatBooking.id}
+          bookingDetails={`${activeChatBooking.pet_name || 'Pet'} • ${activeChatBooking.dates || 'Dates TBA'}`}
           isOpen={chatModalOpen}
           onClose={() => {
             setChatModalOpen(false);
             setActiveChatBooking(null);
           }}
-          currentRole={activeChatRole}
-          currentUserEmail={activeChatRole === 'owner' ? activeChatBooking.owner_email : activeChatBooking.sitters?.email || activeChatBooking.sitter_email}
-          otherPartyEmail={activeChatRole === 'owner' ? activeChatBooking.sitters?.email || activeChatBooking.sitter_email : activeChatBooking.owner_email}
-          otherPartyName={activeChatRole === 'owner' ? formatSitterName(activeChatBooking.sitters?.name || activeChatBooking.sitter_name) : (activeChatBooking.owner_name || 'Owner')}
+          currentUserEmail={activeChatRole === 'owner' ? (activeChatBooking.owner_email || reqEmail) : (sitterEmail || activeChatBooking.sitters?.email || activeChatBooking.sitter_email || localStorage.getItem('lumo_sitter_email') || '')}
+          otherUserName={activeChatRole === 'owner' ? formatSitterName(activeChatBooking.sitters?.name || activeChatBooking.sitter_name) : (activeChatBooking.owner_name || 'Owner')}
         />
       )}
 
