@@ -409,7 +409,7 @@ export default function AffiliatesManagement({ adminKey, onUnauthorized }: Affil
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="e.g. Your website/channel is not pet-focused. We look forward to reviewing you again later."
                 rows={3}
-                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-red-500 resize-none"
+                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-500 resize-none"
               />
             </div>
 
@@ -466,7 +466,7 @@ export default function AffiliatesManagement({ adminKey, onUnauthorized }: Affil
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 placeholder={payModalAffiliate.stats?.unpaidBalance.toFixed(2)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500 font-mono text-base"
+                className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono text-base"
               />
             </div>
 

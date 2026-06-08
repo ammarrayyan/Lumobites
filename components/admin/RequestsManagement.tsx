@@ -216,13 +216,13 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#c2e59c]"
             >
-              <option value="All">All Requests</option>
-              <option value="Pending">Pending</option>
-              <option value="Accepted">Accepted</option>
-              <option value="Completed">Completed</option>
-              <option value="Declined">Declined</option>
-              <option value="Cancelled">Cancelled</option>
-              <option value="No_Show">No Show</option>
+              <option className="bg-[#1a1a1a] text-white" value="All">All Requests</option>
+              <option className="bg-[#1a1a1a] text-white" value="Pending">Pending</option>
+              <option className="bg-[#1a1a1a] text-white" value="Accepted">Accepted</option>
+              <option className="bg-[#1a1a1a] text-white" value="Completed">Completed</option>
+              <option className="bg-[#1a1a1a] text-white" value="Declined">Declined</option>
+              <option className="bg-[#1a1a1a] text-white" value="Cancelled">Cancelled</option>
+              <option className="bg-[#1a1a1a] text-white" value="No_Show">No Show</option>
             </select>
           </div>
         </div>
