@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, rate_type, availability, phone_number, phone_visible,
-      gender, available_days, available_times, service_types, self_declared, blocked_dates
+      gender, available_days, available_times, service_types, self_declared, blocked_dates,
+      rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare
     } = body;
 
     if (!email || !name) {
@@ -245,6 +246,11 @@ export async function POST(request: NextRequest) {
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
         rate_type: rate_type || 'night',
+        rate_dropins: rate_dropins ? parseFloat(rate_dropins) : null,
+        rate_walking: rate_walking ? parseFloat(rate_walking) : null,
+        rate_overnight: rate_overnight ? parseFloat(rate_overnight) : null,
+        rate_boarding: rate_boarding ? parseFloat(rate_boarding) : null,
+        rate_daycare: rate_daycare ? parseFloat(rate_daycare) : null,
         availability: true,
         available_days: available_days || [],
         available_times: available_times || [],
