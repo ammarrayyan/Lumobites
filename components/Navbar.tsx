@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils } from 'lucide-react';
 
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [isPro, setIsPro] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [proEmail, setProEmail] = useState('');
+  const [sitterEmail, setSitterEmail] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -24,6 +26,9 @@ export default function Navbar() {
   const syncStatus = () => {
     if (typeof window === 'undefined') return;
     const cachedEmail = localStorage.getItem('lumo_pro_email');
+    const cachedSitter = localStorage.getItem('lumo_sitter_email');
+    setSitterEmail(cachedSitter || '');
+    
     const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
     const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
     
@@ -318,14 +323,16 @@ export default function Navbar() {
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
             
+            {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+            
             {!isPro && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
-                  className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
-                >
-                  Go PRO <Sparkles className="w-3 h-3" />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                    className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                  >
+                    Go PRO <Sparkles className="w-3 h-3" />
+                  </button>
                 {showUpgradeMenu && (
                   <>
                     <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
@@ -414,14 +421,16 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2 ml-auto">
           <ShareButton />
           
+          {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+          
           {!isPro && (
-            <div className="relative">
-              <button
-                onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
-                className="bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
-              >
-                Go PRO <Sparkles className="w-3 h-3" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                  className="bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                >
+                  Go PRO <Sparkles className="w-3 h-3" />
+                </button>
               {showUpgradeMenu && (
                 <>
                   <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />

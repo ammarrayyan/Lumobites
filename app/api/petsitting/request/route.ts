@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
@@ -165,7 +166,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError?.message || 'Database error' }, { status: 500 });
     }
 
-    // 5. Send Email to Sitter via Resend
+        // Notification
+    await supabase.from('notifications').insert({
+      recipient_email: sitter.email,
+      type: 'booking_request',
+      title: 'New Booking Request! 🎉',
+      message: `${owner_name || cleanEmail} wants to book you for ${pet_name}`,
+      link: '/petsitting'
+    });
+        await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `${owner_name || cleanEmail} wants to book you for ${pet_name}`, '/petsitting');
+// 5. Send Email to Sitter via Resend
     const origin = request.nextUrl.origin;
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const emailRes = await resend.emails.send({

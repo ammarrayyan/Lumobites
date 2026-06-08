@@ -6,6 +6,7 @@ import PwaRegister from "@/components/PwaRegister";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import PwaSplashScreen from "@/components/PwaSplashScreen";
 import FloatingQRCode from "@/components/FloatingQRCode";
+import PushManager from "@/components/PushManager";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -68,6 +69,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <PwaRegister />
+        <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
         {children}

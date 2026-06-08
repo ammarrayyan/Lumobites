@@ -70,13 +70,12 @@ export async function GET(request: NextRequest) {
 
     const requests = (data || []).map((req: any) => {
       const sitter = req.sitters || {};
-      const isVisible = req.status === 'accepted' && isBookingDateActive(req.dates);
       return {
         ...req,
         sitter_name: sitter.name || 'Local Sitter',
         sitter_photo_url: sitter.photo_url || '',
-        sitter_email: isVisible ? (sitter.email || 'N/A') : '***@***.***',
-        sitter_phone: (isVisible && sitter.phone_number) ? sitter.phone_number : null
+        sitter_email: '***@***.***',
+        sitter_phone: null
       };
     });
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
@@ -72,6 +73,19 @@ export async function POST(request: NextRequest) {
     const petName = reqRow.pet_name || 'your pet';
     const dates = reqRow.dates ? `${reqRow.dates}${reqRow.time_slot ? ` — ${reqRow.time_slot}` : ''}` : 'the requested dates';
     const bookingNumber = reqRow.booking_number || `Booking #${reqRow.id.substring(0, 4)}`;
+
+    // Notifications
+    const recipient = by === 'owner' ? reqRow.sitters?.email : reqRow.owner_email;
+    if (recipient) {
+      await supabaseAdmin.from('notifications').insert({
+        recipient_email: recipient,
+        type: 'booking_cancelled',
+        title: 'Booking Cancelled',
+        message: 'Your booking was cancelled',
+        link: '/petsitting'
+      });
+        await sendPushNotification(recipient, 'Booking Cancelled', 'Your booking was cancelled', '/petsitting');
+    }
 
     if (by === 'owner') {
       // Owner cancelled -> Send email to Sitter

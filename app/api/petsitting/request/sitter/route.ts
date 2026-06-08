@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
       return {
         ...req,
         owner_name: (isAccepted || isCompleted) ? req.owner_name : null,
-        owner_email: isAccepted ? req.owner_email : null,
-        phone_number: isAccepted ? req.phone_number : null
+        owner_email: null,
+        phone_number: null
       };
     });
 

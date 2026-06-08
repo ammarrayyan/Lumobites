@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
+import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload } from 'lucide-react';
@@ -179,6 +180,9 @@ export default function PetSitting() {
   const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
   const [requestFilter, setRequestFilter] = useState('all');
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [activeChatBooking, setActiveChatBooking] = useState<any>(null);
+  const [activeChatRole, setActiveChatRole] = useState<'owner'|'sitter'>('owner');
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
 

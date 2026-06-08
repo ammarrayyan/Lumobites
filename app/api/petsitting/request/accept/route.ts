@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
@@ -49,7 +50,16 @@ export async function GET(request: NextRequest) {
       .eq('id', reqRow.sitter_id)
       .single();
 
-    // 5. Email the owner
+        // Notification
+    await supabase.from('notifications').insert({
+      recipient_email: reqRow.owner_email,
+      type: 'booking_accepted',
+      title: 'Booking Accepted! 🎉',
+      message: `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`,
+      link: '/petsitting'
+    });
+        await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`, '/petsitting');
+// 5. Email the owner
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const fullSitterNameStr = sitter?.name || 'A local sitter';
     const sitterNameStr = formatSitterName(sitter?.name);

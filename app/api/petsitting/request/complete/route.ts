@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
@@ -73,6 +74,15 @@ export async function POST(request: NextRequest) {
           .eq('id', reqRow.sitter_id)
           .single();
         const sitterName = formatSitterName(sitter?.name);
+        
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: reqRow.owner_email,
+          type: 'booking_completed',
+          title: 'Booking Completed ✅',
+          message: `Your booking with ${sitterName} is complete`,
+          link: '/petsitting'
+        });
+        await sendPushNotification(reqRow.owner_email, 'Booking Completed ✅', `Your booking with ${sitterName} is complete`, '/petsitting');
         
         const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
         const subject = "How was your sitter? Leave a review 🐾";
