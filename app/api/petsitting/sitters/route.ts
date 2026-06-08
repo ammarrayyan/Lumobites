@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('sitters')
-      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
+      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
       .eq('approval_status', 'approved')
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true);

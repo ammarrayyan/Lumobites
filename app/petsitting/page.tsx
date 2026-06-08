@@ -20,6 +20,7 @@ interface Sitter {
   bio: string;
   pet_types: string;
   rate_per_night: number;
+  rate_type?: string;
   phone_number?: string;
   phone_visible?: boolean;
   distance?: number;
@@ -144,6 +145,7 @@ export default function PetSitting() {
   const [sitterAvailableTimes, setSitterAvailableTimes] = useState<string[]>([]);
   const [sitterServiceTypes, setSitterServiceTypes] = useState<string[]>([]);
   const [sitterRate, setSitterRate] = useState('');
+  const [sitterRateType, setSitterRateType] = useState('night');
   const [sitterPhone, setSitterPhone] = useState('');
   const [sitterPhoneVisible, setSitterPhoneVisible] = useState(false);
   const [sitterAvailable, setSitterAvailable] = useState(true);
@@ -991,6 +993,7 @@ export default function PetSitting() {
           setSitterGender(data.gender || '');
           setSitterPetTypes(data.pet_types || 'both');
           setSitterRate(data.rate_per_night?.toString() || '');
+          setSitterRateType(data.rate_type || 'night');
           setSitterPhone(data.phone_number || '');
           setSitterPhoneVisible(data.phone_visible || false);
           setSitterAvailable(data.availability === true || data.availability === 'true' || !!data.availability);
@@ -1265,6 +1268,7 @@ export default function PetSitting() {
           bio: sitterBio,
           pet_types: sitterPetTypes,
           rate_per_night: sitterRate,
+          rate_type: sitterRateType,
           phone_number: sitterPhone,
           phone_visible: sitterPhoneVisible,
           availability: sitterAvailable,
@@ -2085,7 +2089,7 @@ export default function PetSitting() {
                             {sitter.pet_types === 'both' ? 'Dogs & Cats' : sitter.pet_types === 'dog' ? 'Dogs Only' : 'Cats Only'}
                           </div>
                           <div className="text-lg font-black text-[#4A3E3D]">
-                            ${sitter.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
+                            {(sitter.service_types?.length || 0) > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${sitter.rate_per_night}</> : <>${sitter.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/{sitter.rate_type || 'night'}</span></>}
                           </div>
                         </div>
 
@@ -2435,7 +2439,7 @@ export default function PetSitting() {
                       {sitterPetTypes === 'both' ? 'Dogs & Cats' : sitterPetTypes === 'dog' ? 'Dogs Only' : 'Cats Only'}
                     </div>
                     <div className="text-lg font-black text-[#4A3E3D]">
-                      ${sitterRate || '0'}<span className="text-sm font-medium text-[#8B7E7D]">/night</span>
+                      {sitterServiceTypes.length > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${sitterRate || '0'}</> : <>${sitterRate || '0'}<span className="text-sm font-medium text-[#8B7E7D]">/{sitterRateType || 'night'}</span></>}
                     </div>
                   </div>
                 </div>
@@ -3259,11 +3263,22 @@ export default function PetSitting() {
                     <option value="Prefer not to say">Prefer not to say</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Rate per night ($)</label>
-                  <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['rate'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
-                  {formErrors['rate'] && <p className="text-red-500 text-sm mt-1">{formErrors['rate']}</p>}
-                </div>
+                <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Base Rate ($)</label>
+                      <input required type="number" min="0" value={sitterRate} onChange={e => setSitterRate(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['rate'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} placeholder="25" />
+                      {formErrors['rate'] && <p className="text-red-500 text-sm mt-1">{formErrors['rate']}</p>}
+                    </div>
+                    <div className="w-1/3">
+                      <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Per</label>
+                      <select value={sitterRateType} onChange={e => setSitterRateType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3.5 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] appearance-none cursor-pointer">
+                        <option value="night">Night</option>
+                        <option value="visit">Visit</option>
+                        <option value="walk">Walk</option>
+                        <option value="day">Day</option>
+                      </select>
+                    </div>
+                  </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number (Optional)</label>
                   <input type="tel" value={sitterPhone} onChange={e => setSitterPhone(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] mb-2" placeholder="(555) 555-5555" />
@@ -4012,8 +4027,8 @@ export default function PetSitting() {
               {/* Service & Rate Details Section */}
               <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Nightly Rate</h4>
-                  <p className="text-lg font-black text-[#4A3E3D]">${selectedSitterForReviews.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/night</span></p>
+                  <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Base Rate</h4>
+                  <p className="text-lg font-black text-[#4A3E3D]">{(selectedSitterForReviews.service_types?.length || 0) > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${selectedSitterForReviews.rate_per_night}</> : <>${selectedSitterForReviews.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/{selectedSitterForReviews.rate_type || 'night'}</span></>}</p>
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pets Allowed</h4>

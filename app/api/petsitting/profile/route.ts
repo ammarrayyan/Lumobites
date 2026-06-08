@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
-      bio, pet_types, rate_per_night, availability, phone_number, phone_visible,
+      bio, pet_types, rate_per_night, rate_type, availability, phone_number, phone_visible,
       gender, available_days, available_times, service_types, self_declared, blocked_dates
     } = body;
 
@@ -244,6 +244,7 @@ export async function POST(request: NextRequest) {
         bio,
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
+        rate_type: rate_type || 'night',
         availability: true,
         available_days: available_days || [],
         available_times: available_times || [],
