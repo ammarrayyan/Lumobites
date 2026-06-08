@@ -24,6 +24,8 @@ interface SharedTwin {
 export default function PetTwinPreview() {
   const [shares, setShares] = useState<SharedTwin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // States for Self-Service Deletion Modal
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
@@ -75,7 +77,7 @@ export default function PetTwinPreview() {
         const res = await fetch('/api/twin/share');
         const data = await res.json();
         if (res.ok && data.shares && data.shares.length > 0) {
-          setShares(data.shares.slice(0, 10));
+          setShares(data.shares.slice(0, 4));
         } else {
           setShares(mockShares);
         }
@@ -116,7 +118,24 @@ export default function PetTwinPreview() {
     }
   };
 
-  const displayedShares = shares.slice(0, 3);
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const res = await fetch('/api/twin/share');
+      const data = await res.json();
+      if (res.ok && data.shares && data.shares.length > 0) {
+        setShares(data.shares.slice(0, 20));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+      setExpanded(true);
+    }
+  };
+
+  const displayedShares = expanded ? shares : shares.slice(0, 3);
+  const hasMore = !expanded && shares.length > 3;
 
   return (
     <section className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] px-6 py-16">
@@ -164,71 +183,116 @@ export default function PetTwinPreview() {
                 ))}
               </div>
             ) : displayedShares.length > 0 ? (
-              <div className="space-y-5">
-                {displayedShares.map(share => (
-                  <div key={share.id} className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in">
-                    
-                    {/* Double Face Avatar */}
-                    <div className="flex items-center -space-x-4 shrink-0 mt-1">
-                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#F5EDE4] relative z-10 flex items-center justify-center text-xs text-[#8B5E3C] font-black">
-                        {share.userPhoto ? (
-                          <img src={share.userPhoto} alt="User" className="w-full h-full object-cover" />
-                        ) : (
-                          <span>🧑</span>
-                        )}
-                      </div>
-                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#FAF6F4] relative z-0 flex items-center justify-center">
-                        {share.petPhoto ? (
-                          <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-lg">🐕</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Meta Details */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[70px]">
-                      <div>
-                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                          <h4 className="font-bold text-[#191919] text-sm truncate">{share.petBreed}</h4>
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#8B5E3C]/5 text-[#8B5E3C] border border-[#8B5E3C]/10">
-                            {share.matchScore}% Match
-                          </span>
+              <>
+                <div className="space-y-5">
+                  {displayedShares.map(share => (
+                    <div key={share.id} className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in">
+                      
+                      {/* Double Face Avatar */}
+                      <div className="flex items-center -space-x-4 shrink-0 mt-1">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#F5EDE4] relative z-10 flex items-center justify-center text-xs text-[#8B5E3C] font-black">
+                          {share.userPhoto ? (
+                            <img src={share.userPhoto} alt="User" className="w-full h-full object-cover" />
+                          ) : (
+                            <span>🧑</span>
+                          )}
                         </div>
-                        {share.traits && share.traits.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {share.traits.slice(0, 3).map(trait => (
-                              <span key={trait} className="text-[10px] bg-[#FAF6F4] text-[#8B7E7D] px-1.5 py-0.5 rounded border border-[#E8DDD4]">
-                                {trait}
-                              </span>
-                            ))}
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#FAF6F4] relative z-0 flex items-center justify-center">
+                          {share.petPhoto ? (
+                            <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-lg">🐕</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Meta Details */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[70px]">
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                            <h4 className="font-bold text-[#191919] text-sm truncate">{share.petBreed}</h4>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#8B5E3C]/5 text-[#8B5E3C] border border-[#8B5E3C]/10">
+                              {share.matchScore}% Match
+                            </span>
                           </div>
-                        )}
-                        <p className="text-[11px] text-[#8B7E7D] italic mt-1.5 leading-relaxed">
-                          &ldquo;{share.quote}&rdquo;
-                        </p>
+                          {share.traits && share.traits.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {share.traits.slice(0, 3).map(trait => (
+                                <span key={trait} className="text-[10px] bg-[#FAF6F4] text-[#8B7E7D] px-1.5 py-0.5 rounded border border-[#E8DDD4]">
+                                  {trait}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-[11px] text-[#8B7E7D] italic mt-1.5 leading-relaxed">
+                            &ldquo;{share.quote}&rdquo;
+                          </p>
+                        </div>
+
+                        {/* Small Remove Link */}
+                        <div className="mt-2">
+                          <button
+                            onClick={() => {
+                              setRemovePostId(share.id);
+                              setRemoveEmail('');
+                              setRemoveStatus('idle');
+                              setRemoveMessage('');
+                              setRemoveModalOpen(true);
+                            }}
+                            className="text-[10px] text-gray-400 hover:text-red-500 font-bold transition-colors cursor-pointer border-0 bg-transparent p-0"
+                          >
+                            Remove my result
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Small Remove Link */}
-                      <div className="mt-2">
-                        <button
-                          onClick={() => {
-                            setRemovePostId(share.id);
-                            setRemoveEmail('');
-                            setRemoveStatus('idle');
-                            setRemoveMessage('');
-                            setRemoveModalOpen(true);
-                          }}
-                          className="text-[10px] text-gray-400 hover:text-red-500 font-bold transition-colors cursor-pointer border-0 bg-transparent p-0"
-                        >
-                          Remove my result
-                        </button>
-                      </div>
                     </div>
+                  ))}
 
-                  </div>
-                ))}
-              </div>
+                  {loadingMore && (
+                    <div className="space-y-5 pt-5 border-t border-[#FAF6F4]">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={`skel-${i}`} className="flex gap-4 items-start border-b border-[#FAF6F4] pb-4 last:border-0 last:pb-0 animate-pulse">
+                          <div className="flex items-center -space-x-4 shrink-0 mt-1">
+                            <div className="w-12 h-12 rounded-full border-2 border-white shadow-sm bg-gray-200 relative z-10"></div>
+                            <div className="w-12 h-12 rounded-full border-2 border-white shadow-sm bg-gray-200 relative z-0"></div>
+                          </div>
+                          <div className="flex-1 space-y-2 py-1">
+                            <div className="flex items-center gap-2">
+                              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                              <div className="h-4 bg-gray-200 rounded-full w-12"></div>
+                            </div>
+                            <div className="flex gap-1 mt-1">
+                              <div className="h-4 bg-gray-200 rounded w-12"></div>
+                              <div className="h-4 bg-gray-200 rounded w-16"></div>
+                            </div>
+                            <div className="h-3 bg-gray-200 rounded w-3/4 mt-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/4 mt-1"></div>
+                            <div className="h-3 bg-gray-200 rounded w-20 mt-2"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {hasMore && (
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="w-full mt-6 bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3.5 rounded-xl transition-colors disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+                        Loading matches...
+                      </>
+                    ) : (
+                      'See All Matches →'
+                    )}
+                  </button>
+                )}
+              </>
             ) : (
               <p className="text-sm text-[#8B7E7D] italic text-center py-4">No shared matches yet. Be the first!</p>
             )}
