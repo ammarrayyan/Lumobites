@@ -2338,10 +2338,19 @@ export default function PetSitting() {
                                     <td colSpan={6} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
                                       <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div>
-                                          <p className="font-bold text-[#3B2410] mb-1">🐾 Contact Info Shared</p>
-                                          <p className="text-gray-600">Email: <strong>{req.sitter_email}</strong> {req.sitter_phone ? ` | Phone: ` : ''}<strong>{req.sitter_phone}</strong></p>
-                                          <p className="text-[#8B7E7D] text-[10px] mt-1">Contact details visible while booking is active</p>
+                                          <p className="font-bold text-[#3B2410] mb-1">💬 Message Sitter</p>
+                                          <p className="text-[#8B7E7D] text-[10px] mt-1">Communicate directly with your sitter to coordinate details</p>
                                         </div>
+                                        <button
+                                          onClick={() => {
+                                            setActiveChatBooking(req);
+                                            setActiveChatRole('owner');
+                                            setChatModalOpen(true);
+                                          }}
+                                          className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
+                                        >
+                                          Message Sitter
+                                        </button>
                                       </div>
                                     </td>
                                   </tr>
@@ -2808,13 +2817,23 @@ export default function PetSitting() {
                               })()}
                             </div>
 
-                            {/* Contact Details (Step 5) */}
+                            {/* Messaging */}
                             {isAccepted && (
-                              <div className="text-xs bg-white p-2.5 rounded-xl border border-[#E8DDD4] space-y-1">
-                                <div className="font-bold text-[#3B2410] mb-0.5">Owner Contact Info:</div>
-                                {req.owner_name && <div>Name: <strong>{req.owner_name}</strong></div>}
-                                <div>Email: <strong>{req.owner_email}</strong></div>
-                                {req.phone_number && <div>Phone: <strong>{req.phone_number}</strong></div>}
+                              <div className="text-xs bg-white p-3 rounded-xl border border-[#E8DDD4] flex flex-col sm:flex-row justify-between items-center gap-3">
+                                <div className="space-y-1">
+                                  <div className="font-bold text-[#3B2410] mb-0.5">💬 Message Owner</div>
+                                  <div className="text-[#8B7E7D] text-[10px]">Communicate directly with the owner to coordinate details</div>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    setActiveChatBooking(req);
+                                    setActiveChatRole('sitter');
+                                    setChatModalOpen(true);
+                                  }}
+                                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
+                                >
+                                  Message Owner
+                                </button>
                               </div>
                             )}
 
@@ -4082,7 +4101,6 @@ export default function PetSitting() {
       )}
 
       {/* REVIEWS MODAL */}
-      {/* REVIEWS MODAL */}
       {reviewsModalOpen && selectedSitterForReviews && (
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
@@ -4275,7 +4293,7 @@ export default function PetSitting() {
       {deleteModalOpen && (
         <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
-            <span className="text-5xl mb-4 block">⚠️</span>
+            <span className="text-5xl mb-4 block">😢</span>
             <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Are you sure?</h3>
             <p className="text-[#8B7E7D] text-sm mb-6">This will permanently delete your profile and cancel your subscription. You will no longer appear in search results.</p>
 
@@ -4297,6 +4315,23 @@ export default function PetSitting() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Chat Modal */}
+      {chatModalOpen && activeChatBooking && (
+        <ChatModal
+          bookingId={activeChatBooking.id}
+          bookingNumber={activeChatBooking.booking_number || activeChatBooking.id}
+          isOpen={chatModalOpen}
+          onClose={() => {
+            setChatModalOpen(false);
+            setActiveChatBooking(null);
+          }}
+          currentRole={activeChatRole}
+          currentUserEmail={activeChatRole === 'owner' ? activeChatBooking.owner_email : activeChatBooking.sitters?.email || activeChatBooking.sitter_email}
+          otherPartyEmail={activeChatRole === 'owner' ? activeChatBooking.sitters?.email || activeChatBooking.sitter_email : activeChatBooking.owner_email}
+          otherPartyName={activeChatRole === 'owner' ? formatSitterName(activeChatBooking.sitters?.name || activeChatBooking.sitter_name) : (activeChatBooking.owner_name || 'Owner')}
+        />
       )}
 
     </div>
