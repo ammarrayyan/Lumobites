@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Mark as read if user is provided
     if (email) {
-      await supabase
+      await supabaseAdmin
         .from('messages')
         .update({ read: true })
         .eq('booking_id', booking_id)
