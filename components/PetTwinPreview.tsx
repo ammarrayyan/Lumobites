@@ -24,8 +24,6 @@ interface SharedTwin {
 export default function PetTwinPreview() {
   const [shares, setShares] = useState<SharedTwin[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   // States for Self-Service Deletion Modal
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
@@ -118,24 +116,8 @@ export default function PetTwinPreview() {
     }
   };
 
-  const handleLoadMore = async () => {
-    setLoadingMore(true);
-    try {
-      const res = await fetch('/api/twin/share');
-      const data = await res.json();
-      if (res.ok && data.shares && data.shares.length > 0) {
-        setShares(data.shares.slice(0, 20));
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingMore(false);
-      setExpanded(true);
-    }
-  };
-
-  const displayedShares = expanded ? shares : shares.slice(0, 3);
-  const hasMore = !expanded && shares.length > 3;
+  const displayedShares = shares.slice(0, 3);
+  const hasMore = shares.length > 3;
 
   return (
     <section className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] px-6 py-16">
@@ -248,49 +230,16 @@ export default function PetTwinPreview() {
 
                     </div>
                   ))}
-
-                  {loadingMore && (
-                    <div className="space-y-5 pt-5 border-t border-[#FAF6F4]">
-                      {[1, 2, 3, 4].map(i => (
-                        <div key={`skel-${i}`} className="flex gap-4 items-start border-b border-[#FAF6F4] pb-4 last:border-0 last:pb-0 animate-pulse">
-                          <div className="flex items-center -space-x-4 shrink-0 mt-1">
-                            <div className="w-12 h-12 rounded-full border-2 border-white shadow-sm bg-gray-200 relative z-10"></div>
-                            <div className="w-12 h-12 rounded-full border-2 border-white shadow-sm bg-gray-200 relative z-0"></div>
-                          </div>
-                          <div className="flex-1 space-y-2 py-1">
-                            <div className="flex items-center gap-2">
-                              <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                              <div className="h-4 bg-gray-200 rounded-full w-12"></div>
-                            </div>
-                            <div className="flex gap-1 mt-1">
-                              <div className="h-4 bg-gray-200 rounded w-12"></div>
-                              <div className="h-4 bg-gray-200 rounded w-16"></div>
-                            </div>
-                            <div className="h-3 bg-gray-200 rounded w-3/4 mt-2"></div>
-                            <div className="h-3 bg-gray-200 rounded w-1/4 mt-1"></div>
-                            <div className="h-3 bg-gray-200 rounded w-20 mt-2"></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {hasMore && (
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={loadingMore}
-                    className="w-full mt-6 bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3.5 rounded-xl transition-colors disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
+                  <NextLink
+                    href="/twin/gallery"
+                    className="w-full mt-6 bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-decoration-none"
+                    style={{ textDecoration: 'none' }}
                   >
-                    {loadingMore ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
-                        Loading matches...
-                      </>
-                    ) : (
-                      'See All Matches →'
-                    )}
-                  </button>
+                    See All Matches →
+                  </NextLink>
                 )}
               </>
             ) : (
