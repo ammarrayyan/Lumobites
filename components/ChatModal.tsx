@@ -106,7 +106,11 @@ export default function ChatModal({
         // Fetch to get real ID and trigger any read updates
         fetchMessages();
       } else {
-        // Handle error (maybe revert optimistic msg)
+        const errorData = await res.json();
+        console.error('[ChatModal] Failed to send message:', errorData);
+        alert(`Failed to send message: ${errorData.error || 'Unknown error'}`);
+        // Remove optimistic message on failure
+        setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
       }
     } catch (err) {
       console.error('Error sending message:', err);

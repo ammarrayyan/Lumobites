@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing booking_id' }, { status: 400 });
     }
 
-    const { data: messages, error } = await supabase
+    const { data: messages, error } = await supabaseAdmin
       .from('messages')
       .select('*')
       .eq('booking_id', booking_id)
@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('[Messages API] POST called with body:', body);
+    
     const { booking_id, sender_email, message } = body;
     let { receiver_email } = body;
 
@@ -52,13 +54,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Lookup receiver if not provided
     if (!receiver_email) {
-      const { data: booking } = await supabase.from('sitting_requests').select('owner_email, sitter_id').eq('id', booking_id).single();
+      const { data: booking } = await supabaseAdmin.from('sitting_requests').select('owner_email, sitter_id').eq('id', booking_id).single();
       if (booking) {
         if (sender_email === booking.owner_email) {
           // Sender is owner, receiver is sitter
-          const { data: sitter } = await supabase.from('sitters').select('email').eq('id', booking.sitter_id).single();
+          const { data: sitter } = await supabaseAdmin.from('sitters').select('email').eq('id', booking.sitter_id).single();
           if (sitter) receiver_email = sitter.email;
         } else {
           // Sender is sitter, receiver is owner
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Save to messages table
-    const { data: newMessage, error: insertError } = await supabase
+    const { data: newMessage, error: insertError } = await supabaseAdmin
       .from('messages')
       .insert({
         booking_id,
@@ -85,33 +86,35 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
+      console.error('[Messages API] Supabase insert error:', insertError);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
+
+    console.log('[Messages API] Message inserted successfully:', newMessage.id);
 
     // 2. Create notification for receiver
     let senderName = sender_email.split('@')[0];
     
-    // Attempt to get sender's actual name
-    const { data: sitterData } = await supabase.from('sitters').select('name').eq('email', sender_email).single();
+    const { data: sitterData } = await supabaseAdmin.from('sitters').select('name').eq('email', sender_email).single();
     if (sitterData && sitterData.name) {
       senderName = sitterData.name;
     } else {
-      const { data: reqData } = await supabase.from('sitting_requests').select('owner_name').eq('owner_email', sender_email).single();
+      const { data: reqData } = await supabaseAdmin.from('sitting_requests').select('owner_name').eq('owner_email', sender_email).single();
       if (reqData && reqData.owner_name) {
         senderName = reqData.owner_name;
       }
     }
 
-    const msgPreview = message.length > 40 ? message.substring(0, 40) + '...' : message;
-    
-    await supabase.from('notifications').insert({
-      recipient_email: receiver_email,
-      type: 'new_message',
-      title: 'New Message 💬',
-      message: `${senderName}: ${msgPreview}`,
-      link: `/petsitting?booking=${booking_id}`,
-      read: false
-    });
+    const { data: notification, error: notifError } = await supabaseAdmin
+      .from('notifications')
+      .insert({
+        recipient_email: receiver_email,
+        type: 'message',
+        title: `New message from ${senderName}`,
+        message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        link: `/petsitting?booking=${booking_id}`,
+        read: false
+      });
 
     // 3. Send fallback email
     // Check if we already have the sender name nicely formatted
