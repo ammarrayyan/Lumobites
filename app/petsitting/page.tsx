@@ -170,6 +170,7 @@ export default function PetSitting() {
   const [sitterId, setSitterId] = useState('');
   const [sitterRequests, setSitterRequests] = useState<any[]>([]);
   const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
+  const [requestFilter, setRequestFilter] = useState('all');
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
@@ -2684,12 +2685,29 @@ export default function PetSitting() {
 
                 {/* Sitter Booking Tracker Section */}
                 <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
-                  <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                    📋 Your Booking Requests
-                  </h3>
-                  <p className="text-[#8B7E7D] text-xs mb-6">
-                    Manage requests and track booking statuses submitted by pet owners.
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
+                        📋 Your Booking Requests
+                      </h3>
+                      <p className="text-[#8B7E7D] text-xs">
+                        Manage requests and track booking statuses submitted by pet owners.
+                      </p>
+                    </div>
+                    
+                    <select
+                      value={requestFilter}
+                      onChange={(e) => setRequestFilter(e.target.value)}
+                      className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
+                    >
+                      <option value="all">All Requests</option>
+                      <option value="pending">Pending</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="declined">Declined</option>
+                    </select>
+                  </div>
 
                   {loadingSitterRequests ? (
                     <div className="text-center py-6 text-gray-500">Loading your bookings...</div>
@@ -2699,7 +2717,10 @@ export default function PetSitting() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {sitterRequests.map((req) => {
+                      {sitterRequests
+                        .filter(req => requestFilter === 'all' || req.status === requestFilter)
+                        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+                        .map((req) => {
                         const isPending = req.status === 'pending';
                         const isAccepted = req.status === 'accepted';
                         const isCompleted = req.status === 'completed';
