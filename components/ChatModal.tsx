@@ -55,6 +55,9 @@ export default function ChatModal({
 
   useEffect(() => {
     if (isOpen && bookingId) {
+      console.log('[ChatModal] Opened for booking_id:', bookingId);
+      console.log('[ChatModal] Props - currentUserEmail:', currentUserEmail);
+      
       setIsLoading(true);
       fetchMessages();
       
