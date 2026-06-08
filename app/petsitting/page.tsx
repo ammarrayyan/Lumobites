@@ -3310,48 +3310,7 @@ export default function PetSitting() {
                     <option value="Prefer not to say">Prefer not to say</option>
                   </select>
                 </div>
-                  <div className="space-y-3">
-                    <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Service Rates ($)</label>
-                    {sitterServiceTypes.length === 0 && (
-                      <p className="text-xs text-[#8B7E7D]">Select services below to set your rates.</p>
-                    )}
-                    {sitterServiceTypes.includes('Home visits') && (
-                      <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-                        <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Drop-in visit</span>
-                        <input type="number" min="0" value={sitterRateDropins} onChange={e => setSitterRateDropins(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="25" />
-                        <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ visit</span>
-                      </div>
-                    )}
-                    {sitterServiceTypes.includes('Dog walking') && (
-                      <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-                        <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Dog walking</span>
-                        <input type="number" min="0" value={sitterRateWalking} onChange={e => setSitterRateWalking(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="20" />
-                        <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ walk</span>
-                      </div>
-                    )}
-                    {sitterServiceTypes.includes('Overnight stays') && (
-                      <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-                        <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Overnight stay</span>
-                        <input type="number" min="0" value={sitterRateOvernight} onChange={e => setSitterRateOvernight(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="55" />
-                        <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ night</span>
-                      </div>
-                    )}
-                    {sitterServiceTypes.includes('Sitter\'s home boarding') && (
-                      <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-                        <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Home boarding</span>
-                        <input type="number" min="0" value={sitterRateBoarding} onChange={e => setSitterRateBoarding(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="50" />
-                        <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ night</span>
-                      </div>
-                    )}
-                    {sitterServiceTypes.includes('Full day sitting') && (
-                      <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-                        <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Full day sitting</span>
-                        <input type="number" min="0" value={sitterRateDaycare} onChange={e => setSitterRateDaycare(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="40" />
-                        <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ day</span>
-                      </div>
-                    )}
-                    {formErrors['rate'] && <p className="text-red-500 text-sm mt-1">{formErrors['rate']}</p>}
-                  </div>
+
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number (Optional)</label>
                   <input type="tel" value={sitterPhone} onChange={e => setSitterPhone(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] mb-2" placeholder="(555) 555-5555" />
@@ -3420,6 +3379,49 @@ export default function PetSitting() {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              <div className="md:col-span-2 space-y-3">
+                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Service Rates ($)</label>
+                {sitterServiceTypes.length === 0 && (
+                  <p className="text-xs text-[#8B7E7D]">Select services below to set your rates.</p>
+                )}
+                {sitterServiceTypes.includes('Home visits') && (
+                  <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                    <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Drop-in visit</span>
+                    <input type="number" min="0" value={sitterRateDropins} onChange={e => setSitterRateDropins(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="25" />
+                    <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ visit</span>
+                  </div>
+                )}
+                {sitterServiceTypes.includes('Dog walking') && (
+                  <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                    <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Dog walking</span>
+                    <input type="number" min="0" value={sitterRateWalking} onChange={e => setSitterRateWalking(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="20" />
+                    <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ walk</span>
+                  </div>
+                )}
+                {sitterServiceTypes.includes('Overnight stays') && (
+                  <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                    <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Overnight stay</span>
+                    <input type="number" min="0" value={sitterRateOvernight} onChange={e => setSitterRateOvernight(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="55" />
+                    <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ night</span>
+                  </div>
+                )}
+                {sitterServiceTypes.includes('Sitter\'s home boarding') && (
+                  <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                    <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Home boarding</span>
+                    <input type="number" min="0" value={sitterRateBoarding} onChange={e => setSitterRateBoarding(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="50" />
+                    <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ night</span>
+                  </div>
+                )}
+                {sitterServiceTypes.includes('Full day sitting') && (
+                  <div className="flex items-center gap-3 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                    <span className="text-sm font-bold w-1/2 text-[#4A3E3D]">Full day sitting</span>
+                    <input type="number" min="0" value={sitterRateDaycare} onChange={e => setSitterRateDaycare(e.target.value)} className="w-1/2 bg-white border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="40" />
+                    <span className="text-xs text-[#8B7E7D] whitespace-nowrap">/ day</span>
+                  </div>
+                )}
+                {formErrors['rate'] && <p className="text-red-500 text-sm mt-1">{formErrors['rate']}</p>}
               </div>
 
               <div className="md:col-span-2">
