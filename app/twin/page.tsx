@@ -2084,7 +2084,7 @@ export default function TwinPage() {
                         We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 15 minutes.
                       </p>
                       <input
-                        type="password"
+                        type="text"
                         inputMode="numeric"
                         maxLength={6}
                         value={verificationCode}

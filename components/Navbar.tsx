@@ -712,7 +712,7 @@ export default function Navbar() {
                 ) : (
                   <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
                     <input
-                      type="password"
+                      type="text"
                       inputMode="numeric"
                       value={signInCode}
                       onChange={e => setSignInCode(e.target.value)}

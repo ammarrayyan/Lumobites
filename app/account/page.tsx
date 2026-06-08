@@ -347,7 +347,7 @@ export default function AccountPage() {
                     Enter 6-Digit Code
                   </label>
                   <input
-                    type="password"
+                    type="text"
                     inputMode="numeric"
                     maxLength={6}
                     value={verificationCode}

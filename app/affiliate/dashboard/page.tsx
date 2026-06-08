@@ -253,7 +253,7 @@ export default function AffiliateDashboard() {
                     Enter Verification Code
                   </label>
                   <input
-                    type="password"
+                    type="text"
                     inputMode="numeric"
                     maxLength={6}
                     value={verificationCode}
