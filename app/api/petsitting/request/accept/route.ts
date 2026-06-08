@@ -77,15 +77,13 @@ export async function GET(request: NextRequest) {
           <p style="${emailStyles.p}">Great news! Your sitter accepted your request. View your booking details at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
           ${emailStyles.divider}
           ${emailStyles.highlightBox(`
-            <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Sitter Contact Information</p>
+            <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Message Your Sitter</p>
             <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
-              <strong>Sitter:</strong> ${fullSitterNameStr}<br/>
-              <strong>Email:</strong> <a href="mailto:${sitter?.email || ''}" style="color:#8B6A50;text-decoration:none;">${sitter?.email || ''}</a>
-              ${sitter?.phone_number ? `<br/><strong>Phone:</strong> ${sitter.phone_number}` : ''}
+              Message them directly on Lumo Bites → <a href="https://lumobites.net/petsitting" style="color:#8B6A50;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a>
             </p>
           `)}
           ${emailStyles.divider}
-          <p style="${emailStyles.p}">Please reach out to them directly to finalize details and coordinate handoff or meet-ups.</p>
+          <p style="${emailStyles.p}">Please reach out to them directly on Lumo Bites to finalize details and coordinate handoff or meet-ups.</p>
           ${emailStyles.signoff}
         `
       })
@@ -124,10 +122,8 @@ export async function GET(request: NextRequest) {
             <div class="info-item"><strong>Pet Name:</strong> ${reqRow.pet_name || 'Their pet'} ${reqRow.pet_type === 'dog' ? '🐶' : '🐱'}</div>
             <div class="info-item"><strong>Dates:</strong> ${reqRow.dates} ${reqRow.time_slot ? `— ${reqRow.time_slot}` : ''}</div>
             
-            <div class="info-title" style="margin-top: 20px;">👤 Owner Contact Information</div>
-            <div class="info-item"><strong>Owner Name:</strong> ${reqRow.owner_name || 'N/A'}</div>
-            <div class="info-item"><strong>Owner Email:</strong> <a href="mailto:${reqRow.owner_email}" style="color: #8B5E3C; font-weight: bold; text-decoration: underline;">${reqRow.owner_email}</a></div>
-            <div class="info-item"><strong>Owner Phone:</strong> ${reqRow.phone_number || 'Not provided'}</div>
+            <div class="info-title" style="margin-top: 20px;">💬 Message the Owner</div>
+            <div class="info-item">Message <strong>${reqRow.owner_name || 'the owner'}</strong> directly on your Lumo Bites dashboard to coordinate details.</div>
           </div>
 
           <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>

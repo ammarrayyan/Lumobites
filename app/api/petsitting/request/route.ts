@@ -190,24 +190,22 @@ export async function POST(request: NextRequest) {
     <h1 style="${emailStyles.h1}">New Pet Sitting Request! 🐾</h1>
     <p style="${emailStyles.p}">Hi <strong>${formatSitterName(sitter.name)}</strong>,</p>
     <p style="${emailStyles.p}">You have a new pet sitting request through Lumo Bites (<strong>${booking_number}</strong>). Here are the details:</p>
-    ${emailStyles.divider}
     ${emailStyles.infoBox(`
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Booking Number:</strong> ${booking_number}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Name:</strong> ${owner_name || 'N/A'}</p>
-      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Email:</strong> ${cleanEmail}</p>
-      ${phone_number ? `<p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Phone:</strong> ${phone_number}</p>` : ''}
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Name:</strong> ${pet_name}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Type:</strong> ${pet_type}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Dates Needed:</strong> ${dates} ${time_slot ? `— ${time_slot}` : ''}</p>
       <p style="margin:0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Notes:</strong> ${special_notes || 'None'}</p>
     `)}
     ${emailStyles.divider}
-    <p style="${emailStyles.p}">Please respond to this request by clicking one of the buttons below:</p>
+    <p style="${emailStyles.p}">You can message the owner directly on Lumo Bites — log in to your dashboard to view and reply to this request.</p>
     <div style="text-align:center;margin:32px 0;">
-      <a href="${origin}/api/petsitting/request/accept?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#10B981;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;margin-right:12px;">✅ Accept Booking</a>
-      <a href="${origin}/api/petsitting/request/decline?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#EF4444;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">❌ Decline Booking</a>
+      <a href="${origin}/petsitting" style="background-color:#8B5E3C;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;margin-bottom:12px;">View Request → lumobites.net/petsitting</a>
+      <br/>
+      <a href="${origin}/api/petsitting/request/accept?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#10B981;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;margin-right:12px;">✓ Accept Booking</a>
+      <a href="${origin}/api/petsitting/request/decline?id=${insertedReq.id}&token=${insertedReq.secure_token}" style="background-color:#EF4444;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">✕ Decline Booking</a>
     </div>
-    <p style="${emailStyles.p}">Alternatively, you can visit <a href="${origin}/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a> to manage your bookings.</p>
     ${emailStyles.signoff}
   `
       })
