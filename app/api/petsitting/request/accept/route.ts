@@ -50,44 +50,59 @@ export async function GET(request: NextRequest) {
       .eq('id', reqRow.sitter_id)
       .single();
 
-        // Notification
-    await supabase.from('notifications').insert({
-      recipient_email: reqRow.owner_email,
-      type: 'booking_accepted',
-      title: 'Booking Accepted! 🎉',
-      message: `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`,
-      link: '/petsitting'
-    });
-        await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`, '/petsitting');
-// 5. Email the owner
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const fullSitterNameStr = sitter?.name || 'A local sitter';
     const sitterNameStr = formatSitterName(sitter?.name);
-    
-    await resend.emails.send({
-      from: fromEmail,
-      to: reqRow.owner_email,
-      subject: `🎉 Great news! Your sitter accepted your request`,
-      html: brandedEmail({
+
+    // Notification
+    try {
+      await supabase.from('notifications').insert({
+        recipient_email: reqRow.owner_email,
+        type: 'booking_accepted',
+        title: 'Booking Accepted! 🎉',
+        message: `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`,
+        link: '/petsitting'
+      });
+    } catch (err) {
+      console.error('[Accept Request] Notification error:', err);
+    }
+
+    try {
+      await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`, '/petsitting');
+    } catch (err) {
+      console.error('[Accept Request] Push notification error:', err);
+    }
+
+    // 5. Email the owner
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      
+      await resend.emails.send({
+        from: fromEmail,
+        to: reqRow.owner_email,
         subject: `🎉 Great news! Your sitter accepted your request`,
-        preheader: `${sitterNameStr} has accepted your request for ${reqRow.pet_name || 'your pet'}.`,
-        body: `
-          <h1 style="${emailStyles.h1}">Your request was accepted! 🎉</h1>
-          <p style="${emailStyles.p}">Hi there,</p>
-          <p style="${emailStyles.p}">Great news! Your sitter accepted your request. View your booking details at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
-          ${emailStyles.divider}
-          ${emailStyles.highlightBox(`
-            <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Message Your Sitter</p>
-            <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
-              Message them directly on Lumo Bites → <a href="https://lumobites.net/petsitting" style="color:#8B6A50;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a>
-            </p>
-          `)}
-          ${emailStyles.divider}
-          <p style="${emailStyles.p}">Please reach out to them directly on Lumo Bites to finalize details and coordinate handoff or meet-ups.</p>
-          ${emailStyles.signoff}
-        `
-      })
-    });
+        html: brandedEmail({
+          subject: `🎉 Great news! Your sitter accepted your request`,
+          preheader: `${sitterNameStr} has accepted your request for ${reqRow.pet_name || 'your pet'}.`,
+          body: `
+            <h1 style="${emailStyles.h1}">Your request was accepted! 🎉</h1>
+            <p style="${emailStyles.p}">Hi there,</p>
+            <p style="${emailStyles.p}">Great news! Your sitter accepted your request. View your booking details at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
+            ${emailStyles.divider}
+            ${emailStyles.highlightBox(`
+              <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Message Your Sitter</p>
+              <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
+                Message them directly on Lumo Bites → <a href="https://lumobites.net/petsitting" style="color:#8B6A50;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a>
+              </p>
+            `)}
+            ${emailStyles.divider}
+            <p style="${emailStyles.p}">Please reach out to them directly on Lumo Bites to finalize details and coordinate handoff or meet-ups.</p>
+            ${emailStyles.signoff}
+          `
+        })
+      });
+    } catch (err) {
+      console.error('[Accept Request] Email error:', err);
+    }
 
     // 6. Return gorgeous html page
     const html = `

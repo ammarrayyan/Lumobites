@@ -69,44 +69,57 @@ export async function POST(request: NextRequest) {
     if (reqRow.owner_email && reqRow.sitter_id) {
       try {
         const { data: sitter } = await supabaseAdmin
-          .from('sitters')
-          .select('name')
-          .eq('id', reqRow.sitter_id)
-          .single();
-        const sitterName = formatSitterName(sitter?.name);
-        
+        .from('sitters')
+        .select('name')
+        .eq('id', reqRow.sitter_id)
+        .single();
+      const sitterName = formatSitterName(sitter?.name);
+      
+      try {
         await supabaseAdmin.from('notifications').insert({
           recipient_email: reqRow.owner_email,
           type: 'booking_completed',
-          title: 'Booking Completed ✅',
+          title: 'Booking Completed 🎉',
           message: `Your booking with ${sitterName} is complete`,
           link: '/petsitting'
         });
-        await sendPushNotification(reqRow.owner_email, 'Booking Completed ✅', `Your booking with ${sitterName} is complete`, '/petsitting');
-        
-        const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
-        const subject = "How was your sitter? Leave a review 🐾";
-        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-        
+      } catch (err) {
+        console.error('[Complete Booking] Notification error:', err);
+      }
+
+      try {
+        await sendPushNotification(reqRow.owner_email, 'Booking Completed 🎉', `Your booking with ${sitterName} is complete`, '/petsitting');
+      } catch (err) {
+        console.error('[Complete Booking] Push error:', err);
+      }
+      
+      const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
+      const subject = "How was your sitter? Leave a review 🎉";
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      
+      try {
         await resend.emails.send({
           from: fromEmail,
           to: reqRow.owner_email,
           subject: subject,
           html: brandedEmail({
             subject: subject,
-            preheader: `Leave a review for ${sitterName} 🐾`,
+            preheader: `Leave a review for ${sitterName} 🎉`,
             body: `
-              <h1 style="${emailStyles.h1}">How was your sitter? 🐾</h1>
+              <h1 style="${emailStyles.h1}">How was your sitter? 🎉</h1>
               <p style="${emailStyles.p}">Hi there,</p>
               <p style="${emailStyles.p}">Your booking with <strong>${sitterName}</strong> has been marked as completed. We'd love to hear how it went! Leave a review to help other pet owners find great sitters:</p>
               <p style="${emailStyles.p}"><a href="${reviewLink}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${reqRow.sitter_id}</a></p>
               ${emailStyles.divider}
-              ${emailStyles.button(reviewLink, 'Leave a Review 🐾')}
+              ${emailStyles.button(reviewLink, 'Leave a Review 🎉')}
               ${emailStyles.divider}
               ${emailStyles.signoff}
             `
           })
         });
+        } catch (err) {
+          console.error('[Complete Booking] Email error:', err);
+        }
 
         // 6. Update review_sent flag
         const { error: emailSentUpdateError } = await supabaseAdmin
@@ -117,8 +130,8 @@ export async function POST(request: NextRequest) {
         if (emailSentUpdateError) {
           console.error('[Complete Booking] Failed to update review_sent status:', emailSentUpdateError);
         }
-      } catch (emailErr) {
-        console.error('[Complete Booking] Failed to send review request email:', emailErr);
+      } catch (err: any) {
+        console.error('[Complete Booking] Failed to send email to owner:', err);
       }
     }
 

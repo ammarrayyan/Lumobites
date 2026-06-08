@@ -50,38 +50,53 @@ export async function GET(request: NextRequest) {
       .eq('id', reqRow.sitter_id)
       .single();
 
-        // Notification
-    await supabase.from('notifications').insert({
-      recipient_email: reqRow.owner_email,
-      type: 'booking_declined',
-      title: 'Booking Declined',
-      message: `${sitterNameStr} declined your booking for ${reqRow.pet_name}`,
-      link: '/petsitting'
-    });
-        await sendPushNotification(reqRow.owner_email, 'Booking Declined', `${sitterNameStr} declined your booking for ${reqRow.pet_name}`, '/petsitting');
-// 5. Email the owner
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
     const sitterNameStr = formatSitterName(sitter?.name);
-    
-    await resend.emails.send({
-      from: fromEmail,
-      to: reqRow.owner_email,
-      subject: `🐾 Update on your Pet Sitting Request`,
-      html: brandedEmail({
-        subject: `🐾 Update on your Pet Sitting Request`,
-        preheader: `An update regarding your sitting request for ${reqRow.pet_name || 'your pet'}.`,
-        body: `
-          <h1 style="${emailStyles.h1}">Sitting Request Update 🐾</h1>
-          <p style="${emailStyles.p}">Hi there,</p>
-          <p style="${emailStyles.p}">Your sitter was unable to accept your request. Please search for another sitter at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
-          ${emailStyles.divider}
-          <p style="${emailStyles.p}">Don't worry! We have many other amazing sitters in your community. You can find another sitter easily:</p>
-          ${emailStyles.button('https://lumobites.net/petsitting', 'Find Another Sitter')}
-          ${emailStyles.divider}
-          ${emailStyles.signoff}
-        `
-      })
-    });
+
+    // Notification
+    try {
+      await supabase.from('notifications').insert({
+        recipient_email: reqRow.owner_email,
+        type: 'booking_declined',
+        title: 'Booking Declined',
+        message: `${sitterNameStr} declined your booking for ${reqRow.pet_name}`,
+        link: '/petsitting'
+      });
+    } catch (err) {
+      console.error('[Decline Request] Notification error:', err);
+    }
+
+    try {
+      await sendPushNotification(reqRow.owner_email, 'Booking Declined', `${sitterNameStr} declined your booking for ${reqRow.pet_name}`, '/petsitting');
+    } catch (err) {
+      console.error('[Decline Request] Push notification error:', err);
+    }
+
+    // 5. Email the owner
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      
+      await resend.emails.send({
+        from: fromEmail,
+        to: reqRow.owner_email,
+        subject: `😔 Update on your Pet Sitting Request`,
+        html: brandedEmail({
+          subject: `😔 Update on your Pet Sitting Request`,
+          preheader: `An update regarding your sitting request for ${reqRow.pet_name || 'your pet'}.`,
+          body: `
+            <h1 style="${emailStyles.h1}">Sitting Request Update 😔</h1>
+            <p style="${emailStyles.p}">Hi there,</p>
+            <p style="${emailStyles.p}">Your sitter was unable to accept your request. Please search for another sitter at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
+            ${emailStyles.divider}
+            <p style="${emailStyles.p}">Don't worry! We have many other amazing sitters in your community. You can find another sitter easily:</p>
+            ${emailStyles.button('https://lumobites.net/petsitting', 'Find Another Sitter')}
+            ${emailStyles.divider}
+            ${emailStyles.signoff}
+          `
+        })
+      });
+    } catch (err) {
+      console.error('[Decline Request] Email error:', err);
+    }
 
     // 6. Return confirmation html page
     const html = `

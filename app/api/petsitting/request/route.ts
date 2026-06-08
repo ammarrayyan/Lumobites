@@ -166,21 +166,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError?.message || 'Database error' }, { status: 500 });
     }
 
-        // Notification
-    await supabase.from('notifications').insert({
-      recipient_email: sitter.email,
-      type: 'booking_request',
-      title: 'New Booking Request! 🎉',
-      message: `${owner_name || cleanEmail} wants to book you for ${pet_name}`,
-      link: '/petsitting'
-    });
-        await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `${owner_name || cleanEmail} wants to book you for ${pet_name}`, '/petsitting');
-// 5. Send Email to Sitter via Resend
+    // Notification
+    try {
+      await supabase.from('notifications').insert({
+        recipient_email: sitter.email,
+        type: 'booking_request',
+        title: 'New Booking Request! 🎉',
+        message: `${owner_name || cleanEmail} wants to book you for ${pet_name}`,
+        link: '/petsitting'
+      });
+    } catch (err) {
+      console.error('[PetSitting Request] Notification error:', err);
+    }
+
+    try {
+      await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `${owner_name || cleanEmail} wants to book you for ${pet_name}`, '/petsitting');
+    } catch (err) {
+      console.error('[PetSitting Request] Push error:', err);
+    }
+
+    // 5. Send Email to Sitter via Resend
     const origin = request.nextUrl.origin;
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-    const emailRes = await resend.emails.send({
-      from: fromEmail,
-      to: sitter.email,
+    try {
+      const emailRes = await resend.emails.send({
+        from: fromEmail,
+        to: sitter.email,
       replyTo: cleanEmail,
       subject: `🐾 New Pet Sitting Request: ${booking_number} from ${owner_name || cleanEmail}`,
       html: brandedEmail({
@@ -208,14 +219,17 @@ export async function POST(request: NextRequest) {
     </div>
     ${emailStyles.signoff}
   `
-      })
-    });
+        })
+      });
 
-    if (emailRes.error) {
-      console.error('[PetSitting Request API] Resend Error:', emailRes.error);
-      return NextResponse.json({ error: emailRes.error.message || 'Email service error' }, { status: 500 });
+      if (emailRes.error) {
+        console.error('[PetSitting Request API] Resend Error:', emailRes.error);
+      }
+    } catch (err) {
+      console.error('[PetSitting Request API] Email sending failed:', err);
     }
 
+    // 6. Return success
     return NextResponse.json({ success: true, booking_number });
   } catch (error: any) {
     console.error('[PetSitting Request API] Unhandled Error:', error);

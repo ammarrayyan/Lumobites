@@ -77,14 +77,23 @@ export async function POST(request: NextRequest) {
     // Notifications
     const recipient = by === 'owner' ? reqRow.sitters?.email : reqRow.owner_email;
     if (recipient) {
-      await supabaseAdmin.from('notifications').insert({
-        recipient_email: recipient,
-        type: 'booking_cancelled',
-        title: 'Booking Cancelled',
-        message: 'Your booking was cancelled',
-        link: '/petsitting'
-      });
+      try {
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: recipient,
+          type: 'booking_cancelled',
+          title: 'Booking Cancelled',
+          message: 'Your booking was cancelled',
+          link: '/petsitting'
+        });
+      } catch (err) {
+        console.error('[Cancel Booking] Notification error:', err);
+      }
+
+      try {
         await sendPushNotification(recipient, 'Booking Cancelled', 'Your booking was cancelled', '/petsitting');
+      } catch (err) {
+        console.error('[Cancel Booking] Push error:', err);
+      }
     }
 
     if (by === 'owner') {
