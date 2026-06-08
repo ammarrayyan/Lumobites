@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     if (by === 'owner') {
       // Owner cancelled -> Send email to Sitter
       const sitterEmail = reqRow.sitters?.email;
-      const sitterName = reqRow.sitters?.name || 'Sitter';
+      const sitterName = formatSitterName(reqRow.sitters?.name);
       
       if (sitterEmail) {
         try {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (by === 'sitter') {
       // Sitter cancelled -> Send email to Owner
-      const sitterName = reqRow.sitters?.name || 'Your sitter';
+      const sitterName = formatSitterName(reqRow.sitters?.name);
       const ownerEmail = reqRow.owner_email;
 
       if (ownerEmail) {

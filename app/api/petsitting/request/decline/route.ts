@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // 5. Email the owner
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-    const sitterNameStr = sitter?.name || 'The sitter';
+    const sitterNameStr = formatSitterName(sitter?.name);
     
     await resend.emails.send({
       from: fromEmail,

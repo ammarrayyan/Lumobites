@@ -6,6 +6,13 @@ import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload } from 'lucide-react';
 
+
+export function formatSitterName(fullName) {
+  if (!fullName) return 'Sitter';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+}
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Sitter {
@@ -2030,15 +2037,15 @@ export default function PetSitting() {
                         
                         <div className="flex items-start gap-4 mb-4">
                           {sitter.photo_url ? (
-                            <img src={sitter.photo_url} alt={sitter.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0" />
+                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0" />
                           ) : (
                             <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl flex-shrink-0">
-                              {sitter.name.charAt(0)}
+                              {formatSitterName(sitter.name).charAt(0)}
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                               <h3 className="text-xl font-bold text-[#4A3E3D]">{sitter.name}</h3>
+                               <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
                                {sitter.gender && (
                                  <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
                                    {sitter.gender}
@@ -2218,13 +2225,13 @@ export default function PetSitting() {
                                   <td className="p-3 text-sm">
                                     <div className="flex items-center gap-2">
                                       {req.sitter_photo_url ? (
-                                        <img src={req.sitter_photo_url} alt={req.sitter_name} className="w-8 h-8 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
+                                        <img src={req.sitter_photo_url} alt={['accepted', 'completed'].includes(req.status) ? req.sitter_name : formatSitterName(req.sitter_name)} className="w-8 h-8 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
                                       ) : (
                                         <div className="w-8 h-8 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xs flex-shrink-0">
-                                          {req.sitter_name.charAt(0)}
+                                          {formatSitterName(req.sitter_name).charAt(0)}
                                         </div>
                                       )}
-                                      <div className="font-bold text-[#4A3E3D]">{req.sitter_name}</div>
+                                      <div className="font-bold text-[#4A3E3D]">{['accepted', 'completed'].includes(req.status) ? req.sitter_name : formatSitterName(req.sitter_name)}</div>
                                     </div>
                                   </td>
                                   <td className="p-3 text-sm">
@@ -3555,7 +3562,7 @@ export default function PetSitting() {
         <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setRequestModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-md sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
-              <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {selectedSitter.name}</h3>
+              <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {formatSitterName(selectedSitter.name)}</h3>
               <p className="text-[#8B7E7D] text-xs sm:text-sm">The sitter will reply to you directly via email to coordinate details.</p>
               <button 
                 onClick={() => setRequestModalOpen(false)} 
@@ -3570,7 +3577,7 @@ export default function PetSitting() {
                 <div className="text-center py-8">
                   <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <h4 className="text-xl font-bold text-green-600 mb-2">Request Sent!</h4>
-                  <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {selectedSitter.name}.</p>
+                  <p className="text-gray-600 mb-6">Keep an eye on your email inbox for a reply from {formatSitterName(selectedSitter.name)}.</p>
                   
                   <button
                     onClick={() => {
@@ -4078,15 +4085,15 @@ export default function PetSitting() {
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10">
               <div className="flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={selectedSitterForReviews.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
+                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
                 ) : (
                   <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-2xl sm:text-4xl flex-shrink-0 shadow-md">
-                    {selectedSitterForReviews.name.charAt(0)}
+                    {formatSitterName(selectedSitterForReviews.name).charAt(0)}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{selectedSitterForReviews.name}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{formatSitterName(selectedSitterForReviews.name)}</h3>
                     {selectedSitterForReviews.gender && (
                       <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4] whitespace-nowrap">
                         {selectedSitterForReviews.gender}
@@ -4210,7 +4217,7 @@ export default function PetSitting() {
                 ) : sitterReviews.length === 0 ? (
                   <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] text-center shadow-sm">
                     <span className="text-3xl mb-2 block">🐾</span>
-                    <p className="text-[#8B7E7D] text-sm font-medium">No reviews yet for {selectedSitterForReviews.name}.</p>
+                    <p className="text-[#8B7E7D] text-sm font-medium">No reviews yet for {formatSitterName(selectedSitterForReviews.name)}.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

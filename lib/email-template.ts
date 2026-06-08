@@ -106,3 +106,11 @@ export const emailStyles = {
   `,
   signoff: `<p style="font-size:14px;line-height:1.6;color:#6B5040;margin:0;">Warm regards,<br/><strong style="color:#3B2410;">The Lumo Bites Team 🐾</strong></p>`,
 };
+
+
+export function formatSitterName(fullName: string | null | undefined): string {
+  if (!fullName) return 'Sitter';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+}

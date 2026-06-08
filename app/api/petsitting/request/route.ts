@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
         preheader: `${pet_name} needs a sitter! Respond to manage this request.`,
         body: `
     <h1 style="${emailStyles.h1}">New Pet Sitting Request! 🐾</h1>
-    <p style="${emailStyles.p}">Hi <strong>${sitter.name}</strong>,</p>
+    <p style="${emailStyles.p}">Hi <strong>${formatSitterName(sitter.name)}</strong>,</p>
     <p style="${emailStyles.p}">You have a new pet sitting request through Lumo Bites (<strong>${booking_number}</strong>). Here are the details:</p>
     ${emailStyles.divider}
     ${emailStyles.infoBox(`

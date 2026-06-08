@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sitterId = reqRow.sitter_id;
-    const sitterName = reqRow.sitters?.name || 'your sitter';
+    const sitterName = formatSitterName(reqRow.sitters?.name);
     const sitterEmail = reqRow.sitters?.email;
     const petName = reqRow.pet_name || 'your pet';
     const dates = reqRow.dates || 'the booking dates';

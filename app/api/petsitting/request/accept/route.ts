@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
 
     // 5. Email the owner
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-    const sitterNameStr = sitter?.name || 'A local sitter';
+    const fullSitterNameStr = sitter?.name || 'A local sitter';
+    const sitterNameStr = formatSitterName(sitter?.name);
     
     await resend.emails.send({
       from: fromEmail,
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
           ${emailStyles.highlightBox(`
             <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Sitter Contact Information</p>
             <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
-              <strong>Sitter:</strong> ${sitterNameStr}<br/>
+              <strong>Sitter:</strong> ${fullSitterNameStr}<br/>
               <strong>Email:</strong> <a href="mailto:${sitter?.email || ''}" style="color:#8B6A50;text-decoration:none;">${sitter?.email || ''}</a>
               ${sitter?.phone_number ? `<br/><strong>Phone:</strong> ${sitter.phone_number}` : ''}
             </p>

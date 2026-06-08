@@ -4,6 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 
+export function formatSitterName(fullName: string | null | undefined): string {
+  if (!fullName) return 'Sitter';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+}
+
 interface SitterInfo {
   name: string;
   photo_url: string;
@@ -136,16 +143,16 @@ export default function SitterReviewPage() {
               <div className="flex flex-col items-center text-center gap-3 border-b border-[#F0E8E0] pb-6 mb-2">
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-[#F5EDE4] border-2 border-[#E8DDD4]">
                   {sitter?.photo_url ? (
-                    <img src={sitter.photo_url} alt={sitter.name} className="w-full h-full object-cover" />
+                    <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[#8B5E3C] font-bold text-2xl">
-                      {sitter?.name?.charAt(0) || 'S'}
+                      {formatSitterName(sitter?.name).charAt(0)}
                     </div>
                   )}
                 </div>
                 <div>
                   <p className="text-[#8B5E3C] text-xs font-bold uppercase tracking-[0.1em] mb-1">Leave a Review for</p>
-                  <h1 className="text-2xl font-black text-[#191919]">{sitter?.name || 'Local Sitter'}</h1>
+                  <h1 className="text-2xl font-black text-[#191919]">{formatSitterName(sitter?.name)}</h1>
                 </div>
               </div>
 

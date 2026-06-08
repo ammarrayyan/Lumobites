@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           .select('name')
           .eq('id', reqRow.sitter_id)
           .single();
-        const sitterName = sitter?.name || 'your sitter';
+        const sitterName = formatSitterName(sitter?.name);
         
         const reviewLink = `https://lumobites.net/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(reqRow.owner_email)}`;
         const subject = "How was your sitter? Leave a review 🐾";
