@@ -2232,15 +2232,33 @@ export default function PetSitting() {
             {/* Owner Booking History Section */}
             <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
               <div id="messages" />
-              <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                📋 Your Booking History
-              </h3>
-              {ownerLastUpdated && (
-                <p className="text-[10px] text-green-600 font-semibold mb-1 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
-                  Updated {ownerLastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · auto-refreshes every 60s
-                </p>
-              )}
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
+                  📋 Your Booking History
+                </h3>
+                {(ownerLastUpdated || loadingOwnerRequests) && (
+                  <div className="flex items-center gap-2">
+                    {loadingOwnerRequests ? (
+                      <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
+                        Refreshing...
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+                        Updated just now
+                      </span>
+                    )}
+                    <button
+                      onClick={() => fetchOwnerRequests(reqEmail)}
+                      disabled={loadingOwnerRequests || !reqEmail}
+                      className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-0.5 cursor-pointer disabled:opacity-50"
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+                )}
+              </div>
               <p className="text-[#8B7E7D] text-sm mb-6">
                 Enter your email address to track the status of your requested pet sitting bookings.
               </p>
@@ -2719,15 +2737,33 @@ export default function PetSitting() {
                 <div id="sitter-dashboard" className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
-                      <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                        📋 Your Booking Requests
-                      </h3>
-                      {sitterLastUpdated && (
-                        <p className="text-[10px] text-green-600 font-semibold mb-1 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
-                          Updated {sitterLastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · auto-refreshes every 60s
-                        </p>
-                      )}
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
+                          📋 Your Booking Requests
+                        </h3>
+                        {(sitterLastUpdated || loadingSitterRequests) && (
+                          <div className="flex items-center gap-2">
+                            {loadingSitterRequests ? (
+                              <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
+                                Refreshing...
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+                                Updated just now
+                              </span>
+                            )}
+                            <button
+                              onClick={() => fetchSitterRequests(sitterId)}
+                              disabled={loadingSitterRequests}
+                              className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-0.5 cursor-pointer disabled:opacity-50"
+                            >
+                              🔄 Refresh
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       <p className="text-[#8B7E7D] text-xs">
                         Manage requests and track booking statuses submitted by pet owners.
                       </p>

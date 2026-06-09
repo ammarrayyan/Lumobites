@@ -136,33 +136,48 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Send fallback email
-    // Check if we already have the sender name nicely formatted
-    // Send email using Resend
-    const origin = request.nextUrl.origin;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-    
-    await resend.emails.send({
-      from: fromEmail,
-      to: receiver_email,
-      replyTo: sender_email,
-      subject: 'New message on Lumo Bites — lumobites.net/petsitting',
-      html: brandedEmail({
-        subject: 'You have a new message!',
-        preheader: `${senderName} sent you a message regarding a booking.`,
-        body: `
-          <h1 style="${emailStyles.h1}">New Message Received 💬</h1>
-          <p style="${emailStyles.p}"><strong>${senderName}</strong> says:</p>
-          ${emailStyles.infoBox(`
-            <p style="margin:0;font-size:15px;color:#4A3728;font-style:italic;">"${message}"</p>
-          `)}
-          <br/>
-          <div style="text-align:center;margin:32px 0;">
-            <a href="${origin}/petsitting" style="background-color:#8B5E3C;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">Reply on Lumo Bites</a>
-          </div>
-          ${emailStyles.signoff}
-        `
-      })
-    });
+    // Check if there are already unread messages from same sender in last 5 minutes — if yes skip email
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { data: existingUnread } = await supabaseAdmin
+      .from('messages')
+      .select('id')
+      .eq('sender_email', sender_email)
+      .eq('receiver_email', receiver_email)
+      .eq('read', false)
+      .neq('id', newMessage.id)
+      .gt('created_at', fiveMinutesAgo)
+      .limit(1);
+
+    if (!existingUnread || existingUnread.length === 0) {
+      const origin = request.nextUrl.origin;
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      
+      try {
+        await resend.emails.send({
+          from: fromEmail,
+          to: receiver_email,
+          replyTo: sender_email,
+          subject: 'You have unread messages on Lumo Bites',
+          html: brandedEmail({
+            subject: 'You have unread messages on Lumo Bites',
+            preheader: 'You have new messages about your booking.',
+            body: `
+              <p style="${emailStyles.p}">You have new messages about your booking — view them at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;text-decoration:underline;">lumobites.net/petsitting</a></p>
+              <br/>
+              <div style="text-align:center;margin:32px 0;">
+                <a href="${origin}/petsitting" style="background-color:#8B5E3C;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">View Messages</a>
+              </div>
+              ${emailStyles.signoff}
+            `
+          })
+        });
+        console.log('[Messages API] Email sent to', receiver_email);
+      } catch (emailErr) {
+        console.error('[Messages API] Email sending error:', emailErr);
+      }
+    } else {
+      console.log('[Messages API] Skipping email because there is already an unread message from same sender in last 5 minutes');
+    }
 
     return NextResponse.json({ message: newMessage });
   } catch (error: any) {
