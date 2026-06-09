@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
         from: fromEmail,
         to: sitter.email,
       replyTo: cleanEmail,
-      subject: `🐾 New Pet Sitting Request: ${booking_number} from ${owner_name || cleanEmail}`,
+      subject: `🐾 New Pet Sitting Request: ${booking_number} from ${owner_name ? formatSitterName(owner_name) : cleanEmail}`,
       html: brandedEmail({
         subject: `🐾 New Pet Sitting Request: ${booking_number}`,
         preheader: `${pet_name} needs a sitter! Respond to manage this request.`,
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     <p style="${emailStyles.p}">You have a new pet sitting request through Lumo Bites (<strong>${booking_number}</strong>). Here are the details:</p>
     ${emailStyles.infoBox(`
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Booking Number:</strong> ${booking_number}</p>
-      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Name:</strong> ${owner_name || 'N/A'}</p>
+      <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Owner Name:</strong> ${owner_name ? formatSitterName(owner_name) : 'N/A'}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Name:</strong> ${pet_name}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Pet Type:</strong> ${pet_type}</p>
       <p style="margin:0 0 10px 0;font-size:13px;color:#6B5040;"><strong style="color:#3B2410;">Dates Needed:</strong> ${dates} ${time_slot ? `— ${time_slot}` : ''}</p>

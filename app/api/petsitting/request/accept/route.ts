@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
         <div class="card">
           <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
           <h1>Request Accepted! 🎉</h1>
-          <p>You have successfully accepted <strong>${reqRow.owner_name || 'the owner'}'s</strong> request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
+          <p>You have successfully accepted <strong>${reqRow.owner_name ? formatSitterName(reqRow.owner_name) : 'the owner'}'s</strong> request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
           
           <div class="info-section">
             <div class="info-title">📅 Booking Details</div>
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
             <div class="info-item"><strong>Dates:</strong> ${reqRow.dates} ${reqRow.time_slot ? `— ${reqRow.time_slot}` : ''}</div>
             
             <div class="info-title" style="margin-top: 20px;">💬 Message the Owner</div>
-            <div class="info-item">Message <strong>${reqRow.owner_name || 'the owner'}</strong> directly on your Lumo Bites dashboard to coordinate details.</div>
+            <div class="info-item">Message <strong>${reqRow.owner_name ? formatSitterName(reqRow.owner_name) : 'the owner'}</strong> directly on your Lumo Bites dashboard to coordinate details.</div>
           </div>
 
           <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
