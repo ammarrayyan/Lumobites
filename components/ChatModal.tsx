@@ -3,6 +3,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Send, CheckCheck, Check, Phone, Video, Info } from 'lucide-react';
 
+// Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
+function formatName(fullName: string): string {
+  if (!fullName) return 'User';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 interface Message {
   id: string;
   booking_id: string;
@@ -140,6 +148,8 @@ export default function ChatModal({
 
   if (!isOpen) return null;
 
+  const displayName = formatName(otherUserName);
+
   // Group messages by date + consecutive sender
   type MsgGroup = { date: string; sender: string; msgs: Message[] };
   const groups: MsgGroup[] = [];
@@ -183,13 +193,13 @@ export default function ChatModal({
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-gray-200 sm:hidden" />
 
           <div className="relative">
-            <Avatar name={otherUserName} size="md" />
+            <Avatar name={displayName} size="md" />
             {/* Online dot */}
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-white" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-gray-900 text-[15px] leading-tight truncate">{otherUserName}</p>
+            <p className="font-bold text-gray-900 text-[15px] leading-tight truncate">{displayName}</p>
             <p className="text-[11px] text-gray-500 truncate">{bookingDetails}</p>
           </div>
 
@@ -221,7 +231,7 @@ export default function ChatModal({
                 <span className="text-4xl">👋</span>
               </div>
               <div className="text-center">
-                <p className="font-bold text-gray-800 text-[15px]">Say hello to {otherUserName}</p>
+                <p className="font-bold text-gray-800 text-[15px]">Say hello to {displayName}</p>
                 <p className="text-gray-400 text-sm mt-1">This is the beginning of your conversation</p>
               </div>
             </div>
@@ -247,7 +257,7 @@ export default function ChatModal({
                     <div className={`flex items-end gap-2 mb-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
                       {/* Avatar — only for other person, only once per group */}
                       {!isMine ? (
-                        <Avatar name={otherUserName} size="sm" />
+                        <Avatar name={displayName} size="sm" />
                       ) : (
                         <div className="w-7 shrink-0" />
                       )}
@@ -317,7 +327,7 @@ export default function ChatModal({
               ref={textareaRef}
               value={newMessage}
               onChange={handleTextareaChange}
-              placeholder={`Message ${otherUserName}…`}
+              placeholder={`Message ${displayName}…`}
               rows={1}
               className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
               style={{ maxHeight: '128px' }}
