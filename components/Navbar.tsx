@@ -5,9 +5,11 @@ import Link from 'next/link';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils } from 'lucide-react';
+import { app, getToken, getMessaging } from '@/lib/firebase';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPushBanner, setShowPushBanner] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [proEmail, setProEmail] = useState('');
@@ -101,6 +103,52 @@ export default function Navbar() {
       window.removeEventListener('lumo-open-signin', handleOpenSignIn);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const email = proEmail || sitterEmail || localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email');
+      const dismissed = localStorage.getItem('lumo_push_banner_dismissed') === 'true';
+      const supportsPush = 'Notification' in window && 'serviceWorker' in navigator;
+      
+      if (email && !dismissed && supportsPush && Notification.permission === 'default') {
+        setShowPushBanner(true);
+      } else {
+        setShowPushBanner(false);
+      }
+    }
+  }, [isSignedIn, proEmail, sitterEmail]);
+
+  const handleEnableNotifications = async () => {
+    try {
+      if (!('Notification' in window)) return;
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const messaging = getMessaging(app);
+        const token = await getToken(messaging, {
+          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+        });
+        
+        if (token) {
+          const email = proEmail || sitterEmail || localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email');
+          if (email) {
+            await fetch('/api/push/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, token, device: navigator.userAgent })
+            });
+            console.log('[Navbar] Registered token for:', email);
+          }
+        }
+        setShowPushBanner(false);
+      } else {
+        localStorage.setItem('lumo_push_banner_dismissed', 'true');
+        setShowPushBanner(false);
+      }
+    } catch (err) {
+      console.error('[Navbar] Error enabling notifications:', err);
+      setShowPushBanner(false);
+    }
+  };
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
@@ -639,6 +687,30 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+    {showPushBanner && (
+      <div className="bg-gradient-to-r from-[#FFFBF5] to-[#FAF6F4] border-b border-[#E8D5C0] px-4 py-2 text-center flex items-center justify-center gap-3 animate-fade-in relative z-40">
+        <span className="text-xs text-[#8B5E3C] font-bold">
+          🔔 Enable notifications to get instant updates
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleEnableNotifications}
+            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-colors cursor-pointer"
+          >
+            Enable
+          </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('lumo_push_banner_dismissed', 'true');
+              setShowPushBanner(false);
+            }}
+            className="text-[#8B7E7D] hover:text-[#4A3E3D] text-[11px] font-bold px-2 py-1 transition-colors cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )}
       {showSignInModal && (
         <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">

@@ -5,13 +5,14 @@ import { app, getToken, onMessage, getMessaging } from '@/lib/firebase';
 
 export default function PushManager() {
   useEffect(() => {
+    console.log('[PushManager] Component mounted');
+    
     const setupPush = async () => {
       try {
         if ('serviceWorker' in navigator && 'PushManager' in window) {
-          // Request permission on page load regardless of login status
-          const permission = await Notification.requestPermission();
-          
-          if (permission === 'granted') {
+          // Only proceed automatically if permission is already granted
+          if (Notification.permission === 'granted') {
+            console.log('[PushManager] Permission already granted, syncing push token');
             const messaging = getMessaging(app);
             
             // Get FCM token
@@ -31,6 +32,7 @@ export default function PushManager() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email, token, device: navigator.userAgent })
                 });
+                console.log('[PushManager] Registered token for:', email);
               } else {
                 // If not logged in yet, save the token to localStorage,
                 // and register it once the user logs in!
@@ -39,13 +41,15 @@ export default function PushManager() {
 
               // Handle foreground messages
               onMessage(messaging, (payload) => {
-                console.log('Foreground push notification received:', payload);
+                console.log('[PushManager] Foreground push notification received:', payload);
               });
             }
+          } else {
+            console.log('[PushManager] Permission status:', Notification.permission, '- waiting for user action');
           }
         }
       } catch (err) {
-        console.error('Error setting up push notifications:', err);
+        console.error('[PushManager] Error setting up push notifications:', err);
       }
     };
 
