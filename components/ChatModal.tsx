@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Send, Check, CheckCheck } from 'lucide-react';
+import { X, Send, CheckCheck, Check, Phone, Video, Info } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -22,6 +22,38 @@ interface ChatModalProps {
   bookingDetails: string;
 }
 
+function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+  const initials = name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?';
+  const colors = [
+    'from-violet-500 to-purple-600',
+    'from-blue-500 to-cyan-500',
+    'from-emerald-500 to-teal-600',
+    'from-orange-500 to-rose-500',
+    'from-pink-500 to-fuchsia-600',
+  ];
+  const colorIdx = name.charCodeAt(0) % colors.length;
+  const sz = size === 'sm' ? 'w-7 h-7 text-[10px]' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-9 h-9 text-xs';
+  return (
+    <div className={`${sz} rounded-full bg-gradient-to-br ${colors[colorIdx]} flex items-center justify-center text-white font-bold shrink-0 shadow-sm`}>
+      {initials}
+    </div>
+  );
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
 export default function ChatModal({
   isOpen,
   onClose,
@@ -38,7 +70,6 @@ export default function ChatModal({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch full message history
   const fetchMessages = useCallback(async (silent = false) => {
     if (!bookingId || !currentUserEmail) return;
     try {
@@ -47,90 +78,60 @@ export default function ChatModal({
       );
       if (res.ok) {
         const data = await res.json();
-        // Replace ALL temp messages with confirmed ones from server
         setMessages(data.messages || []);
       }
-    } catch (err) {
-      console.error('[ChatModal] Error fetching messages:', err);
-    } finally {
-      if (!silent) setIsLoading(false);
-    }
+    } catch {}
+    finally { if (!silent) setIsLoading(false); }
   }, [bookingId, currentUserEmail]);
 
-  // Open: load history + start polling every 4 seconds
   useEffect(() => {
     if (!isOpen || !bookingId) return;
-
     setIsLoading(true);
     setMessages([]);
     fetchMessages();
-
-    // Poll every 4s for new messages (fallback if realtime not enabled)
     pollIntervalRef.current = setInterval(() => fetchMessages(true), 4000);
-
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
+    return () => { if (pollIntervalRef.current) clearInterval(pollIntervalRef.current); };
   }, [isOpen, bookingId]);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-grow textarea
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     e.target.style.height = 'auto';
-    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+    e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
   };
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  const handleSend = async () => {
     const msgText = newMessage.trim();
     if (!msgText || isSending) return;
-
     setIsSending(true);
     setNewMessage('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
-    // Optimistic message
     const tempId = 'temp-' + Date.now();
-    const optimisticMsg: Message = {
-      id: tempId,
-      booking_id: bookingId,
-      sender_email: currentUserEmail,
-      receiver_email: '',
-      message: msgText,
-      read: false,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, optimisticMsg]);
+    setMessages(prev => [...prev, {
+      id: tempId, booking_id: bookingId, sender_email: currentUserEmail,
+      receiver_email: '', message: msgText, read: false, created_at: new Date().toISOString(),
+    }]);
 
     try {
       const res = await fetch('/api/petsitting/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          booking_id: bookingId,
-          sender_email: currentUserEmail,
-          message: msgText,
-        }),
+        body: JSON.stringify({ booking_id: bookingId, sender_email: currentUserEmail, message: msgText }),
       });
-
       if (res.ok) {
-        // Fetch confirmed messages from server — replaces the optimistic one
         await fetchMessages(true);
       } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('[ChatModal] Send failed:', errorData);
-        alert(`Failed to send: ${errorData.error || 'Please try again'}`);
-        setMessages((prev) => prev.filter((m) => m.id !== tempId));
-        setNewMessage(msgText); // restore
+        const err = await res.json().catch(() => ({}));
+        alert(`Failed to send: ${err.error || 'Please try again'}`);
+        setMessages(prev => prev.filter(m => m.id !== tempId));
+        setNewMessage(msgText);
       }
-    } catch (err) {
-      console.error('[ChatModal] Network error:', err);
-      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+    } catch {
+      setMessages(prev => prev.filter(m => m.id !== tempId));
       setNewMessage(msgText);
     } finally {
       setIsSending(false);
@@ -139,165 +140,216 @@ export default function ChatModal({
 
   if (!isOpen) return null;
 
-  // Group messages by date
-  const groupedMessages: { date: string; msgs: Message[] }[] = [];
-  messages.forEach((msg) => {
-    const dateLabel = new Date(msg.created_at).toLocaleDateString([], {
-      weekday: 'short', month: 'short', day: 'numeric',
-    });
-    const last = groupedMessages[groupedMessages.length - 1];
-    if (last && last.date === dateLabel) {
+  // Group messages by date + consecutive sender
+  type MsgGroup = { date: string; sender: string; msgs: Message[] };
+  const groups: MsgGroup[] = [];
+  messages.forEach(msg => {
+    const dateLabel = formatDateLabel(msg.created_at);
+    const last = groups[groups.length - 1];
+    if (last && last.date === dateLabel && last.sender === msg.sender_email) {
       last.msgs.push(msg);
     } else {
-      groupedMessages.push({ date: dateLabel, msgs: [msg] });
+      groups.push({ date: dateLabel, sender: msg.sender_email, msgs: [msg] });
     }
   });
 
-  const initials = otherUserName ? otherUserName.charAt(0).toUpperCase() : '?';
+  // Collect date boundaries for separators
+  const dateBoundaries = new Set<number>();
+  let lastDate = '';
+  messages.forEach((msg, i) => {
+    const d = formatDateLabel(msg.created_at);
+    if (d !== lastDate) { dateBoundaries.add(i); lastDate = d; }
+  });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 p-0">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-6 p-0">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        style={{ animation: 'fadeIn 0.15s ease' }}
+        onClick={onClose}
+      />
 
       {/* Modal */}
       <div
-        className="relative bg-white sm:rounded-2xl rounded-t-3xl w-full max-w-md sm:max-w-lg flex flex-col shadow-2xl overflow-hidden"
-        style={{ height: 'min(600px, 92vh)' }}
-        onClick={(e) => e.stopPropagation()}
+        className="relative flex flex-col bg-white sm:rounded-2xl rounded-t-[28px] overflow-hidden shadow-2xl w-full max-w-[420px]"
+        style={{ height: 'min(640px, 94svh)', animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
+        onClick={e => e.stopPropagation()}
       >
-        {/* ─── Header ─── */}
-        <div className="shrink-0 bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3.5 flex items-center gap-3">
-          {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-base shrink-0 ring-2 ring-white/40">
-            {initials}
+
+        {/* ── HEADER ── */}
+        <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3">
+          {/* Drag pill (mobile) */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-gray-200 sm:hidden" />
+
+          <div className="relative">
+            <Avatar name={otherUserName} size="md" />
+            {/* Online dot */}
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-white" />
           </div>
+
           <div className="flex-1 min-w-0">
-            <p className="text-white font-bold text-base leading-tight truncate">{otherUserName}</p>
-            <p className="text-blue-100 text-xs truncate">{bookingDetails}</p>
+            <p className="font-bold text-gray-900 text-[15px] leading-tight truncate">{otherUserName}</p>
+            <p className="text-[11px] text-gray-500 truncate">{bookingDetails}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors shrink-0"
-          >
-            <X size={16} />
-          </button>
+
+          {/* Action icons */}
+          <div className="flex items-center gap-1">
+            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* ─── Messages ─── */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gray-50">
+        {/* ── MESSAGES ── */}
+        <div
+          className="flex-1 overflow-y-auto py-4 px-4 space-y-[2px]"
+          style={{ background: 'linear-gradient(180deg, #f8faff 0%, #f0f2f5 100%)' }}
+        >
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
-              <p className="text-gray-400 text-sm">Loading messages...</p>
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
+              <p className="text-gray-400 text-xs">Loading messages</p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-3 pb-8">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-100">
-                <span className="text-3xl">💬</span>
+            <div className="flex flex-col items-center justify-center h-full gap-4 pb-8">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                <span className="text-4xl">👋</span>
               </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Start the conversation</p>
-                <p className="text-gray-400 text-sm mt-1">Send a message to {otherUserName}</p>
+              <div className="text-center">
+                <p className="font-bold text-gray-800 text-[15px]">Say hello to {otherUserName}</p>
+                <p className="text-gray-400 text-sm mt-1">This is the beginning of your conversation</p>
               </div>
             </div>
           ) : (
-            groupedMessages.map(({ date, msgs }) => (
-              <div key={date}>
-                {/* Date separator */}
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">{date}</span>
-                  <div className="flex-1 h-px bg-gray-200" />
-                </div>
+            <>
+              {groups.map((group, gi) => {
+                const isMine = group.sender === currentUserEmail;
+                const firstMsgIdx = messages.indexOf(group.msgs[0]);
+                const showDate = dateBoundaries.has(firstMsgIdx);
 
-                <div className="space-y-1">
-                  {msgs.map((msg, idx) => {
-                    const isMine = msg.sender_email === currentUserEmail;
-                    const isOptimistic = msg.id.startsWith('temp-');
-                    const isLastInGroup = idx === msgs.length - 1 || msgs[idx + 1].sender_email !== msg.sender_email;
+                return (
+                  <React.Fragment key={`${group.date}-${gi}`}>
+                    {/* Date separator */}
+                    {showDate && (
+                      <div className="flex items-center justify-center py-3">
+                        <span className="bg-white/80 backdrop-blur-sm text-gray-400 text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                          {group.date}
+                        </span>
+                      </div>
+                    )}
 
-                    return (
-                      <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                        {/* Other party avatar — only on last of group */}
-                        {!isMine && (
-                          <div className={`w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px] shrink-0 ${isLastInGroup ? 'opacity-100' : 'opacity-0'}`}>
-                            {initials}
-                          </div>
-                        )}
+                    {/* Message group */}
+                    <div className={`flex items-end gap-2 mb-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+                      {/* Avatar — only for other person, only once per group */}
+                      {!isMine ? (
+                        <Avatar name={otherUserName} size="sm" />
+                      ) : (
+                        <div className="w-7 shrink-0" />
+                      )}
 
-                        <div className={`max-w-[72%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                          <div
-                            className={`px-3.5 py-2.5 rounded-2xl text-[14px] leading-relaxed whitespace-pre-wrap break-words ${
-                              isMine
-                                ? `bg-blue-500 text-white ${isLastInGroup ? 'rounded-br-sm' : ''} ${isOptimistic ? 'opacity-70' : ''}`
-                                : `bg-white text-gray-800 border border-gray-100 shadow-sm ${isLastInGroup ? 'rounded-bl-sm' : ''}`
-                            }`}
-                          >
-                            {msg.message}
-                          </div>
+                      {/* Bubble stack */}
+                      <div className={`flex flex-col gap-[3px] max-w-[72%] ${isMine ? 'items-end' : 'items-start'}`}>
+                        {group.msgs.map((msg, mi) => {
+                          const isFirst = mi === 0;
+                          const isLast = mi === group.msgs.length - 1;
+                          const isOptimistic = msg.id.startsWith('temp-');
 
-                          {isLastInGroup && (
-                            <div className={`flex items-center gap-1 mt-1 px-0.5 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                              <span className="text-[10px] text-gray-400">
-                                {isOptimistic
-                                  ? 'Sending...'
-                                  : new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              {isMine && !isOptimistic && (
-                                msg.read
-                                  ? <CheckCheck size={12} className="text-blue-400" />
-                                  : <Check size={12} className="text-gray-300" />
+                          // Messenger-style bubble rounding
+                          const myRadius = [
+                            isFirst ? 'rounded-tl-2xl rounded-tr-2xl' : 'rounded-tl-2xl rounded-tr-sm',
+                            isLast ? 'rounded-bl-2xl rounded-br-sm' : 'rounded-bl-sm rounded-br-sm',
+                          ].join(' ');
+                          const theirRadius = [
+                            isFirst ? 'rounded-tl-2xl rounded-tr-2xl' : 'rounded-tl-sm rounded-tr-2xl',
+                            isLast ? 'rounded-br-2xl rounded-bl-sm' : 'rounded-br-sm rounded-bl-sm',
+                          ].join(' ');
+
+                          return (
+                            <div key={msg.id}>
+                              <div
+                                className={`px-4 py-[9px] text-[14.5px] leading-relaxed break-words whitespace-pre-wrap max-w-full transition-opacity ${
+                                  isMine
+                                    ? `bg-blue-500 text-white ${myRadius} ${isOptimistic ? 'opacity-60' : 'opacity-100'}`
+                                    : `bg-white text-gray-800 shadow-sm border border-gray-100 ${theirRadius}`
+                                }`}
+                                style={{ wordBreak: 'break-word' }}
+                              >
+                                {msg.message}
+                              </div>
+
+                              {/* Timestamp + status — only last in group */}
+                              {isLast && (
+                                <div className={`flex items-center gap-1 mt-1 ${isMine ? 'justify-end pr-1' : 'justify-start pl-1'}`}>
+                                  <span className="text-[10.5px] text-gray-400">
+                                    {isOptimistic ? 'Sending…' : formatTime(msg.created_at)}
+                                  </span>
+                                  {isMine && !isOptimistic && (
+                                    msg.read
+                                      ? <CheckCheck size={13} className="text-blue-400" />
+                                      : <Check size={13} className="text-gray-300" />
+                                  )}
+                                </div>
                               )}
                             </div>
-                          )}
-                        </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ─── Input ─── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-3">
-          <div className="flex items-end gap-2 bg-gray-100 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400/50 transition-all">
+        {/* ── INPUT BAR ── */}
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5">
+          <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
+            newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
+          }`}>
             <textarea
               ref={textareaRef}
               value={newMessage}
               onChange={handleTextareaChange}
-              placeholder={`Message ${otherUserName}...`}
+              placeholder={`Message ${otherUserName}…`}
               rows={1}
-              className="flex-1 bg-transparent border-none focus:outline-none resize-none text-sm text-gray-800 placeholder-gray-400 py-1 max-h-[120px] leading-relaxed"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
+              className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
+              style={{ maxHeight: '128px' }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
               }}
             />
             <button
-              onClick={() => handleSendMessage()}
+              onClick={handleSend}
               disabled={!newMessage.trim() || isSending}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all mb-0.5 ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 ${
                 newMessage.trim() && !isSending
-                  ? 'bg-blue-500 hover:bg-blue-600 active:scale-95 text-white shadow-sm'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-blue-500 hover:bg-blue-600 active:scale-90 text-white shadow-md shadow-blue-200'
+                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
               }`}
             >
-              {isSending ? (
-                <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
+              {isSending
+                ? <div className="w-3.5 h-3.5 border-[2px] border-white/30 border-t-white rounded-full animate-spin" />
+                : <Send size={14} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
+              }
             </button>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-2">Press Enter to send · Shift+Enter for new line</p>
+          <p className="text-center text-[10px] text-gray-300 mt-1.5 select-none">
+            Enter to send &middot; Shift+Enter for new line
+          </p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
+      `}</style>
     </div>
   );
 }
