@@ -98,7 +98,7 @@ export default function NotificationBell({ email }: { email: string }) {
       </button>
 
       {showDropdown && (
-        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto right-0 sm:right-0 top-[60px] sm:top-auto sm:mt-2 sm:w-80 w-auto bg-white border border-gray-200 rounded-2xl shadow-2xl z-[300] overflow-hidden flex flex-col text-left mx-auto sm:mx-0">
+        <div className="fixed sm:absolute right-4 sm:right-0 top-[60px] sm:top-auto sm:mt-2 sm:w-80 w-[calc(100vw-32px)] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[300] overflow-hidden flex flex-col text-left mx-auto sm:mx-0">
           <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
             {unreadCount > 0 && (
