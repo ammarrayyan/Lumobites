@@ -183,6 +183,8 @@ export default function PetSitting() {
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [activeChatBooking, setActiveChatBooking] = useState<any>(null);
   const [activeChatRole, setActiveChatRole] = useState<'owner'|'sitter'>('owner');
+  const [sitterLastUpdated, setSitterLastUpdated] = useState<Date | null>(null);
+  const [ownerLastUpdated, setOwnerLastUpdated] = useState<Date | null>(null);
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
 
@@ -643,6 +645,7 @@ export default function PetSitting() {
       const data = await res.json();
       if (res.ok && data.requests) {
         setSitterRequests(data.requests);
+        setSitterLastUpdated(new Date());
       }
     } catch (e) {
       console.error('Failed to fetch sitter requests');
@@ -660,6 +663,7 @@ export default function PetSitting() {
       if (res.ok && data.requests) {
         setOwnerRequests(data.requests);
         setOwnerHistoryFetched(true);
+        setOwnerLastUpdated(new Date());
         localStorage.setItem('lumo_owner_history_email', email);
       }
     } catch (e) {
@@ -668,6 +672,24 @@ export default function PetSitting() {
       setLoadingOwnerRequests(false);
     }
   };
+
+  // Auto-poll sitter dashboard every 60 seconds
+  useEffect(() => {
+    if (!sitterId) return;
+    const interval = setInterval(() => {
+      fetchSitterRequests(sitterId);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [sitterId]);
+
+  // Auto-poll owner booking history every 60 seconds
+  useEffect(() => {
+    if (!reqEmail) return;
+    const interval = setInterval(() => {
+      fetchOwnerRequests(reqEmail);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [reqEmail]);
 
   const isBookingDateActive = (datesStr: string): boolean => {
     if (!datesStr) return false;
@@ -2179,6 +2201,12 @@ export default function PetSitting() {
               <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
                 📋 Your Booking History
               </h3>
+              {ownerLastUpdated && (
+                <p className="text-[10px] text-green-600 font-semibold mb-1 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+                  Updated {ownerLastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · auto-refreshes every 60s
+                </p>
+              )}
               <p className="text-[#8B7E7D] text-sm mb-6">
                 Enter your email address to track the status of your requested pet sitting bookings.
               </p>
@@ -2710,6 +2738,12 @@ export default function PetSitting() {
                       <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
                         📋 Your Booking Requests
                       </h3>
+                      {sitterLastUpdated && (
+                        <p className="text-[10px] text-green-600 font-semibold mb-1 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+                          Updated {sitterLastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · auto-refreshes every 60s
+                        </p>
+                      )}
                       <p className="text-[#8B7E7D] text-xs">
                         Manage requests and track booking statuses submitted by pet owners.
                       </p>
