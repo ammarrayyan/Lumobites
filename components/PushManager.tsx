@@ -9,7 +9,49 @@ export default function PushManager() {
     
     const setupPush = async () => {
       try {
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
+        const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor;
+
+        if (isCapacitor) {
+          console.log('[PushManager] Capacitor native environment detected');
+          const { PushNotifications } = await import('@capacitor/push-notifications');
+          
+          let permStatus = await PushNotifications.checkPermissions();
+          if (permStatus.receive === 'prompt') {
+            permStatus = await PushNotifications.requestPermissions();
+          }
+
+          if (permStatus.receive !== 'granted') {
+            console.warn('[PushManager] Push notification permission not granted natively');
+            return;
+          }
+
+          await PushNotifications.register();
+
+          // Listen for registration success
+          PushNotifications.addListener('registration', async (token) => {
+            console.log('[PushManager] Native push registration token:', token.value);
+            const proEmail = localStorage.getItem('lumo_pro_email');
+            const sitterEmail = localStorage.getItem('lumo_sitter_email');
+            const email = proEmail || sitterEmail;
+            
+            if (email) {
+              await fetch('/api/push/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, token: token.value, device: 'Android (Capacitor)' })
+              });
+              console.log('[PushManager] Registered native token for:', email);
+            } else {
+              localStorage.setItem('lumo_pending_push_token', token.value);
+            }
+          });
+
+          // Handle incoming notifications
+          PushNotifications.addListener('pushNotificationReceived', (notification) => {
+            console.log('[PushManager] Native push notification received:', notification);
+          });
+
+        } else if ('serviceWorker' in navigator && 'PushManager' in window) {
           // Only proceed automatically if permission is already granted
           if (Notification.permission === 'granted') {
             console.log('[PushManager] Permission already granted, syncing push token');
@@ -62,10 +104,11 @@ export default function PushManager() {
       const sitterEmail = localStorage.getItem('lumo_sitter_email');
       const email = proEmail || sitterEmail;
       if (token && email) {
+        const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor;
         fetch('/api/push/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, token, device: navigator.userAgent })
+          body: JSON.stringify({ email, token, device: isCapacitor ? 'Android (Capacitor)' : navigator.userAgent })
         }).catch(err => console.error('Failed to register pending push token:', err));
       }
     };
