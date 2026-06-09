@@ -60,14 +60,14 @@ export async function GET(request: NextRequest) {
         type: 'booking_accepted',
         title: 'Booking Accepted! 🎉',
         message: `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`,
-        link: '/petsitting'
+        link: '/petsitting#owner-history'
       });
     } catch (err) {
       console.error('[Accept Request] Notification error:', err);
     }
 
     try {
-      await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`, '/petsitting');
+      await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `${sitterNameStr} accepted your booking for ${reqRow.pet_name}`, '/petsitting#owner-history');
     } catch (err) {
       console.error('[Accept Request] Push notification error:', err);
     }

@@ -59,14 +59,14 @@ export async function GET(request: NextRequest) {
         type: 'booking_declined',
         title: 'Booking Declined',
         message: `${sitterNameStr} declined your booking for ${reqRow.pet_name}`,
-        link: '/petsitting'
+        link: '/petsitting#owner-history'
       });
     } catch (err) {
       console.error('[Decline Request] Notification error:', err);
     }
 
     try {
-      await sendPushNotification(reqRow.owner_email, 'Booking Declined', `${sitterNameStr} declined your booking for ${reqRow.pet_name}`, '/petsitting');
+      await sendPushNotification(reqRow.owner_email, 'Booking Declined', `${sitterNameStr} declined your booking for ${reqRow.pet_name}`, '/petsitting#owner-history');
     } catch (err) {
       console.error('[Decline Request] Push notification error:', err);
     }

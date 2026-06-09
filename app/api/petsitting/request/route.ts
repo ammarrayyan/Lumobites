@@ -167,20 +167,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Notification
+    const formattedOwnerName = owner_name ? formatSitterName(owner_name) : cleanEmail.split('@')[0];
     try {
       await supabase.from('notifications').insert({
         recipient_email: sitter.email,
         type: 'booking_request',
         title: 'New Booking Request! 🎉',
-        message: `${owner_name || cleanEmail} wants to book you for ${pet_name}`,
-        link: '/petsitting'
+        message: `${formattedOwnerName} wants to book you for ${pet_name}`,
+        link: '/petsitting#sitter-dashboard'
       });
     } catch (err) {
       console.error('[PetSitting Request] Notification error:', err);
     }
 
     try {
-      await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `${owner_name || cleanEmail} wants to book you for ${pet_name}`, '/petsitting');
+      await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `${formattedOwnerName} wants to book you for ${pet_name}`, '/petsitting#sitter-dashboard');
     } catch (err) {
       console.error('[PetSitting Request] Push error:', err);
     }

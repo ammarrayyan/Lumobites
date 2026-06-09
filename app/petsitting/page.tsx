@@ -322,6 +322,39 @@ export default function PetSitting() {
     }
   }, [reqEmail]);
 
+  // Automatically open chat modal if 'chat' booking ID is present in URL query params
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const chatBookingId = params.get('chat');
+    if (!chatBookingId) return;
+
+    // Find the booking request in either sitterRequests or ownerRequests
+    const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
+    if (foundSitterReq) {
+      setActiveChatBooking(foundSitterReq);
+      setActiveChatRole('sitter');
+      setChatModalOpen(true);
+      
+      // Clean up search param without page reload so we don't reopen it on reload
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({ path: newUrl }, '', newUrl);
+      return;
+    }
+
+    const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
+    if (foundOwnerReq) {
+      setActiveChatBooking(foundOwnerReq);
+      setActiveChatRole('owner');
+      setChatModalOpen(true);
+      
+      // Clean up search param without page reload
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({ path: newUrl }, '', newUrl);
+      return;
+    }
+  }, [sitterRequests, ownerRequests]);
+
   const handleClearSavedInfo = async (e: React.MouseEvent) => {
     e.preventDefault();
     
@@ -2197,7 +2230,8 @@ export default function PetSitting() {
               </div>
             )}
             {/* Owner Booking History Section */}
-            <div className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+            <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+              <div id="messages" />
               <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
                 📋 Your Booking History
               </h3>
@@ -2682,7 +2716,7 @@ export default function PetSitting() {
                 </div>
 
                 {/* Sitter Booking Tracker Section */}
-                <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
+                <div id="sitter-dashboard" className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                       <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">

@@ -81,14 +81,14 @@ export async function POST(request: NextRequest) {
           type: 'booking_completed',
           title: 'Booking Completed 🎉',
           message: `Your booking with ${sitterName} is complete`,
-          link: '/petsitting'
+          link: '/petsitting#owner-history'
         });
       } catch (err) {
         console.error('[Complete Booking] Notification error:', err);
       }
 
       try {
-        await sendPushNotification(reqRow.owner_email, 'Booking Completed 🎉', `Your booking with ${sitterName} is complete`, '/petsitting');
+        await sendPushNotification(reqRow.owner_email, 'Booking Completed 🎉', `Your booking with ${sitterName} is complete`, '/petsitting#owner-history');
       } catch (err) {
         console.error('[Complete Booking] Push error:', err);
       }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
-import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -97,11 +97,11 @@ export async function POST(request: NextRequest) {
     
     const { data: sitterData } = await supabaseAdmin.from('sitters').select('name').eq('email', sender_email).single();
     if (sitterData && sitterData.name) {
-      senderName = sitterData.name;
+      senderName = formatSitterName(sitterData.name);
     } else {
       const { data: reqData } = await supabaseAdmin.from('sitting_requests').select('owner_name').eq('owner_email', sender_email).single();
       if (reqData && reqData.owner_name) {
-        senderName = reqData.owner_name;
+        senderName = formatSitterName(reqData.owner_name);
       }
     }
 
@@ -112,9 +112,20 @@ export async function POST(request: NextRequest) {
         type: 'message',
         title: `New message from ${senderName}`,
         message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
-        link: `/petsitting?booking=${booking_id}`,
+        link: `/petsitting?chat=${booking_id}#messages`,
         read: false
       });
+
+    try {
+      await sendPushNotification(
+        receiver_email,
+        `New message from ${senderName}`,
+        message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        `/petsitting?chat=${booking_id}#messages`
+      );
+    } catch (err) {
+      console.error('[Messages API] Push notification error:', err);
+    }
 
     // 3. Send fallback email
     // Check if we already have the sender name nicely formatted
