@@ -180,27 +180,27 @@ export default function ChatModal({
         onClick={onClose}
       />
 
-      {/* Modal */}
+      {/* Modal — compact on mobile so no zoom needed */}
       <div
-        className="relative flex flex-col bg-white sm:rounded-2xl rounded-t-[28px] overflow-hidden shadow-2xl w-full max-w-[420px]"
-        style={{ height: 'min(640px, 94svh)', animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
+        className="relative flex flex-col bg-white sm:rounded-2xl rounded-t-[24px] overflow-hidden shadow-2xl w-full max-w-[420px]"
+        style={{ height: 'min(520px, 75svh)', animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
         onClick={e => e.stopPropagation()}
       >
 
         {/* ── HEADER ── */}
         <div className="shrink-0 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center gap-3">
           {/* Drag pill (mobile) */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-gray-200 sm:hidden" />
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gray-200 sm:hidden" />
 
           <div className="relative">
-            <Avatar name={displayName} size="md" />
+            <Avatar name={displayName} size="sm" />
             {/* Online dot */}
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-white" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-gray-900 text-[15px] leading-tight truncate">{displayName}</p>
-            <p className="text-[11px] text-gray-500 truncate">{bookingDetails}</p>
+            <p className="font-bold text-gray-900 text-[14px] leading-tight truncate">{displayName}</p>
+            <p className="text-[10px] text-gray-500 truncate">{bookingDetails}</p>
           </div>
 
           {/* Action icons */}
@@ -213,7 +213,7 @@ export default function ChatModal({
 
         {/* ── MESSAGES ── */}
         <div
-          className="flex-1 overflow-y-auto py-4 px-4 space-y-[2px]"
+          className="flex-1 overflow-y-auto py-3 px-3 space-y-[2px]"
           style={{ background: 'linear-gradient(180deg, #f8faff 0%, #f0f2f5 100%)' }}
         >
           {isLoading ? (
@@ -282,7 +282,7 @@ export default function ChatModal({
                           return (
                             <div key={msg.id}>
                               <div
-                                className={`px-4 py-[9px] text-[14.5px] leading-relaxed break-words whitespace-pre-wrap max-w-full transition-opacity ${
+                                className={`px-3 py-2 rounded-2xl text-[13px] leading-relaxed break-words whitespace-pre-wrap max-w-full transition-opacity ${
                                   isMine
                                     ? `bg-blue-500 text-white ${myRadius} ${isOptimistic ? 'opacity-60' : 'opacity-100'}`
                                     : `bg-white text-gray-800 shadow-sm border border-gray-100 ${theirRadius}`
