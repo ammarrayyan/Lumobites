@@ -95,6 +95,100 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
     }
   };
 
+  const handleDeleteRequest = async (id: string) => {
+    if (!confirm('Are you sure? This cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/requests?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': adminKey
+        }
+      });
+      if (res.ok) {
+        alert('Booking deleted successfully!');
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to delete booking.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while deleting the booking.');
+    }
+  };
+
+  const handleClearAllBookings = async () => {
+    if (!confirm('Are you sure? This cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/requests?all=true', {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': adminKey
+        }
+      });
+      if (res.ok) {
+        alert('All bookings cleared successfully!');
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to clear bookings.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+    }
+  };
+
+  const handleClearAllMessages = async () => {
+    if (!confirm('Are you sure? This cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/messages?all=true', {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': adminKey
+        }
+      });
+      if (res.ok) {
+        alert('All messages cleared successfully!');
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to clear messages.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+    }
+  };
+
+  const handleClearAllNotifications = async () => {
+    if (!confirm('Are you sure? This cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/notifications?all=true', {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': adminKey
+        }
+      });
+      if (res.ok) {
+        alert('All notifications cleared successfully!');
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to clear notifications.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+    }
+  };
+
   useEffect(() => {
     fetchRequests();
   }, [adminKey]);
@@ -164,10 +258,32 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
 
   return (
     <div className="space-y-8">
-      {/* Page Title */}
-      <h2 className="text-xl font-semibold text-[#191919] border-b border-gray-200 pb-4">
-        Sitting Requests Management
-      </h2>
+      {/* Page Title & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
+        <h2 className="text-xl font-semibold text-[#191919]">
+          Sitting Requests Management
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleClearAllBookings}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            🗑️ Clear All Bookings
+          </button>
+          <button
+            onClick={handleClearAllMessages}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            🗑️ Clear All Messages
+          </button>
+          <button
+            onClick={handleClearAllNotifications}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            🗑️ Clear All Notifications
+          </button>
+        </div>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4">
@@ -260,6 +376,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                   <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Status</th>
                   <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider">Action Date</th>
                   <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider text-center">Review Sent</th>
+                  <th className="p-4 text-xs font-bold text-[#555555] uppercase tracking-wider text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -362,12 +479,25 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                             <span className="text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">No</span>
                           )}
                         </td>
+
+                        {/* Delete Button */}
+                        <td className="p-4 text-sm text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteRequest(request.id);
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
                       </tr>
 
                       {/* Expanded Section showing Owner Message/Notes */}
                       {isExpanded && (
                         <tr className="bg-gray-100">
-                          <td colSpan={8} className="p-5 border-b border-gray-200">
+                          <td colSpan={9} className="p-5 border-b border-gray-200">
                             <div className="space-y-3">
                               <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
                                 Message / Special Notes from Owner:

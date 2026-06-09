@@ -101,3 +101,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const all = searchParams.get('all');
+
+    if (all === 'true') {
+      const { error } = await supabaseAdmin
+        .from('sitting_requests')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      if (error) throw error;
+      return NextResponse.json({ success: true });
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing id or all parameter' }, { status: 400 });
+    }
+
+    // Delete related messages first to prevent foreign key issues
+    const { error: msgError } = await supabaseAdmin
+      .from('messages')
+      .delete()
+      .eq('booking_id', id);
+
+    if (msgError) throw msgError;
+
+    // Delete sitting request
+    const { error: reqError } = await supabaseAdmin
+      .from('sitting_requests')
+      .delete()
+      .eq('id', id);
+
+    if (reqError) throw reqError;
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('[Admin Requests DELETE] Error:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+  }
+}
