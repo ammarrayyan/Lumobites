@@ -37,6 +37,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Sitter not found' }, { status: 404 });
     }
 
+    if (sitter.email && cleanEmail.toLowerCase() === sitter.email.toLowerCase()) {
+      return NextResponse.json({ error: 'You cannot request yourself as a sitter' }, { status: 400 });
+    }
+
     // Validation: Check if requested time slot is in sitter's available times
     if (time_slot) {
       const sitterAvailable = sitter.available_times || [];

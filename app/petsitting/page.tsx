@@ -1727,6 +1727,12 @@ export default function PetSitting() {
     setReqError('');
     setReqSuccess(false);
 
+    if (reqEmail && selectedSitter?.email && reqEmail.toLowerCase().trim() === selectedSitter.email.toLowerCase().trim()) {
+      setReqError('You cannot request yourself as a sitter');
+      setReqLoading(false);
+      return;
+    }
+
     try {
       if (reqStartDate && reqEndDate) {
         if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
@@ -2202,21 +2208,23 @@ export default function PetSitting() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isOwnerPro) {
-                              setUnlockModalOpen(true);
-                            } else {
-                              setSelectedSitter(sitter);
-                              setRequestModalOpen(true);
-                            }
-                          }}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
-                          <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
-                        </button>
+                        {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isOwnerPro) {
+                                setUnlockModalOpen(true);
+                              } else {
+                                setSelectedSitter(sitter);
+                                setRequestModalOpen(true);
+                              }
+                            }}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
+                            <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -4331,21 +4339,27 @@ export default function PetSitting() {
               >
                 Close
               </button>
-              <button
-                onClick={() => {
-                  setReviewsModalOpen(false);
-                  if (!isOwnerPro) {
-                    setUnlockModalOpen(true);
-                  } else {
-                    setSelectedSitter(selectedSitterForReviews);
-                    setRequestModalOpen(true);
-                  }
-                }}
-                className="w-full sm:flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer text-center"
-              >
-                {!isOwnerPro && <span className="text-xs">🔒</span>}
-                <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
-              </button>
+              {(() => {
+                const isSelf = !!(reqEmail && selectedSitterForReviews?.email && reqEmail.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim());
+                return (
+                  <button
+                    disabled={isSelf}
+                    onClick={() => {
+                      setReviewsModalOpen(false);
+                      if (!isOwnerPro) {
+                        setUnlockModalOpen(true);
+                      } else {
+                        setSelectedSitter(selectedSitterForReviews);
+                        setRequestModalOpen(true);
+                      }
+                    }}
+                    className={`w-full sm:flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 text-center ${isSelf ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    {!isOwnerPro && <span className="text-xs">🔒</span>}
+                    <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
+                  </button>
+                );
+              })()}
             </div>
           </div>
         </div>
