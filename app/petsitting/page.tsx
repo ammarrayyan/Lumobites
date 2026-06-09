@@ -214,8 +214,6 @@ export default function PetSitting() {
   
   // Sitter Auth State
   const [sitterAuthMode, setSitterAuthMode] = useState<'email' | 'otp' | 'form'>('email');
-  const sitterAuthModeRef = useRef(sitterAuthMode);
-  sitterAuthModeRef.current = sitterAuthMode;
   const [sitterAuthCode, setSitterAuthCode] = useState('');
   const [sitterAuthLoading, setSitterAuthLoading] = useState(false);
   const [sitterAuthError, setSitterAuthError] = useState('');
@@ -261,7 +259,6 @@ export default function PetSitting() {
 
   useEffect(() => {
     const syncStatus = () => {
-      // 1. Owner / Pro status sync
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail.trim() !== '') {
         setReqEmail(cachedEmail);
@@ -271,63 +268,40 @@ export default function PetSitting() {
         setReqEmail('');
         setIsOwnerPro(false);
       }
-
-      // 2. Restore/Sync sitter persistent session if valid
-      const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
-      const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
-
-      if (cachedSitterEmail && cachedSitterEmail.trim() !== '') {
-        let isSessionValid = true;
-        if (cachedSitterExpiry) {
-          const expiryTime = parseInt(cachedSitterExpiry, 10);
-          if (isNaN(expiryTime) || Date.now() >= expiryTime) {
-            isSessionValid = false;
-          }
-        }
-
-        if (isSessionValid) {
-          setSitterEmail(cachedSitterEmail);
-          setSitterAuthMode('form');
-          // Check if profile exists and load details
-          fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
-            .then(res => {
-              if (!res.ok) {
-                throw new Error('Failed to fetch profile status');
-              }
-              return res.json();
-            })
-            .then(profileData => {
-              if (profileData && profileData.id) {
-                loadSitterProfile(cachedSitterEmail);
-                setProfilePreviewMode(true);
-              } else {
-                setProfilePreviewMode(false);
-              }
-            })
-            .catch(err => {
-              console.error('Failed to auto-load sitter profile:', err);
-            });
-        } else {
-          // Expired, clean up
-          localStorage.removeItem('lumo_sitter_email');
-          localStorage.removeItem('lumo_sitter_email_expiry');
-          setSitterEmail('');
-          setSitterAuthMode('email');
-          setProfilePreviewMode(false);
-        }
-      } else {
-        // Clear sitter mode if they logged out (i.e., we are currently in form view but storage is empty)
-        if (sitterAuthModeRef.current === 'form') {
-          setSitterEmail('');
-          setSitterAuthMode('email');
-          setProfilePreviewMode(false);
-        }
-      }
     };
 
     syncStatus();
     window.addEventListener('lumo-pro-update', syncStatus);
     window.addEventListener('storage', syncStatus);
+
+    // Restore sitter persistent session if valid
+    const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
+    const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
+    if (cachedSitterEmail && cachedSitterExpiry) {
+      const expiryTime = parseInt(cachedSitterExpiry, 10);
+      if (!isNaN(expiryTime) && Date.now() < expiryTime) {
+        setSitterEmail(cachedSitterEmail);
+        setSitterAuthMode('form');
+        // Check if profile exists and load details
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
+          .then(res => res.json())
+          .then(profileData => {
+            if (profileData && profileData.id) {
+              loadSitterProfile(cachedSitterEmail);
+              setProfilePreviewMode(true);
+            } else {
+              setProfilePreviewMode(false);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to auto-load sitter profile:', err);
+          });
+      } else {
+        // Expired, clean up
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_sitter_email_expiry');
+      }
+    }
 
     // Set activeTab from URL search params or hash
     const params = new URLSearchParams(window.location.search);

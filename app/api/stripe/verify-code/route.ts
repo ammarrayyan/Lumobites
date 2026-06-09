@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,41 +47,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Consume/delete the code immediately only AFTER successful verification
-    await supabaseAdmin
+    // 3. Confirm double-verify that the user has a PRO subscription in the emails table
+    // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
+    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
+    let isProUser = isOwner;
+
+    if (!isOwner) {
+      const { data: userData, error: userError } = await supabase
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (userError) {
+        console.error('[Verify Code API] Supabase error confirming user status:', userError);
+        return NextResponse.json({ error: 'Failed to verify subscription status' }, { status: 500 });
+      }
+
+      if (userData && userData.is_pro) {
+        isProUser = true;
+      }
+    }
+
+    if (!isProUser) {
+      console.log(`[Verify Code API] Verification failed. Email: ${cleanEmail} is not registered as PRO.`);
+      return NextResponse.json(
+        { error: 'No active Pro subscription found for this email.' },
+        { status: 404 }
+      );
+    }
+
+    // 4. Consume/delete the code immediately only AFTER successful verification
+    await supabase
       .from('verification_codes')
       .delete()
       .eq('id', codeData.id);
 
-    // Check PRO status
-    const { data: proUser } = await supabaseAdmin
-      .from('emails')
-      .select('*')
-      .eq('email', cleanEmail)
-      .maybeSingle();
+    console.log(`[Verify Code API] Successfully verified email and granted Pro access: ${cleanEmail}`);
 
-    // Check sitter status
-    const { data: sitter } = await supabaseAdmin
-      .from('sitters')
-      .select('id, email, is_approved, approval_status, name')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-
-    // Combined status
-    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
-    const isPro = isOwner || proUser?.is_pro === true || sitter?.is_approved === true;
-    const isSitter = sitter?.is_approved === true;
-
-    console.log(`[Verify Code API] Successfully verified email ${cleanEmail}. isPro: ${isPro}, isSitter: ${isSitter}`);
-
-    return NextResponse.json({
-      success: true,
-      isPro,
-      isSitter,
-      sitterId: sitter?.id || null,
-      sitterName: sitter?.name || null,
-      approvalStatus: sitter?.approval_status || null
-    });
+    return NextResponse.json({ success: true, isPro: true });
   } catch (err: any) {
     console.error('[Verify Code API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

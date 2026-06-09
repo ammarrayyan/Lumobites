@@ -154,14 +154,10 @@ export default function Navbar() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('lumo_pro_email');
       localStorage.removeItem('lumo_admin_bypass');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_sitter_id');
-      localStorage.removeItem('lumo_sitter_email_expiry');
     }
     setIsPro(false);
     setIsSignedIn(false);
     setProEmail('');
-    setSitterEmail('');
     setShowProMenu(false);
     
     // Broadcast auth change
@@ -204,18 +200,43 @@ export default function Navbar() {
     setSignInLoading(true);
     setSignInError('');
     try {
+      // Try PRO table first
       let res = await fetch('/api/stripe/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: signInEmail })
       });
       
-      const data = await res.json();
+      let isNotPro = false;
+      let stripeErr = '';
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to send code');
+        const data = await res.json();
+        if (data.error === 'not_pro') {
+          isNotPro = true;
+        }
+        stripeErr = data.message || data.error || 'Failed to send code';
+        
+        // If not PRO, try Sitters table
+        const sitterRes = await fetch('/api/petsitting/auth/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: signInEmail }) // checks sitters
+        });
+        
+        if (sitterRes.ok) {
+          setSignInStep('code');
+          return;
+        }
+        
+        if (isNotPro) {
+          setSignInError('not_pro');
+          return;
+        }
+        
+        throw new Error(stripeErr || 'Account not found. Please ensure you are a PRO member or have a Sitter profile.');
+      } else {
+        setSignInStep('code');
       }
-      
-      setSignInStep('code');
     } catch(err: any) {
       setSignInError(err.message);
     } finally {
@@ -239,39 +260,28 @@ export default function Navbar() {
         throw new Error(data.error || 'Invalid or expired verification code.');
       }
 
-      const result = await res.json();
-
-      // Save universal session
       localStorage.setItem('lumo_pro_email', signInEmail);
-      if (result.isSitter) {
-        localStorage.setItem('lumo_sitter_email', signInEmail);
-        localStorage.setItem('lumo_sitter_id', result.sitterId);
-        setSitterEmail(signInEmail);
-      }
-
+      syncStatus();
       setShowSignInModal(false);
       setSignInStep('email');
       setSignInCode('');
       setSignInEmail('');
       
-      setIsPro(result.isPro);
+      // Force status re-check
+      const statusRes = await fetch('/api/stripe/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: signInEmail })
+      });
+      const data = await statusRes.json();
+      if (data.isPro) {
+        setIsPro(true);
+      } else {
+        setIsPro(false);
+      }
       setIsSignedIn(true);
       setProEmail(signInEmail);
-      
-      syncStatus();
       window.dispatchEvent(new Event('lumo-pro-update'));
-
-      // Show correct message after sign in
-      if (result.isPro && result.isSitter) {
-        alert("Welcome back! You have full access as a PRO member and sitter");
-      } else if (result.isPro) {
-        alert("Welcome back! You are signed in as PRO member");
-      } else if (result.isSitter) {
-        alert("Welcome back! You are signed in as a sitter. Visit the Pet Sitting page to manage your profile");
-      } else {
-        alert("Welcome back! Please upgrade to PRO to access premium features.");
-        setShowUpgradeMenu(true);
-      }
       
     } catch(err: any) {
       setSignInError(err.message);
