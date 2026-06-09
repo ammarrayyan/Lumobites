@@ -78,12 +78,8 @@ export async function POST(request: NextRequest) {
     const recipient = by === 'owner' ? reqRow.sitters?.email : reqRow.owner_email;
     if (recipient) {
       const link = by === 'owner' ? '/petsitting#sitter-dashboard' : '/petsitting#owner-history';
-      const senderName = by === 'owner'
-        ? (reqRow.owner_name ? formatSitterName(reqRow.owner_name) : reqRow.owner_email.split('@')[0])
-        : formatSitterName(reqRow.sitters?.name);
-      
       const title = 'Booking Cancelled';
-      const message = `${senderName} cancelled the booking for ${reqRow.pet_name || 'your pet'}`;
+      const message = `Booking for ${reqRow.pet_name || 'your pet'} cancelled`;
 
       try {
         await supabaseAdmin.from('notifications').insert({

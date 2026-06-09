@@ -54,17 +54,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!receiver_email) {
-      const { data: booking } = await supabaseAdmin.from('sitting_requests').select('owner_email, sitter_id').eq('id', booking_id).single();
-      if (booking) {
-        if (sender_email === booking.owner_email) {
-          // Sender is owner, receiver is sitter
-          const { data: sitter } = await supabaseAdmin.from('sitters').select('email').eq('id', booking.sitter_id).single();
-          if (sitter) receiver_email = sitter.email;
-        } else {
-          // Sender is sitter, receiver is owner
-          receiver_email = booking.owner_email;
-        }
+    // Fetch booking request details
+    const { data: booking } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('owner_email, owner_name, sitter_id, pet_name, sitters(name)')
+      .eq('id', booking_id)
+      .single();
+
+    if (!receiver_email && booking) {
+      if (sender_email === booking.owner_email) {
+        // Sender is owner, receiver is sitter
+        const { data: sitter } = await supabaseAdmin.from('sitters').select('email').eq('id', booking.sitter_id).single();
+        if (sitter) receiver_email = sitter.email;
+      } else {
+        // Sender is sitter, receiver is owner
+        receiver_email = booking.owner_email;
       }
     }
 
@@ -93,15 +97,19 @@ export async function POST(request: NextRequest) {
     console.log('[Messages API] Message inserted successfully:', newMessage.id);
 
     // 2. Create notification for receiver
-    let senderName = sender_email.split('@')[0];
+    let senderName = 'User';
+    const petName = booking?.pet_name || 'your pet';
     
-    const { data: sitterData } = await supabaseAdmin.from('sitters').select('name').eq('email', sender_email).single();
-    if (sitterData && sitterData.name) {
-      senderName = formatSitterName(sitterData.name);
+    if (booking) {
+      if (sender_email.toLowerCase().trim() === booking.owner_email.toLowerCase().trim()) {
+        senderName = booking.owner_name ? formatSitterName(booking.owner_name) : 'Owner';
+      } else {
+        senderName = booking.sitters?.name ? formatSitterName(booking.sitters.name) : 'Sitter';
+      }
     } else {
-      const { data: reqData } = await supabaseAdmin.from('sitting_requests').select('owner_name').eq('owner_email', sender_email).single();
-      if (reqData && reqData.owner_name) {
-        senderName = formatSitterName(reqData.owner_name);
+      const { data: sitterData } = await supabaseAdmin.from('sitters').select('name').eq('email', sender_email).single();
+      if (sitterData && sitterData.name) {
+        senderName = formatSitterName(sitterData.name);
       }
     }
 
@@ -111,7 +119,7 @@ export async function POST(request: NextRequest) {
         recipient_email: receiver_email,
         type: 'message',
         title: `New message from ${senderName}`,
-        message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        message: `New message about ${petName}'s booking`,
         link: `/petsitting?chat=${booking_id}#messages`,
         read: false
       });
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
       await sendPushNotification(
         receiver_email,
         `New message from ${senderName}`,
-        message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        `New message about ${petName}'s booking`,
         `/petsitting?chat=${booking_id}#messages`
       );
     } catch (err) {
