@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { X, Send, Check, Wifi } from 'lucide-react';
-
-// Client-side Supabase for Realtime (uses anon key — fine since RLS is disabled)
-const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { X, Send, Check, CheckCheck } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -35,18 +28,18 @@ export default function ChatModal({
   bookingId,
   currentUserEmail,
   otherUserName,
-  bookingDetails
+  bookingDetails,
 }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<ReturnType<typeof supabaseClient.channel> | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch full message history from API
-  const fetchMessages = useCallback(async () => {
+  // Fetch full message history
+  const fetchMessages = useCallback(async (silent = false) => {
     if (!bookingId || !currentUserEmail) return;
     try {
       const res = await fetch(
@@ -54,67 +47,29 @@ export default function ChatModal({
       );
       if (res.ok) {
         const data = await res.json();
+        // Replace ALL temp messages with confirmed ones from server
         setMessages(data.messages || []);
       }
     } catch (err) {
       console.error('[ChatModal] Error fetching messages:', err);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [bookingId, currentUserEmail]);
 
-  // Setup Supabase Realtime subscription
+  // Open: load history + start polling every 4 seconds
   useEffect(() => {
     if (!isOpen || !bookingId) return;
 
-    console.log('[ChatModal] Opening for booking_id:', bookingId, 'email:', currentUserEmail);
-
     setIsLoading(true);
     setMessages([]);
-
-    // 1. Load initial history
     fetchMessages();
 
-    // 2. Subscribe to realtime inserts on this booking
-    const channel = supabaseClient
-      .channel(`messages:${bookingId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `booking_id=eq.${bookingId}`,
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          console.log('[ChatModal] Realtime: new message received', newMsg.id);
-          setMessages((prev) => {
-            // Avoid duplicates — replace optimistic message if same content+sender
-            const filtered = prev.filter(
-              (m) =>
-                !(
-                  m.id.startsWith('temp-') &&
-                  m.sender_email === newMsg.sender_email &&
-                  m.message === newMsg.message
-                )
-            );
-            return [...filtered, newMsg];
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log('[ChatModal] Realtime status:', status);
-        setIsConnected(status === 'SUBSCRIBED');
-      });
-
-    channelRef.current = channel;
+    // Poll every 4s for new messages (fallback if realtime not enabled)
+    pollIntervalRef.current = setInterval(() => fetchMessages(true), 4000);
 
     return () => {
-      console.log('[ChatModal] Unsubscribing from realtime');
-      supabaseClient.removeChannel(channel);
-      channelRef.current = null;
-      setIsConnected(false);
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
   }, [isOpen, bookingId]);
 
@@ -123,17 +78,26 @@ export default function ChatModal({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || isSending) return;
+  // Auto-grow textarea
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const msgText = newMessage.trim();
+    if (!msgText || isSending) return;
 
     setIsSending(true);
-    const msgText = newMessage.trim();
     setNewMessage('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
-    // Optimistic UI — show immediately
+    // Optimistic message
+    const tempId = 'temp-' + Date.now();
     const optimisticMsg: Message = {
-      id: 'temp-' + Date.now(),
+      id: tempId,
       booking_id: bookingId,
       sender_email: currentUserEmail,
       receiver_email: '',
@@ -154,17 +118,20 @@ export default function ChatModal({
         }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
+      if (res.ok) {
+        // Fetch confirmed messages from server — replaces the optimistic one
+        await fetchMessages(true);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
         console.error('[ChatModal] Send failed:', errorData);
-        alert(`Failed to send message: ${errorData.error || 'Unknown error'}`);
-        // Revert optimistic message
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+        alert(`Failed to send: ${errorData.error || 'Please try again'}`);
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setNewMessage(msgText); // restore
       }
-      // On success, realtime subscription will replace the optimistic message automatically
     } catch (err) {
-      console.error('[ChatModal] Error sending message:', err);
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      console.error('[ChatModal] Network error:', err);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setNewMessage(msgText);
     } finally {
       setIsSending(false);
     }
@@ -172,115 +139,163 @@ export default function ChatModal({
 
   if (!isOpen) return null;
 
+  // Group messages by date
+  const groupedMessages: { date: string; msgs: Message[] }[] = [];
+  messages.forEach((msg) => {
+    const dateLabel = new Date(msg.created_at).toLocaleDateString([], {
+      weekday: 'short', month: 'short', day: 'numeric',
+    });
+    const last = groupedMessages[groupedMessages.length - 1];
+    if (last && last.date === dateLabel) {
+      last.msgs.push(msg);
+    } else {
+      groupedMessages.push({ date: dateLabel, msgs: [msg] });
+    }
+  });
+
+  const initials = otherUserName ? otherUserName.charAt(0).toUpperCase() : '?';
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center sm:p-4 p-0">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 p-0">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
       <div
-        className="bg-white sm:rounded-2xl rounded-none w-full max-w-lg h-full sm:h-[600px] flex flex-col shadow-2xl relative overflow-hidden"
+        className="relative bg-white sm:rounded-2xl rounded-t-3xl w-full max-w-md sm:max-w-lg flex flex-col shadow-2xl overflow-hidden"
+        style={{ height: 'min(600px, 92vh)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0 shadow-sm">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              Chat with {otherUserName}
-              <span
-                title={isConnected ? 'Live — connected' : 'Connecting...'}
-                className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-gray-300'} transition-colors`}
-              />
-            </h3>
-            <p className="text-gray-500 text-xs font-medium mt-0.5">{bookingDetails}</p>
+        {/* ─── Header ─── */}
+        <div className="shrink-0 bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3.5 flex items-center gap-3">
+          {/* Avatar */}
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-base shrink-0 ring-2 ring-white/40">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-bold text-base leading-tight truncate">{otherUserName}</p>
+            <p className="text-blue-100 text-xs truncate">{bookingDetails}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors shrink-0"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4">
+        {/* ─── Messages ─── */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gray-50">
           {isLoading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            <div className="flex flex-col items-center justify-center h-full gap-3">
+              <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+              <p className="text-gray-400 text-sm">Loading messages...</p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-3">
-                <span className="text-2xl">💬</span>
+            <div className="flex flex-col items-center justify-center h-full text-center gap-3 pb-8">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center border-2 border-blue-100">
+                <span className="text-3xl">💬</span>
               </div>
-              <p className="text-gray-500 font-medium">No messages yet</p>
-              <p className="text-gray-400 text-sm mt-1">Send a message to start the conversation.</p>
+              <div>
+                <p className="text-gray-700 font-semibold">Start the conversation</p>
+                <p className="text-gray-400 text-sm mt-1">Send a message to {otherUserName}</p>
+              </div>
             </div>
           ) : (
-            messages.map((msg, idx) => {
-              const isMine = msg.sender_email === currentUserEmail;
-              const isLastMine =
-                isMine &&
-                (idx === messages.length - 1 ||
-                  messages[idx + 1].sender_email !== currentUserEmail);
-              const isOptimistic = msg.id.startsWith('temp-');
-
-              return (
-                <div key={msg.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                  <div
-                    className={`max-w-[80%] px-4 py-2.5 rounded-2xl transition-opacity ${
-                      isMine
-                        ? `bg-blue-500 text-white rounded-tr-sm ${isOptimistic ? 'opacity-60' : 'opacity-100'}`
-                        : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
-                    }`}
-                  >
-                    <p className="text-[15px] whitespace-pre-wrap leading-relaxed">{msg.message}</p>
-                  </div>
-
-                  <div className={`flex items-center gap-1 mt-1 px-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                    <span className="text-[11px] text-gray-400 font-medium">
-                      {isOptimistic
-                        ? 'Sending...'
-                        : new Date(msg.created_at).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                    </span>
-                    {isMine && isLastMine && msg.read && !isOptimistic && (
-                      <span className="flex items-center text-[10px] text-blue-500 font-bold ml-1">
-                        <Check size={12} className="mr-0.5" /> Seen
-                      </span>
-                    )}
-                  </div>
+            groupedMessages.map(({ date, msgs }) => (
+              <div key={date}>
+                {/* Date separator */}
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">{date}</span>
+                  <div className="flex-1 h-px bg-gray-200" />
                 </div>
-              );
-            })
+
+                <div className="space-y-1">
+                  {msgs.map((msg, idx) => {
+                    const isMine = msg.sender_email === currentUserEmail;
+                    const isOptimistic = msg.id.startsWith('temp-');
+                    const isLastInGroup = idx === msgs.length - 1 || msgs[idx + 1].sender_email !== msg.sender_email;
+
+                    return (
+                      <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                        {/* Other party avatar — only on last of group */}
+                        {!isMine && (
+                          <div className={`w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px] shrink-0 ${isLastInGroup ? 'opacity-100' : 'opacity-0'}`}>
+                            {initials}
+                          </div>
+                        )}
+
+                        <div className={`max-w-[72%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                          <div
+                            className={`px-3.5 py-2.5 rounded-2xl text-[14px] leading-relaxed whitespace-pre-wrap break-words ${
+                              isMine
+                                ? `bg-blue-500 text-white ${isLastInGroup ? 'rounded-br-sm' : ''} ${isOptimistic ? 'opacity-70' : ''}`
+                                : `bg-white text-gray-800 border border-gray-100 shadow-sm ${isLastInGroup ? 'rounded-bl-sm' : ''}`
+                            }`}
+                          >
+                            {msg.message}
+                          </div>
+
+                          {isLastInGroup && (
+                            <div className={`flex items-center gap-1 mt-1 px-0.5 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                              <span className="text-[10px] text-gray-400">
+                                {isOptimistic
+                                  ? 'Sending...'
+                                  : new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {isMine && !isOptimistic && (
+                                msg.read
+                                  ? <CheckCheck size={12} className="text-blue-400" />
+                                  : <Check size={12} className="text-gray-300" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="p-3 sm:p-4 bg-white border-t border-gray-100 shrink-0">
-          <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
-              <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="w-full bg-transparent border-none focus:ring-0 resize-none p-3 max-h-32 min-h-[44px] text-sm text-gray-800"
-                rows={1}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage(e);
-                  }
-                }}
-              />
-            </div>
+        {/* ─── Input ─── */}
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-3">
+          <div className="flex items-end gap-2 bg-gray-100 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400/50 transition-all">
+            <textarea
+              ref={textareaRef}
+              value={newMessage}
+              onChange={handleTextareaChange}
+              placeholder={`Message ${otherUserName}...`}
+              rows={1}
+              className="flex-1 bg-transparent border-none focus:outline-none resize-none text-sm text-gray-800 placeholder-gray-400 py-1 max-h-[120px] leading-relaxed"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+            />
             <button
-              type="submit"
+              onClick={() => handleSendMessage()}
               disabled={!newMessage.trim() || isSending}
-              className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-colors flex shrink-0 items-center justify-center h-[44px] w-[44px]"
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all mb-0.5 ${
+                newMessage.trim() && !isSending
+                  ? 'bg-blue-500 hover:bg-blue-600 active:scale-95 text-white shadow-sm'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
-              <Send size={18} />
+              {isSending ? (
+                <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Send size={16} />
+              )}
             </button>
-          </form>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center mt-2">Press Enter to send · Shift+Enter for new line</p>
         </div>
       </div>
     </div>
