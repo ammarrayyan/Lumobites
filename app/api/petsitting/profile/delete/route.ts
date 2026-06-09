@@ -80,6 +80,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to delete profile from database' }, { status: 500 });
     }
 
+    // Revert free PRO if source was 'sitter_profile'
+    const { data: emailRecord } = await supabaseAdmin
+      .from('emails')
+      .select('*')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (emailRecord && emailRecord.source === 'sitter_profile') {
+      await supabaseAdmin
+        .from('emails')
+        .update({ is_pro: false })
+        .eq('email', cleanEmail);
+      console.log(`[Delete Sitter Profile] Reverted free PRO for ${cleanEmail} because profile was deleted.`);
+    }
+
     // 4. Send Confirmation Email
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';

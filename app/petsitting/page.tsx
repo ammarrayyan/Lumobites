@@ -268,40 +268,56 @@ export default function PetSitting() {
         setReqEmail('');
         setIsOwnerPro(false);
       }
+
+      // Restore sitter persistent session if valid
+      const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
+      const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
+      if (cachedSitterEmail && cachedSitterEmail.trim() !== '') {
+        let isSessionValid = true;
+        if (cachedSitterExpiry) {
+          const expiryTime = parseInt(cachedSitterExpiry, 10);
+          if (isNaN(expiryTime) || Date.now() >= expiryTime) {
+            isSessionValid = false;
+          }
+        }
+
+        if (isSessionValid) {
+          setSitterEmail(cachedSitterEmail);
+          setSitterAuthMode('form');
+          // Check if profile exists and load details
+          fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
+            .then(res => res.json())
+            .then(profileData => {
+              if (profileData && profileData.id) {
+                loadSitterProfile(cachedSitterEmail);
+                setProfilePreviewMode(true);
+              } else {
+                setProfilePreviewMode(false);
+              }
+            })
+            .catch(err => {
+              console.error('Failed to auto-load sitter profile:', err);
+            });
+        } else {
+          // Expired, clean up
+          localStorage.removeItem('lumo_sitter_email');
+          localStorage.removeItem('lumo_sitter_email_expiry');
+          setSitterEmail('');
+          setSitterAuthMode('auth');
+          setProfilePreviewMode(false);
+          setSitterProfile(null);
+        }
+      } else {
+        setSitterEmail('');
+        setSitterAuthMode('auth');
+        setProfilePreviewMode(false);
+        setSitterProfile(null);
+      }
     };
 
     syncStatus();
     window.addEventListener('lumo-pro-update', syncStatus);
     window.addEventListener('storage', syncStatus);
-
-    // Restore sitter persistent session if valid
-    const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
-    const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
-    if (cachedSitterEmail && cachedSitterExpiry) {
-      const expiryTime = parseInt(cachedSitterExpiry, 10);
-      if (!isNaN(expiryTime) && Date.now() < expiryTime) {
-        setSitterEmail(cachedSitterEmail);
-        setSitterAuthMode('form');
-        // Check if profile exists and load details
-        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
-          .then(res => res.json())
-          .then(profileData => {
-            if (profileData && profileData.id) {
-              loadSitterProfile(cachedSitterEmail);
-              setProfilePreviewMode(true);
-            } else {
-              setProfilePreviewMode(false);
-            }
-          })
-          .catch(err => {
-            console.error('Failed to auto-load sitter profile:', err);
-          });
-      } else {
-        // Expired, clean up
-        localStorage.removeItem('lumo_sitter_email');
-        localStorage.removeItem('lumo_sitter_email_expiry');
-      }
-    }
 
     // Set activeTab from URL search params or hash
     const params = new URLSearchParams(window.location.search);

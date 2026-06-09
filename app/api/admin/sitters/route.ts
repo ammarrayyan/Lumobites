@@ -84,6 +84,19 @@ export async function POST(req: NextRequest) {
 
       if (updateErr) throw updateErr;
 
+      // Auto grant PRO to approved sitters
+      await supabaseAdmin
+        .from('emails')
+        .upsert({
+          email: sitter.email,
+          is_pro: true,
+          source: 'sitter_profile',
+          created_at: new Date().toISOString()
+        }, {
+          onConflict: 'email',
+          ignoreDuplicates: false
+        });
+
       // Send approval email
       await resend.emails.send({
         from: fromEmail,
@@ -149,6 +162,8 @@ export async function POST(req: NextRequest) {
         })
       });
     } else if (action === 'delete') {
+      const sitterEmail = sitter?.email;
+
       // Delete associated sitting requests first to satisfy foreign key constraints
       const { error: reqDeleteErr } = await supabaseAdmin
         .from('sitting_requests')
@@ -164,6 +179,24 @@ export async function POST(req: NextRequest) {
         .eq('id', id);
 
       if (deleteErr) throw deleteErr;
+
+      // Revert free PRO if source was 'sitter_profile'
+      if (sitterEmail) {
+        const cleanSitterEmail = sitterEmail.toLowerCase().trim();
+        const { data: emailRecord } = await supabaseAdmin
+          .from('emails')
+          .select('*')
+          .eq('email', cleanSitterEmail)
+          .maybeSingle();
+
+        if (emailRecord && emailRecord.source === 'sitter_profile') {
+          await supabaseAdmin
+            .from('emails')
+            .update({ is_pro: false })
+            .eq('email', cleanSitterEmail);
+          console.log(`[Admin Delete Sitter] Reverted free PRO for ${cleanSitterEmail}`);
+        }
+      }
 
       // Send deletion notification email
       if (sitter.email) {

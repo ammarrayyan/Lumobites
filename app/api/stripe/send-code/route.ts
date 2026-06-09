@@ -16,32 +16,34 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Verify that this email actually has a PRO subscription in the database
-    // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
-    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
-    let isProUser = isOwner;
+    // 1. Send OTP to ANY email that exists in EITHER emails table OR sitters table
+    const { data: emailUser, error: emailError } = await supabase
+      .from('emails')
+      .select('email')
+      .eq('email', cleanEmail)
+      .maybeSingle();
 
-    if (!isOwner) {
-      const { data: userData, error: userError } = await supabase
-        .from('emails')
-        .select('is_pro')
-        .eq('email', cleanEmail)
-        .maybeSingle();
-
-      if (userError) {
-        console.error('[Send Code API] Supabase error fetching user status:', userError);
-        return NextResponse.json({ error: 'Failed to retrieve subscription status' }, { status: 500 });
-      }
-
-      if (userData && userData.is_pro) {
-        isProUser = true;
-      }
+    if (emailError) {
+      console.error('[Send Code API] Supabase error fetching email status:', emailError);
     }
 
-    if (!isProUser) {
-      console.log(`[Send Code API] Restoration blocked. Email: ${cleanEmail} is not registered as PRO.`);
+    const { data: sitterUser, error: sitterError } = await supabase
+      .from('sitters')
+      .select('email')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (sitterError) {
+      console.error('[Send Code API] Supabase error fetching sitter status:', sitterError);
+    }
+
+    const emailExists = !!emailUser;
+    const sitterExists = !!sitterUser;
+
+    if (!emailExists && !sitterExists) {
+      console.log(`[Send Code API] Sign in blocked. Email: ${cleanEmail} not found in emails or sitters.`);
       return NextResponse.json(
-        { error: 'not_pro', message: 'This email is not a PRO member. Please upgrade to PRO first.' },
+        { error: 'No account found for this email. Please sign up first.' },
         { status: 400 }
       );
     }
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
           preheader: `Your one-time verification code is ${code}. It expires in 15 minutes.`,
           body: `
     <h1 style="${emailStyles.h1}">Verify Your Identity 🔐</h1>
-    <p style="${emailStyles.p}">We received a request to access your Lumo Bites Pro account. Use the code below to confirm your identity:</p>
+    <p style="${emailStyles.p}">We received a request to access your Lumo Bites account. Use the code below to confirm your identity:</p>
     ${emailStyles.codeBox(code)}
     <p style="${emailStyles.pSmall}">This code expires in <strong>15 minutes</strong>. If you did not request this, you can safely ignore this email — your account remains secure.</p>
     ${emailStyles.divider}
