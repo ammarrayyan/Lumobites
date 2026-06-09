@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import { Footprints, User, PawPrint } from 'lucide-react';
 
 interface SharedTwin {
   id: string;
@@ -114,8 +115,8 @@ export default function GalleryClient() {
 
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-12">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-3xl md:text-5xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4">
-            Pet Twin Gallery 🐾
+          <h1 className="text-3xl md:text-5xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center gap-2">
+            Pet Twin Gallery <Footprints className="w-8 h-8 text-[#8B5E3C] inline-block" />
           </h1>
           <p className="text-[#666666] text-lg leading-relaxed">
             Discover the amazing community matches. See what dog or cat breed matches people's personality and facial features!
@@ -133,14 +134,14 @@ export default function GalleryClient() {
                   {share.userPhoto ? (
                     <img src={share.userPhoto} alt="User" className="w-full h-full object-cover" />
                   ) : (
-                    <span>🧑</span>
+                    <User className="w-6 h-6 text-[#8B7E7D]" />
                   )}
                 </div>
                 <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-md bg-[#FAF6F4] relative z-0 flex items-center justify-center">
                   {share.petPhoto ? (
                     <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="text-2xl">🐕</span>
+                    <PawPrint className="w-6 h-6 text-[#8B7E7D]" />
                   )}
                 </div>
               </div>

@@ -297,8 +297,8 @@ export default function Home() {
           <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
             <Footprints className="w-3.5 h-3.5" /> Public Affiliate Program
           </div>
-          <h2 className="font-[900] text-[#191919] tracking-[-0.02em] leading-tight mb-4 animate-fade-in" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
-            Earn money sharing Lumo Bites 🐾
+          <h2 className="font-[900] text-[#191919] tracking-[-0.02em] leading-tight mb-4 animate-fade-in flex items-center justify-center gap-2" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
+            Earn money sharing Lumo Bites <Footprints className="w-8 h-8 text-[#8B5E3C] inline-block" />
           </h2>
           <p className="text-gray-600 mb-8 max-w-[540px] leading-relaxed text-sm md:text-base">
             Join our affiliate program and earn <strong className="text-[#8B5E3C]">$1 for every PRO member</strong> you refer — every month they stay subscribed. Payouts via PayPal once you reach $50.

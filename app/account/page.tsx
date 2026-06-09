@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw } from 'lucide-react';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info } from 'lucide-react';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -272,7 +272,7 @@ export default function AccountPage() {
                   {error && (
                     <div className="flex flex-col gap-3 items-center">
                       <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                        ⚠️ {error}
+                        <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 inline mr-1" /> {error}
                       </p>
                       {error.toLowerCase().includes('no active pro subscription') && (
                         <button
@@ -306,7 +306,7 @@ export default function AccountPage() {
                           ) : (
                             <>
                               <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
-                              Become PRO — $2.99/mo ✨
+                              Become PRO — $2.99/mo <Sparkles className="w-4 h-4 text-white shrink-0 inline ml-1.5" />
                             </>
                           )}
                         </button>
@@ -367,7 +367,7 @@ export default function AccountPage() {
 
                 {error && (
                   <div className="text-xs text-red-500 font-semibold text-center leading-normal flex flex-col items-center gap-1">
-                    <span>⚠️ {error}</span>
+                    <span className="flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
                     {error.includes('Code expired') && (
                       <button
                         type="button"
@@ -495,13 +495,13 @@ export default function AccountPage() {
 
                   {error && (
                     <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                      ⚠️ {error}
+                      <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
                     </p>
                   )}
 
                   {subDetails.adminBypass ? (
                     <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
-                      💡 Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
+                      <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
                     </div>
                   ) : subDetails.cancelAtPeriodEnd ? (
                     <div className="flex flex-col gap-3">

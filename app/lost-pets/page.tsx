@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
-import { Megaphone, Footprints, MapPin } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check } from 'lucide-react';
 
 export default function LostPetsFeed() {
   const [pets, setPets] = useState<any[]>([]);
@@ -132,8 +132,8 @@ export default function LostPetsFeed() {
               </div>
             )}
             {locationVerified && !isGeocoding && searchCoords && (
-               <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5 absolute -bottom-6 left-1">
-                 ✅ {searchLocationName}
+               <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1 absolute -bottom-6 left-1">
+                 <Check className="w-4 h-4 text-green-600 stroke-[3]" /> {searchLocationName}
                </p>
             )}
           </div>

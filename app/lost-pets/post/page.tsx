@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Footprints, CheckCircle, MapPin } from 'lucide-react';
 
 export default function PostLostPet() {
   const router = useRouter();
@@ -180,7 +181,7 @@ export default function PostLostPet() {
         <Navbar />
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-10 rounded-3xl shadow-lg border border-[#E8DDD4] text-center max-w-md animate-fade-in">
-            <span className="text-6xl mb-4 block">🐾</span>
+            <Footprints className="w-16 h-16 text-[#8B5E3C] mx-auto mb-4 animate-bounce" />
             <h2 className="text-3xl font-black text-[#4A3E3D] mb-4">Post Shared!</h2>
             <p className="text-[#8B7E7D] font-medium text-lg mb-6">
               Your post has been shared! We hope you find {type === 'lost' ? 'your pet' : 'their owner'} soon.
@@ -267,7 +268,7 @@ export default function PostLostPet() {
                 
                 {selectedLocation && (
                   <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5">
-                    ✅ {selectedLocation.formatted_address}
+                    <CheckCircle className="w-4 h-4 text-green-600" /> {selectedLocation.formatted_address}
                   </p>
                 )}
                 
@@ -285,9 +286,9 @@ export default function PostLostPet() {
                             setLocationVerified(true);
                             setLocationInput(opt.formatted_address);
                           }}
-                          className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D]"
+                          className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D] flex items-center gap-1.5"
                         >
-                          📍 {opt.formatted_address}
+                          <MapPin className="w-4 h-4 text-gray-500 shrink-0" /> {opt.formatted_address}
                         </button>
                       ))}
                     </div>

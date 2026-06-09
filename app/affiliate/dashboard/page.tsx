@@ -207,8 +207,8 @@ export default function AffiliateDashboard() {
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-500 font-semibold text-center mt-1">
-                    ⚠️ {error}
+                  <p className="text-xs text-red-500 font-semibold text-center mt-1 flex items-center justify-center gap-1">
+                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> {error}
                   </p>
                 )}
 
@@ -272,8 +272,8 @@ export default function AffiliateDashboard() {
                 )}
 
                 {error && (
-                  <p className="text-xs text-red-500 font-semibold text-center mt-1">
-                    ⚠️ {error}
+                  <p className="text-xs text-red-500 font-semibold text-center mt-1 flex items-center justify-center gap-1">
+                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> {error}
                   </p>
                 )}
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Trash2, Footprints } from 'lucide-react';
 
 interface SittingRequest {
   id: string;
@@ -268,19 +269,19 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
             onClick={handleClearAllBookings}
             className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
-            🗑️ Clear All Bookings
+            <Trash2 className="w-3.5 h-3.5" /> Clear All Bookings
           </button>
           <button
             onClick={handleClearAllMessages}
             className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
-            🗑️ Clear All Messages
+            <Trash2 className="w-3.5 h-3.5" /> Clear All Messages
           </button>
           <button
             onClick={handleClearAllNotifications}
             className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
           >
-            🗑️ Clear All Notifications
+            <Trash2 className="w-3.5 h-3.5" /> Clear All Notifications
           </button>
         </div>
       </div>
@@ -359,8 +360,8 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
       {/* Table Card */}
       <div className="bg-white/40 border border-gray-200 rounded-2xl overflow-hidden">
         {filteredRequests.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <span className="text-4xl mb-4 block">🐾</span>
+          <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center">
+            <Footprints className="w-10 h-10 text-gray-400 mb-4" />
             <p>No sitting requests match the current filters.</p>
           </div>
         ) : (
@@ -487,9 +488,9 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                               e.stopPropagation();
                               handleDeleteRequest(request.id);
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-1.5 px-3 rounded-lg transition-colors cursor-pointer flex items-center gap-1 mx-auto"
                           >
-                            🗑️ Delete
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         </td>
                       </tr>

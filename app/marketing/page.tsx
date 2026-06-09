@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
+import { Download, AlertTriangle, Key, Sparkles, Footprints, ShieldCheck, Check, Info } from 'lucide-react';
 
 const qrConfigs = [
   { title: "Homepage", url: "https://lumobites.net", tagline: "Find the best food for your pet. Free. No sign-up required.", filename: "lumobites-homepage-qr.png" },
@@ -81,7 +82,7 @@ const QRCodeCard = ({ title, url, tagline, filename }: { title: string, url: str
         onClick={handleDownload}
         className="w-full bg-[#8B5E3C] text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-[#724C2F] active:scale-[0.98] transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2 mt-auto"
       >
-        <span>📥</span> Download PNG
+        <Download className="w-4 h-4 shrink-0" /> Download PNG
       </button>
     </div>
   );
@@ -193,7 +194,9 @@ export default function MarketingPage() {
             </div>
             
             {error && (
-              <p className="text-red-500 text-xs font-bold text-left mt-1">⚠️ {error}</p>
+              <p className="text-red-500 text-xs font-bold text-left mt-1 flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> {error}
+              </p>
             )}
 
             <button
@@ -226,8 +229,8 @@ export default function MarketingPage() {
           </div>
         </Link>
         <div className="flex items-center gap-4">
-          <span className="text-[12px] bg-[#8B5E3C]/10 text-[#8B5E3C] px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
-            🔑 Admin Portal
+          <span className="text-[12px] bg-[#8B5E3C]/10 text-[#8B5E3C] px-3 py-1.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <Key className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" /> Admin Portal
           </span>
           <button 
             onClick={handleLogout}
@@ -299,8 +302,8 @@ export default function MarketingPage() {
 
                 {/* Top Badge */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', zIndex: 3 }}>
-                  <div style={{ backgroundColor: 'rgba(139, 94, 60, 0.05)', border: '1.5px solid rgba(139, 94, 60, 0.6)', color: '#8B5E3C', fontSize: '15px', fontWeight: '900', letterSpacing: '0.22em', padding: '12px 32px', borderRadius: '100px', textTransform: 'uppercase' }}>
-                    ✨ FREE &middot; NO SIGN-UP NEEDED
+                  <div style={{ backgroundColor: 'rgba(139, 94, 60, 0.05)', border: '1.5px solid rgba(139, 94, 60, 0.6)', color: '#8B5E3C', fontSize: '15px', fontWeight: '900', letterSpacing: '0.22em', padding: '12px 32px', borderRadius: '100px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <Sparkles style={{ width: '16px', height: '16px', color: '#8B5E3C' }} /> FREE &middot; NO SIGN-UP NEEDED
                   </div>
                 </div>
 
@@ -326,7 +329,9 @@ export default function MarketingPage() {
                     </div>
 
                     {/* Separator Glowing Paw Print */}
-                    <div style={{ fontSize: '64px', color: '#C17D3C', transform: 'translateY(-2px)' }}>🐾</div>
+                    <div style={{ color: '#C17D3C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Footprints style={{ width: '64px', height: '64px' }} />
+                    </div>
 
                     {/* Right: Real Dog Photo cropped as Circle */}
                     <div style={{ width: '220px', height: '220px', borderRadius: '50%', border: '4px solid #8B5E3C', boxShadow: '0 10px 30px rgba(139, 94, 60, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#FDF9F5' }}>
@@ -335,8 +340,8 @@ export default function MarketingPage() {
                   </div>
                   
                   {/* Match Badge */}
-                  <div style={{ background: 'linear-gradient(135deg, #C17D3C 0%, #8B5E3C 100%)', color: '#FFFFFF', fontSize: '22px', fontWeight: '950', letterSpacing: '0.14em', padding: '14px 48px', borderRadius: '100px', boxShadow: '0 8px 25px rgba(139, 94, 60, 0.25)' }}>
-                    91% MATCH ✨
+                  <div style={{ background: 'linear-gradient(135deg, #C17D3C 0%, #8B5E3C 100%)', color: '#FFFFFF', fontSize: '22px', fontWeight: '950', letterSpacing: '0.14em', padding: '14px 48px', borderRadius: '100px', boxShadow: '0 8px 25px rgba(139, 94, 60, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <Sparkles style={{ width: '22px', height: '22px', color: 'white' }} /> 91% MATCH
                   </div>
                 </div>
 
@@ -421,8 +426,8 @@ export default function MarketingPage() {
 
                 {/* Top Badge */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', zIndex: 3 }}>
-                  <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1.5px solid rgba(16, 185, 129, 0.6)', color: '#10B981', fontSize: '15px', fontWeight: '900', letterSpacing: '0.22em', padding: '12px 32px', borderRadius: '100px', textTransform: 'uppercase' }}>
-                    🛡️ AI INGREDIENT SAFETY SCANNER
+                  <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1.5px solid rgba(16, 185, 129, 0.6)', color: '#10B981', fontSize: '15px', fontWeight: '900', letterSpacing: '0.22em', padding: '12px 32px', borderRadius: '100px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <ShieldCheck style={{ width: '18px', height: '18px' }} /> AI INGREDIENT SAFETY SCANNER
                   </div>
                 </div>
 
@@ -446,8 +451,8 @@ export default function MarketingPage() {
                       <div style={{ fontSize: '120px', fontWeight: '950', color: '#10B981', lineHeight: 1, margin: '14px 0', fontFamily: 'system-ui, sans-serif' }}>
                         A
                       </div>
-                      <div style={{ backgroundColor: '#10B981', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-block', letterSpacing: '0.06em' }}>
-                        VERIFIED SAFE ✅
+                      <div style={{ backgroundColor: '#10B981', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.06em' }}>
+                        VERIFIED SAFE <Check style={{ width: '18px', height: '18px', color: 'white', strokeWidth: '3' }} />
                       </div>
                     </div>
 
@@ -457,8 +462,8 @@ export default function MarketingPage() {
                       <div style={{ fontSize: '120px', fontWeight: '950', color: '#EF4444', lineHeight: 1, margin: '14px 0', fontFamily: 'system-ui, sans-serif' }}>
                         D
                       </div>
-                      <div style={{ backgroundColor: '#EF4444', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-block', letterSpacing: '0.06em' }}>
-                        TOXINS DETECTED ⚠️
+                      <div style={{ backgroundColor: '#EF4444', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.06em' }}>
+                        TOXINS DETECTED <AlertTriangle style={{ width: '18px', height: '18px', color: 'white' }} />
                       </div>
                     </div>
 
@@ -516,7 +521,9 @@ export default function MarketingPage() {
 
         {/* Usage notes */}
         <div className="max-w-[800px] mx-auto mt-16 bg-[#F5EDE4]/60 border border-[#E8D5C0] rounded-2xl p-6 text-[14px] leading-relaxed">
-          <h4 className="font-bold text-[#191919] mb-2">💡 Tips for Best Output Quality</h4>
+          <h4 className="font-bold text-[#191919] mb-2 flex items-center gap-1.5">
+            <Info className="w-4 h-4 text-[#8B5E3C] shrink-0" /> Tips for Best Output Quality
+          </h4>
           <ul className="list-disc pl-5 space-y-1 text-[#666666]">
             <li>Downloading triggers a **2x high-resolution canvas capture** (exactly 2160x2160px output size) to ensure crystal clear clarity on high-DPI social media feeds.</li>
             <li>Images will be downloaded as clean PNG files directly to your device.</li>

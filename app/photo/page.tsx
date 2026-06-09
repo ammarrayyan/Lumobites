@@ -347,7 +347,7 @@ export default function PhotoPage() {
               {isHumanDetected ? (
                 <div className="flex flex-col items-center gap-6 w-full max-w-[90%] mx-auto animate-fade-in">
                   <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight">
-                    Oops! That looks like a human 😄
+                    Oops! That looks like a human
                   </h2>
                   <p className="text-[#666666] leading-relaxed">
                     Please upload a photo of your dog or cat instead. We&apos;re designed to find the perfect food for pets!
@@ -375,7 +375,7 @@ export default function PhotoPage() {
               ) : detectedPetType === 'none' ? (
                 <div className="w-full flex flex-col gap-4 items-center">
                   <h2 className="text-2xl font-[800] text-[#191919] leading-tight">
-                    We couldn&apos;t detect a pet! 🕵️
+                    We couldn&apos;t detect a pet!
                   </h2>
                   <p className="text-[#666666] mb-4">Please upload a clear photo of your cat or dog, or enter the breed manually.</p>
                   <button 
@@ -423,9 +423,9 @@ export default function PhotoPage() {
                   <div className="flex flex-col items-center gap-2">
                     <h2 className="text-2xl md:text-3xl font-[800] text-[#191919] leading-tight max-w-[80%]">
                       {detectedBreed2 ? (
-                        <>{detectedPetType === 'cat' ? '🐱' : '🐕'} Is your pet a <span className="text-[#8B5E3C]">{detectedBreed}</span> or <span className="text-[#8B5E3C]">{detectedBreed2}</span>?</>
+                        <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">{detectedPetType === 'cat' ? <Cat className="w-6 h-6 text-[#8B5E3C]" /> : <Dog className="w-6 h-6 text-[#8B5E3C]" />} Is your pet a <span className="text-[#8B5E3C]">{detectedBreed}</span> or <span className="text-[#8B5E3C]">{detectedBreed2}</span>?</span>
                       ) : (
-                        <>{detectedPetType === 'cat' ? '🐱' : '🐕'} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?</>
+                        <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">{detectedPetType === 'cat' ? <Cat className="w-6 h-6 text-[#8B5E3C]" /> : <Dog className="w-6 h-6 text-[#8B5E3C]" />} Looks like a <span className="text-[#8B5E3C]">{detectedBreed}</span>! Is that right?</span>
                       )}
                     </h2>
                     {confidence && !detectedBreed2 && (

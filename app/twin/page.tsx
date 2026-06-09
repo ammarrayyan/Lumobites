@@ -1062,7 +1062,7 @@ export default function TwinPage() {
           }
 
           // 3. Show status toast
-          setShareStatus("Card downloaded! Share it on social media 📸");
+          setShareStatus("Card downloaded! Share it on social media");
           setTimeout(() => setShareStatus(null), 5000);
         } else {
           setError("Could not generate share image. Please try again.");
@@ -1116,7 +1116,7 @@ export default function TwinPage() {
 
           {shareStatus && (
             <div className="mb-6 p-4 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-xl text-center font-bold animate-bounce flex items-center justify-center gap-2 shadow-xs">
-              🎉 {shareStatus}
+              <Sparkles className="w-4 h-4 text-emerald-600" /> {shareStatus}
             </div>
           )}
 
@@ -1366,7 +1366,11 @@ export default function TwinPage() {
                   {/* TWIN Photo */}
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-4 border-white shadow-md relative shrink-0 bg-[#F9F7F5] flex items-center justify-center">
                     {imageError ? (
-                      <span className="text-4xl">🐕</span>
+                      result.petType === 'cat' ? (
+                        <Cat className="w-10 h-10 text-[#8B7E7D]" />
+                      ) : (
+                        <Dog className="w-10 h-10 text-[#8B7E7D]" />
+                      )
                     ) : (
                       <img 
                         src={result.unsplashImageUrl} 
@@ -1411,7 +1415,7 @@ export default function TwinPage() {
                   {/* Personality Breakdown */}
                   <div>
                     <h4 className="text-xs font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                      ✨ Personality Breakdown
+                      <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> Personality Breakdown
                     </h4>
                     <p className="text-gray-600 leading-relaxed font-semibold">
                       {result.personalityBreakdown}
@@ -1422,7 +1426,7 @@ export default function TwinPage() {
                   {result.bothSection && result.bothSection.length > 0 && (
                     <div>
                       <h4 className="text-xs font-black text-[#8B5E3C] uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        🤝 You & Your Twin Both...
+                        <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> You & Your Twin Both...
                       </h4>
                       <ul className="space-y-1.5">
                         {result.bothSection.map((item, idx) => (
@@ -1440,7 +1444,7 @@ export default function TwinPage() {
                     {result.famousPets && result.famousPets.length > 0 && (
                       <div className="bg-[#FAF6F4]/50 border border-[#E8DDD4]/65 rounded-xl p-3.5">
                         <h4 className="text-[11px] font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                          🎬 Famous {result.breed}s
+                          <Star className="w-3 h-3 text-[#8B5E3C] fill-current" /> Famous {result.breed}s
                         </h4>
                         <ul className="space-y-1 text-xs text-gray-500 font-medium">
                           {result.famousPets.map((pet, idx) => (
@@ -1454,7 +1458,7 @@ export default function TwinPage() {
                     {result.celebrityMatch && (
                       <div className="bg-[#FAF6F4]/50 border border-[#E8DDD4]/65 rounded-xl p-3.5">
                         <h4 className="text-[11px] font-black text-[#8B5E3C] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                          🌟 Celebrity Match
+                          <Star className="w-3 h-3 text-[#8B5E3C] fill-current" /> Celebrity Match
                         </h4>
                         <p className="text-xs text-gray-500 font-medium leading-relaxed">
                           {result.celebrityMatch}
@@ -2032,7 +2036,7 @@ export default function TwinPage() {
                                   className="mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-2 px-4 rounded-xl font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
                                 >
                                   <Sparkles className="w-3.5 h-3.5 text-white shrink-0 animate-pulse" />
-                                  Become PRO instead ✨
+                                  Become PRO instead
                                 </button>
                               )}
                             </div>
@@ -2272,7 +2276,11 @@ export default function TwinPage() {
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '90px' }}>🐕</span>
+                  result.petType === 'cat' ? (
+                    <Cat style={{ width: '90px', height: '90px', color: '#8B7E7D' }} />
+                  ) : (
+                    <Dog style={{ width: '90px', height: '90px', color: '#8B7E7D' }} />
+                  )
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -2472,7 +2480,11 @@ export default function TwinPage() {
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '110px' }}>🐕</span>
+                  result.petType === 'cat' ? (
+                    <Cat style={{ width: '110px', height: '110px', color: '#8B7E7D' }} />
+                  ) : (
+                    <Dog style={{ width: '110px', height: '110px', color: '#8B7E7D' }} />
+                  )
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -2674,7 +2686,11 @@ export default function TwinPage() {
                 justifyContent: 'center'
               }}>
                 {imageError ? (
-                  <span style={{ fontSize: '65px' }}>🐕</span>
+                  result.petType === 'cat' ? (
+                    <Cat style={{ width: '65px', height: '65px', color: '#8B7E7D' }} />
+                  ) : (
+                    <Dog style={{ width: '65px', height: '65px', color: '#8B7E7D' }} />
+                  )
                 ) : (
                   <img 
                     src={result.unsplashImageUrl} 
@@ -2766,8 +2782,8 @@ export default function TwinPage() {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl md:text-2xl font-[900] text-[#191919] tracking-tight mb-2">
-              Your Pet Twin is Ready! 🐾
+            <h3 className="text-xl md:text-2xl font-[900] text-[#191919] tracking-tight mb-2 flex items-center justify-center gap-1.5">
+              Your Pet Twin is Ready! <Footprints className="w-5 h-5 text-[#8B5E3C]" />
             </h3>
 
             {/* Subtitle */}

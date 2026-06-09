@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { APIProvider, Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import { MapPin } from 'lucide-react';
 
 export interface MapPet {
   id: string;
@@ -140,8 +141,8 @@ export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
                     {activePet.status === 'resolved' ? 'Resolved' : activePet.type}
                   </span>
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#4A3E3D', marginBottom: 8 }}>
-                  📍 {activePet.city}
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#4A3E3D', marginBottom: 8, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <MapPin style={{ width: 14, height: 14, color: '#8B5E3C' }} /> {activePet.city}
                 </div>
                 <button
                   onClick={() => router.push(`/lost-pets/${activePet.id}`)}

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { PawPrint, Search, AlertTriangle, Leaf, Sparkles, Share2, ShieldCheck } from 'lucide-react';
 
 export default function IngredientsPage() {
   const [ingredientsText, setIngredientsText] = useState('');
@@ -98,13 +99,13 @@ export default function IngredientsPage() {
                 onClick={() => setPetType('dog')}
                 className={`flex-1 py-4 rounded-2xl border-2 transition-all font-bold flex items-center justify-center gap-2 ${petType === 'dog' ? 'border-[#8B5E3C] bg-[#8B5E3C]/5 text-[#8B5E3C]' : 'border-gray-100 text-gray-400'}`}
               >
-                <span>🐶</span> Dog
+                <PawPrint className="w-4 h-4 shrink-0" /> Dog
               </button>
               <button 
                 onClick={() => setPetType('cat')}
                 className={`flex-1 py-4 rounded-2xl border-2 transition-all font-bold flex items-center justify-center gap-2 ${petType === 'cat' ? 'border-[#8B5E3C] bg-[#8B5E3C]/5 text-[#8B5E3C]' : 'border-gray-100 text-gray-400'}`}
               >
-                <span>🐱</span> Cat
+                <PawPrint className="w-4 h-4 shrink-0" /> Cat
               </button>
             </div>
           </div>
@@ -126,8 +127,7 @@ export default function IngredientsPage() {
           >
             {loading ? (
               <>
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                🔍 Analyzing with AI...
+                <Search className="w-5 h-5 animate-spin" /> Analyzing with AI...
               </>
             ) : (
               "Check Ingredients Now →"
@@ -139,7 +139,9 @@ export default function IngredientsPage() {
         {loading && (
           <div className="mt-12 bg-white rounded-3xl p-12 border border-[#F0E6DD] text-center flex flex-col items-center justify-center shadow-xl shadow-[#8B5E3C]/5 animate-in fade-in slide-in-from-bottom-8 duration-500">
             <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-            <h3 className="text-[#191919] font-bold text-lg mb-2">🔍 Analyzing ingredients with AI...</h3>
+            <h3 className="text-[#191919] font-bold text-lg mb-2 flex items-center justify-center gap-1.5">
+              <Search className="w-5 h-5 animate-spin text-[#8B5E3C]" /> Analyzing ingredients with AI...
+            </h3>
             <p className="text-gray-500 text-sm max-w-[280px] mx-auto leading-relaxed">
               Claude AI is evaluating ingredient safety against veterinary & FDA guidelines.
             </p>
@@ -182,7 +184,7 @@ export default function IngredientsPage() {
                   {results.dangerous.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="text-sm leading-none">🔴</span> Dangerous Ingredients ({results.dangerous.length})
+                        <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" /> Dangerous Ingredients ({results.dangerous.length})
                       </h4>
                       <div className="space-y-1.5">
                         {results.dangerous.map((item, i) => (
@@ -199,7 +201,7 @@ export default function IngredientsPage() {
                   {results.concerning.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="text-sm leading-none">⚠️</span> Concerning Ingredients ({results.concerning.length})
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" /> Concerning Ingredients ({results.concerning.length})
                       </h4>
                       <div className="space-y-1.5">
                         {results.concerning.map((item, i) => (
@@ -216,7 +218,7 @@ export default function IngredientsPage() {
                   {results.safe.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="text-sm leading-none">🌱</span> Safe & Beneficial ({results.safe.length})
+                        <Leaf className="w-4 h-4 text-emerald-600 shrink-0" /> Safe & Beneficial ({results.safe.length})
                       </h4>
                       <div className="flex flex-wrap gap-1.5 p-3 bg-emerald-50/30 border border-emerald-100/30 rounded-xl max-h-40 overflow-y-auto">
                         {results.safe.map((item, i) => (
@@ -231,7 +233,9 @@ export default function IngredientsPage() {
                   {/* Perfect Score State */}
                   {results.dangerous.length === 0 && results.concerning.length === 0 && (
                     <div className="bg-emerald-50/60 border border-emerald-100/50 text-emerald-800 p-5 rounded-2xl text-center shadow-3xs">
-                      <p className="font-bold text-sm uppercase tracking-wide">Excellent Ingredient Quality! 🎉</p>
+                      <p className="font-bold text-sm uppercase tracking-wide flex items-center justify-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-emerald-600 inline" /> Excellent Ingredient Quality!
+                      </p>
                       <p className="text-xs text-emerald-700 mt-1 leading-normal">Claude AI did not identify any dangerous or concerning ingredients in this recipe.</p>
                     </div>
                   )}
@@ -242,14 +246,14 @@ export default function IngredientsPage() {
                     onClick={handleShare}
                     className="flex-1 bg-white border-2 border-gray-150 text-[#191919] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:border-[#8B5E3C]/20 transition-all cursor-pointer"
                   >
-                    <span>🔗</span> Share Result
+                    <Share2 className="w-4 h-4 shrink-0" /> Share Result
                   </button>
                   <Link 
                     href={`/chat?issues=${[...results.dangerous, ...results.concerning].map(item => item.name).join(',')}`}
                     className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition-all text-center"
                     style={{ textDecoration: 'none' }}
                   >
-                    <span>🛡️</span> Find Safer Alternatives
+                    <ShieldCheck className="w-4 h-4 shrink-0" /> Find Safer Alternatives
                   </Link>
                 </div>
               </div>

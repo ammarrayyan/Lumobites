@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw } from 'lucide-react';
 
 export default function SitterManagement({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
   const [sitters, setSitters] = useState<any[]>([]);
@@ -216,21 +217,21 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                       {sitter.approval_status || 'pending'}
                     </span>
                     {sitter.needs_reapproval && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-600 border border-orange-500/30 animate-pulse">
-                        Re-review ⚠️
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-600 border border-orange-500/30 animate-pulse flex items-center gap-1">
+                        Re-review <AlertTriangle className="w-3.5 h-3.5 text-orange-600" />
                       </span>
                     )}
                     {sitter.self_declared && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-600 border border-blue-500/30">
-                        Self Declared ✅
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-600 border border-blue-500/30 flex items-center gap-1">
+                        Self Declared <CheckCircle className="w-3.5 h-3.5 text-blue-600" />
                       </span>
                     )}
                     <span className="px-2 py-0.5 rounded text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200">
                       No Shows: {sitter.no_show_count || 0}
                     </span>
                     {sitter.no_show_count >= 3 && (
-                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-600 border border-red-500/30 animate-pulse">
-                        ⚠️ HIGH NO-SHOW RISK
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-600 border border-red-500/30 animate-pulse flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-600" /> HIGH NO-SHOW RISK
                       </span>
                     )}
                   </div>
@@ -267,8 +268,8 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                   )}
                   {sitter.id_photo_url && (
                     <p className="text-sm mt-2">
-                      <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-[#191919] transition-colors">
-                        🪪 View ID Photo
+                      <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-[#191919] transition-colors">
+                        <Eye className="w-3.5 h-3.5" /> View ID Photo
                       </a>
                     </p>
                   )}
@@ -343,7 +344,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     disabled={processingId === sitter.id}
                     className="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 border border-orange-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
                   >
-                    {processingId === sitter.id ? 'Processing...' : '🪪 Reset ID Verification'}
+                    {processingId === sitter.id ? 'Processing...' : <span className="flex items-center justify-center gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Reset ID Verification</span>}
                   </button>
                 )}
 
@@ -353,7 +354,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                   disabled={processingId === sitter.id || deletingId === sitter.id}
                   className="w-full bg-red-600 hover:bg-red-700 text-[#191919] font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
                 >
-                  {deletingId === sitter.id ? 'Deleting...' : '🗑️ Delete Profile'}
+                  {deletingId === sitter.id ? 'Deleting...' : <span className="flex items-center justify-center gap-1.5"><Trash2 className="w-3.5 h-3.5" /> Delete Profile</span>}
                 </button>
               </div>
             </div>

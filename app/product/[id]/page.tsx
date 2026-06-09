@@ -3,6 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { 
+  Dog, 
+  Cat, 
+  AlertTriangle, 
+  CheckCircle, 
+  BarChart3, 
+  Beef, 
+  Check, 
+  X, 
+  Calendar, 
+  ShoppingCart, 
+  Footprints, 
+  MapPin 
+} from 'lucide-react';
 
 interface Product {
   id: string;
@@ -172,8 +186,12 @@ export default function ProductDetailPage() {
  
       {/* Hero */}
       <div style={{ backgroundColor: '#FFFFFF', paddingTop: '32px', paddingBottom: '40px', paddingLeft: '24px', paddingRight: '24px', borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
-        <div style={{ width: '192px', height: '192px', margin: '0 auto 32px auto', backgroundColor: '#F5EDE4', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '80px' }}>
-          {product.pet_type === 'dog' ? '🐶' : '🐱'}
+        <div style={{ width: '192px', height: '192px', margin: '0 auto 32px auto', backgroundColor: '#F5EDE4', borderRadius: '24px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+          {product.pet_type === 'dog' ? (
+            <Dog style={{ width: '96px', height: '96px', color: '#8B5E3C' }} />
+          ) : (
+            <Cat style={{ width: '96px', height: '96px', color: '#8B5E3C' }} />
+          )}
         </div>
         <h1 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', textAlign: 'center', color: '#191919', lineHeight: 1.2, margin: '0 0 8px 0' }}>{displayName}</h1>
         <p style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: '14px' }}>{product.brand}</p>
@@ -184,7 +202,7 @@ export default function ProductDetailPage() {
             <div style={{ fontSize: '12px', color: '#999', animation: 'pulse 2s infinite' }}>Checking FDA recall status...</div>
           ) : recallData?.active ? (
             <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #EF4444', borderRadius: '8px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>🚨</span>
+              <AlertTriangle style={{ width: '20px', height: '20px', color: '#EF4444' }} />
               <div style={{ textAlign: 'left' }}>
                 <p style={{ color: '#991B1B', fontWeight: 'bold', fontSize: '13px', margin: 0 }}>ACTIVE RECALL FOUND</p>
                 <p style={{ color: '#7F1D1D', fontSize: '11px', margin: 0, opacity: 0.8 }}>{recallData.reason?.substring(0, 60)}...</p>
@@ -192,7 +210,7 @@ export default function ProductDetailPage() {
             </div>
           ) : recallData?.active === false ? (
             <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #22C55E', borderRadius: '8px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px' }}>✅</span>
+              <CheckCircle style={{ width: '16px', height: '16px', color: '#22C55E' }} />
               <span style={{ color: '#166534', fontWeight: 'bold', fontSize: '13px' }}>No Active Recalls Found</span>
             </div>
           ) : null}
@@ -213,7 +231,7 @@ export default function ProductDetailPage() {
         {(product.protein_pct || product.fat_pct || product.fiber_pct) && (
           <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
             <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
-              <span>📊</span> Nutrition Breakdown
+              <BarChart3 style={{ width: '20px', height: '20px', color: '#191919' }} /> Nutrition Breakdown
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', textAlign: 'center' }}>
               <div style={{ backgroundColor: '#F9F9F9', borderRadius: '12px', padding: '12px' }}>
@@ -235,7 +253,7 @@ export default function ProductDetailPage() {
         {/* Ingredients */}
         <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
           <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 12px 0' }}>
-            <span>🥩</span> Ingredients
+            <Beef style={{ width: '20px', height: '20px', color: '#191919' }} /> Ingredients
           </h3>
           <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, margin: 0 }}>{product.ingredients}</p>
         </section>
@@ -245,13 +263,17 @@ export default function ProductDetailPage() {
           <div style={{ display: 'grid', gap: '16px' }}>
             {(product.pros || product.description) && (
               <section style={{ backgroundColor: '#F5EDE4', borderRadius: '24px', padding: '20px' }}>
-                <h3 style={{ fontWeight: 800, color: '#8B5E3C', margin: '0 0 8px 0' }}>✅ Why it's great</h3>
+                <h3 style={{ fontWeight: 800, color: '#8B5E3C', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check style={{ width: '20px', height: '20px', color: '#8B5E3C' }} /> Why it's great
+                </h3>
                 <p style={{ fontSize: '14px', color: '#5C3D20', margin: 0 }}>{product.pros || product.description}</p>
               </section>
             )}
             {product.cons && (
               <section style={{ backgroundColor: '#FEF2F2', borderRadius: '24px', padding: '20px' }}>
-                <h3 style={{ fontWeight: 800, color: '#7F1D1D', margin: '0 0 8px 0' }}>❌ Things to note</h3>
+                <h3 style={{ fontWeight: 800, color: '#7F1D1D', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <X style={{ width: '20px', height: '20px', color: '#7F1D1D' }} /> Things to note
+                </h3>
                 <p style={{ fontSize: '14px', color: '#991B1B', margin: 0 }}>{product.cons}</p>
               </section>
             )}
@@ -261,12 +283,12 @@ export default function ProductDetailPage() {
         {/* 7-Day Transition Plan */}
         <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
           <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
-            <span>🗓️</span> 7-Day Transition Plan
+            <Calendar style={{ width: '20px', height: '20px', color: '#191919' }} /> 7-Day Transition Plan
           </h3>
           <p style={{ fontSize: '12px', color: '#555', marginBottom: '16px' }}>Slowly mix this food with their current diet to prevent an upset stomach.</p>
           {[{ days: '1-2', pct: 25 }, { days: '3-4', pct: 50 }, { days: '5-6', pct: 75 }, { days: '7+', pct: 100 }].map(({ days, pct }) => (
             <div key={days} style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-              <div style={{ width: '48px', height: '48px', backgroundColor: pct === 100 ? '#F5EDE4' : '#F9F9F9', color: pct === 100 ? '#8B5E3C' : '#191919', borderRadius: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold', flexShrink: 0 }}>{days}</div>
+              <div style={{ width: '48px', height: '48px', backgroundColor: pct === 100 ? '#F5EDE4' : '#F9F9F9', color: pct === 100 ? '#8B5E3C' : '#191919', borderRadius: '50px', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '14px', fontEweight: 'bold', flexShrink: 0 }}>{days}</div>
               <div style={{ flex: 1, height: '16px', backgroundColor: '#F9F9F9', borderRadius: '50px', overflow: 'hidden', display: 'flex' }}>
                 <div style={{ backgroundColor: '#D1D5DB', height: '100%', width: `${100 - pct}%` }}></div>
                 <div style={{ backgroundColor: '#8B5E3C', height: '100%', width: `${pct}%` }}></div>
@@ -286,9 +308,15 @@ export default function ProductDetailPage() {
             <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>Prices are estimates — check retailer for current price</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🛒 Amazon</a>
-            <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🐾 Chewy</a>
-            <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>📍 Find a store near me</a>
+            <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <ShoppingCart style={{ width: '18px', height: '18px' }} /> Amazon
+            </a>
+            <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Footprints style={{ width: '18px', height: '18px' }} /> Chewy
+            </a>
+            <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>
+              <MapPin style={{ width: '18px', height: '18px' }} /> Find a store near me
+            </a>
           </div>
         </div>
       </div>

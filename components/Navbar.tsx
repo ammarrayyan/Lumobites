@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 
 export default function Navbar() {
@@ -420,8 +420,8 @@ export default function Navbar() {
                   className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                 >
                   {isPro && (
-                    <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
-                      PRO ✅
+                    <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
+                      PRO <Check className="w-3 h-3 text-white stroke-[3]" />
                     </div>
                   )}
                   <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
@@ -518,8 +518,8 @@ export default function Navbar() {
                 className="flex items-center gap-2 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] px-3 py-1.5 rounded-full transition-all cursor-pointer select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               >
                 {isPro && (
-                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none">
-                    PRO ✅
+                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
+                    PRO <Check className="w-3 h-3 text-white stroke-[3]" />
                   </div>
                 )}
                 {!isPro && (
@@ -689,8 +689,8 @@ export default function Navbar() {
     </nav>
     {showPushBanner && (
       <div className="bg-gradient-to-r from-[#FFFBF5] to-[#FAF6F4] border-b border-[#E8D5C0] px-4 py-2 text-center flex items-center justify-center gap-3 animate-fade-in relative z-40">
-        <span className="text-xs text-[#8B5E3C] font-bold">
-          🔔 Enable notifications to get instant updates
+        <span className="text-xs text-[#8B5E3C] font-bold flex items-center gap-1.5">
+          <Bell className="w-4 h-4 text-[#8B5E3C] shrink-0" /> Enable notifications to get instant updates
         </span>
         <div className="flex items-center gap-2">
           <button
@@ -730,7 +730,9 @@ export default function Navbar() {
 
             {alreadyProMsg && (
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-center">
-                <p className="text-green-700 font-bold text-sm mb-1">✅ You are already a PRO member!</p>
+                <p className="text-green-700 font-bold text-sm mb-1 flex items-center justify-center gap-1">
+                  <Check className="w-4 h-4 text-green-700 stroke-[3]" /> You are already a PRO member!
+                </p>
                 <p className="text-green-600 text-xs">Sign in below to access your account.</p>
               </div>
             )}

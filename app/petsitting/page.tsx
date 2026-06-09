@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles } from 'lucide-react';
 
 
 export function formatSitterName(fullName) {
@@ -1889,8 +1889,8 @@ export default function PetSitting() {
           <div className="absolute top-0 left-0 w-1.5 h-full bg-[#8B5E3C]"></div>
           
           <div className="flex items-center gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform duration-300">
-              ✨
+            <div className="w-12 h-12 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+              <Sparkles className="w-6 h-6 text-[#8B5E3C]" />
             </div>
             <div>
               <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-1">
@@ -2004,10 +2004,10 @@ export default function PetSitting() {
                 onChange={(e) => { setSearchServiceType(e.target.value); fetchSitters(undefined, undefined, e.target.value); }}
               >
                 <option value="all">Any Service</option>
-                <option value="Home visits">🏠 Home visits</option>
-                <option value="Overnight stays">🌙 Overnight stays</option>
-                <option value="Dog walking">🚶 Dog walking</option>
-                <option value="Sitter's home boarding">🏡 Sitter's home boarding</option>
+                <option value="Home visits">Home visits</option>
+                <option value="Overnight stays">Overnight stays</option>
+                <option value="Dog walking">Dog walking</option>
+                <option value="Sitter's home boarding">Sitter's home boarding</option>
               </select>
             </div>
 
@@ -2022,9 +2022,13 @@ export default function PetSitting() {
                     Locating...
                   </span>
                 ) : searchLocationError ? (
-                  <span className="text-red-600 text-sm font-semibold">❌ {searchLocationError}</span>
+                  <span className="text-red-600 text-sm font-semibold flex items-center gap-1.5">
+                    <XCircle className="w-4 h-4 text-red-600" /> {searchLocationError}
+                  </span>
                 ) : searchLocationName ? (
-                  <span className="text-green-700 text-sm font-semibold">✅ {searchLocationName}</span>
+                  <span className="text-green-700 text-sm font-semibold flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4 text-green-700" /> {searchLocationName}
+                  </span>
                 ) : null}
               </div>
             )}
@@ -2060,7 +2064,7 @@ export default function PetSitting() {
                 <div className="w-16 h-16 bg-[#FAF6F4] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#E8DDD4]">
                   <MapPin className="w-8 h-8 text-[#8B5E3C]" />
                 </div>
-                <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Enter your city to find trusted pet sitters near you 🐾</h3>
+                <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Enter your city to find trusted pet sitters near you</h3>
                 <p className="text-[#8B7E7D] max-w-md mx-auto">
                   Type your city or zip code in the search bar above to see our network of local, loving sitters ready to help.
                 </p>
@@ -2117,7 +2121,7 @@ export default function PetSitting() {
                                )}
                                {sitter.completed_bookings && sitter.completed_bookings > 0 ? (
                                  <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-[#8B5E3C]/20">
-                                   🐾 {sitter.completed_bookings} {sitter.completed_bookings === 1 ? 'booking' : 'bookings'} completed
+                                   <Footprints className="w-3.5 h-3.5 inline mr-1" /> {sitter.completed_bookings} {sitter.completed_bookings === 1 ? 'booking' : 'bookings'} completed
                                  </div>
                                ) : null}
                              </div>
@@ -2234,7 +2238,7 @@ export default function PetSitting() {
               <div id="messages" />
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                  📋 Your Booking History
+                  <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking History
                 </h3>
                 {(ownerLastUpdated || loadingOwnerRequests) && (
                   <div className="flex items-center gap-2">
@@ -2252,9 +2256,9 @@ export default function PetSitting() {
                     <button
                       onClick={() => fetchOwnerRequests(reqEmail)}
                       disabled={loadingOwnerRequests || !reqEmail}
-                      className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-0.5 cursor-pointer disabled:opacity-50"
+                      className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                     >
-                      🔄 Refresh
+                      <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
                     </button>
                   </div>
                 )}
@@ -2298,12 +2302,12 @@ export default function PetSitting() {
 
                         const statusBadge = (() => {
                           switch (req.status) {
-                            case 'accepted':  return <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200">🟢 Accepted</span>;
-                            case 'completed': return <span className="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-200">🔵 Completed</span>;
-                            case 'declined':  return <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200">🔴 Declined</span>;
-                            case 'cancelled': return <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200">⚪ Cancelled</span>;
-                            case 'no_show':   return <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-full border border-orange-200">🟠 No Show</span>;
-                            default:          return <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">🟡 Pending</span>;
+                            case 'accepted':  return <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500 shrink-0" /> Accepted</span>;
+                            case 'completed': return <span className="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-200 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /> Completed</span>;
+                            case 'declined':  return <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500 shrink-0" /> Declined</span>;
+                            case 'cancelled': return <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-gray-400 shrink-0" /> Cancelled</span>;
+                            case 'no_show':   return <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-full border border-orange-200 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" /> No Show</span>;
+                            default:          return <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" /> Pending</span>;
                           }
                         })();
 
@@ -2358,7 +2362,7 @@ export default function PetSitting() {
                               <div>
                                 <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pet</p>
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-base">{req.pet_type === 'dog' ? '🐶' : '🐱'}</span>
+                                  <PawPrint className="w-4 h-4 text-[#8B5E3C] shrink-0" />
                                   <span className="font-semibold text-[#4A3E3D] text-sm">{req.pet_name}</span>
                                 </div>
                               </div>
@@ -2367,7 +2371,7 @@ export default function PetSitting() {
                                 <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Dates</p>
                                 <p className="text-[#4A3E3D] font-medium text-xs leading-snug">{req.dates}</p>
                                 {req.time_slot && (
-                                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase mt-1 inline-block">⏰ {req.time_slot}</span>
+                                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase mt-1 inline-flex items-center gap-1"><Clock className="w-3 h-3 text-[#8B5E3C]" /> {req.time_slot}</span>
                                 )}
                               </div>
 
@@ -2383,7 +2387,7 @@ export default function PetSitting() {
                                   onClick={() => { setActiveChatBooking(req); setActiveChatRole('owner'); setChatModalOpen(true); }}
                                   className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
                                 >
-                                  💬 Message Sitter
+                                  <MessageSquare className="w-4 h-4 text-white" /> Message Sitter
                                 </button>
                               </div>
                             )}
@@ -2513,7 +2517,7 @@ export default function PetSitting() {
                       <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
                       {completedBookings > 0 && (
                         <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
-                          🐾 {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
+                          <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
                         </div>
                       )}
                       <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
@@ -2585,7 +2589,7 @@ export default function PetSitting() {
                 {/* Sitter Availability Calendar Section */}
                 <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
                   <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
-                    📅 Manage Your Availability
+                    <Calendar className="w-5 h-5 text-[#8B5E3C] shrink-0" /> Manage Your Availability
                   </h3>
                   <p className="text-[#8B7E7D] text-xs mb-6">
                     Block out days you are unavailable. Your accepted bookings (shown in red) are automatically marked as busy.
@@ -2739,7 +2743,7 @@ export default function PetSitting() {
                     <div>
                       <div className="flex flex-wrap items-center gap-3 mb-2">
                         <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                          📋 Your Booking Requests
+                          <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking Requests
                         </h3>
                         {(sitterLastUpdated || loadingSitterRequests) && (
                           <div className="flex items-center gap-2">
@@ -2757,9 +2761,9 @@ export default function PetSitting() {
                             <button
                               onClick={() => fetchSitterRequests(sitterId)}
                               disabled={loadingSitterRequests}
-                              className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-0.5 cursor-pointer disabled:opacity-50"
+                              className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                             >
-                              🔄 Refresh
+                              <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
                             </button>
                           </div>
                         )}
@@ -2819,28 +2823,28 @@ export default function PetSitting() {
                               </span>
                               <div>
                                 {isAccepted && (
-                                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200">
-                                    🟢 Accepted
+                                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Accepted
                                   </span>
                                 )}
                                 {isCompleted && (
-                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200">
-                                    🔵 Completed
+                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Completed
                                   </span>
                                 )}
                                 {isDeclined && (
-                                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200">
-                                    🔴 Declined
+                                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Declined
                                   </span>
                                 )}
                                 {isCancelled && (
-                                  <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200">
-                                    ⚪ Cancelled
+                                  <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Cancelled
                                   </span>
                                 )}
                                 {isPending && (
-                                  <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse">
-                                    🟡 Pending
+                                  <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Pending
                                   </span>
                                 )}
                               </div>
@@ -2875,7 +2879,7 @@ export default function PetSitting() {
                             {isAccepted && (
                               <div className="text-xs bg-white p-3 rounded-xl border border-[#E8DDD4] flex flex-col sm:flex-row justify-between items-center gap-3">
                                 <div className="space-y-1">
-                                  <div className="font-bold text-[#3B2410] mb-0.5">💬 Message Owner</div>
+                                  <div className="font-bold text-[#3B2410] mb-0.5 flex items-center gap-1.5"><MessageSquare className="w-4 h-4 text-[#8B5E3C]" /> Message Owner</div>
                                   <div className="text-[#8B7E7D] text-[10px]">Communicate directly with the owner to coordinate details</div>
                                 </div>
                                 <button
@@ -3471,18 +3475,18 @@ export default function PetSitting() {
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-3">Service Types Offered</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      { val: 'Home visits', label: '🏠 Home visits (drop-in)' },
-                      { val: 'Overnight stays', label: '🌙 Overnight stays' },
-                      { val: 'Dog walking', label: '🦮 Dog walking' },
-                      { val: 'Sitter\'s home boarding', label: '🏠 Sitter\'s home boarding' },
-                      { val: 'Full day sitting', label: '☀️ Full day sitting (daycare)' }
+                      { val: 'Home visits', label: 'Home visits (drop-in)', icon: <Home className="w-4 h-4 text-[#8B5E3C]" /> },
+                      { val: 'Overnight stays', label: 'Overnight stays', icon: <Moon className="w-4 h-4 text-[#8B5E3C]" /> },
+                      { val: 'Dog walking', label: 'Dog walking', icon: <Footprints className="w-4 h-4 text-[#8B5E3C]" /> },
+                      { val: 'Sitter\'s home boarding', label: 'Sitter\'s home boarding', icon: <Home className="w-4 h-4 text-[#8B5E3C]" /> },
+                      { val: 'Full day sitting', label: 'Full day sitting (daycare)', icon: <Sun className="w-4 h-4 text-[#8B5E3C]" /> }
                     ].map(st => (
                       <label key={st.val} className="flex items-center gap-2 text-sm text-[#4A3E3D] cursor-pointer">
                         <input type="checkbox" checked={sitterServiceTypes.includes(st.val)} onChange={e => {
                           if (e.target.checked) setSitterServiceTypes([...sitterServiceTypes, st.val]);
                           else setSitterServiceTypes(sitterServiceTypes.filter(t => t !== st.val));
                         }} className="w-4 h-4 accent-[#8B5E3C]" />
-                        {st.label}
+                        <span className="flex items-center gap-1.5">{st.icon} {st.label}</span>
                       </label>
                     ))}
                   </div>
@@ -4040,28 +4044,28 @@ export default function PetSitting() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg">🚨</span>
+                  <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
                   <div>
                     <h5 className="font-bold text-xs text-[#4A3E3D]">Lost Pet Alerts</h5>
                     <p className="text-[11px] text-[#8B7E7D] leading-tight">Instant SMS & email neighborhood alerts</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg">🔍</span>
+                  <Search className="w-5 h-5 text-[#8B5E3C] shrink-0" />
                   <div>
                     <h5 className="font-bold text-xs text-[#4A3E3D]">Smart Pet Scanning</h5>
                     <p className="text-[11px] text-[#8B7E7D] leading-tight">Scan tools & interactive pet profiles</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg">💬</span>
+                  <MessageSquare className="w-5 h-5 text-[#8B5E3C] shrink-0" />
                   <div>
                     <h5 className="font-bold text-xs text-[#4A3E3D]">Direct Messaging</h5>
                     <p className="text-[11px] text-[#8B7E7D] leading-tight">Chat in real-time with local caretakers</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg">📚</span>
+                  <BookOpen className="w-5 h-5 text-[#8B5E3C] shrink-0" />
                   <div>
                     <h5 className="font-bold text-xs text-[#4A3E3D]">Premium Care Guides</h5>
                     <p className="text-[11px] text-[#8B7E7D] leading-tight">Exclusive pet nutrition & care resources</p>
@@ -4249,11 +4253,15 @@ export default function PetSitting() {
                   <div>
                     <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-2">Offered Services</h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedSitterForReviews.service_types?.map(st => (
-                        <span key={st} className="text-xs font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-xl border border-[#E8DDD4]">
-                          {st === 'Home visits' ? '🏠 Drop-in visits' : st === 'Overnight stays' ? '🌙 Overnight stays' : st === 'Dog walking' ? '🚶 Dog walking' : '🏡 Boarding'}
-                        </span>
-                      ))}
+                      {selectedSitterForReviews.service_types?.map(st => {
+                        const icon = st === 'Home visits' ? <Home className="w-3.5 h-3.5 shrink-0" /> : st === 'Overnight stays' ? <Moon className="w-3.5 h-3.5 shrink-0" /> : st === 'Dog walking' ? <Footprints className="w-3.5 h-3.5 shrink-0" /> : <Home className="w-3.5 h-3.5 shrink-0" />;
+                        const label = st === 'Home visits' ? 'Drop-in visits' : st === 'Overnight stays' ? 'Overnight stays' : st === 'Dog walking' ? 'Dog walking' : 'Boarding';
+                        return (
+                          <span key={st} className="text-xs font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-xl border border-[#E8DDD4] flex items-center gap-1.5">
+                            {icon} {label}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -4291,8 +4299,8 @@ export default function PetSitting() {
                     <p className="text-[#8B7E7D] text-xs">Loading reviews...</p>
                   </div>
                 ) : sitterReviews.length === 0 ? (
-                  <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] text-center shadow-sm">
-                    <span className="text-3xl mb-2 block">🐾</span>
+                  <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] text-center shadow-sm flex flex-col items-center justify-center">
+                    <Footprints className="w-8 h-8 text-gray-400 mb-2" />
                     <p className="text-[#8B7E7D] text-sm font-medium">No reviews yet for {formatSitterName(selectedSitterForReviews.name)}.</p>
                   </div>
                 ) : (

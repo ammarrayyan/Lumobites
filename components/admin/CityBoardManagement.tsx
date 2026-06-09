@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AlertTriangle, ThumbsUp } from 'lucide-react';
 
 interface CityBoardManagementProps {
   adminKey: string;
@@ -178,12 +179,12 @@ export default function CityBoardManagement({ adminKey, onUnauthorized }: CityBo
                     <span className="bg-[#c2e59c] text-black text-xs font-bold px-2 py-0.5 rounded">{post.post_id}</span>
                     <span className="text-[#555555] text-sm">{post.city} • {post.category}</span>
                     {isReported && (
-                      <span className="bg-red-500/20 text-red-600 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                        ⚠️ Reported ({post.report_count})
+                      <span className="bg-red-500/20 text-red-600 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 inline-flex">
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-600" /> Reported ({post.report_count})
                       </span>
                     )}
-                    <span className="text-[#191919] text-xs font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 ml-2">
-                      👍 {post.helpful_count || 0} helpful
+                    <span className="text-[#191919] text-xs font-semibold px-2 py-0.5 bg-gray-100 rounded border border-gray-200 ml-2 flex items-center gap-1 inline-flex">
+                      <ThumbsUp className="w-3.5 h-3.5 text-gray-700" /> {post.helpful_count || 0} helpful
                     </span>
                   </div>
                   <div className="text-xs text-gray-500">Device: {post.device_cookie} • {new Date(post.created_at).toLocaleString()}</div>

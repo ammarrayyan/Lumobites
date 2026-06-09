@@ -451,7 +451,7 @@ export default function ChatPage() {
           </div>
           {selectedBrand && (
             <div className="bg-[#8B5E3C] text-white py-1.5 px-4 text-[11px] font-bold text-center uppercase tracking-wider">
-               Finding the best {selectedBrand} products for your pet 🐾
+               Finding the best {selectedBrand} products for your pet
             </div>
           )}
           <div style={{ width: '100%', height: '4px', backgroundColor: '#F5EDE4', borderRadius: '100px', overflow: 'hidden' }}>
