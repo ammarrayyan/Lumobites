@@ -2236,158 +2236,108 @@ export default function PetSitting() {
                       No bookings found for this email address.
                     </div>
                   ) : (
-                    <div className="overflow-hidden border border-[#E8DDD4] rounded-2xl bg-[#FAF6F4]">
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                          <thead>
-                            <tr className="bg-[#E8DDD4]/20 border-b border-[#E8DDD4]">
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Booking #</th>
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Sitter</th>
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Pet</th>
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Dates</th>
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase">Status</th>
-                              <th className="p-3 text-xs font-bold text-[#4A3E3D] uppercase text-right">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#E8DDD4]/50">
-                            {ownerRequests.map((req) => (
-                              <React.Fragment key={req.id}>
-                                <tr className="hover:bg-white/50 transition-colors">
-                                  <td className="p-3 text-sm font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 4)}`}</td>
-                                  <td className="p-3 text-sm">
-                                    <div className="flex items-center gap-2">
-                                      {req.sitter_photo_url ? (
-                                        <img src={req.sitter_photo_url} alt={['accepted', 'completed'].includes(req.status) ? req.sitter_name : formatSitterName(req.sitter_name)} className="w-8 h-8 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
-                                      ) : (
-                                        <div className="w-8 h-8 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xs flex-shrink-0">
-                                          {formatSitterName(req.sitter_name).charAt(0)}
-                                        </div>
-                                      )}
-                                      <div className="font-bold text-[#4A3E3D]">{['accepted', 'completed'].includes(req.status) ? req.sitter_name : formatSitterName(req.sitter_name)}</div>
-                                    </div>
-                                  </td>
-                                  <td className="p-3 text-sm">
-                                    <span className="font-semibold text-[#4A3E3D]">{req.pet_name}</span>
-                                    <span className="ml-1.5 text-[10px] font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase">
-                                      {req.pet_type === 'dog' ? '🐶' : '🐱'}
-                                    </span>
-                                  </td>
-                                  <td className="p-3 text-sm text-[#8B7E7D]">
-                                    <div>{req.dates}</div>
-                                    {req.time_slot && (
-                                      <div className="text-[10px] font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase mt-1 inline-block">
-                                        ⏰ {req.time_slot}
-                                      </div>
-                                    )}
-                                  </td>
-                                  <td className="p-3 text-sm">
-                                    {req.status === 'accepted' ? (
-                                      <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200">
-                                        🟢 Accepted
-                                      </span>
-                                    ) : req.status === 'completed' ? (
-                                      <span className="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-200">
-                                        🔵 Completed
-                                      </span>
-                                    ) : req.status === 'declined' ? (
-                                      <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200">
-                                        🔴 Declined
-                                      </span>
-                                    ) : req.status === 'cancelled' ? (
-                                      <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200">
-                                        ⚪ Cancelled
-                                      </span>
-                                    ) : req.status === 'no_show' ? (
-                                      <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-full border border-orange-200">
-                                        🟠 No Show
-                                      </span>
-                                    ) : (
-                                      <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">
-                                        🟡 Pending
-                                      </span>
-                                    )}
-                                  </td>
-                                  <td className="p-3 text-sm text-right">
-                                    {(req.status === 'completed' || req.status === 'declined' || req.status === 'cancelled' || req.status === 'no_show') ? (
-                                      <button
-                                        onClick={() => handleRequestAgain(req)}
-                                        className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                      >
-                                        Request Again
-                                      </button>
-                                    ) : (() => {
-                                      const endDate = getBookingEndDate(req.dates);
-                                      const today = new Date();
-                                      today.setHours(0, 0, 0, 0);
-                                      const isAfterEndDate = endDate ? today > endDate : false;
+                    <div className="space-y-3">
+                      {ownerRequests.map((req) => {
+                        const sitterDisplayName = formatSitterName(req.sitters?.name || req.sitter_name);
+                        const endDate = getBookingEndDate(req.dates);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const isAfterEndDate = endDate ? today > endDate : false;
 
-                                      if (req.status === 'accepted' && isAfterEndDate) {
-                                        return (
-                                          <div className="flex gap-2 justify-end flex-wrap">
-                                            <button
-                                              onClick={() => handleConfirmCompletedByOwner(req)}
-                                              className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                            >
-                                              Confirm Completed
-                                            </button>
-                                            <button
-                                              onClick={() => handleReportNoShow(req)}
-                                              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                            >
-                                              Report No Show
-                                            </button>
-                                          </div>
-                                        );
-                                      }
+                        const statusBadge = (() => {
+                          switch (req.status) {
+                            case 'accepted':  return <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-1 rounded-full border border-green-200">🟢 Accepted</span>;
+                            case 'completed': return <span className="bg-blue-100 text-blue-700 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-200">🔵 Completed</span>;
+                            case 'declined':  return <span className="bg-red-100 text-red-700 font-bold text-xs px-2.5 py-1 rounded-full border border-red-200">🔴 Declined</span>;
+                            case 'cancelled': return <span className="bg-gray-100 text-gray-700 font-bold text-xs px-2.5 py-1 rounded-full border border-gray-200">⚪ Cancelled</span>;
+                            case 'no_show':   return <span className="bg-orange-100 text-orange-700 font-bold text-xs px-2.5 py-1 rounded-full border border-orange-200">🟠 No Show</span>;
+                            default:          return <span className="bg-yellow-100 text-yellow-700 font-bold text-xs px-2.5 py-1 rounded-full border border-yellow-200 animate-pulse">🟡 Pending</span>;
+                          }
+                        })();
 
-                                      return (
-                                        <div className="flex gap-2 justify-end flex-wrap">
-                                          <button
-                                            onClick={() => handleViewBooking(req)}
-                                            className="bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                          >
-                                            View Booking
-                                          </button>
-                                          {!isAfterEndDate && (
-                                            <button
-                                              onClick={() => handleCancelRequestByOwner(req.id)}
-                                              className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
-                                            >
-                                              Cancel Request
-                                            </button>
-                                          )}
-                                        </div>
-                                      );
-                                    })()}
-                                  </td>
-                                </tr>
-                                {req.status === 'accepted' && (
-                                  <tr className="bg-green-50/30">
-                                    <td colSpan={6} className="p-3 text-xs border-t border-b border-[#E8DDD4]/30">
-                                      <div className="bg-white p-3 rounded-xl border border-green-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                        <div>
-                                          <p className="font-bold text-[#3B2410] mb-1">💬 Message Sitter</p>
-                                          <p className="text-[#8B7E7D] text-[10px] mt-1">Communicate directly with your sitter to coordinate details</p>
-                                        </div>
-                                        <button
-                                          onClick={() => {
-                                            setActiveChatBooking(req);
-                                            setActiveChatRole('owner');
-                                            setChatModalOpen(true);
-                                          }}
-                                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
-                                        >
-                                          Message Sitter
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
+                        const actionButtons = (() => {
+                          if (['completed', 'declined', 'cancelled', 'no_show'].includes(req.status)) {
+                            return (
+                              <button onClick={() => handleRequestAgain(req)} className="w-full sm:w-auto bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">
+                                Request Again
+                              </button>
+                            );
+                          }
+                          if (req.status === 'accepted' && isAfterEndDate) {
+                            return (
+                              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                <button onClick={() => handleConfirmCompletedByOwner(req)} className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">Confirm Completed</button>
+                                <button onClick={() => handleReportNoShow(req)} className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">Report No Show</button>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                              <button onClick={() => handleViewBooking(req)} className="w-full sm:w-auto bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] border border-[#E8DDD4] text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">View Booking</button>
+                              {!isAfterEndDate && (
+                                <button onClick={() => handleCancelRequestByOwner(req.id)} className="w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">Cancel Request</button>
+                              )}
+                            </div>
+                          );
+                        })();
+
+                        return (
+                          <div key={req.id} className="bg-white border border-[#E8DDD4] rounded-2xl overflow-hidden shadow-sm">
+                            {/* Header: booking number + status */}
+                            <div className="flex items-center justify-between px-4 py-3 bg-[#FAF6F4] border-b border-[#E8DDD4]">
+                              <span className="text-xs font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 8)}`}</span>
+                              {statusBadge}
+                            </div>
+
+                            {/* Body: 2-col on mobile, 4-col on sm+ */}
+                            <div className="px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                              <div>
+                                <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Sitter</p>
+                                <div className="flex items-center gap-2">
+                                  {req.sitters?.photo_url || req.sitter_photo_url ? (
+                                    <img src={req.sitters?.photo_url || req.sitter_photo_url} alt={sitterDisplayName} className="w-7 h-7 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
+                                  ) : (
+                                    <div className="w-7 h-7 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xs flex-shrink-0">{sitterDisplayName.charAt(0)}</div>
+                                  )}
+                                  <span className="font-bold text-[#4A3E3D] text-sm leading-tight">{sitterDisplayName}</span>
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pet</p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-base">{req.pet_type === 'dog' ? '🐶' : '🐱'}</span>
+                                  <span className="font-semibold text-[#4A3E3D] text-sm">{req.pet_name}</span>
+                                </div>
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Dates</p>
+                                <p className="text-[#4A3E3D] font-medium text-xs leading-snug">{req.dates}</p>
+                                {req.time_slot && (
+                                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded uppercase mt-1 inline-block">⏰ {req.time_slot}</span>
                                 )}
-                              </React.Fragment>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                              </div>
+
+                              <div className="col-span-2 sm:col-span-1 flex items-center">
+                                {actionButtons}
+                              </div>
+                            </div>
+
+                            {/* Message Sitter CTA — full width, only on accepted */}
+                            {req.status === 'accepted' && (
+                              <div className="px-4 pb-4">
+                                <button
+                                  onClick={() => { setActiveChatBooking(req); setActiveChatRole('owner'); setChatModalOpen(true); }}
+                                  className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+                                >
+                                  💬 Message Sitter
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
