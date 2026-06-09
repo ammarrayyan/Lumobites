@@ -214,6 +214,8 @@ export default function PetSitting() {
   
   // Sitter Auth State
   const [sitterAuthMode, setSitterAuthMode] = useState<'email' | 'otp' | 'form'>('email');
+  const sitterAuthModeRef = useRef(sitterAuthMode);
+  sitterAuthModeRef.current = sitterAuthMode;
   const [sitterAuthCode, setSitterAuthCode] = useState('');
   const [sitterAuthLoading, setSitterAuthLoading] = useState(false);
   const [sitterAuthError, setSitterAuthError] = useState('');
@@ -259,6 +261,7 @@ export default function PetSitting() {
 
   useEffect(() => {
     const syncStatus = () => {
+      // 1. Owner / Pro status sync
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail.trim() !== '') {
         setReqEmail(cachedEmail);
@@ -269,9 +272,10 @@ export default function PetSitting() {
         setIsOwnerPro(false);
       }
 
-      // Restore sitter persistent session if valid
+      // 2. Restore/Sync sitter persistent session if valid
       const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
       const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
+
       if (cachedSitterEmail && cachedSitterEmail.trim() !== '') {
         let isSessionValid = true;
         if (cachedSitterExpiry) {
@@ -286,7 +290,12 @@ export default function PetSitting() {
           setSitterAuthMode('form');
           // Check if profile exists and load details
           fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch profile status');
+              }
+              return res.json();
+            })
             .then(profileData => {
               if (profileData && profileData.id) {
                 loadSitterProfile(cachedSitterEmail);
@@ -303,15 +312,16 @@ export default function PetSitting() {
           localStorage.removeItem('lumo_sitter_email');
           localStorage.removeItem('lumo_sitter_email_expiry');
           setSitterEmail('');
-          setSitterAuthMode('auth');
+          setSitterAuthMode('email');
           setProfilePreviewMode(false);
-          setSitterProfile(null);
         }
       } else {
-        setSitterEmail('');
-        setSitterAuthMode('auth');
-        setProfilePreviewMode(false);
-        setSitterProfile(null);
+        // Clear sitter mode if they logged out (i.e., we are currently in form view but storage is empty)
+        if (sitterAuthModeRef.current === 'form') {
+          setSitterEmail('');
+          setSitterAuthMode('email');
+          setProfilePreviewMode(false);
+        }
       }
     };
 
