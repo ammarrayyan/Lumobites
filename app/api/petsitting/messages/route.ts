@@ -136,13 +136,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Send fallback email
-    // Check if there are already unread messages from same sender in last 5 minutes — if yes skip email
+    // Check if there are already unread messages from same sender in last 5 minutes in this conversation — if yes skip email
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { data: existingUnread } = await supabaseAdmin
       .from('messages')
       .select('id')
+      .eq('booking_id', booking_id)
       .eq('sender_email', sender_email)
-      .eq('receiver_email', receiver_email)
       .eq('read', false)
       .neq('id', newMessage.id)
       .gt('created_at', fiveMinutesAgo)
@@ -157,12 +157,12 @@ export async function POST(request: NextRequest) {
           from: fromEmail,
           to: receiver_email,
           replyTo: sender_email,
-          subject: 'You have unread messages on Lumo Bites',
+          subject: 'You have a new message on Lumo Bites',
           html: brandedEmail({
-            subject: 'You have unread messages on Lumo Bites',
-            preheader: 'You have new messages about your booking.',
+            subject: 'You have a new message on Lumo Bites',
+            preheader: 'You have unread messages about your booking.',
             body: `
-              <p style="${emailStyles.p}">You have new messages about your booking — view them at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;text-decoration:underline;">lumobites.net/petsitting</a></p>
+              <p style="${emailStyles.p}">You have unread messages about your booking. View them at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;text-decoration:underline;">lumobites.net/petsitting</a></p>
               <br/>
               <div style="text-align:center;margin:32px 0;">
                 <a href="${origin}/petsitting" style="background-color:#8B5E3C;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">View Messages</a>
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         console.error('[Messages API] Email sending error:', emailErr);
       }
     } else {
-      console.log('[Messages API] Skipping email because there is already an unread message from same sender in last 5 minutes');
+      console.log('[Messages API] Skipping email because there is already an unread message in this conversation in last 5 minutes');
     }
 
     return NextResponse.json({ message: newMessage });
