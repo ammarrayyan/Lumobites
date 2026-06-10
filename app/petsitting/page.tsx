@@ -102,6 +102,7 @@ export default function PetSitting() {
   const [unlockEmail, setUnlockEmail] = useState('');
   const [unlockLoading, setUnlockLoading] = useState(false);
   const [searchZip, setSearchZip] = useState('');
+  const skipGeocodeRef = useRef(false);
   const [searchLocationName, setSearchLocationName] = useState('');
   const [searchLocationError, setSearchLocationError] = useState('');
   const [searchPetType, setSearchPetType] = useState('all');
@@ -570,6 +571,11 @@ export default function PetSitting() {
 
   // Debounced geocoding effect
   useEffect(() => {
+    if (skipGeocodeRef.current) {
+      skipGeocodeRef.current = false;
+      return;
+    }
+
     if (!searchZip.trim()) {
       setSearchCoords(null);
       setSearchLocationName('');
@@ -611,7 +617,47 @@ export default function PetSitting() {
     return () => clearTimeout(timeoutId);
   }, [searchZip]);
 
-
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      setIsGeocoding(true);
+      setSearchLocationError('');
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            const res = await fetch(`/api/petsitting/geocode?latlng=${lat},${lng}`);
+            const data = await res.json();
+            if (res.ok && data.lat && data.lng) {
+              const locationName = data.formatted_address || data.city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              skipGeocodeRef.current = true;
+              setSearchZip(locationName);
+              setSearchCoords({ lat: data.lat, lng: data.lng });
+              setSearchLocationName(locationName);
+              setSearchLocationError('');
+              if (sitters.length === 0) {
+                await fetchSitters();
+              }
+            } else {
+              setSearchLocationError('Could not determine your location name.');
+            }
+          } catch (e) {
+            console.error('Reverse geocoding error:', e);
+            setSearchLocationError('Failed to parse your location name.');
+          } finally {
+            setIsGeocoding(false);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setIsGeocoding(false);
+          alert('Unable to get your location. Please enter a city manually.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  };
 
   const fetchSitters = async (email?: string, dayOverride?: string, serviceOverride?: string) => {
     setLoadingSitters(true);
@@ -1949,7 +1995,7 @@ export default function PetSitting() {
           <div className="animate-fade-in">
             {/* Search Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col md:flex-row gap-4 relative">
-              <div className="flex-1 flex flex-col justify-center">
+              <div className="flex-1 flex gap-2">
                 <input
                   type="text"
                   placeholder="City or Zip Code (e.g. Louisville or 40202)"
@@ -1957,6 +2003,15 @@ export default function PetSitting() {
                   value={searchZip}
                   onChange={(e) => setSearchZip(e.target.value)}
                 />
+                <button
+                  onClick={handleUseMyLocation}
+                  type="button"
+                  className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0"
+                  title="Use my current location"
+                >
+                  <span>📍</span>
+                  <span className="hidden sm:inline">Use My Location</span>
+                </button>
               </div>
               <select
                 className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"

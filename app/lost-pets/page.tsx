@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -12,6 +12,7 @@ export default function LostPetsFeed() {
   const [loading, setLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState('');
+  const skipGeocodeRef = useRef(false);
   const [searchRadius, setSearchRadius] = useState('25');
   const [filterType, setFilterType] = useState('all');
   const [filterSpecies, setFilterSpecies] = useState('all');
@@ -22,6 +23,11 @@ export default function LostPetsFeed() {
 
 
   useEffect(() => {
+    if (skipGeocodeRef.current) {
+      skipGeocodeRef.current = false;
+      return;
+    }
+
     if (!searchQuery.trim()) {
       setSearchCoords(null);
       setLocationVerified(false);
@@ -57,6 +63,47 @@ export default function LostPetsFeed() {
     const delay = setTimeout(geocode, 600);
     return () => clearTimeout(delay);
   }, [searchQuery]);
+
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      setIsGeocoding(true);
+      setLocationVerified(false);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+            if (!apiKey) return;
+            const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              const locationName = data.results[0].formatted_address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              skipGeocodeRef.current = true;
+              setSearchQuery(locationName);
+              setSearchCoords({ lat, lng });
+              setSearchLocationName(locationName);
+              setLocationVerified(true);
+            } else {
+              alert('Could not determine your location name.');
+            }
+          } catch (e) {
+            console.error('Reverse geocoding error:', e);
+            alert('Failed to parse your location name.');
+          } finally {
+            setIsGeocoding(false);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setIsGeocoding(false);
+          alert('Unable to get your location. Please enter a city manually.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  };
 
   useEffect(() => {
     if (isGeocoding) return;
@@ -112,30 +159,41 @@ export default function LostPetsFeed() {
 
         {/* Unified Filter Bar — normal flow on all devices, stacks on mobile */}
         <div className="flex flex-col md:flex-row gap-4 bg-white border border-[#E8DDD4] rounded-2xl p-4 shadow-sm mb-8">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              placeholder="Search by city or zip code..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setLocationVerified(false);
-              }}
-              className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
-            />
-            {isGeocoding && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
-            )}
-            {locationVerified && !isGeocoding && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-              </div>
-            )}
-            {locationVerified && !isGeocoding && searchCoords && (
-               <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1 absolute -bottom-6 left-1">
-                 <Check className="w-4 h-4 text-green-600 stroke-[3]" /> {searchLocationName}
-               </p>
-            )}
+          <div className="flex-1 flex gap-2">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search by city or zip code..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setLocationVerified(false);
+                }}
+                className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
+              />
+              {isGeocoding && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+              )}
+              {locationVerified && !isGeocoding && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                </div>
+              )}
+              {locationVerified && !isGeocoding && searchCoords && (
+                 <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1 absolute -bottom-6 left-1">
+                   <Check className="w-4 h-4 text-green-600 stroke-[3]" /> {searchLocationName}
+                 </p>
+              )}
+            </div>
+            <button
+              onClick={handleUseMyLocation}
+              type="button"
+              className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0"
+              title="Use my current location"
+            >
+              <span>📍</span>
+              <span className="hidden sm:inline">Use My Location</span>
+            </button>
           </div>
           <select
             value={searchRadius}

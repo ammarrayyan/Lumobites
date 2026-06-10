@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const address = request.nextUrl.searchParams.get('address');
+  const latlng = request.nextUrl.searchParams.get('latlng');
   
-  if (!address) {
-    return NextResponse.json({ error: 'Address is required' }, { status: 400 });
+  if (!address && !latlng) {
+    return NextResponse.json({ error: 'Address or latlng is required' }, { status: 400 });
   }
 
   // We prioritize the dedicated Maps key if provided, otherwise fallback to vision key
@@ -15,12 +16,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=us&key=${apiKey}`;
+    let url = '';
+    if (latlng) {
+      url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(latlng)}&key=${apiKey}`;
+    } else {
+      url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address || '')}&region=us&key=${apiKey}`;
+    }
+    
     let res = await fetch(url);
     let data = await res.json();
 
     // Fallback if ZERO_RESULTS and it looks like a US zip code (5 digits)
-    if (data.status === 'ZERO_RESULTS' && /^\d{5}$/.test(address.trim())) {
+    if (!latlng && address && data.status === 'ZERO_RESULTS' && /^\d{5}$/.test(address.trim())) {
       url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address + ' USA')}&key=${apiKey}`;
       res = await fetch(url);
       data = await res.json();
@@ -28,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     if (data.status === 'OK' && data.results && data.results.length > 0) {
       const resultTypes = data.results[0].types || [];
-      if (resultTypes.includes('administrative_area_level_1') || resultTypes.includes('country') || resultTypes.includes('administrative_area_level_2')) {
+      if (!latlng && address && (resultTypes.includes('administrative_area_level_1') || resultTypes.includes('country') || resultTypes.includes('administrative_area_level_2'))) {
         return NextResponse.json({ 
           error: `Please enter a specific city or zip code for better results — for example 'Louisville' instead of '${address}'`
         }, { status: 400 });
