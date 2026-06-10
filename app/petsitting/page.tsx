@@ -1999,14 +1999,14 @@ export default function PetSitting() {
                 <input
                   type="text"
                   placeholder="City or Zip Code (e.g. Louisville or 40202)"
-                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                  className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                   value={searchZip}
                   onChange={(e) => setSearchZip(e.target.value)}
                 />
                 <button
                   onClick={handleUseMyLocation}
                   type="button"
-                  className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0"
+                  className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm"
                   title="Use my current location"
                 >
                   <span>📍</span>
