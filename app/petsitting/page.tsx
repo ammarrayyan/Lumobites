@@ -2235,6 +2235,7 @@ export default function PetSitting() {
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}
+                    searchRadius={searchRadius}
                     onSelectSitter={handleSelectSitterFromMap}
                     highlightedSitterId={highlightedSitterId}
                   />

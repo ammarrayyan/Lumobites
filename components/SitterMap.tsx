@@ -18,6 +18,7 @@ export interface MapSitter {
 interface SitterMapProps {
   sitters: MapSitter[];
   searchCoords?: { lat: number, lng: number } | null;
+  searchRadius?: string | number | null;
   onSelectSitter: (sitter: MapSitter) => void;
   highlightedSitterId?: string | null;
 }
@@ -45,7 +46,42 @@ function MapHandler({ searchCoords }: { searchCoords?: { lat: number, lng: numbe
   return null;
 }
 
-export default function SitterMap({ sitters, searchCoords, onSelectSitter, highlightedSitterId }: SitterMapProps) {
+function MapCircleHandler({
+  searchCoords,
+  searchRadius
+}: {
+  searchCoords?: { lat: number, lng: number } | null;
+  searchRadius?: string | number | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !searchCoords) return;
+
+    const distanceInMiles = typeof searchRadius === 'string' ? parseFloat(searchRadius) : (searchRadius || 0);
+    if (isNaN(distanceInMiles) || distanceInMiles <= 0) return;
+
+    const circle = new google.maps.Circle({
+      strokeColor: "#8B5E3C",
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: "#8B5E3C",
+      fillOpacity: 0.12,
+      map: map,
+      center: { lat: searchCoords.lat, lng: searchCoords.lng },
+      radius: distanceInMiles * 1609.34,
+      clickable: false
+    });
+
+    return () => {
+      circle.setMap(null);
+    };
+  }, [map, searchCoords, searchRadius]);
+
+  return null;
+}
+
+export default function SitterMap({ sitters, searchCoords, searchRadius, onSelectSitter, highlightedSitterId }: SitterMapProps) {
   const [isClient, setIsClient] = useState(false);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
@@ -87,6 +123,7 @@ export default function SitterMap({ sitters, searchCoords, onSelectSitter, highl
           className="w-full h-full"
         >
           <MapHandler searchCoords={searchCoords} />
+          <MapCircleHandler searchCoords={searchCoords} searchRadius={searchRadius} />
           {sitters.map((sitter) => {
             if (!sitter.lat || !sitter.lng) return null;
             const isHighlighted = highlightedSitterId === sitter.id;

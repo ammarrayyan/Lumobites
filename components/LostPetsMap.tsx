@@ -23,6 +23,7 @@ export interface MapPet {
 interface LostPetsMapProps {
   pets: MapPet[];
   searchCoords?: { lat: number, lng: number } | null;
+  searchRadius?: string | number | null;
 }
 
 const getMarkerIcon = (type: string, status: string) => {
@@ -52,7 +53,42 @@ function MapHandler({ searchCoords }: { searchCoords?: { lat: number, lng: numbe
   return null;
 }
 
-export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
+function MapCircleHandler({
+  searchCoords,
+  searchRadius
+}: {
+  searchCoords?: { lat: number, lng: number } | null;
+  searchRadius?: string | number | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !searchCoords) return;
+
+    const distanceInMiles = typeof searchRadius === 'string' ? parseFloat(searchRadius) : (searchRadius || 0);
+    if (isNaN(distanceInMiles) || distanceInMiles <= 0) return;
+
+    const circle = new google.maps.Circle({
+      strokeColor: "#8B5E3C",
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: "#8B5E3C",
+      fillOpacity: 0.12,
+      map: map,
+      center: { lat: searchCoords.lat, lng: searchCoords.lng },
+      radius: distanceInMiles * 1609.34,
+      clickable: false
+    });
+
+    return () => {
+      circle.setMap(null);
+    };
+  }, [map, searchCoords, searchRadius]);
+
+  return null;
+}
+
+export default function LostPetsMap({ pets, searchCoords, searchRadius }: LostPetsMapProps) {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [activePet, setActivePet] = useState<MapPet | null>(null);
@@ -96,6 +132,7 @@ export default function LostPetsMap({ pets, searchCoords }: LostPetsMapProps) {
           className="w-full h-full"
         >
           <MapHandler searchCoords={searchCoords} />
+          <MapCircleHandler searchCoords={searchCoords} searchRadius={searchRadius} />
           {pets.map((pet) => {
             if (!pet.latitude || !pet.longitude) return null;
             return (
