@@ -1994,82 +1994,89 @@ export default function PetSitting() {
         {activeTab === 'find' && (
           <div className="animate-fade-in">
             {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col md:flex-row gap-4 relative">
-              <div className="flex-1 flex gap-2">
-                <input
-                  type="text"
-                  placeholder="City or Zip Code (e.g. Louisville or 40202)"
-                  className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                  value={searchZip}
-                  onChange={(e) => setSearchZip(e.target.value)}
-                />
-                <button
-                  onClick={handleUseMyLocation}
-                  type="button"
-                  className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm"
-                  title="Use my current location"
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
+              {/* Row 1: Location & Search Radius */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="City or Zip Code (e.g. Louisville or 40202)"
+                    className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                    value={searchZip}
+                    onChange={(e) => setSearchZip(e.target.value)}
+                  />
+                  <button
+                    onClick={handleUseMyLocation}
+                    type="button"
+                    className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm"
+                    title="Use my current location"
+                  >
+                    <span>📍</span>
+                    <span className="hidden sm:inline">Use My Location</span>
+                  </button>
+                </div>
+                <select
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] md:w-64 shrink-0"
+                  value={searchRadius}
+                  onChange={(e) => setSearchRadius(e.target.value)}
                 >
-                  <span>📍</span>
-                  <span className="hidden sm:inline">Use My Location</span>
-                </button>
+                  <option value="10">Within 10 miles</option>
+                  <option value="25">Within 25 miles</option>
+                  <option value="50">Within 50 miles</option>
+                  <option value="100">Within 100 miles</option>
+                  <option value="any">Any distance</option>
+                </select>
               </div>
-              <select
-                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchRadius}
-                onChange={(e) => setSearchRadius(e.target.value)}
-              >
-                <option value="10">Within 10 miles</option>
-                <option value="25">Within 25 miles</option>
-                <option value="50">Within 50 miles</option>
-                <option value="100">Within 100 miles</option>
-                <option value="any">Any distance</option>
-              </select>
-              <select
-                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchPetType}
-                onChange={(e) => setSearchPetType(e.target.value)}
-              >
-                <option value="all">All Pets</option>
-                <option value="dog">Dogs Only</option>
-                <option value="cat">Cats Only</option>
-              </select>
-              <select
-                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchDay}
-                onChange={(e) => { setSearchDay(e.target.value); fetchSitters(undefined, e.target.value, undefined); }}
-              >
-                <option value="all">Any Day</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-                <option value="Sunday">Sunday</option>
-              </select>
-              <select
-                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchTimeSlot}
-                onChange={(e) => setSearchTimeSlot(e.target.value)}
-              >
-                <option value="">All Time Slots</option>
-                <option value="Morning (8am - 12pm)">Morning (8am - 12pm)</option>
-                <option value="Afternoon (12pm - 5pm)">Afternoon (12pm - 5pm)</option>
-                <option value="Evening (5pm - 9pm)">Evening (5pm - 9pm)</option>
-                <option value="Full Day (8am - 9pm)">Full Day (8am - 9pm)</option>
-                <option value="Overnight (9pm - 8am)">Overnight (9pm - 8am)</option>
-              </select>
-              <select
-                className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                value={searchServiceType}
-                onChange={(e) => { setSearchServiceType(e.target.value); fetchSitters(undefined, undefined, e.target.value); }}
-              >
-                <option value="all">Any Service</option>
-                <option value="Home visits">Home visits</option>
-                <option value="Overnight stays">Overnight stays</option>
-                <option value="Dog walking">Dog walking</option>
-                <option value="Sitter's home boarding">Sitter's home boarding</option>
-              </select>
+
+              {/* Row 2: Detailed Filters in Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <select
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  value={searchPetType}
+                  onChange={(e) => setSearchPetType(e.target.value)}
+                >
+                  <option value="all">All Pets</option>
+                  <option value="dog">Dogs Only</option>
+                  <option value="cat">Cats Only</option>
+                </select>
+                <select
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  value={searchDay}
+                  onChange={(e) => { setSearchDay(e.target.value); fetchSitters(undefined, e.target.value, undefined); }}
+                >
+                  <option value="all">Any Day</option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+                <select
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  value={searchTimeSlot}
+                  onChange={(e) => setSearchTimeSlot(e.target.value)}
+                >
+                  <option value="">All Time Slots</option>
+                  <option value="Morning (8am - 12pm)">Morning (8am - 12pm)</option>
+                  <option value="Afternoon (12pm - 5pm)">Afternoon (12pm - 5pm)</option>
+                  <option value="Evening (5pm - 9pm)">Evening (5pm - 9pm)</option>
+                  <option value="Full Day (8am - 9pm)">Full Day (8am - 9pm)</option>
+                  <option value="Overnight (9pm - 8am)">Overnight (9pm - 8am)</option>
+                </select>
+                <select
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  value={searchServiceType}
+                  onChange={(e) => { setSearchServiceType(e.target.value); fetchSitters(undefined, undefined, e.target.value); }}
+                >
+                  <option value="all">Any Service</option>
+                  <option value="Home visits">Home visits</option>
+                  <option value="Overnight stays">Overnight stays</option>
+                  <option value="Dog walking">Dog walking</option>
+                  <option value="Sitter's home boarding">Sitter's home boarding</option>
+                </select>
+              </div>
             </div>
 
             <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
