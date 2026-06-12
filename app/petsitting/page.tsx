@@ -61,6 +61,57 @@ function getDistanceInMiles(lat1: number, lon1: number, lat2: number, lon2: numb
 export default function PetSitting() {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
 
+  // Report Modal State
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTargetEmail, setReportTargetEmail] = useState('');
+  const [reportTargetType, setReportTargetType] = useState<'sitter' | 'user'>('sitter');
+  const [reportBookingId, setReportBookingId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState('Inappropriate behavior');
+  const [reportDetails, setReportDetails] = useState('');
+  const [reportLoading, setReportLoading] = useState(false);
+
+  const handleOpenReportModal = (email: string, type: 'sitter' | 'user', bookingId?: string) => {
+    setReportTargetEmail(email);
+    setReportTargetType(type);
+    setReportBookingId(bookingId || null);
+    setReportReason('Inappropriate behavior');
+    setReportDetails('');
+    setReportModalOpen(true);
+  };
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportTargetEmail) return;
+    setReportLoading(true);
+    try {
+      const reporter = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || 'anonymous@lumobites.com';
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reporter_email: reporter,
+          reported_email: reportTargetEmail,
+          reported_type: reportTargetType,
+          booking_id: reportBookingId,
+          reason: reportReason,
+          details: reportDetails
+        })
+      });
+      if (res.ok) {
+        alert('Thank you. Your report has been submitted for admin review.');
+        setReportModalOpen(false);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to submit report. Please try again.');
+      }
+    } catch (err) {
+      console.error('[Submit Report] Error:', err);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const inviteMessageText = "Hey! I just signed up as a pet sitter on Lumo Bites — a free platform where you can earn money sitting pets in your neighborhood. No commission ever! Check it out and create your profile: lumobites.net/petsitting";
 
   const handleCopyMessage = () => {
@@ -2270,21 +2321,32 @@ export default function PetSitting() {
                         </div>
 
                         {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isOwnerPro) {
-                                setUnlockModalOpen(true);
-                              } else {
-                                setSelectedSitter(sitter);
-                                setRequestModalOpen(true);
-                              }
-                            }}
-                            className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
-                            <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
-                          </button>
+                          <div className="mt-3 flex flex-col gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isOwnerPro) {
+                                  setUnlockModalOpen(true);
+                                } else {
+                                  setSelectedSitter(sitter);
+                                  setRequestModalOpen(true);
+                                }
+                              }}
+                              className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
+                              <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenReportModal(sitter.email, 'sitter');
+                              }}
+                              className="w-full bg-transparent hover:bg-red-50 text-red-600 border border-red-150 hover:border-red-200 font-semibold py-2 rounded-xl transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              ⚠️ Report this sitter
+                            </button>
+                          </div>
                         )}
                       </div>
                     ))}
@@ -4467,7 +4529,79 @@ export default function PetSitting() {
           }}
           currentUserEmail={activeChatRole === 'owner' ? (activeChatBooking.owner_email || reqEmail) : (sitterEmail || activeChatBooking.sitters?.email || activeChatBooking.sitter_email || localStorage.getItem('lumo_sitter_email') || '')}
           otherUserName={activeChatRole === 'owner' ? formatSitterName(activeChatBooking.sitters?.name || activeChatBooking.sitter_name) : (activeChatBooking.owner_name || 'Owner')}
+          otherUserEmail={activeChatRole === 'owner' ? (activeChatBooking.sitters?.email || activeChatBooking.sitter_email || '') : (activeChatBooking.owner_email || '')}
+          otherUserType={activeChatRole === 'owner' ? 'sitter' : 'user'}
+          onReport={(email, type) => {
+            setChatModalOpen(false);
+            handleOpenReportModal(email, type, activeChatBooking.id);
+          }}
         />
+      )}
+
+      {/* Report Modal */}
+      {reportModalOpen && (
+        <div className="modal-overlay fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
+            <button 
+              onClick={() => setReportModalOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-250 text-gray-500 transition-colors border-none cursor-pointer"
+            >
+              <XCircle className="w-5 h-5 text-gray-500" />
+            </button>
+
+            <h2 className="text-2xl font-bold text-[#3B2410] mb-2 text-center flex items-center justify-center gap-2">
+              <span>⚠️ Report {reportTargetType === 'sitter' ? 'Sitter' : 'User'}</span>
+            </h2>
+            <p className="text-center text-[#8B7E7D] text-xs mb-6 truncate font-medium">
+              Target: {reportTargetEmail}
+            </p>
+
+            <form onSubmit={handleSubmitReport} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[#4A3E3D] uppercase mb-1.5">Reason for Report</label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-sm focus:outline-none focus:border-[#8B5E3C] text-gray-800 font-medium"
+                >
+                  <option value="Inappropriate behavior">Inappropriate behavior</option>
+                  <option value="No-show">No-show</option>
+                  <option value="Unsafe">Unsafe</option>
+                  <option value="Harassment">Harassment</option>
+                  <option value="Spam/abuse">Spam/abuse</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#4A3E3D] text-xs font-bold uppercase mb-1.5">Optional Details</label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Provide any additional details or context..."
+                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-sm h-28 resize-none focus:outline-none focus:border-[#8B5E3C] text-gray-800"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="submit"
+                  disabled={reportLoading}
+                  className="w-full bg-red-650 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm disabled:opacity-50 cursor-pointer border-none"
+                >
+                  {reportLoading ? 'Submitting...' : 'Submit Report'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportModalOpen(false)}
+                  className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#4A3E3D] font-bold py-3 rounded-xl transition-colors border border-[#E8DDD4]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
     </div>

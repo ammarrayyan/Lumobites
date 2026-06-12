@@ -41,6 +41,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You cannot request yourself as a sitter' }, { status: 400 });
     }
 
+    // Rate Limiting: Limit booking requests to max 5 pending requests per owner at once
+    const { count: pendingCount, error: pendingError } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_email', cleanEmail)
+      .eq('status', 'pending');
+
+    if (pendingError) {
+      console.error('[Request POST] Pending count check error:', pendingError);
+    } else if (pendingCount !== null && pendingCount >= 5) {
+      return NextResponse.json({ error: 'You have too many pending requests. Please wait for responses before sending more.' }, { status: 400 });
+    }
+
     // Validation: Check if requested time slot is in sitter's available times
     if (time_slot) {
       const sitterAvailable = sitter.available_times || [];

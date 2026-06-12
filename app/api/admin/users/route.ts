@@ -59,3 +59,39 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { email, status } = body; // status can be 'active', 'suspended', 'banned'
+
+    if (!email || !status) {
+      return NextResponse.json({ error: 'Email and status are required' }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    // 1. Update emails table
+    const { error: emailsErr } = await supabaseAdmin
+      .from('emails')
+      .update({ account_status: status })
+      .eq('email', cleanEmail);
+
+    if (emailsErr) throw emailsErr;
+
+    // 2. Also update sitters table if sitter profile exists
+    await supabaseAdmin
+      .from('sitters')
+      .update({ account_status: status })
+      .eq('email', cleanEmail);
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('[Admin Users PUT]', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

@@ -54,7 +54,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Code expired — please request a new one' }, { status: 400 });
     }
 
-    // 3. Mark successful login by clearing the code
+    // 3. Check account status of sitter (or owner)
+    const { data: sitterData } = await supabaseAdmin
+      .from('sitters')
+      .select('account_status')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (sitterData && (sitterData.account_status === 'suspended' || sitterData.account_status === 'banned')) {
+      return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
+    }
+
+    const { data: ownerData } = await supabaseAdmin
+      .from('emails')
+      .select('account_status')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (ownerData && (ownerData.account_status === 'suspended' || ownerData.account_status === 'banned')) {
+      return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
+    }
+
+    // 4. Mark successful login by clearing the code
     await supabaseAdmin.from('verification_codes').delete().eq('id', codeData.id);
     if (recentLog) {
       await supabaseAdmin.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);

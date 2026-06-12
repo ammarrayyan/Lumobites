@@ -24,13 +24,17 @@ export async function POST(request: NextRequest) {
     if (!isOwner) {
       const { data: userData, error: userError } = await supabase
         .from('emails')
-        .select('is_pro')
+        .select('is_pro, account_status')
         .eq('email', cleanEmail)
         .maybeSingle();
 
       if (userError) {
         console.error('[Send Code API] Supabase error fetching user status:', userError);
         return NextResponse.json({ error: 'Failed to retrieve subscription status' }, { status: 500 });
+      }
+
+      if (userData?.account_status === 'suspended' || userData?.account_status === 'banned') {
+        return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
       }
 
       if (userData && userData.is_pro) {

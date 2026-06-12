@@ -30,12 +30,16 @@ export async function POST(request: NextRequest) {
 
     const { data: existingUser, error: dbError } = await supabase
       .from('emails')
-      .select('is_pro')
+      .select('is_pro, account_status')
       .eq('email', cleanEmail)
       .maybeSingle();
 
     if (dbError) {
       console.error('[Stripe Checkout API] Supabase check error:', dbError);
+    }
+
+    if (existingUser?.account_status === 'suspended' || existingUser?.account_status === 'banned') {
+      return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
     }
 
     if (existingUser?.is_pro) {

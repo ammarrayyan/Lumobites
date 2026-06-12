@@ -43,6 +43,43 @@ export async function GET(request: NextRequest) {
       return new NextResponse('<h1>Database update failed</h1>', { status: 500, headers: { 'Content-Type': 'text/html' } });
     }
 
+    // Auto-flag pattern detection check: declined by 3+ different sitters in the last 30 days
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: recentDeclines, error: declinesError } = await supabaseAdmin
+        .from('sitting_requests')
+        .select('sitter_id')
+        .eq('owner_email', reqRow.owner_email)
+        .eq('status', 'declined')
+        .gt('created_at', thirtyDaysAgo);
+
+      if (!declinesError && recentDeclines) {
+        const uniqueSitters = new Set(recentDeclines.map(d => d.sitter_id));
+        if (uniqueSitters.size >= 3) {
+          // 1. Flag owner account status
+          await supabaseAdmin
+            .from('emails')
+            .update({ account_status: 'flagged' })
+            .eq('email', reqRow.owner_email);
+
+          // 2. Create automated report
+          await supabaseAdmin
+            .from('reports')
+            .insert({
+              reporter_email: 'system@lumobites.com',
+              reported_email: reqRow.owner_email,
+              reported_type: 'user',
+              booking_id: id,
+              reason: 'Auto-flagged: multiple declines',
+              details: `User was declined by ${uniqueSitters.size} different sitters in the last 30 days.`,
+              status: 'pending'
+            });
+        }
+      }
+    } catch (patternErr) {
+      console.error('[Decline Request] Auto-flag pattern detection error:', patternErr);
+    }
+
     // 4. Fetch sitter info
     const { data: sitter } = await supabase
       .from('sitters')

@@ -11,12 +11,13 @@ import CityBoardManagement from '@/components/admin/CityBoardManagement';
 import RequestsManagement from '@/components/admin/RequestsManagement';
 import TwinGalleryManagement from '@/components/admin/TwinGalleryManagement';
 import AffiliatesManagement from '@/components/admin/AffiliatesManagement';
+import ReportsManagement from '@/components/admin/ReportsManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -26,6 +27,24 @@ export default function AdminPage() {
       setIsAuthenticated(true);
     }
   }, []);
+
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetch('/api/reports', {
+        headers: { 'x-admin-key': password }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.reports) {
+          const pending = data.reports.filter((r: any) => r.status === 'pending').length;
+          setPendingReportsCount(pending);
+        }
+      })
+      .catch(err => console.error('Failed to fetch reports count:', err));
+    }
+  }, [isAuthenticated, activeTab, password]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,6 +200,21 @@ export default function AdminPage() {
           >
             Affiliates
           </button>
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`flex-grow-0 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5 ${
+              activeTab === 'reports'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            Reports
+            {pendingReportsCount > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                {pendingReportsCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -194,6 +228,7 @@ export default function AdminPage() {
           {activeTab === 'city-board' && <CityBoardManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'twin-gallery' && <TwinGalleryManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'affiliates' && <AffiliatesManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'reports' && <ReportsManagement adminKey={password} onUnauthorized={handleLogout} />}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { supabase } from '@/lib/supabase';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -18,6 +19,19 @@ export async function POST(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required to checkout.' }, { status: 400 });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Check if banned/suspended Sitter
+    const { data: sitterData } = await supabase
+      .from('sitters')
+      .select('account_status')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (sitterData?.account_status === 'suspended' || sitterData?.account_status === 'banned') {
+      return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
     }
 
     // 1. Get or create product

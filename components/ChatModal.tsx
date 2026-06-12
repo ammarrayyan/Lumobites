@@ -28,6 +28,9 @@ interface ChatModalProps {
   currentUserEmail: string;
   otherUserName: string;
   bookingDetails: string;
+  otherUserEmail: string;
+  otherUserType: 'sitter' | 'user';
+  onReport: (email: string, type: 'sitter' | 'user') => void;
 }
 
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
@@ -69,6 +72,9 @@ export default function ChatModal({
   currentUserEmail,
   otherUserName,
   bookingDetails,
+  otherUserEmail,
+  otherUserType,
+  onReport,
 }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -205,7 +211,16 @@ export default function ChatModal({
 
           {/* Action icons */}
           <div className="flex items-center gap-1">
-            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
+            {otherUserEmail && (
+              <button 
+                onClick={() => onReport(otherUserEmail, otherUserType)} 
+                title={`Report ${displayName}`}
+                className="w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center text-red-500 transition-colors mr-1 cursor-pointer"
+              >
+                <span className="text-xs">⚠️</span>
+              </button>
+            )}
+            <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors cursor-pointer">
               <X size={18} />
             </button>
           </div>
