@@ -221,7 +221,6 @@ export default function LostPetsFeed() {
             <option value="25">Within 25 miles</option>
             <option value="50">Within 50 miles</option>
             <option value="100">Within 100 miles</option>
-            <option value="any">Any distance</option>
           </select>
           <select
             value={filterType}
