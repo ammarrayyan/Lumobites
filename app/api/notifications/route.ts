@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 });
     }
 
-    const { data: notifications, error } = await supabase
+    const { data: notifications, error } = await supabaseAdmin
       .from('notifications')
       .select('*')
       .eq('recipient_email', email)
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Missing email for mark all as read' }, { status: 400 });
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read: true })
         .eq('recipient_email', email)
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Missing notification id' }, { status: 400 });
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read: true })
         .eq('id', id);

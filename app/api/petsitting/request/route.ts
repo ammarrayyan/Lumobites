@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
@@ -172,15 +172,18 @@ export async function POST(request: NextRequest) {
 
     // Notification
     try {
-      await supabase.from('notifications').insert({
+      const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
         recipient_email: sitter.email,
         type: 'booking_request',
         title: 'New Booking Request! 🎉',
         message: `New booking request for ${pet_name}`,
         link: '/petsitting#sitter-dashboard'
       });
+      if (notifErr) {
+        console.error('[PetSitting Request] Notification insert error:', notifErr);
+      }
     } catch (err) {
-      console.error('[PetSitting Request] Notification error:', err);
+      console.error('[PetSitting Request] Notification exception:', err);
     }
 
     try {

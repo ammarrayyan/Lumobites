@@ -76,15 +76,18 @@ export async function POST(request: NextRequest) {
       const sitterName = formatSitterName(sitter?.name);
       
       try {
-        await supabaseAdmin.from('notifications').insert({
+        const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
           recipient_email: reqRow.owner_email,
           type: 'booking_completed',
           title: 'Booking Completed 🎉',
           message: `Your booking with ${sitterName} is complete`,
           link: '/petsitting#owner-history'
         });
+        if (notifErr) {
+          console.error('[Complete Booking] Notification insert error:', notifErr);
+        }
       } catch (err) {
-        console.error('[Complete Booking] Notification error:', err);
+        console.error('[Complete Booking] Notification exception:', err);
       }
 
       try {

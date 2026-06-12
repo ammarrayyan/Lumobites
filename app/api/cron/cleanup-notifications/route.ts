@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
     // 2. Delete notifications where read = true AND created_at < 30 days ago
-    const { error: readError, count: readCount } = await supabase
+    const { error: readError, count: readCount } = await supabaseAdmin
       .from('notifications')
       .delete({ count: 'exact' })
       .eq('read', true)
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Delete notifications where read = false AND created_at < 90 days ago
-    const { error: unreadError, count: unreadCount } = await supabase
+    const { error: unreadError, count: unreadCount } = await supabaseAdmin
       .from('notifications')
       .delete({ count: 'exact' })
       .eq('read', false)

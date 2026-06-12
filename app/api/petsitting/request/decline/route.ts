@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
@@ -54,15 +54,18 @@ export async function GET(request: NextRequest) {
 
     // Notification
     try {
-      await supabase.from('notifications').insert({
+      const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
         recipient_email: reqRow.owner_email,
         type: 'booking_declined',
         title: 'Booking Declined',
         message: `${sitterNameStr} declined your booking for ${reqRow.pet_name}`,
         link: '/petsitting#owner-history'
       });
+      if (notifErr) {
+        console.error('[Decline Request] Notification insert error:', notifErr);
+      }
     } catch (err) {
-      console.error('[Decline Request] Notification error:', err);
+      console.error('[Decline Request] Notification exception:', err);
     }
 
     try {
