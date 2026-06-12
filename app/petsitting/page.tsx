@@ -66,14 +66,16 @@ export default function PetSitting() {
   const [reportTargetEmail, setReportTargetEmail] = useState('');
   const [reportTargetType, setReportTargetType] = useState<'sitter' | 'user'>('sitter');
   const [reportBookingId, setReportBookingId] = useState<string | null>(null);
+  const [reportSitterId, setReportSitterId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('Inappropriate behavior');
   const [reportDetails, setReportDetails] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
 
-  const handleOpenReportModal = (email: string, type: 'sitter' | 'user', bookingId?: string) => {
-    setReportTargetEmail(email);
+  const handleOpenReportModal = (email: string, type: 'sitter' | 'user', bookingId?: string, sitterId?: string) => {
+    setReportTargetEmail(email || '');
     setReportTargetType(type);
     setReportBookingId(bookingId || null);
+    setReportSitterId(sitterId || null);
     setReportReason('Inappropriate behavior');
     setReportDetails('');
     setReportModalOpen(true);
@@ -81,7 +83,6 @@ export default function PetSitting() {
 
   const handleSubmitReport = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reportTargetEmail) return;
     setReportLoading(true);
     try {
       const reporter = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || 'anonymous@lumobites.com';
@@ -93,6 +94,7 @@ export default function PetSitting() {
           reported_email: reportTargetEmail,
           reported_type: reportTargetType,
           booking_id: reportBookingId,
+          sitter_id: reportSitterId,
           reason: reportReason,
           details: reportDetails
         })
@@ -2337,15 +2339,17 @@ export default function PetSitting() {
                               {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
                               <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
                             </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenReportModal(sitter.email, 'sitter');
-                              }}
-                              className="w-full bg-transparent hover:bg-red-50 text-red-600 border border-red-150 hover:border-red-200 font-semibold py-2 rounded-xl transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                              ⚠️ Report this sitter
-                            </button>
+                            {ownerRequests.some(req => req.sitter_id === sitter.id || (sitter.email && req.sitter_email?.toLowerCase().trim() === sitter.email.toLowerCase().trim())) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenReportModal(sitter.email || '', 'sitter', undefined, sitter.id);
+                                }}
+                                className="w-full bg-transparent hover:bg-red-50 text-red-600 border border-red-150 hover:border-red-200 font-semibold py-2 rounded-xl transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
+                              >
+                                ⚠️ Report this sitter
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>

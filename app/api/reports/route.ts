@@ -31,14 +31,46 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { reporter_email, reported_email, reported_type, booking_id, reason, details } = body;
+    const { reporter_email, reported_email, reported_type, booking_id, reason, details, sitter_id } = body;
 
-    if (!reporter_email || !reported_email || !reported_type || !reason) {
+    if (!reporter_email || (!reported_email && !sitter_id && !booking_id) || !reported_type || !reason) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const cleanReporter = reporter_email.toLowerCase().trim();
-    const cleanReported = reported_email.toLowerCase().trim();
+    let cleanReported = reported_email ? reported_email.toLowerCase().trim() : '';
+
+    // Resolve email if missing on client
+    if (!cleanReported) {
+      if (reported_type === 'sitter' && sitter_id) {
+        const { data: sitter } = await supabaseAdmin
+          .from('sitters')
+          .select('email')
+          .eq('id', sitter_id)
+          .single();
+        if (sitter && sitter.email) {
+          cleanReported = sitter.email.toLowerCase().trim();
+        }
+      } else if (booking_id) {
+        const { data: booking } = await supabaseAdmin
+          .from('sitting_requests')
+          .select('owner_email, sitters(email)')
+          .eq('id', booking_id)
+          .single();
+        if (booking) {
+          if (reported_type === 'sitter') {
+            const sitterEmailStr = (booking.sitters as any)?.email;
+            if (sitterEmailStr) cleanReported = sitterEmailStr.toLowerCase().trim();
+          } else {
+            cleanReported = booking.owner_email.toLowerCase().trim();
+          }
+        }
+      }
+    }
+
+    if (!cleanReported) {
+      return NextResponse.json({ error: 'Could not resolve reported email' }, { status: 400 });
+    }
 
     if (cleanReporter === cleanReported) {
       return NextResponse.json({ error: 'You cannot report yourself' }, { status: 400 });
