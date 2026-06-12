@@ -4327,6 +4327,15 @@ export default function PetSitting() {
                         {selectedSitterForReviews.gender}
                       </span>
                     )}
+                    {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === selectedSitterForReviews.id || (selectedSitterForReviews.email && req.sitter_email?.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim()))) && (
+                      <button
+                        onClick={() => handleOpenReportModal(selectedSitterForReviews.email || '', 'sitter', undefined, selectedSitterForReviews.id)}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-sm"
+                        title="Report this sitter"
+                      >
+                        ⚠️
+                      </button>
+                    )}
                   </div>
                   
                   {selectedSitterForReviews.approval_status === 'approved' && (
@@ -4354,14 +4363,7 @@ export default function PetSitting() {
                       )) ? selectedSitterForReviews.city : `${selectedSitterForReviews.city}${selectedSitterForReviews.country ? `, ${selectedSitterForReviews.country}` : ''}`
                     ) : ''}
                   </p>
-                  {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === selectedSitterForReviews.id || (selectedSitterForReviews.email && req.sitter_email?.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim()))) && (
-                    <button
-                      onClick={() => handleOpenReportModal(selectedSitterForReviews.email || '', 'sitter', undefined, selectedSitterForReviews.id)}
-                      className="text-red-500 hover:text-red-700 text-xs font-semibold underline mt-2.5 block text-left cursor-pointer"
-                    >
-                      ⚠️ Report this sitter
-                    </button>
-                  )}
+
                 </div>
               </div>
               <button 
@@ -4564,7 +4566,7 @@ export default function PetSitting() {
 
       {/* Report Modal */}
       {reportModalOpen && (
-        <div className="modal-overlay fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div className="modal-overlay fixed inset-0 z-[1050] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
             <button 
               onClick={() => setReportModalOpen(false)}
