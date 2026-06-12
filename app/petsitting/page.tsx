@@ -2362,17 +2362,6 @@ export default function PetSitting() {
                               {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
                               <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
                             </button>
-                            {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === sitter.id || (sitter.email && req.sitter_email?.toLowerCase().trim() === sitter.email.toLowerCase().trim()))) && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenReportModal(sitter.email || '', 'sitter', undefined, sitter.id);
-                                }}
-                                className="w-full bg-transparent hover:bg-red-50 text-red-600 border border-red-150 hover:border-red-200 font-semibold py-2 rounded-xl transition-colors text-xs flex items-center justify-center gap-1 cursor-pointer"
-                              >
-                                ⚠️ Report this sitter
-                              </button>
-                            )}
                           </div>
                         )}
                       </div>
@@ -4365,6 +4354,14 @@ export default function PetSitting() {
                       )) ? selectedSitterForReviews.city : `${selectedSitterForReviews.city}${selectedSitterForReviews.country ? `, ${selectedSitterForReviews.country}` : ''}`
                     ) : ''}
                   </p>
+                  {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === selectedSitterForReviews.id || (selectedSitterForReviews.email && req.sitter_email?.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim()))) && (
+                    <button
+                      onClick={() => handleOpenReportModal(selectedSitterForReviews.email || '', 'sitter', undefined, selectedSitterForReviews.id)}
+                      className="text-red-500 hover:text-red-700 text-xs font-semibold underline mt-2.5 block text-left cursor-pointer"
+                    >
+                      ⚠️ Report this sitter
+                    </button>
+                  )}
                 </div>
               </div>
               <button 
