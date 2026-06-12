@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
-import { Megaphone, Footprints, MapPin, Check } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw } from 'lucide-react';
 
 export default function LostPetsFeed() {
   const [pets, setPets] = useState<any[]>([]);
@@ -19,6 +19,7 @@ export default function LostPetsFeed() {
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
   const [searchLocationName, setSearchLocationName] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
 
 
@@ -66,6 +67,7 @@ export default function LostPetsFeed() {
 
   const handleUseMyLocation = () => {
     if (navigator.geolocation) {
+      setIsDetectingLocation(true);
       setIsGeocoding(true);
       setLocationVerified(false);
       navigator.geolocation.getCurrentPosition(
@@ -92,11 +94,13 @@ export default function LostPetsFeed() {
             alert('Failed to parse your location name.');
           } finally {
             setIsGeocoding(false);
+            setIsDetectingLocation(false);
           }
         },
         (error) => {
           console.error('Geolocation error:', error);
           setIsGeocoding(false);
+          setIsDetectingLocation(false);
           alert('Unable to get your location. Please enter a city manually.');
         }
       );
@@ -188,11 +192,23 @@ export default function LostPetsFeed() {
             <button
               onClick={handleUseMyLocation}
               type="button"
-              className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0"
+              disabled={isDetectingLocation}
+              className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 ${
+                isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
               title="Use my current location"
             >
-              <span>📍</span>
-              <span className="hidden sm:inline">Use My Location</span>
+              {isDetectingLocation ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" />
+                  <span className="hidden sm:inline">📍 Detecting location...</span>
+                </>
+              ) : (
+                <>
+                  <span>📍</span>
+                  <span className="hidden sm:inline">Use My Location</span>
+                </>
+              )}
             </button>
           </div>
           <select

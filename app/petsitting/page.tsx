@@ -166,6 +166,7 @@ export default function PetSitting() {
   const [searchRadius, setSearchRadius] = useState('25');
   const [searchCoords, setSearchCoords] = useState<{lat: number, lng: number} | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedSitter, setSelectedSitter] = useState<Sitter | null>(null);
 
@@ -672,6 +673,7 @@ export default function PetSitting() {
 
   const handleUseMyLocation = () => {
     if (navigator.geolocation) {
+      setIsDetectingLocation(true);
       setIsGeocoding(true);
       setSearchLocationError('');
       navigator.geolocation.getCurrentPosition(
@@ -699,11 +701,13 @@ export default function PetSitting() {
             setSearchLocationError('Failed to parse your location name.');
           } finally {
             setIsGeocoding(false);
+            setIsDetectingLocation(false);
           }
         },
         (error) => {
           console.error('Geolocation error:', error);
           setIsGeocoding(false);
+          setIsDetectingLocation(false);
           alert('Unable to get your location. Please enter a city manually.');
         }
       );
@@ -2061,11 +2065,23 @@ export default function PetSitting() {
                   <button
                     onClick={handleUseMyLocation}
                     type="button"
-                    className="bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm"
+                    disabled={isDetectingLocation}
+                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm ${
+                      isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
                     title="Use my current location"
                   >
-                    <span>📍</span>
-                    <span className="hidden sm:inline">Use My Location</span>
+                    {isDetectingLocation ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" />
+                        <span className="hidden sm:inline">📍 Detecting location...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📍</span>
+                        <span className="hidden sm:inline">Use My Location</span>
+                      </>
+                    )}
                   </button>
                 </div>
                 <select
@@ -2177,8 +2193,15 @@ export default function PetSitting() {
             )}
 
             {/* Sitters & Map Layout */}
-            {loadingSitters ? (
-              <div className="text-center text-[#8B5E3C] py-12">Loading trusted sitters...</div>
+            {loadingSitters || isGeocoding ? (
+              <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm flex flex-col items-center justify-center min-h-[300px]">
+                <div className="relative w-16 h-16 mb-4">
+                  <div className="absolute inset-0 rounded-full border-4 border-[#8B5E3C]/10"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-t-[#8B5E3C] animate-spin"></div>
+                </div>
+                <h3 className="text-xl font-bold text-[#4A3E3D] mb-1">Finding sitters near you...</h3>
+                <p className="text-[#8B7E7D] text-sm">Searching our network of local, loving sitters...</p>
+              </div>
             ) : (!searchZip.trim() || !searchCoords) ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4] animate-fade-in shadow-sm">
                 <div className="w-16 h-16 bg-[#FAF6F4] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#E8DDD4]">
@@ -2192,13 +2215,13 @@ export default function PetSitting() {
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
                 <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in {searchLocationName || searchZip} yet.</h3>
-                <p className="text-[#8B7E7D] mb-4">Check back soon, try expanding your search distance, or become a sitter!</p>
+                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
+                <p className="text-[#8B7E7D] mb-4">Try expanding your search distance.</p>
                 <button 
                   onClick={() => setActiveTab('become')}
                   className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
                 >
-                  Be the first! &rarr;
+                  Become a sitter &rarr;
                 </button>
               </div>
             ) : (
