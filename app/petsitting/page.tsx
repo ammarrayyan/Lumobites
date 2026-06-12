@@ -2362,7 +2362,7 @@ export default function PetSitting() {
                               {!isOwnerPro && <Lock className="w-3.5 h-3.5" />}
                               <span>{isOwnerPro ? 'Request Sitter' : 'Unlock & Request'}</span>
                             </button>
-                            {ownerRequests.some(req => req.sitter_id === sitter.id || (sitter.email && req.sitter_email?.toLowerCase().trim() === sitter.email.toLowerCase().trim())) && (
+                            {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === sitter.id || (sitter.email && req.sitter_email?.toLowerCase().trim() === sitter.email.toLowerCase().trim()))) && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
