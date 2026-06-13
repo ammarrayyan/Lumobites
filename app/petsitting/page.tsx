@@ -215,6 +215,7 @@ export default function PetSitting() {
   const [petFormPhotos, setPetFormPhotos] = useState<string[]>([]);
   const [submittingPet, setSubmittingPet] = useState(false);
   const [selectedRequestPet, setSelectedRequestPet] = useState<any | null>(null);
+  const [selectedRequestPets, setSelectedRequestPets] = useState<any[]>([]);
 
   // Inline Add Pet State
   const [showInlineAddPet, setShowInlineAddPet] = useState(false);
@@ -455,6 +456,13 @@ export default function PetSitting() {
       return;
     }
   }, [sitterRequests, ownerRequests]);
+
+  // If ownerPets loads and selectedRequestPets is empty, auto-select the first pet if it's the only one
+  useEffect(() => {
+    if (ownerPets.length === 1 && selectedRequestPets.length === 0) {
+      setSelectedRequestPets([ownerPets[0]]);
+    }
+  }, [ownerPets]);
 
   const handleClearSavedInfo = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1034,7 +1042,7 @@ export default function PetSitting() {
       const data = await res.json();
       if (res.ok && data.success && data.pet) {
         await fetchOwnerPets(reqEmail);
-        setSelectedRequestPet(data.pet);
+        setSelectedRequestPets(prev => [...prev.filter(p => p.id !== data.pet.id), data.pet]);
         setShowInlineAddPet(false);
       } else {
         alert(data.error || 'Failed to save pet profile.');
@@ -1155,25 +1163,34 @@ export default function PetSitting() {
     }
 
     // Auto-select the pet if req.pet_id is provided, or if pet_name matches
-    if (req.pet_id) {
+    if (req.pet_details?.pets) {
+      setSelectedRequestPets(req.pet_details.pets);
+      setSelectedRequestPet(req.pet_details.pets[0] || null);
+    } else if (req.pet_id) {
       const found = ownerPets.find(p => p.id === req.pet_id);
       if (found) {
         setSelectedRequestPet(found);
+        setSelectedRequestPets([found]);
       } else if (req.pet_details) {
         setSelectedRequestPet(req.pet_details);
+        setSelectedRequestPets([req.pet_details]);
       }
     } else if (req.pet_name) {
       const found = ownerPets.find(p => p.pet_name?.toLowerCase().trim() === req.pet_name?.toLowerCase().trim());
       if (found) {
         setSelectedRequestPet(found);
+        setSelectedRequestPets([found]);
       } else if (req.pet_details) {
         setSelectedRequestPet(req.pet_details);
+        setSelectedRequestPets([req.pet_details]);
       } else {
-        setSelectedRequestPet({
+        const fallback = {
           pet_name: req.pet_name,
           pet_type: req.pet_type || 'dog',
           age: req.pet_age || ''
-        });
+        };
+        setSelectedRequestPet(fallback);
+        setSelectedRequestPets([fallback]);
       }
     }
     
@@ -2095,8 +2112,8 @@ export default function PetSitting() {
       return;
     }
 
-    if (!selectedRequestPet) {
-      setReqError('Please select a pet or add a new one first');
+    if (selectedRequestPets.length === 0) {
+      setReqError('Please select at least one pet or add a new one first');
       setReqLoading(false);
       return;
     }
@@ -2137,10 +2154,45 @@ export default function PetSitting() {
       const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
 
-      const petAgeStr = (selectedRequestPet?.age || '').trim();
+      const primaryPet = selectedRequestPets[0];
+      const petAgeStr = (primaryPet?.age || '').trim();
       const finalNotes = petAgeStr
         ? `[Pet Age: ${petAgeStr}]${reqNotes ? ' ' + reqNotes : ''}` 
         : reqNotes;
+
+      let rate = selectedSitter?.rate_per_night || 0;
+      let unit = 'night';
+      if (reqServiceType === 'Home visits') {
+        rate = selectedSitter?.rate_dropins || selectedSitter?.rate_per_night || 0;
+        unit = 'visit';
+      } else if (reqServiceType === 'Dog walking') {
+        rate = selectedSitter?.rate_walking || selectedSitter?.rate_per_night || 0;
+        unit = 'walk';
+      } else if (reqServiceType === 'Overnight stays') {
+        rate = selectedSitter?.rate_overnight || selectedSitter?.rate_per_night || 0;
+        unit = 'night';
+      } else if (reqServiceType === 'Sitter\'s home boarding') {
+        rate = selectedSitter?.rate_boarding || selectedSitter?.rate_per_night || 0;
+        unit = 'night';
+      } else if (reqServiceType === 'Full day sitting') {
+        rate = selectedSitter?.rate_daycare || selectedSitter?.rate_per_night || 0;
+        unit = 'day';
+      }
+
+      const numPets = selectedRequestPets.length;
+      const totalCost = rate * numPets;
+
+      const petDetailsPayload = primaryPet ? {
+        ...primaryPet,
+        pets: selectedRequestPets,
+        booking_pricing: {
+          service_type: reqServiceType,
+          rate: rate,
+          unit: unit,
+          num_pets: numPets,
+          total_cost: totalCost
+        }
+      } : null;
 
       const res = await fetch('/api/petsitting/request', {
         method: 'POST',
@@ -2149,14 +2201,14 @@ export default function PetSitting() {
           sitter_id: selectedSitter?.id,
           owner_email: reqEmail,
           owner_name: reqOwnerName,
-          pet_name: selectedRequestPet?.pet_name,
-          pet_type: selectedRequestPet?.pet_type,
+          pet_name: selectedRequestPets.map(p => p.pet_name).join(', '),
+          pet_type: primaryPet?.pet_type || 'dog',
           dates: finalDates,
           special_notes: `${reqServiceType ? `Service Requested: ${reqServiceType}\n\n` : ''}${finalNotes}`,
           phone_number: reqPhone || null,
           time_slot: reqTimeSlot,
-          pet_id: selectedRequestPet?.id || null,
-          pet_details: selectedRequestPet || null
+          pet_id: primaryPet?.id || null,
+          pet_details: petDetailsPayload
         })
       });
 
@@ -2170,9 +2222,9 @@ export default function PetSitting() {
             body: JSON.stringify({
               email: reqEmail,
               owner_name: reqOwnerName,
-              pet_name: selectedRequestPet?.pet_name,
-              pet_type: selectedRequestPet?.pet_type,
-              pet_age: selectedRequestPet?.age || '',
+              pet_name: primaryPet?.pet_name,
+              pet_type: primaryPet?.pet_type,
+              pet_age: primaryPet?.age || '',
               phone_number: reqPhone || null,
               special_notes: reqNotes || null
             })
@@ -2185,6 +2237,7 @@ export default function PetSitting() {
         setReqSuccess(true);
         setReqTimeSlot('');
         setSelectedRequestPet(null);
+        setSelectedRequestPets([]);
         setTimeout(() => {
           setRequestModalOpen(false);
           setReqSuccess(false);
@@ -2870,7 +2923,12 @@ export default function PetSitting() {
                                 <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pet</p>
                                 <div className="flex items-center gap-1.5">
                                   <PawPrint className="w-4 h-4 text-[#8B5E3C] shrink-0" />
-                                  <span className="font-semibold text-[#4A3E3D] text-sm">{req.pet_name}</span>
+                                  <span className="font-semibold text-[#4A3E3D] text-xs sm:text-sm truncate max-w-full" title={req.pet_name}>
+                                    {req.pet_details?.pets && req.pet_details.pets.length > 1 
+                                      ? `🐾 ${req.pet_details.pets.length} pets: ${req.pet_details.pets.map((p: any) => p.pet_name).join(' & ')}`
+                                      : req.pet_name
+                                    }
+                                  </span>
                                 </div>
                               </div>
 
@@ -2886,6 +2944,18 @@ export default function PetSitting() {
                                 {actionButtons}
                               </div>
                             </div>
+
+                            {req.pet_details?.booking_pricing && (
+                              <div className="px-4 pb-3 text-[11px] text-[#8B7E7D] flex justify-between items-center border-t border-gray-50 pt-2.5">
+                                <span className="font-medium">Estimated Pricing:</span>
+                                <span className="font-bold text-[#4A3E3D]">
+                                  ${req.pet_details.booking_pricing.total_cost} 
+                                  <span className="text-[#8B7E7D] font-normal text-[10px] ml-1.5">
+                                    (${req.pet_details.booking_pricing.rate}/{req.pet_details.booking_pricing.unit} × {req.pet_details.booking_pricing.num_pets} {req.pet_details.booking_pricing.num_pets === 1 ? 'pet' : 'pets'})
+                                  </span>
+                                </span>
+                              </div>
+                            )}
 
                             {/* Message Sitter CTA — full width, only on accepted */}
                             {req.status === 'accepted' && (
@@ -3359,68 +3429,91 @@ export default function PetSitting() {
                             </div>
 
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
-                              <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
-                              <div><strong>Dates:</strong> {req.dates} {req.time_slot ? `(${req.time_slot})` : ''}</div>
-                              {(() => {
-                                const { petAge, cleanNotes } = parseSpecialNotes(req.special_notes);
-                                return (
-                                  <>
-                                    {petAge && (
-                                      <div><strong>Pet Age:</strong> {petAge}</div>
-                                    )}
-                                    {req.created_at && (
-                                      <div className={petAge ? "" : "col-span-1 sm:col-span-2"}>
-                                        <strong>Requested On:</strong> {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                      </div>
-                                    )}
-                                    {cleanNotes && (
-                                      <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
-                                        <strong>Notes:</strong> {cleanNotes}
-                                      </div>
-                                    )}
-                                    {req.pet_details && (
-                                      <div className="col-span-1 sm:col-span-2 mt-2 bg-white rounded-xl border border-[#E8DDD4] p-3 text-xs text-[#4A3E3D]">
-                                        <div className="font-bold text-[#8B5E3C] mb-2 flex items-center gap-1.5 border-b border-[#FAF6F4] pb-1.5">
-                                          <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Care Profile: {req.pet_details.pet_name}
-                                        </div>
-                                        <div className="flex gap-3 flex-col sm:flex-row">
-                                          {(req.pet_details.photo_url || (Array.isArray(req.pet_details.photo_urls) && req.pet_details.photo_urls.filter(Boolean).length > 0)) && (
-                                            <PetPhotoCarousel
-                                              photoUrls={req.pet_details.photo_urls || [req.pet_details.photo_url]}
-                                              petType={req.pet_details.pet_type}
-                                              className="w-14 h-14 rounded-lg"
-                                            />
-                                          )}
-                                          <div className="flex-1 space-y-1.5 text-[11px]">
-                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                                              {req.pet_details.breed && <div><strong>Breed:</strong> {req.pet_details.breed}</div>}
-                                              {req.pet_details.gender && <div><strong>Gender:</strong> {req.pet_details.gender}</div>}
-                                              {req.pet_details.weight && <div><strong>Weight:</strong> {req.pet_details.weight}</div>}
-                                              {req.pet_details.spayed_neutered !== undefined && (
-                                                <div><strong>Spayed/Neutered:</strong> {req.pet_details.spayed_neutered ? 'Yes' : 'No'}</div>
-                                              )}
-                                            </div>
-                                            {req.pet_details.feeding_schedule && (
-                                              <div><strong>Feeding:</strong> {req.pet_details.feeding_schedule}</div>
-                                            )}
-                                            {req.pet_details.medication && (
-                                              <div><strong>Medications:</strong> {req.pet_details.medication}</div>
-                                            )}
-                                            {req.pet_details.behavior_notes && (
-                                              <div><strong>Behavior Notes:</strong> {req.pet_details.behavior_notes}</div>
-                                            )}
-                                            {(req.pet_details.vet_name || req.pet_details.vet_phone) && (
-                                              <div className="text-[10px] text-[#8B7E7D] bg-[#FAF6F4] p-1.5 rounded-lg border border-[#E8DDD4] mt-1 inline-block">
-                                                Vet: {req.pet_details.vet_name || 'N/A'} {req.pet_details.vet_phone && `(${req.pet_details.vet_phone})`}
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </>
-                                );
-                              })()}
+                               {req.pet_details?.pets && req.pet_details.pets.length > 1 ? (
+                                 <div className="col-span-1 sm:col-span-2">
+                                   <strong>Pets:</strong> 🐾 {req.pet_details.pets.length} pets: {req.pet_details.pets.map((p: any) => p.pet_name).join(' & ')}
+                                 </div>
+                               ) : (
+                                 <div><strong>Pet Name:</strong> {req.pet_name} ({req.pet_type})</div>
+                               )}
+                               <div><strong>Dates:</strong> {req.dates} {req.time_slot ? `(${req.time_slot})` : ''}</div>
+                               {(() => {
+                                 const { petAge, cleanNotes } = parseSpecialNotes(req.special_notes);
+                                 return (
+                                   <>
+                                     {petAge && (
+                                       <div><strong>Pet Age:</strong> {petAge}</div>
+                                     )}
+                                     {req.created_at && (
+                                       <div className={petAge ? "" : "col-span-1 sm:col-span-2"}>
+                                         <strong>Requested On:</strong> {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                       </div>
+                                     )}
+                                     {cleanNotes && (
+                                       <div className="col-span-1 sm:col-span-2 mt-1 bg-white p-2.5 rounded-xl border border-[#E8DDD4]">
+                                         <strong>Notes:</strong> {cleanNotes}
+                                       </div>
+                                     )}
+
+                                     {req.pet_details?.booking_pricing && (
+                                       <div className="col-span-1 sm:col-span-2 mt-1.5 bg-white border border-[#E8DDD4] p-2.5 rounded-xl text-xs text-[#4A3E3D] font-medium flex justify-between items-center">
+                                         <span>💰 Booking Rate & Cost:</span>
+                                         <span className="font-bold text-[#4A3E3D]">
+                                           ${req.pet_details.booking_pricing.total_cost}
+                                           <span className="text-[#8B7E7D] font-normal text-[10px] ml-1.5">
+                                             (${req.pet_details.booking_pricing.rate}/{req.pet_details.booking_pricing.unit} × {req.pet_details.booking_pricing.num_pets} {req.pet_details.booking_pricing.num_pets === 1 ? 'pet' : 'pets'})
+                                           </span>
+                                         </span>
+                                       </div>
+                                     )}
+
+                                     {req.pet_details && (
+                                       <div className="col-span-1 sm:col-span-2 mt-2 space-y-2.5">
+                                         {(req.pet_details.pets || [req.pet_details]).map((pet: any, idx: number) => (
+                                           <div key={pet.id || idx} className="bg-white rounded-xl border border-[#E8DDD4] p-3 text-xs text-[#4A3E3D]">
+                                             <div className="font-bold text-[#8B5E3C] mb-2 flex items-center gap-1.5 border-b border-[#FAF6F4] pb-1.5">
+                                               <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Care Profile: {pet.pet_name}
+                                             </div>
+                                             <div className="flex gap-3 flex-col sm:flex-row text-left">
+                                               {(pet.photo_url || (Array.isArray(pet.photo_urls) && pet.photo_urls.filter(Boolean).length > 0)) && (
+                                                 <PetPhotoCarousel
+                                                   photoUrls={pet.photo_urls || [pet.photo_url]}
+                                                   petType={pet.pet_type}
+                                                   className="w-14 h-14 rounded-lg"
+                                                 />
+                                               )}
+                                               <div className="flex-1 space-y-1.5 text-[11px]">
+                                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                   {pet.breed && <div><strong>Breed:</strong> {pet.breed}</div>}
+                                                   {pet.gender && <div><strong>Gender:</strong> {pet.gender}</div>}
+                                                   {pet.weight && <div><strong>Weight:</strong> {pet.weight}</div>}
+                                                   {pet.spayed_neutered !== undefined && (
+                                                     <div><strong>Spayed/Neutered:</strong> {pet.spayed_neutered ? 'Yes' : 'No'}</div>
+                                                   )}
+                                                 </div>
+                                                 {pet.feeding_schedule && (
+                                                   <div><strong>Feeding:</strong> {pet.feeding_schedule}</div>
+                                                 )}
+                                                 {pet.medication && (
+                                                   <div><strong>Medications:</strong> {pet.medication}</div>
+                                                 )}
+                                                 {pet.behavior_notes && (
+                                                   <div><strong>Behavior Notes:</strong> {pet.behavior_notes}</div>
+                                                 )}
+                                                 {(pet.vet_name || pet.vet_phone) && (
+                                                   <div className="text-[10px] text-[#8B7E7D] bg-[#FAF6F4] p-1.5 rounded-lg border border-[#E8DDD4] mt-1 inline-block">
+                                                     Vet: {pet.vet_name || 'N/A'} {pet.vet_phone && `(${pet.vet_phone})`}
+                                                   </div>
+                                                 )}
+                                               </div>
+                                             </div>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     )}
+                                   </>
+                                 );
+                               })()}
                             </div>
 
                             {/* Messaging */}
@@ -4246,44 +4339,55 @@ export default function PetSitting() {
                     </div>
                   </div>
 
-                  {/* Select Pet Dropdown */}
-                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-4">
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5 flex items-center gap-1">
-                      <PawPrint className="w-4 h-4 text-[#8B5E3C] inline" /> Select Pet *
+                  {/* Select Pets (Checkboxes) */}
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-4 text-left">
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-2 flex items-center gap-1">
+                      <PawPrint className="w-4 h-4 text-[#8B5E3C] inline" /> Select Pets *
                     </label>
-                    <select
-                      required
-                      className="w-full bg-white border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C] cursor-pointer font-medium"
-                      value={showInlineAddPet ? 'add_new' : (selectedRequestPet?.id || '')}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === 'add_new') {
-                          setShowInlineAddPet(true);
-                          setSelectedRequestPet(null);
-                          setInlinePetName('');
-                          setInlinePetType('dog');
-                          setInlinePetBreed('');
-                          setInlinePetAge('');
-                        } else if (val === '') {
-                          setSelectedRequestPet(null);
-                          setShowInlineAddPet(false);
-                        } else {
-                          const found = ownerPets.find(p => p.id === val);
-                          if (found) {
-                            setSelectedRequestPet(found);
-                            setShowInlineAddPet(false);
-                          }
-                        }
+                    
+                    {ownerPets.length === 0 ? (
+                      <p className="text-xs text-[#8B7E7D] italic mb-3">No pets added yet. Click &ldquo;Add New Pet&rdquo; below to add one.</p>
+                    ) : (
+                      <div className="space-y-2 mb-3 max-h-[160px] overflow-y-auto pr-1">
+                        {ownerPets.map(p => {
+                          const isChecked = selectedRequestPets.some(sp => sp.id === p.id);
+                          return (
+                            <label key={p.id} className="flex items-center gap-2.5 p-2.5 bg-white border border-[#E8DDD4] rounded-xl cursor-pointer hover:border-[#8B5E3C] transition-all text-xs text-[#4A3E3D] font-bold">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedRequestPets(prev => [...prev.filter(sp => sp.id !== p.id), p]);
+                                  } else {
+                                    setSelectedRequestPets(prev => prev.filter(sp => sp.id !== p.id));
+                                  }
+                                }}
+                                className="w-4 h-4 accent-[#8B5E3C] rounded cursor-pointer"
+                              />
+                              <span className="flex-1 truncate">{p.pet_name}</span>
+                              <span className="text-[10px] bg-[#FAF6F4] text-[#8B5E3C] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide border border-[#E8DDD4]">
+                                {p.pet_type}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowInlineAddPet(prev => !prev);
+                        setInlinePetName('');
+                        setInlinePetType('dog');
+                        setInlinePetBreed('');
+                        setInlinePetAge('');
                       }}
+                      className="text-[#8B5E3C] hover:text-[#7A5234] font-bold text-xs cursor-pointer border-none bg-transparent flex items-center gap-1 p-0 mt-1"
                     >
-                      <option value="">-- Choose a pet --</option>
-                      {ownerPets.map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.pet_name} ({p.pet_type === 'cat' ? 'cat' : p.pet_type === 'dog' ? 'dog' : 'other'}{p.breed ? ` • ${p.breed}` : ''})
-                        </option>
-                      ))}
-                      <option value="add_new" className="font-bold text-[#8B5E3C]">+ Add New Pet</option>
-                    </select>
+                      <Plus className="w-3.5 h-3.5" /> {showInlineAddPet ? 'Cancel Adding Pet' : 'Add New Pet'}
+                    </button>
 
                     {/* Inline Quick Pet Form */}
                     {showInlineAddPet && (
@@ -4380,7 +4484,6 @@ export default function PetSitting() {
                             type="button"
                             onClick={() => {
                               setShowInlineAddPet(false);
-                              setSelectedRequestPet(null);
                             }}
                             className="bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 text-[11px] font-bold py-2 px-3 rounded-lg transition-all cursor-pointer"
                           >
@@ -4614,6 +4717,69 @@ export default function PetSitting() {
                     <textarea rows={3} value={reqNotes} onChange={e => setReqNotes(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"></textarea>
                   </div>
  
+                  {/* Booking Summary & Pricing Box */}
+                  {reqStartDate && reqEndDate && reqServiceType && selectedRequestPets.length > 0 && (
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 mt-4 text-xs space-y-2 text-left">
+                      <div className="font-bold text-[#8B5E3C] border-b border-[#E8DDD4] pb-1.5 mb-1.5 flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> Booking Summary
+                      </div>
+                      <div className="flex justify-between text-[#4A3E3D]">
+                        <span className="font-bold">Dates:</span>
+                        <span>{reqStartDate} to {reqEndDate}</span>
+                      </div>
+                      <div className="flex justify-between text-[#4A3E3D]">
+                        <span className="font-bold">Service:</span>
+                        <span>{reqServiceType}</span>
+                      </div>
+                      {reqTimeSlot && (
+                        <div className="flex justify-between text-[#4A3E3D]">
+                          <span className="font-bold">Time Slot:</span>
+                          <span>{reqTimeSlot}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[#4A3E3D]">
+                        <span className="font-bold">Selected Pets:</span>
+                        <span>{selectedRequestPets.length} {selectedRequestPets.length === 1 ? 'pet' : 'pets'} ({selectedRequestPets.map(p => p.pet_name).join(', ')})</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 border-t border-[#E8DDD4] font-black text-sm text-[#4A3E3D]">
+                        <span>Estimated Total:</span>
+                        <span className="text-right">
+                          {(() => {
+                            let rate = selectedSitter.rate_per_night;
+                            let unit = 'night';
+                            if (reqServiceType === 'Home visits') {
+                              rate = selectedSitter.rate_dropins || selectedSitter.rate_per_night;
+                              unit = 'visit';
+                            } else if (reqServiceType === 'Dog walking') {
+                              rate = selectedSitter.rate_walking || selectedSitter.rate_per_night;
+                              unit = 'walk';
+                            } else if (reqServiceType === 'Overnight stays') {
+                              rate = selectedSitter.rate_overnight || selectedSitter.rate_per_night;
+                              unit = 'night';
+                            } else if (reqServiceType === 'Sitter\'s home boarding') {
+                              rate = selectedSitter.rate_boarding || selectedSitter.rate_per_night;
+                              unit = 'night';
+                            } else if (reqServiceType === 'Full day sitting') {
+                              rate = selectedSitter.rate_daycare || selectedSitter.rate_per_night;
+                              unit = 'day';
+                            }
+
+                            const numPets = selectedRequestPets.length;
+                            const total = rate * numPets;
+                            return (
+                              <span className="flex flex-col items-end">
+                                <span className="text-sm font-black">${total}</span>
+                                <span className="text-[10px] text-[#8B7E7D] font-normal mt-0.5">
+                                  ${rate}/{unit} × {numPets} {numPets === 1 ? 'pet' : 'pets'}
+                                </span>
+                              </span>
+                            );
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
  
                   <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm cursor-pointer">
