@@ -357,6 +357,29 @@ export default function PetSitting() {
         setReqEmail(cachedEmail);
         fetchSitters(cachedEmail);
         loadOwnerProfile(cachedEmail);
+
+        // Owner session validation check
+        fetch('/api/stripe/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cachedEmail })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.session_invalidated_at) {
+            const sessionStarted = localStorage.getItem('lumo_session_started_at');
+            if (sessionStarted) {
+              const startedDate = new Date(sessionStarted);
+              const invalidatedDate = new Date(data.session_invalidated_at);
+              if (invalidatedDate > startedDate) {
+                localStorage.clear();
+                alert("You have been signed out of all devices for security.");
+                window.location.href = "/";
+              }
+            }
+          }
+        })
+        .catch(err => console.error('[Page Owner Check] error:', err));
       } else {
         setReqEmail('');
         setIsOwnerPro(false);
@@ -379,11 +402,26 @@ export default function PetSitting() {
         fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
           .then(res => res.json())
           .then(profileData => {
-            if (profileData && profileData.id) {
-              loadSitterProfile(cachedSitterEmail);
-              setProfilePreviewMode(true);
-            } else {
-              setProfilePreviewMode(false);
+            if (profileData) {
+              if (profileData.session_invalidated_at) {
+                const sessionStarted = localStorage.getItem('lumo_session_started_at');
+                if (sessionStarted) {
+                  const startedDate = new Date(sessionStarted);
+                  const invalidatedDate = new Date(profileData.session_invalidated_at);
+                  if (invalidatedDate > startedDate) {
+                    localStorage.clear();
+                    alert("You have been signed out of all devices for security.");
+                    window.location.href = "/";
+                    return;
+                  }
+                }
+              }
+              if (profileData.id) {
+                loadSitterProfile(cachedSitterEmail);
+                setProfilePreviewMode(true);
+              } else {
+                setProfilePreviewMode(false);
+              }
             }
           })
           .catch(err => {
@@ -1556,6 +1594,7 @@ export default function PetSitting() {
         const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
         localStorage.setItem('lumo_sitter_email', sitterEmail);
         localStorage.setItem('lumo_sitter_email_expiry', expiry.toString());
+        localStorage.setItem('lumo_session_started_at', new Date().toISOString());
 
         const profileRes = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
         const profileData = await profileRes.json();
@@ -1659,6 +1698,28 @@ export default function PetSitting() {
       alert('An error occurred during deletion.');
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleSitterSignOutAllDevices = async () => {
+    const email = sitterEmail || localStorage.getItem('lumo_sitter_email');
+    if (email) {
+      try {
+        await fetch('/api/petsitting/auth/signout-all-devices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim() })
+        });
+      } catch (err) {
+        console.error('[Sitter SignOut All Devices] failed:', err);
+      }
+    }
+    localStorage.removeItem('lumo_sitter_email');
+    localStorage.removeItem('lumo_sitter_email_expiry');
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+      alert('You have been signed out of all devices for security.');
+      window.location.href = '/';
     }
   };
 
@@ -3328,7 +3389,10 @@ export default function PetSitting() {
                   
 
                   
-                  <button type="button" onClick={handleSitterSignOut} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer">
+                  <button type="button" onClick={handleSitterSignOutAllDevices} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer">
+                    Sign Out All Devices
+                  </button>
+                  <button type="button" onClick={handleSitterSignOut} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer mt-2">
                     Sign Out
                   </button>
 

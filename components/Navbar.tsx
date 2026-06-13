@@ -79,6 +79,19 @@ export default function Navbar() {
       })
       .then(res => res.json())
       .then(data => {
+        if (data && data.session_invalidated_at) {
+          const sessionStarted = localStorage.getItem('lumo_session_started_at');
+          if (sessionStarted) {
+            const startedDate = new Date(sessionStarted);
+            const invalidatedDate = new Date(data.session_invalidated_at);
+            if (invalidatedDate > startedDate) {
+              localStorage.clear();
+              alert("You have been signed out of all devices for security.");
+              window.location.href = "/";
+              return;
+            }
+          }
+        }
         if (data.isPro) {
           setIsPro(true);
         } else {
@@ -89,6 +102,29 @@ export default function Navbar() {
       })
       .catch((err) => {
         console.error('[Lumo Subscription] Failed to sync status with Supabase:', err);
+      });
+    }
+
+    const cachedSitter = localStorage.getItem('lumo_sitter_email');
+    if (cachedSitter && cachedSitter !== 'undefined' && cachedSitter !== 'null' && cachedSitter.trim() !== '') {
+      fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitter)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.session_invalidated_at) {
+          const sessionStarted = localStorage.getItem('lumo_session_started_at');
+          if (sessionStarted) {
+            const startedDate = new Date(sessionStarted);
+            const invalidatedDate = new Date(data.session_invalidated_at);
+            if (invalidatedDate > startedDate) {
+              localStorage.clear();
+              alert("You have been signed out of all devices for security.");
+              window.location.href = "/";
+            }
+          }
+        }
+      })
+      .catch(err => {
+        console.error('[Navbar Sitter Check] Failed to check status:', err);
       });
     }
 
@@ -165,6 +201,26 @@ export default function Navbar() {
     
     // Force clean page refresh
     window.location.reload();
+  };
+
+  const handleSignOutAllDevices = async () => {
+    const email = proEmail || localStorage.getItem('lumo_pro_email');
+    if (email) {
+      try {
+        await fetch('/api/stripe/signout-all-devices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim() })
+        });
+      } catch (err) {
+        console.error('[Navbar SignOut All Devices] failed:', err);
+      }
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+      alert('You have been signed out of all devices for security.');
+      window.location.href = '/';
+    }
   };
 
   const handleUpgradeCheckout = async () => {
@@ -261,6 +317,7 @@ export default function Navbar() {
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
+      localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       syncStatus();
       setShowSignInModal(false);
       setSignInStep('email');
@@ -470,6 +527,12 @@ export default function Navbar() {
                         <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
                       </Link>
                       <button
+                        onClick={handleSignOutAllDevices}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out All Devices
+                      </button>
+                      <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
                       >
@@ -567,6 +630,12 @@ export default function Navbar() {
                     >
                       <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
                     </Link>
+                    <button
+                      onClick={handleSignOutAllDevices}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out All Devices
+                    </button>
                     <button
                       onClick={handleSignOut}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
@@ -700,6 +769,15 @@ export default function Navbar() {
                 >
                   <Settings className="w-4 h-4 text-[#8B5E3C]" /> Manage Subscription
                 </Link>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleSignOutAllDevices();
+                  }}
+                  className="w-full px-4 py-3 text-left text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center bg-transparent border-none cursor-pointer animate-fade-in gap-2"
+                >
+                  <LogOut className="w-4 h-4 text-red-600" /> Sign Out All Devices
+                </button>
                 <button
                   onClick={() => {
                     setIsOpen(false);

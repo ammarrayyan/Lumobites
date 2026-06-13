@@ -97,6 +97,10 @@ export default function AccountPage() {
         throw new Error(data.error || 'Code verification failed');
       }
 
+      localStorage.setItem('lumo_pro_email', email.trim());
+      localStorage.setItem('lumo_session_started_at', new Date().toISOString());
+      window.dispatchEvent(new Event('lumo-pro-update'));
+
       // If code verified successfully, fetch subscription details
       await fetchSubscriptionDetails();
     } catch (err: any) {
@@ -177,6 +181,24 @@ export default function AccountPage() {
       setShowConfirmCancel(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSignOutAllDevices = async () => {
+    if (!email) return;
+    try {
+      await fetch('/api/stripe/signout-all-devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+    } catch (err) {
+      console.error('[Account SignOut All Devices] failed:', err);
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+      alert('You have been signed out of all devices for security.');
+      window.location.href = '/';
     }
   };
 
@@ -583,6 +605,14 @@ export default function AccountPage() {
                       Cancel Subscription
                     </button>
                   )}
+                  {/* Sign Out All Devices Button */}
+                  <button
+                    type="button"
+                    onClick={handleSignOutAllDevices}
+                    className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
+                  >
+                    <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
+                  </button>
                 </div>
               )}
               {showConfirmCancel && (

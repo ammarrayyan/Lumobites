@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('emails')
-      .select('is_pro')
+      .select('is_pro, session_invalidated_at')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -27,7 +27,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to retrieve user status' }, { status: 500 });
     }
 
-    return NextResponse.json({ isPro: !!data?.is_pro });
+    return NextResponse.json({ 
+      isPro: !!data?.is_pro,
+      session_invalidated_at: data?.session_invalidated_at || null
+    });
   } catch (err: any) {
     console.error('[Stripe Status API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
