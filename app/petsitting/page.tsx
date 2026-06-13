@@ -6,7 +6,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Image as ImageIcon, X } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil } from 'lucide-react';
 
 
 export function formatSitterName(fullName) {
@@ -1615,7 +1615,6 @@ export default function PetSitting() {
           setSitterFirstName('');
           setSitterLastName('');
           setSitterPhoto('');
-          setSitterCoverPhoto('');
           setSitterIdPhoto('');
           setHasExistingIdPhoto(false);
           setSitterCity('');
@@ -1666,7 +1665,6 @@ export default function PetSitting() {
         setSitterFirstName('');
         setSitterLastName('');
         setSitterPhoto('');
-        setSitterCoverPhoto('');
         setSitterIdPhoto('');
         setHasExistingIdPhoto(false);
         setSitterCity('');
@@ -3857,100 +3855,7 @@ export default function PetSitting() {
                   )}
                   {formErrors['lastName'] && <p className="text-red-500 text-sm mt-1">{formErrors['lastName']}</p>}
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2 flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4 text-gray-500" /> Cover Photo / Banner
-                    <span className="text-gray-400 font-normal text-xs">— Optional</span>
-                  </label>
-                  {formErrors['cover_photo'] && <p className="text-red-500 text-sm mb-1">{formErrors['cover_photo']}</p>}
-                  
-                  {/* Wide banner preview */}
-                  <div className="relative w-full h-32 sm:h-40 rounded-2xl overflow-hidden mb-3 border border-[#E8DDD4] shadow-inner bg-[#FAF6F4]">
-                    {sitterCoverPhoto ? (
-                      <img 
-                        src={sitterCoverPhoto} 
-                        alt="Cover Preview" 
-                        className="w-full h-full object-cover" 
-                      />
-                    ) : (
-                      <div 
-                        className="w-full h-full flex items-center justify-center text-white font-bold text-sm tracking-wide"
-                        style={{ background: 'linear-gradient(135deg, #8B5E3C, #C17D3C)' }}
-                      >
-                        Default Gradient Banner
-                      </div>
-                    )}
-                    {sitterCoverPhoto && (
-                      <button
-                        type="button"
-                        onClick={() => setSitterCoverPhoto('')}
-                        className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors cursor-pointer"
-                        title="Remove Cover Photo"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
 
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <input 
-                      type="file" 
-                      ref={coverPhotoInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          if (file.size > 4 * 1024 * 1024) {
-                            setFormErrors(prev => ({ ...prev, cover_photo: 'Your cover photo is too large. Please use an image under 4MB' }));
-                            return;
-                          } else {
-                            setFormErrors(prev => { const newErr = {...prev}; delete newErr.cover_photo; return newErr; });
-                          }
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const img = new window.Image();
-                            img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let width = img.width;
-                              let height = img.height;
-                              const MAX_WIDTH = 1200;
-                              const MAX_HEIGHT = 400;
-                              const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-                              if (scale < 1) {
-                                width = Math.round(width * scale);
-                                height = Math.round(height * scale);
-                              }
-                              canvas.width = width;
-                              canvas.height = height;
-                              const ctx = canvas.getContext('2d');
-                              ctx?.drawImage(img, 0, 0, width, height);
-                              setSitterCoverPhoto(canvas.toDataURL('image/jpeg', 0.8));
-                            };
-                            img.src = reader.result as string;
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }} 
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => startCamera('cover')}
-                      className="flex-1 w-full flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4 shrink-0" />
-                      <span>Take Cover Photo</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => coverPhotoInputRef.current?.click()}
-                      className="flex-1 w-full flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
-                    >
-                      <Upload className="w-4 h-4 shrink-0" />
-                      <span>Upload Cover Photo</span>
-                    </button>
-                  </div>
-                </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2 flex items-center gap-1.5">
