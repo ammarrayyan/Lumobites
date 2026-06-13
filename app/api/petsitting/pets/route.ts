@@ -25,7 +25,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, pets });
+    const normalizedPets = (pets || []).map(p => {
+      let urls = p.photo_urls;
+      if (!Array.isArray(urls) || urls.length === 0) {
+        urls = p.photo_url ? [p.photo_url] : [];
+      }
+      return {
+        ...p,
+        photo_urls: urls
+      };
+    });
+
+    return NextResponse.json({ success: true, pets: normalizedPets });
   } catch (error: any) {
     console.error('[Pets GET] Server error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
@@ -50,7 +61,8 @@ export async function POST(request: NextRequest) {
       behavior_notes,
       vet_name,
       vet_phone,
-      photo_url
+      photo_url,
+      photo_urls
     } = body;
 
     if (!owner_email || !pet_name || !pet_type) {
@@ -59,36 +71,51 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = owner_email.toLowerCase().trim();
 
-    // Handle base64 photo upload if provided
-    let finalPhotoUrl = photo_url || '';
-    if (photo_url && photo_url.startsWith('data:image/')) {
-      try {
-        const matches = photo_url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-          const base64Data = matches[2];
-          const buffer = Buffer.from(base64Data, 'base64');
-          const randSuffix = Math.random().toString(36).substring(2, 7);
-          const fileName = `pet_${Date.now()}_${randSuffix}.${fileExt}`;
+    // Process photo_urls array (up to 3 photos)
+    let processedPhotoUrls: string[] = [];
+    const rawPhotoUrls = Array.isArray(photo_urls) ? photo_urls : (photo_url ? [photo_url] : []);
+    
+    // Limit to maximum of 3 photos
+    const targetUrls = rawPhotoUrls.slice(0, 3);
 
-          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-            .from('sitter-photos')
-            .upload(fileName, buffer, {
-              contentType: `image/${matches[1]}`,
-              upsert: true
-            });
+    for (const url of targetUrls) {
+      if (typeof url === 'string') {
+        if (url.startsWith('data:image/')) {
+          try {
+            const matches = url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+            if (matches && matches.length === 3) {
+              const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+              const base64Data = matches[2];
+              const buffer = Buffer.from(base64Data, 'base64');
+              const randSuffix = Math.random().toString(36).substring(2, 7);
+              const fileName = `pet_${Date.now()}_${randSuffix}.${fileExt}`;
 
-          if (uploadError) {
-            console.warn('[Pets POST] Storage upload failed. Fallback to raw/base64 URL:', uploadError.message);
-          } else {
-            const { data: publicUrlData } = supabaseAdmin.storage
-              .from('sitter-photos')
-              .getPublicUrl(fileName);
-            finalPhotoUrl = publicUrlData.publicUrl;
+              const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+                .from('sitter-photos')
+                .upload(fileName, buffer, {
+                  contentType: `image/${matches[1]}`,
+                  upsert: true
+                });
+
+              if (uploadError) {
+                console.warn('[Pets POST] Storage upload failed for carousel photo:', uploadError.message);
+                processedPhotoUrls.push(url);
+              } else {
+                const { data: publicUrlData } = supabaseAdmin.storage
+                  .from('sitter-photos')
+                  .getPublicUrl(fileName);
+                processedPhotoUrls.push(publicUrlData.publicUrl);
+              }
+            } else {
+              processedPhotoUrls.push(url);
+            }
+          } catch (ex) {
+            console.error('[Pets POST] Carousel photo upload exception:', ex);
+            processedPhotoUrls.push(url);
           }
+        } else {
+          processedPhotoUrls.push(url);
         }
-      } catch (uploadEx) {
-        console.error('[Pets POST] Photo upload exception:', uploadEx);
       }
     }
 
@@ -106,7 +133,8 @@ export async function POST(request: NextRequest) {
       behavior_notes: behavior_notes || null,
       vet_name: vet_name || null,
       vet_phone: vet_phone || null,
-      photo_url: finalPhotoUrl
+      photo_url: processedPhotoUrls[0] || '',
+      photo_urls: processedPhotoUrls
     };
 
     let resultData = null;

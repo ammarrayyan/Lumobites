@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
+import PetPhotoCarousel from './PetPhotoCarousel';
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -403,13 +404,11 @@ export default function ChatModal({
             </div>
 
             <div className="flex gap-4 mb-4 items-center">
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
-                {petDetails.photo_url ? (
-                  <img src={petDetails.photo_url} alt={petDetails.pet_name} className="w-full h-full object-cover" />
-                ) : (
-                  petDetails.pet_type === 'cat' ? <Cat className="w-8 h-8 text-[#8B5E3C]" /> : petDetails.pet_type === 'dog' ? <Dog className="w-8 h-8 text-[#8B5E3C]" /> : <PawPrint className="w-8 h-8 text-[#8B5E3C]" />
-                )}
-              </div>
+              <PetPhotoCarousel
+                photoUrls={petDetails.photo_urls || (petDetails.photo_url ? [petDetails.photo_url] : [])}
+                petType={petDetails.pet_type}
+                className="w-16 h-16 rounded-xl"
+              />
               <div>
                 <h5 className="font-bold text-gray-900 text-[15px]">{petDetails.pet_name}</h5>
                 <p className="text-xs text-gray-500">

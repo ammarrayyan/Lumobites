@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
+import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil } from 'lucide-react';
 
@@ -211,6 +212,7 @@ export default function PetSitting() {
   const [petFormVetName, setPetFormVetName] = useState('');
   const [petFormVetPhone, setPetFormVetPhone] = useState('');
   const [petFormPhoto, setPetFormPhoto] = useState('');
+  const [petFormPhotos, setPetFormPhotos] = useState<string[]>([]);
   const [submittingPet, setSubmittingPet] = useState(false);
   const [selectedRequestPet, setSelectedRequestPet] = useState<any | null>(null);
 
@@ -317,6 +319,7 @@ export default function PetSitting() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
   const petPhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const petCameraInputRef = useRef<HTMLInputElement | null>(null);
 
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
@@ -873,6 +876,15 @@ export default function PetSitting() {
       setPetFormVetName(pet.vet_name || '');
       setPetFormVetPhone(pet.vet_phone || '');
       setPetFormPhoto(pet.photo_url || '');
+      
+      const urls = Array.isArray(pet.photo_urls) ? pet.photo_urls.filter(Boolean) : [];
+      if (urls.length > 0) {
+        setPetFormPhotos(urls);
+      } else if (pet.photo_url) {
+        setPetFormPhotos([pet.photo_url]);
+      } else {
+        setPetFormPhotos([]);
+      }
     } else {
       setEditingPet(null);
       setPetFormName('');
@@ -888,8 +900,40 @@ export default function PetSitting() {
       setPetFormVetName('');
       setPetFormVetPhone('');
       setPetFormPhoto('');
+      setPetFormPhotos([]);
     }
     setPetModalOpen(true);
+  };
+
+  const handlePhotoUpload = (file: File) => {
+    if (petFormPhotos.length >= 3) {
+      alert("Maximum of 3 photos reached");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        setPetFormPhotos(prev => [...prev, compressed].slice(0, 3));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSavePet = async (e: React.FormEvent) => {
@@ -915,7 +959,8 @@ export default function PetSitting() {
           behavior_notes: petFormNotes,
           vet_name: petFormVetName,
           vet_phone: petFormVetPhone,
-          photo_url: petFormPhoto
+          photo_url: petFormPhotos[0] || '',
+          photo_urls: petFormPhotos
         })
       });
       const data = await res.json();
@@ -2677,13 +2722,7 @@ export default function PetSitting() {
                         {ownerPets.map((pet) => (
                           <div key={pet.id} className="bg-white border border-[#E8DDD4] rounded-2xl p-4 flex gap-4 shadow-sm relative group hover:border-[#8B5E3C] transition-all">
                             {/* Pet Photo / Icon */}
-                            <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#FAF6F4] flex items-center justify-center border border-[#E8DDD4] shrink-0">
-                              {pet.photo_url ? (
-                                <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" />
-                              ) : (
-                                pet.pet_type === 'cat' ? <Cat className="w-6 h-6 text-[#8B5E3C]" /> : pet.pet_type === 'dog' ? <Dog className="w-6 h-6 text-[#8B5E3C]" /> : <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
-                              )}
-                            </div>
+                            <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.pet_type} className="w-16 h-16 rounded-xl" />
 
                             {/* Pet Details */}
                             <div className="flex-1 min-w-0">
@@ -3333,10 +3372,12 @@ export default function PetSitting() {
                                           <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Care Profile: {req.pet_details.pet_name}
                                         </div>
                                         <div className="flex gap-3 flex-col sm:flex-row">
-                                          {req.pet_details.photo_url && (
-                                            <div className="w-14 h-14 rounded-lg overflow-hidden bg-[#FAF6F4] border border-[#E8DDD4] shrink-0 mx-auto sm:mx-0">
-                                              <img src={req.pet_details.photo_url} alt={req.pet_details.pet_name} className="w-full h-full object-cover" />
-                                            </div>
+                                          {(req.pet_details.photo_url || (Array.isArray(req.pet_details.photo_urls) && req.pet_details.photo_urls.filter(Boolean).length > 0)) && (
+                                            <PetPhotoCarousel
+                                              photoUrls={req.pet_details.photo_urls || [req.pet_details.photo_url]}
+                                              petType={req.pet_details.pet_type}
+                                              className="w-14 h-14 rounded-lg"
+                                            />
                                           )}
                                           <div className="flex-1 space-y-1.5 text-[11px]">
                                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -5263,68 +5304,81 @@ export default function PetSitting() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Pet Photo</label>
-                <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center shrink-0">
-                    {petFormPhoto ? (
-                      <img src={petFormPhoto} alt="Pet Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
-                    )}
-                  </div>
-                  <div className="flex gap-2">
+                <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Pet Photos (Up to 3)</label>
+                
+                {/* Photo Previews Grid */}
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {petFormPhotos.map((url, index) => (
+                    <div key={index} className="w-20 h-20 rounded-xl overflow-hidden bg-[#FAF6F4] border border-[#E8DDD4] relative group">
+                      <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPetFormPhotos(prev => prev.filter((_, idx) => idx !== index));
+                        }}
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-650/80 hover:bg-red-650 text-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer border-none shadow-sm transition-all"
+                        title="Remove Photo"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                  {petFormPhotos.length === 0 && (
+                    <div className="w-20 h-20 rounded-xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center">
+                      <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
+                    </div>
+                  )}
+                </div>
+
+                {petFormPhotos.length < 3 ? (
+                  <div className="flex gap-2 items-center">
                     <button
                       type="button"
                       onClick={() => petPhotoInputRef.current?.click()}
-                      className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm text-xs cursor-pointer"
+                      className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2 px-3 rounded-xl transition-all shadow-sm text-xs cursor-pointer flex items-center gap-1.5"
                     >
-                      📁 Choose Photo
+                      📁 Choose from Gallery
                     </button>
-                    <input
-                      type="file"
-                      ref={petPhotoInputRef}
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            const img = new Image();
-                            img.onload = () => {
-                              const canvas = document.createElement('canvas');
-                              let width = img.width;
-                              let height = img.height;
-                              const MAX_WIDTH = 600;
-                              const MAX_HEIGHT = 600;
-                              if (width > height) {
-                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                              } else {
-                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                              }
-                              canvas.width = width;
-                              canvas.height = height;
-                              const ctx = canvas.getContext('2d');
-                              ctx?.drawImage(img, 0, 0, width, height);
-                              setPetFormPhoto(canvas.toDataURL('image/jpeg', 0.8));
-                            };
-                            img.src = reader.result as string;
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                    {petFormPhoto && (
-                      <button
-                        type="button"
-                        onClick={() => setPetFormPhoto('')}
-                        className="text-[11px] text-red-650 font-bold hover:underline cursor-pointer border-none bg-transparent"
-                      >
-                        Remove
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => petCameraInputRef.current?.click()}
+                      className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2 px-3 rounded-xl transition-all shadow-sm text-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      📷 Take Photo
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  <p className="text-[11px] text-[#8B7E7D] font-medium italic">Maximum of 3 photos added.</p>
+                )}
+
+                {/* Hidden File Inputs */}
+                <input
+                  type="file"
+                  ref={petPhotoInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handlePhotoUpload(file);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                <input
+                  type="file"
+                  ref={petCameraInputRef}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handlePhotoUpload(file);
+                      e.target.value = '';
+                    }
+                  }}
+                />
               </div>
 
               <div className="flex gap-3 pt-3 border-t border-[#F0E8E0]">
