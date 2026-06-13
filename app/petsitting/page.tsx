@@ -214,6 +214,14 @@ export default function PetSitting() {
   const [submittingPet, setSubmittingPet] = useState(false);
   const [selectedRequestPet, setSelectedRequestPet] = useState<any | null>(null);
 
+  // Inline Add Pet State
+  const [showInlineAddPet, setShowInlineAddPet] = useState(false);
+  const [inlinePetName, setInlinePetName] = useState('');
+  const [inlinePetType, setInlinePetType] = useState('dog');
+  const [inlinePetBreed, setInlinePetBreed] = useState('');
+  const [inlinePetAge, setInlinePetAge] = useState('');
+  const [inlineSaving, setInlineSaving] = useState(false);
+
   // Become Sitter State
   const [sitterEmail, setSitterEmail] = useState('');
   const [sitterFirstName, setSitterFirstName] = useState('');
@@ -914,7 +922,10 @@ export default function PetSitting() {
       if (res.ok && data.success) {
         alert(editingPet ? 'Pet profile updated! 🐾' : 'Pet profile added! 🐾');
         setPetModalOpen(false);
-        fetchOwnerPets(reqEmail);
+        await fetchOwnerPets(reqEmail);
+        if (data.pet) {
+          setSelectedRequestPet(data.pet);
+        }
       } else {
         alert(data.error || 'Failed to save pet profile.');
       }
@@ -940,6 +951,41 @@ export default function PetSitting() {
       }
     } catch (err) {
       console.error('Failed to delete pet:', err);
+    }
+  };
+
+  const handleSavePetInline = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!inlinePetName.trim()) {
+      alert('Pet name is required');
+      return;
+    }
+    setInlineSaving(true);
+    try {
+      const res = await fetch('/api/petsitting/pets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner_email: reqEmail,
+          pet_name: inlinePetName,
+          pet_type: inlinePetType,
+          breed: inlinePetBreed,
+          age: inlinePetAge,
+          spayed_neutered: false
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.pet) {
+        await fetchOwnerPets(reqEmail);
+        setSelectedRequestPet(data.pet);
+        setShowInlineAddPet(false);
+      } else {
+        alert(data.error || 'Failed to save pet profile.');
+      }
+    } catch (err) {
+      console.error('Failed to save pet inline:', err);
+    } finally {
+      setInlineSaving(false);
     }
   };
 
@@ -1049,8 +1095,29 @@ export default function PetSitting() {
     // Fallback to request details if profile load yielded nothing
     if (!profile) {
       if (req.owner_name) setReqOwnerName(req.owner_name);
-      if (req.pet_name) setReqPetName(req.pet_name);
-      if (req.pet_type) setReqPetType(req.pet_type);
+    }
+
+    // Auto-select the pet if req.pet_id is provided, or if pet_name matches
+    if (req.pet_id) {
+      const found = ownerPets.find(p => p.id === req.pet_id);
+      if (found) {
+        setSelectedRequestPet(found);
+      } else if (req.pet_details) {
+        setSelectedRequestPet(req.pet_details);
+      }
+    } else if (req.pet_name) {
+      const found = ownerPets.find(p => p.pet_name?.toLowerCase().trim() === req.pet_name?.toLowerCase().trim());
+      if (found) {
+        setSelectedRequestPet(found);
+      } else if (req.pet_details) {
+        setSelectedRequestPet(req.pet_details);
+      } else {
+        setSelectedRequestPet({
+          pet_name: req.pet_name,
+          pet_type: req.pet_type || 'dog',
+          age: req.pet_age || ''
+        });
+      }
     }
     
     // Set selected sitter
@@ -1971,6 +2038,12 @@ export default function PetSitting() {
       return;
     }
 
+    if (!selectedRequestPet) {
+      setReqError('Please select a pet or add a new one first');
+      setReqLoading(false);
+      return;
+    }
+
     try {
       if (reqStartDate && reqEndDate) {
         if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
@@ -2007,8 +2080,9 @@ export default function PetSitting() {
       const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
 
-      const finalNotes = reqPetAge.trim() 
-        ? `[Pet Age: ${reqPetAge.trim()}]${reqNotes ? ' ' + reqNotes : ''}` 
+      const petAgeStr = (selectedRequestPet?.age || '').trim();
+      const finalNotes = petAgeStr
+        ? `[Pet Age: ${petAgeStr}]${reqNotes ? ' ' + reqNotes : ''}` 
         : reqNotes;
 
       const res = await fetch('/api/petsitting/request', {
@@ -2018,8 +2092,8 @@ export default function PetSitting() {
           sitter_id: selectedSitter?.id,
           owner_email: reqEmail,
           owner_name: reqOwnerName,
-          pet_name: reqPetName,
-          pet_type: reqPetType,
+          pet_name: selectedRequestPet?.pet_name,
+          pet_type: selectedRequestPet?.pet_type,
           dates: finalDates,
           special_notes: `${reqServiceType ? `Service Requested: ${reqServiceType}\n\n` : ''}${finalNotes}`,
           phone_number: reqPhone || null,
@@ -2039,9 +2113,9 @@ export default function PetSitting() {
             body: JSON.stringify({
               email: reqEmail,
               owner_name: reqOwnerName,
-              pet_name: reqPetName,
-              pet_type: reqPetType,
-              pet_age: reqPetAge,
+              pet_name: selectedRequestPet?.pet_name,
+              pet_type: selectedRequestPet?.pet_type,
+              pet_age: selectedRequestPet?.age || '',
               phone_number: reqPhone || null,
               special_notes: reqNotes || null
             })
@@ -4119,55 +4193,147 @@ export default function PetSitting() {
                     </div>
                   </div>
 
-                  {ownerPets.length > 0 && (
-                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 mb-2 flex items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <label className="block text-xs font-bold text-[#8B5E3C] mb-1">
-                          ✨ Select from your saved pets:
-                        </label>
-                        <select
-                          className="w-full bg-white border border-[#E8DDD4] rounded-lg px-3 py-1.5 text-[#4A3E3D] text-xs focus:outline-none focus:border-[#8B5E3C] cursor-pointer"
-                          value={selectedRequestPet?.id || ''}
-                          onChange={(e) => {
-                            const petId = e.target.value;
-                            if (petId === '') {
-                              setSelectedRequestPet(null);
-                            } else {
-                              const found = ownerPets.find(p => p.id === petId);
-                              if (found) {
-                                setSelectedRequestPet(found);
-                                setReqPetName(found.pet_name || '');
-                                setReqPetType(found.pet_type || 'dog');
-                                setReqPetAge(found.age || '');
-                              }
-                            }
-                          }}
-                        >
-                          <option value="">-- Choose a pet (optional) --</option>
-                          {ownerPets.map(p => (
-                            <option key={p.id} value={p.id}>{p.pet_name} ({p.breed || p.pet_type})</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  )}
+                  {/* Select Pet Dropdown */}
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-4">
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5 flex items-center gap-1">
+                      🐾 Select Pet *
+                    </label>
+                    <select
+                      required
+                      className="w-full bg-white border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C] cursor-pointer font-medium"
+                      value={showInlineAddPet ? 'add_new' : (selectedRequestPet?.id || '')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'add_new') {
+                          setShowInlineAddPet(true);
+                          setSelectedRequestPet(null);
+                          setInlinePetName('');
+                          setInlinePetType('dog');
+                          setInlinePetBreed('');
+                          setInlinePetAge('');
+                        } else if (val === '') {
+                          setSelectedRequestPet(null);
+                          setShowInlineAddPet(false);
+                        } else {
+                          const found = ownerPets.find(p => p.id === val);
+                          if (found) {
+                            setSelectedRequestPet(found);
+                            setShowInlineAddPet(false);
+                          }
+                        }
+                      }}
+                    >
+                      <option value="">-- Choose a pet --</option>
+                      {ownerPets.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.pet_name} ({p.pet_type === 'cat' ? '🐱 cat' : p.pet_type === 'dog' ? '🐶 dog' : '🐾 other'}{p.breed ? ` • ${p.breed}` : ''})
+                        </option>
+                      ))}
+                      <option value="add_new" className="font-bold text-[#8B5E3C]">+ Add New Pet</option>
+                    </select>
 
-                  <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name</label>
-                      <input required type="text" value={reqPetName} onChange={e => setReqPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type</label>
-                      <select value={reqPetType} onChange={e => setReqPetType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
-                        <option value="dog">Dog</option>
-                        <option value="cat">Cat</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Age</label>
-                      <input type="text" value={reqPetAge} onChange={e => setReqPetAge(e.target.value)} placeholder="e.g. 3 yrs" className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                    </div>
+                    {/* Inline Quick Pet Form */}
+                    {showInlineAddPet && (
+                      <div className="mt-4 bg-white border border-[#E8DDD4] rounded-xl p-4 space-y-3 shadow-sm animate-fade-in text-left">
+                        <div className="text-xs font-bold text-[#8B5E3C] flex items-center justify-between border-b border-[#FAF6F4] pb-2 mb-1">
+                          <span>✨ Quick Pet Profile</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Transition to full pet profile modal
+                              setEditingPet(null);
+                              setPetFormName(inlinePetName);
+                              setPetFormType(inlinePetType);
+                              setPetFormBreed(inlinePetBreed);
+                              setPetFormAge(inlinePetAge);
+                              setPetFormWeight('');
+                              setPetFormGender('');
+                              setPetFormSpayed(false);
+                              setPetFormFeeding('');
+                              setPetFormMedication('');
+                              setPetFormNotes('');
+                              setPetFormVetName('');
+                              setPetFormVetPhone('');
+                              setPetFormPhoto('');
+                              setPetModalOpen(true);
+                              setShowInlineAddPet(false);
+                            }}
+                            className="text-[10px] text-[#8B5E3C] hover:underline cursor-pointer bg-transparent border-none flex items-center gap-1 font-bold"
+                          >
+                            Expand to full profile ➔
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-[#4A3E3D] mb-1">Pet Name *</label>
+                            <input
+                              type="text"
+                              value={inlinePetName}
+                              onChange={(e) => setInlinePetName(e.target.value)}
+                              placeholder="e.g. Buddy"
+                              className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-[#4A3E3D] mb-1">Pet Type *</label>
+                            <select
+                              value={inlinePetType}
+                              onChange={(e) => setInlinePetType(e.target.value)}
+                              className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                            >
+                              <option value="dog">Dog</option>
+                              <option value="cat">Cat</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-[#4A3E3D] mb-1">Breed</label>
+                            <input
+                              type="text"
+                              value={inlinePetBreed}
+                              onChange={(e) => setInlinePetBreed(e.target.value)}
+                              placeholder="e.g. Golden Retriever"
+                              className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-[#4A3E3D] mb-1">Age</label>
+                            <input
+                              type="text"
+                              value={inlinePetAge}
+                              onChange={(e) => setInlinePetAge(e.target.value)}
+                              placeholder="e.g. 3 yrs"
+                              className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-2 border-t border-[#FAF6F4]">
+                          <button
+                            type="button"
+                            disabled={inlineSaving}
+                            onClick={handleSavePetInline}
+                            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold py-2 px-3 rounded-lg transition-all cursor-pointer border-none disabled:opacity-50"
+                          >
+                            {inlineSaving ? 'Saving...' : '✓ Save & Select'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowInlineAddPet(false);
+                              setSelectedRequestPet(null);
+                            }}
+                            className="bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 text-[11px] font-bold py-2 px-3 rounded-lg transition-all cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
