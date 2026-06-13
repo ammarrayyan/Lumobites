@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Send, CheckCheck, Check, Phone, Video, Info } from 'lucide-react';
+import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -222,7 +222,7 @@ export default function ChatModal({
                   showPetProfile ? 'bg-amber-100 text-amber-700 hover:bg-amber-150' : 'hover:bg-amber-50 text-amber-600'
                 }`}
               >
-                <Info size={16} />
+                <PawPrint size={16} />
               </button>
             )}
             {otherUserEmail && (
@@ -392,7 +392,7 @@ export default function ChatModal({
           >
             <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
               <h4 className="font-black text-gray-800 text-[15px] flex items-center gap-1.5">
-                <span>🐾</span> Pet Care Profile
+                <PawPrint className="w-5 h-5 text-[#8B5E3C]" /> Pet Care Profile
               </h4>
               <button 
                 onClick={() => setShowPetProfile(false)}
@@ -407,7 +407,7 @@ export default function ChatModal({
                 {petDetails.photo_url ? (
                   <img src={petDetails.photo_url} alt={petDetails.pet_name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-3xl">{petDetails.pet_type === 'cat' ? '🐱' : petDetails.pet_type === 'dog' ? '🐶' : '🐾'}</span>
+                  petDetails.pet_type === 'cat' ? <Cat className="w-8 h-8 text-[#8B5E3C]" /> : petDetails.pet_type === 'dog' ? <Dog className="w-8 h-8 text-[#8B5E3C]" /> : <PawPrint className="w-8 h-8 text-[#8B5E3C]" />
                 )}
               </div>
               <div>

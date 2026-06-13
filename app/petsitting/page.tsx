@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil } from 'lucide-react';
 
 
 export function formatSitterName(fullName) {
@@ -2652,7 +2652,7 @@ export default function PetSitting() {
                     <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
                       <div>
                         <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
-                          🐾 My Pets
+                          <PawPrint className="w-5 h-5 text-[#8B5E3C]" /> My Pets
                         </h4>
                         <p className="text-xs text-[#8B7E7D] mt-0.5">
                           Manage your pets' profiles to automatically share their care details with sitters.
@@ -2668,7 +2668,7 @@ export default function PetSitting() {
 
                     {ownerPets.length === 0 ? (
                       <div className="text-center py-8 text-[#8B7E7D] bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4] flex flex-col items-center gap-2">
-                        <span className="text-2xl">🐶🐱</span>
+                        <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
                         <p className="text-sm font-semibold text-[#4A3E3D]">No pets added yet</p>
                         <p className="text-xs max-w-xs leading-relaxed px-4">Add your pet's details (breed, feeding, medications) to make booking sitters quick and easy.</p>
                       </div>
@@ -2681,7 +2681,7 @@ export default function PetSitting() {
                               {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover" />
                               ) : (
-                                <span className="text-2xl">{pet.pet_type === 'cat' ? '🐱' : pet.pet_type === 'dog' ? '🐶' : '🐾'}</span>
+                                pet.pet_type === 'cat' ? <Cat className="w-6 h-6 text-[#8B5E3C]" /> : pet.pet_type === 'dog' ? <Dog className="w-6 h-6 text-[#8B5E3C]" /> : <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
                               )}
                             </div>
 
@@ -3330,7 +3330,7 @@ export default function PetSitting() {
                                     {req.pet_details && (
                                       <div className="col-span-1 sm:col-span-2 mt-2 bg-white rounded-xl border border-[#E8DDD4] p-3 text-xs text-[#4A3E3D]">
                                         <div className="font-bold text-[#8B5E3C] mb-2 flex items-center gap-1.5 border-b border-[#FAF6F4] pb-1.5">
-                                          <span>🐾</span> Care Profile: {req.pet_details.pet_name}
+                                          <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Care Profile: {req.pet_details.pet_name}
                                         </div>
                                         <div className="flex gap-3 flex-col sm:flex-row">
                                           {req.pet_details.photo_url && (
@@ -3348,17 +3348,17 @@ export default function PetSitting() {
                                               )}
                                             </div>
                                             {req.pet_details.feeding_schedule && (
-                                              <div><strong>🥣 Feeding:</strong> {req.pet_details.feeding_schedule}</div>
+                                              <div><strong>Feeding:</strong> {req.pet_details.feeding_schedule}</div>
                                             )}
                                             {req.pet_details.medication && (
-                                              <div><strong>💊 Medications:</strong> {req.pet_details.medication}</div>
+                                              <div><strong>Medications:</strong> {req.pet_details.medication}</div>
                                             )}
                                             {req.pet_details.behavior_notes && (
-                                              <div><strong>🧠 Behavior Notes:</strong> {req.pet_details.behavior_notes}</div>
+                                              <div><strong>Behavior Notes:</strong> {req.pet_details.behavior_notes}</div>
                                             )}
                                             {(req.pet_details.vet_name || req.pet_details.vet_phone) && (
                                               <div className="text-[10px] text-[#8B7E7D] bg-[#FAF6F4] p-1.5 rounded-lg border border-[#E8DDD4] mt-1 inline-block">
-                                                🏥 Vet: {req.pet_details.vet_name || 'N/A'} {req.pet_details.vet_phone && `(${req.pet_details.vet_phone})`}
+                                                Vet: {req.pet_details.vet_name || 'N/A'} {req.pet_details.vet_phone && `(${req.pet_details.vet_phone})`}
                                               </div>
                                             )}
                                           </div>
@@ -4196,7 +4196,7 @@ export default function PetSitting() {
                   {/* Select Pet Dropdown */}
                   <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-4">
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5 flex items-center gap-1">
-                      🐾 Select Pet *
+                      <PawPrint className="w-4 h-4 text-[#8B5E3C] inline" /> Select Pet *
                     </label>
                     <select
                       required
@@ -4226,7 +4226,7 @@ export default function PetSitting() {
                       <option value="">-- Choose a pet --</option>
                       {ownerPets.map(p => (
                         <option key={p.id} value={p.id}>
-                          {p.pet_name} ({p.pet_type === 'cat' ? '🐱 cat' : p.pet_type === 'dog' ? '🐶 dog' : '🐾 other'}{p.breed ? ` • ${p.breed}` : ''})
+                          {p.pet_name} ({p.pet_type === 'cat' ? 'cat' : p.pet_type === 'dog' ? 'dog' : 'other'}{p.breed ? ` • ${p.breed}` : ''})
                         </option>
                       ))}
                       <option value="add_new" className="font-bold text-[#8B5E3C]">+ Add New Pet</option>
@@ -4236,7 +4236,9 @@ export default function PetSitting() {
                     {showInlineAddPet && (
                       <div className="mt-4 bg-white border border-[#E8DDD4] rounded-xl p-4 space-y-3 shadow-sm animate-fade-in text-left">
                         <div className="text-xs font-bold text-[#8B5E3C] flex items-center justify-between border-b border-[#FAF6F4] pb-2 mb-1">
-                          <span>✨ Quick Pet Profile</span>
+                          <span className="flex items-center gap-1">
+                            <PawPrint className="w-3.5 h-3.5 text-[#8B5E3C]" /> Quick Pet Profile
+                          </span>
                           <button
                             type="button"
                             onClick={() => {
@@ -4260,7 +4262,7 @@ export default function PetSitting() {
                             }}
                             className="text-[10px] text-[#8B5E3C] hover:underline cursor-pointer bg-transparent border-none flex items-center gap-1 font-bold"
                           >
-                            Expand to full profile ➔
+                            <Pencil className="w-3 h-3" /> Add more details
                           </button>
                         </div>
 
@@ -4317,9 +4319,9 @@ export default function PetSitting() {
                             type="button"
                             disabled={inlineSaving}
                             onClick={handleSavePetInline}
-                            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold py-2 px-3 rounded-lg transition-all cursor-pointer border-none disabled:opacity-50"
+                            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold py-2 px-3 rounded-lg transition-all cursor-pointer border-none disabled:opacity-50 flex items-center gap-1.5"
                           >
-                            {inlineSaving ? 'Saving...' : '✓ Save & Select'}
+                            {inlineSaving ? 'Saving...' : <><Check className="w-3.5 h-3.5" /> Save & Select</>}
                           </button>
                           <button
                             type="button"
@@ -5116,7 +5118,7 @@ export default function PetSitting() {
             </button>
 
             <h3 className="text-xl font-black text-[#4A3E3D] mb-4 flex items-center gap-2">
-              🐾 {editingPet ? 'Edit Pet Profile' : 'Add a Pet'}
+              <PawPrint className="w-5 h-5 text-[#8B5E3C]" /> {editingPet ? 'Edit Pet Profile' : 'Add a Pet'}
             </h3>
 
             <form onSubmit={handleSavePet} className="space-y-4">
@@ -5267,7 +5269,7 @@ export default function PetSitting() {
                     {petFormPhoto ? (
                       <img src={petFormPhoto} alt="Pet Preview" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-xl">🐾</span>
+                      <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
                     )}
                   </div>
                   <div className="flex gap-2">
