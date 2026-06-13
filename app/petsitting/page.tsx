@@ -232,7 +232,6 @@ export default function PetSitting() {
   const [sitterLastName, setSitterLastName] = useState('');
   const sitterName = `${sitterFirstName} ${sitterLastName}`.trim();
   const [sitterPhoto, setSitterPhoto] = useState('');
-  const [sitterCoverPhoto, setSitterCoverPhoto] = useState('');
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
   const [hasExistingIdPhoto, setHasExistingIdPhoto] = useState(false);
   const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
@@ -321,8 +320,6 @@ export default function PetSitting() {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
-  const coverPhotoInputRef = useRef<HTMLInputElement | null>(null);
-  const dashboardCoverPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const petPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const petCameraInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1478,7 +1475,6 @@ export default function PetSitting() {
           setSitterFirstName(nameParts[0] || '');
           setSitterLastName(nameParts.slice(1).join(' ') || '');
           setSitterPhoto(data.photo_url || '');
-          setSitterCoverPhoto(data.cover_photo_url || '');
           setHasExistingIdPhoto(!!data.id_photo_url);
           setSitterCity(data.city || '');
           setSitterLocationInput(data.city || '');
@@ -1735,7 +1731,6 @@ export default function PetSitting() {
     setSitterFirstName('');
     setSitterLastName('');
     setSitterPhoto('');
-    setSitterCoverPhoto('');
     setSitterCity('');
     setSitterLocationInput('');
     setSitterLocationVerified(false);
@@ -1761,60 +1756,7 @@ export default function PetSitting() {
     alert('Signed out successfully.');
   };
 
-  const handleUpdateCoverPhoto = async (base64Image: string) => {
-    setProfileLoading(true);
-    setProfileMessage('');
-    try {
-      const res = await fetch('/api/petsitting/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: sitterEmail,
-          name: sitterName,
-          photo_url: sitterPhoto,
-          cover_photo_url: base64Image,
-          city: sitterCity || sitterLocationInput,
-          zip: '',
-          country: (() => {
-            const addressParts = (sitterCity || sitterLocationInput || '').split(',');
-            const parsedCountry = addressParts.length > 0 ? addressParts[addressParts.length - 1].trim() : '';
-            return sitterSelectedLocation?.country || parsedCountry || '';
-          })(),
-          bio: sitterBio,
-          pet_types: sitterPetTypes,
-          rate_per_night: sitterRate,
-          rate_type: sitterRateType,
-          rate_dropins: sitterRateDropins,
-          rate_walking: sitterRateWalking,
-          rate_overnight: sitterRateOvernight,
-          rate_boarding: sitterRateBoarding,
-          rate_daycare: sitterRateDaycare,
-          phone_number: sitterPhone,
-          phone_visible: sitterPhoneVisible,
-          availability: sitterAvailable,
-          available_days: sitterAvailableDays,
-          available_times: sitterAvailableTimes,
-          service_types: sitterServiceTypes,
-          gender: sitterGender,
-          self_declared: selfDeclared
-        })
-      });
 
-      if (res.ok) {
-        const updatedData = await res.json();
-        setSitterId(updatedData.id || '');
-        setSitterCoverPhoto(updatedData.cover_photo_url || '');
-        alert('Cover photo updated successfully!');
-      } else {
-        const err = await res.json();
-        alert(err.error || 'Failed to update cover photo.');
-      }
-    } catch (error) {
-      alert('Connection problem. Please try again.');
-    } finally {
-      setProfileLoading(false);
-    }
-  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1850,7 +1792,6 @@ export default function PetSitting() {
           email: sitterEmail,
           name: sitterName,
           photo_url: sitterPhoto,
-          cover_photo_url: sitterCoverPhoto,
           ...(sitterIdPhoto ? { id_photo_url: sitterIdPhoto } : {}),
           city: sitterCity || sitterLocationInput,
           zip: '',
@@ -2146,19 +2087,8 @@ export default function PetSitting() {
     if (videoRef.current && cameraTarget) {
       const video = videoRef.current;
       const canvas = document.createElement('canvas');
-      
-      let width = video.videoWidth || 640;
-      let height = video.videoHeight || 640;
-      
-      if (cameraTarget === 'cover') {
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 400;
-        const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-        if (scale < 1) {
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-      }
+      const width = video.videoWidth || 640;
+      const height = video.videoHeight || 640;
       
       canvas.width = width;
       canvas.height = height;
@@ -2166,21 +2096,12 @@ export default function PetSitting() {
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         
         if (cameraTarget === 'selfie') {
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           setSitterPhoto(dataUrl);
           setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
-        } else if (cameraTarget === 'cover') {
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          if (profilePreviewMode) {
-            handleUpdateCoverPhoto(dataUrl);
-          } else {
-            setSitterCoverPhoto(dataUrl);
-            setFormErrors(prev => { const newErr = {...prev}; delete newErr.cover_photo; return newErr; });
-          }
         } else {
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           setSitterIdPhoto(dataUrl);
         }
       }
@@ -2701,38 +2622,22 @@ export default function PetSitting() {
                         key={sitter.id}
                         id={`sitter-card-${sitter.id}`}
                         onClick={() => handleViewReviews(sitter)}
-                        className={`bg-white rounded-3xl overflow-hidden border transition-all duration-300 cursor-pointer ${
+                        className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
                           highlightedSitterId === sitter.id 
                             ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
                             : 'border-[#E8DDD4] shadow-sm hover:shadow-md'
                         }`}
                       >
-                        {/* Cover Photo */}
-                        <div className="relative h-28 w-full bg-[#E8DDD4] overflow-hidden">
-                          {sitter.cover_photo_url ? (
-                            <img 
-                              src={sitter.cover_photo_url} 
-                              alt="" 
-                              className="w-full h-full object-cover" 
-                            />
+                        
+                        <div className="flex items-start gap-4 mb-4">
+                          {sitter.photo_url ? (
+                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0" />
                           ) : (
-                            <div 
-                              className="w-full h-full" 
-                              style={{ background: 'linear-gradient(135deg, #8B5E3C, #C17D3C)' }} 
-                            />
+                            <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl flex-shrink-0">
+                              {formatSitterName(sitter.name).charAt(0)}
+                            </div>
                           )}
-                        </div>
-
-                        <div className="p-6 pt-3">
-                          <div className="flex items-end gap-4 -mt-12 mb-4 relative z-10">
-                            {sitter.photo_url ? (
-                              <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md flex-shrink-0" />
-                            ) : (
-                              <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-2xl border-4 border-white shadow-md flex-shrink-0">
-                                {formatSitterName(sitter.name).charAt(0)}
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0 pb-1">
+                          <div className="flex-1 min-w-0">
                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
                                {sitter.gender && (
@@ -2847,7 +2752,6 @@ export default function PetSitting() {
                             </button>
                           </div>
                         )}
-                        </div> {/* CLOSE p-6 pt-3 */}
                       </div>
                     ))}
                   </div>
@@ -3243,111 +3147,18 @@ export default function PetSitting() {
                 )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden">
-                  
-                  {/* Dashboard Cover Photo Input */}
-                  <input 
-                    type="file"
-                    ref={dashboardCoverPhotoInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 4 * 1024 * 1024) {
-                          alert('Your cover photo is too large. Please use an image under 4MB');
-                          return;
-                        }
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          const img = new window.Image();
-                          img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const MAX_WIDTH = 1200;
-                            const MAX_HEIGHT = 400;
-                            const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-                            if (scale < 1) {
-                              width = Math.round(width * scale);
-                              height = Math.round(height * scale);
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx?.drawImage(img, 0, 0, width, height);
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                            handleUpdateCoverPhoto(compressedBase64);
-                          };
-                          img.src = reader.result as string;
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-
-                  {/* Cover Photo banner */}
-                  <div className="relative h-28 w-full bg-[#E8DDD4] overflow-hidden group">
-                    {sitterCoverPhoto ? (
-                      <img 
-                        src={sitterCoverPhoto} 
-                        alt="" 
-                        className="w-full h-full object-cover" 
-                      />
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
+                  <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
+                  <div className="flex items-center gap-4 mb-4 mt-2">
+                    {sitterPhoto ? (
+                      <img src={sitterPhoto} alt={sitterName} className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white" />
                     ) : (
-                      <div 
-                        className="w-full h-full" 
-                        style={{ background: 'linear-gradient(135deg, #8B5E3C, #C17D3C)' }} 
-                      />
+                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-xl font-bold text-[#8B7E7D]">
+                        {sitterName.charAt(0) || '?'}
+                      </div>
                     )}
-                    
-                    {/* Status badge overlaid on top-left of cover */}
-                    <div className="absolute top-2 left-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider z-10">
-                      {sitterApprovalStatus}
-                    </div>
-
-                    {/* Edit Overlay (Visible on hover in group) */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-200 z-10">
-                      <button
-                        type="button"
-                        onClick={() => dashboardCoverPhotoInputRef.current?.click()}
-                        className="bg-white hover:bg-gray-100 text-[#8B5E3C] font-bold text-[10px] px-2.5 py-1.5 rounded-lg shadow flex items-center gap-1 cursor-pointer"
-                      >
-                        <Upload className="w-3 h-3" /> Upload
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => startCamera('cover')}
-                        className="bg-white hover:bg-gray-100 text-[#8B5E3C] font-bold text-[10px] px-2.5 py-1.5 rounded-lg shadow flex items-center gap-1 cursor-pointer"
-                      >
-                        <Camera className="w-3 h-3" /> Take Photo
-                      </button>
-                    </div>
-                    
-                    {/* Mobile Edit Button (always visible in top right on mobile) */}
-                    <div className="absolute top-2 right-2 sm:hidden z-20">
-                      <button
-                        type="button"
-                        onClick={() => dashboardCoverPhotoInputRef.current?.click()}
-                        className="bg-black/60 text-white rounded-full p-2 shadow flex items-center justify-center cursor-pointer"
-                        title="Edit Cover Photo"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-6 pt-3">
-                    <div className="flex items-end gap-4 -mt-12 mb-4 relative z-10">
-                      {sitterPhoto ? (
-                        <img src={sitterPhoto} alt={sitterName} className="w-20 h-20 rounded-full object-cover shadow-sm border-4 border-white flex-shrink-0" />
-                      ) : (
-                        <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-xl font-bold text-[#8B7E7D] border-4 border-white flex-shrink-0">
-                          {sitterName.charAt(0) || '?'}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0 pb-1">
-                        <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName || 'New Sitter'}</h3>
+                    <div>
+                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
                       {completedBookings > 0 && (
                         <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
                           <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
@@ -3378,7 +3189,6 @@ export default function PetSitting() {
                     </div>
                   </div>
                 </div>
-              </div>
 
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
