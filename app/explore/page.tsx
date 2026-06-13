@@ -7,7 +7,8 @@ import PetTwinPreview from '@/components/PetTwinPreview';
 import LostPetsPreview from '@/components/LostPetsPreview';
 import PetSittingPreview from '@/components/PetSittingPreview';
 import CityBoardPreview from '@/components/CityBoardPreview';
-import { Compass, Sparkles, Footprints, Home as HomeIcon, MessageSquare } from 'lucide-react';
+import BrandMarquee from '@/components/BrandMarquee';
+import { Compass, Sparkles, Footprints, Home as HomeIcon, MessageSquare, Target, Search, AlertTriangle, ShoppingBag } from 'lucide-react';
 
 export default function ExplorePage() {
   return (
@@ -69,6 +70,90 @@ export default function ExplorePage() {
         {/* 4. City Board Discussion Preview */}
         <CityBoardPreview />
       </div>
+
+      {/* BRAND LOGOS STRIP */}
+      <BrandMarquee />
+
+      {/* HOW IT WORKS */}
+      <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
+            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(20px, 2.5vw, 28px)' }}>
+              Personalized recommendations, not generic lists.
+            </h2>
+          </div>
+          <div className="flex flex-wrap justify-center gap-6">
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <Target className="w-9 h-9 text-[#8B5E3C] mb-5" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Matched to your pet</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <Search className="w-9 h-9 text-[#8B5E3C] mb-5" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Ingredient Safety Check</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <AlertTriangle className="w-9 h-9 text-[#8B5E3C] mb-5" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <Sparkles className="w-9 h-9 text-[#8B5E3C] mb-5" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
+            </div>
+            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+              <ShoppingBag className="w-9 h-9 text-[#8B5E3C] mb-5" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
+              <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
+            </div>
+            <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
+              <HomeIcon className="w-9 h-9 text-[#8B5E3C] mb-5 relative z-10" />
+              <h3 className="text-[#191919] font-bold text-xl mb-2 relative z-10">Sitting & Community</h3>
+              <p className="text-[#666666] text-base leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* BOTTOM CTA */}
+      <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
+        <div className="max-w-[700px] mx-auto">
+          <h2 className="font-[800] tracking-[-0.02em] leading-tight mb-4" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: '#FFFFFF' }}>
+            Ready to find the perfect food?
+          </h2>
+          <p className="text-[18px] mb-10 max-w-[480px] mx-auto" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            Join thousands of pet owners who found their pet&apos;s favorite food.
+          </p>
+          <Link href="/chat" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
+            Get Started &rarr;
+          </Link>
+        </div>
+      </section>
+
+      {/* AFFILIATE SECTION */}
+      <section className="w-full py-16 px-6 text-center border-t border-[#E8D5C0]" style={{ backgroundColor: '#FAF6F4' }}>
+        <div className="max-w-[700px] mx-auto flex flex-col items-center">
+          <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
+            <Footprints className="w-3.5 h-3.5" /> Public Affiliate Program
+          </div>
+          <h2 className="font-[900] text-[#191919] tracking-[-0.02em] leading-tight mb-4 animate-fade-in flex items-center justify-center gap-2" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
+            Earn money sharing Lumo Bites <Footprints className="w-8 h-8 text-[#8B5E3C] inline-block" />
+          </h2>
+          <p className="text-gray-600 mb-8 max-w-[540px] leading-relaxed text-sm md:text-base">
+            Join our affiliate program and earn <strong className="text-[#8B5E3C]">$1 for every PRO member</strong> you refer — every month they stay subscribed. Payouts via PayPal once you reach $50.
+          </p>
+          <Link
+            href="/affiliate"
+            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:scale-[1.02] hover:shadow-lg transition-all text-sm cursor-pointer"
+            style={{ textDecoration: 'none' }}
+          >
+            Apply Now &rarr;
+          </Link>
+        </div>
+      </section>
 
       {/* FOOTER */}
       <footer className="w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
