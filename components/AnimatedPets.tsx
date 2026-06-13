@@ -75,14 +75,6 @@ export default function AnimatedPets() {
         </div>
       </Link>
 
-      {/* Subtle secondary pill */}
-      <Link 
-        href="/twin"
-        className="inline-flex items-center gap-1.5 text-[#999999] hover:text-[#8B5E3C] hover:bg-[#8B5E3C]/5 px-3 py-1 rounded-full text-[12px] tracking-wide transition-all select-none opacity-80 hover:opacity-100"
-        style={{ textDecoration: 'none' }}
-      >
-        <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" /> Find Your Pet Twin
-      </Link>
     </div>
   );
 }
