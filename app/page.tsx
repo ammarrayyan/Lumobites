@@ -106,19 +106,7 @@ export default function Home() {
             }
           `}</style>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Free to Join
-            </span>
-            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> Community Powered
-            </span>
-            <span style={{ color: '#DDD', fontSize: '16px' }}>&#183;</span>
-            <span style={{ fontSize: '13px', color: '#999', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ color: '#8B5E3C', fontWeight: 700 }}>&#10003;</span> AI Driven
-            </span>
-          </div>
+
 
         </div>
       </section>
