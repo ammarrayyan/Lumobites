@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Footprints, CheckCircle, MapPin } from 'lucide-react';
+import { Footprints, CheckCircle, MapPin, RefreshCw } from 'lucide-react';
 
 export default function PostLostPet() {
   const router = useRouter();
@@ -28,12 +28,63 @@ export default function PostLostPet() {
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     handlePhotoUpload(e);
+  };
+
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      setIsDetectingLocation(true);
+      setIsLocating(true);
+      setLocationVerified(false);
+      setSelectedLocation(null);
+      setLocationOptions([]);
+      setError('');
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            const res = await fetch(`/api/petsitting/geocode?latlng=${lat},${lng}`);
+            const data = await res.json();
+            if (res.ok && data.lat && data.lng) {
+              const locationName = data.formatted_address || data.city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              setLocationInput(locationName);
+              setCity(locationName);
+              setSelectedLocation({
+                formatted_address: locationName,
+                lat: data.lat,
+                lng: data.lng
+              });
+              setLocationVerified(true);
+            } else {
+              setError('Could not determine your location name.');
+            }
+          } catch (e) {
+            console.error('Reverse geocoding error:', e);
+            setError('Failed to parse your location name.');
+          } finally {
+            setIsLocating(false);
+            setIsDetectingLocation(false);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setIsLocating(false);
+          setIsDetectingLocation(false);
+          setError('Unable to get your location. Please enter manually.');
+          alert('Unable to get your location. Please enter manually.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
   };
 
   const handleLocationBlur = async () => {
@@ -248,29 +299,52 @@ export default function PostLostPet() {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Seen Location (City or Zip Code)</label>
-                <div className="relative">
-                  <input 
-                    required 
-                    type="text" 
-                    value={locationInput} 
-                    onChange={e => {
-                      setLocationInput(e.target.value);
-                      setLocationVerified(false);
-                      setSelectedLocation(null);
-                      setLocationOptions([]);
-                    }} 
-                    onBlur={handleLocationBlur}
-                    className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
-                    placeholder="Enter city name OR 5-digit zip code..." 
-                  />
-                  {isLocating && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
-                  )}
-                  {locationVerified && !isLocating && selectedLocation && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                    </div>
-                  )}
+                <div className="flex gap-2">
+                  <div className="relative flex-grow">
+                    <input 
+                      required 
+                      type="text" 
+                      value={locationInput} 
+                      onChange={e => {
+                        setLocationInput(e.target.value);
+                        setLocationVerified(false);
+                        setSelectedLocation(null);
+                        setLocationOptions([]);
+                      }} 
+                      onBlur={handleLocationBlur}
+                      className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
+                      placeholder="Enter city name OR 5-digit zip code..." 
+                    />
+                    {isLocating && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                    {locationVerified && !isLocating && selectedLocation && (
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleUseMyLocation}
+                    disabled={isDetectingLocation}
+                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm ${
+                      isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''
+                    }`}
+                    title="Use my current location"
+                  >
+                    {isDetectingLocation ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" />
+                        <span className="hidden sm:inline">📍 Detecting location...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📍</span>
+                        <span className="hidden sm:inline">Use My Location</span>
+                      </>
+                    )}
+                  </button>
                 </div>
                 
                 {selectedLocation && (
