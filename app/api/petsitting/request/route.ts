@@ -258,3 +258,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const id = request.nextUrl.searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Request ID is required' }, { status: 400 });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('status')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('[Request GET] Supabase Error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Request not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, status: data.status });
+  } catch (err: any) {
+    console.error('[Request GET] Error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

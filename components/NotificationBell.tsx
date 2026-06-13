@@ -58,6 +58,26 @@ export default function NotificationBell({ email }: { email: string }) {
         body: JSON.stringify({ id })
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      
+      if (link && link.includes('chat=')) {
+        try {
+          const urlParams = new URLSearchParams(link.split('?')[1] || '');
+          const bookingId = urlParams.get('chat');
+          if (bookingId) {
+            const res = await fetch(`/api/petsitting/request?id=${bookingId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.status === 'cancelled') {
+                alert("This booking has been cancelled and the conversation is no longer available");
+                return;
+              }
+            }
+          }
+        } catch (checkErr) {
+          console.error('Failed to check booking status:', checkErr);
+        }
+      }
+
       if (link) {
         window.location.href = link;
       }
