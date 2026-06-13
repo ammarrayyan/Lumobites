@@ -30,6 +30,31 @@ export default function ExplorePage() {
         </div>
       </section>
 
+      {/* STATS BAR */}
+      <section className="w-full bg-[#F5EDE4] border-b border-[#E8D5C0] py-5">
+        <div className="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
+          <div className="flex flex-col items-center">
+            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">Built for Pet Lovers</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Community Powered</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">AI Driven</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Smart Recommendations</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">Free to Join</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>No Hidden Fees</span>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
+          <div className="flex flex-col items-center">
+            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">FDA Monitored</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Real Time Recall Alerts</span>
+          </div>
+        </div>
+      </section>
+
       {/* EXPLORE PAGE MAIN FEED GRID/LAYOUT */}
       <div className="flex-1 flex flex-col">
         {/* 1. Pet Twin Matcher Preview */}
