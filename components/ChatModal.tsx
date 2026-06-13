@@ -31,6 +31,7 @@ interface ChatModalProps {
   otherUserEmail: string;
   otherUserType: 'sitter' | 'user';
   onReport: (email: string, type: 'sitter' | 'user') => void;
+  petDetails?: any;
 }
 
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
@@ -75,8 +76,10 @@ export default function ChatModal({
   otherUserEmail,
   otherUserType,
   onReport,
+  petDetails,
 }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [showPetProfile, setShowPetProfile] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -211,6 +214,17 @@ export default function ChatModal({
 
           {/* Action icons */}
           <div className="flex items-center gap-1">
+            {petDetails && (
+              <button 
+                onClick={() => setShowPetProfile(prev => !prev)} 
+                title="View Pet Care Profile"
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors mr-1 cursor-pointer ${
+                  showPetProfile ? 'bg-amber-100 text-amber-700 hover:bg-amber-150' : 'hover:bg-amber-50 text-amber-600'
+                }`}
+              >
+                <Info size={16} />
+              </button>
+            )}
             {otherUserEmail && (
               <button 
                 onClick={() => onReport(otherUserEmail, otherUserType)} 
@@ -369,6 +383,91 @@ export default function ChatModal({
             Enter to send &middot; Shift+Enter for new line
           </p>
         </div>
+
+        {/* ── PET CARE PROFILE DRAWER ── */}
+        {showPetProfile && petDetails && (
+          <div 
+            className="absolute inset-x-0 bottom-0 top-[60px] bg-white z-20 flex flex-col p-4 overflow-y-auto border-t border-gray-100"
+            style={{ animation: 'slideUp 0.2s ease-out' }}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+              <h4 className="font-black text-gray-800 text-[15px] flex items-center gap-1.5">
+                <span>🐾</span> Pet Care Profile
+              </h4>
+              <button 
+                onClick={() => setShowPetProfile(false)}
+                className="text-[11px] font-bold text-[#8B5E3C] hover:underline cursor-pointer border-none bg-transparent"
+              >
+                Back to Chat
+              </button>
+            </div>
+
+            <div className="flex gap-4 mb-4 items-center">
+              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
+                {petDetails.photo_url ? (
+                  <img src={petDetails.photo_url} alt={petDetails.pet_name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">{petDetails.pet_type === 'cat' ? '🐱' : petDetails.pet_type === 'dog' ? '🐶' : '🐾'}</span>
+                )}
+              </div>
+              <div>
+                <h5 className="font-bold text-gray-900 text-[15px]">{petDetails.pet_name}</h5>
+                <p className="text-xs text-gray-500">
+                  {petDetails.breed && `${petDetails.breed}`}
+                  {petDetails.gender && ` • ${petDetails.gender}`}
+                  {petDetails.age && ` • ${petDetails.age}`}
+                  {petDetails.weight && ` • ${petDetails.weight}`}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3.5 text-xs text-gray-700">
+              {petDetails.spayed_neutered !== undefined && (
+                <div className="flex justify-between items-center bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+                  <span className="font-bold text-gray-600">Spayed/Neutered</span>
+                  <span className="font-semibold">{petDetails.spayed_neutered ? 'Yes' : 'No'}</span>
+                </div>
+              )}
+
+              {petDetails.feeding_schedule && (
+                <div className="space-y-1">
+                  <span className="font-bold text-gray-600 block">🥣 Feeding Schedule</span>
+                  <div className="bg-amber-50/50 border border-amber-100 p-2.5 rounded-xl leading-relaxed text-gray-700">
+                    {petDetails.feeding_schedule}
+                  </div>
+                </div>
+              )}
+
+              {petDetails.medication && (
+                <div className="space-y-1">
+                  <span className="font-bold text-gray-600 block">💊 Medications</span>
+                  <div className="bg-red-50/40 border border-red-100 p-2.5 rounded-xl leading-relaxed text-gray-700">
+                    {petDetails.medication}
+                  </div>
+                </div>
+              )}
+
+              {petDetails.behavior_notes && (
+                <div className="space-y-1">
+                  <span className="font-bold text-gray-600 block">🧠 Behavior Notes</span>
+                  <div className="bg-blue-50/40 border border-blue-100 p-2.5 rounded-xl leading-relaxed text-gray-700">
+                    {petDetails.behavior_notes}
+                  </div>
+                </div>
+              )}
+
+              {(petDetails.vet_name || petDetails.vet_phone) && (
+                <div className="space-y-1">
+                  <span className="font-bold text-gray-600 block">🏥 Veterinary Contact</span>
+                  <div className="bg-gray-50 border border-gray-200 p-2.5 rounded-xl space-y-0.5 text-gray-700">
+                    {petDetails.vet_name && <div><strong>Clinic/Vet:</strong> {petDetails.vet_name}</div>}
+                    {petDetails.vet_phone && <div><strong>Phone:</strong> {petDetails.vet_phone}</div>}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
