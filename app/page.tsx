@@ -79,7 +79,7 @@ export default function Home() {
           <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
             <span className="text-[#191919]">Everything your pet needs</span>
             <br />
-            <span className="text-[#C17D3C]">— in one place.</span>
+            <span className="text-[#C17D3C]">in one place.</span>
           </h1>
           
           <p className="text-[#666666] mb-10 leading-[1.65] max-w-[600px] relative z-10 mx-auto" style={{ fontSize: 'var(--text-hero-sub)' }}>
