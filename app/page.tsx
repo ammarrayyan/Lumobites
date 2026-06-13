@@ -5,11 +5,7 @@ import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import BrandMarquee from '@/components/BrandMarquee';
 import Navbar from '@/components/Navbar';
-import LostPetsPreview from '@/components/LostPetsPreview';
-import PetSittingPreview from '@/components/PetSittingPreview';
-import CityBoardPreview from '@/components/CityBoardPreview';
-import PetTwinPreview from '@/components/PetTwinPreview';
-import { Star, Home as HomeIcon, Utensils, Footprints, Target, Search, AlertTriangle, Sparkles, ShoppingBag } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Target, Search, AlertTriangle, Sparkles, ShoppingBag, Globe } from 'lucide-react';
 
 export default function Home() {
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
@@ -71,17 +67,14 @@ export default function Home() {
       {/* HERO SECTION */}
       <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
-          
           <AnimatedPets />
-          
 
-          
           <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
             <span className="text-[#191919]">Everything your pet needs</span>
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
-          
+
           <p className="text-[#666666] mb-10 leading-[1.65] max-w-[600px] relative z-10 mx-auto" style={{ fontSize: 'var(--text-hero-sub)' }}>
             Your neighborhood pet community — find trusted sitters, reunite lost pets, scan food ingredients, get FDA recall alerts and discover your Pet Twin. Built for pet lovers, by pet lovers.
           </p>
@@ -105,18 +98,13 @@ export default function Home() {
               box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
             }
           `}</style>
-
-
-
         </div>
       </section>
 
-      {/* Removed PRO BANNER SECTION */}
-
       {/* SERVICES GRID SECTION */}
-      <section className="w-full bg-[#FDFAF7] px-6 pb-16">
+      <section className="w-full bg-[#FDFAF7] px-6 pb-8">
         <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
-          
+
           {/* 1. Pet Sitting */}
           <div className="col-span-12 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10 mt-2">
@@ -134,7 +122,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
- 
+
           {/* 2. Lost Pets */}
           <div className="col-span-12 lg:col-span-4 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
@@ -152,7 +140,7 @@ export default function Home() {
               </Link>
             </div>
           </div>
- 
+
           {/* 3. Pet Food & Safety */}
           <div className="col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
@@ -177,17 +165,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PET TWIN PREVIEW SECTION */}
-      <PetTwinPreview />
-
-      {/* LOST PETS PREVIEW SECTION */}
-      <LostPetsPreview />
-
-      {/* PET SITTING PREVIEW SECTION */}
-      <PetSittingPreview />
-
-      {/* CITY BOARD PREVIEW SECTION */}
-      <CityBoardPreview />
+      {/* EXPLORE TEASER BANNER */}
+      <section className="w-full bg-[#FDFAF7] px-6 pb-14">
+        <div className="max-w-[1200px] mx-auto">
+          <Link
+            href="/explore"
+            className="group flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-[#FAF5EE] to-[#F6F0FF] border border-[#E8DDD4] hover:border-[#C17D3C]/40 rounded-2xl px-6 py-5 transition-all hover:shadow-md"
+            style={{ textDecoration: 'none' }}
+          >
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8B5E3C] to-[#C17D3C] flex items-center justify-center shadow-sm shrink-0">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-[#4A3E3D] font-extrabold text-sm md:text-base leading-snug">See what&apos;s happening in the community</p>
+                <p className="text-[#8B7E7D] text-xs mt-0.5">Pet Twin matches · Lost pet alerts · Sitter previews · City discussions</p>
+              </div>
+            </div>
+            <span className="text-[#8B5E3C] font-bold text-sm whitespace-nowrap group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
+              Explore →
+            </span>
+          </Link>
+        </div>
+      </section>
 
       {/* STATS BAR */}
       <section className="w-full bg-[#F5EDE4] border-y border-[#E8D5C0] py-5">
@@ -216,7 +216,6 @@ export default function Home() {
 
       {/* BRAND LOGOS STRIP */}
       <BrandMarquee />
-
 
       {/* HOW IT WORKS */}
       <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">
@@ -251,7 +250,7 @@ export default function Home() {
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <ShoppingBag className="w-9 h-9 text-[#8B5E3C] mb-5" />
               <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet's needs.</p>
+              <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
             </div>
             <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
               <HomeIcon className="w-9 h-9 text-[#8B5E3C] mb-5 relative z-10" />
@@ -261,9 +260,7 @@ export default function Home() {
           </div>
         </div>
       </section>
- 
-      {/* REMOVED COMING SOON SECTION */}
- 
+
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
         <div className="max-w-[700px] mx-auto">
@@ -278,7 +275,7 @@ export default function Home() {
           </Link>
         </div>
       </section>
- 
+
       {/* AFFILIATE SECTION */}
       <section className="w-full py-16 px-6 text-center border-t border-[#E8D5C0]" style={{ backgroundColor: '#FAF6F4' }}>
         <div className="max-w-[700px] mx-auto flex flex-col items-center">
@@ -324,6 +321,7 @@ export default function Home() {
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
               <li><Link href="/petsitting" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Sitting</Link></li>
               <li><Link href="/lost-pets" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Lost Pets</Link></li>
+              <li><Link href="/explore" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Explore Community</Link></li>
               <li><Link href="/city-board" style={{ color: '#AAAAAA', textDecoration: 'none' }}>City Board</Link></li>
               <li><Link href="/recalls" style={{ color: '#EF4444', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '6px', height: '6px', backgroundColor: '#EF4444', borderRadius: '50%', display: 'inline-block', animation: 'pulse 2s infinite' }}></span>Recall Alerts</Link></li>
             </ul>
@@ -348,37 +346,19 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto pt-8 border-t border-gray-800 text-[#AAAAAA] text-xs flex flex-col md:flex-row items-center justify-between gap-4">
           <div>&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. All rights reserved.</div>
           <div className="flex items-center gap-5 text-base">
-            <a 
-              href="https://www.instagram.com/lumobites" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors"
-              aria-label="Instagram"
-            >
+            <a href="https://www.instagram.com/lumobites" target="_blank" rel="noopener noreferrer" className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors" aria-label="Instagram">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                 <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
               </svg>
             </a>
-            <a 
-              href="https://www.tiktok.com/@lumo.bites" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors"
-              aria-label="TikTok"
-            >
+            <a href="https://www.tiktok.com/@lumo.bites" target="_blank" rel="noopener noreferrer" className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors" aria-label="TikTok">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
               </svg>
             </a>
-            <a 
-              href="https://www.facebook.com/profile.php?id=61590405247212" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors"
-              aria-label="Facebook"
-            >
+            <a href="https://www.facebook.com/profile.php?id=61590405247212" target="_blank" rel="noopener noreferrer" className="text-[#AAAAAA] hover:text-[#C17D3C] transition-colors" aria-label="Facebook">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
               </svg>

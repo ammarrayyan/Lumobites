@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 
 export default function Navbar() {
@@ -368,6 +368,12 @@ export default function Navbar() {
             Pet Twin
           </Link>
 
+          {/* Explore */}
+          <Link href="/explore" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
+            <Globe className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+            Explore
+          </Link>
+
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
             
@@ -656,6 +662,16 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.096.813zM19.071 4.929l-.244 1.533-.244-1.533L17.05 4.685l1.533-.244.244-1.533.244 1.533 1.533.244-1.533.244z" />
               </svg>
               Pet Twin
+            </Link>
+
+            {/* Explore (mobile) */}
+            <Link 
+              href="/explore" 
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
+              onClick={() => setIsOpen(false)}
+            >
+              <Globe className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+              Explore Community
             </Link>
 
             
