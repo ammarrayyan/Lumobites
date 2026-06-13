@@ -75,10 +75,6 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
-          <p className="text-[#666666] mb-10 leading-[1.65] max-w-[600px] relative z-10 mx-auto" style={{ fontSize: 'var(--text-hero-sub)' }}>
-            Your neighborhood pet community — find trusted sitters, reunite lost pets, scan food ingredients, get FDA recall alerts and discover your Pet Twin. Built for pet lovers, by pet lovers.
-          </p>
-
           <style>{`
             @keyframes heartbeat {
               0% { transform: scale(1); }
