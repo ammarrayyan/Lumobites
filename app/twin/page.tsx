@@ -920,7 +920,7 @@ export default function TwinPage() {
 
     const imageFile = await generateImageFile(ref, filename);
 
-    // 1. Mobile/Web Share API first (shows WhatsApp, Instagram, TikTok natively)
+    // 1. Mobile/Web Share API first (shows WhatsApp and Instagram natively)
     if (imageFile && navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
       try {
         await navigator.share({
@@ -976,13 +976,6 @@ export default function TwinPage() {
     const shareText = `I'm a ${result?.breed}! 🐾 https://lumobites.net/twin`;
     const fallbackUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
     sharePlatformWithImage(twitterCardRef, filename, fallbackUrl, shareText);
-  };
-
-  const shareToTikTok = () => {
-    const filename = `${result?.breed.replace(/\s+/g, '_')}_twin_story.png`;
-    const shareText = `I'm a ${result?.breed}! Find your pet twin free at lumobites.net/twin`;
-    const successToastMessage = "Image saved! Open TikTok → tap + → upload this photo → add your reaction and post!";
-    sharePlatformWithDownloadOnly(storyCardRef, filename, shareText, successToastMessage);
   };
 
   const shareToInstagram = () => {
@@ -1662,17 +1655,6 @@ export default function TwinPage() {
                     >
                       <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                      </svg>
-                    </button>
-
-                    {/* TikTok */}
-                    <button
-                      onClick={shareToTikTok}
-                      className="w-11 h-11 rounded-full bg-[#000000] hover:bg-[#191919] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Share on TikTok"
-                    >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12.525.02c1.31-.032 2.61.1 3.86.38v3.47a8.13 8.13 0 0 1-2.38-.17v10.3a6 6 0 1 1-6-6c.3 0 .59.02.88.06v-3.1a9 9 0 1 0 9 9V0h4v3.5a4.5 4.5 0 0 1-4.5 4.5V5a7.1 7.1 0 0 0 4.5-4.5v-3h-8.475v.02z"/>
                       </svg>
                     </button>
 
