@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -28,6 +28,13 @@ export default function PostLostPet() {
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePhotoUpload(e);
+  };
 
   const handleLocationBlur = async () => {
     const input = locationInput.trim();
@@ -326,11 +333,39 @@ export default function PostLostPet() {
                       type="file" 
                       accept="image/*" 
                       multiple 
+                      ref={fileInputRef}
                       onChange={handlePhotoUpload} 
                       disabled={photoUrls.length >= 5}
-                      className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-white file:text-[#8B5E3C] file:border file:border-[#E8DDD4] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                      className="hidden" 
                     />
-                    <p className="text-[11px] text-[#8B7E7D] mt-2 font-medium">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      ref={cameraInputRef}
+                      onChange={handlePhotoCapture}
+                      disabled={photoUrls.length >= 5}
+                      className="hidden"
+                    />
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={photoUrls.length >= 5}
+                        className="flex-1 min-w-[150px] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        📁 Choose from Gallery
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        disabled={photoUrls.length >= 5}
+                        className="flex-1 min-w-[150px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        📷 Take Photo
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-[#8B7E7D] mt-3 font-medium">
                       Select up to 5 photos. You have added {photoUrls.length}/5 photos.
                     </p>
                   </div>
