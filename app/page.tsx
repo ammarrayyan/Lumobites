@@ -4,12 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import Navbar from '@/components/Navbar';
-import { Home as HomeIcon, Utensils, Footprints, Globe } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
+  const [btnHover, setBtnHover] = useState(false);
 
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,25 +166,36 @@ export default function Home() {
       </section>
 
       {/* EXPLORE TEASER BANNER */}
-      <section className="w-full bg-[#FDFAF7] px-6 pb-14">
-        <div className="max-w-[1200px] mx-auto">
-          <Link
+      <section className="w-full bg-[#FDFAF7] px-6 pb-14 text-center">
+        <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
+            <Globe className="w-6 h-6 text-[#8B5E3C]" />
+          </div>
+          <h2 className="text-xl md:text-2xl font-black text-[#191919] mb-2">Meet Your Pet Community</h2>
+          <p className="text-[#666666] text-sm md:text-base leading-relaxed mb-6">
+            See what&apos;s happening around you — real sitters, lost pet alerts, neighborhood discussions and more.
+          </p>
+          <Link 
             href="/explore"
-            className="group flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-[#FAF5EE] to-[#F6F0FF] border border-[#E8DDD4] hover:border-[#C17D3C]/40 rounded-2xl px-6 py-5 transition-all hover:shadow-md"
-            style={{ textDecoration: 'none' }}
+            onMouseEnter={() => setBtnHover(true)}
+            onMouseLeave={() => setBtnHover(false)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: btnHover ? '#734A2E' : '#8B5E3C',
+              color: 'white',
+              padding: '14px 32px',
+              borderRadius: '50px',
+              fontSize: '16px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              boxShadow: btnHover ? '0 6px 20px rgba(139, 94, 60, 0.45)' : '0 4px 15px rgba(139, 94, 60, 0.3)',
+              transform: btnHover ? 'translateY(-1px)' : 'none',
+              transition: 'all 0.2s ease',
+            }}
           >
-            <div className="flex items-center gap-3 text-left">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8B5E3C] to-[#C17D3C] flex items-center justify-center shadow-sm shrink-0">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-[#4A3E3D] font-extrabold text-sm md:text-base leading-snug">See what&apos;s happening in the community</p>
-                <p className="text-[#8B7E7D] text-xs mt-0.5">Pet Twin matches · Lost pet alerts · Sitter previews · City discussions</p>
-              </div>
-            </div>
-            <span className="text-[#8B5E3C] font-bold text-sm whitespace-nowrap group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
-              Explore →
-            </span>
+            Explore Community <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
