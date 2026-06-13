@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('sitters')
-      .select('id, name, photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
+      .select('id, name, photo_url, cover_photo_url, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
       .eq('approval_status', 'approved')
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true);
@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
         ...sitter,
         name: 'Local Sitter',
         photo_url: '',
+        cover_photo_url: '',
         bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
         phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
       };
