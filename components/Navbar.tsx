@@ -292,7 +292,19 @@ export default function Navbar() {
 
   return (
     <>
-    <nav className="bg-white border-b border-[#EEEEEE] relative z-50">
+    <nav 
+      className="border-b border-[#EEEEEE]"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        background: 'rgba(253, 250, 247, 0.95)',
+        backdropFilter: 'blur(8px)',
+        boxShadow: '0 1px 10px rgba(0,0,0,0.08)',
+      }}
+    >
       {/* Desktop & Mobile Header Container */}
       <div className="px-4 md:px-6 xl:px-[48px] h-[72px] flex items-center justify-between">
         {/* Left: Logo */}

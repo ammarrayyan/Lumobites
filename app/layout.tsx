@@ -72,7 +72,9 @@ export default function RootLayout({
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
-        {children}
+        <div className="pt-[72px]">
+          {children}
+        </div>
         <FloatingQRCode />
       </body>
     </html>
