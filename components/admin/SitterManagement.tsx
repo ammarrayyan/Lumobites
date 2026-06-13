@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw } from 'lucide-react';
+import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw, LogOut } from 'lucide-react';
 
 export default function SitterManagement({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
   const [sitters, setSitters] = useState<any[]>([]);
@@ -157,6 +157,39 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
       }));
 
       alert('ID verification reset successfully!');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleForceSignOut = async (email: string, id: string) => {
+    const confirmed = window.confirm(`Are you sure you want to force sign out all sessions for ${email}?`);
+    if (!confirmed) return;
+
+    setProcessingId(id);
+    try {
+      const res = await fetch('/api/admin/force-signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ email, target: 'sitter' })
+      });
+
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to force sign out');
+      }
+
+      alert('Sitter has been signed out from all devices.');
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -347,6 +380,15 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     {processingId === sitter.id ? 'Processing...' : <span className="flex items-center justify-center gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Reset ID Verification</span>}
                   </button>
                 )}
+
+                {/* Force Sign Out button */}
+                <button
+                  onClick={() => handleForceSignOut(sitter.email, sitter.id)}
+                  disabled={processingId === sitter.id}
+                  className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-500/20 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 text-sm mt-1"
+                >
+                  {processingId === sitter.id ? 'Processing...' : <span className="flex items-center justify-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Force Sign Out</span>}
+                </button>
 
                 {/* Delete Button — always visible */}
                 <button

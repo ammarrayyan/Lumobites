@@ -7,6 +7,7 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [signingOutEmail, setSigningOutEmail] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -59,6 +60,39 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
     }
   };
 
+  const handleForceSignOut = async (email: string) => {
+    const confirmed = window.confirm(`Are you sure you want to force sign out all sessions for ${email}?`);
+    if (!confirmed) return;
+
+    setSigningOutEmail(email);
+    try {
+      const res = await fetch('/api/admin/force-signout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey
+        },
+        body: JSON.stringify({ email, target: 'owner' })
+      });
+
+      if (res.status === 401) {
+        onUnauthorized();
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to force sign out');
+      }
+
+      alert('User has been signed out from all devices.');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSigningOutEmail(null);
+    }
+  };
+
   const filteredUsers = users.filter(u => u.email.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
@@ -106,6 +140,13 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
                   </td>
                   <td className="px-4 py-3">{new Date(user.created_at).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => handleForceSignOut(user.email)}
+                      disabled={signingOutEmail === user.email}
+                      className="text-amber-600 hover:text-amber-300 font-medium disabled:opacity-50 transition-colors mr-4"
+                    >
+                      {signingOutEmail === user.email ? 'Signing Out...' : 'Force Sign Out'}
+                    </button>
                     <button
                       onClick={() => handleDelete(user.id, user.email)}
                       disabled={deletingId === user.id}
