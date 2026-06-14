@@ -266,6 +266,7 @@ export async function POST(request: NextRequest) {
       .from('sitters')
       .upsert({
         email: cleanEmail,
+        name,
         photo_url: finalPhotoUrl,
         cover_photo_url: finalCoverPhotoUrl,
         id_photo_url: finalIdUrl,
