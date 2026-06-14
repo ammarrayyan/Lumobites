@@ -2851,7 +2851,7 @@ export default function PetSitting() {
                         {ownerPets.map((pet) => (
                           <div key={pet.id} className="bg-white border border-[#E8DDD4] rounded-2xl p-4 flex gap-4 shadow-sm relative group hover:border-[#8B5E3C] transition-all">
                             {/* Pet Photo / Icon */}
-                            <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.pet_type} className="w-16 h-16 rounded-xl" />
+                            <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.pet_type} className="w-20 h-20 rounded-xl" />
 
                             {/* Pet Details */}
                             <div className="flex-1 min-w-0">
@@ -3546,7 +3546,7 @@ export default function PetSitting() {
                                                  <PetPhotoCarousel
                                                    photoUrls={pet.photo_urls || [pet.photo_url]}
                                                    petType={pet.pet_type}
-                                                   className="w-14 h-14 rounded-lg"
+                                                   className="w-20 h-20 rounded-xl"
                                                  />
                                                )}
                                                <div className="flex-1 space-y-1.5 text-[11px]">
