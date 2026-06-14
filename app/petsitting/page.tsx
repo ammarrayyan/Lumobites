@@ -2629,7 +2629,7 @@ export default function PetSitting() {
                         
                         <div className="flex flex-col gap-4 mb-4">
                           {sitter.photo_url ? (
-                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md" />
+                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
                           ) : (
                             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0">
                               {formatSitterName(sitter.name).charAt(0)}
@@ -3149,7 +3149,7 @@ export default function PetSitting() {
                   <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
                   <div className="flex flex-col gap-4 mb-4 mt-2">
                     {sitterPhoto ? (
-                      <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0" />
+                      <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0 pointer-events-none" />
                     ) : (
                       <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0">
                         {sitterName.charAt(0) || '?'}
@@ -3867,7 +3867,7 @@ export default function PetSitting() {
                     // Already has a photo (new upload or loaded from DB)
                     <div className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-xl bg-green-50 border border-green-200 justify-between">
                       <div className="flex items-center gap-4">
-                        <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-green-300" />
+                        <img src={sitterPhoto} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-green-300 pointer-events-none" />
                         <div className="flex-1">
                           <p className="text-sm font-bold text-green-700 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Already verified</p>
                           <p className="text-xs text-green-600 mt-0.5">Your selfie is on file.</p>
@@ -5076,7 +5076,7 @@ export default function PetSitting() {
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10">
               <div className="flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0" />
+                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl object-cover border-4 border-[#FAF6F4] shadow-md flex-shrink-0 pointer-events-none" />
                 ) : (
                   <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl flex-shrink-0 shadow-md">
                     {formatSitterName(selectedSitterForReviews.name).charAt(0)}
