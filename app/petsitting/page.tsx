@@ -5882,7 +5882,7 @@ export default function PetSitting() {
       {/* Cover Photo Crop Modal */}
       {cropModalOpen && (
         <div className="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 animate-fade-in" onClick={() => setCropModalOpen(false)}>
-          <div className="bg-white rounded-3xl w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl w-[95vw] md:w-[90vw] max-w-5xl flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="p-5 border-b border-[#E8DDD4] flex justify-between items-center bg-[#FAF6F4]">
               <div>
@@ -5899,7 +5899,7 @@ export default function PetSitting() {
             </div>
 
             {/* Crop Area Container */}
-            <div className="relative w-full h-[300px] bg-gray-900 overflow-hidden">
+            <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-900 overflow-hidden">
               <Cropper
                 image={cropImageSrc}
                 crop={crop}

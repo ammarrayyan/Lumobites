@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
       isOwnerPro = emailData?.is_pro || false;
     }
 
+    const id = request.nextUrl.searchParams.get('id');
     const day = request.nextUrl.searchParams.get('day');
     const serviceType = request.nextUrl.searchParams.get('service_type');
 
@@ -28,6 +29,9 @@ export async function GET(request: NextRequest) {
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true);
 
+    if (id) {
+      query = query.eq('id', id);
+    }
     if (day && day !== 'all') {
       query = query.contains('available_days', [day]);
     }
@@ -52,7 +56,6 @@ export async function GET(request: NextRequest) {
         ...sitter,
         name: 'Local Sitter',
         photo_url: '',
-        cover_photo_url: '',
         bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
         phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
       };
