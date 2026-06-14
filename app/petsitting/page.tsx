@@ -3214,9 +3214,9 @@ export default function PetSitting() {
                 )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-sm mx-auto overflow-hidden">
                    {/* Cover Banner */}
-                  <div className="h-32 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
+                  <div className="h-28 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
                     {sitterCoverPhoto ? (
                       <img
                         src={sitterCoverPhoto}
@@ -3225,53 +3225,63 @@ export default function PetSitting() {
                         style={{ objectFit: 'cover', objectPosition: coverPhotoPosition }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
+                      <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4]" />
                     )}
+                    {/* Status badge in top-right */}
+                    <div className="absolute top-3 right-3 bg-black/30 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
                   </div>
 
-                  <div className="p-6 pt-0">
-                    <div className="absolute top-4 right-4 bg-gray-100/90 backdrop-blur-sm text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider z-20">{sitterApprovalStatus}</div>
-                    <div className="-mt-14 relative z-10 flex items-start gap-4 mb-4">
+                  {/* Profile photo + name row */}
+                  <div className="px-4 pb-0">
+                    {/* Profile photo overlapping banner */}
+                    <div className="relative -mt-10 mb-2 flex items-end gap-3">
                       {sitterPhoto ? (
-                        <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-4 border-white flex-shrink-0 pointer-events-none" />
+                        <img src={sitterPhoto} alt={sitterName} className="w-20 h-20 rounded-full object-cover shadow-md border-4 border-[#FAF6F4] flex-shrink-0 pointer-events-none" />
                       ) : (
-                        <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-white shadow-md">
+                        <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-3xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-[#FAF6F4] shadow-md">
                           {sitterName.charAt(0) || '?'}
                         </div>
                       )}
-                      <div className="min-w-0 flex-1 pt-14">
-                        <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight break-words">{sitterName || 'New Sitter'}</h3>
-                        {completedBookings > 0 && (
-                          <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20 whitespace-nowrap">
-                            <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
-                          </div>
-                        )}
-                        <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mt-1 break-words">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
-                          {sitterCity || sitterLocationInput || 'Location'}
-                        </p>
-                      </div>
                     </div>
-                  <p className="text-[#555555] text-sm mb-4 line-clamp-3">{sitterBio || 'Your bio will appear here...'}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-semibold text-[#8B5E3C] bg-white px-3 py-1 rounded-lg border border-[#E8DDD4]">
-                      {sitterPetTypes === 'both' ? 'Dogs & Cats' : sitterPetTypes === 'dog' ? 'Dogs Only' : 'Cats Only'}
-                    </div>
-                    <div className="flex flex-col items-end gap-1 text-sm font-bold text-[#4A3E3D]">
-                      {sitterRateDropins && <div>Drop-in ${sitterRateDropins}<span className="text-[#8B7E7D] text-xs font-medium">/visit</span></div>}
-                      {sitterRateWalking && <div>Walking ${sitterRateWalking}<span className="text-[#8B7E7D] text-xs font-medium">/walk</span></div>}
-                      {sitterRateOvernight && <div>Overnight ${sitterRateOvernight}<span className="text-[#8B7E7D] text-xs font-medium">/night</span></div>}
-                      {sitterRateBoarding && <div>Boarding ${sitterRateBoarding}<span className="text-[#8B7E7D] text-xs font-medium">/night</span></div>}
-                      {sitterRateDaycare && <div>Daycare ${sitterRateDaycare}<span className="text-[#8B7E7D] text-xs font-medium">/day</span></div>}
-                      {!sitterRateDropins && !sitterRateWalking && !sitterRateOvernight && !sitterRateBoarding && !sitterRateDaycare && (
-                        <div className="text-lg">
-                          {sitterServiceTypes.length > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${sitterRate || '0'}</> : <>${sitterRate || '0'}<span className="text-sm font-medium text-[#8B7E7D]">/{sitterRateType || 'night'}</span></>}
+
+                    {/* Name, bookings badge, location */}
+                    <div className="mb-3">
+                      <h3 className="font-black text-base text-[#4A3E3D] leading-tight break-words">{sitterName || 'New Sitter'}</h3>
+                      {completedBookings > 0 && (
+                        <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
+                          <Footprints className="w-3 h-3 shrink-0" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
                         </div>
                       )}
+                      <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mt-1.5">
+                        <svg className="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
+                        <span className="break-words">{sitterCity || sitterLocationInput || 'Location'}</span>
+                      </p>
+                    </div>
+
+                    {/* Bio */}
+                    <p className="text-[#555555] text-sm mb-4 line-clamp-3 leading-relaxed">{sitterBio || 'Your bio will appear here...'}</p>
+
+                    {/* Pet type + rates */}
+                    <div className="flex flex-wrap items-start justify-between gap-y-2 pb-4 border-t border-[#E8DDD4] pt-3">
+                      <div className="text-xs font-bold text-[#8B5E3C] bg-white px-2.5 py-1 rounded-lg border border-[#E8DDD4] self-start">
+                        {sitterPetTypes === 'both' ? 'Dogs & Cats' : sitterPetTypes === 'dog' ? 'Dogs Only' : 'Cats Only'}
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5 text-xs font-bold text-[#4A3E3D]">
+                        {sitterRateDropins && <div>Drop-in ${sitterRateDropins}<span className="text-[#8B7E7D] font-medium">/visit</span></div>}
+                        {sitterRateWalking && <div>Walking ${sitterRateWalking}<span className="text-[#8B7E7D] font-medium">/walk</span></div>}
+                        {sitterRateOvernight && <div>Overnight ${sitterRateOvernight}<span className="text-[#8B7E7D] font-medium">/night</span></div>}
+                        {sitterRateBoarding && <div>Boarding ${sitterRateBoarding}<span className="text-[#8B7E7D] font-medium">/night</span></div>}
+                        {sitterRateDaycare && <div>Daycare ${sitterRateDaycare}<span className="text-[#8B7E7D] font-medium">/day</span></div>}
+                        {!sitterRateDropins && !sitterRateWalking && !sitterRateOvernight && !sitterRateBoarding && !sitterRateDaycare && (
+                          <div className="text-base">
+                            {sitterServiceTypes.length > 1 ? <><span className="text-xs font-medium text-[#8B7E7D] mr-1">From</span>${sitterRate || '0'}</> : <>${sitterRate || '0'}<span className="text-xs font-medium text-[#8B7E7D]">/{sitterRateType || 'night'}</span></>}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+
 
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
