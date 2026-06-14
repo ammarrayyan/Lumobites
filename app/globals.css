@@ -45,14 +45,6 @@ body {
   line-height: 1.6 !important;
 }
 
-/* Responsive utility class overrides */
-.text-xs {
-  font-size: var(--text-small) !important;
-}
-.text-sm {
-  font-size: var(--text-desc) !important;
-}
-
 .body-text, p {
   line-height: 1.6 !important;
 }
