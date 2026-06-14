@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       bio, pet_types, rate_per_night, rate_type, availability, phone_number, phone_visible,
       gender, available_days, available_times, service_types, self_declared, blocked_dates,
       rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare,
-      cover_photo_url
+      cover_photo_url, cover_photo_position
     } = body;
 
     if (!email || !name) {
@@ -269,6 +269,7 @@ export async function POST(request: NextRequest) {
         name,
         photo_url: finalPhotoUrl,
         cover_photo_url: finalCoverPhotoUrl,
+        cover_photo_position: cover_photo_position || 'center',
         id_photo_url: finalIdUrl,
         city,
         zip,
