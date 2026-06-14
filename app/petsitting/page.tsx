@@ -3251,13 +3251,13 @@ export default function PetSitting() {
                         </div>
                       )}
                       <div className="min-w-0 flex-1 pt-14">
-                        <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight truncate">{sitterName || 'New Sitter'}</h3>
+                        <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight break-words">{sitterName || 'New Sitter'}</h3>
                         {completedBookings > 0 && (
                           <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20 whitespace-nowrap">
                             <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
                           </div>
                         )}
-                        <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mt-1 truncate">
+                        <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mt-1 break-words">
                           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
                           {sitterCity || sitterLocationInput || 'Location'}
                         </p>
@@ -5314,7 +5314,7 @@ export default function PetSitting() {
                 )}
                 <div className="min-w-0 flex-1 pb-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{formatSitterName(selectedSitterForReviews.name)}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] break-words">{formatSitterName(selectedSitterForReviews.name)}</h3>
                     {selectedSitterForReviews.gender && (
                       <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4] whitespace-nowrap">
                         {selectedSitterForReviews.gender}
