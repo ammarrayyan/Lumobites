@@ -3152,29 +3152,54 @@ export default function PetSitting() {
                 )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
-                  <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
-                  <div className="flex flex-col gap-4 mb-4 mt-2">
-                    {sitterPhoto ? (
-                      <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0 pointer-events-none" />
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
+                  {/* Cover Banner */}
+                  <div className="h-32 w-full relative bg-[#FAF6F4] overflow-hidden shrink-0">
+                    {sitterCoverPhoto ? (
+                      <>
+                        {/* Blurred Background to fill empty spaces */}
+                        <div className="absolute inset-0 bg-[#E8DDD4]">
+                          <img 
+                            src={sitterCoverPhoto} 
+                            alt="" 
+                            className="w-full h-full object-cover blur-xl opacity-40 scale-105 pointer-events-none" 
+                          />
+                        </div>
+                        {/* Actual cover photo contained fully */}
+                        <img 
+                          src={sitterCoverPhoto} 
+                          alt="Cover banner" 
+                          className="w-full h-full object-contain relative z-10 pointer-events-none"
+                        />
+                      </>
                     ) : (
-                      <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0">
-                        {sitterName.charAt(0) || '?'}
-                      </div>
+                      <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
                     )}
-                      <div>
-                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName || 'New Sitter'}</h3>
-                      {completedBookings > 0 && (
-                        <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
-                          <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
+                  </div>
+
+                  <div className="p-6 pt-0">
+                    <div className="absolute top-4 right-4 bg-gray-100/90 backdrop-blur-sm text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider z-20">{sitterApprovalStatus}</div>
+                    <div className="-mt-14 relative z-10 flex items-start gap-4 mb-4">
+                      {sitterPhoto ? (
+                        <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-4 border-white flex-shrink-0 pointer-events-none" />
+                      ) : (
+                        <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-white shadow-md">
+                          {sitterName.charAt(0) || '?'}
                         </div>
                       )}
-                      <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
-                        {sitterCity || sitterLocationInput || 'Location'}
-                      </p>
+                      <div className="min-w-0 flex-1 pt-14">
+                        <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight truncate">{sitterName || 'New Sitter'}</h3>
+                        {completedBookings > 0 && (
+                          <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20 whitespace-nowrap">
+                            <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
+                          </div>
+                        )}
+                        <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mt-1 truncate">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/></svg>
+                          {sitterCity || sitterLocationInput || 'Location'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
                   <p className="text-[#555555] text-sm mb-4 line-clamp-3">{sitterBio || 'Your bio will appear here...'}</p>
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold text-[#8B5E3C] bg-white px-3 py-1 rounded-lg border border-[#E8DDD4]">
@@ -3194,6 +3219,7 @@ export default function PetSitting() {
                     </div>
                   </div>
                 </div>
+              </div>
 
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
@@ -5204,13 +5230,24 @@ export default function PetSitting() {
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Cover Banner */}
-            <div className="h-56 sm:h-72 w-full relative bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] overflow-hidden shrink-0">
+            <div className="h-56 sm:h-72 w-full relative bg-[#FAF6F4] overflow-hidden shrink-0">
               {selectedSitterForReviews.cover_photo_url ? (
-                <img 
-                  src={selectedSitterForReviews.cover_photo_url} 
-                  alt="Cover banner" 
-                  className="w-full h-full object-cover pointer-events-none"
-                />
+                <>
+                  {/* Blurred Background to fill empty spaces */}
+                  <div className="absolute inset-0 bg-[#E8DDD4]">
+                    <img 
+                      src={selectedSitterForReviews.cover_photo_url} 
+                      alt="" 
+                      className="w-full h-full object-cover blur-xl opacity-40 scale-105 pointer-events-none" 
+                    />
+                  </div>
+                  {/* Actual cover photo contained fully */}
+                  <img 
+                    src={selectedSitterForReviews.cover_photo_url} 
+                    alt="Cover banner" 
+                    className="w-full h-full object-contain relative z-10 pointer-events-none"
+                  />
+                </>
               ) : (
                 <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
               )}
@@ -5225,7 +5262,7 @@ export default function PetSitting() {
                     {formatSitterName(selectedSitterForReviews.name).charAt(0)}
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 pt-16 sm:pt-20">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{formatSitterName(selectedSitterForReviews.name)}</h3>
                     {selectedSitterForReviews.gender && (
