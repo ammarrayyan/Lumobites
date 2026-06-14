@@ -28,7 +28,7 @@ export const getCroppedImg = (
     image.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
-      canvas.height = 400;
+      canvas.height = 600;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         reject(new Error('No 2d context'));
@@ -44,7 +44,7 @@ export const getCroppedImg = (
         0,
         0,
         1200,
-        400
+        600
       );
       
       resolve(canvas.toDataURL('image/jpeg', 0.8));
@@ -4052,7 +4052,7 @@ export default function PetSitting() {
                   </label>
                   {sitterCoverPhoto ? (
                     <div className="flex flex-col gap-2">
-                      <div className="relative w-full h-32 rounded-xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                      <div className="relative w-full h-48 rounded-xl overflow-hidden shadow-sm border border-[#E8DDD4]">
                         <img src={sitterCoverPhoto} alt="Cover Banner" className="w-full h-full object-cover pointer-events-none" />
                         <button
                           type="button"
@@ -5904,7 +5904,7 @@ export default function PetSitting() {
                 image={cropImageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={3} // 1200x400 aspect ratio = 3
+                aspect={2} // 1200x600 aspect ratio = 2
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
