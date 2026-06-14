@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, rate_type, availability, phone_number, phone_visible,
       gender, available_days, available_times, service_types, self_declared, blocked_dates,
-      rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare
+      rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare,
+      cover_photo_url
     } = body;
 
     if (!email || !name) {
@@ -159,8 +160,39 @@ export async function POST(request: NextRequest) {
         finalPhotoUrl = photo_url;
       }
     }
-
-
+    let finalCoverPhotoUrl = cover_photo_url || null;
+    if (cover_photo_url && cover_photo_url.startsWith('data:image/')) {
+      try {
+        const matches = cover_photo_url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+          const base64Data = matches[2];
+          const buffer = Buffer.from(base64Data, 'base64');
+          const fileName = `${cleanEmail.replace(/[^a-z0-9]/g, '_')}_cover_${Date.now()}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+            .from('sitter-photos')
+            .upload(fileName, buffer, {
+              contentType: `image/${matches[1]}`,
+              upsert: true
+            });
+            
+          if (uploadError) {
+            console.warn('[PetSitting Profile] Supabase storage cover upload failed. Using raw/base64 URL fallback:', uploadError.message);
+            finalCoverPhotoUrl = cover_photo_url;
+          } else {
+            const { data: publicUrlData } = supabaseAdmin.storage
+              .from('sitter-photos')
+              .getPublicUrl(fileName);
+              
+            finalCoverPhotoUrl = publicUrlData.publicUrl;
+          }
+        }
+      } catch (uploadEx) {
+        console.error('[PetSitting Profile] Failed to upload cover photo:', uploadEx);
+        finalCoverPhotoUrl = cover_photo_url;
+      }
+    }
 
     let finalIdUrl = id_photo_url;
     if (id_photo_url && id_photo_url.startsWith('data:image/')) {
@@ -234,8 +266,8 @@ export async function POST(request: NextRequest) {
       .from('sitters')
       .upsert({
         email: cleanEmail,
-        name,
         photo_url: finalPhotoUrl,
+        cover_photo_url: finalCoverPhotoUrl,
         id_photo_url: finalIdUrl,
         city,
         zip,
