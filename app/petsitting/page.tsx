@@ -2628,37 +2628,21 @@ export default function PetSitting() {
                         key={sitter.id}
                         id={`sitter-card-${sitter.id}`}
                         onClick={() => handleViewReviews(sitter)}
-                        className={`bg-white rounded-3xl overflow-hidden border transition-all duration-300 cursor-pointer ${
+                        className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
                           highlightedSitterId === sitter.id 
                             ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
                             : 'border-[#E8DDD4] shadow-sm hover:shadow-md'
                         }`}
                       >
-                        {/* Cover Banner */}
-                        <div className="h-28 w-full relative bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] overflow-hidden">
-                          {sitter.cover_photo_url ? (
-                            <img 
-                              src={sitter.cover_photo_url} 
-                              alt="Cover banner" 
-                              className="w-full h-full object-cover"
-                            />
+                        <div className="flex flex-col gap-4 mb-4">
+                          {sitter.photo_url ? (
+                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
-                          )}
-                        </div>
-
-                        <div className="p-6 pt-0">
-                          <div className="flex flex-col gap-4 mb-4">
-                            <div className="-mt-14 sm:-mt-16 relative z-10">
-                              {sitter.photo_url ? (
-                                <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white flex-shrink-0 shadow-md pointer-events-none" />
-                              ) : (
-                                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0 border-4 border-white shadow-md">
-                                  {formatSitterName(sitter.name).charAt(0)}
-                                </div>
-                              )}
+                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0">
+                              {formatSitterName(sitter.name).charAt(0)}
                             </div>
-                            <div className="flex-1 min-w-0">
+                          )}
+                          <div className="flex-1 min-w-0">
                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
                                {sitter.gender && (
@@ -2773,7 +2757,6 @@ export default function PetSitting() {
                             </button>
                           </div>
                         )}
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -3169,32 +3152,16 @@ export default function PetSitting() {
                 )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
-                  {/* Cover Banner */}
-                  <div className="h-28 w-full relative bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] overflow-hidden">
-                    {sitterCoverPhoto ? (
-                      <img 
-                        src={sitterCoverPhoto} 
-                        alt="Cover banner" 
-                        className="w-full h-full object-cover"
-                      />
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
+                  <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
+                  <div className="flex flex-col gap-4 mb-4 mt-2">
+                    {sitterPhoto ? (
+                      <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0 pointer-events-none" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
-                    )}
-                  </div>
-
-                  <div className="p-6 pt-0">
-                    <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider z-20">{sitterApprovalStatus}</div>
-                    <div className="flex flex-col gap-4 mb-4 mt-2">
-                      <div className="-mt-14 relative z-10">
-                        {sitterPhoto ? (
-                          <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-4 border-white flex-shrink-0 pointer-events-none" />
-                        ) : (
-                          <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-white shadow-md">
-                            {sitterName.charAt(0) || '?'}
-                          </div>
-                        )}
+                      <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0">
+                        {sitterName.charAt(0) || '?'}
                       </div>
+                    )}
                       <div>
                       <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName || 'New Sitter'}</h3>
                       {completedBookings > 0 && (
@@ -3225,7 +3192,6 @@ export default function PetSitting() {
                         </div>
                       )}
                     </div>
-                  </div>
                   </div>
                 </div>
 
