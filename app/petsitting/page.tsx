@@ -2627,11 +2627,11 @@ export default function PetSitting() {
                         }`}
                       >
                         
-                        <div className="flex items-start gap-4 mb-4">
+                        <div className="flex items-start gap-5 mb-4">
                           {sitter.photo_url ? (
-                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-16 h-16 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0" />
+                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-[#FAF6F4] flex-shrink-0 shadow-sm" />
                           ) : (
-                            <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xl flex-shrink-0">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-2xl flex-shrink-0">
                               {formatSitterName(sitter.name).charAt(0)}
                             </div>
                           )}
@@ -3147,11 +3147,11 @@ export default function PetSitting() {
                 {/* Profile Preview Card */}
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
                   <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
-                  <div className="flex items-center gap-4 mb-4 mt-2">
+                  <div className="flex items-center gap-5 mb-4 mt-2">
                     {sitterPhoto ? (
-                      <img src={sitterPhoto} alt={sitterName} className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white" />
+                      <img src={sitterPhoto} alt={sitterName} className="w-20 h-20 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0" />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-xl font-bold text-[#8B7E7D]">
+                      <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-2xl font-bold text-[#8B7E7D] flex-shrink-0">
                         {sitterName.charAt(0) || '?'}
                       </div>
                     )}
