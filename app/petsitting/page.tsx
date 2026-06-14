@@ -5303,16 +5303,16 @@ export default function PetSitting() {
               )}
             </div>
 
-            <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pt-0">
-              <div className="-mt-16 sm:-mt-20 relative z-10 flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-b border-[#E8DDD4] relative bg-white z-10 pt-0">
+              <div className="-mt-14 sm:-mt-18 relative z-10 flex items-end gap-3 sm:gap-4 pr-10 sm:pr-12">
                 {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md flex-shrink-0 pointer-events-none" />
+                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md flex-shrink-0 pointer-events-none" />
                 ) : (
-                  <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl flex-shrink-0 shadow-md border-4 border-white">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl flex-shrink-0 shadow-md border-4 border-white">
                     {formatSitterName(selectedSitterForReviews.name).charAt(0)}
                   </div>
                 )}
-                <div className="min-w-0 flex-1 pt-16 sm:pt-20">
+                <div className="min-w-0 flex-1 pb-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] truncate">{formatSitterName(selectedSitterForReviews.name)}</h3>
                     {selectedSitterForReviews.gender && (
@@ -5905,11 +5905,13 @@ export default function PetSitting() {
                 crop={crop}
                 zoom={zoom}
                 aspect={3} // 1200x400 aspect ratio = 3
+                minZoom={0.5}
+                maxZoom={3}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
                 showGrid={true}
-                restrictPosition={true}
+                restrictPosition={false}
                 objectFit="contain"
               />
             </div>
@@ -5921,7 +5923,7 @@ export default function PetSitting() {
                 <span className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider shrink-0">Zoom</span>
                 <input
                   type="range"
-                  min={1}
+                  min={0.5}
                   max={3}
                   step={0.05}
                   value={zoom}
