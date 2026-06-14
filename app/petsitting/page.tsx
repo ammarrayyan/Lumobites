@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Cropper from 'react-easy-crop';
 import Navbar from '@/components/Navbar';
 import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
@@ -15,6 +16,42 @@ export function formatSitterName(fullName) {
   if (parts.length === 1) return parts[0];
   return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
 }
+
+export const getCroppedImg = (
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number }
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const image = new window.Image();
+    image.src = imageSrc;
+    image.crossOrigin = 'anonymous'; // Avoid tainted canvas with Supabase URLs
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 400;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('No 2d context'));
+        return;
+      }
+      
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        1200,
+        400
+      );
+      
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    image.onerror = (err) => reject(err);
+  });
+};
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Sitter {
@@ -233,6 +270,32 @@ export default function PetSitting() {
   const sitterName = `${sitterFirstName} ${sitterLastName}`.trim();
   const [sitterPhoto, setSitterPhoto] = useState('');
   const [sitterCoverPhoto, setSitterCoverPhoto] = useState('');
+  // Cover Photo Cropper States
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [croppingLoading, setCroppingLoading] = useState(false);
+
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleSaveCroppedImage = async () => {
+    if (!cropImageSrc || !croppedAreaPixels) return;
+    setCroppingLoading(true);
+    try {
+      const croppedBase64 = await getCroppedImg(cropImageSrc, croppedAreaPixels);
+      setSitterCoverPhoto(croppedBase64);
+      setCropModalOpen(false);
+    } catch (e) {
+      console.error('Failed to crop image:', e);
+      alert('Failed to crop image. Please try again.');
+    } finally {
+      setCroppingLoading(false);
+    }
+  };
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
   const [hasExistingIdPhoto, setHasExistingIdPhoto] = useState(false);
   const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
@@ -3988,16 +4051,33 @@ export default function PetSitting() {
                     <span className="text-gray-400 font-normal text-xs">— optional</span>
                   </label>
                   {sitterCoverPhoto ? (
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden shadow-sm border border-[#E8DDD4]">
-                      <img src={sitterCoverPhoto} alt="Cover Banner" className="w-full h-full object-cover pointer-events-none" />
-                      <button
-                        type="button"
-                        onClick={() => setSitterCoverPhoto('')}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md transition-all cursor-pointer flex items-center justify-center"
-                        title="Remove cover photo"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="flex flex-col gap-2">
+                      <div className="relative w-full h-32 rounded-xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                        <img src={sitterCoverPhoto} alt="Cover Banner" className="w-full h-full object-cover pointer-events-none" />
+                        <button
+                          type="button"
+                          onClick={() => setSitterCoverPhoto('')}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md transition-all cursor-pointer flex items-center justify-center"
+                          title="Remove cover photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="flex justify-start">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCropImageSrc(sitterCoverPhoto);
+                            setCrop({ x: 0, y: 0 });
+                            setZoom(1);
+                            setCropModalOpen(true);
+                          }}
+                          className="flex items-center justify-center gap-1.5 bg-white hover:bg-gray-50 text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2 px-3.5 rounded-xl transition-all shadow-sm text-xs cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5 shrink-0" />
+                          <span>Reposition Cover Photo</span>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col sm:flex-row items-center gap-4 p-3 rounded-xl bg-[#FAF6F4] border border-[#E8DDD4]">
@@ -4019,25 +4099,10 @@ export default function PetSitting() {
                               }
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                const img = new window.Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  let width = img.width;
-                                  let height = img.height;
-                                  const MAX_WIDTH = 1200;
-                                  const MAX_HEIGHT = 800;
-                                  if (width > height) {
-                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                  } else {
-                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                                  }
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  ctx?.drawImage(img, 0, 0, width, height);
-                                  setSitterCoverPhoto(canvas.toDataURL('image/jpeg', 0.8));
-                                };
-                                img.src = reader.result as string;
+                                setCropImageSrc(reader.result as string);
+                                setCrop({ x: 0, y: 0 });
+                                setZoom(1);
+                                setCropModalOpen(true);
                               };
                               reader.readAsDataURL(file);
                               e.target.value = '';
@@ -4059,25 +4124,10 @@ export default function PetSitting() {
                               }
                               const reader = new FileReader();
                               reader.onloadend = () => {
-                                const img = new window.Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  let width = img.width;
-                                  let height = img.height;
-                                  const MAX_WIDTH = 1200;
-                                  const MAX_HEIGHT = 800;
-                                  if (width > height) {
-                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                  } else {
-                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                                  }
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  ctx?.drawImage(img, 0, 0, width, height);
-                                  setSitterCoverPhoto(canvas.toDataURL('image/jpeg', 0.8));
-                                };
-                                img.src = reader.result as string;
+                                setCropImageSrc(reader.result as string);
+                                setCrop({ x: 0, y: 0 });
+                                setZoom(1);
+                                setCropModalOpen(true);
                               };
                               reader.readAsDataURL(file);
                               e.target.value = '';
@@ -5825,6 +5875,88 @@ export default function PetSitting() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cover Photo Crop Modal */}
+      {cropModalOpen && (
+        <div className="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 animate-fade-in" onClick={() => setCropModalOpen(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-5 border-b border-[#E8DDD4] flex justify-between items-center bg-[#FAF6F4]">
+              <div>
+                <h3 className="text-lg font-black text-[#4A3E3D]">Position Cover Photo</h3>
+                <p className="text-xs text-[#8B7E7D] mt-0.5">Drag to reposition, use slider to zoom</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setCropModalOpen(false)} 
+                className="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer animate-transition"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Crop Area Container */}
+            <div className="relative w-full h-[300px] bg-gray-900 overflow-hidden">
+              <Cropper
+                image={cropImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={3} // 1200x400 aspect ratio = 3
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+                showGrid={true}
+                restrictPosition={true}
+              />
+            </div>
+
+            {/* Controls */}
+            <div className="p-6 bg-[#FAF6F4] border-t border-[#E8DDD4] flex flex-col gap-4">
+              {/* Zoom Slider */}
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider shrink-0">Zoom</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  value={zoom}
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-[#E8DDD4] rounded-lg appearance-none cursor-pointer accent-[#8B5E3C]"
+                />
+                <span className="text-xs font-bold text-[#4A3E3D] shrink-0 w-8 text-right">{Math.round(zoom * 100)}%</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  disabled={croppingLoading}
+                  onClick={handleSaveCroppedImage}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm disabled:opacity-50 cursor-pointer border-none flex items-center justify-center gap-2 text-sm"
+                >
+                  {croppingLoading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      <span>Applying Crop...</span>
+                    </>
+                  ) : (
+                    <span>Save Position</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={croppingLoading}
+                  onClick={() => setCropModalOpen(false)}
+                  className="w-full bg-white hover:bg-gray-50 text-[#4A3E3D] font-bold py-3.5 rounded-xl transition-colors border border-[#E8DDD4] cursor-pointer text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
