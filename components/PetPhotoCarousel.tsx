@@ -31,7 +31,7 @@ export default function PetPhotoCarousel({ photoUrls, petType, className = "w-16
   if (urls.length === 1) {
     return (
       <div className={`${className} bg-[#FAF6F4] border border-[#E8DDD4] shrink-0 relative overflow-hidden`}>
-        <img src={urls[0]} alt="Pet Profile" className="w-full h-full object-cover" />
+        <img src={urls[0]} alt="Pet Profile" className="w-full h-full object-cover pointer-events-none" />
       </div>
     );
   }
@@ -51,7 +51,7 @@ export default function PetPhotoCarousel({ photoUrls, petType, className = "w-16
   return (
     <div className={`${className} bg-[#FAF6F4] border border-[#E8DDD4] shrink-0 relative overflow-hidden group`}>
       {/* Current Photo */}
-      <img src={urls[activeIndex]} alt={`Pet Profile ${activeIndex + 1}`} className="w-full h-full object-cover" />
+      <img src={urls[activeIndex]} alt={`Pet Profile ${activeIndex + 1}`} className="w-full h-full object-cover pointer-events-none" />
 
       {/* Navigation Chevrons (visible on hover) */}
       <button

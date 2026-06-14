@@ -2982,7 +2982,7 @@ export default function PetSitting() {
                                 <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Sitter</p>
                                 <div className="flex items-center gap-2">
                                   {req.sitters?.photo_url || req.sitter_photo_url ? (
-                                    <img src={req.sitters?.photo_url || req.sitter_photo_url} alt={sitterDisplayName} className="w-7 h-7 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0" />
+                                    <img src={req.sitters?.photo_url || req.sitter_photo_url} alt={sitterDisplayName} className="w-7 h-7 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0 pointer-events-none" />
                                   ) : (
                                     <div className="w-7 h-7 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-xs flex-shrink-0">{sitterDisplayName.charAt(0)}</div>
                                   )}
@@ -3963,7 +3963,7 @@ export default function PetSitting() {
                   </label>
                   {sitterCoverPhoto ? (
                     <div className="relative w-full h-32 rounded-xl overflow-hidden shadow-sm border border-[#E8DDD4]">
-                      <img src={sitterCoverPhoto} alt="Cover Banner" className="w-full h-full object-cover" />
+                      <img src={sitterCoverPhoto} alt="Cover Banner" className="w-full h-full object-cover pointer-events-none" />
                       <button
                         type="button"
                         onClick={() => setSitterCoverPhoto('')}
@@ -5204,12 +5204,12 @@ export default function PetSitting() {
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Cover Banner */}
-            <div className="h-40 sm:h-48 w-full relative bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] overflow-hidden shrink-0">
+            <div className="h-56 sm:h-72 w-full relative bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] overflow-hidden shrink-0">
               {selectedSitterForReviews.cover_photo_url ? (
                 <img 
                   src={selectedSitterForReviews.cover_photo_url} 
                   alt="Cover banner" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
@@ -5700,7 +5700,7 @@ export default function PetSitting() {
                 <div className="flex flex-wrap gap-3 mb-3">
                   {petFormPhotos.map((url, index) => (
                     <div key={index} className="w-20 h-20 rounded-xl overflow-hidden bg-[#FAF6F4] border border-[#E8DDD4] relative group">
-                      <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
                       <button
                         type="button"
                         onClick={() => {
