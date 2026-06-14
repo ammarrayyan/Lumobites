@@ -282,6 +282,24 @@ export default function PetSitting() {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 
+  // Calculate initial zoom so the full image fits within the 3:1 crop frame
+  const calcInitialZoom = (src: string): Promise<number> => {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const imageAspect = img.naturalWidth / img.naturalHeight;
+        const cropAspect = 3; // matches aspect={3} on Cropper
+        // zoom needed so entire image fits: if portrait/square, zoom way out
+        const fitZoom = imageAspect < cropAspect
+          ? imageAspect / cropAspect  // portrait: shrink to fit height
+          : 1;                         // landscape ≥ 3:1: already fits
+        resolve(Math.max(0.1, fitZoom));
+      };
+      img.onerror = () => resolve(0.3); // safe fallback
+      img.src = src;
+    });
+  };
+
   const handleSaveCroppedImage = async () => {
     if (!cropImageSrc || !croppedAreaPixels) return;
     setCroppingLoading(true);
@@ -4066,10 +4084,11 @@ export default function PetSitting() {
                       <div className="flex justify-start">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             setCropImageSrc(sitterCoverPhoto);
                             setCrop({ x: 0, y: 0 });
-                            setZoom(1);
+                            const z = await calcInitialZoom(sitterCoverPhoto);
+                            setZoom(z);
                             setCropModalOpen(true);
                           }}
                           className="flex items-center justify-center gap-1.5 bg-white hover:bg-gray-50 text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2 px-3.5 rounded-xl transition-all shadow-sm text-xs cursor-pointer"
@@ -4098,10 +4117,12 @@ export default function PetSitting() {
                                 return;
                               }
                               const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setCropImageSrc(reader.result as string);
+                              reader.onloadend = async () => {
+                                const src = reader.result as string;
+                                setCropImageSrc(src);
                                 setCrop({ x: 0, y: 0 });
-                                setZoom(1);
+                                const z = await calcInitialZoom(src);
+                                setZoom(z);
                                 setCropModalOpen(true);
                               };
                               reader.readAsDataURL(file);
@@ -4123,10 +4144,12 @@ export default function PetSitting() {
                                 return;
                               }
                               const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setCropImageSrc(reader.result as string);
+                              reader.onloadend = async () => {
+                                const src = reader.result as string;
+                                setCropImageSrc(src);
                                 setCrop({ x: 0, y: 0 });
-                                setZoom(1);
+                                const z = await calcInitialZoom(src);
+                                setZoom(z);
                                 setCropModalOpen(true);
                               };
                               reader.readAsDataURL(file);
@@ -5887,7 +5910,7 @@ export default function PetSitting() {
             <div className="p-5 border-b border-[#E8DDD4] flex justify-between items-center bg-[#FAF6F4]">
               <div>
                 <h3 className="text-lg font-black text-[#4A3E3D]">Position Cover Photo</h3>
-                <p className="text-xs text-[#8B7E7D] mt-0.5">Drag to reposition, use slider to zoom</p>
+                <p className="text-xs text-[#8B7E7D] mt-0.5">Zoom out to see more of your photo, zoom in to focus on a specific area</p>
               </div>
               <button 
                 type="button" 
@@ -5905,7 +5928,7 @@ export default function PetSitting() {
                 crop={crop}
                 zoom={zoom}
                 aspect={3} // 1200x400 aspect ratio = 3
-                minZoom={0.5}
+                minZoom={0.1}
                 maxZoom={3}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -5923,9 +5946,9 @@ export default function PetSitting() {
                 <span className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider shrink-0">Zoom</span>
                 <input
                   type="range"
-                  min={0.5}
+                  min={0.1}
                   max={3}
-                  step={0.05}
+                  step={0.01}
                   value={zoom}
                   onChange={(e) => setZoom(parseFloat(e.target.value))}
                   className="w-full h-1 bg-[#E8DDD4] rounded-lg appearance-none cursor-pointer accent-[#8B5E3C]"
