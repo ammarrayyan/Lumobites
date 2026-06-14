@@ -2627,7 +2627,7 @@ export default function PetSitting() {
                         }`}
                       >
                         
-                        <div className="flex items-center gap-5 mb-4">
+                        <div className="flex flex-col gap-4 mb-4">
                           {sitter.photo_url ? (
                             <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md" />
                           ) : (
@@ -3147,7 +3147,7 @@ export default function PetSitting() {
                 {/* Profile Preview Card */}
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 text-left mb-8 shadow-sm max-w-sm mx-auto relative overflow-hidden opacity-80">
                   <div className="absolute top-4 right-4 bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{sitterApprovalStatus}</div>
-                  <div className="flex items-center gap-5 mb-4 mt-2">
+                  <div className="flex flex-col gap-4 mb-4 mt-2">
                     {sitterPhoto ? (
                       <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-2 border-white flex-shrink-0" />
                     ) : (
@@ -3156,7 +3156,7 @@ export default function PetSitting() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight pr-12">{sitterName || 'New Sitter'}</h3>
+                      <h3 className="font-bold text-lg text-[#4A3E3D] leading-tight">{sitterName || 'New Sitter'}</h3>
                       {completedBookings > 0 && (
                         <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
                           <Footprints className="w-3.5 h-3.5 inline mr-1" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
