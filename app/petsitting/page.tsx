@@ -523,7 +523,7 @@ export default function PetSitting() {
     const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
     if (foundSitterReq) {
       if (foundSitterReq.status === 'cancelled') {
-        alert("This booking has been cancelled and the conversation is no longer available");
+        // Silently strip the stale chat param — booking is cancelled, nothing to open
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({ path: newUrl }, '', newUrl);
         return;
@@ -541,7 +541,7 @@ export default function PetSitting() {
     const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
     if (foundOwnerReq) {
       if (foundOwnerReq.status === 'cancelled') {
-        alert("This booking has been cancelled and the conversation is no longer available");
+        // Silently strip the stale chat param — booking is cancelled, nothing to open
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({ path: newUrl }, '', newUrl);
         return;
