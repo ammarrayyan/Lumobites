@@ -91,7 +91,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Consume/delete the code immediately only AFTER successful verification
+    // 4. Check if the user is also an approved sitter
+    const { data: sitterData, error: sitterError } = await supabase
+      .from('sitters')
+      .select('id')
+      .eq('email', cleanEmail)
+      .eq('is_approved', true)
+      .maybeSingle();
+
+    let isSitter = false;
+    let sitterId = null;
+
+    if (sitterData) {
+      isSitter = true;
+      sitterId = sitterData.id;
+    }
+
+    // 5. Consume/delete the code immediately only AFTER successful verification
     await supabase
       .from('verification_codes')
       .delete()
@@ -99,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Verify Code API] Successfully verified email and granted Pro access: ${cleanEmail}`);
 
-    return NextResponse.json({ success: true, isPro: true, existed });
+    return NextResponse.json({ success: true, isPro: true, existed, isSitter, sitterId });
   } catch (err: any) {
     console.error('[Verify Code API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

@@ -450,49 +450,43 @@ export default function PetSitting() {
     window.addEventListener('lumo-pro-update', syncStatus);
     window.addEventListener('storage', syncStatus);
 
-    // Restore sitter persistent session if valid
-    const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
-    const cachedSitterExpiry = localStorage.getItem('lumo_sitter_email_expiry');
-    if (cachedSitterEmail && cachedSitterExpiry) {
-      const expiryTime = parseInt(cachedSitterExpiry, 10);
-      if (!isNaN(expiryTime) && Date.now() < expiryTime) {
-        setSitterEmail(cachedSitterEmail);
-        setSitterAuthMode('form');
-        // Check if profile exists and load details
-        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
-          .then(res => res.json())
-          .then(profileData => {
-            if (profileData) {
-              if (profileData.session_invalidated_at) {
-                const sessionStarted = localStorage.getItem('lumo_session_started_at');
-                if (sessionStarted) {
-                  const startedDate = new Date(sessionStarted);
-                  const invalidatedDate = new Date(profileData.session_invalidated_at);
-                  if (invalidatedDate > startedDate) {
-                    localStorage.clear();
-                    alert("You have been signed out of all devices for security.");
-                    window.location.href = "/";
-                    return;
-                  }
-                }
-              }
-              if (profileData.id) {
+    const handleSitterSession = () => {
+      const cachedProEmail = localStorage.getItem('lumo_pro_email');
+      const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
+
+      if (cachedProEmail && cachedProEmail !== 'undefined' && cachedProEmail.trim() !== '') {
+        if (cachedSitterEmail && cachedSitterEmail !== 'undefined' && cachedSitterEmail.trim() !== '') {
+          // Signed in as an approved sitter
+          setSitterEmail(cachedSitterEmail);
+          setSitterAuthMode('form');
+          // Check profile to ensure we load data
+          fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
+            .then(res => res.json())
+            .then(profileData => {
+              if (profileData && profileData.id) {
                 loadSitterProfile(cachedSitterEmail);
                 setProfilePreviewMode(true);
               } else {
                 setProfilePreviewMode(false);
               }
-            }
-          })
-          .catch(err => {
-            console.error('Failed to auto-load sitter profile:', err);
-          });
+            })
+            .catch(err => console.error('Failed to auto-load sitter profile:', err));
+        } else {
+          // Signed in as a member, but no approved sitter record
+          setSitterEmail(cachedProEmail);
+          setSitterAuthMode('form');
+          setProfilePreviewMode(false);
+        }
       } else {
-        // Expired, clean up
-        localStorage.removeItem('lumo_sitter_email');
-        localStorage.removeItem('lumo_sitter_email_expiry');
+        // Not signed in
+        setSitterAuthMode('email');
+        setSitterEmail('');
+        setProfilePreviewMode(false);
       }
-    }
+    };
+
+    handleSitterSession();
+    window.addEventListener('lumo-pro-update', handleSitterSession);
 
     // Set activeTab from URL search params or hash
     const params = new URLSearchParams(window.location.search);
@@ -502,6 +496,7 @@ export default function PetSitting() {
 
     return () => {
       window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('lumo-pro-update', handleSitterSession);
       window.removeEventListener('storage', syncStatus);
     };
   }, []);
@@ -3763,90 +3758,22 @@ export default function PetSitting() {
                 </div>
 
             {sitterAuthMode === 'email' && (
-              <div className="space-y-5 max-w-sm mx-auto animate-fade-in">
-                <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Enter your email</label>
-                  <input
-                    type="email"
-                    value={sitterEmail}
-                    onChange={e => { setSitterEmail(e.target.value); setSitterAuthError(''); }}
-                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center"
-                    placeholder="your@email.com"
-                  />
+              <div className="text-center space-y-6 animate-fade-in bg-white p-8 rounded-2xl border border-[#E8DDD4] shadow-sm max-w-md mx-auto">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FAF6F4] mb-2">
+                  <Lock className="w-8 h-8 text-[#8B5E3C]" />
                 </div>
-                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center">{sitterAuthError}</div>}
+                <h3 className="text-xl font-black text-[#4A3E3D]">Sign In Required</h3>
+                <p className="text-[#8B7E7D] text-sm leading-relaxed">
+                  You must be signed in to your free member account to apply or manage your pet sitter profile.
+                </p>
                 <button
                   type="button"
-                  disabled={sitterAuthLoading || !sitterEmail}
-                  onClick={e => handleSitterEmailSubmit(e as any, 'new')}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm"
+                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
-                  {sitterAuthLoading && sitterSignupIntent === 'new' ? 'Sending...' : '✨ Create New Profile'}
-                </button>
-                <div className="relative flex items-center gap-3">
-                  <div className="flex-1 h-px bg-[#E8DDD4]" />
-                  <span className="text-xs text-[#8B7E7D] font-semibold">or</span>
-                  <div className="flex-1 h-px bg-[#E8DDD4]" />
-                </div>
-                <button
-                  type="button"
-                  disabled={sitterAuthLoading || !sitterEmail}
-                  onClick={e => handleSitterEmailSubmit(e as any, 'existing')}
-                  className="w-full bg-white border border-[#8B5E3C] text-[#8B5E3C] font-bold py-3 rounded-xl transition-all hover:bg-[#FAF6F4]"
-                >
-                  {sitterAuthLoading && sitterSignupIntent === 'existing' ? 'Sending...' : '🔑 Sign In to Existing Profile'}
+                  <Key className="w-4 h-4" /> Sign In to Continue
                 </button>
               </div>
-            )}
-
-            {sitterAuthMode === 'otp' && (
-              <form onSubmit={handleSitterOtpSubmit} className="space-y-5 max-w-sm mx-auto animate-fade-in bg-white p-6 rounded-2xl border border-[#E8DDD4] shadow-sm">
-                <div className="text-center mb-2">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FAF6F4] mb-4">
-                    <Key className="w-6 h-6 text-[#8B5E3C]" />
-                  </div>
-                  <h3 className="text-lg font-black text-[#4A3E3D] mb-1">
-                    {sitterSignupIntent === 'new' ? 'Creating New Profile' : 'Signing In'}
-                  </h3>
-                  <p className="text-sm text-[#8B7E7D]">
-                    We sent a 6-digit code to<br/><strong>{sitterEmail}</strong>
-                  </p>
-                  <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-3 mb-2 animate-fade-in">
-                    📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
-                  </div>
-                </div>
-                <div>
-                  <input required autoComplete="off" type="text" inputMode="numeric" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-black text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] shadow-inner" placeholder="••••••" />
-                </div>
-                {sitterAuthError && <div className="text-red-600 text-sm font-bold text-center bg-red-50 py-2 rounded-lg">{sitterAuthError}</div>}
-                
-                {sitterConflict ? (
-                  <button type="button" onClick={() => {
-                    setSitterAuthMode('email');
-                    setSitterAuthCode('');
-                    setSitterConflict(false);
-                    setSitterAuthError('');
-                  }} className="w-full bg-[#4A3E3D] hover:bg-[#322A29] text-white font-bold py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                    Sign In Instead &rarr;
-                  </button>
-                ) : (
-                  <button type="submit" disabled={sitterAuthLoading || sitterAuthCode.length < 6} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 rounded-xl transition-all shadow-md">
-                    {sitterAuthLoading ? 'Verifying...' : 'Verify Code'}
-                  </button>
-                )}
-                
-                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-[#E8DDD4]">
-                  <div className="text-center text-xs text-[#8B7E7D] mb-1">
-                    Didn't receive the code? Check your spam or junk folder.
-                  </div>
-                  <button type="button" onClick={e => handleSitterEmailSubmit(e as any, sitterSignupIntent || 'new')} disabled={sitterAuthLoading} className="w-full text-[#8B5E3C] text-sm font-bold hover:underline py-2">
-                    Still nothing? Resend Code
-                  </button>
-                  <button type="button" onClick={() => { setSitterAuthMode('email'); setSitterAuthCode(''); setSitterAuthError(''); setSitterConflict(false); }} className="w-full text-[#8B7E7D] text-sm font-semibold hover:text-[#4A3E3D] py-2 flex items-center justify-center gap-1">
-                    &larr; Back to start
-                  </button>
-                </div>
-              </form>
             )}
 
             {sitterAuthMode === 'form' && (

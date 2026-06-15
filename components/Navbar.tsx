@@ -279,6 +279,10 @@ export default function Navbar() {
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
+      if (verifyData.isSitter) {
+        localStorage.setItem('lumo_sitter_email', signInEmail);
+        localStorage.setItem('lumo_sitter_id', verifyData.sitterId);
+      }
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       syncStatus();
       setShowSignInModal(false);

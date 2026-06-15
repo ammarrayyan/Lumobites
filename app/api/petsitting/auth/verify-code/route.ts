@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     const { data: ownerData } = await supabaseAdmin
       .from('emails')
-      .select('is_pro, account_status')
+      .select('is_pro, account_status, source, created_at')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -76,15 +76,17 @@ export async function POST(request: NextRequest) {
     }
 
     const existed = !!ownerData;
+    const currentSource = ownerData?.source;
+    const newSource = currentSource === 'stripe' ? 'stripe' : 'sitter_profile';
 
-    if (!ownerData || !ownerData.is_pro) {
+    if (!ownerData || !ownerData.is_pro || ownerData.source !== newSource) {
       const { error: upsertErr } = await supabaseAdmin
         .from('emails')
         .upsert({
           email: cleanEmail,
           is_pro: true,
-          source: 'early_access_free',
-          created_at: new Date().toISOString()
+          source: newSource,
+          created_at: ownerData?.created_at || new Date().toISOString()
         }, { onConflict: 'email' });
 
       if (upsertErr) {
