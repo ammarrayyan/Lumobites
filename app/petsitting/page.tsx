@@ -5246,7 +5246,7 @@ export default function PetSitting() {
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Cover Banner */}
             <div className="h-56 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
-              {selectedSitterForReviews.cover_photo_url ? (
+              {isOwnerPro && selectedSitterForReviews.cover_photo_url ? (
                 <img
                   src={selectedSitterForReviews.cover_photo_url}
                   alt="Cover banner"
@@ -5262,15 +5262,17 @@ export default function PetSitting() {
             </div>
 
             <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-b border-[#E8DDD4] relative bg-white z-10 pt-0">
-              <div className="-mt-14 sm:-mt-18 relative z-10 flex items-end gap-3 sm:gap-4 pr-10 sm:pr-12">
-                {selectedSitterForReviews.photo_url ? (
-                  <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md flex-shrink-0 pointer-events-none" />
-                ) : (
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl flex-shrink-0 shadow-md border-4 border-white">
-                    {formatSitterName(selectedSitterForReviews.name).charAt(0)}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1 pb-1">
+              <div className="relative z-10 flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
+                <div className="-mt-14 sm:-mt-18 flex-shrink-0">
+                  {selectedSitterForReviews.photo_url ? (
+                    <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md pointer-events-none" />
+                  ) : (
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl shadow-md border-4 border-white">
+                      {formatSitterName(selectedSitterForReviews.name).charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1 pt-2 sm:pt-4 pb-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] break-words">{formatSitterName(selectedSitterForReviews.name)}</h3>
                     {selectedSitterForReviews.gender && (
@@ -5410,18 +5412,9 @@ export default function PetSitting() {
                   <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 text-center shadow-xs">
                     <Lock className="w-8 h-8 text-[#8B5E3C] mx-auto mb-3" />
                     <h5 className="font-extrabold text-[#4A3E3D] mb-1">Sign in to see reviews</h5>
-                    <p className="text-xs text-[#8B7E7D] mb-4">
-                      Reviews may contain sitter names or identifying details. Create a free account to view them.
+                    <p className="text-xs text-[#8B7E7D] max-w-sm mx-auto">
+                      Reviews may contain sitter names or identifying details.
                     </p>
-                    <button
-                      onClick={() => {
-                        setReviewsModalOpen(false);
-                        setUnlockModalOpen(true);
-                      }}
-                      className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-5 rounded-xl transition-all text-xs cursor-pointer shadow-xs inline-flex items-center gap-1"
-                    >
-                      <span>Create Free Account</span>
-                    </button>
                   </div>
                 ) : loadingReviews ? (
                   <div className="flex flex-col items-center justify-center py-8">
