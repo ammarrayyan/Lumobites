@@ -54,6 +54,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'You have too many pending requests. Please wait for responses before sending more.' }, { status: 400 });
     }
 
+    // Check if owner already has a pending request with this same sitter
+    const { data: existingSitterPending, error: existingSitterPendingError } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('id')
+      .eq('owner_email', cleanEmail)
+      .eq('sitter_id', sitter_id)
+      .eq('status', 'pending')
+      .limit(1);
+
+    if (existingSitterPendingError) {
+      console.error('[Request POST] Existing sitter pending check error:', existingSitterPendingError);
+    } else if (existingSitterPending && existingSitterPending.length > 0) {
+      return NextResponse.json({ error: 'You already have a pending request with this sitter. Please wait for them to respond before sending another request.' }, { status: 400 });
+    }
+
+
     // Validation: Check if requested time slot is in sitter's available times
     if (time_slot) {
       const sitterAvailable = sitter.available_times || [];
