@@ -2709,15 +2709,25 @@ export default function PetSitting() {
                                ) : null}
                              </div>
                              <div className="text-sm mb-1">
-                               {sitter.review_count ? (
-                                 <span className="text-[#D97706] font-bold flex items-center gap-1">
-                                   <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
-                                   {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
-                                 </span>
-                               ) : (
-                                 <span className="text-[#8B7E7D]">No reviews yet</span>
-                               )}
-                             </div>
+                                {!isOwnerPro ? (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setUnlockModalOpen(true);
+                                    }}
+                                    className="text-[10px] font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4] cursor-pointer"
+                                  >
+                                    <span>🔒 Sign in to see reviews</span>
+                                  </button>
+                                ) : sitter.review_count ? (
+                                  <span className="text-[#D97706] font-bold flex items-center gap-1">
+                                    <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
+                                    {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[#8B7E7D]">No reviews yet</span>
+                                )}
+                              </div>
                             <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
                               <MapPin className="w-3.5 h-3.5 text-gray-400" /> {sitter.city ? (
                                 (sitter.country && (
@@ -5286,7 +5296,11 @@ export default function PetSitting() {
                   )}
  
                   <div className="text-sm">
-                    {selectedSitterForReviews.review_count ? (
+                    {!isOwnerPro ? (
+                      <span className="text-[#8B7E7D] text-xs font-semibold select-none">
+                        🔒 Reviews locked
+                      </span>
+                    ) : selectedSitterForReviews.review_count ? (
                       <span className="text-[#D97706] font-bold whitespace-nowrap">
                         ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
                       </span>
@@ -5392,7 +5406,24 @@ export default function PetSitting() {
                   Reviews ({selectedSitterForReviews.review_count || 0})
                 </h4>
                 
-                {loadingReviews ? (
+                {!isOwnerPro ? (
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 text-center shadow-xs">
+                    <Lock className="w-8 h-8 text-[#8B5E3C] mx-auto mb-3" />
+                    <h5 className="font-extrabold text-[#4A3E3D] mb-1">Sign in to see reviews</h5>
+                    <p className="text-xs text-[#8B7E7D] mb-4">
+                      Reviews may contain sitter names or identifying details. Create a free account to view them.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setReviewsModalOpen(false);
+                        setUnlockModalOpen(true);
+                      }}
+                      className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-5 rounded-xl transition-all text-xs cursor-pointer shadow-xs inline-flex items-center gap-1"
+                    >
+                      <span>Create Free Account</span>
+                    </button>
+                  </div>
+                ) : loadingReviews ? (
                   <div className="flex flex-col items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B5E3C] mb-4"></div>
                     <p className="text-[#8B7E7D] text-xs">Loading reviews...</p>
