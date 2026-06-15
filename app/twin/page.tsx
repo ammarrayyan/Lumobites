@@ -366,30 +366,19 @@ export default function TwinPage() {
     setModalMessage(null);
     
     try {
-      const origin = window.location.origin;
-      const res = await fetch('/api/stripe/checkout', {
+      const res = await fetch('/api/stripe/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: modalEmail,
-          successUrl: `${origin}/twin?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(modalEmail)}`,
-          cancelUrl: `${origin}/twin`
-        })
+        body: JSON.stringify({ email: modalEmail })
       });
       
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        throw new Error(data.error || 'Failed to send verification code');
       }
       
-      if (data.isPro) {
-        setModalStep('already_pro');
-        setModalLoading(false);
-      } else if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
+      setModalStep('verification');
+      setModalMessage({ text: 'Verification code sent! Please check your email.', isError: false });
     } catch (err: any) {
       console.error(err);
       setModalMessage({ text: err.message || 'Something went wrong. Please try again.', isError: true });
@@ -473,7 +462,7 @@ export default function TwinPage() {
         setVerificationCode('');
         setModalStep('paywall');
       } else {
-        throw new Error('This email does not have active PRO access.');
+        throw new Error('Could not verify code. Please try again.');
       }
     } catch (err: any) {
       console.error(err);
@@ -1793,38 +1782,38 @@ export default function TwinPage() {
 
                 {modalStep === 'paywall' && (
                   <div className="flex flex-col gap-4 mt-2">
-                    <button
-                      onClick={() => {
-                        setModalStep('upgrade_email');
-                        setModalMessage(null);
-                      }}
-                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      Upgrade for $2.99/month
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowUpgradeModal(false);
-                        window.dispatchEvent(new Event('lumo-open-signin'));
-                      }}
-                      className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
-                    >
-                      Already a PRO member? Sign in to access your account →
-                    </button>
-
-                    <div className="flex flex-col gap-2.5 mt-1">
-                      <button 
-                        type="button"
+                      <button
                         onClick={() => {
-                          setModalStep('restore_email');
+                          setModalStep('upgrade_email');
                           setModalMessage(null);
                         }}
-                        className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-semibold hover:underline bg-transparent border-none cursor-pointer"
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Already subscribed? Restore subscription
+                        Create Free Account
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowUpgradeModal(false);
+                          window.dispatchEvent(new Event('lumo-open-signin'));
+                        }}
+                        className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                      >
+                        Already have an account? Sign in to access your account →
+                      </button>
+
+                      <div className="flex flex-col gap-2.5 mt-1">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setModalStep('restore_email');
+                            setModalMessage(null);
+                          }}
+                          className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-semibold hover:underline bg-transparent border-none cursor-pointer"
+                        >
+                          Already have an account? Sign in
+                        </button>
                       <span className="text-[11px] text-gray-400 text-center">
                         Come back tomorrow for your free match
                       </span>
@@ -1835,8 +1824,11 @@ export default function TwinPage() {
                 {modalStep === 'upgrade_email' && (
                   <>
                     <div className="text-left mt-2">
-                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Upgrade to Pro</h4>
-                      <p className="text-xs text-gray-500 font-medium">Enter your email to proceed to secure Stripe checkout.</p>
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Create Free Account</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter your email to get a verification code.</p>
+                      <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed font-semibold mt-3 mb-2">
+                        🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                      </div>
                     </div>
 
                     <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
@@ -1870,14 +1862,14 @@ export default function TwinPage() {
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                         ) : (
                           <>
-                            Proceed to Checkout
+                            Send Verification Code
                             <ArrowRight className="w-4 h-4" />
                           </>
                         )}
                       </button>
                       
                       <p className="text-[11px] text-gray-400 text-center mt-2">
-                        Already a PRO member?{" "}
+                        Already have an account?{" "}
                         <button
                           type="button"
                           onClick={() => {
@@ -1923,9 +1915,9 @@ export default function TwinPage() {
                       <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] mb-3">
                         <Footprints className="w-6 h-6" />
                       </div>
-                      <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Pro Membership Found</h4>
+                      <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Membership Found</h4>
                       <p className="text-sm text-gray-600 font-medium max-w-sm mb-4">
-                        We found an active PRO subscription for <strong>{modalEmail}</strong>. You don't need to purchase another subscription!
+                        We found an active account for <strong>{modalEmail}</strong>. You don't need to purchase another subscription!
                       </p>
                     </div>
 
@@ -1938,7 +1930,7 @@ export default function TwinPage() {
                         }}
                         className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
                       >
-                        Sign in to Your Pro Account
+                        Sign in to Your Account
                         <Footprints className="w-4 h-4" />
                       </button>
                     </div>
@@ -2063,7 +2055,7 @@ export default function TwinPage() {
                         }}
                         className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
                       >
-                        Upgrade to Pro
+                        Create Free Account
                       </button>
                     </div>
                   </>

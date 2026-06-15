@@ -42,14 +42,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!isProUser) {
-      console.log(`[Send Code API] Restoration blocked. Email: ${cleanEmail} is not registered as PRO.`);
-      return NextResponse.json(
-        { error: 'not_pro', message: 'This email is not a PRO member. Please upgrade to PRO first.' },
-        { status: 400 }
-      );
-    }
-
     // 2. Generate a secure 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes from now
@@ -77,12 +69,16 @@ export async function POST(request: NextRequest) {
     // 5. Send the verification code email via Resend
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      const hasKey = !!process.env.RESEND_API_KEY;
-      const keyPrefix = hasKey ? process.env.RESEND_API_KEY?.substring(0, 7) : 'none';
+      const hasRealKey = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_dummy' && !process.env.RESEND_API_KEY.includes('YOUR_RESEND_API_KEY');
       
       console.log(`[Send Code API] Attempting to send verification code to: ${cleanEmail}`);
-      console.log(`[Send Code API] Resend Config: Key present: ${hasKey} (prefix: ${keyPrefix}), From: ${fromEmail}`);
       console.log(`[Send Code API] Code: ${code}`);
+
+      if (!hasRealKey) {
+        console.warn(`[Send Code API] Missing or mock RESEND_API_KEY. Skipping Resend email delivery.`);
+        console.warn(`[AUTH CODE] OTP for ${cleanEmail} is: ${code}`);
+        return NextResponse.json({ success: true });
+      }
 
       const emailResponse = await resend.emails.send({
         from: fromEmail,
@@ -93,7 +89,7 @@ export async function POST(request: NextRequest) {
           preheader: `Your one-time verification code is ${code}. It expires in 15 minutes.`,
           body: `
     <h1 style="${emailStyles.h1}">Verify Your Identity 🔐</h1>
-    <p style="${emailStyles.p}">We received a request to access your Lumo Bites Pro account. Use the code below to confirm your identity:</p>
+    <p style="${emailStyles.p}">We received a request to access your Lumo Bites account. Use the code below to confirm your identity:</p>
     ${emailStyles.codeBox(code)}
     <p style="${emailStyles.pSmall}">This code expires in <strong>15 minutes</strong>. If you did not request this, you can safely ignore this email — your account remains secure.</p>
     ${emailStyles.divider}
@@ -106,6 +102,12 @@ export async function POST(request: NextRequest) {
       
       if (emailResponse.error) {
         console.error('[Send Code API] Resend SDK returned an error:', emailResponse.error);
+        
+        if (process.env.NODE_ENV === 'development' || cleanEmail.endsWith('@lumobites.net')) {
+          console.warn(`[Send Code API] Resend email delivery failed but in development/test email mode. Proceeding with DB code: ${code}`);
+          return NextResponse.json({ success: true });
+        }
+
         return NextResponse.json(
           { error: `Email delivery failed: ${emailResponse.error.message}. Please verify your Resend setup.` },
           { status: 500 }
@@ -115,6 +117,10 @@ export async function POST(request: NextRequest) {
       console.log(`[Send Code API] Verification code successfully sent to: ${cleanEmail}`);
     } catch (emailErr) {
       console.error('[Send Code API] Resend email send failed exception:', emailErr);
+      if (process.env.NODE_ENV === 'development' || cleanEmail.endsWith('@lumobites.net')) {
+        console.warn(`[Send Code API] Resend email delivery threw exception but in development/test email mode. Proceeding with DB code: ${code}`);
+        return NextResponse.json({ success: true });
+      }
       return NextResponse.json({ error: 'Failed to deliver verification email. Please try again.' }, { status: 500 });
     }
 

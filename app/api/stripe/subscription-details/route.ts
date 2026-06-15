@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Verify Pro status first in Supabase to prevent unauthenticated access (check both owner and sitter tables)
     const { data: emailData } = await supabase
       .from('emails')
-      .select('is_pro')
+      .select('is_pro, source')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -49,6 +49,17 @@ export async function POST(request: NextRequest) {
         active: false,
         error: 'No active Pro subscription found for this email address.'
       }, { status: 404 });
+    }
+
+    // Check if the user is a free early access account (or has no Stripe setup but is PRO)
+    if (emailData?.source === 'early_access_free' || (emailData && !emailData.source && emailData.is_pro)) {
+      return NextResponse.json({
+        success: true,
+        active: true,
+        earlyAccessFree: true,
+        nextBillingDate: 'N/A - Free Early Access Account 🐾',
+        subscriptionId: 'early_access_free'
+      });
     }
 
     if (!stripeSecretKey) {

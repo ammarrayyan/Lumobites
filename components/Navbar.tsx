@@ -203,33 +203,14 @@ export default function Navbar() {
     window.location.reload();
   };
 
-
-  const handleUpgradeCheckout = async () => {
-    let email = localStorage.getItem('lumo_pro_email');
-    if (!email) {
-      email = window.prompt("Enter your email to continue to Stripe checkout:");
-      if (!email) return;
+  const handleUpgradeCheckout = async (prefilledEmail?: string) => {
+    if (prefilledEmail) {
+      setSignInEmail(prefilledEmail.trim());
     }
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      });
-      const data = await res.json();
-      if (data.isPro) {
-        setShowUpgradeMenu(false);
-        setSignInEmail(email.trim());
-        setSignInError('');
-        setAlreadyProMsg(true);
-        setSignInStep('email');
-        setShowSignInModal(true);
-        return;
-      }
-      if (data.url) window.location.href = data.url;
-    } catch (e) {
-      alert('Checkout failed. Please try again.');
-    }
+    setSignInStep('email');
+    setSignInError('');
+    setAlreadyProMsg(false);
+    setShowSignInModal(true);
   };
 
   const handleSignInSendCode = async (e: React.FormEvent) => {
@@ -435,7 +416,7 @@ export default function Navbar() {
                     onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
                     className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
                   >
-                    Go PRO <Sparkles className="w-3 h-3" />
+                    Create Free Account <Sparkles className="w-3 h-3" />
                   </button>
                 {showUpgradeMenu && (
                   <>
@@ -445,9 +426,9 @@ export default function Navbar() {
                         onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
                         className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
                       >
-                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
+                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
                         <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                        <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
+                        <span className="block text-[#9A7760] text-[10px] font-medium">Free during early launch period</span>
                       </button>
                       <div className="flex items-center my-2 px-3">
                         <div className="flex-grow border-t border-gray-150"></div>
@@ -455,7 +436,7 @@ export default function Navbar() {
                         <div className="flex-grow border-t border-gray-150"></div>
                       </div>
                       <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
-                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already a PRO member?</span>
+                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
                         <button
                           onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
                           className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
@@ -477,7 +458,7 @@ export default function Navbar() {
                 >
                   {isPro && (
                     <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
-                      PRO <Check className="w-3 h-3 text-white stroke-[3]" />
+                      Member <Check className="w-3 h-3 text-white stroke-[3]" />
                     </div>
                   )}
                   <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
@@ -505,7 +486,7 @@ export default function Navbar() {
                         className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
                         style={{ textDecoration: 'none' }}
                       >
-                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
+                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
                       </Link>
                       <button
                         onClick={handleSignOut}
@@ -533,7 +514,7 @@ export default function Navbar() {
                   onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
                   className="bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
                 >
-                  Go PRO <Sparkles className="w-3 h-3" />
+                  Create Free Account <Sparkles className="w-3 h-3" />
                 </button>
               {showUpgradeMenu && (
                 <>
@@ -543,9 +524,9 @@ export default function Navbar() {
                       onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
                       className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
                     >
-                      <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Upgrade to PRO — $2.99/month</span>
+                      <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
                       <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                      <span className="block text-[#9A7760] text-[10px] font-medium">Cancel anytime · No commitment</span>
+                      <span className="block text-[#9A7760] text-[10px] font-medium">Free during early launch period</span>
                     </button>
                     <div className="flex items-center my-2 px-3">
                       <div className="flex-grow border-t border-gray-150"></div>
@@ -553,7 +534,7 @@ export default function Navbar() {
                       <div className="flex-grow border-t border-gray-150"></div>
                     </div>
                     <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
-                      <span className="text-[11px] text-gray-500 font-bold leading-tight">Already a PRO member?</span>
+                      <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
                       <button
                         onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
                         className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
@@ -575,7 +556,7 @@ export default function Navbar() {
               >
                 {isPro && (
                   <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
-                    PRO <Check className="w-3 h-3 text-white stroke-[3]" />
+                    Member <Check className="w-3 h-3 text-white stroke-[3]" />
                   </div>
                 )}
                 {!isPro && (
@@ -603,7 +584,7 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
                       style={{ textDecoration: 'none' }}
                     >
-                      <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Subscription
+                      <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
                     </Link>
                     <button
                       onClick={handleSignOut}

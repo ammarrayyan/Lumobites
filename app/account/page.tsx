@@ -216,10 +216,10 @@ export default function AccountPage() {
               <div className="text-center flex flex-col items-center">
                 <Settings className="w-10 h-10 text-[#8B5E3C] mb-3" />
                 <h1 className="text-3xl font-[900] text-[#191919] tracking-tight mb-2">
-                  Manage Subscription
+                  Your Account
                 </h1>
                 <p className="text-sm text-gray-500 max-w-[340px] mx-auto leading-relaxed">
-                  Enter the email address associated with your Lumo Bites Pro subscription to view details or cancel.
+                  Enter your email address to sign in or manage your account.
                 </p>
               </div>
 
@@ -267,7 +267,7 @@ export default function AccountPage() {
                 <form onSubmit={handleSendCode} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5 text-left">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                      Pro Subscription Email {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
+                      Email Address {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
                     </label>
                     {isLocked ? (
                       <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
@@ -347,6 +347,12 @@ export default function AccountPage() {
                   </button>
                 </form>
               )}
+              {/* Early Access Notice */}
+              <div className="mt-6 p-4 rounded-2xl bg-amber-50/60 border border-amber-100 text-left">
+                <p className="text-xs text-amber-805 leading-relaxed">
+                  <strong>Early Access Free Period:</strong> Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                </p>
+              </div>
             </div>
           )}
 
@@ -484,126 +490,142 @@ export default function AccountPage() {
                   <div className="text-center flex flex-col items-center">
                     <Sparkles className="w-10 h-10 text-amber-500 mb-3" />
                     <h2 className="text-2xl font-[900] text-[#191919] tracking-tight">
-                      Your Pro Dashboard
+                      {subDetails.earlyAccessFree ? "Your Account Dashboard" : "Your Pro Dashboard"}
                     </h2>
                     <p className="text-xs text-gray-400 mt-1 font-bold">
                       Account: {email}
                     </p>
                   </div>
 
-                  <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
-                    <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
-                      {subDetails.cancelAtPeriodEnd ? (
-                        <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                          Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                        </span>
-                      ) : (
+                  {subDetails.earlyAccessFree ? (
+                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-4">
+                      <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Account Status</span>
                         <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                          Active <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          Active (Free Access) <Check className="w-3.5 h-3.5 text-emerald-600" />
                         </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                        {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
-                      </span>
-                      <p className="text-[#191919] font-extrabold text-sm mt-0.5">
-                        {subDetails.nextBillingDate}
+                      </div>
+                      <p className="text-xs text-[#8B7E7D] leading-relaxed">
+                        Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
                       </p>
                     </div>
-                  </div>
-
-                  {error && (
-                    <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                      <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
-                    </p>
-                  )}
-
-                  {subDetails.adminBypass ? (
-                    <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
-                      <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
-                    </div>
-                  ) : subDetails.cancelAtPeriodEnd ? (
-                    <div className="flex flex-col gap-3">
-                      <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
-                        Subscription cancelled — Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
-                        {subDetails.daysRemaining !== undefined && (
-                          <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
-                        )}
-                      </div>
-                      {(subDetails.daysRemaining ?? 0) > 0 ? (
-                        <button
-                          onClick={async () => {
-                            setLoading(true);
-                            setError(null);
-                            try {
-                              const res = await fetch('/api/stripe/reactivate-subscription', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
-                              });
-                              const data = await res.json();
-                              if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
-                              setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
-                            } catch (err: any) {
-                              setError(err.message);
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
-                          disabled={loading}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
-                        >
-                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                            <>
-                              <RefreshCw className="w-4 h-4" />
-                              Reactivate Subscription
-                            </>
+                  ) : (
+                    <>
+                      <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
+                          {subDetails.cancelAtPeriodEnd ? (
+                            <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                              Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                            </span>
+                          ) : (
+                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                              Active <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            </span>
                           )}
-                        </button>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
+                          </span>
+                          <p className="text-[#191919] font-extrabold text-sm mt-0.5">
+                            {subDetails.nextBillingDate}
+                          </p>
+                        </div>
+                      </div>
+
+                      {error && (
+                        <p className="text-xs text-red-500 font-semibold text-center leading-normal">
+                          <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
+                        </p>
+                      )}
+
+                      {subDetails.adminBypass ? (
+                        <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
+                          <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
+                        </div>
+                      ) : subDetails.cancelAtPeriodEnd ? (
+                        <div className="flex flex-col gap-3">
+                          <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
+                            Subscription cancelled — Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
+                            {subDetails.daysRemaining !== undefined && (
+                              <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
+                            )}
+                          </div>
+                          {(subDetails.daysRemaining ?? 0) > 0 ? (
+                            <button
+                              onClick={async () => {
+                                setLoading(true);
+                                setError(null);
+                                try {
+                                  const res = await fetch('/api/stripe/reactivate-subscription', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
+                                  });
+                                  const data = await res.json();
+                                  if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
+                                  setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+                                } catch (err: any) {
+                                  setError(err.message);
+                                } finally {
+                                  setLoading(false);
+                                }
+                              }}
+                              disabled={loading}
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
+                            >
+                              {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                <>
+                                  <RefreshCw className="w-4 h-4" />
+                                  Reactivate Subscription
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                setLoading(true);
+                                setError(null);
+                                try {
+                                  const res = await fetch('/api/stripe/checkout', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: email.trim() })
+                                  });
+                                  const data = await res.json();
+                                  if (data.url) {
+                                    window.location.href = data.url;
+                                  } else {
+                                    throw new Error(data.error || 'Failed to start checkout');
+                                  }
+                                } catch (err: any) {
+                                  setError(err.message);
+                                  setLoading(false);
+                                }
+                              }}
+                              disabled={loading}
+                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                            >
+                              {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                <>
+                                  <Sparkles className="w-4 h-4 text-white" />
+                                  Upgrade to PRO — $2.99/mo
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
                       ) : (
                         <button
-                          onClick={async () => {
-                            setLoading(true);
-                            setError(null);
-                            try {
-                              const res = await fetch('/api/stripe/checkout', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email: email.trim() })
-                              });
-                              const data = await res.json();
-                              if (data.url) {
-                                window.location.href = data.url;
-                              } else {
-                                throw new Error(data.error || 'Failed to start checkout');
-                              }
-                            } catch (err: any) {
-                              setError(err.message);
-                              setLoading(false);
-                            }
-                          }}
-                          disabled={loading}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                          onClick={() => setShowConfirmCancel(true)}
+                          className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
                         >
-                          {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                            <>
-                              <Sparkles className="w-4 h-4 text-white" />
-                              Upgrade to PRO — $2.99/mo
-                            </>
-                          )}
+                          Cancel Subscription
                         </button>
                       )}
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowConfirmCancel(true)}
-                      className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
-                    >
-                      Cancel Subscription
-                    </button>
+                    </>
                   )}
                   {/* Sign Out All Devices Button */}
                   <button

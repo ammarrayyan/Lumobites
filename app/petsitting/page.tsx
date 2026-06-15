@@ -2045,33 +2045,15 @@ export default function PetSitting() {
 
     try {
       if (ownerAuthMode === 'email') {
-        const res = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
-        const data = await res.json();
-        
-        if (data.isOwnerPro) {
-          const otpRes = await fetch('/api/petsitting/auth/send-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: unlockEmail, type: 'owner' })
-          });
-          if (otpRes.ok) {
-            setOwnerAuthMode('verify');
-          } else {
-            setReqError('Failed to send verification code. Please try again.');
-          }
+        const otpRes = await fetch('/api/petsitting/auth/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: unlockEmail, type: 'owner' })
+        });
+        if (otpRes.ok) {
+          setOwnerAuthMode('verify');
         } else {
-          // Not PRO, trigger checkout
-          const checkoutRes = await fetch('/api/stripe/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: unlockEmail })
-          });
-          const checkoutData = await checkoutRes.json();
-          if (checkoutData.sessionId && checkoutData.url) {
-            window.location.href = checkoutData.url;
-          } else {
-            setReqError('Failed to start checkout');
-          }
+          setReqError('Failed to send verification code. Please try again.');
         }
       } else {
         // Verify mode
@@ -2501,7 +2483,7 @@ export default function PetSitting() {
               onClick={() => setActiveTab('become')}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'become' ? 'bg-[#8B5E3C] text-white shadow-md' : 'text-[#666666] hover:text-[#8B5E3C]'}`}
             >
-              Become a Sitter
+              Join Free as an Early Sitter
             </button>
           </div>
         </div>
@@ -2680,7 +2662,7 @@ export default function PetSitting() {
                   onClick={() => setActiveTab('become')}
                   className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
                 >
-                  Become a sitter &rarr;
+                  Join free as an early sitter &rarr;
                 </button>
               </div>
             ) : (
@@ -3798,8 +3780,11 @@ export default function PetSitting() {
             ) : (
               <>
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Lumo Sitters</h2>
-                  <p className="text-[#8B7E7D]">Create or manage your profile to receive pet sitting requests in your neighborhood.</p>
+                  <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Free as an Early Sitter</h2>
+                  <p className="text-[#8B7E7D] mb-4">Create or manage your profile to receive pet sitting requests in your neighborhood. 100% commission-free and fee-free during our early launch period!</p>
+                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-left font-semibold mb-2">
+                    🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                  </div>
                 </div>
 
             {sitterAuthMode === 'email' && (
@@ -5216,7 +5201,7 @@ export default function PetSitting() {
                     placeholder="Enter your email to verify or subscribe..." 
                   />
                   <p className="text-[10px] text-[#8B7E7D] mt-2 leading-relaxed">
-                    Already a PRO member? We'll send you a verification code to log in. Not a member yet? This will direct you to Stripe checkout.
+                    Already have an account? We'll send you a verification code to log in. Don't have one yet? We'll create your free account instantly!
                   </p>
                 </div>
               ) : (
@@ -5280,7 +5265,7 @@ export default function PetSitting() {
                 }}
                 className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs mt-3"
               >
-                Already a PRO member? Sign in to access your account →
+                Already have an account? Sign in to access your account →
               </button>
             )}
           </div>

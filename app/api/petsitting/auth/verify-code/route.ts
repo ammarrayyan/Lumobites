@@ -67,12 +67,28 @@ export async function POST(request: NextRequest) {
 
     const { data: ownerData } = await supabaseAdmin
       .from('emails')
-      .select('account_status')
+      .select('is_pro, account_status')
       .eq('email', cleanEmail)
       .maybeSingle();
 
     if (ownerData && (ownerData.account_status === 'suspended' || ownerData.account_status === 'banned')) {
       return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
+    }
+
+    if (!ownerData || !ownerData.is_pro) {
+      const { error: upsertErr } = await supabaseAdmin
+        .from('emails')
+        .upsert({
+          email: cleanEmail,
+          is_pro: true,
+          source: 'early_access_free',
+          created_at: new Date().toISOString()
+        }, { onConflict: 'email' });
+
+      if (upsertErr) {
+        console.error('[Sitter Auth Verify Code] Failed to register free account:', upsertErr);
+        return NextResponse.json({ error: 'Failed to create your free account.' }, { status: 500 });
+      }
     }
 
     // 4. Mark successful login by clearing the code

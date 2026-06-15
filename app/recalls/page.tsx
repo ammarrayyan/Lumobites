@@ -299,30 +299,15 @@ export default function RecallsPage() {
         setAuthMode('verify');
         setAuthMessage(`Code sent to ${authEmail.trim()}`);
       } else if (authMode === 'upgrade') {
-        const res = await fetch('/api/stripe/status', {
+        const res = await fetch('/api/stripe/send-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: authEmail.trim() })
         });
         const data = await res.json();
-        if (data.isPro) {
-          setAuthError('You are already PRO — sign in instead.');
-          setAuthMode('signin');
-          setAuthLoading(false);
-          return;
-        }
-        const checkoutRes = await fetch('/api/stripe/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: authEmail.trim(), returnUrl: `${window.location.origin}/recalls` })
-        });
-        const checkoutData = await checkoutRes.json();
-        if (checkoutData.url) {
-          window.location.href = checkoutData.url;
-          return;
-        } else {
-          throw new Error(checkoutData.error || 'Failed to initialize checkout');
-        }
+        if (!res.ok) throw new Error(data.error || 'Failed to send code');
+        setAuthMode('verify');
+        setAuthMessage(`Code sent to ${authEmail.trim()}`);
       }
     } catch (err: any) {
       setAuthError(err.message || 'Something went wrong.');
@@ -411,8 +396,13 @@ export default function RecallsPage() {
                 <h3 className="text-[#4A3E3D] font-bold text-lg">Instant Email Alerts</h3>
               </div>
               <p className="relative z-10 text-[#666] text-sm leading-relaxed mb-5">
-                {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled. This is a PRO feature – upgrade for just $2.99/month to keep your pets safe.`}
+                {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled. Accounts are currently 100% free during our early launch period!`}
               </p>
+              {authMode !== 'verify' && (
+                <div className="relative z-10 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-left font-semibold mb-4">
+                  🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                </div>
+              )}
               
               <form onSubmit={handleAuthSubmit} className="relative z-10 flex flex-col gap-3">
                 {authMode !== 'verify' && (
@@ -443,7 +433,7 @@ export default function RecallsPage() {
                   disabled={authLoading}
                   className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center disabled:opacity-70"
                 >
-                  {authLoading ? 'Loading...' : authMode === 'upgrade' ? 'Upgrade to PRO →' : authMode === 'signin' ? 'Sign In →' : 'Verify & Continue'}
+                  {authLoading ? 'Loading...' : authMode === 'upgrade' ? 'Create Free Account →' : authMode === 'signin' ? 'Sign In →' : 'Verify & Continue'}
                 </button>
                 
                 {authError && <p className="text-red-500 text-xs font-semibold text-center">{authError}</p>}
@@ -453,11 +443,11 @@ export default function RecallsPage() {
                   <div className="text-center mt-2">
                     {authMode === 'upgrade' ? (
                       <button type="button" onClick={() => { setAuthMode('signin'); setAuthError(''); }} className="text-xs text-[#8B5E3C] hover:underline font-semibold cursor-pointer">
-                        Already PRO? Sign in here
+                        Already have an account? Sign in here
                       </button>
                     ) : (
                       <button type="button" onClick={() => { setAuthMode('upgrade'); setAuthError(''); }} className="text-xs text-[#8B5E3C] hover:underline font-semibold cursor-pointer">
-                        Not PRO yet? Upgrade here
+                        Need an account? Create one here
                       </button>
                     )}
                   </div>
@@ -492,7 +482,7 @@ export default function RecallsPage() {
                 <div className="flex flex-col gap-3">
                   <div className="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#DCFCE7] text-[#166534] px-4 py-3 rounded-xl font-[600] text-sm w-full">
                     <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" />
-                    <span className="leading-snug">You are automatically subscribed to instant recall alerts as a PRO member. We will email you immediately when any pet food is recalled.</span>
+                    <span className="leading-snug">You are automatically subscribed to instant recall alerts as a member. We will email you immediately when any pet food is recalled.</span>
                   </div>
                   <div className="flex justify-end mt-1">
                     <button onClick={handleUnsubscribe} disabled={submitting} className="text-xs text-gray-400 hover:text-gray-700 font-semibold underline cursor-pointer disabled:opacity-50">

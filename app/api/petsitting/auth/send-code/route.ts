@@ -17,17 +17,13 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     if (type === 'owner') {
-      const { data: ownerData, error: ownerError } = await supabaseAdmin
+      const { data: ownerData } = await supabaseAdmin
         .from('emails')
-        .select('is_pro, account_status')
+        .select('account_status')
         .eq('email', cleanEmail)
         .maybeSingle();
 
-      if (ownerError || !ownerData || !ownerData.is_pro) {
-        return NextResponse.json({ error: 'No active PRO membership found for this email.' }, { status: 404 });
-      }
-
-      if (ownerData.account_status === 'suspended' || ownerData.account_status === 'banned') {
+      if (ownerData && (ownerData.account_status === 'suspended' || ownerData.account_status === 'banned')) {
         return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
       }
     } else {
