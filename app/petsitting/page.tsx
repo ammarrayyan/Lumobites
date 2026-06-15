@@ -2441,37 +2441,6 @@ export default function PetSitting() {
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        {/* CLASSY LAUNCH BANNER */}
-        <div className="bg-white border border-[#E8DDD4] rounded-3xl p-5 md:p-6 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(139,94,60,0.04)] relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#8B5E3C]"></div>
-          
-          <div className="flex items-center gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
-              <Sparkles className="w-6 h-6 text-[#8B5E3C]" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-1">
-                Founding Sitter Initiative
-              </div>
-              <h4 className="text-base font-extrabold text-[#4A3E3D] leading-tight">
-                Now Live! Be part of our community from day one
-              </h4>
-              <p className="text-xs text-[#8B7E7D] mt-0.5">
-                Join today as a founding sitter — free to join, with no commissions ever.
-              </p>
-            </div>
-          </div>
-
-          {activeTab !== 'become' && (
-            <button
-              onClick={() => setActiveTab('become')}
-              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold px-5 py-3 rounded-xl transition-all shadow-sm shrink-0 flex items-center gap-1 cursor-pointer"
-            >
-              Join Free <span>&rarr;</span>
-            </button>
-          )}
-        </div>
-
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-4">Lumo Bites Pet Sitting</h1>
           <p className="text-[#8B5E3C] font-medium text-lg">Connect with trusted, local pet sitters in your community.</p>
