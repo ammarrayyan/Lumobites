@@ -3253,14 +3253,6 @@ export default function PetSitting() {
                   </button>
                   
 
-                  
-                  <button type="button" onClick={handleSitterSignOutAllDevices} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer">
-                    Sign Out All Devices
-                  </button>
-                  <button type="button" onClick={handleSitterSignOut} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#FDEBEB] hover:text-red-700 text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm cursor-pointer mt-2">
-                    Sign Out
-                  </button>
-
                   {sitterApprovalStatus !== 'pending' && (
                     <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
                       <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
@@ -4444,9 +4436,6 @@ export default function PetSitting() {
                 )}
                 <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
                   Delete My Profile
-                </button>
-                <button type="button" onClick={handleSitterSignOut} className="text-gray-500 hover:text-gray-700 text-sm font-bold underline underline-offset-4">
-                  Sign Out
                 </button>
               </div>
 
