@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
-import { Resend } from 'resend';
-import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
+import { formatSitterName } from '@/lib/email-template';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
 export async function GET(request: NextRequest) {
   try {
@@ -135,49 +133,6 @@ export async function POST(request: NextRequest) {
       console.error('[Messages API] Push notification error:', err);
     }
 
-    // 3. Send fallback email
-    // Check if there are already unread messages from same sender in last 5 minutes in this conversation — if yes skip email
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { data: existingUnread } = await supabaseAdmin
-      .from('messages')
-      .select('id')
-      .eq('booking_id', booking_id)
-      .eq('sender_email', sender_email)
-      .eq('read', false)
-      .neq('id', newMessage.id)
-      .gt('created_at', fiveMinutesAgo)
-      .limit(1);
-
-    if (!existingUnread || existingUnread.length === 0) {
-      const origin = request.nextUrl.origin;
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      
-      try {
-        await resend.emails.send({
-          from: fromEmail,
-          to: receiver_email,
-          replyTo: sender_email,
-          subject: 'You have a new message on Lumo Bites',
-          html: brandedEmail({
-            subject: 'You have a new message on Lumo Bites',
-            preheader: 'You have unread messages about your booking.',
-            body: `
-              <p style="${emailStyles.p}">You have unread messages about your booking. View them at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;text-decoration:underline;">lumobites.net/petsitting</a></p>
-              <br/>
-              <div style="text-align:center;margin:32px 0;">
-                <a href="${origin}/petsitting" style="background-color:#8B5E3C;color:#FFFFFF;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:10px;display:inline-block;">View Messages</a>
-              </div>
-              ${emailStyles.signoff}
-            `
-          })
-        });
-        console.log('[Messages API] Email sent to', receiver_email);
-      } catch (emailErr) {
-        console.error('[Messages API] Email sending error:', emailErr);
-      }
-    } else {
-      console.log('[Messages API] Skipping email because there is already an unread message in this conversation in last 5 minutes');
-    }
 
     return NextResponse.json({ message: newMessage });
   } catch (error: any) {
