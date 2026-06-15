@@ -1832,7 +1832,7 @@ export default function TwinPage() {
                       <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Create Free Account</h4>
                       <p className="text-xs text-gray-500 font-medium">Enter your email to get a verification code.</p>
                       <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-3 mb-2">
-                        Free during early access. Early members receive lifetime founder benefits.
+                        Free to join during our early launch
                       </div>
                     </div>
 

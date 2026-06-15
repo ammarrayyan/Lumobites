@@ -406,7 +406,7 @@ export default function RecallsPage() {
               </p>
               {authMode !== 'verify' && (
                 <div className="relative z-10 bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-center font-medium mb-4">
-                  Free during early access. Early members receive lifetime founder benefits.
+                  Free to join during our early launch
                 </div>
               )}
               

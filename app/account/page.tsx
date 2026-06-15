@@ -356,7 +356,7 @@ export default function AccountPage() {
               {/* Early Access Notice */}
               <div className="mt-6 p-3.5 rounded-xl bg-stone-50 border border-stone-200/60 text-center">
                 <p className="text-xs text-stone-600 font-medium">
-                  Free during early access. Early members receive lifetime founder benefits.
+                  Free to join during our early launch
                 </p>
               </div>
             </div>
@@ -515,7 +515,7 @@ export default function AccountPage() {
                         </span>
                       </div>
                       <p className="text-xs text-[#8B7E7D] leading-relaxed font-medium">
-                        Free during early access. Early members receive lifetime founder benefits.
+                        Free to join during our early launch
                       </p>
                     </div>
                   ) : (
