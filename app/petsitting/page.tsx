@@ -5141,14 +5141,9 @@ export default function PetSitting() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            {/* Header Badge */}
-            <div className="inline-flex items-center gap-1.5 bg-[#FAF6F4] border border-[#E8DDD4] text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-6">
-              <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> Create Your Free Account
-            </div>
-            
             <h3 className="text-3xl font-black text-[#4A3E3D] mb-3 leading-tight">See Full Sitter Profiles</h3>
             <p className="text-[#8B7E7D] text-sm mb-6 max-w-sm mx-auto">
-              Create a free account to see full sitter bios, send booking requests, and message sitters directly — completely free during early access!
+              Free account — view bios, message sitters, book instantly.
             </p>
 
             <form onSubmit={handleUnlockProfile} className="space-y-4">
@@ -5161,10 +5156,10 @@ export default function PetSitting() {
                     value={unlockEmail} 
                     onChange={e => setUnlockEmail(e.target.value)} 
                     className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="Enter your email to verify or subscribe..." 
+                    placeholder="Enter your email" 
                   />
-                  <p className="text-[10px] text-[#8B7E7D] mt-2 leading-relaxed">
-                    Already have an account? We'll send you a verification code to log in. Don't have one yet? We'll create your free account instantly!
+                  <p className="text-[11px] text-[#8B7E7D] mt-2 leading-relaxed">
+                    We'll email you a quick code — no password needed.
                   </p>
                 </div>
               ) : (
@@ -5228,7 +5223,7 @@ export default function PetSitting() {
                 }}
                 className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs mt-3"
               >
-                Already have an account? Sign in to access your account →
+                Already have an account? Sign in →
               </button>
             )}
           </div>
