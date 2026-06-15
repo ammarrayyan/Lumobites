@@ -101,6 +101,12 @@ export default function AccountPage() {
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       window.dispatchEvent(new Event('lumo-pro-update'));
 
+      if (data.existed) {
+        alert('Welcome back! ✨');
+      } else {
+        alert('Account created! 🐾');
+      }
+
       // If code verified successfully, fetch subscription details
       await fetchSubscriptionDetails();
     } catch (err: any) {
@@ -370,6 +376,9 @@ export default function AccountPage() {
               </div>
 
               <form onSubmit={handleVerifyCode} className="flex flex-col gap-4">
+                <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mb-1 animate-fade-in">
+                  📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                </div>
                 <div className="flex flex-col gap-1.5 text-left">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
                     Enter 6-Digit Code

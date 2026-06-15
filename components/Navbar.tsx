@@ -273,9 +273,9 @@ export default function Navbar() {
         body: JSON.stringify({ email: signInEmail, code: signInCode })
       });
       
+      const verifyData = await res.json();
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Invalid or expired verification code.');
+        throw new Error(verifyData.error || 'Invalid or expired verification code.');
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
@@ -285,6 +285,12 @@ export default function Navbar() {
       setSignInStep('email');
       setSignInCode('');
       setSignInEmail('');
+
+      if (verifyData.existed) {
+        alert('Welcome back! ✨');
+      } else {
+        alert('Account created! 🐾');
+      }
       
       // Force status re-check
       const statusRes = await fetch('/api/stripe/status', {
@@ -841,6 +847,9 @@ export default function Navbar() {
                   </form>
                 ) : (
                   <form onSubmit={handleSignInVerify} className="flex flex-col gap-4">
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] text-[#8B5E3C] rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-1 mb-1 animate-fade-in">
+                      📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                    </div>
                     <input
                       type="text"
                       inputMode="numeric"

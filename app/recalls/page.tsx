@@ -288,6 +288,12 @@ export default function RecallsPage() {
         setEmail(authEmail.trim());
         localStorage.removeItem('lumo_unsubscribed_recalls');
         checkAndAutoSubscribe(authEmail.trim());
+
+        if (data.existed) {
+          alert('Welcome back! ✨');
+        } else {
+          alert('Account created! 🐾');
+        }
       } else if (authMode === 'signin') {
         const res = await fetch('/api/stripe/send-code', {
           method: 'POST',
@@ -416,16 +422,21 @@ export default function RecallsPage() {
                   />
                 )}
                 {authMode === 'verify' && (
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    required
-                    maxLength={6}
-                    value={authCode}
-                    onChange={e => setAuthCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="••••••"
-                    className="w-full px-4 py-3 text-center text-xl tracking-widest font-mono rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] transition-all"
-                  />
+                  <>
+                    <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mb-3 animate-fade-in">
+                      📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                    </div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      required
+                      maxLength={6}
+                      value={authCode}
+                      onChange={e => setAuthCode(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="••••••"
+                      className="w-full px-4 py-3 text-center text-xl tracking-widest font-mono rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] transition-all"
+                    />
+                  </>
                 )}
                 
                 <button

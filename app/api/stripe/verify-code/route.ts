@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
     const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
     let isProUser = isOwner;
+    let existed = isOwner;
 
     if (!isOwner) {
       const { data: userData, error: userError } = await supabase
@@ -62,6 +63,10 @@ export async function POST(request: NextRequest) {
       if (userError) {
         console.error('[Verify Code API] Supabase error confirming user status:', userError);
         return NextResponse.json({ error: 'Failed to verify subscription status' }, { status: 500 });
+      }
+
+      if (userData) {
+        existed = true;
       }
 
       if (userData?.account_status === 'suspended' || userData?.account_status === 'banned') {
@@ -94,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Verify Code API] Successfully verified email and granted Pro access: ${cleanEmail}`);
 
-    return NextResponse.json({ success: true, isPro: true });
+    return NextResponse.json({ success: true, isPro: true, existed });
   } catch (err: any) {
     console.error('[Verify Code API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

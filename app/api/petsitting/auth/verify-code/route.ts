@@ -75,6 +75,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
     }
 
+    const existed = !!ownerData;
+
     if (!ownerData || !ownerData.is_pro) {
       const { error: upsertErr } = await supabaseAdmin
         .from('emails')
@@ -97,7 +99,7 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);
     }
 
-    return NextResponse.json({ success: true, message: 'Logged in successfully' });
+    return NextResponse.json({ success: true, message: 'Logged in successfully', existed });
 
   } catch (err: any) {
     console.error('[Sitter Auth Verify Code] Server error:', err);

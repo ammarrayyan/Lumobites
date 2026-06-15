@@ -2064,6 +2064,7 @@ export default function PetSitting() {
         });
         
         if (res.ok) {
+          const data = await res.json();
           const sittersRes = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
           const sittersData = await sittersRes.json();
           
@@ -2075,6 +2076,12 @@ export default function PetSitting() {
           localStorage.setItem('lumo_pro_email', unlockEmail);
           setReqEmail(unlockEmail);
           loadOwnerProfile(unlockEmail);
+
+          if (data.existed) {
+            alert('Welcome back! ✨');
+          } else {
+            alert('Account created! 🐾');
+          }
         } else {
           setReqError('Invalid or expired code.');
         }
@@ -3837,6 +3844,9 @@ export default function PetSitting() {
                   <p className="text-sm text-[#8B7E7D]">
                     We sent a 6-digit code to<br/><strong>{sitterEmail}</strong>
                   </p>
+                  <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-3 mb-2 animate-fade-in">
+                    📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                  </div>
                 </div>
                 <div>
                   <input required autoComplete="off" type="text" inputMode="numeric" maxLength={6} value={sitterAuthCode} onChange={e => setSitterAuthCode(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-black text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] shadow-inner" placeholder="••••••" />
@@ -5185,6 +5195,9 @@ export default function PetSitting() {
                     className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest"
                     placeholder="••••••" 
                   />
+                  <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-3 mb-2 animate-fade-in">
+                    📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                  </div>
                   <p className="text-[10px] text-[#8B7E7D] mt-2 leading-relaxed">
                     Enter the 6-digit code sent to <strong>{unlockEmail}</strong>.
                   </p>

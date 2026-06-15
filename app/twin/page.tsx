@@ -461,6 +461,11 @@ export default function TwinPage() {
         setModalMessage(null);
         setVerificationCode('');
         setModalStep('paywall');
+        if (data.existed) {
+          alert('Welcome back! ✨');
+        } else {
+          alert('Account created! 🐾');
+        }
       } else {
         throw new Error('Could not verify code. Please try again.');
       }
@@ -2031,6 +2036,9 @@ export default function TwinPage() {
                       <p className="text-xs text-gray-500 font-medium">
                         We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 15 minutes.
                       </p>
+                      <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-1 mb-2 animate-fade-in">
+                        📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                      </div>
                       <input
                         type="text"
                         inputMode="numeric"
