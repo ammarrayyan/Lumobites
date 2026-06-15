@@ -2617,10 +2617,10 @@ export default function PetSitting() {
                   <Crown className="w-10 h-10 text-amber-500 flex-shrink-0" />
                   <div>
                     <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
-                      Unlock Full Directory Access with Lumo Bites PRO
+                      Create a Free Account to See Full Sitter Details
                     </h4>
                     <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed">
-                      Sitter profiles are currently blurred. Subscribe to PRO to view full bios, phone numbers, contact sitters directly, and enjoy instant lost pet broadcasts, pet scan alerts, and premium care resources!
+                      Sitter profiles are currently blurred. Create a free account to view full bios, contact sitters directly, and unlock lost pet alerts, food scan results, and more — completely free during early access!
                     </p>
                   </div>
                 </div>
@@ -2628,7 +2628,7 @@ export default function PetSitting() {
                   onClick={() => setUnlockModalOpen(true)}
                   className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-3 px-6 rounded-xl transition-all shadow-md text-sm whitespace-nowrap cursor-pointer"
                 >
-                  Unlock PRO Features
+                  Create Free Account
                 </button>
               </div>
             )}
