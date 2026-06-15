@@ -1677,6 +1677,7 @@ export default function PetSitting() {
           setSitterAuthError('No sitter profile found for this email. If you\'re new here, click "Create New Profile" instead.');
         } else {
           // New signup — clear form and open blank profile creation form
+          setSitterId('');
           setSitterFirstName('');
           setSitterLastName('');
           setSitterPhoto('');
@@ -1724,6 +1725,7 @@ export default function PetSitting() {
         localStorage.removeItem('lumo_sitter_email_expiry');
 
         // Reset all states
+        setSitterId('');
         setSitterAuthMode('email');
         setSitterSignupIntent(null);
         setSitterAuthCode('');
@@ -1789,6 +1791,7 @@ export default function PetSitting() {
     localStorage.removeItem('lumo_sitter_email_expiry');
     
     // Reset state
+    setSitterId('');
     setSitterAuthMode('email');
     setSitterSignupIntent(null);
     setSitterAuthCode('');
@@ -1839,7 +1842,7 @@ export default function PetSitting() {
     if (!sitterPhoto) errors['photo'] = 'A profile photo is required';
     if (!sitterIdPhoto && !hasExistingIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
-    if (!selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
+    if (!sitterId && !selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
     if (!sitterAvailable) errors['availability'] = 'You must confirm that you are currently accepting new requests to save your profile.';
     
     if (Object.keys(errors).length > 0) {
@@ -1884,7 +1887,7 @@ export default function PetSitting() {
           available_times: sitterAvailableTimes,
           service_types: sitterServiceTypes,
           gender: sitterGender,
-          self_declared: selfDeclared
+          self_declared: sitterId ? true : selfDeclared
         })
       });
 
@@ -4472,29 +4475,31 @@ export default function PetSitting() {
               </div>
 
               {/* Self-Declaration Checkbox & Terms of Service Note */}
-              <div className="flex flex-col gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
-                <label className="flex items-start gap-3 text-sm text-[#4A3E3D] font-medium cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={selfDeclared} 
-                    onChange={e => setSelfDeclared(e.target.checked)} 
-                    className="w-5 h-5 accent-[#8B5E3C] mt-0.5 shrink-0" 
-                  />
-                  <span>
-                    I confirm that I have no criminal convictions or history that would affect my ability to safely and responsibly care for pets. I understand that providing false information may result in immediate removal from the platform.
-                  </span>
-                </label>
-                {formErrors['self_declared'] && (
-                  <p className="text-red-500 text-xs font-semibold pl-8 mt-0.5">
-                    {formErrors['self_declared']}
+              {!sitterId && (
+                <div className="flex flex-col gap-3 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
+                  <label className="flex items-start gap-3 text-sm text-[#4A3E3D] font-medium cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={selfDeclared} 
+                      onChange={e => setSelfDeclared(e.target.checked)} 
+                      className="w-5 h-5 accent-[#8B5E3C] mt-0.5 shrink-0" 
+                    />
+                    <span>
+                      I confirm that I have no criminal convictions or history that would affect my ability to safely and responsibly care for pets. I understand that providing false information may result in immediate removal from the platform.
+                    </span>
+                  </label>
+                  {formErrors['self_declared'] && (
+                    <p className="text-red-500 text-xs font-semibold pl-8 mt-0.5">
+                      {formErrors['self_declared']}
+                    </p>
+                  )}
+                  
+                  {/* Terms of Service Note */}
+                  <p className="text-xs text-gray-500 pl-8 leading-relaxed">
+                    By submitting this form you agree to our Terms of Service and confirm the above declaration is true and accurate.
                   </p>
-                )}
-                
-                {/* Terms of Service Note */}
-                <p className="text-xs text-gray-500 pl-8 leading-relaxed">
-                  By submitting this form you agree to our Terms of Service and confirm the above declaration is true and accurate.
-                </p>
-              </div>
+                </div>
+              )}
 
               {profileMessage && (
                 <div className="p-4 rounded-xl bg-blue-50 text-blue-800 text-sm font-bold text-center">

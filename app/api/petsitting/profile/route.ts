@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data: existingSitter } = await supabaseAdmin
         .from('sitters')
-        .select('approval_status, is_approved, needs_reapproval, id_photo_url')
+        .select('approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at')
         .eq('email', cleanEmail)
         .maybeSingle();
 
@@ -292,8 +292,8 @@ export async function POST(request: NextRequest) {
         available_times: available_times || [],
         service_types: service_types || [],
         gender: gender || null,
-        self_declared: self_declared || false,
-        self_declared_at: self_declared ? new Date().toISOString() : null,
+        self_declared: (existingSitter?.self_declared) || self_declared || false,
+        self_declared_at: (existingSitter?.self_declared_at) || (self_declared ? new Date().toISOString() : null),
         approval_status: nextApprovalStatus,
         is_approved: nextIsApproved,
         needs_reapproval: nextNeedsReapproval,
