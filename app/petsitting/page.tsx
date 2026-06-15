@@ -2840,7 +2840,8 @@ export default function PetSitting() {
               </div>
             )}
             {/* Owner Booking History Section */}
-            <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+            {isOwnerPro && (
+              <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
               <div id="messages" />
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
@@ -3113,6 +3114,7 @@ export default function PetSitting() {
               </div>
             )}
             </div>
+          )}
           </div>
         )}
 
