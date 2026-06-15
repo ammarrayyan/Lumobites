@@ -241,7 +241,7 @@ export default function RecallsPage() {
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
     if (!isPro) {
-      setSubError("Email recall alerts are a PRO feature. Upgrade to PRO to subscribe.");
+      setSubError("Email recall alerts require a free account. Please create one to subscribe.");
       return;
     }
     setSubmitting(true);

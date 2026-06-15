@@ -1736,10 +1736,10 @@ export default function TwinPage() {
                 <div>
                   <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-3" />
                   <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                    You are a Pro Member!
+                    You are a Member!
                   </h3>
                   <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-                    Thank you for supporting Lumo Bites. You have unlimited Pet Twin matches and Pro benefits active.
+                    Thank you for supporting Lumo Bites. You have unlimited Pet Twin matches and member features active.
                   </p>
                 </div>
                 <Link
@@ -1747,7 +1747,7 @@ export default function TwinPage() {
                   className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer text-center"
                   style={{ textDecoration: 'none' }}
                 >
-                  Manage Subscription
+                  Manage Account
                 </Link>
               </div>
             ) : (
@@ -1758,12 +1758,12 @@ export default function TwinPage() {
                     Want to try again?
                   </h3>
                   <p className="text-sm text-gray-500 mt-3 font-medium text-center leading-relaxed">
-                    Upgrade to PRO for unlimited Pet Twin matches — plus contact verified pet sitters, email recall alerts, and unlimited food scans, all for $2.99/month.
+                    Create a free account for unlimited Pet Twin matches — plus contact verified pet sitters, email recall alerts, and unlimited food scans.
                   </p>
                 </div>
 
                 <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
-                  <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">$2.99/month — cancel anytime</span>
+                  <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">Free Early Access Account 🐾</span>
                 </div>
 
                 <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
@@ -1953,86 +1953,47 @@ export default function TwinPage() {
                 {modalStep === 'restore_email' && (
                   <>
                     <div className="text-left mt-2">
-                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Restore Subscription</h4>
-                      <p className="text-xs text-gray-500 font-medium">Enter the email you subscribed with to receive a 2-step verification code.</p>
+                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Sign In to Account</h4>
+                      <p className="text-xs text-gray-500 font-medium">Enter your email to receive a 2-step verification code.</p>
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      {modalMessage?.text === 'not_pro' ? (
-                        <div className="w-full flex flex-col gap-3 items-center mt-1 text-center">
-                          <p className="text-sm font-bold text-red-500 leading-relaxed">
-                            No PRO subscription found for this email. Please upgrade to PRO first.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={handleCheckout}
-                            className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            Upgrade to PRO →
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setModalMessage(null); }}
-                            className="text-xs text-gray-400 hover:text-gray-600 hover:underline font-bold"
-                          >
-                            Try another email
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex flex-col gap-1.5 text-left">
-                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                              Enter Your Email
-                            </label>
-                            <input
-                              type="email"
-                              value={modalEmail}
-                              onChange={(e) => setModalEmail(e.target.value)}
-                              placeholder="your@email.com"
-                              required
-                              className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                              autoFocus
-                            />
-                          </div>
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Enter Your Email
+                        </label>
+                        <input
+                          type="email"
+                          value={modalEmail}
+                          onChange={(e) => setModalEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          autoFocus
+                        />
+                      </div>
 
-                          {modalMessage && (
-                            <div className="flex flex-col gap-2 items-center">
-                              <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                                {modalMessage.text}
-                              </p>
-                              {modalMessage.isError && modalMessage.text.includes('No active Pro subscription') && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setModalStep('upgrade_email');
-                                    setModalMessage(null);
-                                  }}
-                                  className="mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-2 px-4 rounded-xl font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5 text-white shrink-0 animate-pulse" />
-                                  Become PRO instead
-                                </button>
-                              )}
-                            </div>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={handleRestore}
-                            disabled={modalLoading}
-                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                          >
-                            {modalLoading ? (
-                              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            ) : (
-                              <>
-                                Send Verification Code
-                                <Mail className="w-4 h-4" />
-                              </>
-                            )}
-                          </button>
-                        </>
+                      {modalMessage && (
+                        <p className={`text-xs font-semibold text-center ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {modalMessage.text}
+                        </p>
                       )}
+
+                      <button
+                        type="button"
+                        onClick={handleRestore}
+                        disabled={modalLoading}
+                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {modalLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <>
+                            Send Verification Code
+                            <Mail className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
                     </div>
 
                     <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
