@@ -5150,43 +5150,6 @@ export default function PetSitting() {
             <p className="text-[#8B7E7D] text-sm mb-6 max-w-sm mx-auto">
               Create a free account to see full sitter bios, send booking requests, and message sitters directly — completely free during early access!
             </p>
-            
-            {/* Other services reminder list */}
-            <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-5 text-left mb-6 space-y-4">
-              <p className="text-[#4A3E3D] font-black text-sm uppercase tracking-wider border-b border-[#E8DDD4] pb-2">
-                Also Included With Your Free Account:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
-                  <div>
-                    <h5 className="font-bold text-xs text-[#4A3E3D]">Lost Pet Alerts</h5>
-                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Instant SMS & email neighborhood alerts</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Search className="w-5 h-5 text-[#8B5E3C] shrink-0" />
-                  <div>
-                    <h5 className="font-bold text-xs text-[#4A3E3D]">Smart Pet Scanning</h5>
-                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Scan tools & interactive pet profiles</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <MessageSquare className="w-5 h-5 text-[#8B5E3C] shrink-0" />
-                  <div>
-                    <h5 className="font-bold text-xs text-[#4A3E3D]">Direct Messaging</h5>
-                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Chat in real-time with local caretakers</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <BookOpen className="w-5 h-5 text-[#8B5E3C] shrink-0" />
-                  <div>
-                    <h5 className="font-bold text-xs text-[#4A3E3D]">Premium Care Guides</h5>
-                    <p className="text-[11px] text-[#8B7E7D] leading-tight">Exclusive pet nutrition & care resources</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <form onSubmit={handleUnlockProfile} className="space-y-4">
               {ownerAuthMode === 'email' ? (
