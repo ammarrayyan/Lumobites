@@ -5141,20 +5141,20 @@ export default function PetSitting() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            {/* Premium Gold Header Badge */}
-            <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#FFB703]/20 to-[#FB8500]/20 text-[#FB8500] text-xs font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-6 animate-pulse">
-              👑 Lumo Bites PRO
+            {/* Header Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-[#FAF6F4] border border-[#E8DDD4] text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-6">
+              <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> Create Your Free Account
             </div>
             
-            <h3 className="text-3xl font-black text-[#4A3E3D] mb-3 leading-tight">Unlock Premium Pet Sitters</h3>
+            <h3 className="text-3xl font-black text-[#4A3E3D] mb-3 leading-tight">See Full Sitter Profiles</h3>
             <p className="text-[#8B7E7D] text-sm mb-6 max-w-sm mx-auto">
-              Get direct access to trusted local sitters, unblurred biographies, and the ability to send request messages instantly!
+              Create a free account to see full sitter bios, send booking requests, and message sitters directly — completely free during early access!
             </p>
             
             {/* Other services reminder list */}
             <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-5 text-left mb-6 space-y-4">
               <p className="text-[#4A3E3D] font-black text-sm uppercase tracking-wider border-b border-[#E8DDD4] pb-2">
-                Also Included with PRO Membership:
+                Also Included With Your Free Account:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="flex items-start gap-2.5">
@@ -5241,7 +5241,7 @@ export default function PetSitting() {
               <button 
                 disabled={unlockLoading} 
                 type="submit" 
-                className="w-full bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-4 rounded-xl transition-all shadow-md mt-4 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-4 rounded-xl transition-all shadow-xs mt-4 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {unlockLoading ? (
                   <>
@@ -5250,7 +5250,7 @@ export default function PetSitting() {
                   </>
                 ) : (
                   <>
-                    <span>👑 {ownerAuthMode === 'email' ? 'Unlock All Features Now' : 'Verify & Access Sitters'}</span>
+                    <span>{ownerAuthMode === 'email' ? 'Create Free Account' : 'Verify & Access Sitters'}</span>
                   </>
                 )}
               </button>
