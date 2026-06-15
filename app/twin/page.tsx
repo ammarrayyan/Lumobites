@@ -1826,8 +1826,8 @@ export default function TwinPage() {
                     <div className="text-left mt-2">
                       <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Create Free Account</h4>
                       <p className="text-xs text-gray-500 font-medium">Enter your email to get a verification code.</p>
-                      <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed font-semibold mt-3 mb-2">
-                        🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                      <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-3 mb-2">
+                        Free during early access. Early members receive lifetime founder benefits.
                       </div>
                     </div>
 

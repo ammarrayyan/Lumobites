@@ -348,9 +348,9 @@ export default function AccountPage() {
                 </form>
               )}
               {/* Early Access Notice */}
-              <div className="mt-6 p-4 rounded-2xl bg-amber-50/60 border border-amber-100 text-left">
-                <p className="text-xs text-amber-805 leading-relaxed">
-                  <strong>Early Access Free Period:</strong> Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+              <div className="mt-6 p-3.5 rounded-xl bg-stone-50 border border-stone-200/60 text-center">
+                <p className="text-xs text-stone-600 font-medium">
+                  Free during early access. Early members receive lifetime founder benefits.
                 </p>
               </div>
             </div>
@@ -505,8 +505,8 @@ export default function AccountPage() {
                           Active (Free Access) <Check className="w-3.5 h-3.5 text-emerald-600" />
                         </span>
                       </div>
-                      <p className="text-xs text-[#8B7E7D] leading-relaxed">
-                        Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                      <p className="text-xs text-[#8B7E7D] leading-relaxed font-medium">
+                        Free during early access. Early members receive lifetime founder benefits.
                       </p>
                     </div>
                   ) : (

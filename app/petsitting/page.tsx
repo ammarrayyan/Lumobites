@@ -2612,21 +2612,21 @@ export default function PetSitting() {
 
             {/* Premium PRO Upgrade Banner */}
             {!isOwnerPro && (
-              <div className="bg-gradient-to-r from-[#FFB703]/10 to-[#FB8500]/10 border border-[#FB8500]/30 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-fade-in shadow-sm">
+              <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-5 animate-fade-in shadow-xs">
                 <div className="text-left flex items-start gap-4">
-                  <Crown className="w-10 h-10 text-amber-500 flex-shrink-0" />
+                  <Crown className="w-8 h-8 text-[#8B5E3C] flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
-                      Create a Free Account to See Full Sitter Details
+                    <h4 className="text-lg font-extrabold text-[#4A3E3D] tracking-tight">
+                      Create a Free Account
                     </h4>
-                    <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed">
-                      Sitter profiles are currently blurred. Create a free account to view full bios, contact sitters directly, and unlock lost pet alerts, food scan results, and more — completely free during early access!
+                    <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed max-w-xl">
+                      Unlock full sitter bios, direct messaging, food safety scans, and instant recall alerts. Free during early access!
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setUnlockModalOpen(true)}
-                  className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white font-black py-3 px-6 rounded-xl transition-all shadow-md text-sm whitespace-nowrap cursor-pointer"
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-xs text-sm whitespace-nowrap cursor-pointer"
                 >
                   Create Free Account
                 </button>
@@ -3781,9 +3781,9 @@ export default function PetSitting() {
               <>
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Free as an Early Sitter</h2>
-                  <p className="text-[#8B7E7D] mb-4">Create or manage your profile to receive pet sitting requests in your neighborhood. 100% commission-free and fee-free during our early launch period!</p>
-                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-left font-semibold mb-2">
-                    🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                  <p className="text-[#8B7E7D] mb-4">Receive pet sitting requests in your neighborhood. 100% commission-free!</p>
+                  <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-center font-medium mb-2">
+                    Free during early access. Early members receive lifetime founder benefits.
                   </div>
                 </div>
 

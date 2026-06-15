@@ -396,11 +396,11 @@ export default function RecallsPage() {
                 <h3 className="text-[#4A3E3D] font-bold text-lg">Instant Email Alerts</h3>
               </div>
               <p className="relative z-10 text-[#666] text-sm leading-relaxed mb-5">
-                {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled. Accounts are currently 100% free during our early launch period!`}
+                {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled.`}
               </p>
               {authMode !== 'verify' && (
-                <div className="relative z-10 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-left font-semibold mb-4">
-                  🐾 Lumo Bites is currently free during our early launch. Paid plans may be introduced later, but early members will receive advance notice and special founder pricing.
+                <div className="relative z-10 bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-center font-medium mb-4">
+                  Free during early access. Early members receive lifetime founder benefits.
                 </div>
               )}
               
