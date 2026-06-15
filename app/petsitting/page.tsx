@@ -3176,9 +3176,9 @@ export default function PetSitting() {
                 )}
                 
                 {/* Profile Preview Card */}
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-sm mx-auto overflow-hidden">
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl text-left mb-8 shadow-sm max-w-lg mx-auto overflow-hidden">
                    {/* Cover Banner */}
-                  <div className="h-28 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
+                  <div className="h-40 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
                     {sitterCoverPhoto ? (
                       <img
                         src={sitterCoverPhoto}
@@ -3196,11 +3196,11 @@ export default function PetSitting() {
                   {/* Profile photo + name row */}
                   <div className="px-4 pb-0">
                     {/* Profile photo overlapping banner */}
-                    <div className="relative -mt-10 mb-2 flex items-end gap-3">
+                    <div className="relative -mt-14 mb-2 flex items-end gap-3">
                       {sitterPhoto ? (
-                        <img src={sitterPhoto} alt={sitterName} className="w-20 h-20 rounded-full object-cover shadow-md border-4 border-[#FAF6F4] flex-shrink-0 pointer-events-none" />
+                        <img src={sitterPhoto} alt={sitterName} className="w-28 h-28 rounded-full object-cover shadow-md border-4 border-[#FAF6F4] flex-shrink-0 pointer-events-none" />
                       ) : (
-                        <div className="w-20 h-20 rounded-full bg-[#E8DDD4] flex items-center justify-center text-3xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-[#FAF6F4] shadow-md">
+                        <div className="w-28 h-28 rounded-full bg-[#E8DDD4] flex items-center justify-center text-4xl font-bold text-[#8B7E7D] flex-shrink-0 border-4 border-[#FAF6F4] shadow-md">
                           {sitterName.charAt(0) || '?'}
                         </div>
                       )}
@@ -3208,7 +3208,7 @@ export default function PetSitting() {
 
                     {/* Name, bookings badge, location */}
                     <div className="mb-3">
-                      <h3 className="font-black text-base text-[#4A3E3D] leading-tight break-words">{sitterName || 'New Sitter'}</h3>
+                      <h3 className="font-black text-xl text-[#4A3E3D] leading-tight break-words">{sitterName || 'New Sitter'}</h3>
                       {completedBookings > 0 && (
                         <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border border-[#8B5E3C]/20">
                           <Footprints className="w-3 h-3 shrink-0" /> {completedBookings} {completedBookings === 1 ? 'booking' : 'bookings'} completed
@@ -3247,14 +3247,14 @@ export default function PetSitting() {
 
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
-                <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                <div className="flex flex-col gap-3 max-w-lg mx-auto">
                   <button onClick={() => { setProfilePreviewMode(false); setProfileSuccessMessage(''); }} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm">
                     Edit Profile
                   </button>
                   
 
                   {sitterApprovalStatus !== 'pending' && (
-                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-sm mx-auto text-left shadow-sm">
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 mt-8 max-w-lg mx-auto text-left shadow-sm">
                       <h4 className="text-base font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
                         <Footprints className="w-4 h-4 text-[#8B5E3C]" /> Invite a Friend
                       </h4>
