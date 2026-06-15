@@ -29,20 +29,36 @@ export default function PushManager() {
 
           // Listen for registration success
           PushNotifications.addListener('registration', async (token) => {
-            console.log('[PushManager] Native push registration token:', token.value);
+            console.log('[PushManager] Native push registration token (APNs on iOS, FCM on Android):', token.value);
+            
+            const platform = (window as any).Capacitor.getPlatform();
+            let finalToken = token.value;
+
+            if (platform === 'ios') {
+              try {
+                const { FCM } = await import('@capacitor-community/fcm');
+                const fcmTokenRes = await FCM.getToken();
+                finalToken = fcmTokenRes.token;
+                console.log('[PushManager] Retrieved FCM token for iOS:', finalToken);
+              } catch (err) {
+                console.error('[PushManager] Error fetching FCM token on iOS, falling back to native token:', err);
+              }
+            }
+
             const proEmail = localStorage.getItem('lumo_pro_email');
             const sitterEmail = localStorage.getItem('lumo_sitter_email');
             const email = proEmail || sitterEmail;
+            const deviceName = platform === 'ios' ? 'iOS (Capacitor)' : platform === 'android' ? 'Android (Capacitor)' : 'Capacitor';
             
             if (email) {
               await fetch('/api/push/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, token: token.value, device: 'Android (Capacitor)' })
+                body: JSON.stringify({ email, token: finalToken, device: deviceName })
               });
               console.log('[PushManager] Registered native token for:', email);
             } else {
-              localStorage.setItem('lumo_pending_push_token', token.value);
+              localStorage.setItem('lumo_pending_push_token', finalToken);
             }
           });
 
@@ -105,10 +121,18 @@ export default function PushManager() {
       const email = proEmail || sitterEmail;
       if (token && email) {
         const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor;
+        let deviceName = 'Web';
+        if (isCapacitor) {
+          const platform = (window as any).Capacitor.getPlatform();
+          deviceName = platform === 'ios' ? 'iOS (Capacitor)' : platform === 'android' ? 'Android (Capacitor)' : 'Capacitor';
+        } else if (typeof navigator !== 'undefined') {
+          deviceName = navigator.userAgent;
+        }
+
         fetch('/api/push/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, token, device: isCapacitor ? 'Android (Capacitor)' : navigator.userAgent })
+          body: JSON.stringify({ email, token, device: deviceName })
         }).catch(err => console.error('Failed to register pending push token:', err));
       }
     };
