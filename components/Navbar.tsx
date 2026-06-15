@@ -434,7 +434,7 @@ export default function Navbar() {
                       >
                         <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
                         <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                        <span className="block text-[#9A7760] text-[10px] font-medium">Free during early launch period</span>
+
                       </button>
                       <div className="flex items-center my-2 px-3">
                         <div className="flex-grow border-t border-gray-150"></div>
@@ -532,7 +532,7 @@ export default function Navbar() {
                     >
                       <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
                       <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                      <span className="block text-[#9A7760] text-[10px] font-medium">Free during early launch period</span>
+
                     </button>
                     <div className="flex items-center my-2 px-3">
                       <div className="flex-grow border-t border-gray-150"></div>

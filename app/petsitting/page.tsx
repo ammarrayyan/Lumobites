@@ -2596,7 +2596,7 @@ export default function PetSitting() {
                       Create a Free Account
                     </h4>
                     <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed max-w-xl">
-                      Unlock full sitter bios, direct messaging, food safety scans, and instant recall alerts. Free during early access!
+                      Unlock full sitter bios, direct messaging, food safety scans, and instant recall alerts.
                     </p>
                   </div>
                 </div>
