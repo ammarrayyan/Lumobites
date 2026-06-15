@@ -353,12 +353,7 @@ export default function AccountPage() {
                   </button>
                 </form>
               )}
-              {/* Early Access Notice */}
-              <div className="mt-6 p-3.5 rounded-xl bg-stone-50 border border-stone-200/60 text-center">
-                <p className="text-xs text-stone-600 font-medium">
-                  Free to join during our early launch
-                </p>
-              </div>
+
             </div>
           )}
 
@@ -514,9 +509,7 @@ export default function AccountPage() {
                           Active (Free Access) <Check className="w-3.5 h-3.5 text-emerald-600" />
                         </span>
                       </div>
-                      <p className="text-xs text-[#8B7E7D] leading-relaxed font-medium">
-                        Free to join during our early launch
-                      </p>
+
                     </div>
                   ) : (
                     <>

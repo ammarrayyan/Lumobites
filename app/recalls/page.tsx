@@ -404,11 +404,7 @@ export default function RecallsPage() {
               <p className="relative z-10 text-[#666] text-sm leading-relaxed mb-5">
                 {authMode === 'verify' ? `Enter the 6-digit code sent to ${authEmail}` : `Get instant email alerts the moment your pet's food is recalled.`}
               </p>
-              {authMode !== 'verify' && (
-                <div className="relative z-10 bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-center font-medium mb-4">
-                  Free to join during our early launch
-                </div>
-              )}
+
               
               <form onSubmit={handleAuthSubmit} className="relative z-10 flex flex-col gap-3">
                 {authMode !== 'verify' && (

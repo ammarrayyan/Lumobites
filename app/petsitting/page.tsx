@@ -3759,9 +3759,7 @@ export default function PetSitting() {
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join Free as an Early Sitter</h2>
                   <p className="text-[#8B7E7D] mb-4">Receive pet sitting requests in your neighborhood. 100% commission-free!</p>
-                  <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed max-w-sm mx-auto text-center font-medium mb-2">
-                    Free to join during our early launch
-                  </div>
+
                 </div>
 
             {sitterAuthMode === 'email' && (
