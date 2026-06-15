@@ -295,7 +295,7 @@ export default function PetSitting() {
 
   const [sitterIdPhoto, setSitterIdPhoto] = useState('');
   const [hasExistingIdPhoto, setHasExistingIdPhoto] = useState(false);
-  const [sitterApprovalStatus, setSitterApprovalStatus] = useState('pending');
+  const [sitterApprovalStatus, setSitterApprovalStatus] = useState('none'); // 'none' = no profile, 'pending' = applied/waiting, 'approved', 'rejected'
   const [sitterCity, setSitterCity] = useState('');
   const [sitterLocationInput, setSitterLocationInput] = useState('');
   const [sitterLocationVerified, setSitterLocationVerified] = useState(false);
@@ -452,31 +452,34 @@ export default function PetSitting() {
 
     const handleSitterSession = () => {
       const cachedProEmail = localStorage.getItem('lumo_pro_email');
-      const cachedSitterEmail = localStorage.getItem('lumo_sitter_email');
 
       if (cachedProEmail && cachedProEmail !== 'undefined' && cachedProEmail.trim() !== '') {
-        if (cachedSitterEmail && cachedSitterEmail !== 'undefined' && cachedSitterEmail.trim() !== '') {
-          // Signed in as an approved sitter
-          setSitterEmail(cachedSitterEmail);
-          setSitterAuthMode('form');
-          // Check profile to ensure we load data
-          fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitterEmail)}`)
-            .then(res => res.json())
-            .then(profileData => {
-              if (profileData && profileData.id) {
-                loadSitterProfile(cachedSitterEmail);
+        // Logged in as a member. Always use their Pro email for sitter auth.
+        setSitterEmail(cachedProEmail);
+        setSitterAuthMode('form');
+
+        // Always check their profile status
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedProEmail)}`)
+          .then(res => res.json())
+          .then(profileData => {
+            if (profileData && profileData.id) {
+              loadSitterProfile(cachedProEmail);
+              // Only show dashboard automatically if they are approved
+              if (profileData.approval_status === 'approved') {
                 setProfilePreviewMode(true);
               } else {
                 setProfilePreviewMode(false);
               }
-            })
-            .catch(err => console.error('Failed to auto-load sitter profile:', err));
-        } else {
-          // Signed in as a member, but no approved sitter record
-          setSitterEmail(cachedProEmail);
-          setSitterAuthMode('form');
-          setProfilePreviewMode(false);
-        }
+            } else {
+              // No profile found — member has never applied
+              setProfilePreviewMode(false);
+              setSitterApprovalStatus('none');
+            }
+          })
+          .catch(err => {
+            console.error('Failed to auto-load sitter profile:', err);
+            setProfilePreviewMode(false);
+          });
       } else {
         // Not signed in
         setSitterAuthMode('email');
@@ -3806,7 +3809,8 @@ export default function PetSitting() {
                   </div>
                 )}
 
-            <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
+            {(sitterId === '' || sitterApprovalStatus !== 'pending') && (
+              <form onSubmit={handleProfileSubmit} className="space-y-6" noValidate>
               <div className="mb-6">
                 <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" /></label>
                 <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
@@ -4447,6 +4451,7 @@ export default function PetSitting() {
               </div>
 
             </form>
+            )}
               </div>
             )}
           </>
