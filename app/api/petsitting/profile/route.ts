@@ -232,13 +232,16 @@ export async function POST(request: NextRequest) {
     let nextIsApproved = false;
     let nextNeedsReapproval = false;
     let isInitialSubmission = true;
+    let existingSitter: any = null;
 
     try {
-      const { data: existingSitter } = await supabaseAdmin
+      const { data } = await supabaseAdmin
         .from('sitters')
         .select('approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at')
         .eq('email', cleanEmail)
         .maybeSingle();
+      
+      existingSitter = data;
 
       if (existingSitter) {
         isInitialSubmission = false;
