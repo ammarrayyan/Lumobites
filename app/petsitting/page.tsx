@@ -2459,7 +2459,7 @@ export default function PetSitting() {
               onClick={() => setActiveTab('become')}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'become' ? 'bg-[#8B5E3C] text-white shadow-md' : 'text-[#666666] hover:text-[#8B5E3C]'}`}
             >
-              Join Free as an Early Sitter
+              Become a Pet Sitter
             </button>
           </div>
         </div>
