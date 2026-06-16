@@ -25,11 +25,11 @@ export default function MobileBottomNav() {
       style={{
         width: '90%',
         maxWidth: '420px',
-        backgroundColor: 'rgba(30, 20, 10, 0.92)',
+        backgroundColor: 'rgba(250, 246, 240, 0.95)',
         backdropFilter: 'blur(10px)',
         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.15)',
         borderRadius: '50px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid rgba(139, 94, 60, 0.12)',
       }}
     >
       {tabs.map((tab) => {
@@ -46,14 +46,14 @@ export default function MobileBottomNav() {
             <Icon
               className="w-5 h-5 transition-transform duration-200"
               style={{
-                color: isActive ? '#C17D3C' : 'rgba(255, 255, 255, 0.5)',
+                color: isActive ? '#8B5E3C' : '#6B7280',
                 transform: isActive ? 'scale(1.1)' : 'scale(1)',
               }}
             />
             <span
               className="text-[9px] font-bold tracking-tighter select-none"
               style={{
-                color: isActive ? '#C17D3C' : 'rgba(255, 255, 255, 0.5)',
+                color: isActive ? '#8B5E3C' : '#6B7280',
               }}
             >
               {tab.label}
