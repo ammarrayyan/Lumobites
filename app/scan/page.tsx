@@ -882,7 +882,7 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] pb-12">
+    <div className="min-h-screen bg-[#FDFAF7] pb-12 pt-[52px] md:pt-0">
       <Navbar />
       <MobileFoodNav />
 

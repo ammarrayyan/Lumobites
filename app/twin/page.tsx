@@ -1071,7 +1071,7 @@ export default function TwinPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
+    <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7] pt-[52px] md:pt-0">
       
       {/* NAVBAR */}
       <Navbar />

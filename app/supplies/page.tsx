@@ -88,7 +88,7 @@ export default function SuppliesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans">
+    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans pt-[52px] md:pt-0">
       <Navbar />
       <MobileFoodNav />
 

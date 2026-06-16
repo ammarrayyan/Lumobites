@@ -254,7 +254,7 @@ export default function CityBoardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8] font-sans">
+    <div className="min-h-screen bg-[#F5F0E8] font-sans pt-[52px] md:pt-0">
       <Navbar />
       <MobileCommunityNav />
 

@@ -15,7 +15,7 @@ export default function MobileFoodNav() {
   ];
 
   return (
-    <div className="md:hidden w-full flex items-center justify-between gap-1.5 p-2 bg-[#FAF6F0] border-b border-[#E8DDD4]">
+    <div className="md:hidden fixed top-[72px] left-0 right-0 h-[52px] z-40 flex items-center justify-between gap-1.5 p-2 bg-[#FAF6F0] border-b border-[#E8DDD4] shadow-sm">
       {items.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;

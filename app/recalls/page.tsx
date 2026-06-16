@@ -374,7 +374,7 @@ export default function RecallsPage() {
   }, [historicalRecalls, petFilter, search]);
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7]" style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
+    <div className="min-h-screen bg-[#FDFAF7] pt-[52px] md:pt-0" style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
 
       {/* NAV */}
       <Navbar />
