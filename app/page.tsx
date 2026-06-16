@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import Navbar from '@/components/Navbar';
@@ -11,6 +11,28 @@ export default function Home() {
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    const cachedEmail = localStorage.getItem('lumo_pro_email');
+    const cachedSitter = localStorage.getItem('lumo_sitter_email');
+    if (cachedEmail || cachedSitter) {
+      setIsSignedIn(true);
+    }
+
+    const syncStatus = () => {
+      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const cachedSitter = localStorage.getItem('lumo_sitter_email');
+      setIsSignedIn(!!(cachedEmail || cachedSitter));
+    };
+
+    window.addEventListener('lumo-pro-update', syncStatus);
+    window.addEventListener('storage', syncStatus);
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('storage', syncStatus);
+    };
+  }, []);
 
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +97,15 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
+          {!isSignedIn && (
+            <button
+              onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+              className="md:hidden mt-6 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-8 rounded-full shadow-[0_4px_15px_rgba(139,94,60,0.3)] hover:shadow-[0_6px_20px_rgba(139,94,60,0.45)] transition-all duration-200 text-base cursor-pointer z-10"
+            >
+              Create Free Account
+            </button>
+          )}
+
           <style>{`
             @keyframes heartbeat {
               0% { transform: scale(1); }
@@ -98,7 +129,7 @@ export default function Home() {
       </section>
 
       {/* SERVICES GRID SECTION */}
-      <section className="w-full bg-[#FDFAF7] px-6 pb-8">
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 pb-8">
         <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
 
           {/* 1. Pet Sitting */}
@@ -162,7 +193,7 @@ export default function Home() {
       </section>
 
       {/* EXPLORE TEASER BANNER */}
-      <section className="w-full bg-[#FDFAF7] px-6 pb-14 text-center">
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 pb-14 text-center">
         <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
           <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
             <Globe className="w-6 h-6 text-[#8B5E3C]" />
@@ -197,7 +228,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
+      <footer className="hidden md:block w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', maxWidth: '1200px', margin: '0 auto', marginBottom: '48px' }}>
           <div style={{ flex: '2 1 300px' }}>
             <Link href="/" className="mb-4 inline-block" style={{ textDecoration: 'none' }}>

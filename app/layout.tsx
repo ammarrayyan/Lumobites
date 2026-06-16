@@ -7,6 +7,7 @@ import PwaInstallBanner from "@/components/PwaInstallBanner";
 import PwaSplashScreen from "@/components/PwaSplashScreen";
 import FloatingQRCode from "@/components/FloatingQRCode";
 import PushManager from "@/components/PushManager";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -72,9 +73,10 @@ export default function RootLayout({
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
-        <div className="pt-[72px]">
+        <div className="pt-[72px] pb-16 md:pb-0">
           {children}
         </div>
+        <MobileBottomNav />
         <FloatingQRCode />
       </body>
     </html>
