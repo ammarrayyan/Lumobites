@@ -521,7 +521,7 @@ export default function Navbar() {
           {!isSignedIn ? (
             <button
               onClick={() => setShowSignInModal(true)}
-              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer"
+              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
             >
               Sign In
             </button>
@@ -529,19 +529,10 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
-                className="flex items-center gap-2 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] px-3.5 py-1.5 rounded-full transition-all cursor-pointer select-none shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                className="w-8 h-8 rounded-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(139,94,60,0.25)] cursor-pointer border-none transition-colors select-none"
+                title={proEmail || sitterEmail || 'Account'}
               >
-                {isPro && (
-                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
-                    Member <Check className="w-3 h-3 text-white stroke-[3]" />
-                  </div>
-                )}
-                {!isPro && (
-                  <span className="text-[11px] text-[#4A3E3D] font-bold">Account</span>
-                )}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
+                {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
               </button>
 
               {showProMenu && (
@@ -553,7 +544,7 @@ export default function Navbar() {
                   
                   <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
                     <div className="px-3 py-2 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                      {proEmail || "User Account"}
+                      {proEmail || sitterEmail || "User Account"}
                     </div>
                     <Link 
                       href="/account"
