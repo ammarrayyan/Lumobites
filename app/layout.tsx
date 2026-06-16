@@ -73,7 +73,7 @@ export default function RootLayout({
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
-        <div className="pt-[72px] pb-16 md:pb-0">
+        <div className="pt-[72px] pb-24 md:pb-0">
           {children}
         </div>
         <MobileBottomNav />

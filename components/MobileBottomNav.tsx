@@ -20,7 +20,18 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 h-[64px] bg-[#FAF6F0] border-t border-[#E8DDD4] shadow-[0_-4px_12px_rgba(0,0,0,0.03)] z-50 px-2 flex items-center justify-between pb-safe">
+    <div 
+      className="md:hidden fixed bottom-[20px] left-[50%] -translate-x-1/2 h-[64px] z-50 px-4 flex items-center justify-between"
+      style={{
+        width: '90%',
+        maxWidth: '420px',
+        backgroundColor: 'rgba(250, 246, 240, 0.95)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.15)',
+        borderRadius: '50px',
+        border: '1px solid rgba(139, 94, 60, 0.12)',
+      }}
+    >
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = tab.isActive;
