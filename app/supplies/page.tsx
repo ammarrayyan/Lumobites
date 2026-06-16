@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
+import MobileFoodNav from '@/components/MobileFoodNav';
 import { Footprints, Gamepad2, Inbox, HeartPulse } from 'lucide-react';
 
 export default function SuppliesPage() {
@@ -89,6 +90,7 @@ export default function SuppliesPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans">
       <Navbar />
+      <MobileFoodNav />
 
       <main className="max-w-[800px] mx-auto px-6 py-12">
         <div className="text-center mb-12">

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import confetti from 'canvas-confetti';
 import Navbar from '@/components/Navbar';
+import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
 
@@ -883,6 +884,7 @@ export default function ScanPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-12">
       <Navbar />
+      <MobileFoodNav />
 
       <main className="max-w-2xl mx-auto p-4 md:p-8 flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
         <canvas ref={canvasRef} className="hidden" />

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import Navbar from '@/components/Navbar';
+import MobileCommunityNav from '@/components/MobileCommunityNav';
 import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2 } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
@@ -255,6 +256,7 @@ export default function CityBoardPage() {
   return (
     <div className="min-h-screen bg-[#F5F0E8] font-sans">
       <Navbar />
+      <MobileCommunityNav />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         
