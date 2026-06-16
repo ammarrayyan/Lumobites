@@ -512,8 +512,12 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile: Logo & Sign In / Account Dropdown only */}
+        {/* Mobile: Logo & Sign In / Account Dropdown, Notification Bell & Share */}
         <div className="flex md:hidden items-center gap-2 ml-auto">
+          <ShareButton />
+          
+          {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+
           {!isSignedIn ? (
             <button
               onClick={() => setShowSignInModal(true)}
