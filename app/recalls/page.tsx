@@ -393,7 +393,7 @@ export default function RecallsPage() {
           <p className="text-[18px] text-[#666] leading-[1.65] max-w-[500px] mx-auto mb-6">
             Live recalls sourced directly from the FDA. Updated hourly. Know what&apos;s in your pet&apos;s bowl.
           </p>
-          {!isPro ? (
+          {!isPro && (
             <div className="bg-white border-2 border-[#E8D5C0] p-6 rounded-3xl shadow-sm max-w-[480px] mx-auto text-left relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#8B5E3C]/5 rounded-bl-full pointer-events-none -z-0"></div>
               
@@ -469,46 +469,6 @@ export default function RecallsPage() {
                   </div>
                 )}
               </form>
-            </div>
-          ) : (
-            <div className="max-w-[480px] mx-auto text-left bg-white border border-[#E8D5C0] rounded-3xl p-6 shadow-sm mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-[#191919]">Welcome back!</h3>
-                    <p className="text-xs text-gray-500">Signed in as {proEmail}</p>
-                  </div>
-                </div>
-                <button onClick={handleSignOut} className="text-xs text-gray-400 hover:text-gray-700 font-semibold underline">
-                  Sign out
-                </button>
-              </div>
-              
-              {subscribed ? (
-                <div className="flex flex-col gap-3">
-                  <div className="inline-flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#DCFCE7] text-[#166534] px-4 py-3 rounded-xl font-[600] text-sm w-full">
-                    <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" />
-                    <span className="leading-snug">You are automatically subscribed to instant recall alerts as a member. We will email you immediately when any pet food is recalled.</span>
-                  </div>
-                  <div className="flex justify-end mt-1">
-                    <button onClick={handleUnsubscribe} disabled={submitting} className="text-xs text-gray-400 hover:text-gray-700 font-semibold underline cursor-pointer disabled:opacity-50">
-                      Unsubscribe from alerts
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-600">
-                    You are not currently subscribed to recall alerts.
-                  </div>
-                  <button onClick={() => checkAndAutoSubscribe(proEmail)} disabled={submitting} className="px-5 py-2.5 rounded-xl font-[700] text-white text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer max-w-[200px]" style={{ backgroundColor: '#8B5E3C' }}>
-                    {submitting ? 'Subscribing...' : 'Subscribe to alerts'}
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
