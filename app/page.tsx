@@ -132,15 +132,15 @@ export default function Home() {
       <section className="md:hidden w-full px-6 pb-8">
         <div className="flex flex-col gap-3">
           <Link href="/petsitting" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
-              <PawPrint className="w-5 h-5" />
-              <span>Find a Pet Sitter</span>
+            <div className="w-full min-h-[48px] bg-[#FAF6F0] hover:bg-[#F5EDE4] active:bg-[#EADFD5] text-[#8B5E3C] border border-[#E8DDD4] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_2px_8px_rgba(139,94,60,0.06)] transition-colors cursor-pointer">
+              <PawPrint className="w-4.5 h-4.5 text-[#8B5E3C]" />
+              <span className="text-sm">Find a Pet Sitter</span>
             </div>
           </Link>
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
-              <MapPin className="w-5 h-5" />
-              <span>Post or Find Lost Pet</span>
+            <div className="w-full min-h-[48px] bg-[#FAF6F0] hover:bg-[#F5EDE4] active:bg-[#EADFD5] text-[#8B5E3C] border border-[#E8DDD4] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_2px_8px_rgba(139,94,60,0.06)] transition-colors cursor-pointer">
+              <MapPin className="w-4.5 h-4.5 text-[#8B5E3C]" />
+              <span className="text-sm">Post or Find Lost Pet</span>
             </div>
           </Link>
         </div>
