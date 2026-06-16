@@ -7,6 +7,7 @@ import ChatBubble from '@/components/ChatBubble';
 import { ChatMessage, ParsedPetInfo } from '@/lib/types';
 import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight } from 'lucide-react';
 import MobileFoodNav from '@/components/MobileFoodNav';
+import Navbar from '@/components/Navbar';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
@@ -414,6 +415,7 @@ export default function ChatPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' }}>
+      <Navbar />
       <MobileFoodNav />
       <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px' }}>
 
