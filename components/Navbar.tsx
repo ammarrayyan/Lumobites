@@ -521,7 +521,7 @@ export default function Navbar() {
           {!isSignedIn ? (
             <button
               onClick={() => setShowSignInModal(true)}
-              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
+              className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
             >
               Sign In
             </button>
@@ -529,7 +529,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
-                className="w-8 h-8 rounded-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(139,94,60,0.25)] cursor-pointer border-none transition-colors select-none"
+                className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
                 title={proEmail || sitterEmail || 'Account'}
               >
                 {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
