@@ -96,7 +96,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
               <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
             </div>
           </Link>
-          <p className="text-gray-500 text-sm mb-6 mt-6">&copy; {new Date().getFullYear()} Lumo Bites<sup style={{ fontSize: '50%', color: '#8B5A2B', verticalAlign: 'super', marginLeft: '1px' }}>™</sup>. Finding the best for your pets.</p>
+          <p className="text-gray-500 text-sm mb-6 mt-6">&copy; {new Date().getFullYear()} Premier Pet Nutrition LLC. Finding the best for your pets.</p>
           <div className="flex flex-wrap justify-center gap-6 text-sm font-bold text-gray-400">
             <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
             <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>

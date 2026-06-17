@@ -681,7 +681,7 @@ export default function AccountPage() {
 
       {/* FOOTER */}
       <footer className="py-8 border-t border-[#EEEEEE] text-center text-xs text-gray-400">
-        <p>© {new Date().getFullYear()} Lumo Bites. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Premier Pet Nutrition LLC. All rights reserved.</p>
       </footer>
 
       <style jsx global>{`
