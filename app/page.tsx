@@ -96,35 +96,6 @@ export default function Home() {
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
-
-          {!isSignedIn && (
-            <button
-              onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-              className="md:hidden mt-6 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-8 rounded-full shadow-[0_4px_15px_rgba(139,94,60,0.3)] hover:shadow-[0_6px_20px_rgba(139,94,60,0.45)] transition-all duration-200 text-base cursor-pointer z-10"
-            >
-              Create Free Account
-            </button>
-          )}
-
-          <style>{`
-            @keyframes heartbeat {
-              0% { transform: scale(1); }
-              14% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-              28% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-              42% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(139, 94, 60, 0.4); }
-              70% { transform: scale(1); box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2); }
-            }
-            .btn-heartbeat {
-              animation: heartbeat 2.5s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
-              box-shadow: 0 4px 15px rgba(139, 94, 60, 0.2);
-              transition: all 0.3s ease;
-            }
-            .btn-heartbeat:hover {
-              animation: none;
-              transform: scale(1.03) translateY(-2px);
-              box-shadow: 0 15px 30px rgba(139, 94, 60, 0.4);
-            }
-          `}</style>
         </div>
       </section>
 
@@ -132,15 +103,21 @@ export default function Home() {
       <section className="md:hidden w-full px-6 pb-8">
         <div className="flex flex-col gap-3">
           <Link href="/petsitting" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[48px] bg-[#FAF6F0] hover:bg-[#F5EDE4] active:bg-[#EADFD5] text-[#8B5E3C] border border-[#E8DDD4] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_2px_8px_rgba(139,94,60,0.06)] transition-colors cursor-pointer">
-              <PawPrint className="w-4.5 h-4.5 text-[#8B5E3C]" />
-              <span className="text-sm">Find a Pet Sitter</span>
+            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
+              <PawPrint className="w-5 h-5" />
+              <span>Find a Pet Sitter</span>
+            </div>
+          </Link>
+          <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
+            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
+              <HomeIcon className="w-5 h-5" />
+              <span>Become a Pet Sitter</span>
             </div>
           </Link>
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[48px] bg-[#FAF6F0] hover:bg-[#F5EDE4] active:bg-[#EADFD5] text-[#8B5E3C] border border-[#E8DDD4] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_2px_8px_rgba(139,94,60,0.06)] transition-colors cursor-pointer">
-              <MapPin className="w-4.5 h-4.5 text-[#8B5E3C]" />
-              <span className="text-sm">Post or Find Lost Pet</span>
+            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
+              <MapPin className="w-5 h-5" />
+              <span>Post or Find Lost Pet</span>
             </div>
           </Link>
         </div>
