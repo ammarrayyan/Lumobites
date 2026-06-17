@@ -406,7 +406,7 @@ export default function PetSitting() {
   const loadOwnerProfile = async (email: string) => {
     if (!email) return;
     try {
-      const res = await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}&t=${Date.now()}`);
       const data = await res.json();
       if (res.ok && data.success && data.profile) {
         const p = data.profile;
@@ -472,7 +472,7 @@ export default function PetSitting() {
         setSitterAuthMode('form');
 
         // Always check their profile status
-        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedProEmail)}`)
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedProEmail)}&t=${Date.now()}`)
           .then(res => res.json())
           .then(profileData => {
             if (profileData && profileData.id) {
@@ -921,7 +921,7 @@ export default function PetSitting() {
     setReviewsModalOpen(true);
     setLoadingReviews(true);
     try {
-      const res = await fetch(`/api/petsitting/reviews?sitter_id=${sitter.id}`);
+      const res = await fetch(`/api/petsitting/reviews?sitter_id=${sitter.id}&t=${Date.now()}`);
       const data = await res.json();
       if (res.ok && data.reviews) {
         setSitterReviews(data.reviews);
@@ -950,7 +950,7 @@ export default function PetSitting() {
     if (!id) return;
     setLoadingSitterRequests(true);
     try {
-      const res = await fetch(`/api/petsitting/request/sitter?sitter_id=${id}`);
+      const res = await fetch(`/api/petsitting/request/sitter?sitter_id=${id}&t=${Date.now()}`);
       const data = await res.json();
       if (res.ok && data.requests) {
         setSitterRequests(data.requests);
@@ -967,7 +967,7 @@ export default function PetSitting() {
     if (!email) return;
     setLoadingOwnerRequests(true);
     try {
-      const res = await fetch(`/api/petsitting/request/owner?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/petsitting/request/owner?email=${encodeURIComponent(email)}&t=${Date.now()}`);
       const data = await res.json();
       if (res.ok && data.requests) {
         setOwnerRequests(data.requests);
@@ -986,7 +986,7 @@ export default function PetSitting() {
     if (!email) return;
     setLoadingOwnerPets(true);
     try {
-      const res = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(email)}&t=${Date.now()}`);
       const data = await res.json();
       if (res.ok && data.pets) {
         setOwnerPets(data.pets);
@@ -1319,7 +1319,7 @@ export default function PetSitting() {
       setRequestModalOpen(true);
     } else {
       try {
-        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}`);
+        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}&t=${Date.now()}`);
         const data = await res.json();
         const fetchedSitter = data.sitters?.find((s: any) => s.id === req.sitter_id);
         if (fetchedSitter) {
@@ -1363,7 +1363,7 @@ export default function PetSitting() {
       setReviewsModalOpen(true);
       setLoadingReviews(true);
       try {
-        const res = await fetch(`/api/petsitting/reviews?sitter_id=${existing.id}`);
+        const res = await fetch(`/api/petsitting/reviews?sitter_id=${existing.id}&t=${Date.now()}`);
         const data = await res.json();
         if (res.ok && data.reviews) {
           setSitterReviews(data.reviews);
@@ -1377,14 +1377,14 @@ export default function PetSitting() {
       }
     } else {
       try {
-        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}`);
+        const res = await fetch(`/api/petsitting/sitters?id=${req.sitter_id}&t=${Date.now()}`);
         const data = await res.json();
         const fetchedSitter = data.sitters?.find((s: any) => s.id === req.sitter_id);
         if (fetchedSitter) {
           setSelectedSitterForReviews(fetchedSitter);
           setReviewsModalOpen(true);
           setLoadingReviews(true);
-          const rRes = await fetch(`/api/petsitting/reviews?sitter_id=${req.sitter_id}`);
+          const rRes = await fetch(`/api/petsitting/reviews?sitter_id=${req.sitter_id}&t=${Date.now()}`);
           const rData = await rRes.json();
           if (rRes.ok && rData.reviews) {
             setSitterReviews(rData.reviews);
@@ -1542,7 +1542,7 @@ export default function PetSitting() {
   const loadSitterProfile = async (email: string) => {
     setProfileLoading(true);
     try {
-      const res = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(email)}&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         if (data) {
@@ -1673,7 +1673,7 @@ export default function PetSitting() {
         localStorage.setItem('lumo_sitter_email_expiry', expiry.toString());
         localStorage.setItem('lumo_session_started_at', new Date().toISOString());
 
-        const profileRes = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}`);
+        const profileRes = await fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterEmail)}&t=${Date.now()}`);
         const profileData = await profileRes.json();
 
         if (profileRes.ok && profileData && profileData.id) {
@@ -2081,7 +2081,7 @@ export default function PetSitting() {
         
         if (res.ok) {
           const data = await res.json();
-          const sittersRes = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}`);
+          const sittersRes = await fetch(`/api/petsitting/sitters?owner_email=${encodeURIComponent(unlockEmail)}&t=${Date.now()}`);
           const sittersData = await sittersRes.json();
           
           setSitters(sittersData.sitters || []);
@@ -2359,10 +2359,15 @@ export default function PetSitting() {
 
   const handleSendPhoneCode = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    console.log('[Phone Verification SMS] Starting handleSendPhoneCode...');
     setVerifyPhoneLoading(true);
     setVerifyPhoneError('');
 
+    console.log('[Phone Verification SMS] Input verifyPhoneNum:', verifyPhoneNum);
+    console.log('[Phone Verification SMS] Input verifyPhoneCountry:', verifyPhoneCountry);
+
     if (!verifyPhoneNum || verifyPhoneNum.trim() === '') {
+      console.warn('[Phone Verification SMS] Empty phone number');
       setVerifyPhoneError('Please enter a valid phone number');
       setVerifyPhoneLoading(false);
       return;
@@ -2372,24 +2377,37 @@ export default function PetSitting() {
       // Clear any existing recaptcha
       if (typeof window !== 'undefined') {
         const container = document.getElementById('recaptcha-container');
+        console.log('[Phone Verification SMS] Recaptcha container found in DOM:', !!container);
         if (container) {
           container.innerHTML = '';
         }
       }
 
+      console.log('[Phone Verification SMS] Initializing RecaptchaVerifier...');
       const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible'
       });
       setRecaptchaVerifier(appVerifier);
 
-      const fullPhone = `${verifyPhoneCountry}${verifyPhoneNum.replace(/\D/g, '')}`;
-      console.log('[Phone Verification] Sending SMS to:', fullPhone);
+      // Clean phone number: remove non-digits
+      let cleanPhone = verifyPhoneNum.replace(/\D/g, '');
+      
+      // Strip leading zero if present (essential for international SMS formats, e.g. +971 050 -> +971 50)
+      if (cleanPhone.startsWith('0')) {
+        console.log('[Phone Verification SMS] Stripping leading zero from clean phone');
+        cleanPhone = cleanPhone.substring(1);
+      }
+      
+      const fullPhone = `${verifyPhoneCountry}${cleanPhone}`;
+      console.log('[Phone Verification SMS] Formatted fullPhone:', fullPhone);
+      console.log('[Phone Verification SMS] Firebase Auth initialized:', !!auth);
 
+      console.log('[Phone Verification SMS] Calling signInWithPhoneNumber...');
       const confirmation = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
       setVerifyConfirmationResult(confirmation);
-      console.log('[Phone Verification] SMS code sent successfully!');
+      console.log('[Phone Verification SMS] SMS code sent successfully! confirmationResult received:', !!confirmation);
     } catch (err: any) {
-      console.error('[Phone Verification] Failed to send SMS:', err);
+      console.error('[Phone Verification SMS] Error during signInWithPhoneNumber:', err);
       setVerifyPhoneError(err.message || 'Failed to send verification code. Please check the number and try again.');
     } finally {
       setVerifyPhoneLoading(false);
@@ -2398,10 +2416,14 @@ export default function PetSitting() {
 
   const handleVerifyPhoneCode = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    console.log('[Phone Verification Code] Starting handleVerifyPhoneCode...');
     setVerifyPhoneLoading(true);
     setVerifyPhoneError('');
 
+    console.log('[Phone Verification Code] Input code:', verifyPhoneCode);
+
     if (!verifyPhoneCode || verifyPhoneCode.trim().length !== 6) {
+      console.warn('[Phone Verification Code] Invalid code length');
       setVerifyPhoneError('Please enter a 6-digit verification code');
       setVerifyPhoneLoading(false);
       return;
@@ -2409,15 +2431,22 @@ export default function PetSitting() {
 
     try {
       if (!verifyConfirmationResult) {
+        console.error('[Phone Verification Code] No verification session (confirmationResult is null)');
         throw new Error('No verification session found. Please request a new code.');
       }
 
-      console.log('[Phone Verification] Confirming code:', verifyPhoneCode);
+      console.log('[Phone Verification Code] Confirming code with Firebase...');
       const userCredential = await verifyConfirmationResult.confirm(verifyPhoneCode);
+      console.log('[Phone Verification Code] Code confirmed by Firebase. Fetching user ID token...');
       const firebaseToken = await userCredential.user.getIdToken();
-      const fullPhone = `${verifyPhoneCountry}${verifyPhoneNum.replace(/\D/g, '')}`;
+      
+      let cleanPhone = verifyPhoneNum.replace(/\D/g, '');
+      if (cleanPhone.startsWith('0')) {
+        cleanPhone = cleanPhone.substring(1);
+      }
+      const fullPhone = `${verifyPhoneCountry}${cleanPhone}`;
+      console.log('[Phone Verification Code] Saving status to database for fullPhone:', fullPhone);
 
-      console.log('[Phone Verification] Firebase code confirmed. Saving status to database...');
       const verifyRes = await fetch('/api/stripe/verify-phone', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2429,11 +2458,13 @@ export default function PetSitting() {
       });
 
       const verifyData = await verifyRes.json();
+      console.log('[Phone Verification Code] Database verify-phone response:', verifyData);
+
       if (!verifyRes.ok) {
         throw new Error(verifyData.error || 'Failed to update database with verified status');
       }
 
-      console.log('[Phone Verification] Phone verification complete! Executing booking request...');
+      console.log('[Phone Verification Code] Verification complete! Executing booking request...');
       
       // Clean up verification state
       setShowPhoneVerification(false);
@@ -2444,7 +2475,7 @@ export default function PetSitting() {
       await executeBookingRequest();
 
     } catch (err: any) {
-      console.error('[Phone Verification] Verification failed:', err);
+      console.error('[Phone Verification Code] Error during code verification:', err);
       setVerifyPhoneError(err.message || 'Invalid or expired verification code. Please check and try again.');
     } finally {
       setVerifyPhoneLoading(false);
@@ -2501,18 +2532,21 @@ export default function PetSitting() {
       }
 
       // Check phone verification
+      console.log('[Phone Verification Check] Querying verification status for:', reqEmail);
       const statusRes = await fetch('/api/stripe/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: reqEmail })
       });
       const statusData = await statusRes.json();
+      console.log('[Phone Verification Check] Response statusData:', statusData);
 
       if (!statusRes.ok) {
         throw new Error(statusData.error || 'Failed to check account verification status');
       }
 
       if (!statusData.phone_verified) {
+        console.log('[Phone Verification Check] User phone is not verified. Showing verification UI...');
         // Stop submission, transition to phone verification UI
         if (reqPhone) {
           setVerifyPhoneNum(reqPhone);
@@ -2522,6 +2556,7 @@ export default function PetSitting() {
         return;
       }
 
+      console.log('[Phone Verification Check] User phone is verified. Proceeding to booking request...');
       // If already verified, execute booking request
       await executeBookingRequest();
 

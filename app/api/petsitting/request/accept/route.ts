@@ -32,15 +32,78 @@ export async function GET(request: NextRequest) {
       return new NextResponse('<h1>Unauthorized secure token</h1>', { status: 403, headers: { 'Content-Type': 'text/html' } });
     }
 
-    // 3. Update request status to accepted
-    const { error: updateError } = await supabase
-      .from('sitting_requests')
-      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
-      .eq('id', id);
+    // Check if cancelled
+    if (reqRow.status === 'cancelled') {
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Request Cancelled - Lumo Bites</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #FDFAF7; color: #4A3E3D; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+            .card { background: white; border: 1px solid #E8DDD4; border-radius: 24px; padding: 40px; text-align: center; max-width: 520px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+            h1 { color: #EF4444; font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 16px; }
+            p { font-size: 15px; line-height: 1.6; color: #666; margin-bottom: 24px; }
+            .logo { margin-bottom: 24px; font-size: 24px; font-weight: 900; color: #8B5E3C; text-decoration: none; display: inline-block; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
+            <h1>Request Cancelled</h1>
+            <p>This request has been cancelled by the owner and cannot be accepted.</p>
+            <p style="font-size: 13px; color: #999;">This request has been cancelled and cannot be accepted.</p>
+          </div>
+        </body>
+        </html>
+      `;
+      return new NextResponse(errorHtml, { headers: { 'Content-Type': 'text/html' } });
+    }
 
-    if (updateError) {
-      console.error('[Accept Request] Update error:', updateError);
-      return new NextResponse('<h1>Database update failed</h1>', { status: 500, headers: { 'Content-Type': 'text/html' } });
+    // Only proceed with acceptance if status is still pending or already accepted
+    if (reqRow.status !== 'pending' && reqRow.status !== 'accepted') {
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Cannot Accept Request - Lumo Bites</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #FDFAF7; color: #4A3E3D; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+            .card { background: white; border: 1px solid #E8DDD4; border-radius: 24px; padding: 40px; text-align: center; max-width: 520px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+            h1 { color: #EF4444; font-size: 28px; font-weight: 800; margin-top: 0; margin-bottom: 16px; }
+            p { font-size: 15px; line-height: 1.6; color: #666; margin-bottom: 24px; }
+            .logo { margin-bottom: 24px; font-size: 24px; font-weight: 900; color: #8B5E3C; text-decoration: none; display: inline-block; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <a href="https://lumobites.net" class="logo">🐾 Lumo Bites</a>
+            <h1>Cannot Accept Request</h1>
+            <p>This request is in status <strong>${reqRow.status}</strong> and cannot be accepted.</p>
+          </div>
+        </body>
+        </html>
+      `;
+      return new NextResponse(errorHtml, { headers: { 'Content-Type': 'text/html' } });
+    }
+
+    const isAlreadyAccepted = reqRow.status === 'accepted';
+
+    // 3. Update request status to accepted
+    if (!isAlreadyAccepted) {
+      const { error: updateError } = await supabase
+        .from('sitting_requests')
+        .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (updateError) {
+        console.error('[Accept Request] Update error:', updateError);
+        return new NextResponse('<h1>Database update failed</h1>', { status: 500, headers: { 'Content-Type': 'text/html' } });
+      }
     }
 
     // 4. Fetch sitter info
@@ -53,58 +116,60 @@ export async function GET(request: NextRequest) {
     const fullSitterNameStr = sitter?.name || 'A local sitter';
     const sitterNameStr = formatSitterName(sitter?.name);
 
-    // Notification
-    try {
-      const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
-        recipient_email: reqRow.owner_email,
-        type: 'booking_accepted',
-        title: 'Booking Accepted! 🎉',
-        message: `Booking for ${reqRow.pet_name} accepted`,
-        link: '/petsitting#owner-history'
-      });
-      if (notifErr) {
-        console.error('[Accept Request] Notification insert error:', notifErr);
+    if (!isAlreadyAccepted) {
+      // Notification
+      try {
+        const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
+          recipient_email: reqRow.owner_email,
+          type: 'booking_accepted',
+          title: 'Booking Accepted! 🎉',
+          message: `Booking for ${reqRow.pet_name} accepted`,
+          link: '/petsitting#owner-history'
+        });
+        if (notifErr) {
+          console.error('[Accept Request] Notification insert error:', notifErr);
+        }
+      } catch (err) {
+        console.error('[Accept Request] Notification exception:', err);
       }
-    } catch (err) {
-      console.error('[Accept Request] Notification exception:', err);
-    }
 
-    try {
-      await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `Booking for ${reqRow.pet_name} accepted`, '/petsitting#owner-history');
-    } catch (err) {
-      console.error('[Accept Request] Push notification error:', err);
-    }
+      try {
+        await sendPushNotification(reqRow.owner_email, 'Booking Accepted! 🎉', `Booking for ${reqRow.pet_name} accepted`, '/petsitting#owner-history');
+      } catch (err) {
+        console.error('[Accept Request] Push notification error:', err);
+      }
 
-    // 5. Email the owner
-    try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-      
-      await resend.emails.send({
-        from: fromEmail,
-        to: reqRow.owner_email,
-        subject: `🎉 Great news! Your sitter accepted your request`,
-        html: brandedEmail({
+      // 5. Email the owner
+      try {
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+        
+        await resend.emails.send({
+          from: fromEmail,
+          to: reqRow.owner_email,
           subject: `🎉 Great news! Your sitter accepted your request`,
-          preheader: `${sitterNameStr} has accepted your request for ${reqRow.pet_name || 'your pet'}.`,
-          body: `
-            <h1 style="${emailStyles.h1}">Your request was accepted! 🎉</h1>
-            <p style="${emailStyles.p}">Hi there,</p>
-            <p style="${emailStyles.p}">Great news! Your sitter accepted your request. View your booking details at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
-            ${emailStyles.divider}
-            ${emailStyles.highlightBox(`
-              <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Message Your Sitter</p>
-              <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
-                Message them directly on Lumo Bites → <a href="https://lumobites.net/petsitting" style="color:#8B6A50;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a>
-              </p>
-            `)}
-            ${emailStyles.divider}
-            <p style="${emailStyles.p}">Please reach out to them directly on Lumo Bites to finalize details and coordinate handoff or meet-ups.</p>
-            ${emailStyles.signoff}
-          `
-        })
-      });
-    } catch (err) {
-      console.error('[Accept Request] Email error:', err);
+          html: brandedEmail({
+            subject: `🎉 Great news! Your sitter accepted your request`,
+            preheader: `${sitterNameStr} has accepted your request for ${reqRow.pet_name || 'your pet'}.`,
+            body: `
+              <h1 style="${emailStyles.h1}">Your request was accepted! 🎉</h1>
+              <p style="${emailStyles.p}">Hi there,</p>
+              <p style="${emailStyles.p}">Great news! Your sitter accepted your request. View your booking details at <a href="https://lumobites.net/petsitting" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a></p>
+              ${emailStyles.divider}
+              ${emailStyles.highlightBox(`
+                <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#3B2410;">Message Your Sitter</p>
+                <p style="margin:0;font-size:14px;color:#4A3728;line-height:1.6;">
+                  Message them directly on Lumo Bites → <a href="https://lumobites.net/petsitting" style="color:#8B6A50;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting</a>
+                </p>
+              `)}
+              ${emailStyles.divider}
+              <p style="${emailStyles.p}">Please reach out to them directly on Lumo Bites to finalize details and coordinate handoff or meet-ups.</p>
+              ${emailStyles.signoff}
+            `
+          })
+        });
+      } catch (err) {
+        console.error('[Accept Request] Email error:', err);
+      }
     }
 
     // 6. Return gorgeous html page
