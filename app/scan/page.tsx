@@ -896,7 +896,7 @@ export default function ScanPage() {
           <div className="text-center flex flex-col items-center">
             {/* Sparkle Badge */}
             {isPro ? (
-              <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 border border-amber-400 text-white text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-md">
+              <div className="hidden md:inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 border border-amber-400 text-white text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-md">
                 <Sparkles className="w-3.5 h-3.5 text-white" /> Lumo Bites Member
               </div>
             ) : (
