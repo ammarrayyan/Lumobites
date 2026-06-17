@@ -9,6 +9,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { supabase } from '@/lib/supabase';
 
 
 
@@ -1172,24 +1173,72 @@ export default function PetSitting() {
     }
   };
 
-  // Auto-poll sitter dashboard every 60 seconds
+  // Toast Notification State
+  const [showUpdatedToast, setShowUpdatedToast] = useState(false);
+
+  const triggerUpdatedIndicator = () => {
+    setShowUpdatedToast(true);
+    setTimeout(() => {
+      setShowUpdatedToast(false);
+    }, 3000); // Hide after 3 seconds
+  };
+
+  // Auto-poll sitter dashboard every 15 seconds as fallback
   useEffect(() => {
     if (!sitterId) return;
     const interval = setInterval(() => {
       fetchSitterRequests(sitterId);
-    }, 60000);
+    }, 15000);
     return () => clearInterval(interval);
   }, [sitterId]);
 
-  // Auto-poll owner booking history and pets every 60 seconds
+  // Auto-poll owner booking history and pets every 15 seconds as fallback
   useEffect(() => {
     if (!reqEmail) return;
     const interval = setInterval(() => {
       fetchOwnerRequests(reqEmail);
       fetchOwnerPets(reqEmail);
-    }, 60000);
+    }, 15000);
     return () => clearInterval(interval);
   }, [reqEmail]);
+
+  // Real-time Supabase subscriptions for booking requests
+  useEffect(() => {
+    if (!supabase) return;
+
+    console.log('[Real-time] Setting up Supabase channel subscription for sitting_requests...');
+
+    const channel = supabase
+      .channel('booking-updates')
+      .on('postgres_changes', {
+        event: '*', // Listen to INSERT, UPDATE, DELETE
+        schema: 'public',
+        table: 'sitting_requests'
+      }, (payload) => {
+        console.log('[Real-time] Booking change detected in sitting_requests:', payload);
+        
+        // Refresh bookings
+        if (reqEmail && reqEmail.trim() !== '') {
+          console.log('[Real-time] Refreshing owner requests for:', reqEmail);
+          fetchOwnerRequests(reqEmail);
+        }
+        if (sitterId && sitterId.trim() !== '') {
+          console.log('[Real-time] Refreshing sitter requests for:', sitterId);
+          fetchSitterRequests(sitterId);
+        }
+
+        // Show a subtle "Updated" notification/indicator
+        triggerUpdatedIndicator();
+      })
+      .subscribe((status) => {
+        console.log('[Real-time] Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[Real-time] Cleaning up Supabase channel subscription...');
+      supabase.removeChannel(channel);
+    };
+  }, [reqEmail, sitterId]);
 
   const isBookingDateActive = (datesStr: string): boolean => {
     if (!datesStr) return false;
@@ -2614,6 +2663,14 @@ export default function PetSitting() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
       <Navbar />
+
+      {/* Toast updated indicator */}
+      {showUpdatedToast && (
+        <div className="fixed top-24 right-4 bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg z-50 flex items-center gap-1.5 animate-fade-in-up pointer-events-none">
+          <Sparkles className="w-4 h-4 text-white" />
+          <span>Bookings Updated in Real-time</span>
+        </div>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         <div className="text-center mb-10">
