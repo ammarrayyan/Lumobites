@@ -7,6 +7,9 @@ import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search } from 'lucide-react';
+import { auth } from '@/lib/firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+
 
 
 export function formatSitterName(fullName) {
@@ -230,6 +233,16 @@ export default function PetSitting() {
   const [reqError, setReqError] = useState('');
   const [reqSuccess, setReqSuccess] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
+
+  // Phone Verification State
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
+  const [verifyPhoneNum, setVerifyPhoneNum] = useState('');
+  const [verifyPhoneCountry, setVerifyPhoneCountry] = useState('+1');
+  const [verifyPhoneCode, setVerifyPhoneCode] = useState('');
+  const [verifyPhoneLoading, setVerifyPhoneLoading] = useState(false);
+  const [verifyPhoneError, setVerifyPhoneError] = useState('');
+  const [verifyConfirmationResult, setVerifyConfirmationResult] = useState<any>(null);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<any>(null);
 
   // My Pets Profile State
   const [ownerPets, setOwnerPets] = useState<any[]>([]);
@@ -774,6 +787,11 @@ export default function PetSitting() {
       setReqEndDate('');
       setReqServiceType('');
       setReqTimeSlot('');
+      setShowPhoneVerification(false);
+      setVerifyPhoneNum('');
+      setVerifyPhoneCode('');
+      setVerifyPhoneError('');
+      setVerifyConfirmationResult(null);
       fetchSitterAvailability(selectedSitter.id);
     }
   }, [requestModalOpen, selectedSitter]);
@@ -2224,56 +2242,12 @@ export default function PetSitting() {
     }
   };
 
-  const submitRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeBookingRequest = async () => {
     setReqLoading(true);
     setReqError('');
     setReqSuccess(false);
 
-    if (reqEmail && selectedSitter?.email && reqEmail.toLowerCase().trim() === selectedSitter.email.toLowerCase().trim()) {
-      setReqError('You cannot request yourself as a sitter');
-      setReqLoading(false);
-      return;
-    }
-
-    if (selectedRequestPets.length === 0) {
-      setReqError('Please select at least one pet or add a new one first');
-      setReqLoading(false);
-      return;
-    }
-
     try {
-      if (reqStartDate && reqEndDate) {
-        if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
-          setReqError('End date must be after start date');
-          setReqLoading(false);
-          return;
-        }
-
-        const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
-        const hasOverlap = rangeDates.some(d => {
-          const dateObj = new Date(d + 'T00:00:00');
-          const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
-          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
-          return sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes) || isScheduleUnavailable;
-        });
-        if (hasOverlap) {
-          setReqError('Selected date range overlaps with dates the sitter is unavailable or fully booked');
-          setReqLoading(false);
-          return;
-        }
-
-        // If a time slot is selected, also validate it's free across all dates in range
-        if (reqTimeSlot) {
-          const slotConflict = rangeDates.some(d => isSlotBooked(d, reqTimeSlot));
-          if (slotConflict) {
-            setReqError(`The ${reqTimeSlot} slot is already booked on one or more of the selected dates — please choose another slot or adjust your dates`);
-            setReqLoading(false);
-            return;
-          }
-        }
-      }
-
       const startFmt = reqStartDate ? new Date(reqStartDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const endFmt = reqEndDate ? new Date(reqEndDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       const finalDates = startFmt && endFmt ? `${startFmt} → ${endFmt}` : '';
@@ -2379,6 +2353,180 @@ export default function PetSitting() {
     } catch (err) {
       setReqError('An unexpected error occurred.');
     } finally {
+      setReqLoading(false);
+    }
+  };
+
+  const handleSendPhoneCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setVerifyPhoneLoading(true);
+    setVerifyPhoneError('');
+
+    if (!verifyPhoneNum || verifyPhoneNum.trim() === '') {
+      setVerifyPhoneError('Please enter a valid phone number');
+      setVerifyPhoneLoading(false);
+      return;
+    }
+
+    try {
+      // Clear any existing recaptcha
+      if (typeof window !== 'undefined') {
+        const container = document.getElementById('recaptcha-container');
+        if (container) {
+          container.innerHTML = '';
+        }
+      }
+
+      const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible'
+      });
+      setRecaptchaVerifier(appVerifier);
+
+      const fullPhone = `${verifyPhoneCountry}${verifyPhoneNum.replace(/\D/g, '')}`;
+      console.log('[Phone Verification] Sending SMS to:', fullPhone);
+
+      const confirmation = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
+      setVerifyConfirmationResult(confirmation);
+      console.log('[Phone Verification] SMS code sent successfully!');
+    } catch (err: any) {
+      console.error('[Phone Verification] Failed to send SMS:', err);
+      setVerifyPhoneError(err.message || 'Failed to send verification code. Please check the number and try again.');
+    } finally {
+      setVerifyPhoneLoading(false);
+    }
+  };
+
+  const handleVerifyPhoneCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setVerifyPhoneLoading(true);
+    setVerifyPhoneError('');
+
+    if (!verifyPhoneCode || verifyPhoneCode.trim().length !== 6) {
+      setVerifyPhoneError('Please enter a 6-digit verification code');
+      setVerifyPhoneLoading(false);
+      return;
+    }
+
+    try {
+      if (!verifyConfirmationResult) {
+        throw new Error('No verification session found. Please request a new code.');
+      }
+
+      console.log('[Phone Verification] Confirming code:', verifyPhoneCode);
+      const userCredential = await verifyConfirmationResult.confirm(verifyPhoneCode);
+      const firebaseToken = await userCredential.user.getIdToken();
+      const fullPhone = `${verifyPhoneCountry}${verifyPhoneNum.replace(/\D/g, '')}`;
+
+      console.log('[Phone Verification] Firebase code confirmed. Saving status to database...');
+      const verifyRes = await fetch('/api/stripe/verify-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: reqEmail,
+          phone: fullPhone,
+          firebaseToken
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.error || 'Failed to update database with verified status');
+      }
+
+      console.log('[Phone Verification] Phone verification complete! Executing booking request...');
+      
+      // Clean up verification state
+      setShowPhoneVerification(false);
+      setVerifyPhoneCode('');
+      setVerifyConfirmationResult(null);
+      
+      // Trigger booking request execution
+      await executeBookingRequest();
+
+    } catch (err: any) {
+      console.error('[Phone Verification] Verification failed:', err);
+      setVerifyPhoneError(err.message || 'Invalid or expired verification code. Please check and try again.');
+    } finally {
+      setVerifyPhoneLoading(false);
+    }
+  };
+
+  const submitRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReqLoading(true);
+    setReqError('');
+    setReqSuccess(false);
+
+    if (reqEmail && selectedSitter?.email && reqEmail.toLowerCase().trim() === selectedSitter.email.toLowerCase().trim()) {
+      setReqError('You cannot request yourself as a sitter');
+      setReqLoading(false);
+      return;
+    }
+
+    if (selectedRequestPets.length === 0) {
+      setReqError('Please select at least one pet or add a new one first');
+      setReqLoading(false);
+      return;
+    }
+
+    try {
+      if (reqStartDate && reqEndDate) {
+        if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
+          setReqError('End date must be after start date');
+          setReqLoading(false);
+          return;
+        }
+
+        const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
+        const hasOverlap = rangeDates.some(d => {
+          const dateObj = new Date(d + 'T00:00:00');
+          const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+          return sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes) || isScheduleUnavailable;
+        });
+        if (hasOverlap) {
+          setReqError('Selected date range overlaps with dates the sitter is unavailable or fully booked');
+          setReqLoading(false);
+          return;
+        }
+
+        if (reqTimeSlot) {
+          const slotConflict = rangeDates.some(d => isSlotBooked(d, reqTimeSlot));
+          if (slotConflict) {
+            setReqError(`The ${reqTimeSlot} slot is already booked on one or more of the selected dates — please choose another slot or adjust your dates`);
+            setReqLoading(false);
+            return;
+          }
+        }
+      }
+
+      // Check phone verification
+      const statusRes = await fetch('/api/stripe/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: reqEmail })
+      });
+      const statusData = await statusRes.json();
+
+      if (!statusRes.ok) {
+        throw new Error(statusData.error || 'Failed to check account verification status');
+      }
+
+      if (!statusData.phone_verified) {
+        // Stop submission, transition to phone verification UI
+        if (reqPhone) {
+          setVerifyPhoneNum(reqPhone);
+        }
+        setShowPhoneVerification(true);
+        setReqLoading(false);
+        return;
+      }
+
+      // If already verified, execute booking request
+      await executeBookingRequest();
+
+    } catch (err: any) {
+      setReqError(err.message || 'An unexpected error occurred.');
       setReqLoading(false);
     }
   };
@@ -4481,6 +4629,122 @@ export default function PetSitting() {
                   >
                     Close
                   </button>
+                </div>
+              ) : showPhoneVerification ? (
+                <div className="space-y-4 text-left">
+                  {/* Invisible Recaptcha container */}
+                  <div id="recaptcha-container"></div>
+                  
+                  <div className="text-center pb-2">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-3">
+                      <Lock className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-lg font-bold text-[#4A3E3D]">Phone Verification Required</h4>
+                    <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">Verify your phone number with a one-time passcode before sending your first request.</p>
+                  </div>
+
+                  {!verifyConfirmationResult ? (
+                    <form onSubmit={handleSendPhoneCode} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Phone Number</label>
+                        <div className="flex gap-2">
+                          <select 
+                            value={verifyPhoneCountry} 
+                            onChange={e => setVerifyPhoneCountry(e.target.value)}
+                            className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                          >
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+971">🇦🇪 +971</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+966">🇸🇦 +966</option>
+                            <option value="+973">🇧🇭 +973</option>
+                            <option value="+965">🇰🇼 +965</option>
+                            <option value="+968">🇴🇲 +968</option>
+                            <option value="+974">🇶🇦 +974</option>
+                            <option value="+61">🇦🇺 +61</option>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+91">🇮🇳 +91</option>
+                          </select>
+                          <input 
+                            required 
+                            type="tel" 
+                            value={verifyPhoneNum} 
+                            onChange={e => setVerifyPhoneNum(e.target.value)} 
+                            placeholder="50 123 4567" 
+                            className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" 
+                          />
+                        </div>
+                      </div>
+
+                      {verifyPhoneError && (
+                        <div className="bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold p-3 rounded-xl animate-fade-in">
+                          {verifyPhoneError}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button 
+                          type="button" 
+                          onClick={() => setShowPhoneVerification(false)}
+                          className="w-1/3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors cursor-pointer text-xs"
+                        >
+                          Back
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={verifyPhoneLoading}
+                          className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer disabled:opacity-50 text-xs"
+                        >
+                          {verifyPhoneLoading ? 'Sending...' : 'Send Verification Code'}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleVerifyPhoneCode} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Enter 6-Digit Code</label>
+                        <input 
+                          required 
+                          type="text" 
+                          maxLength={6} 
+                          value={verifyPhoneCode} 
+                          onChange={e => setVerifyPhoneCode(e.target.value.replace(/\D/g, ''))} 
+                          placeholder="123456" 
+                          className="w-full tracking-widest text-center text-lg font-bold bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2.5 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" 
+                        />
+                        <p className="text-[10px] text-gray-500 mt-1.5 text-center">
+                          Code sent to <strong>{verifyPhoneCountry} {verifyPhoneNum}</strong>.
+                        </p>
+                      </div>
+
+                      {verifyPhoneError && (
+                        <div className="bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold p-3 rounded-xl animate-fade-in">
+                          {verifyPhoneError}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setVerifyConfirmationResult(null);
+                            setVerifyPhoneCode('');
+                          }}
+                          className="w-1/3 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors cursor-pointer text-xs"
+                        >
+                          Edit Phone
+                        </button>
+                        <button 
+                          type="submit" 
+                          disabled={verifyPhoneLoading}
+                          className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer disabled:opacity-50 text-xs"
+                        >
+                          {verifyPhoneLoading ? 'Verifying...' : 'Verify & Continue'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               ) : (
                 <form onSubmit={submitRequest} className="space-y-4">
