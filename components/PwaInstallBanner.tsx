@@ -73,7 +73,7 @@ export default function PwaInstallBanner() {
   return (
     <>
       {/* Floating Bottom Installation Banner */}
-      <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:w-[420px] bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-4 shadow-2xl z-[9999] animate-[slideUp_0.4s_ease-out] font-sans">
+      <div className="fixed bottom-[96px] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-[420px] bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-4 shadow-2xl z-[9999] animate-[slideUp_0.4s_ease-out] font-sans">
         <div className="flex items-center gap-3">
           {/* Logo Icon */}
           <div className="w-12 h-12 rounded-xl overflow-hidden bg-white border border-[#E8DDD4] flex-shrink-0 flex items-center justify-center p-1">
