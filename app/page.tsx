@@ -103,20 +103,20 @@ export default function Home() {
       <section className="md:hidden w-full px-6 pb-8">
         <div className="flex flex-col gap-3">
           <Link href="/petsitting" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
-              <PawPrint className="w-5 h-5" />
+            <div className="w-full min-h-[56px] bg-[#C4956A] hover:bg-[#B38459] active:bg-[#A27348] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(196,149,106,0.15)] transition-colors cursor-pointer">
+              <PawPrint className="w-5 h-5 text-white" />
               <span>Find a Pet Sitter</span>
             </div>
           </Link>
           <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
-              <HomeIcon className="w-5 h-5" />
+            <div className="w-full min-h-[56px] bg-[#D4A574] hover:bg-[#C39463] active:bg-[#B28352] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(212,165,116,0.15)] transition-colors cursor-pointer">
+              <HomeIcon className="w-5 h-5 text-white" />
               <span>Become a Pet Sitter</span>
             </div>
           </Link>
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#603E25] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(139,94,60,0.15)] transition-colors cursor-pointer">
-              <MapPin className="w-5 h-5" />
+            <div className="w-full min-h-[56px] bg-[#B8845A] hover:bg-[#A77349] active:bg-[#966238] text-white font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-[0_4px_12px_rgba(184,132,90,0.15)] transition-colors cursor-pointer">
+              <MapPin className="w-5 h-5 text-white" />
               <span>Post or Find Lost Pet</span>
             </div>
           </Link>
