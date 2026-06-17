@@ -1722,7 +1722,7 @@ export default function TwinPage() {
       {/* ── UPGRADE TO PRO MODAL ── */}
       {showUpgradeModal && (
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in pointer-events-auto">
-          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
+          <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
             
             {!modalLoading && (
               <button 

@@ -113,7 +113,7 @@ export default function PwaInstallBanner() {
       {showIosGuide && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000] flex items-end md:items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out]">
           <div 
-            className="w-full max-w-[400px] bg-[#FDFAF7] border border-[#E8DDD4] rounded-3xl p-6 shadow-2xl relative font-sans animate-[scaleIn_0.25s_ease-out]"
+            className="w-full max-w-[400px] bg-[#FDFAF7] border border-[#E8DDD4] rounded-3xl p-6 pb-28 md:pb-6 shadow-2xl relative font-sans animate-[scaleIn_0.25s_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Cross */}

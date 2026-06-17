@@ -641,7 +641,7 @@ export default function AccountPage() {
               )}
               {showConfirmCancel && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
-                  <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center items-center justify-center">
+                  <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center items-center justify-center">
                     <div className="flex flex-col items-center">
                       <AlertTriangle className="w-10 h-10 text-red-500 mb-3" />
                       <h3 className="text-xl font-black text-[#191919] leading-tight">

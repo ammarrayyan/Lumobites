@@ -4613,7 +4613,7 @@ export default function PetSitting() {
               </button>
             </div>
             
-            <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-[#FDFAF7]">
+            <div className="overflow-y-auto flex-1 p-4 pb-32 sm:p-6 bg-[#FDFAF7]">
               {reqSuccess ? (
                 <div className="text-center py-8">
                   <svg className="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -5230,7 +5230,7 @@ export default function PetSitting() {
       {/* CAMERA CAPTURE MODAL */}
       {cameraModalOpen && (
         <div className="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
-          <div className="bg-[#FAF6F4] rounded-3xl p-6 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
+          <div className="bg-[#FAF6F4] rounded-3xl p-6 pb-32 sm:pb-6 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
             <button onClick={stopCamera} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
@@ -5292,7 +5292,7 @@ export default function PetSitting() {
       {/* PREMIUM UNLOCK MODAL */}
       {unlockModalOpen && (
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 pb-32 sm:pb-8 max-w-lg w-full shadow-2xl relative border border-[#E8DDD4] text-center animate-fade-in">
             <button 
               onClick={() => {
                 setUnlockModalOpen(false);
@@ -5487,7 +5487,7 @@ export default function PetSitting() {
               </button>
             </div>
             
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
+            <div className="p-4 pb-32 sm:p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
               {/* Bio Section */}
               <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm">
                 <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider mb-2">About Me</h4>
@@ -5603,7 +5603,7 @@ export default function PetSitting() {
               </div>
             </div>
             
-            <div className="p-4 border-t border-[#E8DDD4] bg-white sticky bottom-0 flex flex-col-reverse sm:flex-row gap-3">
+            <div className="p-4 pb-28 sm:pb-4 border-t border-[#E8DDD4] bg-white sticky bottom-0 flex flex-col-reverse sm:flex-row gap-3">
               <button 
                 onClick={() => setReviewsModalOpen(false)} 
                 className="w-full sm:w-auto bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold px-5 py-3 rounded-xl transition-colors shadow-sm cursor-pointer text-center"
@@ -5638,7 +5638,7 @@ export default function PetSitting() {
       {/* DELETE MODAL */}
       {deleteModalOpen && (
         <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
+          <div className="bg-white rounded-3xl p-8 pb-32 sm:pb-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
             <span className="text-5xl mb-4 block">😢</span>
             <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Are you sure?</h3>
             <p className="text-[#8B7E7D] text-sm mb-6">This will permanently delete your profile and cancel your subscription. You will no longer appear in search results.</p>
@@ -5688,7 +5688,7 @@ export default function PetSitting() {
       {/* Report Modal */}
       {reportModalOpen && (
         <div className="modal-overlay fixed inset-0 z-[1050] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
+          <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 w-full max-w-md shadow-2xl relative">
             <button 
               onClick={() => setReportModalOpen(false)}
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-250 text-gray-500 transition-colors border-none cursor-pointer"
@@ -5754,7 +5754,7 @@ export default function PetSitting() {
       {/* Pet Profile Modal */}
       {petModalOpen && (
         <div className="fixed inset-0 z-[1050] flex items-center justify-center bg-black/45 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative my-8 text-left border border-[#E8DDD4] max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 w-full max-w-lg shadow-2xl relative my-8 text-left border border-[#E8DDD4] max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setPetModalOpen(false)}
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"

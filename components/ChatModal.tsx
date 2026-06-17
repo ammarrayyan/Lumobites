@@ -349,7 +349,7 @@ export default function ChatModal({
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5">
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-28 sm:pb-2.5">
           <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
             newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
           }`}>
@@ -388,7 +388,7 @@ export default function ChatModal({
         {/* ── PET CARE PROFILE DRAWER ── */}
         {showPetProfile && petDetails && (
           <div 
-            className="absolute inset-x-0 bottom-0 top-[60px] bg-white z-20 flex flex-col p-4 overflow-y-auto border-t border-gray-100"
+            className="absolute inset-x-0 bottom-0 top-[60px] bg-white z-20 flex flex-col p-4 pb-28 sm:pb-4 overflow-y-auto border-t border-gray-100"
             style={{ animation: 'slideUp 0.2s ease-out' }}
           >
             <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">

@@ -253,7 +253,7 @@ export default function PetTwinPreview() {
       {/* Self-Service Deletion Modal */}
       {removeModalOpen && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 max-w-md w-full shadow-2xl relative animate-scale-up text-left">
+          <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 pb-32 md:pb-6 max-w-md w-full shadow-2xl relative animate-scale-up text-left">
             <button
               onClick={() => setRemoveModalOpen(false)}
               className="absolute top-4 right-4 text-[#8B7E7D] hover:text-[#4A3E3D] text-2xl font-bold transition-colors cursor-pointer w-8 h-8 rounded-full bg-[#FAF6F4] flex items-center justify-center border-0"
