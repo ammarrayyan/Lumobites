@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Notification {
   id: string;
@@ -12,12 +13,15 @@ interface Notification {
   link: string;
   read: boolean;
   created_at: string;
+  booking_id?: string;
+  sitter_id?: string;
 }
 
 export default function NotificationBell({ email }: { email: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const fetchNotifications = async () => {
     if (!email) return;
@@ -50,40 +54,55 @@ export default function NotificationBell({ email }: { email: string }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showDropdown]);
 
-  const markAsRead = async (id: string, link: string) => {
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read first
     try {
       await fetch('/api/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id: notification.id })
       });
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-      
-      if (link && link.includes('chat=')) {
-        try {
-          const urlParams = new URLSearchParams(link.split('?')[1] || '');
-          const bookingId = urlParams.get('chat');
-          if (bookingId) {
-            const res = await fetch(`/api/petsitting/request?id=${bookingId}`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data.status === 'cancelled') {
-                alert("This booking has been cancelled and the conversation is no longer available");
-                return;
-              }
-            }
-          }
-        } catch (checkErr) {
-          console.error('Failed to check booking status:', checkErr);
-        }
-      }
-
-      if (link) {
-        window.location.href = link;
-      }
+      setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
     } catch (e) {
-      console.error(e);
+      console.error('Failed to mark notification as read:', e);
     }
+    
+    // Navigate based on type
+    switch(notification.type) {
+      case 'booking_request':
+        // Sitter should see their pending requests
+        router.push('/petsitting?section=requests&status=pending');
+        break;
+      case 'booking_accepted':
+        // Owner should see their accepted bookings
+        router.push('/petsitting?section=history&status=accepted');
+        break;
+      case 'booking_declined':
+        // Owner should see their declined bookings
+        router.push('/petsitting?section=history&status=declined');
+        break;
+      case 'booking_cancelled':
+        router.push('/petsitting?section=history&status=cancelled');
+        break;
+      case 'new_message':
+        // Open the chat for this specific booking
+        router.push(`/petsitting?section=messages&booking_id=${notification.booking_id}`);
+        break;
+      case 'booking_completed':
+        router.push('/petsitting?section=history&status=completed');
+        break;
+      case 'no_show':
+        router.push('/petsitting?section=requests');
+        break;
+      case 'review_request':
+        router.push(`/petsitting/review/${notification.sitter_id}`);
+        break;
+      default:
+        router.push('/petsitting');
+    }
+    
+    // Close the notification dropdown
+    setShowDropdown(false);
   };
 
   const markAllAsRead = async () => {
@@ -140,7 +159,7 @@ export default function NotificationBell({ email }: { email: string }) {
               notifications.map((notif) => (
                 <button
                   key={notif.id}
-                  onClick={() => markAsRead(notif.id, notif.link)}
+                  onClick={() => handleNotificationClick(notif)}
                   className={`w-full text-left p-3 border-b border-gray-50 last:border-none transition-colors \${notif.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50'}`}
                 >
                   <div className="flex gap-3">

@@ -342,6 +342,8 @@ export default function PetSitting() {
   const [sitterRequests, setSitterRequests] = useState<any[]>([]);
   const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
   const [requestFilter, setRequestFilter] = useState('all');
+  const [historyFilter, setHistoryFilter] = useState('all');
+  const [hasScrolledToSection, setHasScrolledToSection] = useState(false);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [activeChatBooking, setActiveChatBooking] = useState<any>(null);
@@ -505,10 +507,21 @@ export default function PetSitting() {
     handleSitterSession();
     window.addEventListener('lumo-pro-update', handleSitterSession);
 
-    // Set activeTab from URL search params or hash
+    // Set activeTab and filters from URL search params or hash
     const params = new URLSearchParams(window.location.search);
-    if (params.get('tab') === 'become' || window.location.hash === '#become') {
+    const section = params.get('section');
+    const statusParam = params.get('status');
+    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests') {
       setActiveTab('become');
+      if (section === 'requests') {
+        setProfilePreviewMode(true);
+      }
+    } else if (section === 'history') {
+      setActiveTab('find');
+    }
+    if (statusParam) {
+      setRequestFilter(statusParam);
+      setHistoryFilter(statusParam);
     }
 
     return () => {
@@ -526,18 +539,18 @@ export default function PetSitting() {
     }
   }, [reqEmail]);
 
-  // Automatically open chat modal if 'chat' booking ID is present in URL query params
+  // Automatically open chat modal if 'chat' or 'booking_id' booking ID is present in URL query params
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const chatBookingId = params.get('chat');
+    const chatBookingId = params.get('chat') || (params.get('section') === 'messages' ? params.get('booking_id') : null);
     if (!chatBookingId) return;
 
     // Find the booking request in either sitterRequests or ownerRequests
     const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
     if (foundSitterReq) {
       if (foundSitterReq.status === 'cancelled') {
-        // Silently strip the stale chat param — booking is cancelled, nothing to open
+        // Silently strip the stale chat/booking params — booking is cancelled, nothing to open
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({ path: newUrl }, '', newUrl);
         return;
@@ -555,7 +568,7 @@ export default function PetSitting() {
     const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
     if (foundOwnerReq) {
       if (foundOwnerReq.status === 'cancelled') {
-        // Silently strip the stale chat param — booking is cancelled, nothing to open
+        // Silently strip the stale chat/booking params — booking is cancelled, nothing to open
         const newUrl = window.location.pathname + window.location.hash;
         window.history.replaceState({ path: newUrl }, '', newUrl);
         return;
@@ -570,6 +583,32 @@ export default function PetSitting() {
       return;
     }
   }, [sitterRequests, ownerRequests]);
+
+  // Handle URL section scroll on load
+  useEffect(() => {
+    if (typeof window === 'undefined' || hasScrolledToSection) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+
+    if (section === 'requests') {
+      const el = document.getElementById('sitter-dashboard');
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+        setHasScrolledToSection(true);
+      }
+    } else if (section === 'history') {
+      const el = document.getElementById('owner-history');
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+        setHasScrolledToSection(true);
+      }
+    }
+  }, [sitterRequests, ownerRequests, hasScrolledToSection]);
 
   // If ownerPets loads and selectedRequestPets is empty, auto-select the first pet if it's the only one
   useEffect(() => {
@@ -3034,32 +3073,47 @@ export default function PetSitting() {
             {isOwnerPro && (
               <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
               <div id="messages" />
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                  <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking History
-                </h3>
-                {(ownerLastUpdated || loadingOwnerRequests) && (
-                  <div className="flex items-center gap-2">
-                    {loadingOwnerRequests ? (
-                      <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
-                        Refreshing...
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
-                        Updated just now
-                      </span>
-                    )}
-                    <button
-                      onClick={() => fetchOwnerRequests(reqEmail)}
-                      disabled={loadingOwnerRequests || !reqEmail}
-                      className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
-                    </button>
-                  </div>
-                )}
+              <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
+                    <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking History
+                  </h3>
+                  {(ownerLastUpdated || loadingOwnerRequests) && (
+                    <div className="flex items-center gap-2">
+                      {loadingOwnerRequests ? (
+                        <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
+                          Refreshing...
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
+                          Updated just now
+                        </span>
+                      )}
+                      <button
+                        onClick={() => fetchOwnerRequests(reqEmail)}
+                        disabled={loadingOwnerRequests || !reqEmail}
+                        className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <select
+                  value={historyFilter}
+                  onChange={(e) => setHistoryFilter(e.target.value)}
+                  className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
+                >
+                  <option value="all">All Bookings</option>
+                  <option value="pending">Pending</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="declined">Declined</option>
+                </select>
               </div>
               <p className="text-[#8B7E7D] text-sm mb-6">
                 Enter your email address to track the status of your requested pet sitting bookings.
@@ -3175,13 +3229,15 @@ export default function PetSitting() {
                   </div>
 
                   <div className="space-y-4">
-                  {ownerRequests.length === 0 ? (
+                  {ownerRequests.filter(req => historyFilter === 'all' || req.status === historyFilter).length === 0 ? (
                     <div className="text-center py-6 text-gray-500 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
-                      No bookings found for this email address.
+                      {historyFilter === 'all' ? 'No bookings found for this email address.' : `No ${historyFilter} bookings found.`}
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {ownerRequests.map((req) => {
+                      {ownerRequests
+                        .filter(req => historyFilter === 'all' || req.status === historyFilter)
+                        .map((req) => {
                         const sitterDisplayName = formatSitterName(req.sitters?.name || req.sitter_name);
                         const endDate = getBookingEndDate(req.dates);
                         const today = new Date();
