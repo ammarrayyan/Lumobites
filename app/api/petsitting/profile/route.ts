@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
         needs_reapproval: nextNeedsReapproval,
         submitted_at: new Date().toISOString(),
         blocked_dates: blocked_dates || [],
-        ...(cleanEmail === 'premierpetnutritionllc@gmail.com' ? { is_pro: true } : {})
+        ...(cleanEmail === 'premierpetnutritionllc@gmail.com' || cleanEmail === 'reviewer@lumobites.net' ? { is_pro: true } : {})
       }, { onConflict: 'email', ignoreDuplicates: false })
       .select()
       .single();

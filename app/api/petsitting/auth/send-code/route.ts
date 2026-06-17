@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
+    // Apple reviewer bypass
+    if (cleanEmail === 'reviewer@lumobites.net') {
+      console.log(`[Sitter Auth Send Code] Apple reviewer bypass triggered`);
+      return NextResponse.json({ success: true });
+    }
+
     if (type === 'owner') {
       const { data: ownerData } = await supabaseAdmin
         .from('emails')

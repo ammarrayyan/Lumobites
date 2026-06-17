@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanCode = code.trim();
 
+    // Apple reviewer bypass
+    if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
+      console.log(`[Verify Code API] Apple reviewer bypass triggered`);
+      return NextResponse.json({ success: true, isPro: true, existed: true, isSitter: false, sitterId: null });
+    }
+
     // 1. Check if the code exists
     const { data: codeData, error: codeError } = await supabase
       .from('verification_codes')

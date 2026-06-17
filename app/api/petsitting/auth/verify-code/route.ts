@@ -12,6 +12,12 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
+    // Apple reviewer bypass
+    if (cleanEmail === 'reviewer@lumobites.net' && code === '123456') {
+      console.log(`[Sitter Auth Verify Code] Apple reviewer bypass triggered`);
+      return NextResponse.json({ success: true, message: 'Logged in successfully', existed: true });
+    }
+
     // 0. Brute Force Check
     const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     

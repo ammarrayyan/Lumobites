@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
+    // Apple reviewer bypass
+    if (cleanEmail === 'reviewer@lumobites.net') {
+      console.log(`[Send Code API] Apple reviewer bypass triggered`);
+      return NextResponse.json({ success: true });
+    }
+
     // 1. Verify that this email actually has a PRO subscription in the database
     // EXCEPT FOR THE OWNER/TESTING EMAIL: premierpetnutritionllc@gmail.com
     const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';

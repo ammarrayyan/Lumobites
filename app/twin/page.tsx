@@ -162,7 +162,7 @@ export default function TwinPage() {
     const syncStatus = () => {
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         setIsPro(true);
@@ -240,7 +240,7 @@ export default function TwinPage() {
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
       console.log('[Lumo Twin Pro] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
       
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         console.log('[Lumo Twin Pro] Admin/Owner bypass detected in localStorage. Activating Pro status.');

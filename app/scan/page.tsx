@@ -69,7 +69,7 @@ export default function ScanPage() {
     const syncStatus = () => {
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         setIsPro(true);
@@ -147,7 +147,7 @@ export default function ScanPage() {
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
       console.log('[Lumo Subscription] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
       
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         console.log('[Lumo Subscription] Admin/Owner bypass detected in localStorage. Activating Pro status.');

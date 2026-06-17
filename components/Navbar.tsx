@@ -32,7 +32,7 @@ export default function Navbar() {
     setSitterEmail(cachedSitter || '');
     
     const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
     
     if (isAdminBypass || isOwnerEmail) {
       setIsPro(true);
@@ -69,7 +69,7 @@ export default function Navbar() {
     // Dynamic database check if cached email exists
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com';
+    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
 
     if (cachedEmail && !isAdminBypass && !isOwnerEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
       fetch('/api/stripe/status', {

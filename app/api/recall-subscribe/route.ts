@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     // 1. Verify PRO Status
-    if (cleanEmail !== 'premierpetnutritionllc@gmail.com') {
+    if (cleanEmail !== 'premierpetnutritionllc@gmail.com' && cleanEmail !== 'reviewer@lumobites.net') {
       const { data: proData, error: proError } = await supabase
         .from('emails')
         .select('is_pro')
@@ -162,7 +162,7 @@ export async function DELETE(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     
     // Verify PRO status
-    if (cleanEmail !== 'premierpetnutritionllc@gmail.com') {
+    if (cleanEmail !== 'premierpetnutritionllc@gmail.com' && cleanEmail !== 'reviewer@lumobites.net') {
       const { data: proData, error: proError } = await supabase
         .from('emails')
         .select('is_pro')

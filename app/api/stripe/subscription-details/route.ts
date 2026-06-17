@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
 
     // Check for owner/admin bypass
     const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
+    const isReviewer = cleanEmail === 'reviewer@lumobites.net';
 
-    if (isOwner) {
+    if (isOwner || isReviewer) {
       return NextResponse.json({
         success: true,
         active: true,

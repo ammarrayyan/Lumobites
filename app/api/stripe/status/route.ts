@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    if (cleanEmail === 'premierpetnutritionllc@gmail.com') {
+    if (cleanEmail === 'premierpetnutritionllc@gmail.com' || cleanEmail === 'reviewer@lumobites.net') {
       return NextResponse.json({ isPro: true });
     }
 
