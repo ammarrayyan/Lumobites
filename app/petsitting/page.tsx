@@ -2488,6 +2488,25 @@ export default function PetSitting() {
     setReqError('');
     setReqSuccess(false);
 
+    // Check phone verification before submitting
+    const proEmail = typeof window !== 'undefined' ? localStorage.getItem('lumo_pro_email') : null;
+    console.log('[submitRequest] proEmail from localStorage:', proEmail);
+    if (proEmail) {
+      console.log('[submitRequest] Checking phone verification for proEmail:', proEmail);
+      const statusRes = await fetch(`/api/stripe/status?email=${proEmail}&t=${Date.now()}`);
+      const statusData = await statusRes.json();
+      console.log('[submitRequest] status check response:', statusData);
+      if (!statusData.phone_verified) {
+        console.log('[submitRequest] Phone not verified. Transitioning to verification modal.');
+        if (reqPhone) {
+          setVerifyPhoneNum(reqPhone);
+        }
+        setShowPhoneVerification(true);
+        setReqLoading(false);
+        return;
+      }
+    }
+
     if (reqEmail && selectedSitter?.email && reqEmail.toLowerCase().trim() === selectedSitter.email.toLowerCase().trim()) {
       setReqError('You cannot request yourself as a sitter');
       setReqLoading(false);
@@ -2531,36 +2550,11 @@ export default function PetSitting() {
         }
       }
 
-      // Check phone verification
-      console.log('[Phone Verification Check] Querying verification status for:', reqEmail);
-      const statusRes = await fetch('/api/stripe/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: reqEmail })
-      });
-      const statusData = await statusRes.json();
-      console.log('[Phone Verification Check] Response statusData:', statusData);
-
-      if (!statusRes.ok) {
-        throw new Error(statusData.error || 'Failed to check account verification status');
-      }
-
-      if (!statusData.phone_verified) {
-        console.log('[Phone Verification Check] User phone is not verified. Showing verification UI...');
-        // Stop submission, transition to phone verification UI
-        if (reqPhone) {
-          setVerifyPhoneNum(reqPhone);
-        }
-        setShowPhoneVerification(true);
-        setReqLoading(false);
-        return;
-      }
-
-      console.log('[Phone Verification Check] User phone is verified. Proceeding to booking request...');
-      // If already verified, execute booking request
+      console.log('[submitRequest] Phone is verified, executing booking request...');
       await executeBookingRequest();
 
     } catch (err: any) {
+      console.error('[submitRequest] Error in try block:', err);
       setReqError(err.message || 'An unexpected error occurred.');
       setReqLoading(false);
     }
