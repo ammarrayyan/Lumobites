@@ -920,7 +920,18 @@ export default function PetSitting() {
           console.error('Geolocation error:', error);
           setIsGeocoding(false);
           setIsDetectingLocation(false);
-          alert('Unable to get your location. Please enter a city manually.');
+          if (error.code === error.PERMISSION_DENIED) {
+            alert('Location access denied. Please enable location in your phone settings and try again.');
+          } else if (error.code === error.TIMEOUT) {
+            alert('Location request timed out. Please try again or enter your city manually.');
+          } else {
+            alert('Unable to get your location. Please enter your city manually.');
+          }
+        },
+        { 
+          timeout: 10000,
+          enableHighAccuracy: true,
+          maximumAge: 60000 
         }
       );
     } else {
