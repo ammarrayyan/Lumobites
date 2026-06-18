@@ -7,8 +7,7 @@ import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search } from 'lucide-react';
-import { auth } from '@/lib/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+
 import { supabase } from '@/lib/supabase';
 
 
@@ -243,7 +242,7 @@ export default function PetSitting() {
   const [verifyPhoneLoading, setVerifyPhoneLoading] = useState(false);
   const [verifyPhoneError, setVerifyPhoneError] = useState('');
   const [verifyConfirmationResult, setVerifyConfirmationResult] = useState<any>(null);
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<any>(null);
+
 
   // My Pets Profile State
   const [ownerPets, setOwnerPets] = useState<any[]>([]);
@@ -2462,25 +2461,9 @@ export default function PetSitting() {
     }
 
     try {
-      // Clear any existing recaptcha
-      if (typeof window !== 'undefined') {
-        const container = document.getElementById('recaptcha-container');
-        console.log('[Phone Verification SMS] Recaptcha container found in DOM:', !!container);
-        if (container) {
-          container.innerHTML = '';
-        }
-      }
-
-      console.log('[Phone Verification SMS] Initializing RecaptchaVerifier...');
-      const appVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible'
-      });
-      setRecaptchaVerifier(appVerifier);
-
       // Clean phone number: remove non-digits
       let cleanPhone = verifyPhoneNum.replace(/\D/g, '');
       
-      // Strip leading zero if present (essential for international SMS formats, e.g. +971 050 -> +971 50)
       if (cleanPhone.startsWith('0')) {
         console.log('[Phone Verification SMS] Stripping leading zero from clean phone');
         cleanPhone = cleanPhone.substring(1);
@@ -2488,14 +2471,22 @@ export default function PetSitting() {
       
       const fullPhone = `${verifyPhoneCountry}${cleanPhone}`;
       console.log('[Phone Verification SMS] Formatted fullPhone:', fullPhone);
-      console.log('[Phone Verification SMS] Firebase Auth initialized:', !!auth);
 
-      console.log('[Phone Verification SMS] Calling signInWithPhoneNumber...');
-      const confirmation = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
-      setVerifyConfirmationResult(confirmation);
-      console.log('[Phone Verification SMS] SMS code sent successfully! confirmationResult received:', !!confirmation);
+      console.log('[Phone Verification SMS] Calling Twilio send-code API...');
+      const res = await fetch('/api/phone/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: fullPhone })
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to send SMS');
+      }
+
+      setVerifyConfirmationResult(true as any); // truthy value switches UI to code input
+      console.log('[Phone Verification SMS] SMS code sent successfully!');
     } catch (err: any) {
-      console.error('[Phone Verification SMS] Error during signInWithPhoneNumber:', err);
+      console.error('[Phone Verification SMS] Error during send-code:', err);
       setVerifyPhoneError(err.message || 'Failed to send verification code. Please check the number and try again.');
     } finally {
       setVerifyPhoneLoading(false);
@@ -2519,37 +2510,34 @@ export default function PetSitting() {
 
     try {
       if (!verifyConfirmationResult) {
-        console.error('[Phone Verification Code] No verification session (confirmationResult is null)');
+        console.error('[Phone Verification Code] No verification session');
         throw new Error('No verification session found. Please request a new code.');
       }
 
-      console.log('[Phone Verification Code] Confirming code with Firebase...');
-      const userCredential = await verifyConfirmationResult.confirm(verifyPhoneCode);
-      console.log('[Phone Verification Code] Code confirmed by Firebase. Fetching user ID token...');
-      const firebaseToken = await userCredential.user.getIdToken();
-      
       let cleanPhone = verifyPhoneNum.replace(/\D/g, '');
       if (cleanPhone.startsWith('0')) {
         cleanPhone = cleanPhone.substring(1);
       }
       const fullPhone = `${verifyPhoneCountry}${cleanPhone}`;
-      console.log('[Phone Verification Code] Saving status to database for fullPhone:', fullPhone);
+      console.log('[Phone Verification Code] Confirming code with Twilio API for fullPhone:', fullPhone);
+      
+      const email = reqEmail || (typeof window !== 'undefined' ? localStorage.getItem('lumo_pro_email') : null) || (typeof window !== 'undefined' ? localStorage.getItem('lumo_sitter_email') : null);
 
-      const verifyRes = await fetch('/api/stripe/verify-phone', {
+      const verifyRes = await fetch('/api/phone/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: reqEmail,
           phone: fullPhone,
-          firebaseToken
+          code: verifyPhoneCode,
+          email: email
         })
       });
 
       const verifyData = await verifyRes.json();
-      console.log('[Phone Verification Code] Database verify-phone response:', verifyData);
+      console.log('[Phone Verification Code] Twilio verify response:', verifyData);
 
-      if (!verifyRes.ok) {
-        throw new Error(verifyData.error || 'Failed to update database with verified status');
+      if (!verifyData.success) {
+        throw new Error(verifyData.error || 'Invalid verification code');
       }
 
       console.log('[Phone Verification Code] Verification complete! Executing booking request...');
@@ -4787,9 +4775,6 @@ export default function PetSitting() {
                 </div>
               ) : showPhoneVerification ? (
                 <div className="space-y-4 text-left">
-                  {/* Invisible Recaptcha container */}
-                  <div id="recaptcha-container"></div>
-                  
                   <div className="text-center pb-2">
                     <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-3">
                       <Lock className="w-6 h-6" />
