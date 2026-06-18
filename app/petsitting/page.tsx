@@ -2578,10 +2578,11 @@ export default function PetSitting() {
 
     // Check phone verification before submitting
     const proEmail = typeof window !== 'undefined' ? localStorage.getItem('lumo_pro_email') : null;
-    console.log('[submitRequest] proEmail from localStorage:', proEmail);
-    if (proEmail) {
-      console.log('[submitRequest] Checking phone verification for proEmail:', proEmail);
-      const statusRes = await fetch(`/api/stripe/status?email=${proEmail}&t=${Date.now()}`);
+    const emailToCheck = reqEmail || proEmail;
+    console.log('[submitRequest] emailToCheck for phone verification:', emailToCheck);
+    if (emailToCheck) {
+      console.log('[submitRequest] Checking phone verification for email:', emailToCheck);
+      const statusRes = await fetch(`/api/stripe/status?email=${emailToCheck}&t=${Date.now()}`);
       const statusData = await statusRes.json();
       console.log('[submitRequest] status check response:', statusData);
       if (!statusData.phone_verified) {
