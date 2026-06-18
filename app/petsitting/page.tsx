@@ -921,12 +921,13 @@ export default function PetSitting() {
           setIsGeocoding(false);
           setIsDetectingLocation(false);
           if (error.code === error.PERMISSION_DENIED) {
-            alert('Location access denied. Please enable location in your phone settings and try again.');
+            alert('Location access is blocked. To enable:\niPhone: Settings → Privacy → Location Services → Safari/Chrome → Allow\nAndroid: Settings → Apps → Browser → Permissions → Location → Allow');
           } else if (error.code === error.TIMEOUT) {
             alert('Location request timed out. Please try again or enter your city manually.');
           } else {
             alert('Unable to get your location. Please enter your city manually.');
           }
+          document.getElementById('locationSearchInput')?.focus();
         },
         { 
           timeout: 10000,
@@ -2756,6 +2757,7 @@ export default function PetSitting() {
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex gap-2">
                   <input
+                    id="locationSearchInput"
                     type="text"
                     placeholder="City or Zip Code (e.g. Louisville or 40202)"
                     className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"

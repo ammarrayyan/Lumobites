@@ -102,12 +102,13 @@ export default function LostPetsFeed() {
           setIsGeocoding(false);
           setIsDetectingLocation(false);
           if (error.code === error.PERMISSION_DENIED) {
-            alert('Location access denied. Please enable location in your phone settings and try again.');
+            alert('Location access is blocked. To enable:\niPhone: Settings → Privacy → Location Services → Safari/Chrome → Allow\nAndroid: Settings → Apps → Browser → Permissions → Location → Allow');
           } else if (error.code === error.TIMEOUT) {
             alert('Location request timed out. Please try again or enter your city manually.');
           } else {
             alert('Unable to get your location. Please enter your city manually.');
           }
+          document.getElementById('locationSearchInput')?.focus();
         },
         { 
           timeout: 10000,
@@ -177,6 +178,7 @@ export default function LostPetsFeed() {
           <div className="flex-1 flex gap-2">
             <div className="flex-1 relative">
               <input
+                id="locationSearchInput"
                 type="text"
                 placeholder="Search by city or zip code..."
                 value={searchQuery}
