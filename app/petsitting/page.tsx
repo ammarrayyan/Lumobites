@@ -2570,31 +2570,43 @@ export default function PetSitting() {
     }
   };
 
+  const handleSendRequestClick = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Get email from any available source
+    const email = reqEmail || (typeof window !== 'undefined' ? localStorage.getItem('lumo_pro_email') : null) || (typeof window !== 'undefined' ? localStorage.getItem('lumo_sitter_email') : null);
+    
+    if (!email) {
+      alert('Please sign in first');
+      return;
+    }
+    
+    // Check phone verification directly from API
+    try {
+      const res = await fetch(`/api/stripe/status?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      console.log('Phone verification status:', data.phone_verified, 'for email:', email);
+      
+      if (!data.phone_verified) {
+        // Show phone verification modal
+        if (reqPhone) {
+          setVerifyPhoneNum(reqPhone);
+        }
+        setShowPhoneVerification(true);
+        return; // Stop here - don't submit yet
+      }
+    } catch (err) {
+      console.error('Phone check error:', err);
+    }
+    
+    // If phone verified - proceed with normal submission
+    submitRequest(e);
+  };
+
   const submitRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setReqLoading(true);
     setReqError('');
     setReqSuccess(false);
-
-    // Check phone verification before submitting
-    const proEmail = typeof window !== 'undefined' ? localStorage.getItem('lumo_pro_email') : null;
-    const emailToCheck = reqEmail || proEmail;
-    console.log('[submitRequest] emailToCheck for phone verification:', emailToCheck);
-    if (emailToCheck) {
-      console.log('[submitRequest] Checking phone verification for email:', emailToCheck);
-      const statusRes = await fetch(`/api/stripe/status?email=${emailToCheck}&t=${Date.now()}`);
-      const statusData = await statusRes.json();
-      console.log('[submitRequest] status check response:', statusData);
-      if (!statusData.phone_verified) {
-        console.log('[submitRequest] Phone not verified. Transitioning to verification modal.');
-        if (reqPhone) {
-          setVerifyPhoneNum(reqPhone);
-        }
-        setShowPhoneVerification(true);
-        setReqLoading(false);
-        return;
-      }
-    }
 
     if (reqEmail && selectedSitter?.email && reqEmail.toLowerCase().trim() === selectedSitter.email.toLowerCase().trim()) {
       setReqError('You cannot request yourself as a sitter');
@@ -4890,7 +4902,7 @@ export default function PetSitting() {
                   )}
                 </div>
               ) : (
-                <form onSubmit={submitRequest} className="space-y-4">
+                <form onSubmit={handleSendRequestClick} className="space-y-4">
                   {hasSavedInfo && (
                     <div className="bg-[#F6EFEA] border border-[#E4D5CA] rounded-2xl p-3.5 flex items-center justify-between text-xs text-[#8B5E3C] shadow-sm animate-fade-in">
                       <span className="flex items-center gap-1.5 font-medium">
