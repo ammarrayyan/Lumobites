@@ -8,15 +8,6 @@ async function checkStatus(email: string) {
     return { isPro: true, phone_verified: true, session_invalidated_at: null };
   }
 
-  // Check if they are an approved sitter
-  const { data: sitterData } = await supabase
-    .from('sitters')
-    .select('is_approved')
-    .eq('email', cleanEmail)
-    .eq('is_approved', true)
-    .maybeSingle();
-
-  const isApprovedSitter = !!sitterData?.is_approved;
 
   const { data, error } = await supabase
     .from('emails')
@@ -31,7 +22,7 @@ async function checkStatus(email: string) {
   return {
     isPro: !!data?.is_pro,
     session_invalidated_at: data?.session_invalidated_at || null,
-    phone_verified: isApprovedSitter || !!data?.phone_verified
+    phone_verified: !!data?.phone_verified
   };
 }
 
