@@ -99,6 +99,13 @@ function getDistanceInMiles(lat1: number, lon1: number, lat2: number, lon2: numb
   return R * c;
 }
 
+const formatPhoneNumber = (value: string) => {
+  const digits = value.replace(/\D/g, '').substring(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0,3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+};
+
 export default function PetSitting() {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
 
@@ -2589,7 +2596,7 @@ export default function PetSitting() {
       if (!data.phone_verified) {
         // Show phone verification modal
         if (reqPhone) {
-          setVerifyPhoneNum(reqPhone);
+          setVerifyPhoneNum(formatPhoneNumber(reqPhone));
         }
         setShowPhoneVerification(true);
         return; // Stop here - don't submit yet
@@ -4823,8 +4830,8 @@ export default function PetSitting() {
                             required 
                             type="tel" 
                             value={verifyPhoneNum} 
-                            onChange={e => setVerifyPhoneNum(e.target.value)} 
-                            placeholder="50 123 4567" 
+                            onChange={e => setVerifyPhoneNum(formatPhoneNumber(e.target.value))} 
+                            placeholder="(502) 555-1234" 
                             className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" 
                           />
                         </div>
