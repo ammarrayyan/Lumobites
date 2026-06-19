@@ -5813,7 +5813,7 @@ export default function PetSitting() {
         <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Cover Banner */}
-            <div className="h-56 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
+            <div className="h-32 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
               {isOwnerPro && selectedSitterForReviews.cover_photo_url ? (
                 <img
                   src={selectedSitterForReviews.cover_photo_url}
@@ -5831,7 +5831,7 @@ export default function PetSitting() {
 
             <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-b border-[#E8DDD4] relative bg-white z-10 pt-0">
               <div className="relative z-10 flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
-                <div className="-mt-14 sm:-mt-18 flex-shrink-0">
+                <div className="-mt-12 sm:-mt-18 flex-shrink-0">
                   {selectedSitterForReviews.photo_url ? (
                     <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md pointer-events-none" />
                   ) : (
@@ -5901,9 +5901,9 @@ export default function PetSitting() {
             
             <div className="p-4 pb-32 sm:p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
               {/* Bio Section */}
-              <div className="bg-white p-4 sm:p-5 rounded-3xl border border-[#E8DDD4] shadow-sm">
-                <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider mb-2">About Me</h4>
-                <p className="text-[#555555] text-base leading-relaxed whitespace-pre-wrap">{selectedSitterForReviews.bio}</p>
+              <div className="bg-white p-5 sm:p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <h4 className="text-sm font-bold text-[#8B5E3C] uppercase tracking-wider mb-3">About Me</h4>
+                <p className="text-[#4A3E3D] text-lg sm:text-base leading-relaxed whitespace-pre-wrap">{selectedSitterForReviews.bio}</p>
               </div>
 
               {/* Service & Rate Details Section */}
