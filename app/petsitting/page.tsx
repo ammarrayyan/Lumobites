@@ -4972,7 +4972,7 @@ export default function PetSitting() {
           <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-md sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
               <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {formatSitterName(selectedSitter.name)}</h3>
-              <p className="text-[#8B7E7D] text-xs sm:text-sm">The sitter will reply to you directly via email to coordinate details.</p>
+              <p className="text-[#8B7E7D] text-xs sm:text-sm">You'll be notified instantly when the sitter responds. You can also message them directly through the app.</p>
               <button 
                 onClick={() => setRequestModalOpen(false)} 
                 className="absolute top-4 right-4 sm:top-6 sm:right-6 text-gray-400 hover:text-gray-600 w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] z-20"
