@@ -2832,6 +2832,12 @@ export default function PetSitting() {
       return;
     }
 
+    if (!reqStartDate || !reqEndDate) {
+      setReqError('Please select your start and end dates from the availability calendar');
+      setReqLoading(false);
+      return;
+    }
+
     try {
       if (reqStartDate && reqEndDate) {
         if (new Date(reqEndDate + 'T00:00:00') < new Date(reqStartDate + 'T00:00:00')) {
@@ -5341,14 +5347,6 @@ export default function PetSitting() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Dates Needed</label>
-                    <div className="flex space-x-2 mb-2">
-                      <input required type="date" min={new Date().toISOString().split('T')[0]} value={reqStartDate} onChange={e => setReqStartDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                      <input required type="date" min={reqStartDate || new Date().toISOString().split('T')[0]} value={reqEndDate} onChange={e => setReqEndDate(e.target.value)} className="w-1/2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                    </div>
-                  </div>
-
-                  <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Service Needed</label>
                     <select required value={reqServiceType} onChange={e => setReqServiceType(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] mb-4">
                       <option value="">Select a service</option>
@@ -5539,6 +5537,18 @@ export default function PetSitting() {
                           return cells;
                         })()}
                       </div>
+
+                      {reqStartDate && (
+                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center font-bold text-[#8B5E3C] shadow-sm text-sm">
+                          Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate && reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })}
+                          {reqEndDate && reqEndDate !== reqStartDate ? ` - ${new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}` : `, ${new Date(reqStartDate + 'T12:00:00').getFullYear()}`}
+                        </div>
+                      )}
+                      {!reqStartDate && (
+                        <div className="mt-4 p-3 bg-white rounded-xl border border-dashed border-[#E8DDD4] text-center font-bold text-[#8B7E7D] text-sm">
+                          Please select your dates above
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-[#E8DDD4] text-[10px] font-bold text-[#4A3E3D]">
                         <div className="flex items-center gap-1">
