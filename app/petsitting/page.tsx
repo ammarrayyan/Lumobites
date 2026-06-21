@@ -5547,9 +5547,20 @@ export default function PetSitting() {
                       </div>
 
                       {reqStartDate && !isSelectingMultipleDays && (
-                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center shadow-sm">
-                          <div className="font-bold text-[#8B5E3C] text-sm flex items-center justify-center gap-1.5">
-                            <Check className="w-4 h-4" /> Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} (1 day)
+                        <div className="flex flex-col items-center">
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: '#F0FAF4',
+                            border: '1px solid #8B5E3C',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            marginTop: '8px'
+                          }}>
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <span style={{ fontWeight: 600 }}>{new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                            <span style={{ color: '#6B7280' }}>(1 day)</span>
                           </div>
                           <button
                             type="button"
@@ -5557,7 +5568,13 @@ export default function PetSitting() {
                               setIsSelectingMultipleDays(true);
                               setReqEndDate('');
                             }}
-                            className="mt-2 text-xs text-[#8B5E3C] font-bold hover:underline"
+                            style={{
+                              color: '#8B5E3C',
+                              fontWeight: 500,
+                              textDecoration: 'underline',
+                              marginTop: '8px',
+                              fontSize: '14px'
+                            }}
                           >
                             + Need multiple days? Select end date
                           </button>
@@ -5565,13 +5582,26 @@ export default function PetSitting() {
                       )}
                       
                       {reqStartDate && isSelectingMultipleDays && (
-                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center font-bold text-[#8B5E3C] shadow-sm text-sm">
+                        <div className="flex flex-col items-center">
                           {reqEndDate ? (
-                            <>
-                              Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })} - {new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} ({Math.max(1, getDatesBetween(reqStartDate, reqEndDate).length)} days)
-                            </>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: '#F0FAF4',
+                              border: '1px solid #8B5E3C',
+                              borderRadius: '8px',
+                              padding: '12px 16px',
+                              marginTop: '8px'
+                            }}>
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                              <span style={{ fontWeight: 600 }}>{new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })} - {new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                              <span style={{ color: '#6B7280' }}>({Math.max(1, getDatesBetween(reqStartDate, reqEndDate).length)} days)</span>
+                            </div>
                           ) : (
-                            <>Please click an end date on the calendar</>
+                            <div className="mt-4 p-3 bg-white rounded-xl border border-dashed border-[#E8DDD4] text-center font-bold text-[#8B7E7D] text-sm">
+                              Please click an end date on the calendar
+                            </div>
                           )}
                           <div className="mt-2">
                             <button
