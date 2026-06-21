@@ -436,6 +436,7 @@ export default function PetSitting() {
   const [reqPetAge, setReqPetAge] = useState('');
   const [reqStartDate, setReqStartDate] = useState('');
   const [reqEndDate, setReqEndDate] = useState('');
+  const [isSelectingMultipleDays, setIsSelectingMultipleDays] = useState(false);
   const [reqNotes, setReqNotes] = useState('');
   const [reqServiceType, setReqServiceType] = useState('');
   const [reqTimeSlot, setReqTimeSlot] = useState('');
@@ -1014,6 +1015,12 @@ export default function PetSitting() {
     if (dateStr < todayStr) return;
     if (isDateFullyBooked(dateStr, loadedSitterAvailableTimes) || sitterBlockedDates.includes(dateStr)) return;
 
+    if (!isSelectingMultipleDays) {
+      setReqStartDate(dateStr);
+      setReqEndDate(dateStr);
+      return;
+    }
+
     if (!reqStartDate || (reqStartDate && reqEndDate)) {
       setReqStartDate(dateStr);
       setReqEndDate('');
@@ -1036,6 +1043,7 @@ export default function PetSitting() {
     if (requestModalOpen && selectedSitter?.id) {
       setReqStartDate('');
       setReqEndDate('');
+      setIsSelectingMultipleDays(false);
       setReqServiceType('');
       setReqTimeSlot('');
       setShowPhoneVerification(false);
@@ -5538,12 +5546,49 @@ export default function PetSitting() {
                         })()}
                       </div>
 
-                      {reqStartDate && (
-                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center font-bold text-[#8B5E3C] shadow-sm text-sm">
-                          Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate && reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })}
-                          {reqEndDate && reqEndDate !== reqStartDate ? ` - ${new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}` : `, ${new Date(reqStartDate + 'T12:00:00').getFullYear()}`}
+                      {reqStartDate && !isSelectingMultipleDays && (
+                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center shadow-sm">
+                          <div className="font-bold text-[#8B5E3C] text-sm flex items-center justify-center gap-1.5">
+                            <Check className="w-4 h-4" /> Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} (1 day)
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsSelectingMultipleDays(true);
+                              setReqEndDate('');
+                            }}
+                            className="mt-2 text-xs text-[#8B5E3C] font-bold hover:underline"
+                          >
+                            + Need multiple days? Select end date
+                          </button>
                         </div>
                       )}
+                      
+                      {reqStartDate && isSelectingMultipleDays && (
+                        <div className="mt-4 p-3 bg-white rounded-xl border border-[#E8DDD4] text-center font-bold text-[#8B5E3C] shadow-sm text-sm">
+                          {reqEndDate ? (
+                            <>
+                              Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })} - {new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} ({Math.max(1, getDatesBetween(reqStartDate, reqEndDate).length)} days)
+                            </>
+                          ) : (
+                            <>Please click an end date on the calendar</>
+                          )}
+                          <div className="mt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReqStartDate('');
+                                setReqEndDate('');
+                                setIsSelectingMultipleDays(false);
+                              }}
+                              className="text-xs text-rose-500 font-bold hover:underline"
+                            >
+                              Clear Selection
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
                       {!reqStartDate && (
                         <div className="mt-4 p-3 bg-white rounded-xl border border-dashed border-[#E8DDD4] text-center font-bold text-[#8B7E7D] text-sm">
                           Please select your dates above
@@ -5622,12 +5667,23 @@ export default function PetSitting() {
                             }
 
                             const numPets = selectedRequestPets.length;
-                            const total = rate * numPets;
+                            
+                            let numDays = 1;
+                            if (reqStartDate && reqEndDate) {
+                              const rangeLen = getDatesBetween(reqStartDate, reqEndDate).length;
+                              if (reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding") {
+                                numDays = Math.max(1, rangeLen - 1);
+                              } else {
+                                numDays = rangeLen;
+                              }
+                            }
+                            
+                            const total = rate * numPets * numDays;
                             return (
                               <span className="flex flex-col items-end">
                                 <span className="text-sm font-black">${total}</span>
                                 <span className="text-[10px] text-[#8B7E7D] font-normal mt-0.5">
-                                  ${rate}/{unit} × {numPets} {numPets === 1 ? 'pet' : 'pets'}
+                                  ${rate}/{unit} × {numPets} {numPets === 1 ? 'pet' : 'pets'} × {numDays} {reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding" ? (numDays === 1 ? 'night' : 'nights') : (numDays === 1 ? 'day' : 'days')}
                                 </span>
                               </span>
                             );
