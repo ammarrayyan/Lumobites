@@ -1109,8 +1109,32 @@ export default function TwinPage() {
             </div>
           )}
 
-          {/* STEP 0: QUIZ */}
-          {step === 'quiz' && (
+          {!isPro ? (
+            <div className="flex flex-col items-center justify-center text-center py-6 animate-fade-in">
+              <div className="bg-[#FAF6F4] p-6 md:p-8 rounded-2xl border border-[#E8DDD4] mb-8 w-full shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Sparkles className="w-24 h-24 text-[#8B5E3C]" />
+                </div>
+                <Dog className="w-14 h-14 text-[#8B5E3C] mx-auto mb-4 opacity-90" />
+                <h3 className="text-xl md:text-2xl font-black text-[#191919] mb-3">Curious about your Pet Twin?</h3>
+                <p className="text-[#666666] text-sm md:text-base font-medium mb-0 max-w-md mx-auto leading-relaxed">
+                  Take our fun personality quiz, upload a quick selfie, and our AI will instantly match you with your perfect dog or cat breed counterpart!
+                </p>
+              </div>
+              <p className="text-sm md:text-base font-bold text-[#8B5E3C] mb-5 uppercase tracking-wide">
+                Create a free account to discover your Pet Twin!
+              </p>
+              <button
+                onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                className="w-full sm:w-auto bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-4 px-10 rounded-xl font-black text-sm shadow-[0_4px_14px_rgba(139,94,60,0.4)] transition-all transform hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(139,94,60,0.5)] flex items-center justify-center gap-2"
+              >
+                Create Free Account <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* STEP 0: QUIZ */}
+              {step === 'quiz' && (
             <div className="flex flex-col gap-6 w-full text-left">
               {/* Progress indicator */}
               <div className="w-full flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">
@@ -1714,6 +1738,8 @@ export default function TwinPage() {
               </div>
 
             </div>
+          )}
+          </>
           )}
 
         </div>
