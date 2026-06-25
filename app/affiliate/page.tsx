@@ -103,14 +103,14 @@ export default function AffiliateSignupPage() {
             Lumo Bites Affiliate Program
           </div>
           <h1 className="text-4xl md:text-5xl font-[900] text-[#191919] tracking-tight leading-tight text-center lg:text-left">
-            Earn money sharing <span className="text-[#8B5E3C]">Lumo Bites</span>
+            Join Early — Earn When We Launch Paid Plans
           </h1>
           <p className="text-base text-gray-500 leading-relaxed text-center lg:text-left">
-            Share your love for Lumo Bites and get paid for it! Earn <strong className="text-gray-700">$1.00 every single month</strong> for every PRO member you bring in — for as long as they stay subscribed.
+            Join our affiliate program now for free! Lumo Bites is currently free during our early launch period. When we introduce paid memberships, you'll automatically earn <strong className="text-gray-700">$1 every month</strong> for each person you referred who subscribes — for as long as they stay subscribed. Sign up now to build your referral network early and maximize your future earnings.
           </p>
           <div className="flex items-center gap-1 justify-center lg:justify-start text-xs text-gray-400 leading-relaxed italic font-bold">
-            <DollarSign className="w-3.5 h-3.5 text-gray-400" />
-            Payouts are sent via PayPal once you reach $50 in earnings.
+            <AlertTriangle className="w-3.5 h-3.5 text-[#8B5E3C]" />
+            Early affiliates get priority status and the best commission rates when paid plans launch. Don't miss out — join now while it's free!
           </div>
 
           <div className="pt-4 space-y-4 text-left hidden lg:block">
@@ -138,7 +138,7 @@ export default function AffiliateSignupPage() {
               </div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">3. Earn Monthly Residuals</h4>
-                <p className="text-xs text-gray-400 leading-normal mt-0.5">Earn recurring commissions. Payouts are sent via PayPal once you reach $50 in earnings.</p>
+                <p className="text-xs text-gray-400 leading-normal mt-0.5">Current earnings: $0 (platform is free during early access)<br />Future earnings: $1/month per referred paying member<br />Example: Refer 20 people → they start paying → you earn $20/month passively</p>
               </div>
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function AffiliateSignupPage() {
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span>Submitting...</span>
                   </div>
-                ) : 'Submit Application →'}
+                ) : 'Join Free — Start Referring Now'}
               </button>
 
               <div className="text-center mt-2 border-t border-[#F0E6DD] pt-4">
