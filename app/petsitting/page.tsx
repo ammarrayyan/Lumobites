@@ -3124,8 +3124,8 @@ export default function PetSitting() {
             {loadingSitters || isGeocoding ? (
               <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm flex flex-col items-center justify-center min-h-[300px]">
                 <div className="relative w-16 h-16 mb-4">
-                  <div className="absolute inset-0 rounded-full border-4 border-[#8B5E3C]/10"></div>
-                  <div className="absolute inset-0 rounded-full border-4 border-t-[#8B5E3C] animate-spin"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-[#8B5E3C]/20"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#8B5E3C] animate-spin"></div>
                 </div>
                 <h3 className="text-xl font-bold text-[#4A3E3D] mb-1">Finding sitters near you...</h3>
                 <p className="text-[#8B7E7D] text-sm">Searching our network of local, loving sitters...</p>
