@@ -1020,7 +1020,6 @@ export default function PetSitting() {
   const handleOwnerCalendarDayClick = (dateStr: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
     if (dateStr < todayStr) return;
-    if (isDateFullyBooked(dateStr, loadedSitterAvailableTimes) || sitterBlockedDates.includes(dateStr)) return;
 
     if (!isSelectingMultipleDays) {
       setReqStartDate(dateStr);
@@ -1035,13 +1034,7 @@ export default function PetSitting() {
       if (dateStr < reqStartDate) {
         setReqStartDate(dateStr);
       } else {
-        const intermediate = getDatesBetween(reqStartDate, dateStr);
-        const hasOverlap = intermediate.some(d => sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes));
-        if (hasOverlap) {
-          setReqStartDate(dateStr);
-        } else {
-          setReqEndDate(dateStr);
-        }
+        setReqEndDate(dateStr);
       }
     }
   };
@@ -2695,8 +2688,52 @@ export default function PetSitting() {
         unit = 'day';
       }
 
+      let numDays = 1;
+      let availableCount = 0;
+      if (reqStartDate && reqEndDate) {
+        const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
+        if (reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding") {
+          const nightDates = rangeDates.slice(0, -1);
+          if (nightDates.length === 0) {
+            const isAvail = (() => {
+              const d = reqStartDate;
+              const dateObj = new Date(d + 'T00:00:00');
+              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+              return !sitterBlockedDates.includes(d) && !isDateFullyBooked(d, loadedSitterAvailableTimes) && !isScheduleUnavailable;
+            })();
+            if (isAvail) availableCount = 1;
+            numDays = Math.max(1, availableCount);
+          } else {
+            nightDates.forEach(d => {
+              const dateObj = new Date(d + 'T00:00:00');
+              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+              const isBlocked = sitterBlockedDates.includes(d);
+              const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+              if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                availableCount++;
+              }
+            });
+            numDays = Math.max(1, availableCount);
+          }
+        } else {
+          rangeDates.forEach(d => {
+            const dateObj = new Date(d + 'T00:00:00');
+            const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+            const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+            const isBlocked = sitterBlockedDates.includes(d);
+            const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+            if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+              availableCount++;
+            }
+          });
+          numDays = availableCount;
+        }
+      }
+
       const numPets = selectedRequestPets.length;
-      const totalCost = rate * numPets;
+      const totalCost = rate * numPets * numDays;
 
       const petDetailsPayload = primaryPet ? {
         ...primaryPet,
@@ -2706,6 +2743,7 @@ export default function PetSitting() {
           rate: rate,
           unit: unit,
           num_pets: numPets,
+          num_days: numDays,
           total_cost: totalCost
         }
       } : null;
@@ -2954,22 +2992,59 @@ export default function PetSitting() {
         }
 
         const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
-        const hasOverlap = rangeDates.some(d => {
-          const dateObj = new Date(d + 'T00:00:00');
-          const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
-          const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
-          return sitterBlockedDates.includes(d) || isDateFullyBooked(d, loadedSitterAvailableTimes) || isScheduleUnavailable;
-        });
-        if (hasOverlap) {
-          setReqError('Selected date range overlaps with dates the sitter is unavailable or fully booked');
+        let availableCount = 0;
+        if (reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding") {
+          const nightDates = rangeDates.slice(0, -1);
+          if (nightDates.length === 0) {
+            const isAvail = (() => {
+              const d = reqStartDate;
+              const dateObj = new Date(d + 'T00:00:00');
+              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+              return !sitterBlockedDates.includes(d) && !isDateFullyBooked(d, loadedSitterAvailableTimes) && !isScheduleUnavailable;
+            })();
+            if (isAvail) availableCount = 1;
+          } else {
+            nightDates.forEach(d => {
+              const dateObj = new Date(d + 'T00:00:00');
+              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+              const isBlocked = sitterBlockedDates.includes(d);
+              const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+              if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                availableCount++;
+              }
+            });
+          }
+        } else {
+          rangeDates.forEach(d => {
+            const dateObj = new Date(d + 'T00:00:00');
+            const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+            const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+            const isBlocked = sitterBlockedDates.includes(d);
+            const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+            if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+              availableCount++;
+            }
+          });
+        }
+
+        if (availableCount === 0) {
+          setReqError('Selected date range does not contain any available dates for this sitter');
           setReqLoading(false);
           return;
         }
 
         if (reqTimeSlot) {
-          const slotConflict = rangeDates.some(d => isSlotBooked(d, reqTimeSlot));
+          const availableRangeDates = rangeDates.filter(d => {
+            const dateObj = new Date(d + 'T00:00:00');
+            const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+            const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+            return !sitterBlockedDates.includes(d) && !isDateFullyBooked(d, loadedSitterAvailableTimes) && !isScheduleUnavailable;
+          });
+          const slotConflict = availableRangeDates.some(d => isSlotBooked(d, reqTimeSlot));
           if (slotConflict) {
-            setReqError(`The ${reqTimeSlot} slot is already booked on one or more of the selected dates — please choose another slot or adjust your dates`);
+            setReqError(`The ${reqTimeSlot} slot is already booked on one or more of the available dates in your selection`);
             setReqLoading(false);
             return;
           }
@@ -5643,59 +5718,149 @@ export default function PetSitting() {
                         })()}
                       </div>
 
-                      {reqStartDate && !isSelectingMultipleDays && (
-                        <div className="flex flex-col items-center">
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: '#F0FAF4',
-                            border: '1px solid #8B5E3C',
-                            borderRadius: '8px',
-                            padding: '12px 16px',
-                            marginTop: '8px'
-                          }}>
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span style={{ fontWeight: 600 }}>{new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                            <span style={{ color: '#6B7280' }}>(1 day)</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsSelectingMultipleDays(true);
-                              setReqEndDate('');
-                            }}
-                            style={{
-                              color: '#8B5E3C',
-                              fontWeight: 500,
-                              textDecoration: 'underline',
+                      {reqStartDate && !isSelectingMultipleDays && (() => {
+                        const d = reqStartDate;
+                        const dateObj = new Date(d + 'T00:00:00');
+                        const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                        const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                        const isBlocked = sitterBlockedDates.includes(d);
+                        const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+                        const isAvail = !isBlocked && !isBooked && !isScheduleUnavailable;
+
+                        return (
+                          <div className="flex flex-col items-center">
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: isAvail ? '#F0FAF4' : '#FFF1F2',
+                              border: `1px solid ${isAvail ? '#8B5E3C' : '#F43F5E'}`,
+                              borderRadius: '8px',
+                              padding: '12px 16px',
                               marginTop: '8px',
-                              fontSize: '14px'
-                            }}
-                          >
-                            + Need multiple days? Select end date
-                          </button>
-                        </div>
-                      )}
+                              textAlign: 'center'
+                            }}>
+                              <div className="flex items-center gap-2 flex-wrap justify-center">
+                                {isAvail ? (
+                                  <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                                ) : (
+                                  <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+                                )}
+                                <span style={{ fontWeight: 600 }} className="text-[#4A3E3D]">
+                                  Selected: {new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}{' '}
+                                  <span style={{ fontWeight: 500 }} className="text-[#8B7E7D] text-xs">
+                                    ({isAvail ? 'Available' : 'Unavailable'})
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-4">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsSelectingMultipleDays(true);
+                                  setReqEndDate('');
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#8B5E3C',
+                                  fontWeight: 500,
+                                  textDecoration: 'underline',
+                                  marginTop: '8px',
+                                  fontSize: '14px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                + Need multiple days? Select end date
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
                       
                       {reqStartDate && isSelectingMultipleDays && (
                         <div className="flex flex-col items-center">
-                          {reqEndDate ? (
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              background: '#F0FAF4',
-                              border: '1px solid #8B5E3C',
-                              borderRadius: '8px',
-                              padding: '12px 16px',
-                              marginTop: '8px'
-                            }}>
-                              <CheckCircle className="w-5 h-5 text-green-600" />
-                              <span style={{ fontWeight: 600 }}>{new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' })} - {new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                              <span style={{ color: '#6B7280' }}>({Math.max(1, getDatesBetween(reqStartDate, reqEndDate).length)} days)</span>
-                            </div>
-                          ) : (
+                          {reqEndDate ? (() => {
+                            const isOvernight = reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding";
+                            const labelUnit = isOvernight ? 'night' : 'day';
+                            const labelUnits = isOvernight ? 'nights' : 'days';
+
+                            const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
+                            let availableCount = 0;
+                            let unavailableCount = 0;
+
+                            if (isOvernight) {
+                              const nightDates = rangeDates.slice(0, -1);
+                              if (nightDates.length === 0) {
+                                const isAvail = (() => {
+                                  const d = reqStartDate;
+                                  const dateObj = new Date(d + 'T00:00:00');
+                                  const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                                  const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                                  return !sitterBlockedDates.includes(d) && !isDateFullyBooked(d, loadedSitterAvailableTimes) && !isScheduleUnavailable;
+                                })();
+                                availableCount = isAvail ? 1 : 0;
+                                unavailableCount = isAvail ? 0 : 1;
+                              } else {
+                                nightDates.forEach(d => {
+                                  const dateObj = new Date(d + 'T00:00:00');
+                                  const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                                  const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                                  const isBlocked = sitterBlockedDates.includes(d);
+                                  const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+                                  if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                                    availableCount++;
+                                  } else {
+                                    unavailableCount++;
+                                  }
+                                });
+                              }
+                            } else {
+                              rangeDates.forEach(d => {
+                                const dateObj = new Date(d + 'T00:00:00');
+                                const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                                const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                                const isBlocked = sitterBlockedDates.includes(d);
+                                const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+                                if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                                  availableCount++;
+                                } else {
+                                  unavailableCount++;
+                                }
+                              });
+                            }
+
+                            const startFmt = new Date(reqStartDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: reqEndDate.startsWith(reqStartDate.substring(0, 4)) ? undefined : 'numeric' });
+                            const endFmt = new Date(reqEndDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+                            return (
+                              <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#F0FAF4',
+                                border: '1px solid #8B5E3C',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginTop: '8px',
+                                textAlign: 'center'
+                              }}>
+                                <div className="flex items-center gap-2 flex-wrap justify-center">
+                                  <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                                  <span style={{ fontWeight: 600 }} className="text-[#4A3E3D]">
+                                    Selected: {startFmt} - {endFmt}{' '}
+                                    <span style={{ fontWeight: 500 }} className="text-[#8B7E7D] text-xs">
+                                      ({availableCount} available {availableCount === 1 ? labelUnit : labelUnits}
+                                      {unavailableCount > 0 ? `, ${unavailableCount} unavailable` : ''})
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })() : (
                             <div className="mt-4 p-3 bg-white rounded-xl border border-dashed border-[#E8DDD4] text-center font-bold text-[#8B7E7D] text-sm">
                               Please click an end date on the calendar
                             </div>
@@ -5752,71 +5917,119 @@ export default function PetSitting() {
                       <div className="font-bold text-[#8B5E3C] border-b border-[#E8DDD4] pb-1.5 mb-1.5 flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> Booking Summary
                       </div>
-                      <div className="flex justify-between text-[#4A3E3D]">
-                        <span className="font-bold">Dates:</span>
-                        <span>{reqStartDate} to {reqEndDate}</span>
-                      </div>
-                      <div className="flex justify-between text-[#4A3E3D]">
-                        <span className="font-bold">Service:</span>
-                        <span>{reqServiceType}</span>
-                      </div>
-                      {reqTimeSlot && (
-                        <div className="flex justify-between text-[#4A3E3D]">
-                          <span className="font-bold">Time Slot:</span>
-                          <span>{reqTimeSlot}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-[#4A3E3D]">
-                        <span className="font-bold">Selected Pets:</span>
-                        <span>{selectedRequestPets.length} {selectedRequestPets.length === 1 ? 'pet' : 'pets'} ({selectedRequestPets.map(p => p.pet_name).join(', ')})</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-[#E8DDD4] font-black text-sm text-[#4A3E3D]">
-                        <span>Estimated Total:</span>
-                        <span className="text-right">
-                          {(() => {
-                            let rate = selectedSitter.rate_per_night;
-                            let unit = 'night';
-                            if (reqServiceType === 'Home visits') {
-                              rate = selectedSitter.rate_dropins || selectedSitter.rate_per_night;
-                              unit = 'visit';
-                            } else if (reqServiceType === 'Dog walking') {
-                              rate = selectedSitter.rate_walking || selectedSitter.rate_per_night;
-                              unit = 'walk';
-                            } else if (reqServiceType === 'Overnight stays') {
-                              rate = selectedSitter.rate_overnight || selectedSitter.rate_per_night;
-                              unit = 'night';
-                            } else if (reqServiceType === 'Sitter\'s home boarding') {
-                              rate = selectedSitter.rate_boarding || selectedSitter.rate_per_night;
-                              unit = 'night';
-                            } else if (reqServiceType === 'Full day sitting') {
-                              rate = selectedSitter.rate_daycare || selectedSitter.rate_per_night;
-                              unit = 'day';
-                            }
+                      {(() => {
+                        const isOvernight = reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding";
+                        const labelUnit = isOvernight ? 'night' : 'day';
+                        const labelUnits = isOvernight ? 'nights' : 'days';
 
-                            const numPets = selectedRequestPets.length;
-                            
-                            let numDays = 1;
-                            if (reqStartDate && reqEndDate) {
-                              const rangeLen = getDatesBetween(reqStartDate, reqEndDate).length;
-                              if (reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding") {
-                                numDays = Math.max(1, rangeLen - 1);
+                        const rangeDates = getDatesBetween(reqStartDate, reqEndDate);
+                        let availableCount = 0;
+                        let unavailableCount = 0;
+
+                        if (isOvernight) {
+                          const nightDates = rangeDates.slice(0, -1);
+                          if (nightDates.length === 0) {
+                            const isAvail = (() => {
+                              const d = reqStartDate;
+                              const dateObj = new Date(d + 'T00:00:00');
+                              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                              return !sitterBlockedDates.includes(d) && !isDateFullyBooked(d, loadedSitterAvailableTimes) && !isScheduleUnavailable;
+                            })();
+                            availableCount = isAvail ? 1 : 0;
+                            unavailableCount = isAvail ? 0 : 1;
+                          } else {
+                            nightDates.forEach(d => {
+                              const dateObj = new Date(d + 'T00:00:00');
+                              const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                              const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                              const isBlocked = sitterBlockedDates.includes(d);
+                              const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+                              if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                                availableCount++;
                               } else {
-                                numDays = rangeLen;
+                                unavailableCount++;
                               }
+                            });
+                          }
+                        } else {
+                          rangeDates.forEach(d => {
+                            const dateObj = new Date(d + 'T00:00:00');
+                            const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dateObj.getDay()];
+                            const isScheduleUnavailable = sitterAvailableDays.length > 0 && !sitterAvailableDays.includes(dayName);
+                            const isBlocked = sitterBlockedDates.includes(d);
+                            const isBooked = isDateFullyBooked(d, loadedSitterAvailableTimes);
+                            if (!isBlocked && !isBooked && !isScheduleUnavailable) {
+                              availableCount++;
+                            } else {
+                              unavailableCount++;
                             }
-                            
-                            const total = rate * numPets * numDays;
-                            return (
-                              <span className="flex flex-col items-end">
-                                <span className="text-sm font-black">${total}</span>
-                                <span className="text-[10px] text-[#8B7E7D] font-normal mt-0.5">
-                                  ${rate}/{unit} × {numPets} {numPets === 1 ? 'pet' : 'pets'} × {numDays} {reqServiceType === 'Overnight stays' || reqServiceType === "Sitter's home boarding" ? (numDays === 1 ? 'night' : 'nights') : (numDays === 1 ? 'day' : 'days')}
+                          });
+                        }
+
+                        let rate = selectedSitter.rate_per_night;
+                        let unit = 'night';
+                        if (reqServiceType === 'Home visits') {
+                          rate = selectedSitter.rate_dropins || selectedSitter.rate_per_night;
+                          unit = 'visit';
+                        } else if (reqServiceType === 'Dog walking') {
+                          rate = selectedSitter.rate_walking || selectedSitter.rate_per_night;
+                          unit = 'walk';
+                        } else if (reqServiceType === 'Overnight stays') {
+                          rate = selectedSitter.rate_overnight || selectedSitter.rate_per_night;
+                          unit = 'night';
+                        } else if (reqServiceType === 'Sitter\'s home boarding') {
+                          rate = selectedSitter.rate_boarding || selectedSitter.rate_per_night;
+                          unit = 'night';
+                        } else if (reqServiceType === 'Full day sitting') {
+                          rate = selectedSitter.rate_daycare || selectedSitter.rate_per_night;
+                          unit = 'day';
+                        }
+
+                        const numPets = selectedRequestPets.length;
+                        const numDays = isOvernight ? Math.max(1, availableCount) : availableCount;
+                        const total = rate * numPets * numDays;
+
+                        return (
+                          <>
+                            <div className="flex justify-between text-[#4A3E3D]">
+                              <span className="font-bold">Dates:</span>
+                              <span className="text-right">
+                                <div>{reqStartDate} to {reqEndDate}</div>
+                                <div className="text-[10px] text-[#8B7E7D] mt-0.5">
+                                  ({availableCount} available {availableCount === 1 ? labelUnit : labelUnits}
+                                  {unavailableCount > 0 ? `, ${unavailableCount} unavailable` : ''})
+                                </div>
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-[#4A3E3D]">
+                              <span className="font-bold">Service:</span>
+                              <span>{reqServiceType}</span>
+                            </div>
+                            {reqTimeSlot && (
+                              <div className="flex justify-between text-[#4A3E3D]">
+                                <span className="font-bold">Time Slot:</span>
+                                <span>{reqTimeSlot}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between text-[#4A3E3D]">
+                              <span className="font-bold">Selected Pets:</span>
+                              <span>{selectedRequestPets.length} {selectedRequestPets.length === 1 ? 'pet' : 'pets'} ({selectedRequestPets.map(p => p.pet_name).join(', ')})</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-2 border-t border-[#E8DDD4] font-black text-sm text-[#4A3E3D]">
+                              <span>Estimated Total:</span>
+                              <span className="text-right">
+                                <span className="flex flex-col items-end">
+                                  <span className="text-sm font-black">${total}</span>
+                                  <span className="text-[10px] text-[#8B7E7D] font-normal mt-0.5">
+                                    ${rate}/{unit} × {numPets} {numPets === 1 ? 'pet' : 'pets'} × {numDays} {availableCount === 1 ? labelUnit : labelUnits}
+                                  </span>
                                 </span>
                               </span>
-                            );
-                          })()}
-                        </span>
-                      </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   )}
 
