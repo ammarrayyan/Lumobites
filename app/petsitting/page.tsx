@@ -2178,7 +2178,6 @@ export default function PetSitting() {
     if (!sitterIdPhoto && !hasExistingIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     if (!sitterId && !selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
-    if (!sitterAvailable) errors['availability'] = 'You must confirm that you are currently accepting new requests to save your profile.';
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -3691,16 +3690,22 @@ export default function PetSitting() {
                 )}
                 {sitterApprovalStatus === 'approved' && (
                   <>
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isProSitter ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isProSitter ? (sitterAvailable ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600') : 'bg-red-100 text-red-600'}`}>
                       {isProSitter ? (
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                        sitterAvailable ? (
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                        ) : (
+                          <span className="text-3xl">⏸️</span>
+                        )
                       ) : (
                         <AlertTriangle className="w-8 h-8 text-red-600" />
                       )}
                     </div>
-                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">Sitter Profile Active</h2>
+                    <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">
+                      {isProSitter ? (sitterAvailable ? 'Sitter Profile Active' : 'Profile Hidden') : 'Subscription Inactive'}
+                    </h2>
                     <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                      Your profile is approved and visible to pet owners in your neighborhood.
+                      {isProSitter ? (sitterAvailable ? 'Your profile is approved and visible to pet owners in your neighborhood.' : 'You are not currently accepting requests. Your profile is temporarily hidden from search results.') : 'Your subscription is inactive. Your profile is hidden from search results.'}
                     </p>
                   </>
                 )}
@@ -4886,10 +4891,10 @@ export default function PetSitting() {
 
               <div className="flex flex-col gap-1.5 bg-[#FAF6F4] p-4 rounded-xl border border-[#E8DDD4]">
                 <label className="flex items-center gap-3 text-sm text-[#4A3E3D] font-bold cursor-pointer">
-                  <input type="checkbox" id="avail" required checked={sitterAvailable} onChange={e => setSitterAvailable(e.target.checked)} className="w-5 h-5 accent-[#8B5E3C] shrink-0" />
-                  <span>I am currently accepting new requests</span>
+                  <input type="checkbox" id="avail" checked={sitterAvailable} onChange={e => setSitterAvailable(e.target.checked)} className="w-5 h-5 accent-[#8B5E3C] shrink-0" />
+                  <span>I am currently accepting new booking requests</span>
                 </label>
-                {formErrors['availability'] && <p className="text-red-500 text-sm mt-1">{formErrors['availability']}</p>}
+                <p className="text-xs text-gray-500 pl-8">Uncheck to temporarily hide your profile from search results.</p>
               </div>
 
               {/* Self-Declaration Checkbox & Terms of Service Note */}
@@ -4938,11 +4943,17 @@ export default function PetSitting() {
                       {sitterSubActionLoading ? 'Processing...' : 'Reactivate Subscription'}
                     </button>
                   </div>
-                ) : (
+                ) : sitterAvailable ? (
                   <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
                     <span className="text-3xl mb-2 block">✨</span>
                     <h3 className="text-green-800 font-bold text-lg mb-1">Sitter Profile Active</h3>
                     <p className="text-green-700 text-sm m-0">Your profile is visible in search results.</p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center">
+                    <span className="text-3xl mb-2 block">⏸️</span>
+                    <h3 className="text-gray-800 font-bold text-lg mb-1">Profile Hidden</h3>
+                    <p className="text-gray-600 text-sm m-0">You are not currently accepting requests. Your profile is temporarily hidden from search.</p>
                   </div>
                 )
               )}
