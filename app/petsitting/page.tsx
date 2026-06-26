@@ -4958,11 +4958,13 @@ export default function PetSitting() {
                 </button>
 
                 {/* Delete Profile Link */}
-                <div className="mt-6 flex justify-center">
-                  <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
-                    Delete My Profile
-                  </button>
-                </div>
+                {sitterId && sitterApprovalStatus === 'approved' && (
+                  <div className="mt-6 flex justify-center">
+                    <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
+                      Delete My Profile
+                    </button>
+                  </div>
+                )}
               </div>
 
             </form>
