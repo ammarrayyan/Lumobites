@@ -6,7 +6,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2 } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -3048,14 +3048,16 @@ export default function PetSitting() {
         onTouchEnd={handleTouchEnd}
         style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
       >
-        {/* Pull to refresh indicator */}
-        {pullDownY > 0 && (
-          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50">
-            <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+        {(pullDownY > 0 || isRefreshing) && (
+          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50 animate-fade-in" style={{ transform: isRefreshing ? 'none' : `translateY(${pullDownY}px)` }}>
+            <div className="bg-white rounded-full shadow-md py-2.5 px-4 flex items-center justify-center gap-2 border border-[#E8DDD4] text-[#8B5E3C] font-bold text-xs">
               {isRefreshing ? (
-                <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+                <>
+                  <Loader2 className="w-4 h-4 text-[#8B5E3C] animate-spin" />
+                  <span>Refreshing...</span>
+                </>
               ) : (
-                <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+                <RefreshCw className="w-4 h-4 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
               )}
             </div>
           </div>

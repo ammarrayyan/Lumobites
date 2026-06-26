@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import Navbar from '@/components/Navbar';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
-import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw } from 'lucide-react';
+import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw, Loader2 } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -323,14 +323,16 @@ export default function CityBoardPage() {
         onTouchEnd={handleTouchEnd}
         style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
       >
-        {/* Pull to refresh indicator */}
-        {pullDownY > 0 && (
-          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50">
-            <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+        {(pullDownY > 0 || isRefreshing) && (
+          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50 animate-fade-in" style={{ transform: isRefreshing ? 'none' : `translateY(${pullDownY}px)` }}>
+            <div className="bg-white rounded-full shadow-md py-2.5 px-4 flex items-center justify-center gap-2 border border-[#E8DDD4] text-[#8B5E3C] font-bold text-xs">
               {isRefreshing ? (
-                <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+                <>
+                  <Loader2 className="w-4 h-4 text-[#8B5E3C] animate-spin" />
+                  <span>Refreshing...</span>
+                </>
               ) : (
-                <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+                <RefreshCw className="w-4 h-4 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
               )}
             </div>
           </div>
