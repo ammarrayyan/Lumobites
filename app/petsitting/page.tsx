@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
@@ -565,6 +565,12 @@ export default function PetSitting() {
   const [ownerLastUpdated, setOwnerLastUpdated] = useState<Date | null>(null);
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
+
+  // Refresh State
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDownY, setPullDownY] = useState(0);
+  const isPullingRef = useRef(false);
+  const pullStartYRef = useRef(0);
 
   const [completedBookings, setCompletedBookings] = useState(0);
 
@@ -1454,24 +1460,88 @@ export default function PetSitting() {
     }, 3000); // Hide after 3 seconds
   };
 
-  // Auto-poll sitter dashboard every 15 seconds as fallback
-  useEffect(() => {
-    if (!sitterId) return;
-    const interval = setInterval(() => {
-      fetchSitterRequests(sitterId);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [sitterId]);
+  // Keep current context for stable refresh function
+  const currentContextRef = useRef({ activeTab, ownerActiveTab, reqEmail, sitterId });
+  currentContextRef.current = { activeTab, ownerActiveTab, reqEmail, sitterId };
 
-  // Auto-poll owner booking history and pets every 15 seconds as fallback
+  // Unified refresh function for active UI context
+  const refreshActiveData = useCallback(async () => {
+    setIsRefreshing(true);
+    const ctx = currentContextRef.current;
+    try {
+      if (ctx.activeTab === 'find') {
+        await fetchSitters();
+        if (ctx.reqEmail) {
+          if (ctx.ownerActiveTab === 'bookings') await fetchOwnerRequests(ctx.reqEmail);
+          else await fetchOwnerPets(ctx.reqEmail);
+        }
+      } else if (ctx.activeTab === 'become') {
+        if (ctx.sitterId) await fetchSitterRequests(ctx.sitterId);
+      }
+    } catch (e) {
+      console.error('Refresh error', e);
+    } finally {
+      setIsRefreshing(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Refresh on tab switch
   useEffect(() => {
-    if (!reqEmail) return;
+    refreshActiveData();
+  }, [activeTab, ownerActiveTab, refreshActiveData]);
+
+  // Refresh on returning to browser tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshActiveData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refreshActiveData]);
+
+  // Auto-poll every 30 seconds
+  useEffect(() => {
     const interval = setInterval(() => {
-      fetchOwnerRequests(reqEmail);
-      fetchOwnerPets(reqEmail);
-    }, 15000);
+      refreshActiveData();
+    }, 30000);
     return () => clearInterval(interval);
-  }, [reqEmail]);
+  }, [refreshActiveData]);
+
+  // Pull-to-refresh Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      isPullingRef.current = true;
+      pullStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPullingRef.current) return;
+    const y = e.touches[0].clientY;
+    const delta = y - pullStartYRef.current;
+    if (delta > 0 && window.scrollY === 0) {
+      setPullDownY(Math.min(delta * 0.4, 80));
+    } else {
+      isPullingRef.current = false;
+      setPullDownY(0);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDownY > 60 && !isRefreshing) {
+      setIsRefreshing(true);
+      refreshActiveData().finally(() => {
+        setIsRefreshing(false);
+        setPullDownY(0);
+      });
+    } else {
+      setPullDownY(0);
+    }
+    isPullingRef.current = false;
+  };
 
   // Real-time Supabase subscriptions for booking requests
   useEffect(() => {
@@ -2976,7 +3046,25 @@ export default function PetSitting() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans">
+    <div 
+      className="min-h-screen bg-[#FDFAF7] font-sans relative"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
+    >
+      {/* Pull to refresh indicator */}
+      {pullDownY > 0 && (
+        <div className="absolute top-0 left-0 w-full flex justify-center -mt-12" style={{ transform: `translateY(${pullDownY}px)` }}>
+          <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+            {isRefreshing ? (
+              <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+            )}
+          </div>
+        </div>
+      )}
       <Navbar />
 
       {/* Toast updated indicator */}
