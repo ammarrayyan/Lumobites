@@ -3445,8 +3445,7 @@ export default function PetSitting() {
                   <Clipboard className="w-6 h-6 text-[#8B5E3C]" /> Owner Dashboard
                 </h3>
               </div>
-              {ownerHistoryFetched && (
-                <div className="space-y-6">
+              <div className="space-y-6">
                   {/* Tabs Navigation */}
                   <div className="flex gap-6 border-b border-[#E8DDD4]">
                     <button 
@@ -3482,7 +3481,12 @@ export default function PetSitting() {
                       </button>
                     </div>
 
-                    {ownerPets.length === 0 ? (
+                    {loadingOwnerPets && ownerPets.length === 0 ? (
+                      <div className="text-center py-12 flex flex-col items-center justify-center gap-3 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
+                        <div className="w-8 h-8 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs text-[#8B7E7D]">Loading pet profiles...</p>
+                      </div>
+                    ) : ownerPets.length === 0 ? (
                       <div className="text-center py-8 text-[#8B7E7D] bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4] flex flex-col items-center gap-2">
                         <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
                         <p className="text-sm font-semibold text-[#4A3E3D]">No pets added yet</p>
@@ -3572,7 +3576,12 @@ export default function PetSitting() {
                         <option value="declined">Declined</option>
                       </select>
                     </div>
-                  {ownerRequests.filter(req => historyFilter === 'all' || req.status === historyFilter).length === 0 ? (
+                  {!ownerHistoryFetched && ownerRequests.length === 0 ? (
+                    <div className="text-center py-12 flex flex-col items-center justify-center gap-3 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
+                      <div className="w-8 h-8 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-xs text-[#8B7E7D]">Loading bookings...</p>
+                    </div>
+                  ) : ownerRequests.filter(req => historyFilter === 'all' || req.status === historyFilter).length === 0 ? (
                     <div className="text-center py-6 text-gray-500 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
                       {historyFilter === 'all' ? 'No bookings found for this email address.' : `No ${historyFilter} bookings found.`}
                     </div>
@@ -3703,7 +3712,6 @@ export default function PetSitting() {
                   </div>
                   )}
                 </div>
-              )}
               </div>
             )}
             </div>
