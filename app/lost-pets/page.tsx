@@ -225,7 +225,7 @@ export default function LostPetsFeed() {
       <Navbar />
 
       <div 
-        className="flex-1 flex flex-col w-full relative pt-20"
+        className="flex-1 flex flex-col w-full relative pt-16 md:pt-20"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

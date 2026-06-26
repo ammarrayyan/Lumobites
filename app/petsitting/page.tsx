@@ -3050,7 +3050,7 @@ export default function PetSitting() {
       <Navbar />
 
       <div 
-        className="flex-1 flex flex-col pt-24 pb-12 w-full relative"
+        className="flex-1 flex flex-col pt-16 md:pt-24 pb-12 w-full relative"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
