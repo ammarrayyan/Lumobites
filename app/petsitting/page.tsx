@@ -1461,8 +1461,8 @@ export default function PetSitting() {
   };
 
   // Keep current context for stable refresh function
-  const currentContextRef = useRef({ activeTab, ownerActiveTab, reqEmail, sitterId });
-  currentContextRef.current = { activeTab, ownerActiveTab, reqEmail, sitterId };
+  const currentContextRef = useRef({ activeTab, ownerActiveTab, reqEmail, sitterId, searchDay, searchServiceType });
+  currentContextRef.current = { activeTab, ownerActiveTab, reqEmail, sitterId, searchDay, searchServiceType };
 
   // Unified refresh function for active UI context
   const refreshActiveData = useCallback(async () => {
@@ -1470,7 +1470,7 @@ export default function PetSitting() {
     const ctx = currentContextRef.current;
     try {
       if (ctx.activeTab === 'find') {
-        await fetchSitters();
+        await fetchSitters(ctx.reqEmail, ctx.searchDay, ctx.searchServiceType);
         if (ctx.reqEmail) {
           if (ctx.ownerActiveTab === 'bookings') await fetchOwnerRequests(ctx.reqEmail);
           else await fetchOwnerPets(ctx.reqEmail);
@@ -3050,7 +3050,7 @@ export default function PetSitting() {
       <Navbar />
 
       <div 
-        className="flex-1 flex flex-col pt-16 md:pt-24 pb-12 w-full relative"
+        className="flex-1 flex flex-col pt-2 md:pt-24 pb-12 w-full relative"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
