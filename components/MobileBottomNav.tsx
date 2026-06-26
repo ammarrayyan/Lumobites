@@ -39,20 +39,20 @@ export default function MobileBottomNav() {
           <Link
             key={tab.label}
             href={tab.href}
-            className="relative flex items-center justify-center h-full flex-1 cursor-pointer"
+            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-1"
             style={{ textDecoration: 'none' }}
           >
-            {/* Active Oval Highlight */}
+            {/* Active Highlight */}
             {isActive && (
               <div 
-                className="absolute inset-0 m-auto w-[48px] h-[48px] bg-black/5 rounded-full"
+                className="absolute inset-0 m-auto w-[52px] h-[56px] bg-black/5 rounded-2xl"
                 style={{ zIndex: 0 }}
               />
             )}
             
             {/* Icon */}
             <Icon
-              className="w-[24px] h-[24px] relative z-10 transition-all duration-200"
+              className="w-[20px] h-[20px] relative z-10 transition-all duration-200"
               style={{
                 color: isActive ? '#000000' : '#4b5563', // Solid black for active, dark gray for inactive
                 fill: isActive ? '#000000' : 'none',
@@ -60,6 +60,16 @@ export default function MobileBottomNav() {
                 strokeWidth: isActive ? 2.5 : 2,
               }}
             />
+
+            {/* Label */}
+            <span
+              className="text-[9px] font-bold tracking-tighter select-none relative z-10 transition-colors duration-200"
+              style={{
+                color: isActive ? '#000000' : '#4b5563',
+              }}
+            >
+              {tab.label}
+            </span>
           </Link>
         );
       })}
