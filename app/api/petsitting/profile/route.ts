@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
         rate_overnight: rate_overnight ? parseFloat(rate_overnight) : null,
         rate_boarding: rate_boarding ? parseFloat(rate_boarding) : null,
         rate_daycare: rate_daycare ? parseFloat(rate_daycare) : null,
-        availability: true,
+        availability: availability !== undefined ? availability : true,
         available_days: available_days || [],
         available_times: available_times || [],
         service_types: service_types || [],
