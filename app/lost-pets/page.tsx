@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,6 +22,14 @@ export default function LostPetsFeed() {
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [locationVerified, setLocationVerified] = useState(false);
 
+  // Refresh State
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDownY, setPullDownY] = useState(0);
+  const isPullingRef = useRef(false);
+  const pullStartYRef = useRef(0);
+
+  const currentContextRef = useRef({ filterType, filterSpecies, searchQuery, searchCoords, searchRadius });
+  currentContextRef.current = { filterType, filterSpecies, searchQuery, searchCoords, searchRadius };
 
   useEffect(() => {
     if (skipGeocodeRef.current) {
@@ -121,48 +129,122 @@ export default function LostPetsFeed() {
     }
   };
 
-  useEffect(() => {
+  const fetchPets = useCallback(async (showRefreshIndicator = false) => {
     if (isGeocoding) return;
-
-    const fetchPets = async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams();
-        if (filterType !== 'all') params.append('type', filterType);
-        if (filterSpecies !== 'all') params.append('species', filterSpecies);
-        
-        if (searchQuery) {
-          if (searchCoords) {
-            params.append('lat', searchCoords.lat.toString());
-            params.append('lng', searchCoords.lng.toString());
-            if (searchRadius !== 'any') {
-              params.append('radius', searchRadius);
-            }
-          } else {
-            params.append('q', searchQuery);
+    if (showRefreshIndicator) setIsRefreshing(true);
+    else setLoading(true);
+    
+    const ctx = currentContextRef.current;
+    try {
+      const params = new URLSearchParams();
+      if (ctx.filterType !== 'all') params.append('type', ctx.filterType);
+      if (ctx.filterSpecies !== 'all') params.append('species', ctx.filterSpecies);
+      
+      if (ctx.searchQuery) {
+        if (ctx.searchCoords) {
+          params.append('lat', ctx.searchCoords.lat.toString());
+          params.append('lng', ctx.searchCoords.lng.toString());
+          if (ctx.searchRadius !== 'any') {
+            params.append('radius', ctx.searchRadius);
           }
+        } else {
+          params.append('q', ctx.searchQuery);
         }
+      }
 
-        const res = await fetch(`/api/lost-pets?${params.toString()}`);
-        const data = await res.json();
-        if (res.ok) {
-          setPets(data.pets || []);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      const res = await fetch(`/api/lost-pets?${params.toString()}`);
+      const data = await res.json();
+      if (res.ok) {
+        setPets(data.pets || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (showRefreshIndicator) setIsRefreshing(false);
+      else setLoading(false);
+    }
+  }, [isGeocoding]);
+
+  // Initial fetch on param change
+  useEffect(() => {
+    fetchPets(false);
+  }, [searchQuery, searchCoords, searchRadius, filterType, filterSpecies, isGeocoding, fetchPets]);
+
+  // Auto-poll every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPets(false);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchPets]);
+
+  // Refresh on returning to browser tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchPets(false);
       }
     };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchPets]);
 
-    fetchPets();
-  }, [searchQuery, searchCoords, searchRadius, filterType, filterSpecies, isGeocoding]);
+  // Pull-to-refresh Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      isPullingRef.current = true;
+      pullStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPullingRef.current) return;
+    const y = e.touches[0].clientY;
+    const delta = y - pullStartYRef.current;
+    if (delta > 0 && window.scrollY === 0) {
+      setPullDownY(Math.min(delta * 0.4, 80));
+    } else {
+      isPullingRef.current = false;
+      setPullDownY(0);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDownY > 60 && !isRefreshing) {
+      fetchPets(true).finally(() => {
+        setPullDownY(0);
+      });
+    } else {
+      setPullDownY(0);
+    }
+    isPullingRef.current = false;
+  };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans">
+    <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col relative">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+      <div 
+        className="flex-1 flex flex-col w-full relative pt-20"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
+      >
+        {/* Pull to refresh indicator */}
+        {pullDownY > 0 && (
+          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50">
+            <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+              {isRefreshing ? (
+                <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+              )}
+            </div>
+          </div>
+        )}
+
+      <main className="max-w-6xl mx-auto px-4 py-8 md:py-12 w-full">
         <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
           <div className="text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>
@@ -342,6 +424,7 @@ export default function LostPetsFeed() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }

@@ -3046,26 +3046,28 @@ export default function PetSitting() {
   }, []);
 
   return (
-    <div 
-      className="min-h-screen bg-[#FDFAF7] font-sans relative"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
-    >
-      {/* Pull to refresh indicator */}
-      {pullDownY > 0 && (
-        <div className="absolute top-0 left-0 w-full flex justify-center -mt-12" style={{ transform: `translateY(${pullDownY}px)` }}>
-          <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
-            {isRefreshing ? (
-              <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
-            ) : (
-              <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
-            )}
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen bg-[#FDFAF7] font-sans selection:bg-[#8B5E3C] selection:text-white flex flex-col relative">
       <Navbar />
+
+      <div 
+        className="flex-1 flex flex-col pt-24 pb-12 w-full relative"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
+      >
+        {/* Pull to refresh indicator */}
+        {pullDownY > 0 && (
+          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50">
+            <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+              {isRefreshing ? (
+                <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+              )}
+            </div>
+          </div>
+        )}
 
       {/* Toast updated indicator */}
       {showUpdatedToast && (
@@ -4073,31 +4075,11 @@ export default function PetSitting() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div>
                       <div className="flex flex-wrap items-center gap-3 mb-2">
-                        <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                          <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking Requests
-                        </h3>
-                        {(sitterLastUpdated || loadingSitterRequests) && (
-                          <div className="flex items-center gap-2">
-                            {loadingSitterRequests ? (
-                              <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
-                                Refreshing...
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
-                                Updated just now
-                              </span>
-                            )}
-                            <button
-                              onClick={() => fetchSitterRequests(sitterId)}
-                              disabled={loadingSitterRequests}
-                              className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                            >
-                              <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
+                            <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking Requests
+                          </h3>
+                        </div>
                       </div>
                       <p className="text-[#8B7E7D] text-xs">
                         Manage requests and track booking statuses submitted by pet owners.
@@ -6629,6 +6611,7 @@ export default function PetSitting() {
 
 
 
+      </div>
     </div>
   );
 }

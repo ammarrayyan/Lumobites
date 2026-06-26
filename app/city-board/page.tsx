@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import Navbar from '@/components/Navbar';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
-import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2 } from 'lucide-react';
+import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -42,6 +42,15 @@ export default function CityBoardPage() {
   const [searchCategory, setSearchCategory] = useState('All');
   const [searchPostId, setSearchPostId] = useState('');
   const [showMyPosts, setShowMyPosts] = useState(false);
+
+  // Refresh State
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pullDownY, setPullDownY] = useState(0);
+  const isPullingRef = useRef(false);
+  const pullStartYRef = useRef(0);
+
+  const currentContextRef = useRef({ searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie });
+  currentContextRef.current = { searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie };
 
   // New Post Form
   const [newCity, setNewCity] = useState('');
@@ -120,16 +129,21 @@ export default function CityBoardPage() {
     return () => clearTimeout(debounceSearch);
   }, [searchCity]);
 
-  const fetchPosts = async () => {
-    setLoading(true);
+  const fetchPosts = useCallback(async (showRefreshIndicator = false) => {
+    const ctx = currentContextRef.current;
+    if (!ctx.deviceCookie) return;
+    
+    if (showRefreshIndicator) setIsRefreshing(true);
+    else setLoading(true);
+
     try {
       const params = new URLSearchParams();
-      if (searchKeyword) params.append('keyword', searchKeyword);
-      if (searchCity) params.append('city', searchCity);
-      if (searchCategory !== 'All') params.append('category', searchCategory);
-      if (searchPostId) params.append('post_id', searchPostId);
-      if (deviceCookie) params.append('device_cookie', deviceCookie);
-      if (showMyPosts) params.append('my_posts_only', 'true');
+      if (ctx.searchKeyword) params.append('keyword', ctx.searchKeyword);
+      if (ctx.searchCity) params.append('city', ctx.searchCity);
+      if (ctx.searchCategory !== 'All') params.append('category', ctx.searchCategory);
+      if (ctx.searchPostId) params.append('post_id', ctx.searchPostId);
+      if (ctx.deviceCookie) params.append('device_cookie', ctx.deviceCookie);
+      if (ctx.showMyPosts) params.append('my_posts_only', 'true');
 
       const res = await fetch(`/api/city-board/posts?${params.toString()}`);
       if (res.ok) {
@@ -139,15 +153,68 @@ export default function CityBoardPage() {
     } catch (e) {
       console.error('Failed to fetch posts', e);
     } finally {
-      setLoading(false);
+      if (showRefreshIndicator) setIsRefreshing(false);
+      else setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (deviceCookie) {
-      fetchPosts();
+      fetchPosts(false);
     }
-  }, [searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie]);
+  }, [searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie, fetchPosts]);
+
+  // Auto-poll every 30 seconds
+  useEffect(() => {
+    if (!deviceCookie) return;
+    const interval = setInterval(() => {
+      fetchPosts(false);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [deviceCookie, fetchPosts]);
+
+  // Refresh on returning to browser tab
+  useEffect(() => {
+    if (!deviceCookie) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchPosts(false);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [deviceCookie, fetchPosts]);
+
+  // Pull-to-refresh Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      isPullingRef.current = true;
+      pullStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPullingRef.current) return;
+    const y = e.touches[0].clientY;
+    const delta = y - pullStartYRef.current;
+    if (delta > 0 && window.scrollY === 0) {
+      setPullDownY(Math.min(delta * 0.4, 80));
+    } else {
+      isPullingRef.current = false;
+      setPullDownY(0);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDownY > 60 && !isRefreshing) {
+      fetchPosts(true).finally(() => {
+        setPullDownY(0);
+      });
+    } else {
+      setPullDownY(0);
+    }
+    isPullingRef.current = false;
+  };
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -254,11 +321,31 @@ export default function CityBoardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8] font-sans pt-[52px] md:pt-0">
+    <div className="min-h-screen bg-[#F5F0E8] font-sans pt-[52px] md:pt-0 flex flex-col relative">
       <Navbar />
       <MobileCommunityNav />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <div 
+        className="flex-1 flex flex-col w-full relative"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateY(${pullDownY}px)`, transition: isPullingRef.current ? 'none' : 'transform 0.3s ease-out' }}
+      >
+        {/* Pull to refresh indicator */}
+        {pullDownY > 0 && (
+          <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50">
+            <div className="bg-white rounded-full shadow-md p-2.5 flex items-center justify-center border border-[#E8DDD4]">
+              {isRefreshing ? (
+                <span className="w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <RefreshCw className="w-5 h-5 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
+              )}
+            </div>
+          </div>
+        )}
+
+      <main className="max-w-4xl mx-auto px-4 py-8 w-full">
         
         <div className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 shadow-sm border border-[#3B2410]/10 mb-8">
           <div className="mb-6">
@@ -522,6 +609,7 @@ export default function CityBoardPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
