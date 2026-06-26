@@ -555,6 +555,7 @@ export default function PetSitting() {
   const [loadingSitterRequests, setLoadingSitterRequests] = useState(false);
   const [requestFilter, setRequestFilter] = useState('all');
   const [historyFilter, setHistoryFilter] = useState('all');
+  const [ownerActiveTab, setOwnerActiveTab] = useState<'bookings' | 'pets'>('bookings');
   const [hasScrolledToSection, setHasScrolledToSection] = useState(false);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [chatModalOpen, setChatModalOpen] = useState(false);
@@ -3352,7 +3353,7 @@ export default function PetSitting() {
               <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
                 <div className="flex flex-wrap items-center gap-3">
                   <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                    <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Your Booking History
+                    <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Owner Dashboard
                   </h3>
                   {(ownerLastUpdated || loadingOwnerRequests) && (
                     <div className="flex items-center gap-2">
@@ -3378,18 +3379,6 @@ export default function PetSitting() {
                   )}
                 </div>
 
-                <select
-                  value={historyFilter}
-                  onChange={(e) => setHistoryFilter(e.target.value)}
-                  className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
-                >
-                  <option value="all">All Bookings</option>
-                  <option value="pending">Pending</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="declined">Declined</option>
-                </select>
               </div>
               <p className="text-[#8B7E7D] text-sm mb-6">
                 Enter your email address to track the status of your requested pet sitting bookings.
@@ -3414,10 +3403,26 @@ export default function PetSitting() {
               </div>
 
               {ownerHistoryFetched && (
-                <div className="space-y-8">
-                  {/* My Pets Dashboard Block */}
-                  <div className="border-b border-[#F0E8E0] pb-8 mb-6">
-                    <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+                <div className="space-y-6">
+                  {/* Tabs Navigation */}
+                  <div className="flex gap-6 border-b border-[#E8DDD4]">
+                    <button 
+                      onClick={() => setOwnerActiveTab('bookings')} 
+                      className={`pb-3 font-bold text-sm transition-colors border-b-2 flex items-center gap-2 ${ownerActiveTab === 'bookings' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}
+                    >
+                      📅 My Bookings
+                    </button>
+                    <button 
+                      onClick={() => setOwnerActiveTab('pets')} 
+                      className={`pb-3 font-bold text-sm transition-colors border-b-2 flex items-center gap-2 ${ownerActiveTab === 'pets' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}
+                    >
+                      🐾 My Pets
+                    </button>
+                  </div>
+                  
+                  {ownerActiveTab === 'pets' && (
+                  <div className="pb-8 animate-fade-in">
+                    <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
                       <div>
                         <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
                           <PawPrint className="w-5 h-5 text-[#8B5E3C]" /> My Pets
@@ -3503,8 +3508,27 @@ export default function PetSitting() {
                       </div>
                     )}
                   </div>
+                  )}
 
-                  <div className="space-y-4">
+                  {ownerActiveTab === 'bookings' && (
+                  <div className="space-y-4 animate-fade-in">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
+                        📅 My Bookings
+                      </h4>
+                      <select
+                        value={historyFilter}
+                        onChange={(e) => setHistoryFilter(e.target.value)}
+                        className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
+                      >
+                        <option value="all">All Bookings</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="declined">Declined</option>
+                      </select>
+                    </div>
                   {ownerRequests.filter(req => historyFilter === 'all' || req.status === historyFilter).length === 0 ? (
                     <div className="text-center py-6 text-gray-500 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
                       {historyFilter === 'all' ? 'No bookings found for this email address.' : `No ${historyFilter} bookings found.`}
@@ -3633,14 +3657,14 @@ export default function PetSitting() {
                       })}
                     </div>
                   )}
+                  </div>
+                  )}
                 </div>
+              )}
               </div>
             )}
             </div>
           )}
-          </div>
-        )}
-
         {/* BECOME A SITTER TAB */}
         {activeTab === 'become' && (
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
