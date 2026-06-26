@@ -3438,58 +3438,11 @@ export default function PetSitting() {
             {isOwnerPro && (
               <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
               <div id="messages" />
-              <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="text-xl font-black text-[#4A3E3D] flex items-center gap-2">
-                    <Clipboard className="w-5 h-5 text-[#8B5E3C]" /> Owner Dashboard
-                  </h3>
-                  {(ownerLastUpdated || loadingOwnerRequests) && (
-                    <div className="flex items-center gap-2">
-                      {loadingOwnerRequests ? (
-                        <span className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
-                          Refreshing...
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse" />
-                          Updated just now
-                        </span>
-                      )}
-                      <button
-                        onClick={() => fetchOwnerRequests(reqEmail)}
-                        disabled={loadingOwnerRequests || !reqEmail}
-                        className="text-[10px] font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5 text-[#8B5E3C]" /> Refresh
-                      </button>
-                    </div>
-                  )}
-                </div>
-
+              <div className="mb-6">
+                <h3 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
+                  <Clipboard className="w-6 h-6 text-[#8B5E3C]" /> Owner Dashboard
+                </h3>
               </div>
-              <p className="text-[#8B7E7D] text-sm mb-6">
-                Enter your email address to track the status of your requested pet sitting bookings.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-md">
-                <input
-                  type="email"
-                  placeholder="Unlock Lumo Bites PRO or request a sitter to view history..."
-                  value={reqEmail}
-                  readOnly
-                  disabled
-                  className="flex-1 bg-[#FAF6F4]/60 border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] text-sm cursor-not-allowed opacity-75 focus:outline-none"
-                />
-                <button
-                  onClick={() => fetchOwnerRequests(reqEmail)}
-                  disabled={loadingOwnerRequests || !reqEmail}
-                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loadingOwnerRequests ? 'Searching...' : 'Track Bookings'}
-                </button>
-              </div>
-
               {ownerHistoryFetched && (
                 <div className="space-y-6">
                   {/* Tabs Navigation */}
