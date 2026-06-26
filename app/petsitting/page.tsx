@@ -4961,7 +4961,7 @@ export default function PetSitting() {
                 {sitterId && sitterApprovalStatus === 'approved' && (
                   <div className="mt-6 flex justify-center">
                     <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
-                      Delete My Profile
+                      Remove Sitter Profile
                     </button>
                   </div>
                 )}
@@ -6147,7 +6147,7 @@ export default function PetSitting() {
           <div className="bg-white rounded-3xl p-8 pb-32 sm:pb-8 max-w-sm w-full shadow-2xl relative animate-fade-in text-center">
             <span className="text-5xl mb-4 block">😢</span>
             <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Are you sure?</h3>
-            <p className="text-[#8B7E7D] text-sm mb-6">This will permanently delete your profile and cancel your subscription. You will no longer appear in search results.</p>
+            <p className="text-[#8B7E7D] text-sm mb-6">Are you sure you want to remove your sitter profile? Your Lumo Bites member account will remain active — you just won't appear in sitter search results. This cannot be undone.</p>
 
             <div className="flex flex-col gap-3">
               <button 
@@ -6155,7 +6155,7 @@ export default function PetSitting() {
                 disabled={deleteLoading} 
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl transition-all shadow-md"
               >
-                {deleteLoading ? 'Deleting...' : 'Yes, Delete Profile'}
+                {deleteLoading ? 'Removing...' : 'Yes, Remove Profile'}
               </button>
               <button 
                 onClick={() => setDeleteModalOpen(false)} 
