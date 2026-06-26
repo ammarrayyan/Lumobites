@@ -164,15 +164,6 @@ export default function CityBoardPage() {
     }
   }, [searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie, fetchPosts]);
 
-  // Auto-poll every 30 seconds
-  useEffect(() => {
-    if (!deviceCookie) return;
-    const interval = setInterval(() => {
-      fetchPosts(false);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [deviceCookie, fetchPosts]);
-
   // Refresh on returning to browser tab
   useEffect(() => {
     if (!deviceCookie) return;

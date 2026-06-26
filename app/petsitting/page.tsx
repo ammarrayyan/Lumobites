@@ -1502,14 +1502,6 @@ export default function PetSitting() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshActiveData]);
 
-  // Auto-poll every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshActiveData();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [refreshActiveData]);
-
   // Pull-to-refresh Handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (window.scrollY === 0) {

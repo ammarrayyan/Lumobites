@@ -170,14 +170,6 @@ export default function LostPetsFeed() {
     fetchPets(false);
   }, [searchQuery, searchCoords, searchRadius, filterType, filterSpecies, isGeocoding, fetchPets]);
 
-  // Auto-poll every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchPets(false);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [fetchPets]);
-
   // Refresh on returning to browser tab
   useEffect(() => {
     const handleVisibilityChange = () => {
