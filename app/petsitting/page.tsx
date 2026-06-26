@@ -2503,6 +2503,43 @@ export default function PetSitting() {
     }
   };
 
+  const handleSitterUseMyLocation = () => {
+    if (navigator.geolocation) {
+      setSitterIsLocating(true);
+      setSitterLocationVerified(false);
+      setSitterSelectedLocation(null);
+      setSitterLocationOptions([]);
+      setFormErrors(prev => { const newErr = {...prev}; delete newErr.location; return newErr; });
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          try {
+            const res = await fetch(`/api/petsitting/geocode?latlng=${lat},${lng}`);
+            const data = await res.json();
+            if (res.ok && data.lat && data.lng) {
+              const locationName = data.formatted_address || data.city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+              setSitterLocationInput(locationName);
+              setSitterCity(locationName);
+              setSitterLocationVerified(true);
+            }
+          } catch (e) {
+            console.error('Reverse geocoding error:', e);
+          } finally {
+            setSitterIsLocating(false);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setSitterIsLocating(false);
+          alert('Unable to get your location. Please enter your city manually.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by this browser.');
+    }
+  };
+
   const handleSitterLocationBlur = async () => {
     const input = sitterLocationInput.trim();
     if (!input) {
@@ -4686,15 +4723,19 @@ export default function PetSitting() {
                   )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Location (City or Zip Code) {sitterApprovalStatus === 'approved' && <span title="Locked after verification">🔒</span>}</label>
-                  {sitterApprovalStatus === 'approved' ? (
-                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium flex items-center gap-2">
-                      <span>📍</span> {sitterCity || sitterLocationInput}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="relative">
-                        <input 
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-bold text-[#4A3E3D]">Location (City or Zip Code)</label>
+                    <button 
+                      type="button" 
+                      onClick={handleSitterUseMyLocation} 
+                      disabled={sitterIsLocating}
+                      className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3 py-1 rounded-full transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      {sitterIsLocating ? '📍 Detecting...' : '📍 Use My Location'}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input 
                           required 
                           type="text" 
                           value={sitterLocationInput} 
@@ -4748,8 +4789,6 @@ export default function PetSitting() {
                           </div>
                         </div>
                       )}
-                    </>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pets Accepted</label>
