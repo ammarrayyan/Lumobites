@@ -4925,7 +4925,8 @@ export default function PetSitting() {
                 </div>
               )}
 
-              {isProSitter ? (
+              {/* Profile Status Badge - Only for approved sitters */}
+              {sitterApprovalStatus === 'approved' && isProSitter && (
                 sitterSubCancelAtPeriodEnd ? (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
                     <span className="text-3xl mb-2 block">⏳</span>
@@ -4933,40 +4934,35 @@ export default function PetSitting() {
                     <p className="text-yellow-700 text-sm mb-4">
                       Your subscription has been cancelled. Your profile will remain visible until <strong>{sitterSubEndDate}</strong> — <strong>{sitterSubDaysRemaining} days remaining</strong>. After that your profile will be hidden from search results.
                     </p>
-                    <div className="flex flex-col gap-3">
-                      <button type="submit" disabled={profileSaving} className={`bg-white border-2 border-yellow-700 text-yellow-800 font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-100'}`}>
-                        {profileSaving ? 'Saving...' : 'Update Profile'}
-                      </button>
-                      <button type="button" onClick={handleReactivateSitterSub} disabled={sitterSubActionLoading} className="bg-yellow-700 hover:bg-yellow-800 text-white font-bold py-2 px-6 rounded-lg transition shadow-sm">
-                        {sitterSubActionLoading ? 'Processing...' : 'Reactivate'}
-                      </button>
-                    </div>
+                    <button type="button" onClick={handleReactivateSitterSub} disabled={sitterSubActionLoading} className="w-full bg-yellow-700 hover:bg-yellow-800 text-white font-bold py-2 px-6 rounded-lg transition shadow-sm">
+                      {sitterSubActionLoading ? 'Processing...' : 'Reactivate Subscription'}
+                    </button>
                   </div>
                 ) : (
                   <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
                     <span className="text-3xl mb-2 block">✨</span>
                     <h3 className="text-green-800 font-bold text-lg mb-1">Sitter Profile Active</h3>
-                    <p className="text-green-700 text-sm mb-4">Your profile is visible in search results.</p>
-                    <button type="submit" disabled={profileSaving} className={`w-full bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition ${!isFormValid ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:bg-green-800'}`}>
-                      {profileSaving ? 'Saving...' : 'Update Profile'}
-                    </button>
+                    <p className="text-green-700 text-sm m-0">Your profile is visible in search results.</p>
                   </div>
                 )
-              ) : (
-                <button type="submit" disabled={profileSaving} className={`w-full text-white font-black py-4 rounded-xl transition-all shadow-md ${!isFormValid ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8B5E3C] hover:bg-[#7A5234]'}`}>
-                  {profileSaving ? 'Saving...' : 'Save Profile'}
-                </button>
               )}
 
-              <div className="pt-8 border-t border-[#E8DDD4] mt-8 flex flex-col items-center gap-4">
-                {isProSitter && !sitterSubCancelAtPeriodEnd && (
-                  <button type="button" onClick={handleCancelSitterSub} disabled={sitterSubActionLoading} className="text-[#8B5E3C] hover:text-[#724C2F] text-sm font-bold underline underline-offset-4">
-                    {sitterSubActionLoading ? 'Processing...' : 'Cancel Subscription'}
-                  </button>
-                )}
-                <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
-                  Delete My Profile
+              {/* Main Submit Button */}
+              <div className="pt-6 pb-28">
+                <button 
+                  type="submit" 
+                  disabled={profileSaving} 
+                  className={`w-full text-white font-black py-4 px-6 rounded-xl transition-all shadow-md text-lg ${!isFormValid ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#8B5E3C] hover:bg-[#7A5234]'}`}
+                >
+                  {profileSaving ? 'Saving...' : (sitterId && sitterApprovalStatus === 'approved' ? 'Update Profile' : 'Submit Application')}
                 </button>
+
+                {/* Delete Profile Link */}
+                <div className="mt-6 flex justify-center">
+                  <button type="button" onClick={() => setDeleteModalOpen(true)} className="text-red-500 hover:text-red-700 text-sm font-bold underline decoration-red-300 underline-offset-4">
+                    Delete My Profile
+                  </button>
+                </div>
               </div>
 
             </form>
