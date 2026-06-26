@@ -646,18 +646,28 @@ export default function PetSitting() {
   };
 
   useEffect(() => {
-    const syncStatus = () => {
-      const cachedEmail = localStorage.getItem('lumo_pro_email');
-      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail.trim() !== '') {
-        setReqEmail(cachedEmail);
-        fetchSitters(cachedEmail);
-        loadOwnerProfile(cachedEmail);
+    const getSession = async () => {
+      let email = localStorage.getItem('lumo_pro_email');
+      if (!email) {
+        // Wait 500ms and try again — Navbar may still be setting it
+        await new Promise(resolve => setTimeout(resolve, 500));
+        email = localStorage.getItem('lumo_pro_email');
+      }
+      return email;
+    };
+
+    const initializeSession = async () => {
+      const email = await getSession();
+      if (email && email !== 'undefined' && email.trim() !== '') {
+        setReqEmail(email);
+        fetchSitters(email);
+        loadOwnerProfile(email);
 
         // Owner session validation check
         fetch('/api/stripe/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cachedEmail })
+          body: JSON.stringify({ email })
         })
         .then(res => res.json())
         .then(data => {
@@ -675,30 +685,17 @@ export default function PetSitting() {
           }
         })
         .catch(err => console.error('[Page Owner Check] error:', err));
-      } else {
-        setReqEmail('');
-        setIsOwnerPro(false);
-      }
-    };
 
-    syncStatus();
-    window.addEventListener('lumo-pro-update', syncStatus);
-    window.addEventListener('storage', syncStatus);
-
-    const handleSitterSession = () => {
-      const cachedProEmail = localStorage.getItem('lumo_pro_email');
-
-      if (cachedProEmail && cachedProEmail !== 'undefined' && cachedProEmail.trim() !== '') {
         // Logged in as a member. Always use their Pro email for sitter auth.
-        setSitterEmail(cachedProEmail);
+        setSitterEmail(email);
         setSitterAuthMode('form');
 
         // Always check their profile status
-        fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedProEmail)}&t=${Date.now()}`)
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(email)}&t=${Date.now()}`)
           .then(res => res.json())
           .then(profileData => {
             if (profileData && profileData.id) {
-              loadSitterProfile(cachedProEmail);
+              loadSitterProfile(email);
               // Only show dashboard automatically if they are approved
               if (profileData.approval_status === 'approved') {
                 setProfilePreviewMode(true);
@@ -716,15 +713,23 @@ export default function PetSitting() {
             setProfilePreviewMode(false);
           });
       } else {
-        // Not signed in
+        setReqEmail('');
+        setIsOwnerPro(false);
         setSitterAuthMode('email');
         setSitterEmail('');
         setProfilePreviewMode(false);
       }
     };
 
-    handleSitterSession();
-    window.addEventListener('lumo-pro-update', handleSitterSession);
+    initializeSession();
+    window.addEventListener('lumo-pro-update', initializeSession);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'lumo_pro_email' && e.newValue) {
+        initializeSession();
+      }
+    };
+    window.addEventListener('storage', onStorage);
 
     // Set activeTab and filters from URL search params or hash
     const params = new URLSearchParams(window.location.search);
@@ -744,9 +749,8 @@ export default function PetSitting() {
     }
 
     return () => {
-      window.removeEventListener('lumo-pro-update', syncStatus);
-      window.removeEventListener('lumo-pro-update', handleSitterSession);
-      window.removeEventListener('storage', syncStatus);
+      window.removeEventListener('lumo-pro-update', initializeSession);
+      window.removeEventListener('storage', onStorage);
     };
   }, []);
 
