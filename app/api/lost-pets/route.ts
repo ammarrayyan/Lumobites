@@ -217,6 +217,65 @@ export async function POST(request: NextRequest) {
       data = response.data;
     }
 
+    // 3.5 Extract AI features if API key is configured
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        console.log('[AI Features] Starting feature extraction for pet ID:', data.id);
+        const featuresResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 500,
+            messages: [{
+              role: 'user',
+              content: `Extract pet features from this description. Return ONLY JSON, no other text:
+Description: "${description}"
+Type: "${type}"
+
+{
+  "species": "dog or cat or other",
+  "breed": "breed name or mixed or unknown", 
+  "color": ["primary color", "secondary color"],
+  "size": "small or medium or large",
+  "markings": "any distinctive markings or none",
+  "gender": "male or female or unknown",
+  "age": "puppy/kitten or young or adult or senior or unknown"
+}`
+            }]
+          })
+        });
+        
+        if (!featuresResponse.ok) {
+          throw new Error(`Anthropic API returned status ${featuresResponse.status}`);
+        }
+        
+        const featuresData = await featuresResponse.json();
+        const textContent = featuresData.content?.[0]?.text || '';
+        const cleanText = textContent.replace(/```json|```/g, '').trim();
+        const features = JSON.parse(cleanText);
+        
+        console.log('[AI Features] Extracted features successfully:', features);
+        
+        const { error: updateError } = await supabaseAdmin
+          .from('lost_pets')
+          .update({ ai_features: features })
+          .eq('id', data.id);
+          
+        if (updateError) throw updateError;
+        console.log('[AI Features] Database record updated successfully for ID:', data.id);
+      } catch (err) {
+        console.error('[AI Features] Feature extraction failed:', err);
+        // Don't fail the whole request if AI extraction fails
+      }
+    } else {
+      console.warn('[AI Features] ANTHROPIC_API_KEY is not defined. Skipping feature extraction.');
+    }
+
     // 4. Send email if provided
     if (contact_email && process.env.RESEND_API_KEY) {
       console.log(`[Lost Pets POST] About to send email to: ${contact_email}`);

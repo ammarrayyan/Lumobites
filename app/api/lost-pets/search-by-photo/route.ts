@@ -261,10 +261,12 @@ ${JSON.stringify(filteredPets.map(p => ({
   species: p.species,
   description: p.description,
   city: p.city,
-  date_lost_found: p.date_lost_found
+  date_lost_found: p.date_lost_found,
+  ai_features: p.ai_features
 })), null, 2)}
 
 Compare the lost pet features against each found pet report. For each found pet report, calculate a matching score (percentage integer from 0 to 100) representing how likely they are to be the same pet, and provide a short, descriptive match rationale.
+Use the pre-extracted structured 'ai_features' if available, as well as contextual details in the 'description'.
 Consider:
 1. Species (if species do not match, the score should be 0).
 2. Breed similarity, size, age, gender.
