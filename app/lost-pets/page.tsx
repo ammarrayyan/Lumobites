@@ -37,7 +37,7 @@ export default function LostPetsFeed() {
   const [aiRadius, setAiRadius] = useState('25');
   const [aiTimeframe, setAiTimeframe] = useState('any');
   const [aiSpecies, setAiSpecies] = useState('all');
-  const [aiMinScore, setAiMinScore] = useState(50);
+  const [aiMinScore, setAiMinScore] = useState(10);
 
   // Refresh State
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -469,6 +469,7 @@ export default function LostPetsFeed() {
                     onChange={(e) => setAiMinScore(parseInt(e.target.value))}
                     className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                   >
+                    <option value="10">10% + Match</option>
                     <option value="50">50% + Match</option>
                     <option value="70">70% + Match</option>
                     <option value="85">85% + Match</option>

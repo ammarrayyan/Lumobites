@@ -158,6 +158,8 @@ Description: "${description}"`
       return NextResponse.json({ error: 'Failed to query database for found pets' }, { status: 500 });
     }
 
+    console.log('[AI Match API] Total active found pets fetched from DB:', foundPets.length);
+
     // 3. Pre-filter found pets based on constraints
     let filteredPets = foundPets.map(pet => {
       let distance = null;
@@ -227,6 +229,8 @@ Description: "${description}"`
       filteredPets = filteredPets.filter(p => p.species === species);
     }
 
+    console.log('[AI Match API] Filtered found pets count:', filteredPets.length, 'using filters:', { lat, lng, radius, timeframe, species });
+
     if (filteredPets.length === 0) {
       return NextResponse.json({ success: true, matches: [] });
     }
@@ -289,6 +293,7 @@ Return ONLY a JSON array of objects, containing the found pet ID, the match perc
 
     const scoringData = await scoringResponse.json();
     const scoringTextContent = scoringData.content?.find((c: any) => c.type === 'text')?.text || '';
+    console.log('[AI Match API] Raw Claude scoring response:', scoringTextContent);
     const cleanScoringText = scoringTextContent.replace(/```json|```/g, '').trim();
     const scoredList: any[] = JSON.parse(cleanScoringText);
 
@@ -302,8 +307,11 @@ Return ONLY a JSON array of objects, containing the found pet ID, the match perc
       };
     });
 
+    console.log('[AI Match API] Scored pets before filtering:', matchedPets.map(p => ({ id: p.id, name: p.pet_name, score: p.score, summary: p.matchSummary })));
+
     // 5. Apply minMatchScore filter and sort
-    const minScore = minMatchScore ? parseInt(minMatchScore) : 50;
+    const minScore = minMatchScore ? parseInt(minMatchScore) : 10;
+    console.log('[AI Match API] Applying minMatchScore filter of:', minScore);
     matchedPets = matchedPets.filter(p => p.score >= minScore);
     matchedPets.sort((a, b) => b.score - a.score);
 
