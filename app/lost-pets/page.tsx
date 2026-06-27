@@ -7,7 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
-import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2 } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint } from 'lucide-react';
 
 export default function LostPetsFeed() {
   // ── Page Tab ──────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ export default function LostPetsFeed() {
                   : 'text-[#8B7E7D] hover:text-[#4A3E3D] hover:bg-[#FAF6F4]'
               }`}
             >
-              <span>🐾</span>
+              <PawPrint className="w-4 h-4" />
               <span>Lost &amp; Found Board</span>
             </button>
             <button
@@ -380,7 +380,7 @@ export default function LostPetsFeed() {
                   : 'text-[#8B7E7D] hover:text-[#4A3E3D] hover:bg-[#FAF6F4]'
               }`}
             >
-              <span>🔍</span>
+              <Search className="w-4 h-4" />
               <span>AI Pet Search</span>
             </button>
           </div>
@@ -424,9 +424,9 @@ export default function LostPetsFeed() {
                     title="Use my current location"
                   >
                     {isDetectingLocation ? (
-                      <><RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" /><span className="hidden sm:inline">📍 Detecting location...</span></>
+                      <><RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" /><span className="hidden sm:inline">Detecting location...</span></>
                     ) : (
-                      <><span>📍</span><span className="hidden sm:inline">Use My Location</span></>
+                      <><MapPin className="w-4 h-4" /><span className="hidden sm:inline">Use My Location</span></>
                     )}
                   </button>
                 </div>
@@ -479,7 +479,7 @@ export default function LostPetsFeed() {
                                   pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                   pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                                 }`}>
-                                  {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
+                                  {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : pet.type}
                                 </span>
                               </div>
                             </div>
@@ -532,7 +532,7 @@ export default function LostPetsFeed() {
               {/* AI Panel Card */}
               <div className="bg-white border border-[#E8DDD4] rounded-3xl p-6 shadow-sm animate-fade-in text-left">
                 <div className="flex items-center gap-2.5 mb-5">
-                  <span className="text-2xl">🔍</span>
+                  <Search className="w-6 h-6 text-[#8B5E3C]" />
                   <div>
                     <h3 className="text-xl font-black text-[#4A3E3D]">AI Pet Matching</h3>
                     <p className="text-xs text-[#8B7E7D] mt-0.5">
@@ -543,11 +543,11 @@ export default function LostPetsFeed() {
 
                 {/* Photo / Text tabs */}
                 <div className="flex gap-4 border-b border-[#E8DDD4] mb-6">
-                  <button type="button" onClick={() => setAiSearchTab('photo')} className={`pb-2 font-bold text-sm transition-colors border-b-2 ${aiSearchTab === 'photo' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
-                    📷 Search by Photo
+                  <button type="button" onClick={() => setAiSearchTab('photo')} className={`pb-2 font-bold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${aiSearchTab === 'photo' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
+                    <Camera className="w-3.5 h-3.5" /> Search by Photo
                   </button>
-                  <button type="button" onClick={() => setAiSearchTab('text')} className={`pb-2 font-bold text-sm transition-colors border-b-2 ${aiSearchTab === 'text' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
-                    ✏️ Describe Pet instead
+                  <button type="button" onClick={() => setAiSearchTab('text')} className={`pb-2 font-bold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${aiSearchTab === 'text' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
+                    <PenLine className="w-3.5 h-3.5" /> Describe Pet instead
                   </button>
                 </div>
 
@@ -563,7 +563,7 @@ export default function LostPetsFeed() {
                           </div>
                         ) : (
                           <label className="flex flex-col items-center gap-2 cursor-pointer w-full h-full py-6">
-                            <span className="text-3xl">📷</span>
+                            <Camera className="w-10 h-10 text-[#8B5E3C]" />
                             <span className="text-sm font-bold text-[#8B5E3C]">Upload Photo</span>
                             <span className="text-xs text-[#8B7E7D]">JPEG or PNG image of your pet</span>
                             <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
@@ -604,7 +604,7 @@ export default function LostPetsFeed() {
                           {isDetectingAiLocation ? (
                             <><RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" /><span className="hidden sm:inline text-sm">Detecting...</span></>
                           ) : (
-                            <><span>📍</span><span className="hidden sm:inline text-sm">Use My Location</span></>
+                            <><MapPin className="w-4 h-4" /><span className="hidden sm:inline text-sm">Use My Location</span></>
                           )}
                         </button>
                         {aiLocationVerified && (
@@ -664,7 +664,7 @@ export default function LostPetsFeed() {
 
                 {/* Action row */}
                 <div className="mt-6 pt-4 border-t border-[#E8DDD4] flex flex-col sm:flex-row items-center justify-between gap-4">
-                  {aiError && <span className="text-xs font-bold text-red-600">⚠️ {aiError}</span>}
+                  {aiError && <span className="text-xs font-bold text-red-600 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> {aiError}</span>}
                   {!aiError && (
                     <span className="text-xs text-[#8B7E7D]">
                       {aiSearchTab === 'photo'
@@ -683,7 +683,8 @@ export default function LostPetsFeed() {
                       onClick={handleAIMatchSearch}
                       className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 cursor-pointer text-sm"
                     >
-                      <span>✨ Scan &amp; Match Pet</span>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Scan &amp; Match Pet</span>
                     </button>
                   )}
                 </div>
@@ -702,7 +703,7 @@ export default function LostPetsFeed() {
                     <>
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-black text-[#4A3E3D]">
-                          ✨ {aiMatches.length} Potential {aiMatches.length === 1 ? 'Match' : 'Matches'} Found
+                          <Sparkles className="w-5 h-5 text-[#8B5E3C]" /> {aiMatches.length} Potential {aiMatches.length === 1 ? 'Match' : 'Matches'} Found
                         </h2>
                         <span className="text-xs text-[#8B7E7D] font-semibold">Sorted by match confidence</span>
                       </div>
@@ -720,7 +721,7 @@ export default function LostPetsFeed() {
                                   pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                   (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                                 }`}>
-                                  {pet.status === 'resolved' ? 'Resolved 🎉' : (pet.type || pet.pet_type)}
+                                  {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : (pet.type || pet.pet_type)}
                                 </span>
                                 {pet.score !== undefined && (
                                   <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md text-white ${
@@ -734,7 +735,7 @@ export default function LostPetsFeed() {
                             <div className="p-6 flex flex-col flex-1">
                               {pet.matchSummary && (
                                 <div className="mb-4 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-xs font-bold text-[#8B5E3C]">
-                                  ✨ {pet.matchSummary}
+                                  <Sparkles className="w-3 h-3 inline mr-1" />{pet.matchSummary}
                                 </div>
                               )}
                               <div className="flex justify-between items-start mb-2">
