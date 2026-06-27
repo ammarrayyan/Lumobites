@@ -3286,6 +3286,18 @@ export default function PetSitting() {
 
             <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
 
+            {reqEmail && (
+              <div className="flex justify-center mb-6">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('owner-history')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-full px-4 py-1.5 transition duration-200 shadow-sm cursor-pointer"
+                >
+                  📋 Jump to My Dashboard ↓
+                </button>
+              </div>
+            )}
+
             {/* Location Verification Status */}
             {searchZip.trim() && (
               <div className="mb-6 px-2 min-h-[24px]">
