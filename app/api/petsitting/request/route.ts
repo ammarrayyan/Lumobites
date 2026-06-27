@@ -206,9 +206,10 @@ export async function POST(request: NextRequest) {
       const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
         recipient_email: sitter.email,
         type: 'booking_request',
-        title: 'New Booking Request! 🎉',
-        message: `New booking request for ${pet_name}`,
-        link: '/petsitting#sitter-dashboard'
+        title: 'New Booking Request! 🐾',
+        message: `${owner_name || 'An owner'} has sent you a pet sitting request`,
+        link: '/petsitting?section=sitter-dashboard&tab=requests',
+        booking_id: insertedReq.id
       });
       if (notifErr) {
         console.error('[PetSitting Request] Notification insert error:', notifErr);
@@ -218,7 +219,13 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      await sendPushNotification(sitter.email, 'New Booking Request! 🎉', `New booking request for ${pet_name}`, '/petsitting#sitter-dashboard');
+      await sendPushNotification(
+        sitter.email,
+        'New Booking Request! 🐾',
+        `${owner_name || 'An owner'} has sent you a pet sitting request`,
+        '/petsitting?section=sitter-dashboard&tab=requests',
+        { type: 'booking_request', requestId: insertedReq.id }
+      );
     } catch (err) {
       console.error('[PetSitting Request] Push error:', err);
     }

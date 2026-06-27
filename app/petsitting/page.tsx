@@ -737,13 +737,17 @@ export default function PetSitting() {
     const params = new URLSearchParams(window.location.search);
     const section = params.get('section');
     const statusParam = params.get('status');
-    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests') {
+    const tabParam = params.get('tab');
+    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard') {
       setActiveTab('become');
       if (section === 'requests') {
         setProfilePreviewMode(true);
       }
-    } else if (section === 'history') {
+    } else if (section === 'history' || section === 'owner-dashboard') {
       setActiveTab('find');
+      if (section === 'owner-dashboard' && (tabParam === 'bookings' || tabParam === 'pets')) {
+        setOwnerActiveTab(tabParam as 'bookings' | 'pets');
+      }
     }
     if (statusParam) {
       setRequestFilter(statusParam);
@@ -809,6 +813,49 @@ export default function PetSitting() {
     }
   }, [sitterRequests, ownerRequests]);
 
+  // Handle open_chat_booking_id from localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const isMessagesSection = params.get('section') === 'messages';
+    if (!isMessagesSection) return;
+
+    const chatBookingId = localStorage.getItem('open_chat_booking_id');
+    if (!chatBookingId) return;
+
+    // Find the booking request in either sitterRequests or ownerRequests
+    const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
+    if (foundSitterReq) {
+      localStorage.removeItem('open_chat_booking_id');
+      if (foundSitterReq.status === 'cancelled') {
+        alert('This booking has been cancelled');
+        // Navigate to booking history instead of opening chat
+        setActiveTab('become'); // sitter dashboard
+        return;
+      }
+      setActiveChatBooking(foundSitterReq);
+      setActiveChatRole('sitter');
+      setChatModalOpen(true);
+      return;
+    }
+
+    const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
+    if (foundOwnerReq) {
+      localStorage.removeItem('open_chat_booking_id');
+      if (foundOwnerReq.status === 'cancelled') {
+        alert('This booking has been cancelled');
+        // Navigate to booking history instead of opening chat
+        setActiveTab('find');
+        setOwnerActiveTab('bookings');
+        return;
+      }
+      setActiveChatBooking(foundOwnerReq);
+      setActiveChatRole('owner');
+      setChatModalOpen(true);
+      return;
+    }
+  }, [sitterRequests, ownerRequests]);
+
   // Handle URL section scroll on load
   useEffect(() => {
     if (typeof window === 'undefined' || hasScrolledToSection) return;
@@ -816,7 +863,7 @@ export default function PetSitting() {
     const params = new URLSearchParams(window.location.search);
     const section = params.get('section');
 
-    if (section === 'requests') {
+    if (section === 'requests' || section === 'sitter-dashboard') {
       const el = document.getElementById('sitter-dashboard');
       if (el) {
         setTimeout(() => {
@@ -824,7 +871,7 @@ export default function PetSitting() {
         }, 300);
         setHasScrolledToSection(true);
       }
-    } else if (section === 'history') {
+    } else if (section === 'history' || section === 'owner-dashboard') {
       const el = document.getElementById('owner-history');
       if (el) {
         setTimeout(() => {

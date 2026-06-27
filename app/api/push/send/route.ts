@@ -4,7 +4,7 @@ import admin from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, title, body, link } = await request.json();
+    const { email, title, body, link, data } = await request.json();
 
     if (!email || !title || !body) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       },
       data: {
         link: link || '/petsitting',
+        ...(data || {}),
       },
       tokens: tokenStrings,
     };

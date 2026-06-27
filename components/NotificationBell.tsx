@@ -70,29 +70,35 @@ export default function NotificationBell({ email }: { email: string }) {
     // Navigate based on type
     switch(notification.type) {
       case 'booking_request':
-        // Sitter should see their pending requests
-        router.push('/petsitting?section=requests&status=pending');
+        // Take sitter to their pending requests
+        router.push('/petsitting?section=sitter-dashboard&tab=requests');
         break;
       case 'booking_accepted':
-        // Owner should see their accepted bookings
-        router.push('/petsitting?section=history&status=accepted');
+        // Take owner to their accepted bookings
+        router.push('/petsitting?section=owner-dashboard&tab=bookings');
         break;
       case 'booking_declined':
-        // Owner should see their declined bookings
-        router.push('/petsitting?section=history&status=declined');
+        // Take owner to their booking history
+        router.push('/petsitting?section=owner-dashboard&tab=bookings');
         break;
       case 'booking_cancelled':
-        router.push('/petsitting?section=history&status=cancelled');
+        alert('This booking has been cancelled');
+        router.push(notification.link || '/petsitting?section=sitter-dashboard&tab=requests');
         break;
       case 'new_message':
-        // Open the chat for this specific booking
-        router.push(`/petsitting?section=messages&booking_id=${notification.booking_id}`);
+      case 'message':
+        // Open chat for this specific booking
+        // Store booking ID in localStorage then navigate
+        if (notification.booking_id) {
+          localStorage.setItem('open_chat_booking_id', notification.booking_id);
+        }
+        router.push('/petsitting?section=messages');
         break;
       case 'booking_completed':
-        router.push('/petsitting?section=history&status=completed');
+        router.push('/petsitting?section=owner-dashboard&tab=bookings');
         break;
       case 'no_show':
-        router.push('/petsitting?section=requests');
+        router.push('/petsitting?section=sitter-dashboard&tab=requests');
         break;
       case 'review_request':
         router.push(`/petsitting/review/${notification.sitter_id}`);

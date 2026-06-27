@@ -1,7 +1,7 @@
 import admin from '@/lib/firebase-admin';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export async function sendPushNotification(email: string, title: string, body: string, link: string = '/petsitting') {
+export async function sendPushNotification(email: string, title: string, body: string, link: string = '/petsitting', customData?: Record<string, string>) {
   try {
     const { data: tokens } = await supabaseAdmin
       .from('push_tokens')
@@ -14,7 +14,10 @@ export async function sendPushNotification(email: string, title: string, body: s
 
     const message = {
       notification: { title, body },
-      data: { link },
+      data: {
+        link,
+        ...(customData || {})
+      },
       tokens: tokenStrings,
     };
 

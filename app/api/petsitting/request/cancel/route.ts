@@ -77,9 +77,11 @@ export async function POST(request: NextRequest) {
     // Notifications
     const recipient = by === 'owner' ? reqRow.sitters?.email : reqRow.owner_email;
     if (recipient) {
-      const link = by === 'owner' ? '/petsitting#sitter-dashboard' : '/petsitting#owner-history';
-      const title = 'Booking Cancelled';
-      const message = `Booking for ${reqRow.pet_name || 'your pet'} cancelled`;
+      const link = by === 'owner' ? '/petsitting?section=sitter-dashboard&tab=requests' : '/petsitting?section=owner-dashboard&tab=bookings';
+      const title = 'Booking Cancelled 🐾';
+      const message = by === 'owner'
+        ? `${reqRow.owner_name || 'The owner'} has cancelled their booking request for ${reqRow.pet_name || 'their pet'}`
+        : `Your sitter has cancelled your booking for ${reqRow.pet_name || 'your pet'}`;
 
       try {
         await supabaseAdmin.from('notifications').insert({
@@ -87,14 +89,21 @@ export async function POST(request: NextRequest) {
           type: 'booking_cancelled',
           title: title,
           message: message,
-          link: link
+          link: link,
+          booking_id: reqRow.id
         });
       } catch (err) {
         console.error('[Cancel Booking] Notification error:', err);
       }
 
       try {
-        await sendPushNotification(recipient, title, message, link);
+        await sendPushNotification(
+          recipient,
+          title,
+          message,
+          link,
+          { type: 'booking_cancelled', requestId: reqRow.id }
+        );
       } catch (err) {
         console.error('[Cancel Booking] Push error:', err);
       }

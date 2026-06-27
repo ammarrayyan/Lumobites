@@ -94,9 +94,10 @@ export async function GET(request: NextRequest) {
       const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
         recipient_email: reqRow.owner_email,
         type: 'booking_declined',
-        title: 'Booking Declined',
-        message: `${sitterNameStr} declined your booking for ${reqRow.pet_name}`,
-        link: '/petsitting#owner-history'
+        title: 'Booking Declined 😔',
+        message: `${sitterNameStr} has declined your request for ${reqRow.pet_name || 'your pet'}`,
+        link: '/petsitting?section=owner-dashboard&tab=bookings',
+        booking_id: reqRow.id
       });
       if (notifErr) {
         console.error('[Decline Request] Notification insert error:', notifErr);
@@ -106,7 +107,13 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      await sendPushNotification(reqRow.owner_email, 'Booking Declined', `${sitterNameStr} declined your booking for ${reqRow.pet_name}`, '/petsitting#owner-history');
+      await sendPushNotification(
+        reqRow.owner_email,
+        'Booking Declined 😔',
+        `${sitterNameStr} has declined your request for ${reqRow.pet_name || 'your pet'}`,
+        '/petsitting?section=owner-dashboard&tab=bookings',
+        { type: 'booking_declined', requestId: reqRow.id }
+      );
     } catch (err) {
       console.error('[Decline Request] Push notification error:', err);
     }
