@@ -21,8 +21,13 @@ export default function MobileBottomNav() {
 
   return (
     <div 
-      className="md:hidden fixed bottom-[24px] left-[50%] -translate-x-1/2 h-[68px] z-50 px-2 flex items-center justify-evenly w-[calc(100%-32px)] max-w-[420px]"
+      className="md:hidden px-2 flex items-center justify-evenly w-[calc(100%-32px)] max-w-[420px] h-[68px]"
       style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
         backgroundColor: 'rgba(255, 255, 255, 0.65)',
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',

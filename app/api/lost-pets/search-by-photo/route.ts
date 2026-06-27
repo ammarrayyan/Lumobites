@@ -28,6 +28,11 @@ export async function POST(request: NextRequest) {
       minMatchScore
     } = body;
 
+    console.log('=== SEARCH REQUEST RECEIVED ===');
+    console.log('Has image:', !!photo);
+    console.log('Description:', description);
+    console.log('Filters:', { species, radius, timeframe, minMatchScore });
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Anthropic API key not configured.' }, { status: 500 });
@@ -158,7 +163,8 @@ Description: "${description}"`
       return NextResponse.json({ error: 'Failed to query database for found pets' }, { status: 500 });
     }
 
-    console.log('[AI Match API] Total active found pets fetched from DB:', foundPets.length);
+    console.log('Found pets in DB:', foundPets?.length || 0);
+    console.log('Found pets data:', JSON.stringify(foundPets?.slice(0, 2)));
 
     // 3. Pre-filter found pets based on constraints
     let filteredPets = foundPets.map(pet => {
@@ -294,6 +300,7 @@ Return ONLY a JSON array of objects, containing the found pet ID, the match perc
     }
 
     const scoringData = await scoringResponse.json();
+    console.log('Claude raw response:', JSON.stringify(scoringData));
     const scoringTextContent = scoringData.content?.find((c: any) => c.type === 'text')?.text || '';
     console.log('[AI Match API] Raw Claude scoring response:', scoringTextContent);
     const cleanScoringText = scoringTextContent.replace(/```json|```/g, '').trim();
