@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
@@ -73,59 +75,58 @@ export default function LostPetsFeed() {
     return () => clearTimeout(delay);
   }, [searchQuery]);
 
-  const handleUseMyLocation = () => {
-    if (navigator.geolocation) {
+  const handleUseMyLocation = async () => {
+    try {
       setIsDetectingLocation(true);
       setIsGeocoding(true);
       setLocationVerified(false);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          try {
-            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-            if (!apiKey) return;
-            const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              const locationName = data.results[0].formatted_address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-              skipGeocodeRef.current = true;
-              setSearchQuery(locationName);
-              setSearchCoords({ lat, lng });
-              setSearchLocationName(locationName);
-              setLocationVerified(true);
-            } else {
-              alert('Could not determine your location name.');
-            }
-          } catch (e) {
-            console.error('Reverse geocoding error:', e);
-            alert('Failed to parse your location name.');
-          } finally {
-            setIsGeocoding(false);
-            setIsDetectingLocation(false);
-          }
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
+
+      // Request permission first on native platforms
+      if (Capacitor.isNativePlatform()) {
+        const permission = await Geolocation.requestPermissions();
+        if (permission.location !== 'granted') {
+          alert('Location permission is required to use this feature. Please enable it in your device settings.');
           setIsGeocoding(false);
           setIsDetectingLocation(false);
-          if (error.code === error.PERMISSION_DENIED) {
-            alert('Location access is blocked. To enable:\niPhone: Settings → Privacy → Location Services → Safari/Chrome → Allow\nAndroid: Settings → Apps → Browser → Permissions → Location → Allow');
-          } else if (error.code === error.TIMEOUT) {
-            alert('Location request timed out. Please try again or enter your city manually.');
-          } else {
-            alert('Unable to get your location. Please enter your city manually.');
-          }
-          document.getElementById('locationSearchInput')?.focus();
-        },
-        { 
-          timeout: 10000,
-          enableHighAccuracy: true,
-          maximumAge: 60000 
+          return;
         }
-      );
-    } else {
-      alert('Geolocation is not supported by your browser.');
+      }
+
+      // Get current position
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      try {
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) return;
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const locationName = data.results[0].formatted_address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          skipGeocodeRef.current = true;
+          setSearchQuery(locationName);
+          setSearchCoords({ lat, lng });
+          setSearchLocationName(locationName);
+          setLocationVerified(true);
+        } else {
+          alert('Could not determine your location name.');
+        }
+      } catch (e) {
+        console.error('Reverse geocoding error:', e);
+        alert('Failed to parse your location name.');
+      }
+    } catch (error: any) {
+      console.error('Geolocation error:', error);
+      alert('Unable to get your location. Please enter your city manually.');
+      document.getElementById('locationSearchInput')?.focus();
+    } finally {
+      setIsGeocoding(false);
+      setIsDetectingLocation(false);
     }
   };
 
