@@ -595,7 +595,7 @@ export default function LostPetsFeed() {
         {/* Content — no extra offset needed on desktop; mobile offset handled by padding-top on the outer wrapper */}
         <div>
 
-          {loading ? (
+          {loading && searchMode !== 'ai_match' ? (
             <div className="text-center py-20 text-[#8B5E3C] font-bold text-lg animate-pulse">Loading pets...</div>
           ) : displayPets.length === 0 ? (
             <div className="text-center bg-white p-16 rounded-3xl border border-[#E8DDD4] shadow-sm">
@@ -636,9 +636,9 @@ export default function LostPetsFeed() {
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
                         pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                        pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                        (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                       }`}>
-                        {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
+                        {pet.status === 'resolved' ? 'Resolved 🎉' : (pet.type || pet.pet_type)}
                       </span>
                       {pet.score !== undefined && (
                         <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md text-white ${
