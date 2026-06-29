@@ -737,13 +737,14 @@ export default function PetSitting() {
     const section = params.get('section');
     const statusParam = params.get('status');
     const tabParam = params.get('tab');
-    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard') {
+    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
       setActiveTab('become');
       if (section === 'requests') {
         setProfilePreviewMode(true);
       }
-    } else if (section === 'history' || section === 'owner-dashboard') {
+    } else if (section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
       setActiveTab('find');
+      setOwnerActiveTab('bookings');
       if (section === 'owner-dashboard' && (tabParam === 'bookings' || tabParam === 'pets')) {
         setOwnerActiveTab(tabParam as 'bookings' | 'pets');
       }
@@ -862,7 +863,7 @@ export default function PetSitting() {
     const params = new URLSearchParams(window.location.search);
     const section = params.get('section');
 
-    if (section === 'requests' || section === 'sitter-dashboard') {
+    if (section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
       const el = document.getElementById('sitter-dashboard');
       if (el) {
         setTimeout(() => {
@@ -870,7 +871,7 @@ export default function PetSitting() {
         }, 300);
         setHasScrolledToSection(true);
       }
-    } else if (section === 'history' || section === 'owner-dashboard') {
+    } else if (section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
       const el = document.getElementById('owner-history');
       if (el) {
         setTimeout(() => {

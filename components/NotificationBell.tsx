@@ -54,6 +54,21 @@ export default function NotificationBell({ email }: { email: string }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showDropdown]);
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleNotificationClick = async (notification: Notification) => {
     // Mark as read first
     try {
@@ -67,38 +82,49 @@ export default function NotificationBell({ email }: { email: string }) {
       console.error('Failed to mark notification as read:', e);
     }
     
+    // For message notifications — check if booking still exists
+    if ((notification.type === 'new_message' || notification.type === 'message') && notification.booking_id) {
+      try {
+        const res = await fetch(`/api/petsitting/request?id=${notification.booking_id}`);
+        const data = await res.json();
+        
+        if (!res.ok || !data || data.status === 'cancelled') {
+          showToast('This conversation is no longer available — the booking was cancelled', 'error');
+          setShowDropdown(false);
+          return;
+        }
+        if (data.status === 'completed') {
+          showToast('This booking has been completed. Messages are read-only.', 'info');
+        }
+        // Store booking ID to auto-open chat
+        localStorage.setItem('open_chat_booking_id', notification.booking_id);
+      } catch (err) {
+        showToast('Unable to open this conversation', 'error');
+        setShowDropdown(false);
+        return;
+      }
+    }
+
     // Navigate based on type
     switch(notification.type) {
-      case 'booking_request':
-        // Take sitter to their pending requests
-        router.push('/petsitting?section=sitter-dashboard&tab=requests');
-        break;
-      case 'booking_accepted':
-        // Take owner to their accepted bookings
-        router.push('/petsitting?section=owner-dashboard&tab=bookings');
-        break;
-      case 'booking_declined':
-        // Take owner to their booking history
-        router.push('/petsitting?section=owner-dashboard&tab=bookings');
-        break;
-      case 'booking_cancelled':
-        alert('This booking has been cancelled');
-        router.push(notification.link || '/petsitting?section=sitter-dashboard&tab=requests');
-        break;
       case 'new_message':
       case 'message':
-        // Open chat for this specific booking
-        // Store booking ID in localStorage then navigate
-        if (notification.booking_id) {
-          localStorage.setItem('open_chat_booking_id', notification.booking_id);
-        }
         router.push('/petsitting?section=messages');
         break;
+      case 'booking_request':
+        router.push('/petsitting?section=sitter-requests');
+        break;
+      case 'booking_accepted':
+      case 'booking_declined':
+      case 'booking_cancelled':
       case 'booking_completed':
-        router.push('/petsitting?section=owner-dashboard&tab=bookings');
+        if (notification.type === 'booking_cancelled') {
+          showToast('This booking was cancelled', 'info');
+        }
+        router.push('/petsitting?section=owner-bookings');
         break;
       case 'no_show':
-        router.push('/petsitting?section=sitter-dashboard&tab=requests');
+        router.push('/petsitting?section=sitter-requests');
         break;
       case 'review_request':
         router.push(`/petsitting/review/${notification.sitter_id}`);
@@ -193,6 +219,40 @@ export default function NotificationBell({ email }: { email: string }) {
               See all activity →
             </a>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 9999,
+            backgroundColor: toast.type === 'error' ? '#DC2626' : toast.type === 'success' ? '#10B981' : '#1F1F1F',
+            color: '#FFFFFF',
+            fontSize: '13px',
+            fontWeight: '600',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            border: `1px solid ${toast.type === 'error' ? '#EF4444' : toast.type === 'success' ? '#34D399' : '#374151'}`,
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        >
+          <span 
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#FFFFFF',
+              display: 'inline-block'
+            }}
+          />
+          <span>{toast.message}</span>
         </div>
       )}
     </div>
