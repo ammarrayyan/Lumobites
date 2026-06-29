@@ -49,7 +49,7 @@ export default function LostPetsFeed() {
   const [aiRadius, setAiRadius] = useState('any');
   const [aiTimeframe, setAiTimeframe] = useState('any');
   const [aiSpecies, setAiSpecies] = useState('all');
-  const [aiMinScore, setAiMinScore] = useState(30);
+  const [aiMinScore, setAiMinScore] = useState(20);
 
   // Separate location state for AI tab
   const [aiSearchCoords, setAiSearchCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -650,6 +650,7 @@ export default function LostPetsFeed() {
                         <label className="text-[11px] font-bold text-[#8B7E7D] block mb-1">Min Match Score</label>
                         <select value={aiMinScore} onChange={(e) => setAiMinScore(parseInt(e.target.value))} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]">
                           <option value="10">Any match (10%+)</option>
+                          <option value="20">Broad match (20%+)</option>
                           <option value="30">Fair match (30%+)</option>
                           <option value="50">Good match (50%+)</option>
                           <option value="70">Strong match (70%+)</option>

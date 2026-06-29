@@ -14,6 +14,34 @@ const getDistanceInMiles = (lat1: number, lon1: number, lat2: number, lon2: numb
   return R * c;
 };
 
+const fetchImageAsBase64 = async (url: string) => {
+  if (url.startsWith('data:')) {
+    const matches = url.match(/^data:(image\/[a-zA-Z0-9]+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      return {
+        media_type: matches[1],
+        data: matches[2]
+      };
+    }
+    return null;
+  }
+  
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const contentType = res.headers.get('content-type') || 'image/jpeg';
+    return {
+      media_type: contentType.includes('png') ? 'image/png' : 'image/jpeg',
+      data: buffer.toString('base64')
+    };
+  } catch (e) {
+    console.error(`[AI Match API] Failed to fetch candidate image ${url}:`, e);
+    return null;
+  }
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -242,22 +270,119 @@ Description: "${description}"`
     }
 
     // 4. Semantic scoring by Claude
-    const scoringResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `We are searching for a lost pet. Here are the features of the lost pet:
+    const messageContent: any[] = [];
+
+    if (photo) {
+      let queryBase64Data = photo;
+      let queryMediaType = 'image/jpeg';
+      const matches = photo.match(/^data:(image\/[a-zA-Z0-9]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        queryMediaType = matches[1];
+        queryBase64Data = matches[2];
+      }
+
+      // Add query photo (Image 1)
+      messageContent.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: queryMediaType,
+          data: queryBase64Data
+        }
+      });
+
+      // Find candidates with photos and convert to base64
+      const candidatesWithPhotos: any[] = [];
+      for (const pet of filteredPets) {
+        const firstPhoto = pet.photos?.[0];
+        if (firstPhoto) {
+          const base64Info = await fetchImageAsBase64(firstPhoto);
+          if (base64Info) {
+            candidatesWithPhotos.push({
+              id: pet.id,
+              pet_name: pet.pet_name,
+              media_type: base64Info.media_type,
+              data: base64Info.data
+            });
+          }
+        }
+      }
+
+      // Limit candidate images in messageContent to 9 (making 10 total images including query image) to stay safe within Claude API limits
+      const limitedCandidatesWithPhotos = candidatesWithPhotos.slice(0, 9);
+      
+      limitedCandidatesWithPhotos.forEach((c) => {
+        messageContent.push({
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: c.media_type,
+            data: c.data
+          }
+        });
+      });
+
+      const candidateList = filteredPets.map((p) => {
+        const photoIndex = limitedCandidatesWithPhotos.findIndex(c => c.id === p.id);
+        const hasPhotoInPayload = photoIndex !== -1;
+        return {
+          id: p.id,
+          pet_name: p.pet_name,
+          species: p.species,
+          description: p.description,
+          city: p.city,
+          date_lost_found: p.date_lost_found,
+          ai_features: p.ai_features,
+          image_reference: hasPhotoInPayload ? `Image ${photoIndex + 2}` : null
+        };
+      });
+
+      const promptText = `You are helping reunite lost pets with their owners.
+
+We are searching for a lost pet. The first image (Image 1) is the photo of the lost pet.
+Lost pet features extracted:
+${JSON.stringify(extractedFeatures, null, 2)}
+
+Here is a list of active "found" pet reports in the database:
+${JSON.stringify(candidateList, null, 2)}
+
+Note that some found pets have photos attached (indicated by "image_reference": "Image X", referring to the corresponding image in the request).
+For each found pet, calculate a similarity score (0-100) representing how likely they are to be the same pet, and provide a concise reason/summary.
+
+Rules for calculating similarity score:
+- Species match: CRITICAL — wrong species = 0 score
+- Color/markings: HIGH importance (40% of score)
+- Breed similarity: MEDIUM importance (30% of score)
+- Size/age: LOW importance (20% of score)
+- Description keywords: LOW importance (10% of score)
+
+For candidates with an "image_reference", directly compare their photo against the lost pet photo (Image 1) to determine visual similarity. For others, compare the lost pet features against their text description and pre-extracted 'ai_features'.
+
+Be GENEROUS with scoring when key features match:
+- Same species + similar color = minimum 50%
+- Same species + same breed = minimum 65%
+- Same species + same color + same breed = minimum 80%
+- Exact same photo features or highly similar visual matches = 90%+
+
+Return ONLY JSON array of objects, containing the found pet ID, the match percentage score, and the concise match summary string (e.g. "87% Match — Gray tabby found 2 miles away" - include the approximate score in this summary as shown):
+[
+  {
+    "id": "pet-id",
+    "score": 87,
+    "summary": "87% Match — Gray tabby found 2 miles away"
+  }
+]`;
+
+      messageContent.push({
+        type: 'text',
+        text: promptText
+      });
+
+    } else {
+      // Fallback for text-only query
+      const promptText = `You are helping reunite lost pets with their owners.
+
+We are searching for a lost pet. Here are the features of the lost pet:
 ${JSON.stringify(extractedFeatures, null, 2)}
 
 Here is a list of active "found" pet reports in the database:
@@ -271,24 +396,46 @@ ${JSON.stringify(filteredPets.map(p => ({
   ai_features: p.ai_features
 })), null, 2)}
 
-Compare the lost pet features against each found pet report. For each found pet report, calculate a matching score (percentage integer from 0 to 100) representing how likely they are to be the same pet, and provide a short, descriptive match rationale.
-Use the pre-extracted structured 'ai_features' if available, as well as contextual details in the 'description'.
-Consider:
-1. Species (if species do not match, the score should be 0).
-2. Breed similarity, size, age, gender.
-3. Color overlap and markings.
-4. Contextual clues in the description.
+For each found pet, calculate a similarity score (0-100) based on:
+- Species match: CRITICAL — wrong species = 0 score
+- Color/markings: HIGH importance (40% of score)
+- Breed similarity: MEDIUM importance (30% of score)  
+- Size/age: LOW importance (20% of score)
+- Description keywords: LOW importance (10% of score)
 
-Return ONLY a JSON array of objects, containing the found pet ID, the match percentage score, and the concise match summary string (e.g. "87% Match — Gray tabby found 2 miles away" - include the approximate score in this summary as shown):
+Be GENEROUS with scoring when key features match:
+- Same species + similar color = minimum 50%
+- Same species + same breed = minimum 65%
+- Same species + same color + same breed = minimum 80%
+
+Return ONLY JSON array of objects, containing the found pet ID, the match percentage score, and the concise match summary string (e.g. "87% Match — Gray tabby found 2 miles away" - include the approximate score in this summary as shown):
 [
   {
-    "id": "found-pet-id",
+    "id": "pet-id",
     "score": 87,
     "summary": "87% Match — Gray tabby found 2 miles away"
   }
-]`
-            }
-          ]
+]`;
+
+      messageContent.push({
+        type: 'text',
+        text: promptText
+      });
+    }
+
+    const scoringResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: messageContent
         }]
       })
     });
@@ -312,14 +459,14 @@ Return ONLY a JSON array of objects, containing the found pet ID, the match perc
       return {
         ...pet,
         score: scoreObj ? scoreObj.score : 0,
-        matchSummary: scoreObj ? scoreObj.summary : 'No match information'
+        matchSummary: scoreObj ? (scoreObj.summary || scoreObj.reason) : 'No match information'
       };
     });
 
     console.log('[AI Match API] Scored pets before filtering:', matchedPets.map(p => ({ id: p.id, name: p.pet_name, score: p.score, summary: p.matchSummary })));
 
     // 5. Apply minMatchScore filter and sort
-    const minScore = minMatchScore ? parseInt(minMatchScore) : 10;
+    const minScore = minMatchScore ? parseInt(minMatchScore) : 20;
     console.log('[AI Match API] Applying minMatchScore filter of:', minScore);
     matchedPets = matchedPets.filter(p => p.score >= minScore);
     matchedPets.sort((a, b) => b.score - a.score);
