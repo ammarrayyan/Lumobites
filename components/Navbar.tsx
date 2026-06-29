@@ -10,6 +10,7 @@ import { app, getToken, getMessaging } from '@/lib/firebase';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [isPro, setIsPro] = useState(() => {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('lumo_pro_email');
@@ -87,6 +88,7 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    setMounted(true);
     syncStatus();
     
     const match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
@@ -454,97 +456,101 @@ export default function Navbar() {
 
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
             <ShareButton />
+            {mounted && (proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
             
-            {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
-            
-            {!isPro && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
-                    className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
-                  >
-                    Create Free Account <Sparkles className="w-3 h-3" />
-                  </button>
-                {showUpgradeMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
-                    <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                      <button 
-                        onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
-                        className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
-                      >
-                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
-                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-
-                      </button>
-                      <div className="flex items-center my-2 px-3">
-                        <div className="flex-grow border-t border-gray-150"></div>
-                        <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
-                        <div className="flex-grow border-t border-gray-150"></div>
-                      </div>
-                      <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
-                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
-                        <button
-                          onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
-                        >
-                          Sign in to access your account →
-                        </button>
-                      </div>
-                    </div>
-                  </>
+            {mounted ? (
+              <>
+                {!isPro && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                      className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                    >
+                      Create Free Account <Sparkles className="w-3 h-3" />
+                    </button>
+                    {showUpgradeMenu && (
+                      <>
+                        <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
+                        <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                          <button 
+                            onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
+                            className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
+                          >
+                            <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
+                            <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
+                          </button>
+                          <div className="flex items-center my-2 px-3">
+                            <div className="flex-grow border-t border-gray-150"></div>
+                            <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
+                            <div className="flex-grow border-t border-gray-150"></div>
+                          </div>
+                          <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
+                            <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
+                            <button
+                              onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
+                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                            >
+                              Sign in to access your account →
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
 
-            {isSignedIn && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowProMenu(!showProMenu)}
-                  className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
-                >
-                  {isPro && (
-                    <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
-                      Member <Check className="w-3 h-3 text-white stroke-[3]" />
-                    </div>
-                  )}
-                  <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
-                    Account
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
-                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                </button>
+                {isSignedIn && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowProMenu(!showProMenu)}
+                      className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    >
+                      {isPro && (
+                        <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
+                          Member <Check className="w-3 h-3 text-white stroke-[3]" />
+                        </div>
+                      )}
+                      <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
+                        Account
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
+                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    </button>
 
-                {showProMenu && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                      onClick={() => setShowProMenu(false)}
-                    />
-                    
-                    <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                      <div className="px-3 py-2 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                        {proEmail || "User Account"}
-                      </div>
-                      <Link 
-                        href="/account"
-                        onClick={() => setShowProMenu(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
-                      >
-                        <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
-                      </button>
-                    </div>
-                  </>
+                    {showProMenu && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40 bg-transparent cursor-default" 
+                          onClick={() => setShowProMenu(false)}
+                        />
+                        
+                        <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                          <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
+                            {proEmail || "User Account"}
+                          </div>
+                          <Link 
+                            href="/account"
+                            onClick={() => setShowProMenu(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
+                          </Link>
+                          <button
+                            onClick={handleSignOut}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
+                          >
+                            <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
-              </div>
+              </>
+            ) : (
+              <div className="w-28 h-7 bg-gray-100 animate-pulse rounded-full" />
             )}
           </div>
         </div>
@@ -552,10 +558,11 @@ export default function Navbar() {
         {/* Mobile: Logo & Sign In / Account Dropdown, Notification Bell & Share */}
         <div className="flex md:hidden items-center gap-2 ml-auto">
           <ShareButton />
-          
-          {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+          {mounted && (proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
 
-          {!isSignedIn ? (
+          {!mounted ? (
+            <div className="w-16 h-7 bg-gray-100 animate-pulse rounded-full" />
+          ) : !isSignedIn ? (
             <button
               onClick={() => setShowSignInModal(true)}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
@@ -580,7 +587,7 @@ export default function Navbar() {
                   />
                   
                   <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                    <div className="px-3 py-2 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
+                    <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
                       {proEmail || sitterEmail || "User Account"}
                     </div>
                     <Link 
