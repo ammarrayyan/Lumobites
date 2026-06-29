@@ -3232,7 +3232,35 @@ export default function PetSitting() {
         {/* FIND A SITTER TAB */}
         {activeTab === 'find' && (
           <div className="animate-fade-in">
-            {/* Search Bar */}
+            {reqEmail && (
+              <div className="flex justify-center border-b border-[#E8DDD4] mb-8 max-w-lg mx-auto">
+                <button
+                  onClick={() => setOwnerSubTab('search')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold border-b-2 transition-colors ${
+                    ownerSubTab === 'search'
+                      ? 'border-[#8B5E3C] text-[#8B5E3C]'
+                      : 'border-transparent text-[#6B7280] hover:text-[#4A3E3D]'
+                  }`}
+                >
+                  <Search className="w-4 h-4" />
+                  Find a Sitter
+                </button>
+                <button
+                  onClick={() => setOwnerSubTab('dashboard')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold border-b-2 transition-colors ${
+                    ownerSubTab === 'dashboard'
+                      ? 'border-[#8B5E3C] text-[#8B5E3C]'
+                      : 'border-transparent text-[#6B7280] hover:text-[#4A3E3D]'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  My Dashboard
+                </button>
+              </div>
+            )}
+
+            <div className={ownerSubTab === 'search' ? 'block animate-fade-in' : 'hidden'}>
+              {/* Search Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
               {/* Row 1: Location & Search Radius */}
               <div className="flex flex-col md:flex-row gap-4">
@@ -3332,17 +3360,7 @@ export default function PetSitting() {
 
             <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
 
-            {reqEmail && (
-              <div className="flex justify-center mb-6">
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('owner-history')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-full px-4 py-1.5 transition duration-200 shadow-sm cursor-pointer"
-                >
-                  📋 Jump to My Dashboard ↓
-                </button>
-              </div>
-            )}
+
 
             {/* Location Verification Status */}
             {searchZip.trim() && (
@@ -3576,9 +3594,11 @@ export default function PetSitting() {
                 </div>
               </div>
             )}
+            </div>
+
             {/* Owner Booking History Section */}
-            {isOwnerPro && (
-              <div id="owner-history" className="mt-12 bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+            {ownerSubTab === 'dashboard' && reqEmail && (
+              <div id="owner-history" className="bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
               <div id="messages" />
               <div className="mb-6">
                 <h3 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
