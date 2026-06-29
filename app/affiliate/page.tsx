@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import { Footprints, DollarSign, Award, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 
 export default function AffiliateSignupPage() {
@@ -92,8 +91,7 @@ export default function AffiliateSignupPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
-      <Navbar />
-
+      
       <main className="flex-1 max-w-[1000px] mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
         
         {/* Left Side: Pitch Copy */}

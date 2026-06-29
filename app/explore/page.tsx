@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import PetTwinPreview from '@/components/PetTwinPreview';
 import LostPetsPreview from '@/components/LostPetsPreview';
 import PetSittingPreview from '@/components/PetSittingPreview';
@@ -14,8 +13,7 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
       {/* NAVBAR */}
-      <Navbar />
-
+      
       {/* HERO HEADER */}
       <section className="w-full bg-[#FDFAF7] pt-12 pb-8 px-6 border-b border-[#E8DDD4]">
         <div className="max-w-[800px] mx-auto text-center flex flex-col items-center">

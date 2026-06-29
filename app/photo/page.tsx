@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, ChangeEvent, DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import { Dog, Cat, Sparkles, Footprints } from 'lucide-react';
 
 type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'budget';
@@ -187,8 +186,7 @@ export default function PhotoPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
       {/* NAVBAR */}
-      <Navbar />
-
+      
       <main className="flex-1 flex flex-col items-center py-12 px-6">
         <div className="w-full max-w-[600px] bg-white rounded-3xl border border-[#EEEEEE] shadow-sm p-8 md:p-10">
           

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Footprints, CheckCircle, MapPin, RefreshCw } from 'lucide-react';
@@ -236,8 +235,7 @@ export default function PostLostPet() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-4">
+                <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white p-10 rounded-3xl shadow-lg border border-[#E8DDD4] text-center max-w-md animate-fade-in">
             <Footprints className="w-16 h-16 text-[#8B5E3C] mx-auto mb-4 animate-bounce" />
             <h2 className="text-3xl font-black text-[#4A3E3D] mb-4">Post Shared!</h2>
@@ -257,8 +255,7 @@ export default function PostLostPet() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
-      <Navbar />
-      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+            <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
         <Link href="/lost-pets" className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-block">&larr; Back to Board</Link>
         
         <div className="bg-white rounded-3xl p-6 md:p-10 border border-[#E8DDD4] shadow-sm">

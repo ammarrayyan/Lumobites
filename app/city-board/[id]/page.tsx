@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
-import Navbar from '@/components/Navbar';
 import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
@@ -185,8 +184,7 @@ export default function CityBoardPostPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F0E8] font-sans">
-      <Navbar />
-
+      
       <main className="max-w-3xl mx-auto px-4 py-8">
         
         {/* Back Button & Thread ID Header */}

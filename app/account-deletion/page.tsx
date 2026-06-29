@@ -1,10 +1,8 @@
-import Navbar from '@/components/Navbar';
 
 export default function AccountDeletionPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans text-[#555555]">
-      <Navbar />
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
         <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '24px', color: '#8B5E3C' }}>
           Delete Your Lumo Bites Account
         </h1>

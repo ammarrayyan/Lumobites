@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import QRCode from 'qrcode';
 import { Copy, QrCode, Download, Share2, Activity, Users, DollarSign, ArrowRight, ShieldCheck, HelpCircle, Lock, Mail, Footprints, AlertTriangle, CheckCircle2, XCircle, Lightbulb, X } from 'lucide-react';
 
@@ -172,8 +171,7 @@ export default function AffiliateDashboard() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
-      <Navbar />
-
+      
       <main className="flex-1 flex flex-col py-16 px-6">
         <div className="max-w-[1200px] w-full mx-auto flex flex-col items-center">
           

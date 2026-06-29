@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { Calendar, MapPin, ClipboardList, Bell, CheckCircle2, AlertTriangle, Dog, Cat, Sparkles } from 'lucide-react';
@@ -377,8 +376,7 @@ export default function RecallsPage() {
     <div className="min-h-screen bg-[#FDFAF7] pt-[52px] md:pt-0" style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
 
       {/* NAV */}
-      <Navbar />
-      <MobileFoodNav />
+            <MobileFoodNav />
 
       {/* HERO */}
       <section className="w-full bg-gradient-to-br from-[#FDFAF7] to-[#F5EDE4] py-16 px-6 text-center border-b border-[#E8D5C0]">

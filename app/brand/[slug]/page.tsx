@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import BrandMarquee from '@/components/BrandMarquee';
-import Navbar from '@/components/Navbar';
 
 export function generateStaticParams() {
   const brands = [
@@ -34,8 +33,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
   return (
     <div className="min-h-screen bg-[#FDFAF7]">
       {/* NAVBAR */}
-      <Navbar />
-
+      
       <main className="max-w-[800px] mx-auto px-6 py-16 text-center">
         <div className="w-24 h-24 bg-[#8B5E3C] rounded-3xl mx-auto mb-8 flex items-center justify-center text-white text-4xl font-black">
           {brandName.charAt(0)}

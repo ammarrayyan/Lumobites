@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import { PawPrint, Search, AlertTriangle, Leaf, Sparkles, Share2, ShieldCheck } from 'lucide-react';
 
 export default function IngredientsPage() {
@@ -81,8 +80,7 @@ export default function IngredientsPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-24">
       {/* NAVBAR */}
-      <Navbar />
-
+      
       <main className="max-w-[800px] mx-auto px-6 pt-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-black text-[#191919] mb-4 tracking-tight">Ingredient Danger Checker</h1>

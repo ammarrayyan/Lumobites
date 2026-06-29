@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
@@ -1074,8 +1073,7 @@ export default function TwinPage() {
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7] pt-[52px] md:pt-0">
       
       {/* NAVBAR */}
-      <Navbar />
-      <MobileCommunityNav />
+            <MobileCommunityNav />
 
       <main className={`flex-1 flex flex-col items-center py-12 px-6 ${(showEmailModal || showUpgradeModal) ? 'blur-md pointer-events-none select-none' : ''}`}>
         <div className="w-full max-w-[650px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 relative overflow-hidden">

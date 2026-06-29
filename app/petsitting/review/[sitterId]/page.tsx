@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
 import { Footprints, AlertTriangle } from 'lucide-react';
 
 export function formatSitterName(fullName: string | null | undefined): string {
@@ -112,8 +111,7 @@ export default function SitterReviewPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col">
-      <Navbar />
-
+      
       <main className="flex-1 max-w-[600px] w-full mx-auto px-4 py-12">
         <div className="bg-white border border-[#E8DDD4] rounded-3xl p-8 shadow-sm">
           {loadingSitter ? (

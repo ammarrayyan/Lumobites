@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
-import Navbar from '@/components/Navbar';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin } from 'lucide-react';
 
 export default function Home() {
@@ -84,8 +83,7 @@ export default function Home() {
       )}
 
       {/* NAVBAR */}
-      <Navbar />
-
+      
       {/* HERO SECTION */}
       <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">

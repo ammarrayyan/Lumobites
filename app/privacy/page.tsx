@@ -1,10 +1,8 @@
-import Navbar from '@/components/Navbar';
 
 export default function PrivacyPage() {
     return (
       <div className="min-h-screen bg-[#FDFAF7] font-sans text-[#555555]">
-        <Navbar />
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
+                <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '8px', color: '#191919' }}>Privacy Policy</h1>
           <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: June 24, 2026</p>
           

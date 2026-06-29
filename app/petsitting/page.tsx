@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Navbar from '@/components/Navbar';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import ChatModal from '@/components/ChatModal';
@@ -3174,8 +3173,7 @@ export default function PetSitting() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans selection:bg-[#8B5E3C] selection:text-white flex flex-col relative">
-      <Navbar />
-
+      
       <div 
         className="flex-1 flex flex-col pt-2 md:pt-24 pb-12 w-full relative"
         onTouchStart={handleTouchStart}

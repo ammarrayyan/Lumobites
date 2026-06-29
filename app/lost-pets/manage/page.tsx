@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { AlertTriangle, Sparkles, Trash2, Settings } from 'lucide-react';
 
@@ -76,8 +75,7 @@ export default function ManageLostPet() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center p-4">
+            <main className="flex-1 flex items-center justify-center p-4">
         <div className="bg-white p-10 rounded-3xl shadow-lg border border-[#E8DDD4] text-center max-w-md w-full animate-fade-in">
           {error && !success ? (
             <>

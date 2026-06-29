@@ -49,12 +49,28 @@ const getInitialIsPro = () => {
   return false;
 };
 
-export default function Navbar() {
+interface NavbarProps {
+  initialEmail?: string;
+}
+
+export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
-  const [isPro, setIsPro] = useState(getInitialIsPro);
-  const [isSignedIn, setIsSignedIn] = useState(getInitialIsSignedIn);
-  const [proEmail, setProEmail] = useState(getInitialProEmail);
+  const [isPro, setIsPro] = useState(() => {
+    if (initialEmail) {
+      const isOwnerEmail = initialEmail.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || initialEmail.toLowerCase().trim() === 'reviewer@lumobites.net';
+      if (isOwnerEmail) return true;
+    }
+    return getInitialIsPro();
+  });
+  const [isSignedIn, setIsSignedIn] = useState(() => {
+    if (initialEmail) return true;
+    return getInitialIsSignedIn();
+  });
+  const [proEmail, setProEmail] = useState(() => {
+    if (initialEmail) return initialEmail;
+    return getInitialProEmail();
+  });
   const [sitterEmail, setSitterEmail] = useState(getInitialSitterEmail);
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
@@ -128,6 +144,7 @@ export default function Navbar() {
             const invalidatedDate = new Date(data.session_invalidated_at);
             if (invalidatedDate > startedDate) {
               localStorage.clear();
+              document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
               alert("You have been signed out of all devices for security.");
               window.location.href = "/";
               return;
@@ -159,6 +176,7 @@ export default function Navbar() {
             const invalidatedDate = new Date(data.session_invalidated_at);
             if (invalidatedDate > startedDate) {
               localStorage.clear();
+              document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
               alert("You have been signed out of all devices for security.");
               window.location.href = "/";
             }
@@ -232,6 +250,7 @@ export default function Navbar() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('lumo_pro_email');
       localStorage.removeItem('lumo_admin_bypass');
+      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }
     setIsPro(false);
     setIsSignedIn(false);
@@ -321,6 +340,7 @@ export default function Navbar() {
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
+      document.cookie = `lumo_pro_email=${signInEmail}; path=/; max-age=2592000`; // 30 days
       if (verifyData.isSitter) {
         localStorage.setItem('lumo_sitter_email', signInEmail);
         localStorage.setItem('lumo_sitter_id', verifyData.sitterId);

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Navbar from '@/components/Navbar';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
@@ -323,8 +322,7 @@ export default function LostPetsFeed() {
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col relative">
-      <Navbar />
-
+      
       <div
         className="flex-1 flex flex-col w-full relative pt-2 md:pt-20"
         onTouchStart={handleTouchStart}

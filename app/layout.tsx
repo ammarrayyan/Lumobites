@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { cookies } from "next/headers";
+import Navbar from "@/components/Navbar";
 import PwaRegister from "@/components/PwaRegister";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import PwaSplashScreen from "@/components/PwaSplashScreen";
@@ -41,11 +43,14 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const proEmail = cookieStore.get('lumo_pro_email')?.value || '';
+
   return (
     <html lang="en">
       <head>
@@ -73,6 +78,7 @@ export default function RootLayout({
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
+        <Navbar initialEmail={proEmail} />
         <div className="pt-[72px] pb-24 md:pb-0">
           {children}
         </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Search, MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
@@ -159,8 +158,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FDFAF7] font-sans">
-        <Navbar />
-        <div className="flex items-center justify-center py-32 text-[#8B5E3C] font-bold text-xl animate-pulse">
+                <div className="flex items-center justify-center py-32 text-[#8B5E3C] font-bold text-xl animate-pulse">
           Loading details...
         </div>
       </div>
@@ -170,8 +168,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   if (error || !pet) {
     return (
       <div className="min-h-screen bg-[#FDFAF7] font-sans">
-        <Navbar />
-        <div className="max-w-xl mx-auto px-4 py-20 text-center">
+                <div className="max-w-xl mx-auto px-4 py-20 text-center">
           <h2 className="text-3xl font-black text-[#4A3E3D] mb-4">Post Not Found</h2>
           <p className="text-[#8B7E7D] mb-8">This post may have been removed or does not exist.</p>
           <Link href="/lost-pets" className="bg-[#8B5E3C] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#7A5234]">
@@ -184,8 +181,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
-      <Navbar />
-
+      
       <main className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <Link href="/lost-pets" className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-block">&larr; Back to Board</Link>
 

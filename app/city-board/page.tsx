@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
-import Navbar from '@/components/Navbar';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw, Loader2 } from 'lucide-react';
 
@@ -313,8 +312,7 @@ export default function CityBoardPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F0E8] font-sans pt-[52px] md:pt-0 flex flex-col relative">
-      <Navbar />
-      <MobileCommunityNav />
+            <MobileCommunityNav />
 
       <div 
         className="flex-1 flex flex-col w-full relative"
