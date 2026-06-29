@@ -10,10 +10,47 @@ import { app, getToken, getMessaging } from '@/lib/firebase';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
-  const [isPro, setIsPro] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [proEmail, setProEmail] = useState('');
-  const [sitterEmail, setSitterEmail] = useState('');
+  const [isPro, setIsPro] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      if (isAdminBypass || isOwnerEmail) {
+        return true;
+      }
+    }
+    return false;
+  });
+  const [isSignedIn, setIsSignedIn] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      if (isAdminBypass || isOwnerEmail || (email && email !== 'undefined' && email !== 'null' && email.trim() !== '')) {
+        return true;
+      }
+    }
+    return false;
+  });
+  const [proEmail, setProEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email');
+      if (email && email !== 'undefined' && email !== 'null' && email.trim() !== '') {
+        return email;
+      }
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      if (isAdminBypass) {
+        return 'admin@lumobites.com';
+      }
+    }
+    return '';
+  });
+  const [sitterEmail, setSitterEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('lumo_sitter_email') || '';
+    }
+    return '';
+  });
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
