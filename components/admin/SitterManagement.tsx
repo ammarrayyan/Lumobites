@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw, LogOut } from 'lucide-react';
+import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw, LogOut, XCircle } from 'lucide-react';
 
 export default function SitterManagement({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
   const [sitters, setSitters] = useState<any[]>([]);
@@ -11,6 +11,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available'>('all');
 
   useEffect(() => {
     fetchSitters();
@@ -197,7 +198,9 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
     }
   };
 
-  const filteredSitters = sitters.filter(s => filter === 'all' || s.approval_status === filter);
+  const filteredSitters = sitters
+    .filter(s => filter === 'all' || s.approval_status === filter)
+    .filter(s => availabilityFilter === 'all' || s.availability === true);
 
   if (loading) {
     return <div className="text-gray-500 animate-pulse text-center py-12">Loading sitters...</div>;
@@ -207,18 +210,38 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
         <h2 className="text-xl font-semibold text-[#191919]">Sitter Management</h2>
-        <div className="flex space-x-2">
-          {['all', 'pending', 'approved', 'rejected'].map(f => (
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex space-x-2 border-r border-gray-200 pr-2 mr-2">
+            {['all', 'pending', 'approved', 'rejected'].map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f as any)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
+                  filter === f ? 'bg-white text-black' : 'bg-gray-50 text-[#555555] hover:bg-gray-100'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <div className="flex space-x-2">
             <button
-              key={f}
-              onClick={() => setFilter(f as any)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
-                filter === f ? 'bg-white text-black' : 'bg-gray-50 text-[#555555] hover:bg-gray-100'
+              onClick={() => setAvailabilityFilter('all')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                availabilityFilter === 'all' ? 'bg-white text-black' : 'bg-gray-50 text-[#555555] hover:bg-gray-100'
               }`}
             >
-              {f}
+              Show All
             </button>
-          ))}
+            <button
+              onClick={() => setAvailabilityFilter('available')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                availabilityFilter === 'available' ? 'bg-white text-black border border-green-500/30 font-bold' : 'bg-gray-50 text-[#555555] hover:bg-gray-100'
+              }`}
+            >
+              Show Available Only
+            </button>
+          </div>
         </div>
       </div>
 
@@ -249,6 +272,15 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     }`}>
                       {sitter.approval_status || 'pending'}
                     </span>
+                    {sitter.availability ? (
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-600 border border-green-500/20 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5 text-green-600" /> Available
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-500/10 text-red-600 border border-red-500/20 flex items-center gap-1">
+                        <XCircle className="w-3.5 h-3.5 text-red-600" /> Unavailable
+                      </span>
+                    )}
                     {sitter.needs_reapproval && (
                       <span className="px-2 py-0.5 rounded text-xs font-bold bg-orange-500/20 text-orange-600 border border-orange-500/30 animate-pulse flex items-center gap-1">
                         Re-review <AlertTriangle className="w-3.5 h-3.5 text-orange-600" />
