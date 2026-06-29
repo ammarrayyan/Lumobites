@@ -5435,7 +5435,18 @@ export default function PetSitting() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Email</label>
-                      <input required type="email" value={reqEmail} onChange={e => setReqEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-3 py-2 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                      <div className="relative flex items-center">
+                        <Lock className="absolute left-3 w-4 h-4 text-gray-400" />
+                        <input 
+                          required 
+                          type="email" 
+                          value={typeof window !== 'undefined' ? (window.localStorage.getItem('lumo_pro_email') || reqEmail) : reqEmail}
+                          readOnly 
+                          disabled
+                          className="w-full bg-gray-100 cursor-not-allowed opacity-75 border border-[#E8DDD4] rounded-lg pl-9 pr-3 py-2 text-[#4A3E3D] focus:outline-none" 
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-1">This is your account email and cannot be changed</p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Your Phone Number (Optional)</label>
