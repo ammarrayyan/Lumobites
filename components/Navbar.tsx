@@ -10,7 +10,12 @@ import { app, getToken, getMessaging } from '@/lib/firebase';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!(window as any).__lumo_hydrated;
+    }
+    return false;
+  });
   const [isPro, setIsPro] = useState(() => {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('lumo_pro_email');
@@ -89,6 +94,9 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+      (window as any).__lumo_hydrated = true;
+    }
     syncStatus();
     
     const match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
@@ -503,19 +511,10 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setShowProMenu(!showProMenu)}
-                      className="flex items-center gap-2.5 bg-white hover:bg-[#FAF8F5] border border-[#E6DFD9] hover:border-[#D6CDC2] px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer select-none shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
+                      title={proEmail || sitterEmail || 'Account'}
                     >
-                      {isPro && (
-                        <div className="bg-gradient-to-r from-[#7C3AED] to-[#DB2777] text-white text-[11px] font-bold italic tracking-wide px-3 py-0.5 rounded-full shadow-sm select-none flex items-center gap-0.5">
-                          Member <Check className="w-3 h-3 text-white stroke-[3]" />
-                        </div>
-                      )}
-                      <span className="text-xs text-[#4A3E3D] font-bold flex items-center gap-1 select-none">
-                        Account
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B7E7D] transition-transform duration-200" style={{ transform: showProMenu ? 'rotate(180deg)' : 'none' }}>
-                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                        </svg>
-                      </span>
+                      {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
                     </button>
 
                     {showProMenu && (
@@ -550,7 +549,7 @@ export default function Navbar() {
                 )}
               </>
             ) : (
-              <div className="w-28 h-7 bg-gray-100 animate-pulse rounded-full" />
+              <div className="w-8 h-8 bg-gray-100 animate-pulse rounded-full" />
             )}
           </div>
         </div>
