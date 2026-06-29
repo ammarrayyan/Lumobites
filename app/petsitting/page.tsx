@@ -7,7 +7,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2 } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -312,6 +312,7 @@ const formatPhoneNumber = (value: string) => {
 
 export default function PetSitting() {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
+  const [ownerSubTab, setOwnerSubTab] = useState<'search' | 'dashboard'>('search');
 
   // Report Modal State
   const [reportModalOpen, setReportModalOpen] = useState(false);
