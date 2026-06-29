@@ -7,6 +7,7 @@ import ChatBubble from '@/components/ChatBubble';
 import { ChatMessage, ParsedPetInfo } from '@/lib/types';
 import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight, Camera, MessageSquare, ArrowLeft, Upload, Loader2 } from 'lucide-react';
 import MobileFoodNav from '@/components/MobileFoodNav';
+import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
@@ -18,12 +19,16 @@ export default function ChatPage() {
   const [photoLoading, setPhotoLoading] = useState(false);
   const [photoAnalysisResult, setPhotoAnalysisResult] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoAmazonProducts, setPhotoAmazonProducts] = useState<AmazonProduct[]>([]);
+  const [photoAmazonLoading, setPhotoAmazonLoading] = useState(false);
 
   const handleAnalyzePhoto = async () => {
     if (!photoFile) return;
     setPhotoLoading(true);
     setPhotoError(null);
     setPhotoAnalysisResult(null);
+    setPhotoAmazonProducts([]);
+    setPhotoAmazonLoading(false);
 
     try {
       const formData = new FormData();
@@ -40,6 +45,47 @@ export default function ChatPage() {
       }
 
       setPhotoAnalysisResult(data.analysis);
+
+      // Fetch Amazon product suggestions
+      if (data.recommendations && data.recommendations.length > 0) {
+        setPhotoAmazonLoading(true);
+        try {
+          const allProducts: AmazonProduct[] = [];
+          const fetchPromises = data.recommendations.map(async (query: string) => {
+            try {
+              const res = await fetch(`/api/amazon/search?q=${encodeURIComponent(query)}&limit=3`);
+              if (res.ok) {
+                const searchData = await res.json();
+                return searchData.products || [];
+              }
+            } catch (err) {
+              console.error(`Failed to fetch Amazon search for ${query}:`, err);
+            }
+            return [];
+          });
+
+          const results = await Promise.all(fetchPromises);
+          for (const list of results) {
+            allProducts.push(...list);
+          }
+
+          // Deduplicate by ASIN
+          const uniqueProducts: AmazonProduct[] = [];
+          const seenAsins = new Set<string>();
+          for (const prod of allProducts) {
+            if (!seenAsins.has(prod.asin)) {
+              seenAsins.add(prod.asin);
+              uniqueProducts.push(prod);
+            }
+          }
+
+          setPhotoAmazonProducts(uniqueProducts);
+        } catch (err) {
+          console.error("Failed fetching Amazon suggestions:", err);
+        } finally {
+          setPhotoAmazonLoading(false);
+        }
+      }
     } catch (err: any) {
       console.error(err);
       setPhotoError(err.message || 'Something went wrong. Please try again.');
@@ -650,12 +696,32 @@ export default function ChatPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8B5E3C', fontWeight: 'bold', fontSize: '13px' }}>
                     <Sparkles size={14} /> AI Analysis & Food Picks
                   </div>
-                  <div 
-                    style={{ fontSize: '13px', color: '#333333', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}
-                  >
-                    {photoAnalysisResult}
+                  <div style={{ fontSize: '13px', color: '#333333', lineHeight: '1.6' }}>
+                    {formatMarkdown(photoAnalysisResult)}
                   </div>
                 </div>
+
+                {/* Recommended Products (Amazon links) */}
+                {(photoAmazonLoading || photoAmazonProducts.length > 0) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '800', color: '#191919', display: 'flex', alignItems: 'center', gap: '6px', margin: '8px 0 4px 0' }}>
+                      🛒 Recommended Products
+                    </h4>
+                    {photoAmazonLoading ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {[0, 1, 2].map((i) => (
+                          <AmazonProductCardSkeleton key={i} compact={true} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {photoAmazonProducts.map((p) => (
+                          <AmazonProductCard key={p.asin} product={p} compact={true} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <button
                   onClick={() => {
@@ -663,6 +729,8 @@ export default function ChatPage() {
                     setPhotoPreview(null);
                     setPhotoAnalysisResult(null);
                     setPhotoError(null);
+                    setPhotoAmazonProducts([]);
+                    setPhotoAmazonLoading(false);
                   }}
                   style={{
                     width: '100%',
@@ -898,4 +966,53 @@ export default function ChatPage() {
       `}} />
     </div>
   );
+}
+
+function formatMarkdown(text: string) {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (!trimmed) return null;
+
+        // Check if it's a heading: starts with one or more #
+        const headingMatch = trimmed.match(/^(#{1,6})\s*(.*)/);
+        if (headingMatch) {
+          const level = headingMatch[1].length;
+          const content = headingMatch[2];
+          const parsedContent = parseBoldText(content);
+          if (level === 1) return <h1 key={i} style={{ fontSize: '15px', fontWeight: '800', color: '#191919', marginTop: '8px', marginBottom: '4px' }}>{parsedContent}</h1>;
+          if (level === 2) return <h2 key={i} style={{ fontSize: '14px', fontWeight: '800', color: '#191919', marginTop: '8px', marginBottom: '4px' }}>{parsedContent}</h2>;
+          return <h3 key={i} style={{ fontSize: '13px', fontWeight: '800', color: '#191919', marginTop: '6px', marginBottom: '4px' }}>{parsedContent}</h3>;
+        }
+
+        // Check if it is a list item: starts with *, -, or numbers like 1., 2.
+        const listMatch = trimmed.match(/^(?:\*|-|\d+\.)\s*(.*)/);
+        if (listMatch) {
+          const content = listMatch[1];
+          return (
+            <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'start', paddingLeft: '8px', fontSize: '12px', lineHeight: '1.5', color: '#4A3E3D' }}>
+              <span style={{ color: '#8B5E3C', marginTop: '2px', flexShrink: 0 }}>•</span>
+              <span style={{ flex: 1 }}>{parseBoldText(content)}</span>
+            </div>
+          );
+        }
+
+        // Default paragraph
+        return <p key={i} style={{ fontSize: '12px', lineHeight: '1.5', color: '#4A3E3D', margin: 0 }}>{parseBoldText(trimmed)}</p>;
+      })}
+    </div>
+  );
+}
+
+function parseBoldText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} style={{ fontWeight: 'bold', color: '#191919' }}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
 }

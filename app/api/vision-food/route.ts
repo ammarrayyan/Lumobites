@@ -45,10 +45,20 @@ export async function POST(req: Request) {
               {
                 type: 'text',
                 text: `Analyze this pet photo and suggest the best pet food options.
-Identify: species, breed, approximate age, size/weight
+Identify: species, breed, approximate age, size/weight.
 Then recommend 3-5 specific pet food types that would be ideal for this pet.
-Consider: age-appropriate nutrition, breed-specific needs, size-appropriate portions
-Return recommendations in a clear, friendly format. Use markdown formatting with bullet points and clear sections.`
+Consider: age-appropriate nutrition, breed-specific needs, size-appropriate portions.
+
+Return the response in JSON format only. Do not include any other text or markdown wrapper outside the JSON itself.
+The JSON must have the following keys:
+1. "analysis": A clear, friendly description of your findings, using markdown for list items and headers.
+2. "recommendations": An array of 3-4 specific pet food product names or search queries that would be ideal to search on Amazon (e.g. ["Royal Canin Kitten Food", "Hill's Science Diet Sensitive Stomach Dog Food"]).
+
+JSON structure example:
+{
+  "analysis": "Markdown text here",
+  "recommendations": ["Query 1", "Query 2", "Query 3"]
+}`
               }
             ]
           }
@@ -64,10 +74,13 @@ Return recommendations in a clear, friendly format. Use markdown formatting with
     }
 
     const textContent = data.content?.find((c: any) => c.type === 'text')?.text || '';
+    const cleanText = textContent.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(cleanText);
 
     return NextResponse.json({
       success: true,
-      analysis: textContent
+      analysis: result.analysis || '',
+      recommendations: result.recommendations || []
     });
 
   } catch (error: any) {
