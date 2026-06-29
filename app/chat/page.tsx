@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ChatBubble from '@/components/ChatBubble';
 import { ChatMessage, ParsedPetInfo } from '@/lib/types';
-import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight, Camera, MessageSquare, ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight, Camera, MessageSquare, ArrowLeft, Upload, Loader2, MessageCircle, Utensils, Heart, PawPrint, Leaf, AlertTriangle, ShoppingCart } from 'lucide-react';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 
@@ -100,7 +100,7 @@ export default function ChatPage() {
   const [returnBanner, setReturnBanner] = useState<{ petType: string; params: string } | null>(null);
   
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: "Hey! 👋 I'm here to help find the perfect food \nfor your pet. Let's start — is your pet a 🐱 cat \nor 🐶 dog?" }
+    { role: 'assistant', content: "Hey! I'm here to help find the perfect food \nfor your pet. Let's start — is your pet a cat \nor dog?" }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -229,11 +229,11 @@ export default function ChatPage() {
       let skipToNext = false;
 
       const getNextStep = (info: ParsedPetInfo) => {
-        if (info.pet_type === undefined) return { step: 0, text: "I got some details, but is your pet a 🐱 cat or 🐶 dog?" };
+        if (info.pet_type === undefined) return { step: 0, text: "I got some details, but is your pet a cat or dog?" };
         if (info.age_years === undefined) return { step: 1, text: `Got it! A ${info.pet_type || 'pet'}. How old are they?\n(e.g. '2 years', '6 months')` };
         if (info.health_issues === undefined) return { step: 3, text: `Any health issues I should know about?\nYou can tap the options below, type them out, or say 'none'.` };
         if (info.budget_monthly_max === undefined) return { step: 5, text: `Almost done! What's your monthly budget for pet food?\n(e.g. '$30', '$50', '$80')` };
-        return { step: 6, text: `Got it all! 🐾 ${info.pet_type === 'cat' ? '🐱' : '🐶'} Finding the best matches...` };
+        return { step: 6, text: "Got it all! Finding the best matches..." };
       };
 
       const handleRetry = (failMsg: string) => {
@@ -254,7 +254,7 @@ export default function ChatPage() {
           isValid = true;
           nextStep = 0; // Stay on step 0
           setRetries(0);
-          botResponse = "Hey there! 😊 So let's find the perfect food for your pet — is your pet a 🐱 cat or 🐶 dog?";
+          botResponse = "Hey there! So let's find the perfect food for your pet — is your pet a cat or dog?";
         } else {
           // ── Robust Multi-field Extraction ──
           
@@ -540,7 +540,7 @@ export default function ChatPage() {
                 <Camera size={24} />
               </div>
               <div style={{ flex: 1 }}>
-                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>📷 Upload Pet Photo</span>
+                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>Upload Pet Photo</span>
                 <span style={{ display: 'block', fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>AI analyzes your pet photo and suggests food instantly.</span>
               </div>
             </button>
@@ -568,7 +568,7 @@ export default function ChatPage() {
                 <MessageSquare size={24} />
               </div>
               <div style={{ flex: 1 }}>
-                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>💬 Answer Questions</span>
+                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>Answer Questions</span>
                 <span style={{ display: 'block', fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>Tell us about your pet's age, weight, and health step by step.</span>
               </div>
             </button>
@@ -613,7 +613,7 @@ export default function ChatPage() {
           {/* Body */}
           <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', backgroundColor: '#FAFAFA' }}>
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>📷 Upload Pet Photo</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#191919', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}><Camera size={18} /> Upload Pet Photo</h3>
               <p style={{ fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>Take a picture or select one. AI will analyze your pet to suggest ideal foods.</p>
             </div>
 
@@ -705,7 +705,7 @@ export default function ChatPage() {
                 {(photoAmazonLoading || photoAmazonProducts.length > 0) && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
                     <h4 style={{ fontSize: '14px', fontWeight: '800', color: '#191919', display: 'flex', alignItems: 'center', gap: '6px', margin: '8px 0 4px 0' }}>
-                      🛒 Recommended Products
+                      <ShoppingCart size={18} /> Recommended Products
                     </h4>
                     {photoAmazonLoading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -758,7 +758,7 @@ export default function ChatPage() {
           {returnBanner && step === 0 && (
             <div style={{ background: '#F5EDE4', borderBottom: '1px solid #E8D5C0', padding: '14px 20px' }}>
               <p style={{ fontSize: 'var(--text-body)', fontWeight: 700, color: '#191919', marginBottom: '8px' }}>
-                👋 Welcome back! Search again for your {returnBanner.petType}?
+                Welcome back! Search again for your {returnBanner.petType}?
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
@@ -982,7 +982,7 @@ function formatMarkdown(text: string) {
         if (headingMatch) {
           const level = headingMatch[1].length;
           const content = headingMatch[2];
-          const parsedContent = parseBoldText(content);
+          const parsedContent = parseInlineText(content);
           if (level === 1) return <h1 key={i} style={{ fontSize: '15px', fontWeight: '800', color: '#191919', marginTop: '8px', marginBottom: '4px' }}>{parsedContent}</h1>;
           if (level === 2) return <h2 key={i} style={{ fontSize: '14px', fontWeight: '800', color: '#191919', marginTop: '8px', marginBottom: '4px' }}>{parsedContent}</h2>;
           return <h3 key={i} style={{ fontSize: '13px', fontWeight: '800', color: '#191919', marginTop: '6px', marginBottom: '4px' }}>{parsedContent}</h3>;
@@ -995,23 +995,46 @@ function formatMarkdown(text: string) {
           return (
             <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'start', paddingLeft: '8px', fontSize: '12px', lineHeight: '1.5', color: '#4A3E3D' }}>
               <span style={{ color: '#8B5E3C', marginTop: '2px', flexShrink: 0 }}>•</span>
-              <span style={{ flex: 1 }}>{parseBoldText(content)}</span>
+              <span style={{ flex: 1 }}>{parseInlineText(content)}</span>
             </div>
           );
         }
 
         // Default paragraph
-        return <p key={i} style={{ fontSize: '12px', lineHeight: '1.5', color: '#4A3E3D', margin: 0 }}>{parseBoldText(trimmed)}</p>;
+        return <p key={i} style={{ fontSize: '12px', lineHeight: '1.5', color: '#4A3E3D', margin: 0 }}>{parseInlineText(trimmed)}</p>;
       })}
     </div>
   );
 }
 
-function parseBoldText(text: string) {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
+const EMOJI_ICON_MAP: Record<string, React.ReactNode> = {
+  '📷': <Camera size={16} className="inline-block mx-1" />,
+  '💬': <MessageCircle size={16} className="inline-block mx-1" />,
+  '🥩': <Utensils size={16} className="inline-block mx-1" />,
+  '🐟': <Utensils size={16} className="inline-block mx-1" />,
+  '🫀': <Heart size={16} className="inline-block mx-1" />,
+  '🦴': <PawPrint size={16} className="inline-block mx-1" />,
+  '🌿': <Leaf size={16} className="inline-block mx-1" />,
+  '⚠️': <AlertTriangle size={16} className="inline-block mx-1" />,
+  '🐾': <PawPrint size={16} className="inline-block mx-1" />,
+  '🐱': <PawPrint size={16} className="inline-block mx-1" />,
+};
+
+function parseInlineText(text: string) {
+  // Strip all emojis that are not in our map
+  const strippedText = text.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, (match) => {
+    if (EMOJI_ICON_MAP[match]) return match;
+    return '';
+  });
+
+  // Split by bold text OR any of our specific emojis
+  const parts = strippedText.split(/(\*\*.*?\*\*|📷|💬|🥩|🐟|🫀|🦴|🌿|⚠️|🐾|🐱)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i} style={{ fontWeight: 'bold', color: '#191919' }}>{part.slice(2, -2)}</strong>;
+    }
+    if (EMOJI_ICON_MAP[part]) {
+      return <span key={i} style={{ color: '#8B5E3C', display: 'inline-flex', verticalAlign: 'text-bottom' }}>{EMOJI_ICON_MAP[part]}</span>;
     }
     return part;
   });
