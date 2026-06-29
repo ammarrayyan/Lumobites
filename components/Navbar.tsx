@@ -7,56 +7,55 @@ import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showPushBanner, setShowPushBanner] = useState(false);
-  const [mounted, setMounted] = useState(() => {
+const getInitialProEmail = () => {
+  try {
     if (typeof window !== 'undefined') {
-      return !!(window as any).__lumo_hydrated;
+      return localStorage.getItem('lumo_pro_email') || '';
     }
-    return false;
-  });
-  const [isPro, setIsPro] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_pro_email');
-      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
-      if (isAdminBypass || isOwnerEmail) {
-        return true;
-      }
-    }
-    return false;
-  });
-  const [isSignedIn, setIsSignedIn] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_pro_email');
-      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
-      if (isAdminBypass || isOwnerEmail || (email && email !== 'undefined' && email !== 'null' && email.trim() !== '')) {
-        return true;
-      }
-    }
-    return false;
-  });
-  const [proEmail, setProEmail] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_pro_email');
-      if (email && email !== 'undefined' && email !== 'null' && email.trim() !== '') {
-        return email;
-      }
-      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      if (isAdminBypass) {
-        return 'admin@lumobites.com';
-      }
-    }
-    return '';
-  });
-  const [sitterEmail, setSitterEmail] = useState(() => {
+  } catch (e) {}
+  return '';
+};
+
+const getInitialSitterEmail = () => {
+  try {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('lumo_sitter_email') || '';
     }
-    return '';
-  });
+  } catch (e) {}
+  return '';
+};
+
+const getInitialIsSignedIn = () => {
+  try {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      return !!(isAdminBypass || isOwnerEmail || (email && email !== 'undefined' && email !== 'null' && email.trim() !== ''));
+    }
+  } catch (e) {}
+  return false;
+};
+
+const getInitialIsPro = () => {
+  try {
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email');
+      const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
+      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      return !!(isAdminBypass || isOwnerEmail);
+    }
+  } catch (e) {}
+  return false;
+};
+
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showPushBanner, setShowPushBanner] = useState(false);
+  const [isPro, setIsPro] = useState(getInitialIsPro);
+  const [isSignedIn, setIsSignedIn] = useState(getInitialIsSignedIn);
+  const [proEmail, setProEmail] = useState(getInitialProEmail);
+  const [sitterEmail, setSitterEmail] = useState(getInitialSitterEmail);
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -93,10 +92,6 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      (window as any).__lumo_hydrated = true;
-    }
     syncStatus();
     
     const match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
@@ -462,106 +457,97 @@ export default function Navbar() {
             Explore
           </Link>
 
-          <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4">
+          <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4" suppressHydrationWarning={true}>
             <ShareButton />
-            {mounted && (proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+            {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
             
-            {mounted ? (
-              <>
-                {!isPro && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
-                      className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
-                    >
-                      Create Free Account <Sparkles className="w-3 h-3" />
-                    </button>
-                    {showUpgradeMenu && (
-                      <>
-                        <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
-                        <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                          <button 
-                            onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
-                            className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
-                          >
-                            <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
-                            <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                          </button>
-                          <div className="flex items-center my-2 px-3">
-                            <div className="flex-grow border-t border-gray-150"></div>
-                            <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
-                            <div className="flex-grow border-t border-gray-150"></div>
-                          </div>
-                          <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
-                            <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
-                            <button
-                              onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
-                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
-                            >
-                              Sign in to access your account →
-                            </button>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
+            {!isPro && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                  className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                >
+                  Create Free Account <Sparkles className="w-3 h-3" />
+                </button>
+                {showUpgradeMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
+                    <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                      <button 
+                        onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
+                        className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
+                      >
+                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
+                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
+                      </button>
+                      <div className="flex items-center my-2 px-3">
+                        <div className="flex-grow border-t border-gray-150"></div>
+                        <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
+                        <div className="flex-grow border-t border-gray-150"></div>
+                      </div>
+                      <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
+                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
+                        <button
+                          onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                        >
+                          Sign in to access your account →
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
+              </div>
+            )}
 
-                {isSignedIn && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowProMenu(!showProMenu)}
-                      className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
-                      title={proEmail || sitterEmail || 'Account'}
-                    >
-                      {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
-                    </button>
+            {isSignedIn && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowProMenu(!showProMenu)}
+                  className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
+                  title={proEmail || sitterEmail || 'Account'}
+                >
+                  {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
+                </button>
 
-                    {showProMenu && (
-                      <>
-                        <div 
-                          className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                          onClick={() => setShowProMenu(false)}
-                        />
-                        
-                        <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                          <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                            {proEmail || "User Account"}
-                          </div>
-                          <Link 
-                            href="/account"
-                            onClick={() => setShowProMenu(false)}
-                            className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
-                            style={{ textDecoration: 'none' }}
-                          >
-                            <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
-                          </Link>
-                          <button
-                            onClick={handleSignOut}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
-                          >
-                            <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                {showProMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40 bg-transparent cursor-default" 
+                      onClick={() => setShowProMenu(false)}
+                    />
+                    
+                    <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                      <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
+                        {proEmail || "User Account"}
+                      </div>
+                      <Link 
+                        href="/account"
+                        onClick={() => setShowProMenu(false)}
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
+                      </button>
+                    </div>
+                  </>
                 )}
-              </>
-            ) : (
-              <div className="w-8 h-8 bg-gray-100 animate-pulse rounded-full" />
+              </div>
             )}
           </div>
         </div>
 
-        {/* Mobile: Logo & Sign In / Account Dropdown, Notification Bell & Share */}
-        <div className="flex md:hidden items-center gap-2 ml-auto">
+        <div className="flex md:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
-          {mounted && (proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+          {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
 
-          {!mounted ? (
-            <div className="w-16 h-7 bg-gray-100 animate-pulse rounded-full" />
-          ) : !isSignedIn ? (
+          {!isSignedIn ? (
             <button
               onClick={() => setShowSignInModal(true)}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
