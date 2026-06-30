@@ -356,31 +356,33 @@ export default function LostPetsFeed() {
           </div>
 
           {/* ── Tab Switcher ── */}
-          <div className="flex gap-2 mb-8 bg-white border border-[#E8DDD4] rounded-2xl p-1.5 shadow-sm w-full max-w-md">
-            <button
-              type="button"
-              onClick={() => setActiveTab('board')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 ${
-                activeTab === 'board'
-                  ? 'bg-[#8B5E3C] text-white shadow-md'
-                  : 'text-[#8B7E7D] hover:text-[#4A3E3D] hover:bg-[#FAF6F4]'
-              }`}
-            >
-              <PawPrint className="w-4 h-4" />
-              <span>Lost &amp; Found Board</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('ai')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 ${
-                activeTab === 'ai'
-                  ? 'bg-[#8B5E3C] text-white shadow-md'
-                  : 'text-[#8B7E7D] hover:text-[#4A3E3D] hover:bg-[#FAF6F4]'
-              }`}
-            >
-              <Search className="w-4 h-4" />
-              <span>AI Pet Search</span>
-            </button>
+          <div className="flex justify-center mb-8">
+            <div className="bg-white p-1 rounded-full shadow-sm inline-flex border border-[#E8DDD4]">
+              <button
+                type="button"
+                onClick={() => setActiveTab('board')}
+                className={`flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                  activeTab === 'board'
+                    ? 'bg-[#8B5E3C] text-white shadow-md'
+                    : 'text-[#666666] hover:text-[#8B5E3C]'
+                }`}
+              >
+                <PawPrint className="w-4 h-4" />
+                <span>Lost &amp; Found Board</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('ai')}
+                className={`flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                  activeTab === 'ai'
+                    ? 'bg-[#8B5E3C] text-white shadow-md'
+                    : 'text-[#666666] hover:text-[#8B5E3C]'
+                }`}
+              >
+                <Search className="w-4 h-4" />
+                <span>AI Pet Search</span>
+              </button>
+            </div>
           </div>
 
           {/* ══════════════════════════════════════════════════════════════════
