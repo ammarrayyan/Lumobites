@@ -1490,39 +1490,28 @@ export default function TwinPage() {
               </div>
 
               {/* CTAs & Options */}
-              <div className="w-full flex flex-col gap-3 mt-4">
+              <div className="w-full flex flex-col gap-4 mt-4">
                 
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <button 
-                    onClick={shareToInstagramStory}
-                    className="flex-1 bg-gradient-to-r from-[#ee2a7b] to-[#6228d7] hover:from-[#d6246e] hover:to-[#551ec0] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer border-0"
-                  >
-                    <Camera className="w-5 h-5 text-white animate-pulse" /> Share to Instagram Stories 📸
-                  </button>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                {/* 1. Explore Breed Resources */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   <Link 
                     href={`/results?breed=${encodeURIComponent(result.breed)}`}
-                    className="flex-1 bg-[#8B5E3C] text-white py-4 rounded-xl font-bold text-base text-center hover:bg-[#734A2E] transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                    className="bg-[#8B5E3C] text-white py-3.5 rounded-xl font-bold text-sm text-center hover:bg-[#734A2E] transition-colors shadow-sm flex items-center justify-center gap-1.5"
                     style={{ textDecoration: 'none' }}
                   >
-                    <Dog className="w-5 h-5" /> Find Best Food for {result.breed}
+                    <Dog className="w-4 h-4" /> Find Best Food for {result.breed}
                   </Link>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <Link 
                     href="/petsitting"
-                    className="flex-1 bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-4 rounded-xl font-bold text-base text-center transition-colors shadow-md flex items-center justify-center gap-1.5"
+                    className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-md flex items-center justify-center gap-1.5"
                     style={{ textDecoration: 'none' }}
                   >
-                    <Footprints className="w-5 h-5 text-white" /> Find a pet sitter who loves your breed! Search sitters near you &rarr;
+                    <Footprints className="w-4 h-4 text-white" /> Search Sitters Near You &rarr;
                   </Link>
                 </div>
 
-                {/* Public Gallery Opt-In Share Card (First Option) */}
-                <div className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 flex flex-col gap-3 text-left mb-2">
+                {/* 2. Public Gallery Opt-In Share Card */}
+                <div className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 flex flex-col gap-3 text-left">
                   <div className="flex items-start gap-3">
                     <input 
                       type="checkbox"
@@ -1595,114 +1584,118 @@ export default function TwinPage() {
                   )}
                 </div>
 
-                {/* Social Sharing Callout Note */}
-                <div className="w-full text-center mt-4 pt-4 border-t border-[#F2ECE6]">
-                  <p className="text-xs font-bold text-[#8B5E3C] leading-relaxed mb-3">
-                    Already shared to our gallery? Now share on social and challenge your friends!
-                  </p>
-                </div>
-
-                {/* Social Media Sharing & Downloads (Second Option) */}
-                <div className="grid grid-cols-3 gap-2.5 w-full">
-                  <button 
-                    onClick={downloadSquareCard}
-                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
-                  >
-                    <Camera className="w-4 h-4 text-gray-500" /> Square (1:1)
-                  </button>
-                  <button 
-                    onClick={downloadStoryCard}
-                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
-                  >
-                    <Camera className="w-4 h-4 text-gray-500" /> Story (9:16)
-                  </button>
-                  <button 
-                    onClick={downloadTwitterCard}
-                    className="bg-white border border-[#E5E0DA] text-[#666666] py-3.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer text-center"
-                  >
-                    <Camera className="w-4 h-4 text-gray-500" /> Twitter/X (16:9)
-                  </button>
-                </div>
-
-                {/* Social Media Share Buttons */}
-                <div className="flex flex-col items-center gap-3 mt-2">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Share on:</span>
-                  <div className="flex items-center justify-center gap-4">
-                    {/* WhatsApp */}
-                    <button
-                      onClick={shareToWhatsApp}
-                      className="w-11 h-11 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Share on WhatsApp"
+                {/* 3. Unified Social Share & Download Card */}
+                <div className="w-full bg-white border border-[#EBEBEB] rounded-2xl p-5 flex flex-col gap-4 text-center shadow-xs">
+                  <span className="text-xs font-black text-[#8B5E3C] uppercase tracking-wider">Share & Save Your Twin</span>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    {/* Share My Twin (Web Share / Native) */}
+                    <button 
+                      onClick={shareMyTwin}
+                      disabled={isSharing}
+                      className="flex-1 bg-[#8B5E3C] text-white border border-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#734A2E] hover:border-[#734A2E] disabled:bg-gray-400 disabled:border-gray-400 transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.437.002 9.859-4.416 9.862-9.852.002-2.633-1.02-5.107-2.88-6.97C16.39 1.905 13.916.88 11.288.88 5.856.88 1.437 5.298 1.435 10.734c-.001 1.558.411 3.076 1.196 4.417L1.674 21.03l6.095-1.599.278.169zM18.8 15.39c-.33-.164-1.953-.964-2.253-1.074-.3-.11-.519-.165-.738.165-.219.33-.849 1.073-1.04 1.293-.191.22-.383.247-.713.082-.33-.165-1.393-.513-2.653-1.636-.98-.873-1.643-1.953-1.835-2.283-.192-.33-.021-.508.144-.672.148-.148.33-.385.495-.578.165-.192.22-.33.33-.55.11-.22.055-.413-.028-.578-.083-.166-.738-1.782-1.01-2.44-.267-.643-.538-.553-.738-.553-.191 0-.41-.013-.629-.013-.218 0-.575.082-.876.412-.3.33-1.15 1.127-1.15 2.746 0 1.62 1.178 3.189 1.34 3.41.164.22 2.318 3.54 5.616 4.966.783.339 1.396.541 1.873.693.788.25 1.505.215 2.072.13.633-.095 1.953-.798 2.227-1.57.275-.77 2.75-1.897 1.897-2.072zm0 0"/>
-                      </svg>
+                      {isSharing ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Generating Card...
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="w-4 h-4" /> Share My Twin
+                        </>
+                      )}
                     </button>
 
-                    {/* Facebook */}
-                    <button
-                      onClick={shareToFacebook}
-                      className="w-11 h-11 rounded-full bg-[#1877F2] hover:bg-[#166fe5] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Share on Facebook"
+                    {/* Share to Instagram Story (Gradient) */}
+                    <button 
+                      onClick={shareToInstagramStory}
+                      className="flex-1 bg-gradient-to-r from-[#ee2a7b] to-[#6228d7] hover:from-[#d6246e] hover:to-[#551ec0] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer border-0"
                     >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                      </svg>
+                      <Camera className="w-4 h-4 text-white" /> Instagram Stories 📸
                     </button>
+                  </div>
 
-                    {/* Instagram */}
-                    <button
-                      onClick={shareToInstagram}
-                      className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:brightness-110 text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Share on Instagram"
-                    >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051C.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                      </svg>
-                    </button>
+                  {/* Share Link Row (WhatsApp, FB, Twitter/X, Copy Link) */}
+                  <div className="flex flex-col items-center gap-2 mt-1">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Share Link:</span>
+                    <div className="flex items-center justify-center gap-4">
+                      {/* WhatsApp */}
+                      <button
+                        onClick={shareToWhatsApp}
+                        className="w-10 h-10 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        title="Share on WhatsApp"
+                      >
+                        <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.437.002 9.859-4.416 9.862-9.852.002-2.633-1.02-5.107-2.88-6.97C16.39 1.905 13.916.88 11.288.88 5.856.88 1.437 5.298 1.435 10.734c-.001 1.558.411 3.076 1.196 4.417L1.674 21.03l6.095-1.599.278.169zM18.8 15.39c-.33-.164-1.953-.964-2.253-1.074-.3-.11-.519-.165-.738.165-.219.33-.849 1.073-1.04 1.293-.191.22-.383.247-.713.082-.33-.165-1.393-.513-2.653-1.636-.98-.873-1.643-1.953-1.835-2.283-.192-.33-.021-.508.144-.672.148-.148.33-.385.495-.578.165-.192.22-.33.33-.55.11-.22.055-.413-.028-.578-.083-.166-.738-1.782-1.01-2.44-.267-.643-.538-.553-.738-.553-.191 0-.41-.013-.629-.013-.218 0-.575.082-.876.412-.3.33-1.15 1.127-1.15 2.746 0 1.62 1.178 3.189 1.34 3.41.164.22 2.318 3.54 5.616 4.966.783.339 1.396.541 1.873.693.788.25 1.505.215 2.072.13.633-.095 1.953-.798 2.227-1.57.275-.77 2.75-1.897 1.897-2.072zm0 0"/>
+                        </svg>
+                      </button>
 
-                    {/* Twitter/X */}
-                    <button
-                      onClick={shareToTwitter}
-                      className="w-11 h-11 rounded-full bg-[#000000] hover:bg-[#191919] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Share on X (Twitter)"
-                    >
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                      </svg>
-                    </button>
+                      {/* Facebook */}
+                      <button
+                        onClick={shareToFacebook}
+                        className="w-10 h-10 rounded-full bg-[#1877F2] hover:bg-[#166fe5] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        title="Share on Facebook"
+                      >
+                        <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                      </button>
 
-                    {/* Copy Link */}
-                    <button
-                      onClick={copyPageLink}
-                      className="w-11 h-11 rounded-full bg-[#7F8C8D] hover:bg-[#707b7c] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                      title="Copy Link"
-                    >
-                      <svg className="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                    </button>
+                      {/* Twitter/X */}
+                      <button
+                        onClick={shareToTwitter}
+                        className="w-10 h-10 rounded-full bg-[#000000] hover:bg-[#191919] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        title="Share on X (Twitter)"
+                      >
+                        <svg className="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      </button>
+
+                      {/* Copy Link */}
+                      <button
+                        onClick={copyPageLink}
+                        className="w-10 h-10 rounded-full bg-[#7F8C8D] hover:bg-[#707b7c] text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        title="Copy Link"
+                      >
+                        <svg className="w-4.5 h-4.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Download Card Section */}
+                  <div className="flex flex-col items-center gap-2 mt-2 pt-3 border-t border-[#FAF6F4]">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                      Save Image Card:
+                    </span>
+                    <div className="grid grid-cols-3 gap-2.5 w-full">
+                      <button 
+                        onClick={downloadSquareCard}
+                        className="bg-white border border-[#E5E0DA] text-[#666666] py-2.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer text-center"
+                      >
+                        Square (1:1)
+                      </button>
+                      <button 
+                        onClick={downloadStoryCard}
+                        className="bg-white border border-[#E5E0DA] text-[#666666] py-2.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer text-center"
+                      >
+                        Story (9:16)
+                      </button>
+                      <button 
+                        onClick={downloadTwitterCard}
+                        className="bg-white border border-[#E5E0DA] text-[#666666] py-2.5 rounded-xl font-medium text-xs hover:bg-[#F9F7F5] hover:text-[#444444] transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer text-center"
+                      >
+                        Landscape (16:9)
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Share My Twin & Try Again Actions */}
-                <div className="flex gap-3 w-full mt-2">
-                  <button 
-                    onClick={shareMyTwin}
-                    disabled={isSharing}
-                    className="flex-1 bg-[#8B5E3C] text-white border border-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#734A2E] hover:border-[#734A2E] disabled:bg-gray-400 disabled:border-gray-400 transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {isSharing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Generating Card...
-                      </>
-                    ) : (
-                      <>
-                        <UploadCloud className="w-4 h-4" /> Share My Twin
-                      </>
-                    )}
-                  </button>
+                {/* 4. Start Over (Try Again) */}
+                <div className="w-full mt-2">
                   <button 
                     onClick={() => {
                       if (!checkTwinLimit()) return;
@@ -1723,12 +1716,11 @@ export default function TwinPage() {
                       setCurrentQuizQuestion(0);
                       setStep('quiz');
                     }}
-                    className="flex-1 bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-white border border-[#D9C0A8] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-sm hover:bg-[#FDF9F5] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-4 h-4" /> Try Again
+                    <RefreshCw className="w-4 h-4" /> Match Another Photo / Try Again
                   </button>
                 </div>
-
               </div>
 
             </div>
