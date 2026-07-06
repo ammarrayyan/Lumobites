@@ -112,7 +112,10 @@ export default function ChatModal({
   }, [isOpen, bookingId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const chatContainer = document.getElementById('chat-messages');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
   }, [messages]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -243,8 +246,12 @@ export default function ChatModal({
 
         {/* ── MESSAGES ── */}
         <div
-          className="flex-1 overflow-y-auto py-3 px-3 space-y-[2px]"
-          style={{ background: 'linear-gradient(180deg, #f8faff 0%, #f0f2f5 100%)' }}
+          id="chat-messages"
+          className="flex-1 overflow-y-auto py-3 px-3 space-y-[2px] flex flex-col scroll-smooth"
+          style={{ 
+            background: 'linear-gradient(180deg, #f8faff 0%, #f0f2f5 100%)',
+            height: '400px'
+          }}
         >
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-full gap-3">
