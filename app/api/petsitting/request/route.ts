@@ -201,6 +201,86 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError?.message || 'Database error' }, { status: 500 });
     }
 
+    // Generate care plan silently in the background
+    if (process.env.ANTHROPIC_API_KEY) {
+      const selectedPetIds = pet_details?.pets?.map((p: any) => p.id).filter(Boolean) || (pet_id ? [pet_id] : []);
+      if (selectedPetIds.length > 0) {
+        (async () => {
+          try {
+            console.log('[Care Plan Background] Starting care plan generation for request:', insertedReq.id);
+            const { data: pets, error: petsErr } = await supabaseAdmin
+              .from('owner_pets')
+              .select('*')
+              .in('id', selectedPetIds);
+
+            if (petsErr) {
+              console.error('[Care Plan Background] Error fetching pets:', petsErr);
+              return;
+            }
+
+            if (pets && pets.length > 0) {
+              const careplanResponse = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': process.env.ANTHROPIC_API_KEY!,
+                  'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                  model: 'claude-sonnet-4-6',
+                  max_tokens: 1000,
+                  messages: [{
+                    role: 'user',
+                    content: `Create a professional pet care plan for a pet sitter based on this pet profile data:
+
+${pets.map(pet => `
+Pet Name: ${pet.pet_name}
+Species: ${pet.pet_type}
+Breed: ${pet.breed || 'Not specified'}
+Age: ${pet.age || 'Not specified'}
+Weight: ${pet.weight || 'Not specified'}
+Gender: ${pet.gender || 'Not specified'}
+Spayed/Neutered: ${pet.spayed_neutered ? 'Yes' : 'No'}
+Feeding Schedule: ${pet.feeding_schedule || 'Not specified'}
+Medications: ${pet.medication || 'None'}
+Behavior Notes: ${pet.behavior_notes || 'None'}
+Primary Vet: ${pet.vet_name || 'Not specified'}
+Vet Phone: ${pet.vet_phone || 'Not specified'}
+`).join('\n')}
+
+Format as a clean, professional care plan the sitter can follow easily.
+Use clear sections with headers.
+Be concise and practical.`
+                  }]
+                })
+              });
+
+              if (!careplanResponse.ok) {
+                console.error('[Care Plan Background] Anthropic API returned status:', careplanResponse.status);
+                return;
+              }
+
+              const careplanData = await careplanResponse.json();
+              const carePlan = careplanData.content[0].text;
+
+              const { error: updateErr } = await supabaseAdmin
+                .from('sitting_requests')
+                .update({ care_plan: carePlan })
+                .eq('id', insertedReq.id);
+
+              if (updateErr) {
+                console.error('[Care Plan Background] Supabase update error:', updateErr);
+              } else {
+                console.log('[Care Plan Background] Care plan generated and saved successfully for request:', insertedReq.id);
+              }
+            }
+          } catch (err) {
+            console.error('[Care Plan Background] Error in background execution:', err);
+          }
+        })();
+      }
+    }
+
     // Notification
     try {
       const { error: notifErr } = await supabaseAdmin.from('notifications').insert({

@@ -3865,6 +3865,17 @@ export default function PetSitting() {
                                 </button>
                               </div>
                             )}
+
+                            {req.care_plan && (
+                              <div className="mx-4 mb-3 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl text-left">
+                                <div className="font-bold text-[#8B5E3C] flex items-center gap-1.5 text-xs">
+                                  <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> 📋 Generated Pet Care Plan
+                                </div>
+                                <div className="border-t border-[#E8DDD4] my-2 pt-2 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                  {req.care_plan}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -4415,6 +4426,16 @@ export default function PetSitting() {
                                          ))}
                                        </div>
                                      )}
+                                      {req.care_plan && (
+                                        <div className="col-span-1 sm:col-span-2 mt-3 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl text-left">
+                                          <div className="font-bold text-[#8B5E3C] flex items-center gap-1.5 text-xs">
+                                            <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> 📋 Pet Care Plan
+                                          </div>
+                                          <div className="border-t border-[#E8DDD4] my-2 pt-2 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                            {req.care_plan}
+                                          </div>
+                                        </div>
+                                      )}
                                    </>
                                  );
                                })()}
