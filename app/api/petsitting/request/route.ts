@@ -233,6 +233,8 @@ export async function POST(request: NextRequest) {
                     role: 'user',
                     content: `Create a professional pet care plan for a pet sitter based on this pet profile data:
 
+Current Date: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+
 ${pets.map(pet => `
 Pet Name: ${pet.pet_name}
 Species: ${pet.pet_type}
@@ -250,7 +252,11 @@ Vet Phone: ${pet.vet_phone || 'Not specified'}
 
 Format as a clean, professional care plan the sitter can follow easily.
 Use clear sections with headers.
-Be concise and practical.`
+Be concise and practical.
+
+Important: This is a digital care plan for a mobile app. 
+Do NOT include signature lines, date fields, physical document 
+formatting, or emojis. Keep it clean, professional and digital.`
                   }]
                 })
               });
