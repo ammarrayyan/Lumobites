@@ -568,6 +568,33 @@ export default function PetSitting() {
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
   const [expandedCarePlans, setExpandedCarePlans] = useState<Record<string, boolean>>({});
+  const [expandedRequests, setExpandedRequests] = useState<Set<string>>(new Set());
+
+  const toggleRequest = (id: string) => {
+    setExpandedRequests(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (sitterRequests.length > 0) {
+      setExpandedRequests(prev => {
+        const next = new Set(prev);
+        sitterRequests.forEach(req => {
+          if (req.status === 'pending') {
+            next.add(req.id);
+          }
+        });
+        return next;
+      });
+    }
+  }, [sitterRequests]);
 
   // Refresh State
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -4326,38 +4353,56 @@ export default function PetSitting() {
 
                         return (
                           <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 space-y-3">
-                            <div className="flex justify-between items-center flex-wrap gap-2">
-                              <span className="font-bold text-sm text-[#4A3E3D]">
-                                {req.booking_number || `Booking #${req.id.substring(0, 4)}`}
-                              </span>
+                            {/* ALWAYS VISIBLE - clickable summary header */}
+                            <div 
+                              className="flex justify-between items-center flex-wrap gap-2 cursor-pointer select-none"
+                              onClick={() => toggleRequest(req.id)}
+                            >
                               <div>
-                                {isAccepted && (
-                                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Accepted
-                                  </span>
-                                )}
-                                {isCompleted && (
-                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Completed
-                                  </span>
-                                )}
-                                {isDeclined && (
-                                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Declined
-                                  </span>
-                                )}
-                                {isCancelled && (
-                                  <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200 inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Cancelled
-                                  </span>
-                                )}
-                                {isPending && (
-                                  <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Pending
-                                  </span>
-                                )}
+                                <span className="font-bold text-sm text-[#4A3E3D]">
+                                  {req.booking_number || `Booking #${req.id.substring(0, 4)}`}
+                                </span>
+                                <p className="text-xs text-[#8B7E7D] mt-0.5">
+                                  {req.pet_name} · {req.dates}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div>
+                                  {isAccepted && (
+                                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 inline-flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Accepted
+                                    </span>
+                                  )}
+                                  {isCompleted && (
+                                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Completed
+                                    </span>
+                                  )}
+                                  {isDeclined && (
+                                    <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 inline-flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Declined
+                                    </span>
+                                  )}
+                                  {isCancelled && (
+                                    <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200 inline-flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Cancelled
+                                    </span>
+                                  )}
+                                  {isPending && (
+                                    <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse inline-flex items-center gap-1">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Pending
+                                    </span>
+                                  )}
+                                </div>
+                                <ChevronDown className={`w-4 h-4 text-[#8B5E3C] transition-transform duration-200 ${
+                                  expandedRequests.has(req.id) ? 'rotate-180' : ''
+                                }`}/>
                               </div>
                             </div>
+
+                            {/* COLLAPSIBLE - only show when expanded */}
+                            {expandedRequests.has(req.id) && (
+                              <div className="border-t border-[#E8DDD4] pt-3 space-y-3">
 
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                                {req.pet_details?.pets && req.pet_details.pets.length > 1 ? (
@@ -4563,7 +4608,9 @@ export default function PetSitting() {
 
                             </div>
                           </div>
-                        );
+                        )}
+                      </div>
+                    );
                       })}
                     </div>
                   )}
