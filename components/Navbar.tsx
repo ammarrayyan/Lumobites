@@ -479,7 +479,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4" suppressHydrationWarning={true}>
             <ShareButton />
-            {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+            {proEmail && <NotificationBell email={proEmail} />}
             
             {!isPro && (
               <div className="relative">
@@ -565,7 +565,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
         <div className="flex md:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
-          {(proEmail || sitterEmail) && <NotificationBell email={proEmail || sitterEmail || ''} />}
+          {proEmail && <NotificationBell email={proEmail} />}
 
           {!isSignedIn ? (
             <button
