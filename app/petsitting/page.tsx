@@ -4324,64 +4324,42 @@ export default function PetSitting() {
 
 
 
-                        const isExpanded = expandedBooking === req.id;
-                        const ownerDisplayName = req.owner_name ? formatSitterName(req.owner_name) : (req.owner_email ? req.owner_email.split('@')[0] : 'Owner');
-
                         return (
-                          <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 transition-all duration-200">
-                            {/* Summary Header - Clickable to expand */}
-                            <div 
-                              className="cursor-pointer select-none flex justify-between items-center gap-3"
-                              onClick={() => setExpandedBooking(isExpanded ? null : req.id)}
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-sm text-[#4A3E3D] truncate">
-                                    {req.booking_number || `Booking #${req.id.substring(0, 4)}`}
+                          <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 space-y-3">
+                            <div className="flex justify-between items-center flex-wrap gap-2">
+                              <span className="font-bold text-sm text-[#4A3E3D]">
+                                {req.booking_number || `Booking #${req.id.substring(0, 4)}`}
+                              </span>
+                              <div>
+                                {isAccepted && (
+                                  <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Accepted
                                   </span>
-                                  <span className="text-xs text-[#8B7E7D]">•</span>
-                                  <span className="text-xs font-semibold text-[#8B5E3C] truncate">
-                                    {ownerDisplayName}
+                                )}
+                                {isCompleted && (
+                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Completed
                                   </span>
-                                </div>
-                                <p className="text-xs text-[#8B7E7D] mt-0.5">{req.dates}</p>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                <div>
-                                  {isAccepted && (
-                                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 inline-flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Accepted
-                                    </span>
-                                  )}
-                                  {isCompleted && (
-                                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Completed
-                                    </span>
-                                  )}
-                                  {isDeclined && (
-                                    <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 inline-flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Declined
-                                    </span>
-                                  )}
-                                  {isCancelled && (
-                                    <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200 inline-flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Cancelled
-                                    </span>
-                                  )}
-                                  {isPending && (
-                                    <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse inline-flex items-center gap-1">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Pending
-                                    </span>
-                                  )}
-                                </div>
-                                <ChevronDown className={`w-4 h-4 text-[#8B7E7D] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                                )}
+                                {isDeclined && (
+                                  <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Declined
+                                  </span>
+                                )}
+                                {isCancelled && (
+                                  <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-gray-200 inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Cancelled
+                                  </span>
+                                )}
+                                {isPending && (
+                                  <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-yellow-200 animate-pulse inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Pending
+                                  </span>
+                                )}
                               </div>
                             </div>
 
-                            {/* Expanded Content */}
-                            {isExpanded && (
-                              <div className="mt-3 border-t border-[#E8DDD4]/60 pt-3 space-y-3">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                                {req.pet_details?.pets && req.pet_details.pets.length > 1 ? (
                                  <div className="col-span-1 sm:col-span-2">
                                    <strong>Pets:</strong> 🐾 {req.pet_details.pets.length} pets: {req.pet_details.pets.map((p: any) => p.pet_name).join(' & ')}
@@ -4585,10 +4563,8 @@ export default function PetSitting() {
 
                             </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
