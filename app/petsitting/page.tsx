@@ -7,7 +7,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -567,6 +567,7 @@ export default function PetSitting() {
   const [ownerLastUpdated, setOwnerLastUpdated] = useState<Date | null>(null);
   const [loadingOwnerRequests, setLoadingOwnerRequests] = useState(false);
   const [ownerHistoryFetched, setOwnerHistoryFetched] = useState(false);
+  const [expandedCarePlans, setExpandedCarePlans] = useState<Record<string, boolean>>({});
 
   // Refresh State
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -3866,16 +3867,31 @@ export default function PetSitting() {
                               </div>
                             )}
 
-                            {req.care_plan && (
-                              <div className="mx-4 mb-3 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl text-left">
-                                <div className="font-bold text-[#8B5E3C] flex items-center gap-1.5 text-xs">
-                                  <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> 📋 Generated Pet Care Plan
+                            {req.care_plan && (() => {
+                              const showCarePlan = !!expandedCarePlans[req.id];
+                              return (
+                                <div className="mx-4 mb-3 text-left">
+                                  <button 
+                                    onClick={() => setExpandedCarePlans(prev => ({ ...prev, [req.id]: !prev[req.id] }))}
+                                    className="text-sm text-[#8B5E3C] border border-[#8B5E3C] rounded-lg px-3 py-1 flex items-center gap-1"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                    {showCarePlan ? 'Hide Care Plan' : 'View Care Plan'}
+                                  </button>
+
+                                  {showCarePlan && (
+                                    <div className="mt-2.5 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl">
+                                      <div className="font-bold text-[#8B5E3C] flex items-center gap-1.5 text-xs">
+                                        <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> 📋 Generated Pet Care Plan
+                                      </div>
+                                      <div className="border-t border-[#E8DDD4] my-2 pt-2 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                        {req.care_plan}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="border-t border-[#E8DDD4] my-2 pt-2 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                  {req.care_plan}
-                                </div>
-                              </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         );
                       })}
