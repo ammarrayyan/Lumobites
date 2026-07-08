@@ -23,6 +23,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
   const [editToken, setEditToken] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -47,6 +49,65 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   };
 
   const photosList = pet?.photos || (pet?.photo_url ? [pet.photo_url] : []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+      setUserEmail(emailVal);
+      const blocked = localStorage.getItem('lumo_blocked_emails');
+      if (blocked) {
+        try {
+          setBlockedEmails(JSON.parse(blocked));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const handleReportPost = async () => {
+    if (!pet) return;
+    const reason = window.prompt("Please enter the reason for reporting this post (e.g. Inappropriate Content, Spam, Harassment):");
+    if (!reason || !reason.trim()) return;
+
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reporter_email: userEmail || 'guest@lumobitespet.com',
+          reported_email: pet.contact_email || 'unknown@lumobitespet.com',
+          reported_type: 'lost_pet_post',
+          reason: reason.trim(),
+          details: `Reported Lost Pet Post ID: ${pet.id}`,
+          status: 'pending'
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to submit report');
+      }
+
+      alert("Thank you. The report has been submitted to administrators for review.");
+    } catch (err: any) {
+      alert(err.message || "Failed to submit report. Please try again.");
+    }
+  };
+
+  const handleBlockUser = () => {
+    if (!pet?.contact_email) return;
+    if (pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) {
+      alert("You cannot block yourself.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to block this user? You will no longer see their posts.")) return;
+
+    const nextBlocked = [...blockedEmails, pet.contact_email.toLowerCase().trim()];
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_emails', JSON.stringify(nextBlocked));
+    }
+    alert("User blocked successfully.");
+    window.location.href = '/lost-pets';
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -108,7 +169,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, token: editToken })
+        body: JSON.stringify({ id, token: editToken, email: userEmail })
       });
       
       if (!res.ok) {
@@ -347,7 +408,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   <Share2 className="w-5 h-5 text-[#8B5E3C]" /> {copied ? 'Link Copied!' : 'Share this post'}
                 </button>
 
-                {editToken && (
+                {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                   <div className="mt-6 border-t border-[#E8DDD4] pt-6">
                     <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
                       <Settings className="w-5 h-5 text-gray-500" /> Manage Your Post
@@ -357,7 +418,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                         <button 
                           onClick={() => handleOwnerAction('resolve')}
                           disabled={actionLoading}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50"
+                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
                         >
                           {actionLoading ? 'Processing...' : 'Mark as Resolved 🎉'}
                         </button>
@@ -365,11 +426,52 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                       <button 
                         onClick={() => handleOwnerAction('delete')}
                         disabled={actionLoading}
-                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50"
+                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
                       >
                         {actionLoading ? 'Processing...' : 'Delete My Post'}
                       </button>
                     </div>
+                  </div>
+                ) : editToken ? (
+                  <div className="mt-6 border-t border-[#E8DDD4] pt-6">
+                    <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-gray-500" /> Manage Your Post
+                    </h4>
+                    <div className="flex flex-col gap-3">
+                      {pet.status === 'active' && (
+                        <button 
+                          onClick={() => handleOwnerAction('resolve')}
+                          disabled={actionLoading}
+                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                        >
+                          {actionLoading ? 'Processing...' : 'Mark as Resolved 🎉'}
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleOwnerAction('delete')}
+                        disabled={actionLoading}
+                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                      >
+                        {actionLoading ? 'Processing...' : 'Delete My Post'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 border-t border-[#E8DDD4] pt-6 flex gap-3">
+                    <button 
+                      onClick={handleReportPost}
+                      className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-3 rounded-xl transition-all text-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
+                    >
+                      Flag Post
+                    </button>
+                    {pet.contact_email && (
+                      <button 
+                        onClick={handleBlockUser}
+                        className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-3 rounded-xl transition-all text-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
+                      >
+                        Block Poster
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

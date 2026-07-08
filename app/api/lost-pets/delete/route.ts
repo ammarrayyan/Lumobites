@@ -4,16 +4,16 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, token } = body;
+    const { id, token, email } = body;
 
-    if (!id || !token) {
-      return NextResponse.json({ error: 'Missing id or token' }, { status: 400 });
+    if (!id || (!token && !email)) {
+      return NextResponse.json({ error: 'Missing id, token or email' }, { status: 400 });
     }
 
     // Verify token and fetch the pet
     const { data: pet, error: fetchError } = await supabaseAdmin
       .from('lost_pets')
-      .select('id, edit_token')
+      .select('id, edit_token, contact_email')
       .eq('id', id)
       .single();
 
@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Pet not found' }, { status: 404 });
     }
 
-    if (pet.edit_token !== token) {
+    const isOwnerByEmail = email && pet.contact_email && pet.contact_email.toLowerCase().trim() === email.toLowerCase().trim();
+    if (pet.edit_token !== token && !isOwnerByEmail) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 403 });
     }
 

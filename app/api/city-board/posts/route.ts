@@ -142,16 +142,31 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('x-admin-key');
-    if (authHeader !== process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
-    const { post_id } = body;
+    const { post_id, device_cookie } = body;
 
     if (!post_id) {
       return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
+    }
+
+    const authHeader = req.headers.get('x-admin-key');
+    const isAdmin = authHeader === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+
+    if (!isAdmin) {
+      if (!device_cookie) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Fetch the post to verify owner
+      const { data: post, error: fetchErr } = await supabaseAdmin
+        .from('city_board_posts')
+        .select('device_cookie')
+        .eq('post_id', post_id)
+        .single();
+
+      if (fetchErr || !post || post.device_cookie !== device_cookie) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     await supabaseAdmin.from('city_board_replies').delete().eq('post_id', post_id);

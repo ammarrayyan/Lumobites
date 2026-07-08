@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
-import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw, Loader2 } from 'lucide-react';
+import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2 } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -34,6 +34,53 @@ export default function CityBoardPage() {
   const [deviceCookie, setDeviceCookie] = useState<string>('');
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const blocked = localStorage.getItem('lumo_blocked_device_cookies');
+      if (blocked) {
+        try {
+          setBlockedCookies(JSON.parse(blocked));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const handleBlockUser = (cookieToBlock: string) => {
+    if (!cookieToBlock) return;
+    if (cookieToBlock === deviceCookie) {
+      alert("You cannot block yourself.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to block this user? You will no longer see their posts.")) return;
+
+    const nextBlocked = [...blockedCookies, cookieToBlock];
+    setBlockedCookies(nextBlocked);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_device_cookies', JSON.stringify(nextBlocked));
+    }
+    alert("User blocked successfully.");
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm("Are you sure you want to delete this post? This will also delete all replies and cannot be undone.")) return;
+    try {
+      const res = await fetch('/api/city-board/posts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId, device_cookie: deviceCookie })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete post');
+      }
+      alert("Post deleted successfully.");
+      setPosts(prev => prev.filter(p => p.post_id !== postId));
+    } catch (err: any) {
+      alert(err.message || "Failed to delete post. Please try again.");
+    }
+  };
 
   // Filters
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -503,7 +550,9 @@ export default function CityBoardPage() {
           <div className="text-center py-16 text-[#3B2410]/50 font-bold bg-[#FFFBF5] rounded-3xl border border-[#3B2410]/10 shadow-sm">No posts found. Be the first to start a conversation!</div>
         ) : (
           <div className="space-y-4">
-            {posts.map(post => (
+            {posts
+              .filter(post => !blockedCookies.includes(post.device_cookie))
+              .map(post => (
               <div key={post.id} className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl p-6 md:p-8 border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] hover:shadow-[0_8px_30px_rgba(59,36,16,0.08)] hover:-translate-y-0.5 transition-all duration-300 relative group">
                 {post.device_cookie === deviceCookie && (
                   <div className="absolute top-6 right-6 bg-[#3B2410] text-[#FFFDF9] text-[10px] uppercase tracking-[0.15em] font-black px-3.5 py-1 rounded-full shadow-sm">
@@ -541,12 +590,29 @@ export default function CityBoardPage() {
                     </button>
                   </div>
                   <div className="flex items-center gap-4 flex-wrap">
-                    <button
-                      onClick={() => openReportModal(post.post_id)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
-                    >
-                      <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
-                    </button>
+                    {post.device_cookie === deviceCookie ? (
+                      <button
+                        onClick={() => handleDeletePost(post.post_id)}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-red-600 hover:underline transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete Post
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => openReportModal(post.post_id)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
+                        </button>
+                        <button
+                          onClick={() => handleBlockUser(post.device_cookie)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
+                        >
+                          <Ban className="w-3.5 h-3.5" /> Block Poster
+                        </button>
+                      </>
+                    )}
                     <span className="text-xs text-[#3B2410]/50 sm:hidden font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
                     <button 
                       onClick={() => {

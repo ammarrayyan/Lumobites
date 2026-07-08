@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine } from 'lucide-react';
+import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine, Ban, Trash2 } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -29,6 +29,55 @@ export default function CityBoardPostPage() {
   const [post, setPost] = useState<any>(null);
   const [replies, setReplies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const blocked = localStorage.getItem('lumo_blocked_device_cookies');
+      if (blocked) {
+        try {
+          setBlockedCookies(JSON.parse(blocked));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const handleBlockUser = (cookieToBlock: string) => {
+    if (!cookieToBlock) return;
+    if (cookieToBlock === deviceCookie) {
+      alert("You cannot block yourself.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to block this user? You will no longer see their posts or replies.")) return;
+
+    const nextBlocked = [...blockedCookies, cookieToBlock];
+    setBlockedCookies(nextBlocked);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_device_cookies', JSON.stringify(nextBlocked));
+    }
+    alert("User blocked successfully.");
+    router.push('/city-board');
+  };
+
+  const handleDeletePost = async () => {
+    if (!post) return;
+    if (!window.confirm("Are you sure you want to delete this post? This will also delete all replies and cannot be undone.")) return;
+    try {
+      const res = await fetch('/api/city-board/posts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: post.post_id, device_cookie: deviceCookie })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete post');
+      }
+      alert("Post deleted successfully.");
+      router.push('/city-board');
+    } catch (err: any) {
+      alert(err.message || "Failed to delete post. Please try again.");
+    }
+  };
 
   const [newReply, setNewReply] = useState('');
   const [isReplying, setIsReplying] = useState(false);
@@ -231,12 +280,29 @@ export default function CityBoardPostPage() {
             </div>
             
             <div className="flex items-center gap-4 flex-wrap">
-              <button
-                onClick={() => openReportModal(post.post_id)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
-              >
-                <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
-              </button>
+              {post.device_cookie === deviceCookie ? (
+                <button
+                  onClick={handleDeletePost}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:underline transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete Post
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => openReportModal(post.post_id)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
+                  </button>
+                  <button
+                    onClick={() => handleBlockUser(post.device_cookie)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
+                  >
+                    <Ban className="w-3.5 h-3.5" /> Block Poster
+                  </button>
+                </>
+              )}
               <button 
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
@@ -256,7 +322,9 @@ export default function CityBoardPostPage() {
 
         {/* Replies List */}
         <div className="space-y-4 mb-8">
-          {replies.map(reply => (
+          {replies
+            .filter(reply => !blockedCookies.includes(reply.device_cookie))
+            .map(reply => (
             <div key={reply.id} className="bg-[#FFFBF5] rounded-2xl p-5 border border-[#3B2410]/10 shadow-sm relative ml-4 md:ml-8">
               <div className="absolute -left-4 md:-left-8 top-6 w-4 md:w-8 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
               <div className="absolute -left-4 md:-left-8 -top-4 bottom-6 w-0 border-l-2 border-[#3B2410]/10"></div>
@@ -268,8 +336,15 @@ export default function CityBoardPostPage() {
                   ) : (
                     <span>Anonymous</span>
                   )}
-                  {reply.device_cookie === deviceCookie && (
+                  {reply.device_cookie === deviceCookie ? (
                     <span className="bg-[#F5F0E8] text-[#8B5E3C] px-2 py-0.5 rounded border border-[#3B2410]/10 text-[10px] uppercase tracking-wider">You</span>
+                  ) : (
+                    <button 
+                      onClick={() => handleBlockUser(reply.device_cookie)}
+                      className="text-[#3B2410]/40 hover:text-red-600 text-[10px] uppercase font-bold tracking-wider hover:underline cursor-pointer"
+                    >
+                      Block User
+                    </button>
                   )}
                 </span>
                 <span className="text-xs text-[#3B2410]/50 font-medium">{formatDistanceToNow(new Date(reply.created_at))} ago</span>

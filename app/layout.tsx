@@ -79,8 +79,16 @@ export default async function RootLayout({
         <PwaSplashScreen />
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
-        <div className="pt-[72px] pb-24 md:pb-0">
-          {children}
+        <div className="pt-[72px] pb-24 md:pb-0 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+          <div className="flex-grow">
+            {children}
+          </div>
+          <footer className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] py-6 px-4 text-center text-xs text-[#8B7E7D] mt-12">
+            <p>© {new Date().getFullYear()} Lumo Bites. All rights reserved.</p>
+            <p className="mt-1 font-semibold text-[#8B5E3C]">
+              Report inappropriate content: <a href="mailto:info@lumobitespet.com" className="underline hover:text-[#734A2E]">info@lumobitespet.com</a>
+            </p>
+          </footer>
         </div>
         <MobileBottomNav />
         <FloatingQRCode />

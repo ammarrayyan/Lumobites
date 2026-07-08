@@ -46,6 +46,88 @@ export default function LostPetsFeed() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiSearchDone, setAiSearchDone] = useState(false);
 
+  const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+      setUserEmail(emailVal);
+      const blocked = localStorage.getItem('lumo_blocked_emails');
+      if (blocked) {
+        try {
+          setBlockedEmails(JSON.parse(blocked));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const handleBlockUser = (emailToBlock: string) => {
+    if (!emailToBlock) return;
+    if (emailToBlock.toLowerCase().trim() === userEmail.toLowerCase().trim()) {
+      alert("You cannot block yourself.");
+      return;
+    }
+    if (!window.confirm("Are you sure you want to block this user? You will no longer see their posts.")) return;
+
+    const nextBlocked = [...blockedEmails, emailToBlock.toLowerCase().trim()];
+    setBlockedEmails(nextBlocked);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_emails', JSON.stringify(nextBlocked));
+    }
+    alert("User blocked successfully.");
+  };
+
+  const handleReportPost = async (postId: string, reportedEmail: string) => {
+    if (!postId) return;
+    const reason = window.prompt("Please enter the reason for reporting this post (e.g. Inappropriate Content, Spam, Harassment):");
+    if (!reason || !reason.trim()) return;
+
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reporter_email: userEmail || 'guest@lumobitespet.com',
+          reported_email: reportedEmail || 'unknown@lumobitespet.com',
+          reported_type: 'lost_pet_post',
+          reason: reason.trim(),
+          details: `Reported Lost Pet Post ID: ${postId}`,
+          status: 'pending'
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to submit report');
+      }
+
+      alert("Thank you. The report has been submitted to administrators for review.");
+    } catch (err: any) {
+      alert(err.message || "Failed to submit report. Please try again.");
+    }
+  };
+
+  const handleDeletePostDirectly = async (postId: string) => {
+    if (!window.confirm("Are you sure you want to delete your post immediately? This cannot be undone.")) return;
+    try {
+      const res = await fetch('/api/lost-pets/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: postId, email: userEmail })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete post');
+      }
+      alert("Post deleted successfully.");
+      setPets(prev => prev.filter(p => p.id !== postId));
+      setAiMatches(prev => prev.filter(p => p.id !== postId));
+    } catch (err: any) {
+      alert(err.message || "Failed to delete post. Please try again.");
+    }
+  };
+
   const [aiRadius, setAiRadius] = useState('any');
   const [aiTimeframe, setAiTimeframe] = useState('any');
   const [aiSpecies, setAiSpecies] = useState('all');
@@ -466,7 +548,9 @@ export default function LostPetsFeed() {
                     {/* Pets Grid */}
                     <div className="flex-1 order-2 lg:order-1 w-full">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {pets.map((pet) => (
+                        {pets
+                          .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
+                          .map((pet) => (
                           <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
                             <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                               {pet.photo_url ? (
@@ -504,9 +588,39 @@ export default function LostPetsFeed() {
                                   </span>
                                   <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
-                                <Link href={`/lost-pets/${pet.id}`} className="block w-full text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors">
-                                  View Details &amp; Help
-                                </Link>
+                                <div className="flex gap-2 w-full">
+                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
+                                    View Details &amp; Help
+                                  </Link>
+                                  {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
+                                    <button 
+                                      onClick={() => handleDeletePostDirectly(pet.id)}
+                                      className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                      title="Delete immediately"
+                                    >
+                                      Delete
+                                    </button>
+                                  ) : (
+                                    <>
+                                      <button 
+                                        onClick={() => handleReportPost(pet.id, pet.contact_email)}
+                                        className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                        title="Report post"
+                                      >
+                                        Flag
+                                      </button>
+                                      {pet.contact_email && (
+                                        <button 
+                                          onClick={() => handleBlockUser(pet.contact_email)}
+                                          className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                          title="Block poster"
+                                        >
+                                          Block
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -709,7 +823,9 @@ export default function LostPetsFeed() {
                         <span className="text-xs text-[#8B7E7D] font-semibold">Sorted by match confidence</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {aiMatches.map((pet) => (
+                        {aiMatches
+                          .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
+                          .map((pet) => (
                           <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
                             <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                               {pet.photo_url ? (
@@ -759,9 +875,39 @@ export default function LostPetsFeed() {
                                   </span>
                                   <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
-                                <Link href={`/lost-pets/${pet.id}`} className="block w-full text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors">
-                                  View Details &amp; Contact
-                                </Link>
+                                <div className="flex gap-2 w-full">
+                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
+                                    View Details &amp; Contact
+                                  </Link>
+                                  {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
+                                    <button 
+                                      onClick={() => handleDeletePostDirectly(pet.id)}
+                                      className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                      title="Delete immediately"
+                                    >
+                                      Delete
+                                    </button>
+                                  ) : (
+                                    <>
+                                      <button 
+                                        onClick={() => handleReportPost(pet.id, pet.contact_email)}
+                                        className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                        title="Report post"
+                                      >
+                                        Flag
+                                      </button>
+                                      {pet.contact_email && (
+                                        <button 
+                                          onClick={() => handleBlockUser(pet.contact_email)}
+                                          className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                          title="Block poster"
+                                        >
+                                          Block
+                                        </button>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>

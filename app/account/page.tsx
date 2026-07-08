@@ -42,6 +42,8 @@ export default function AccountPage() {
   const [isCancelled, setIsCancelled] = useState(false);
   const [cancelEndDate, setCancelEndDate] = useState<string>('');
   const [cancelDaysRemaining, setCancelDaysRemaining] = useState<number>(0);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,6 +206,31 @@ export default function AccountPage() {
       localStorage.clear();
       alert('You have been signed out of all devices for security.');
       window.location.href = '/';
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!email) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete account');
+
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        alert('Your account and all associated data have been permanently deleted.');
+        window.location.href = '/';
+      }
+    } catch (err: any) {
+      alert(err.message || 'Could not delete account. Please contact support.');
+    } finally {
+      setDeleteLoading(false);
+      setShowConfirmDelete(false);
     }
   };
 
@@ -635,6 +662,15 @@ export default function AccountPage() {
                   >
                     <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
                   </button>
+
+                  {/* Delete My Account Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmDelete(true)}
+                    className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
+                  </button>
                 </div>
               )}
               {showConfirmCancel && (
@@ -666,6 +702,40 @@ export default function AccountPage() {
                         className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         Keep Pro Features <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {showConfirmDelete && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
+                  <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <AlertTriangle className="w-10 h-10 text-red-500 mb-3" />
+                      <h3 className="text-xl font-black text-[#191919] leading-tight">
+                        Delete Your Account?
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                        Are you sure you want to delete your account? This will permanently delete all your data including bookings, pets, and posts. This cannot be undone.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 w-full">
+                      <button
+                        onClick={handleDeleteAccount}
+                        disabled={deleteLoading}
+                        className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        {deleteLoading ? (
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        ) : "Delete My Account"}
+                      </button>
+                      <button
+                        onClick={() => setShowConfirmDelete(false)}
+                        disabled={deleteLoading}
+                        className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        Cancel
                       </button>
                     </div>
                   </div>
