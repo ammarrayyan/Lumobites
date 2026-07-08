@@ -45,6 +45,36 @@ export default function AccountPage() {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
+  const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const emails = localStorage.getItem('lumo_blocked_emails');
+        if (emails) setBlockedEmails(JSON.parse(emails));
+        const cookies = localStorage.getItem('lumo_blocked_device_cookies');
+        if (cookies) setBlockedCookies(JSON.parse(cookies));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleUnblockEmail = (emailVal: string) => {
+    const updated = blockedEmails.filter(e => e !== emailVal);
+    setBlockedEmails(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_emails', JSON.stringify(updated));
+    }
+  };
+
+  const handleUnblockCookie = (cookieVal: string) => {
+    const updated = blockedCookies.filter(c => c !== cookieVal);
+    setBlockedCookies(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_blocked_device_cookies', JSON.stringify(updated));
+    }
+  };
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -647,6 +677,52 @@ export default function AccountPage() {
                       ) : null}
                     </>
                   )}
+                  {/* Blocked Users Section */}
+                  {blockedEmails.length > 0 && (
+                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Users</span>
+                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                        {blockedEmails.map((blockedEmail) => (
+                          <div key={blockedEmail} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedEmail}>
+                              {blockedEmail}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleUnblockEmail(blockedEmail)}
+                              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                            >
+                              Unblock
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Blocked Cookies Section */}
+                  {blockedCookies.length > 0 && (
+                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Community Posters</span>
+                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                        {blockedCookies.map((blockedCookie) => (
+                          <div key={blockedCookie} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedCookie}>
+                              Poster {blockedCookie.substring(0, 8)}...
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleUnblockCookie(blockedCookie)}
+                              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                            >
+                              Unblock
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Sign Out All Devices Button */}
                   <button
                     type="button"
