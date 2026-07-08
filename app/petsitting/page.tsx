@@ -3449,7 +3449,7 @@ export default function PetSitting() {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "female sitter experienced with cats")</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "e.g. experienced with dogs, highly rated, good with senior pets...")</p>
                 </div>
               </div>
 
