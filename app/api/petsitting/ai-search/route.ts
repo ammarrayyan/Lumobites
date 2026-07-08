@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { query: searchQuery, email: ownerEmail } = body;
+    const { query: searchQuery, email: ownerEmail, sitterIds } = body;
 
     if (!searchQuery || !searchQuery.trim()) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
@@ -30,22 +30,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ sitters: [] });
     }
 
+    // Filter to selected area sitters if specified
+    let candidateSitters = sitters;
+    if (sitterIds && Array.isArray(sitterIds)) {
+      candidateSitters = sitters.filter(s => sitterIds.includes(s.id));
+    }
+
+    if (candidateSitters.length === 0) {
+      return NextResponse.json({ sitters: [] });
+    }
+
+    const sitterDataForClaude = candidateSitters.map(s => ({
+      id: s.id,
+      name: s.name,
+      bio: s.bio,
+      pet_types: s.pet_types,
+      rating: s.avg_rating,
+      price: s.rate_per_night,
+      location: s.city,
+      services: s.service_types
+    }));
+
+    console.log('[AI Sitter Search] Sitter data sent to Claude:', JSON.stringify(sitterDataForClaude, null, 2));
+
     // 2. Query Claude AI to rank and score the sitters
     const prompt = `You are a pet sitter matching assistant.
 
 User is looking for: "${searchQuery}"
 
 Available sitters:
-${JSON.stringify(sitters.map(s => ({
-  id: s.id,
-  name: s.name,
-  bio: s.bio,
-  pet_types: s.pet_types,
-  rating: s.avg_rating,
-  price: s.rate_per_night,
-  location: s.city,
-  services: s.service_types
-})))}
+${JSON.stringify(sitterDataForClaude)}
 
 Evaluate all sitters based on how well they match the user's description. Read their bio carefully to extract gender details, background qualifications, vet experience, preferences, etc.
 Rank them from best to worst match.

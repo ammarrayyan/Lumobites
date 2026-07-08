@@ -1251,20 +1251,27 @@ export default function PetSitting() {
       setAiSitterResults(null);
       return;
     }
+    const isLocationSelected = !!(searchZip.trim() && searchCoords);
+    if (!isLocationSelected) {
+      alert('Please select your location first');
+      return;
+    }
     setAiSearchLoading(true);
     try {
       const email = reqEmail || (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
+      const sitterIds = filteredSitters.map(s => s.id);
+      
       const response = await fetch('/api/petsitting/ai-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: aiSitterSearch, email })
+        body: JSON.stringify({ query: aiSitterSearch, email, sitterIds })
       });
       if (!response.ok) throw new Error('Search failed');
       const data = await response.json();
       setAiSitterResults(data.sitters || []);
     } catch (error) {
       console.error('AI search error:', error);
-      setAiSitterResults(null);
+      setAiSitterResults([]); // empty array to trigger fallback
       alert('Search unavailable — showing all sitters instead');
     } finally {
       setAiSearchLoading(false);
@@ -3224,7 +3231,7 @@ export default function PetSitting() {
     }
   }
 
-  if (aiSitterResults !== null) {
+  if (aiSitterResults !== null && aiSitterResults.length > 0) {
     filteredSitters = aiSitterResults.map(s => {
       if (searchCoords && s.lat && s.lng) {
         return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
@@ -3329,62 +3336,6 @@ export default function PetSitting() {
             )}
 
             <div className={ownerSubTab === 'search' ? 'block animate-fade-in' : 'hidden'}>
-              {/* AI Sitter Search Panel */}
-              <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 flex flex-col gap-4 relative overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#8B5E3C]/10 p-2 rounded-xl">
-                    <Sparkles className="w-5 h-5 text-[#8B5E3C]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
-                    <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "female sitter good with senior cats")</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-3">
-                  <input
-                    type="text"
-                    placeholder="Describe your ideal sitter... (e.g. 'female sitter experienced with cats')"
-                    value={aiSitterSearch}
-                    onChange={(e) => setAiSitterSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAiSitterSearch();
-                    }}
-                    className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
-                  />
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={handleAiSitterSearch}
-                      disabled={aiSearchLoading}
-                      className="bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      {aiSearchLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Searching...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-4 h-4" />
-                          <span>Find My Perfect Sitter</span>
-                        </>
-                      )}
-                    </button>
-                    {aiSitterResults !== null && (
-                      <button
-                        onClick={() => {
-                          setAiSitterSearch('');
-                          setAiSitterResults(null);
-                        }}
-                        className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold px-4 py-3.5 rounded-xl text-sm transition-all cursor-pointer"
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               {/* Search Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
               {/* Row 1: Location & Search Radius */}
@@ -3485,6 +3436,76 @@ export default function PetSitting() {
 
             <p className="text-xs text-[#8B7E7D] mb-4 ml-2">Search by city name or zip code for best results</p>
 
+            {/* Or search with AI Label */}
+            <div className="mt-6 mb-2 ml-2">
+              <span className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider">Or search with AI</span>
+            </div>
+
+            {/* AI Sitter Search Panel */}
+            <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 flex flex-col gap-4 relative overflow-hidden">
+              <div className="flex items-center gap-2">
+                <div className="bg-[#8B5E3C]/10 p-2 rounded-xl">
+                  <Sparkles className="w-5 h-5 text-[#8B5E3C]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "female sitter experienced with cats")</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Describe your ideal sitter... e.g. experienced with dogs, female, 5 star"
+                  value={aiSitterSearch}
+                  disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
+                  onChange={(e) => setAiSitterSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (searchZip.trim() && searchCoords)) handleAiSitterSearch();
+                  }}
+                  className={`flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] ${
+                    !(searchZip.trim() && searchCoords) ? 'opacity-65 cursor-not-allowed' : ''
+                  }`}
+                />
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={handleAiSitterSearch}
+                    disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {aiSearchLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Searching...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Search className="w-4 h-4" />
+                        <span>Find My Perfect Sitter</span>
+                      </>
+                    )}
+                  </button>
+                  {aiSitterResults !== null && (
+                    <button
+                      onClick={() => {
+                        setAiSitterSearch('');
+                        setAiSitterResults(null);
+                      }}
+                      className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold px-4 py-3.5 rounded-xl text-sm transition-all cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {!(searchZip.trim() && searchCoords) && (
+                <p className="text-xs text-amber-600 font-bold flex items-center gap-1">
+                  ⚠️ Please select your location first
+                </p>
+              )}
+            </div>
+
 
 
             {/* Location Verification Status */}
@@ -3573,7 +3594,14 @@ export default function PetSitting() {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col lg:flex-row gap-8">
+              <>
+                {aiSitterResults !== null && aiSitterResults.length === 0 && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-5 text-sm font-semibold flex items-center gap-2 mb-6">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                    <span>No exact matches found for "{aiSitterSearch}". Showing all sitters in your area instead.</span>
+                  </div>
+                )}
+                <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sitters List (Left on desktop, Below on mobile) */}
                 <div className="flex-1 order-2 lg:order-1">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -3742,6 +3770,7 @@ export default function PetSitting() {
                   />
                 </div>
               </div>
+             </>
             )}
             </div>
 
