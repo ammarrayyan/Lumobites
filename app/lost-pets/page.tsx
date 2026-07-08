@@ -6,11 +6,12 @@ import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
-import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
 
 export default function LostPetsFeed() {
   // ── Page Tab ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
   const [pets, setPets] = useState<any[]>([]);
@@ -432,7 +433,16 @@ export default function LostPetsFeed() {
               <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>
               <p className="text-[#8B5E3C] font-medium text-lg">Help reunite lost pets with their families in your neighborhood.</p>
             </div>
-            <Link href="/lost-pets/post" className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0">
+            <Link 
+              href="/lost-pets/post" 
+              onClick={(e) => {
+                if (!userEmail) {
+                  e.preventDefault();
+                  setShowSignInModal(true);
+                }
+              }}
+              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0"
+            >
               <Megaphone className="w-5 h-5" /> Report Lost/Found Pet
             </Link>
           </div>
@@ -921,6 +931,42 @@ export default function LostPetsFeed() {
           )}
 
         </main>
+
+        {showSignInModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fade-in">
+            <div className="bg-white rounded-3xl p-6 pb-8 md:p-8 max-w-sm w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative text-center items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FAF6F4] mb-4">
+                  <Lock className="w-8 h-8 text-[#8B5E3C]" />
+                </div>
+                <h3 className="text-xl font-black text-[#191919] leading-tight">
+                  Sign In Required
+                </h3>
+                <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                  Please sign in to post a lost or found pet.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 w-full">
+                <button
+                  onClick={() => {
+                    setShowSignInModal(false);
+                    window.dispatchEvent(new Event('lumo-open-signin'));
+                  }}
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Key className="w-4 h-4 text-white" /> Sign In
+                </button>
+                <button
+                  onClick={() => setShowSignInModal(false)}
+                  className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

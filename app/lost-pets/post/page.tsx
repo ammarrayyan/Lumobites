@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Footprints, CheckCircle, MapPin, RefreshCw } from 'lucide-react';
@@ -28,6 +28,18 @@ export default function PostLostPet() {
   const [contactPhone, setContactPhone] = useState('');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+      if (!emailVal) {
+        alert('Please sign in first.');
+        router.push('/lost-pets');
+        return;
+      }
+      setContactEmail(emailVal);
+    }
+  }, [router]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -448,7 +460,7 @@ export default function PostLostPet() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span className="text-red-500">*Required</span></label>
-                    <input required type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="you@email.com" />
+                    <input required type="email" value={contactEmail} readOnly className="w-full bg-gray-100 border border-[#E8DDD4] rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed focus:outline-none" placeholder="you@email.com" />
                     <p className="text-xs text-[#8B7E7D] mt-2 font-medium">Required — we'll send you a secure link to manage or delete your post anytime.</p>
                   </div>
                   <div>
