@@ -85,6 +85,8 @@ interface Sitter {
   available_times?: string[];
   service_types?: string[];
   completed_bookings?: number;
+  matchScore?: number;
+  matchReason?: string;
 }
 
 // Haversine formula to calculate distance between two coordinates in miles
@@ -401,6 +403,9 @@ export default function PetSitting() {
   // Find Sitter State
   const [sitters, setSitters] = useState<Sitter[]>([]);
   const [loadingSitters, setLoadingSitters] = useState(false);
+  const [aiSitterSearch, setAiSitterSearch] = useState('');
+  const [aiSitterResults, setAiSitterResults] = useState<Sitter[] | null>(null);
+  const [aiSearchLoading, setAiSearchLoading] = useState(false);
   const [isOwnerPro, setIsOwnerPro] = useState(false);
   const [unlockModalOpen, setUnlockModalOpen] = useState(false);
   const [ownerAuthMode, setOwnerAuthMode] = useState<'email' | 'verify'>('email');
@@ -1238,6 +1243,31 @@ export default function PetSitting() {
     } finally {
       setIsGeocoding(false);
       setIsDetectingLocation(false);
+    }
+  };
+
+  const handleAiSitterSearch = async () => {
+    if (!aiSitterSearch || !aiSitterSearch.trim()) {
+      setAiSitterResults(null);
+      return;
+    }
+    setAiSearchLoading(true);
+    try {
+      const email = reqEmail || (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
+      const response = await fetch('/api/petsitting/ai-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: aiSitterSearch, email })
+      });
+      if (!response.ok) throw new Error('Search failed');
+      const data = await response.json();
+      setAiSitterResults(data.sitters || []);
+    } catch (error) {
+      console.error('AI search error:', error);
+      setAiSitterResults(null);
+      alert('Search unavailable — showing all sitters instead');
+    } finally {
+      setAiSearchLoading(false);
     }
   };
 
@@ -3193,6 +3223,16 @@ export default function PetSitting() {
       filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
+
+  if (aiSitterResults !== null) {
+    filteredSitters = aiSitterResults.map(s => {
+      if (searchCoords && s.lat && s.lng) {
+        return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
+      }
+      return s;
+    });
+  }
+
   const hasAnyRate = sitterRateDropins || sitterRateWalking || sitterRateOvernight || sitterRateBoarding || sitterRateDaycare;
   const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && (sitterIdPhoto || hasExistingIdPhoto) && sitterLocationInput.trim() && sitterLocationVerified && hasAnyRate && sitterBio.trim();
 
@@ -3289,8 +3329,64 @@ export default function PetSitting() {
             )}
 
             <div className={ownerSubTab === 'search' ? 'block animate-fade-in' : 'hidden'}>
+              {/* AI Sitter Search Panel */}
+              <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 flex flex-col gap-4 relative overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#8B5E3C]/10 p-2 rounded-xl">
+                    <Sparkles className="w-5 h-5 text-[#8B5E3C]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "female sitter good with senior cats")</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="Describe your ideal sitter... (e.g. 'female sitter experienced with cats')"
+                    value={aiSitterSearch}
+                    onChange={(e) => setAiSitterSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAiSitterSearch();
+                    }}
+                    className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                  />
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={handleAiSitterSearch}
+                      disabled={aiSearchLoading}
+                      className="bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {aiSearchLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Searching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4" />
+                          <span>Find My Perfect Sitter</span>
+                        </>
+                      )}
+                    </button>
+                    {aiSitterResults !== null && (
+                      <button
+                        onClick={() => {
+                          setAiSitterSearch('');
+                          setAiSitterResults(null);
+                        }}
+                        className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold px-4 py-3.5 rounded-xl text-sm transition-all cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Search Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
               {/* Row 1: Location & Search Radius */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex gap-2">
@@ -3456,15 +3552,25 @@ export default function PetSitting() {
               </div>
             ) : filteredSitters.length === 0 ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
-                <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
-                <p className="text-[#8B7E7D] mb-4">Try expanding your search distance.</p>
-                <button 
-                  onClick={() => setActiveTab('become')}
-                  className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
-                >
-                  Join free as an early sitter &rarr;
-                </button>
+                {aiSitterResults !== null ? (
+                  <>
+                    <Search className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found matching your description.</h3>
+                    <p className="text-[#8B7E7D] mb-4">Try different keywords or check your spelling.</p>
+                  </>
+                ) : (
+                  <>
+                    <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
+                    <p className="text-[#8B7E7D] mb-4">Try expanding your search distance.</p>
+                    <button 
+                      onClick={() => setActiveTab('become')}
+                      className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
+                    >
+                      Join free as an early sitter &rarr;
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="flex flex-col lg:flex-row gap-8">
@@ -3482,6 +3588,20 @@ export default function PetSitting() {
                             : 'border-[#E8DDD4] shadow-sm hover:shadow-md'
                         }`}
                       >
+                        {sitter.matchScore !== undefined && (
+                          <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-xl p-3.5 flex flex-col gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
+                                {sitter.matchScore}% Match
+                              </span>
+                            </div>
+                            {sitter.matchReason && (
+                              <p className="text-xs text-emerald-800 font-medium italic mt-1 leading-normal">
+                                "{sitter.matchReason}"
+                              </p>
+                            )}
+                          </div>
+                        )}
                         <div className="flex flex-col gap-4 mb-4">
                           {sitter.photo_url ? (
                             <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
