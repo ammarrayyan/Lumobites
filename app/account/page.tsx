@@ -644,14 +644,7 @@ export default function AccountPage() {
                             </button>
                           )}
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => setShowConfirmCancel(true)}
-                          className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center"
-                        >
-                          Cancel Subscription
-                        </button>
-                      )}
+                      ) : null}
                     </>
                   )}
                   {/* Sign Out All Devices Button */}
