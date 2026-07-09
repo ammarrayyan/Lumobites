@@ -85,7 +85,7 @@ export default function Home() {
       {/* NAVBAR */}
       
       {/* HERO SECTION */}
-      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6">
+      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6 md:px-8 lg:px-12">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 
@@ -122,11 +122,11 @@ export default function Home() {
       </section>
 
       {/* SERVICES GRID SECTION */}
-      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 pb-8">
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
         <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
 
           {/* 1. Pet Sitting */}
-          <div className="col-span-12 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-6 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10 mt-2">
               <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
                 <HomeIcon className="w-6 h-6 text-[#C27353]" />
@@ -144,7 +144,7 @@ export default function Home() {
           </div>
 
           {/* 2. Lost Pets */}
-          <div className="col-span-12 lg:col-span-4 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
                 <Footprints className="w-6 h-6 text-[#517685]" />
@@ -162,7 +162,7 @@ export default function Home() {
           </div>
 
           {/* 3. Pet Food & Safety */}
-          <div className="col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
                 <Utensils className="w-6 h-6 text-[#63825D]" />
@@ -186,7 +186,7 @@ export default function Home() {
       </section>
 
       {/* EXPLORE TEASER BANNER */}
-      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 pb-14 text-center">
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
         <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
           <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
             <Globe className="w-6 h-6 text-[#8B5E3C]" />

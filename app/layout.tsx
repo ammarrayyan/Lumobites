@@ -10,6 +10,7 @@ import PwaSplashScreen from "@/components/PwaSplashScreen";
 import FloatingQRCode from "@/components/FloatingQRCode";
 import PushManager from "@/components/PushManager";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import TermsModal from "@/components/TermsModal";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -74,12 +75,13 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
+        <TermsModal />
         <PwaRegister />
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
-        <div className="pt-[72px] pb-24 md:pb-0 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+        <div className="pt-[72px] pb-24 lg:pb-0 min-h-[calc(100vh-72px)] flex flex-col justify-between">
           <div className="flex-grow">
             {children}
           </div>

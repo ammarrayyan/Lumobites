@@ -425,7 +425,7 @@ export default function LostPetsFeed() {
           </div>
         )}
 
-        <main className="max-w-6xl mx-auto px-4 py-8 md:py-12 w-full">
+        <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12 w-full">
 
           {/* ── Page Header ── */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
@@ -554,9 +554,9 @@ export default function LostPetsFeed() {
                     <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
                   </div>
                 ) : (
-                  <div className="flex flex-col lg:flex-row gap-8 items-start">
+                  <div className="flex flex-col md:flex-row gap-8 items-start">
                     {/* Pets Grid */}
-                    <div className="flex-1 order-2 lg:order-1 w-full">
+                    <div className="flex-1 order-2 md:order-1 w-full">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
@@ -639,7 +639,7 @@ export default function LostPetsFeed() {
                     </div>
 
                     {/* Interactive Map */}
-                    <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                    <div className="w-full md:w-[45%] md:sticky md:top-24 h-[400px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
                       <LostPetsMap pets={pets} searchCoords={searchCoords} searchRadius={searchRadius} />
                     </div>
                   </div>

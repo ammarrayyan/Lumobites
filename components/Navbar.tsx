@@ -82,6 +82,15 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const [signInLoading, setSignInLoading] = useState(false);
   const [alreadyProMsg, setAlreadyProMsg] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [hasTermsAccepted, setHasTermsAccepted] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const accepted = localStorage.getItem('lumo_terms_accepted') === 'true';
+      setHasTermsAccepted(accepted);
+    }
+  }, [showSignInModal]);
 
   const syncStatus = () => {
     if (typeof window === 'undefined') return;
@@ -340,6 +349,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       }
 
       localStorage.setItem('lumo_pro_email', signInEmail);
+      localStorage.setItem('lumo_terms_accepted', 'true');
       document.cookie = `lumo_pro_email=${signInEmail}; path=/; max-age=2592000`; // 30 days
       if (verifyData.isSitter) {
         localStorage.setItem('lumo_sitter_email', signInEmail);
@@ -407,7 +417,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
         </Link>
 
         {/* Right: Desktop Links & Share */}
-        <div className="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6 ml-auto">
+        <div className="hidden lg:flex items-center gap-2 lg:gap-4 xl:gap-6 ml-auto">
 
           {/* Pet Sitting */}
           <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
@@ -563,7 +573,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           </div>
         </div>
 
-        <div className="flex md:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
+        <div className="flex lg:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
           {proEmail && <NotificationBell email={proEmail} />}
 
@@ -619,7 +629,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
       {/* Mobile Menu Dropdown */}
       {isOpen && (
-        <div className="md:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
+        <div className="lg:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
 
             {/* Pet Sitting (mobile) */}
@@ -834,10 +844,35 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                       className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
                       required
                     />
+                    {!hasTermsAccepted && (
+                      <label className="flex items-start gap-2.5 my-1 cursor-pointer select-none text-left">
+                        <input
+                          type="checkbox"
+                          checked={termsAccepted}
+                          onChange={(e) => setTermsAccepted(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 text-[#8B5E3C] border-[#E8D5C0] rounded-sm focus:ring-[#8B5E3C]"
+                        />
+                        <span className="text-[11px] text-[#666666] leading-normal font-medium">
+                          I agree to the{' '}
+                          <Link href="/terms" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                            Terms of Service
+                          </Link>
+                          ,{' '}
+                          <Link href="/privacy" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                            Privacy Policy
+                          </Link>{' '}
+                          and{' '}
+                          <Link href="/community-guidelines" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                            Community Guidelines
+                          </Link>
+                          .
+                        </span>
+                      </label>
+                    )}
                     <button
                       type="submit"
-                      disabled={signInLoading}
-                      className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70"
+                      disabled={signInLoading || (!hasTermsAccepted && !termsAccepted)}
+                      className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {signInLoading ? 'Sending...' : 'Send Code'}
                     </button>

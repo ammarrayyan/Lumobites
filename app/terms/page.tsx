@@ -18,8 +18,8 @@ export default function TermsPage() {
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Membership Fees & Refunds</h2>
           <p className="mt-2">Membership and subscription fees (including Lumo Bites PRO and Lumo Sitter Pro) are non-refundable. However, upon cancellation, members retain full access to all PRO features until the end of their current billing period. No partial refunds are issued for unused days within a billing cycle.</p>
 
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. Account Removal</h2>
-          <p className="mt-2">We reserve the right to suspend or permanently remove any profile or account that violates our standards, engages in fraudulent activity, or demonstrates unsafe behavior, at our sole discretion.</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. Account Removal &amp; Zero Tolerance Policy</h2>
+          <p className="mt-2">We enforce a strict zero-tolerance policy for objectionable content or abusive users. We reserve the right to remove any post, message, or review, and to immediately suspend or permanently ban any user account that violates our safety standards, engages in harassment, or demonstrates abusive behavior. Reported violations are moderated and acted upon within 24 hours.</p>
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6. Veterinary Disclaimer</h2>
           <p className="mt-2">Our food recommendations are for informational purposes only and do not constitute veterinary advice. Always consult your veterinarian before making significant changes to your pet's diet.</p>
@@ -39,8 +39,8 @@ export default function TermsPage() {
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>7. Governing Law</h2>
           <p className="mt-2">These Terms of Service and any separate agreements whereby we provide you services shall be governed by and construed in accordance with the laws of the state of Kentucky, United States.</p>
 
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>8. User Conduct</h2>
-          <p className="mt-2">Users must not post false or misleading information, harass other users, use the platform for illegal purposes, or attempt to bypass the membership system. Violations may result in immediate account removal without refund.</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>8. User Conduct &amp; Content Moderation</h2>
+          <p className="mt-2">Users must not post false or misleading information, harass other users, post objectionable or abusive content, use the platform for illegal purposes, or attempt to bypass the membership system. Lumo Bites actively moderates community content, and we reserve the absolute right to remove content and ban users violating these conduct rules within 24 hours of a report.</p>
 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>9. Age Requirement</h2>
           <p className="mt-2">You must be at least 18 years old to use Lumo Bites. By using this platform you confirm you are 18 or older.</p>

@@ -3281,7 +3281,7 @@ export default function PetSitting() {
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+      <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-4">Lumo Bites Pet Sitting</h1>
           <p className="text-[#8B5E3C] font-medium text-lg">Connect with trusted, local pet sitters in your community.</p>
@@ -3601,10 +3601,10 @@ export default function PetSitting() {
                     <span>No exact matches found for "{aiSitterSearch}". Showing all sitters in your area instead.</span>
                   </div>
                 )}
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col md:flex-row gap-8">
                 {/* Sitters List (Left on desktop, Below on mobile) */}
-                <div className="flex-1 order-2 lg:order-1">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <div className="flex-1 order-2 md:order-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
                       <div
                         key={sitter.id}
@@ -3760,7 +3760,7 @@ export default function PetSitting() {
                 </div>
 
                 {/* Map (Right on desktop, Above on mobile) */}
-                <div className="w-full lg:w-[45%] lg:sticky lg:top-24 h-[300px] lg:h-[calc(100vh-140px)] order-1 lg:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
+                <div className="w-full md:w-[45%] md:sticky md:top-24 h-[300px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
                   <SitterMap 
                     sitters={filteredSitters}
                     searchCoords={searchCoords}

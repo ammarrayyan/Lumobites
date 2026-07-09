@@ -21,7 +21,7 @@ export default function MobileBottomNav() {
 
   return (
     <div 
-      className="md:hidden px-2 flex items-center justify-evenly w-[calc(100%-32px)] max-w-[420px] h-[68px]"
+      className="lg:hidden px-2 flex items-center justify-evenly w-[calc(100%-32px)] max-w-[420px] h-[68px]"
       style={{
         position: 'fixed',
         bottom: '20px',
