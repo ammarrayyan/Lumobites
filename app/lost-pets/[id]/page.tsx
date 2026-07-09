@@ -73,9 +73,12 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          reported_by_email: userEmail || 'guest@lumobitespet.com',
           reporter_email: userEmail || 'guest@lumobitespet.com',
           reported_email: pet.contact_email || 'unknown@lumobitespet.com',
-          reported_type: 'lost_pet_post',
+          reported_type: 'lost_pet',
+          post_id: pet.id,
+          post_type: 'lost_pet',
           reason: reason.trim(),
           details: `Reported Lost Pet Post ID: ${pet.id}`,
           status: 'pending'

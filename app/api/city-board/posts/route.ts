@@ -114,6 +114,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Check if device_cookie is banned
+    const { data: isBanned, error: banError } = await supabaseAdmin
+      .from('banned_cookies')
+      .select('cookie')
+      .eq('cookie', device_cookie)
+      .maybeSingle();
+
+    if (banError) {
+      console.error('[City Board POST] Ban check error:', banError);
+    }
+
+    if (isBanned) {
+      return NextResponse.json({ error: 'This device is blocked from posting.' }, { status: 403 });
+    }
+
     const randomChars = crypto.randomBytes(2).toString('hex').toUpperCase();
     const post_id = `LB-${randomChars}`;
 

@@ -337,10 +337,20 @@ export default function CityBoardPage() {
     if (!reportPostId || !deviceCookie) return;
     setSubmittingReport(true);
     try {
-      const res = await fetch('/api/city-board/report', {
+      const userEmail = (typeof window !== 'undefined' && localStorage.getItem('lumo_pro_email')) || 'anonymous@lumobites.net';
+      const res = await fetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: reportPostId, reason: reportReason, device_cookie: deviceCookie })
+        body: JSON.stringify({
+          reported_by_email: userEmail,
+          reporter_email: userEmail,
+          reported_email: 'anonymous@lumobites.net',
+          reported_type: 'city_board',
+          post_id: reportPostId,
+          post_type: 'city_board',
+          reason: reportReason,
+          status: 'pending'
+        })
       });
       if (res.ok) {
         alert('Thank you. This post has been reported and will be reviewed by our admin team.');

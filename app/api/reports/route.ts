@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { Resend } from 'resend';
 
 function checkAuth(req: NextRequest) {
   const key = req.headers.get('x-admin-key');
@@ -31,8 +32,73 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { reporter_email, reported_email, reported_type, booking_id, reason, details, sitter_id } = body;
+    const { 
+      reporter_email, 
+      reported_email, 
+      reported_type, 
+      booking_id, 
+      reason, 
+      details, 
+      sitter_id,
+      reported_by_email,
+      post_id,
+      post_type
+    } = body;
 
+    // A. POST REPORT ROUTE (UGC content moderation)
+    if (post_id) {
+      if (!reason) {
+        return NextResponse.json({ error: 'Missing required reason field' }, { status: 400 });
+      }
+
+      const cleanReporter = (reported_by_email || reporter_email || 'guest@lumobitespet.com').toLowerCase().trim();
+      const cleanReported = (reported_email || 'anonymous@lumobites.net').toLowerCase().trim();
+      const cleanType = post_type || reported_type || 'post';
+
+      // 1. Insert the post report into database
+      const { data: newReport, error: insertError } = await supabaseAdmin
+        .from('reports')
+        .insert({
+          reporter_email: cleanReporter,
+          reported_by_email: cleanReporter,
+          reported_email: cleanReported,
+          reported_type: cleanType,
+          post_id,
+          post_type: cleanType,
+          reason: reason.trim(),
+          details: details || `Reported ${cleanType} post ID: ${post_id}`,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('[Reports POST] UGC insert error:', insertError);
+        return NextResponse.json({ error: 'Failed to save report' }, { status: 500 });
+      }
+
+      // 2. Send email notification to info@lumobitespet.com
+      if (process.env.RESEND_API_KEY) {
+        try {
+          const localResend = new Resend(process.env.RESEND_API_KEY);
+          const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites Pet <no-reply@lumobites.net>';
+          
+          await localResend.emails.send({
+            from: fromEmail,
+            to: 'info@lumobitespet.com',
+            subject: 'New content report on Lumo Bites',
+            text: 'A post has been reported. Login to admin to review: lumobites.net/admin'
+          });
+          console.log('[Reports POST] Admin notification email sent successfully.');
+        } catch (emailErr) {
+          console.error('[Reports POST] Failed to send admin email notification:', emailErr);
+        }
+      }
+
+      return NextResponse.json({ success: true, report: newReport });
+    }
+
+    // B. SITTER / BOOKING / USER REPORT ROUTE (Legacy / Existing flow)
     if (!reporter_email || (!reported_email && !sitter_id && !booking_id) || !reported_type || !reason) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -81,6 +147,7 @@ export async function POST(req: NextRequest) {
       .from('reports')
       .insert({
         reporter_email: cleanReporter,
+        reported_by_email: cleanReporter,
         reported_email: cleanReported,
         reported_type,
         booking_id: booking_id || null,
@@ -92,7 +159,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('[Reports POST] Insert error:', insertError);
+      console.error('[Reports POST] Sitter insert error:', insertError);
       return NextResponse.json({ error: 'Failed to save report' }, { status: 500 });
     }
 
