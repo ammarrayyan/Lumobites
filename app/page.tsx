@@ -89,7 +89,7 @@ export default function Home() {
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 
-          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(34px, 4.5vw, 54px)' }}>
+          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(30px, 4vw, 48px)' }}>
             <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
@@ -134,7 +134,7 @@ export default function Home() {
               <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
             </div>
             <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join.
+              Find trusted, ID-verified pet sitters in your neighborhood. Describe what you need and AI finds the perfect match instantly. No commission — sitters keep 100%.
             </p>
             <div className="mt-auto relative z-10">
               <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
@@ -152,7 +152,7 @@ export default function Home() {
               <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
             </div>
             <p className="text-[#627985] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Post a lost or found pet in seconds and reach your whole neighborhood instantly. Free, no account needed.
+              Post a lost or found pet instantly and let AI search all found pet reports using photo recognition. The fastest way to reunite with your pet.
             </p>
             <div className="mt-auto relative z-10">
               <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#517685] to-[#426270] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
@@ -170,7 +170,7 @@ export default function Home() {
               <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food & Safety</h3>
             </div>
             <p className="text-[#61755E] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Find the safest food for your pet, scan ingredient labels, and browse live FDA recalls. PRO members get instant email alerts.
+              Scan any pet food label — AI instantly flags hidden toxins and harmful ingredients. Get AI-powered food recommendations personalized for your pet. Live FDA recall alerts included.
             </p>
             <div className="mt-auto flex flex-col gap-2 relative z-10">
               <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#63825D] to-[#516E4C] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
@@ -193,7 +193,7 @@ export default function Home() {
           </div>
           <h2 className="text-xl md:text-2xl font-black text-[#191919] mb-2">Meet Your Pet Community</h2>
           <p className="text-[#666666] text-sm md:text-base leading-relaxed mb-6">
-            See what&apos;s happening around you — real sitters, lost pet alerts, neighborhood discussions and more.
+            Connect with local pet owners, follow lost pet alerts, and stay in the loop with everything happening in your neighborhood.
           </p>
           <Link 
             href="/explore"
