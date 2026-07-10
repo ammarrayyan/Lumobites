@@ -258,6 +258,8 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('lumo_pro_email');
+      localStorage.removeItem('lumo_sitter_email');
+      localStorage.removeItem('lumo_sitter_id');
       localStorage.removeItem('lumo_admin_bypass');
       document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     }

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Footprints, CheckCircle, MapPin, RefreshCw } from 'lucide-react';
+import { Footprints, CheckCircle, MapPin, RefreshCw, Lock } from 'lucide-react';
 
 export default function PostLostPet() {
   const router = useRouter();
@@ -24,22 +24,26 @@ export default function PostLostPet() {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   
   const [dateLostFound, setDateLostFound] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
+  const [contactEmail, setContactEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+    }
+    return '';
+  });
   const [contactPhone, setContactPhone] = useState('');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
-      if (!emailVal) {
-        alert('Please sign in first.');
-        router.push('/lost-pets');
-        return;
+      if (emailVal) {
+        setIsSignedIn(true);
+        setContactEmail(emailVal);
       }
-      setContactEmail(emailVal);
     }
-  }, [router]);
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -460,7 +464,22 @@ export default function PostLostPet() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span className="text-red-500">*Required</span></label>
-                    <input required type="email" value={contactEmail} readOnly className="w-full bg-gray-100 border border-[#E8DDD4] rounded-xl px-4 py-3 text-gray-500 cursor-not-allowed focus:outline-none" placeholder="you@email.com" />
+                    <div className="relative">
+                      {isSignedIn && (
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Lock className="w-4 h-4" />
+                        </div>
+                      )}
+                      <input 
+                        required 
+                        type="email" 
+                        value={contactEmail} 
+                        onChange={e => !isSignedIn && setContactEmail(e.target.value)}
+                        readOnly={isSignedIn} 
+                        className={`w-full border border-[#E8DDD4] rounded-xl py-3 focus:outline-none ${isSignedIn ? 'bg-gray-100 text-gray-500 cursor-not-allowed pl-10 pr-4' : 'bg-[#FAF6F4] text-[#4A3E3D] focus:border-[#8B5E3C] px-4'}`} 
+                        placeholder="you@email.com" 
+                      />
+                    </div>
                     <p className="text-xs text-[#8B7E7D] mt-2 font-medium">Required — we'll send you a secure link to manage or delete your post anytime.</p>
                   </div>
                   <div>
