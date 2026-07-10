@@ -494,42 +494,61 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             {proEmail && <NotificationBell email={proEmail} />}
             
             {!isPro && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
-                  className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
-                >
-                  Create Free Account <Sparkles className="w-3 h-3" />
-                </button>
-                {showUpgradeMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
-                    <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                      <button 
-                        onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
-                        className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
-                      >
-                        <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
-                        <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
-                      </button>
-                      <div className="flex items-center my-2 px-3">
-                        <div className="flex-grow border-t border-gray-150"></div>
-                        <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
-                        <div className="flex-grow border-t border-gray-150"></div>
-                      </div>
-                      <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
-                        <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
-                        <button
-                          onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); }}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+              <>
+                {/* Desktop only - simplified */}
+                <div className="hidden md:flex flex-col items-center relative group">
+                  <button 
+                    onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-6 py-2 rounded-xl font-medium transition-colors shadow-sm"
+                  >
+                    Get Started — It's Free
+                  </button>
+                  {/* Tooltip to avoid breaking navbar layout */}
+                  <div className="absolute top-[120%] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-white border border-[#E8DDD4] shadow-md rounded-lg p-3 w-[250px] right-0 z-50 text-center">
+                    <p className="text-xs text-gray-500">
+                      New or returning? Use the same button — enter your email to continue.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mobile - keep exactly as is */}
+                <div className="md:hidden relative">
+                  <button
+                    onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                    className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
+                  >
+                    Create Free Account <Sparkles className="w-3 h-3" />
+                  </button>
+                  {showUpgradeMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40 bg-transparent cursor-default" onClick={() => setShowUpgradeMenu(false)} />
+                      <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#D97706]/30 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                        <button 
+                          onClick={() => { setShowUpgradeMenu(false); handleUpgradeCheckout(); }} 
+                          className="w-full text-left bg-[#FFFBF5] hover:bg-[#F5EDE4] border border-[#E8D5C0] rounded-xl p-3 transition-colors cursor-pointer"
                         >
-                          Sign in to access your account →
+                          <span className="block text-[#8B5E3C] font-bold text-sm mb-1">🌟 Create Your Free Account</span>
+                          <span className="block text-[#666666] text-[11px] mb-1.5 leading-tight">Verified sitters + email recalls + unlimited scans</span>
                         </button>
+                        <div className="flex items-center my-2 px-3">
+                          <div className="flex-grow border-t border-gray-150"></div>
+                          <span className="flex-shrink mx-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">or</span>
+                          <div className="flex-grow border-t border-gray-150"></div>
+                        </div>
+                        <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
+                          <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
+                          <button
+                            onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                          >
+                            Sign in to access your account →
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
-              </div>
+                    </>
+                  )}
+                </div>
+              </>
             )}
 
             {isSignedIn && (
