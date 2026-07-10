@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Trash2, Check, ExternalLink, RefreshCw, EyeOff, Ban } from 'lucide-react';
+import { ShieldAlert, Trash2, Check, ExternalLink, RefreshCw, EyeOff, Ban, MessageSquare, X } from 'lucide-react';
 
 interface Report {
   id: string;
@@ -18,12 +18,27 @@ interface Report {
   created_at: string;
 }
 
+interface SiteComment {
+  id: string;
+  post_id: string;
+  post_type: 'lost_pet' | 'city_board';
+  author: string;
+  content: string;
+  created_at: string;
+}
+
 export default function ReportsManagement({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
   const [reports, setReports] = useState<Report[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [comments, setComments] = useState<SiteComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'ugc' | 'legacy'>('ugc');
+  const [activeSubTab, setActiveSubTab] = useState<'ugc' | 'legacy' | 'comments'>('ugc');
+
+  // Modal / Drawer state for viewing comments on a specific post in the queue
+  const [moderatingPost, setModeratingPost] = useState<{ id: string; type: string } | null>(null);
+  const [postComments, setPostComments] = useState<any[]>([]);
+  const [loadingPostComments, setLoadingPostComments] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -44,8 +59,15 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
       });
       const usersData = await usersRes.json();
 
+      // 3. Fetch Unified Comments
+      const commentsRes = await fetch('/api/admin/comments', {
+        headers: { 'x-admin-key': adminKey }
+      });
+      const commentsData = await commentsRes.json();
+
       setReports(reportsData.reports || []);
       setUsers(usersData.users || []);
+      setComments(commentsData.comments || []);
     } catch (err) {
       console.error('Failed to fetch admin report data:', err);
     } finally {
@@ -236,6 +258,54 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
     }
   };
 
+  // ADMIN COMMENT DELETION
+  const handleDeleteComment = async (commentId: string, type: 'lost_pet' | 'city_board') => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      const res = await fetch('/api/admin/delete-comment', {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': adminKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: commentId, type })
+      });
+      if (!res.ok) throw new Error('Failed to delete comment');
+      
+      // Update global comments list
+      setComments(prev => prev.filter(c => c.id !== commentId));
+      
+      // Update inline comments list if active
+      setPostComments(prev => prev.filter(c => c.id !== commentId));
+
+      alert('Comment deleted successfully.');
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  // MODERATE COMMENTS ON SPECIFIC POST
+  const openCommentModerator = async (postId: string, postType: string) => {
+    setModeratingPost({ id: postId, type: postType });
+    setLoadingPostComments(true);
+    setPostComments([]);
+    try {
+      if (postType === 'lost_pet') {
+        const res = await fetch(`/api/lost-pets/comments?lost_pet_id=${postId}`);
+        const data = await res.json();
+        setPostComments(data.comments || []);
+      } else if (postType === 'city_board') {
+        const res = await fetch(`/api/city-board/replies?post_id=${postId}`);
+        const data = await res.json();
+        setPostComments(data.replies || []);
+      }
+    } catch (err) {
+      console.error('Failed to load post comments:', err);
+    } finally {
+      setLoadingPostComments(false);
+    }
+  };
+
   const getUserStatus = (email: string) => {
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     return user?.account_status || 'active';
@@ -253,7 +323,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
   const legacyReports = reports.filter(r => r.post_id === null);
 
   if (loading) {
-    return <div className="text-gray-500 animate-pulse text-center py-12">Loading reports...</div>;
+    return <div className="text-gray-500 animate-pulse text-center py-12">Loading safety features...</div>;
   }
 
   return (
@@ -264,7 +334,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
             <ShieldAlert className="w-6 h-6 text-red-600" />
             Safety & Moderation Queue
           </h2>
-          <p className="text-xs text-gray-500 mt-1">Review reported content and sitter profiles to maintain community safety.</p>
+          <p className="text-xs text-gray-550 mt-1">Review reported content, sitter profiles, and community comments to maintain community safety.</p>
         </div>
         <button
           onClick={fetchData}
@@ -282,7 +352,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
           className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
             activeSubTab === 'ugc'
               ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-550 hover:text-[#191919]'
+              : 'border-transparent text-gray-555 hover:text-[#191919]'
           }`}
         >
           Content Moderation Queue ({pendingUgcReports.length} pending)
@@ -293,11 +363,21 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
           )}
         </button>
         <button
+          onClick={() => setActiveSubTab('comments')}
+          className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all flex items-center gap-2 ${
+            activeSubTab === 'comments'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-555 hover:text-[#191919]'
+          }`}
+        >
+          Comments & Replies ({comments.length})
+        </button>
+        <button
           onClick={() => setActiveSubTab('legacy')}
           className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all ${
             activeSubTab === 'legacy'
               ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-550 hover:text-[#191919]'
+              : 'border-transparent text-gray-555 hover:text-[#191919]'
           }`}
         >
           Sitter & Booking Reports ({legacyReports.filter(r => r.status === 'pending').length} pending)
@@ -306,7 +386,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
 
       {/* Sub tab content */}
       <div className="overflow-x-auto">
-        {activeSubTab === 'ugc' ? (
+        {activeSubTab === 'ugc' && (
           <table className="w-full text-left text-sm text-[#555555]">
             <thead className="text-xs uppercase bg-gray-50 text-gray-500">
               <tr>
@@ -345,6 +425,13 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
                     <td className="px-4 py-3 text-right">
                       {report.status === 'pending' ? (
                         <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => openCommentModerator(report.post_id!, report.post_type!)}
+                            className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-semibold px-2 py-1 rounded bg-[#8B5E3C]/10 hover:bg-[#8B5E3C]/20 transition-colors flex items-center gap-1"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            Comments
+                          </button>
                           <a
                             href={getPostViewUrl(report)}
                             target="_blank"
@@ -373,7 +460,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
                           <button
                             onClick={() => handleUpdateReportStatus(report.id, 'dismissed')}
                             disabled={actioningId === report.id}
-                            className="text-xs text-gray-550 hover:text-gray-800 font-semibold px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-1"
+                            className="text-xs text-gray-555 hover:text-gray-800 font-semibold px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-1"
                           >
                             <EyeOff className="w-3.5 h-3.5" />
                             Dismiss
@@ -391,7 +478,59 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
               )}
             </tbody>
           </table>
-        ) : (
+        )}
+
+        {/* COMMENTS TAB */}
+        {activeSubTab === 'comments' && (
+          <table className="w-full text-left text-sm text-[#555555]">
+            <thead className="text-xs uppercase bg-gray-50 text-gray-500">
+              <tr>
+                <th className="px-4 py-3 rounded-tl-lg">Who Posted</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Comment Content</th>
+                <th className="px-4 py-3">On Post</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3 rounded-tr-lg text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comments.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">No comments or replies found.</td>
+                </tr>
+              ) : (
+                comments.map(c => (
+                  <tr key={c.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-[#191919]">{c.author}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        c.post_type === 'lost_pet' ? 'bg-red-50 text-red-750' : 'bg-purple-50 text-purple-750'
+                      }`}>
+                        {c.post_type === 'lost_pet' ? 'Lost Pet' : 'City Board'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 max-w-sm font-medium text-gray-700 break-words">{c.content}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{c.post_id}</td>
+                    <td className="px-4 py-3 text-xs">
+                      {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleDeleteComment(c.id, c.post_type)}
+                        className="text-xs text-red-600 hover:text-red-800 font-bold px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1 ml-auto"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+
+        {activeSubTab === 'legacy' && (
           <table className="w-full text-left text-sm text-[#555555]">
             <thead className="text-xs uppercase bg-gray-50 text-gray-500">
               <tr>
@@ -434,7 +573,7 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
                       </td>
                       <td className="px-4 py-3 max-w-xs">
                         <div className="font-semibold text-gray-800">{report.reason}</div>
-                        {report.details && <div className="text-xs text-gray-550 mt-1 line-clamp-3">{report.details}</div>}
+                        {report.details && <div className="text-xs text-gray-555 mt-1 line-clamp-3">{report.details}</div>}
                         {report.booking_id && <div className="text-[10px] text-gray-400 mt-1">Booking: {report.booking_id.substring(0, 8)}...</div>}
                       </td>
                       <td className="px-4 py-3 text-xs">{report.reporter_email}</td>
@@ -500,6 +639,80 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
           </table>
         )}
       </div>
+
+      {/* SPECIFIC POST COMMENT MODERATION MODAL */}
+      {moderatingPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="font-extrabold text-[#191919] text-lg flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-[#8B5E3C]" />
+                  Moderate Comments
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Showing comments for {moderatingPost.type === 'lost_pet' ? 'Lost Pet' : 'City Board'} Post #{moderatingPost.id}
+                </p>
+              </div>
+              <button
+                onClick={() => setModeratingPost(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-grow flex flex-col gap-4">
+              {loadingPostComments ? (
+                <div className="text-center py-8 text-gray-500 animate-pulse">Loading comments...</div>
+              ) : postComments.length === 0 ? (
+                <div className="text-center py-12 text-gray-400 font-medium">No comments on this post.</div>
+              ) : (
+                <div className="space-y-4">
+                  {postComments.map((c) => {
+                    const commentId = c.id;
+                    const author = moderatingPost.type === 'lost_pet' ? c.author_name : (c.device_cookie ? `Cookie: ${c.device_cookie.substring(0, 8)}...` : 'Anonymous');
+                    const text = moderatingPost.type === 'lost_pet' ? c.comment_text : c.content;
+
+                    return (
+                      <div key={commentId} className="bg-gray-50 border border-gray-250/60 p-4 rounded-2xl flex justify-between items-start gap-4 hover:border-gray-300 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-black text-gray-700">{author}</span>
+                            <span className="text-[10px] text-gray-400">
+                              {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 break-words leading-relaxed">{text}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteComment(commentId, moderatingPost.type as 'lost_pet' | 'city_board')}
+                          className="text-xs text-red-600 hover:text-white p-2 rounded-xl bg-red-50 hover:bg-red-650 transition-all flex items-center gap-1.5 border border-red-200 shrink-0 font-bold"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-gray-200 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setModeratingPost(null)}
+                className="px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-150 transition-colors"
+              >
+                Close Moderator
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
