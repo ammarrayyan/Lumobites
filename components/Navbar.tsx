@@ -501,7 +501,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                     onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
                     className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-6 py-2 rounded-xl font-medium transition-colors shadow-sm"
                   >
-                    Get Started — It's Free
+                    Sign In
                   </button>
                   {/* Tooltip to avoid breaking navbar layout */}
                   <div className="absolute top-[120%] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-white border border-[#E8DDD4] shadow-md rounded-lg p-3 w-[250px] right-0 z-50 text-center">
