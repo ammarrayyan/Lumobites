@@ -503,17 +503,29 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
           <div className="bg-[#FAF6F4] p-6 md:p-8 rounded-3xl border border-[#E8DDD4]">
             <h4 className="font-bold text-[#4A3E3D] mb-4">Leave an Update</h4>
-            <form onSubmit={handleCommentSubmit} className="space-y-4">
-              <div>
-                <input required type="text" value={commentAuthor} onChange={e => setCommentAuthor(e.target.value)} placeholder="Your Name" className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+            {!userEmail ? (
+              <div className="text-center py-6">
+                <p className="text-gray-500 mb-3">Sign in to comment</p>
+                <button
+                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+                >
+                  Sign In — It's Free
+                </button>
               </div>
-              <div>
-                <textarea required rows={3} value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Share a sighting or helpful info..." className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-              </div>
-              <button type="submit" disabled={submittingComment || !newComment.trim() || !commentAuthor.trim()} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50">
-                {submittingComment ? 'Posting...' : 'Post Update'}
-              </button>
-            </form>
+            ) : (
+              <form onSubmit={handleCommentSubmit} className="space-y-4">
+                <div>
+                  <input required type="text" value={commentAuthor} onChange={e => setCommentAuthor(e.target.value)} placeholder="Your Name" className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                </div>
+                <div>
+                  <textarea required rows={3} value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Share a sighting or helpful info..." className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
+                </div>
+                <button type="submit" disabled={submittingComment || !newComment.trim() || !commentAuthor.trim()} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50">
+                  {submittingComment ? 'Posting...' : 'Post Update'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </main>

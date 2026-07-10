@@ -26,6 +26,7 @@ export default function CityBoardPostPage() {
   const postId = params.id as string;
 
   const [deviceCookie, setDeviceCookie] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   const [post, setPost] = useState<any>(null);
   const [replies, setReplies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +34,8 @@ export default function CityBoardPostPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+      setUserEmail(email);
       const blocked = localStorage.getItem('lumo_blocked_device_cookies');
       if (blocked) {
         try {
@@ -375,31 +378,43 @@ export default function CityBoardPostPage() {
           <div className="absolute -left-4 md:-left-8 top-10 w-4 md:w-8 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
           <div className="absolute -left-4 md:-left-8 -top-4 bottom-10 w-0 border-l-2 border-[#3B2410]/10"></div>
           
-          <form onSubmit={handleCreateReply}>
-            <textarea 
-              value={newReply}
-              onChange={e => setNewReply(e.target.value)}
-              rows={3}
-              placeholder="Write a reply to this thread..."
-              className="w-full bg-white border border-[#3B2410]/10 rounded-2xl px-5 py-4 text-[#3B2410] focus:outline-none focus:border-[#8B5E3C] focus:ring-1 focus:ring-[#8B5E3C] transition-all mb-3 font-medium placeholder:text-[#3B2410]/40"
-              required
-            />
-            {replyError && (
-              <div className="text-red-500 text-sm font-bold mb-3 px-2 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                {replyError}
-              </div>
-            )}
-            <div className="flex justify-end">
-              <button 
-                type="submit" 
-                disabled={isReplying} 
-                className="bg-[#8B5E3C] hover:bg-[#724C2F] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50 shadow-sm flex items-center gap-2"
+          {!userEmail ? (
+            <div className="text-center py-6">
+              <p className="text-[#3B2410]/70 mb-3 font-medium">Sign in to reply</p>
+              <button
+                onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
               >
-                {isReplying ? 'Posting...' : 'Post Reply'}
+                Sign In — It's Free
               </button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleCreateReply}>
+              <textarea 
+                value={newReply}
+                onChange={e => setNewReply(e.target.value)}
+                rows={3}
+                placeholder="Write a reply to this thread..."
+                className="w-full bg-white border border-[#3B2410]/10 rounded-2xl px-5 py-4 text-[#3B2410] focus:outline-none focus:border-[#8B5E3C] focus:ring-1 focus:ring-[#8B5E3C] transition-all mb-3 font-medium placeholder:text-[#3B2410]/40"
+                required
+              />
+              {replyError && (
+                <div className="text-red-500 text-sm font-bold mb-3 px-2 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  {replyError}
+                </div>
+              )}
+              <div className="flex justify-end">
+                <button 
+                  type="submit" 
+                  disabled={isReplying} 
+                  className="bg-[#8B5E3C] hover:bg-[#724C2F] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50 shadow-sm flex items-center gap-2"
+                >
+                  {isReplying ? 'Posting...' : 'Post Reply'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
       </main>
