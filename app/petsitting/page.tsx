@@ -3730,20 +3730,30 @@ export default function PetSitting() {
 
                         {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
                           <div className="mt-3 flex flex-col gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isOwnerPro) {
-                                  setUnlockModalOpen(true);
-                                } else {
+                            {isOwnerPro ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setSelectedSitter(sitter);
                                   setRequestModalOpen(true);
-                                }
-                              }}
-                              className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                            >
-                              <span>{isOwnerPro ? 'Request Sitter' : 'Create Free Account'}</span>
-                            </button>
+                                }}
+                                className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <span>Request Sitter</span>
+                              </button>
+                            ) : (
+                              <div className="text-center py-3 border-t border-[#E8DDD4] mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.dispatchEvent(new Event('lumo-open-signin'));
+                                  }}
+                                  className="text-sm text-[#8B5E3C] underline cursor-pointer hover:text-[#734A2E]"
+                                >
+                                  Sign in to view full profile & book
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
