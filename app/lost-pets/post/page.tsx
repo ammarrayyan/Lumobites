@@ -247,6 +247,34 @@ export default function PostLostPet() {
       setLoading(false);
     }
   };
+  const proEmail = typeof window !== 'undefined' 
+    ? localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '' 
+    : '';
+
+  if (!proEmail) {
+    return (
+      <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col">
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white p-10 rounded-3xl shadow-sm border border-[#E8DDD4] text-center max-w-md animate-fade-in w-full">
+            <Lock className="w-12 h-12 text-[#8B5E3C] mx-auto mb-4" />
+            <h2 className="text-2xl font-black text-[#4A3E3D] mb-4">Sign In Required</h2>
+            <p className="text-gray-500 mb-6">
+              Please sign in to post a lost or found pet
+            </p>
+            <button 
+              onClick={() => {
+                window.dispatchEvent(new Event('lumo-open-signin'));
+                router.push('/');
+              }}
+              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-3 rounded-xl font-bold transition-colors w-full"
+            >
+              Sign In
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (success) {
     return (
