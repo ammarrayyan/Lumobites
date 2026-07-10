@@ -3541,28 +3541,7 @@ export default function PetSitting() {
               </div>
             )}
 
-            {/* Premium PRO Upgrade Banner */}
-            {!isOwnerPro && (
-              <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-5 animate-fade-in shadow-xs">
-                <div className="text-left flex items-start gap-4">
-                  <Crown className="w-8 h-8 text-[#8B5E3C] flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-lg font-extrabold text-[#4A3E3D] tracking-tight">
-                      Create a Free Account
-                    </h4>
-                    <p className="text-sm text-[#8B7E7D] mt-1 leading-relaxed max-w-xl">
-                      Unlock full sitter bios, direct messaging, food safety scans, and instant recall alerts.
-                    </p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setUnlockModalOpen(true)}
-                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-xs text-sm whitespace-nowrap cursor-pointer"
-                >
-                  Create Free Account
-                </button>
-              </div>
-            )}
+
 
             {/* Sitters & Map Layout */}
             {loadingSitters || isGeocoding ? (
