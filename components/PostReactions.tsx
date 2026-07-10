@@ -11,15 +11,9 @@ export default function PostReactions({ postId }: { postId: string }) {
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Generate or get device ID for reactions
-  const getDeviceId = () => {
-    let deviceId = localStorage.getItem('lumo_reaction_device_id');
-    if (!deviceId) {
-      deviceId = 'device_' + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('lumo_reaction_device_id', deviceId);
-    }
-    return deviceId;
-  };
+  const proEmail = typeof window !== 'undefined' 
+    ? localStorage.getItem('lumo_pro_email') || '' 
+    : '';
 
   useEffect(() => {
     const fetchReactions = async () => {
@@ -40,15 +34,33 @@ export default function PostReactions({ postId }: { postId: string }) {
 
     fetchReactions();
 
-    // Check local storage for existing reaction
+    // Check local storage for existing reaction (tied to email now if desired, but here we just clear on sign out, so local tracking is fine)
     const savedReaction = localStorage.getItem(`reacted_${postId}`);
     if (savedReaction && REACTIONS.includes(savedReaction)) {
       setMyReaction(savedReaction);
     }
   }, [postId]);
 
+  if (!proEmail) {
+    return (
+      <p className="text-xs text-gray-400 text-left mt-3">
+        <button onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))} className="text-[#8B5E3C] underline font-medium bg-transparent border-none p-0 cursor-pointer">
+          Sign in
+        </button> to react
+      </p>
+    );
+  }
+
   const toggleReaction = async (emoji: string) => {
-    const deviceId = getDeviceId();
+    // Use device ID for tracking, not email
+    const deviceId = localStorage.getItem('lumo_device_id') || 
+      (() => {
+        const id = Math.random().toString(36).substring(2)
+        localStorage.setItem('lumo_device_id', id)
+        return id
+      })()
+
+    const userIdentifier = deviceId;
 
     // If clicking the same reaction, remove it
     if (myReaction === emoji) {
@@ -61,7 +73,7 @@ export default function PostReactions({ postId }: { postId: string }) {
         await fetch('/api/lost-pets/reactions', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: postId, device_id: deviceId })
+          body: JSON.stringify({ post_id: postId, device_id: userIdentifier })
         });
       } catch (err) {
         console.error('Failed to remove reaction', err);
@@ -87,7 +99,7 @@ export default function PostReactions({ postId }: { postId: string }) {
         body: JSON.stringify({
           post_id: postId,
           reaction: emoji,
-          device_id: deviceId
+          device_id: userIdentifier
         })
       });
     } catch (err) {
