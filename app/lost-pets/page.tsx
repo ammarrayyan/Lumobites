@@ -10,6 +10,10 @@ import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
 
 export default function LostPetsFeed() {
+  const proEmail = typeof window !== 'undefined' 
+    ? localStorage.getItem('lumo_pro_email') || '' 
+    : '';
+
   // ── Page Tab ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -657,7 +661,7 @@ export default function LostPetsFeed() {
               TAB 2 — AI Pet Search
           ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'ai' && (
-            !userEmail ? (
+            !proEmail ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">Sign in to use AI Pet Matching</p>
                 <button
