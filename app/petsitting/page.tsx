@@ -3507,15 +3507,14 @@ export default function PetSitting() {
                 )}
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 text-center">
-                <p className="text-sm text-gray-500">
-                  <button 
-                    onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))} 
-                    className="text-[#8B5E3C] underline font-bold cursor-pointer hover:text-[#734A2E]"
-                  >
-                    Sign in
-                  </button> to use AI Sitter Search
-                </p>
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-3">Sign in to continue</p>
+                <button
+                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+                >
+                  Sign In — It's Free
+                </button>
               </div>
             )}
 

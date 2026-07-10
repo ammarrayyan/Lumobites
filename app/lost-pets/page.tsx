@@ -658,15 +658,13 @@ export default function LostPetsFeed() {
           ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'ai' && (
             !userEmail ? (
-              <div className="text-center py-16 bg-white border border-[#E8DDD4] rounded-3xl shadow-sm">
-                <Sparkles className="w-12 h-12 text-[#8B5E3C] mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-[#4A3E3D] mb-2">Sign In Required</h3>
-                <p className="text-[#8B7E7D] mb-6">Please sign in to use AI Pet Matching</p>
-                <button 
-                  onClick={() => setShowSignInModal(true)}
-                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white px-8 py-3 font-bold rounded-xl text-sm transition-colors cursor-pointer"
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-3">Sign in to continue</p>
+                <button
+                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
                 >
-                  Sign In
+                  Sign In — It's Free
                 </button>
               </div>
             ) : (

@@ -13,6 +13,34 @@ const STORAGE_KEY = 'lumobites_last_search';
 
 export default function ChatPage() {
   const router = useRouter();
+  const [proEmailAuth, setProEmailAuth] = useState('');
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const email = localStorage.getItem('lumo_pro_email') || '';
+    setProEmailAuth(email);
+    setChecking(false);
+  }, []);
+
+  if (checking) return null;
+
+  if (!proEmailAuth) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#FDFAF7' }}>
+        <MobileFoodNav />
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-3">Sign in to continue</p>
+          <button
+            onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+            className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+          >
+            Sign In — It's Free
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [flow, setFlow] = useState<'selection' | 'questions' | 'photo'>('selection');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
