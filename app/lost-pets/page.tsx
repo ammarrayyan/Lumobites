@@ -6,6 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
+import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
 
 export default function LostPetsFeed() {
@@ -634,6 +635,7 @@ export default function LostPetsFeed() {
                                     </>
                                   )}
                                 </div>
+                                <PostReactions postId={pet.id} />
                               </div>
                             </div>
                           </div>
@@ -921,6 +923,7 @@ export default function LostPetsFeed() {
                                     </>
                                   )}
                                 </div>
+                                <PostReactions postId={pet.id} />
                               </div>
                             </div>
                           </div>
