@@ -16,24 +16,6 @@ export default function PostLostPet() {
     setChecking(false);
   }, []);
 
-  if (checking) return null;
-
-  if (!proEmailAuth) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-3">Sign in to continue</p>
-          <button
-            onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-            className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-          >
-            Sign In — It's Free
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -292,6 +274,24 @@ export default function PostLostPet() {
             )}
           </div>
         </main>
+      </div>
+    );
+  }
+
+  if (checking) return null;
+
+  if (!proEmailAuth) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-3">Sign in to continue</p>
+          <button
+            onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+            className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+          >
+            Sign In — It's Free
+          </button>
+        </div>
       </div>
     );
   }
