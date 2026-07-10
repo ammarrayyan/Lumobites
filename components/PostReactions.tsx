@@ -41,15 +41,7 @@ export default function PostReactions({ postId }: { postId: string }) {
     }
   }, [postId]);
 
-  if (!proEmail) {
-    return (
-      <p className="text-xs text-gray-400 text-left mt-3">
-        <button onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))} className="text-[#8B5E3C] underline font-medium bg-transparent border-none p-0 cursor-pointer">
-          Sign in
-        </button> to react
-      </p>
-    );
-  }
+  if (!proEmail) return null;
 
   const toggleReaction = async (emoji: string) => {
     // Use device ID for tracking, not email
