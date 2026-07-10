@@ -3442,69 +3442,82 @@ export default function PetSitting() {
             </div>
 
             {/* AI Sitter Search Panel */}
-            <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 flex flex-col gap-4 relative overflow-hidden">
-              <div className="flex items-center gap-2">
-                <div className="bg-[#8B5E3C]/10 p-2 rounded-xl">
-                  <Sparkles className="w-5 h-5 text-[#8B5E3C]" />
+            {reqEmail ? (
+              <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 flex flex-col gap-4 relative overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#8B5E3C]/10 p-2 rounded-xl">
+                    <Sparkles className="w-5 h-5 text-[#8B5E3C]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
+                    <p className="text-xs text-gray-550 mt-0.5">Describe what you need in plain English (e.g. "e.g. experienced with dogs, highly rated, good with senior pets...")</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Describe what you need in plain English (e.g. "e.g. experienced with dogs, highly rated, good with senior pets...")</p>
-                </div>
-              </div>
 
-              <div className="flex flex-col md:flex-row gap-3">
-                <input
-                  type="text"
-                  placeholder="Describe your ideal sitter... e.g. experienced with dogs, female, 5 star"
-                  value={aiSitterSearch}
-                  disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
-                  onChange={(e) => setAiSitterSearch(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (searchZip.trim() && searchCoords)) handleAiSitterSearch();
-                  }}
-                  className={`flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] ${
-                    !(searchZip.trim() && searchCoords) ? 'opacity-65 cursor-not-allowed' : ''
-                  }`}
-                />
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    onClick={handleAiSitterSearch}
+                <div className="flex flex-col md:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="Describe your ideal sitter... e.g. experienced with dogs, female, 5 star"
+                    value={aiSitterSearch}
                     disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
-                    className="bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {aiSearchLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Searching...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Search className="w-4 h-4" />
-                        <span>Find My Perfect Sitter</span>
-                      </>
-                    )}
-                  </button>
-                  {aiSitterResults !== null && (
+                    onChange={(e) => setAiSitterSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (searchZip.trim() && searchCoords)) handleAiSitterSearch();
+                    }}
+                    className={`flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] ${
+                      !(searchZip.trim() && searchCoords) ? 'opacity-65 cursor-not-allowed' : ''
+                    }`}
+                  />
+                  <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => {
-                        setAiSitterSearch('');
-                        setAiSitterResults(null);
-                      }}
-                      className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold px-4 py-3.5 rounded-xl text-sm transition-all cursor-pointer"
+                      onClick={handleAiSitterSearch}
+                      disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
+                      className="bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
                     >
-                      Reset
+                      {aiSearchLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Searching...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4" />
+                          <span>Find My Perfect Sitter</span>
+                        </>
+                      )}
                     </button>
-                  )}
+                    {aiSitterResults !== null && (
+                      <button
+                        onClick={() => {
+                          setAiSitterSearch('');
+                          setAiSitterResults(null);
+                        }}
+                        className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold px-4 py-3.5 rounded-xl text-sm transition-all cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {!(searchZip.trim() && searchCoords) && (
-                <p className="text-xs text-amber-600 font-bold flex items-center gap-1">
-                  ⚠️ Please select your location first
+                {!(searchZip.trim() && searchCoords) && (
+                  <p className="text-xs text-amber-600 font-bold flex items-center gap-1">
+                    ⚠️ Please select your location first
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-[#FAF6F4] to-white p-5 rounded-2xl border border-[#8B5E3C]/10 shadow-sm mb-6 text-center">
+                <p className="text-sm text-gray-500">
+                  <button 
+                    onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))} 
+                    className="text-[#8B5E3C] underline font-bold cursor-pointer hover:text-[#734A2E]"
+                  >
+                    Sign in
+                  </button> to use AI Sitter Search
                 </p>
-              )}
-            </div>
+              </div>
+            )}
 
 
 
