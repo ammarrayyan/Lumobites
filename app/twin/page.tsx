@@ -1094,6 +1094,21 @@ export default function TwinPage() {
             </p>
           </div>
 
+          {/* TOP SIGN-IN PROMPT FOR LOGGED OUT USERS */}
+          {!proEmail && (
+            <div className="w-full flex justify-center mb-8 px-4">
+              <button
+                onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-3.5 rounded-xl font-bold shadow-[0_4px_14px_rgba(139,94,60,0.4)] transition-all w-full sm:w-auto text-[15px] flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Sign In
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl flex items-center justify-center gap-1.5 font-medium">
               <AlertTriangle className="w-4 h-4 text-red-600" />
