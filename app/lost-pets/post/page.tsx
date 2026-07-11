@@ -282,19 +282,25 @@ export default function PostLostPet() {
 
   if (!proEmailAuth) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-3">Sign in to continue</p>
-          <button
-            onClick={() => {
-              localStorage.setItem('lumo_redirect_after_login', '/lost-pets/post')
-              window.location.href = '/?signin=true'
-            }}
-            className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-          >
-            Sign In — It's Free
-          </button>
-        </div>
+      <div 
+        className="fixed inset-0 flex flex-col items-center justify-center text-center px-4"
+        style={{ zIndex: 50, backgroundColor: 'white' }}
+      >
+        <p className="text-lg font-medium text-[#4A3E3D] mb-2">
+          Post a Lost or Found Pet
+        </p>
+        <p className="text-gray-500 mb-6">
+          Sign in to continue
+        </p>
+        <button
+          onClick={() => {
+            localStorage.setItem('lumo_redirect_after_login', '/lost-pets/post')
+            window.location.href = '/?signin=true'
+          }}
+          className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium"
+        >
+          Sign In — It's Free
+        </button>
       </div>
     );
   }

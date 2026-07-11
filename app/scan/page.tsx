@@ -23,14 +23,22 @@ export default function ScanPage() {
 
   if (!proEmail) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <p className="text-gray-500 mb-4">Sign in to use the Pet Food Safety Scanner</p>
+      <div 
+        className="fixed inset-0 flex flex-col items-center justify-center text-center px-4"
+        style={{ zIndex: 50, backgroundColor: 'white' }}
+      >
+        <p className="text-lg font-medium text-[#4A3E3D] mb-2">
+          Pet Food Safety Scanner
+        </p>
+        <p className="text-gray-500 mb-6">
+          Sign in to use the scanner
+        </p>
         <button
           onClick={() => {
             localStorage.setItem('lumo_redirect_after_login', '/scan')
             window.location.href = '/?signin=true'
           }}
-          className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+          className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium"
         >
           Sign In — It's Free
         </button>
