@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 
 const getInitialProEmail = () => {
@@ -199,6 +199,8 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
     const handleOpenSignIn = () => {
       setShowSignInModal(true);
+      setSignInStep('email');
+      setSignInError('');
     };
     window.addEventListener('lumo-open-signin', handleOpenSignIn);
 
@@ -418,16 +420,26 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     >
       {/* Desktop & Mobile Header Container */}
       <div className="px-4 md:px-6 xl:px-[48px] h-[72px] flex items-center justify-between">
-        {/* Left: Logo */}
-        <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
-            <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
+        <div className="flex items-center">
+          {/* Hamburger Menu Toggle */}
+          <button 
+            className="xl:hidden mr-3 text-[#8B5E3C] p-2 hover:bg-[#FDF9F5] rounded-lg transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          
+          {/* Left: Logo */}
+          <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
+              <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
+              <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+            </div>
+          </Link>
+        </div>
 
         {/* Right: Desktop Links & Share */}
-        <div className="hidden lg:flex items-center gap-2 lg:gap-4 xl:gap-6 ml-auto">
+        <div className="hidden xl:flex items-center gap-2 lg:gap-4 xl:gap-6 ml-auto">
 
           {/* Pet Sitting */}
           <Link href="/petsitting" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
@@ -602,13 +614,13 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           </div>
         </div>
 
-        <div className="flex lg:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
+        <div className="flex xl:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
           {proEmail && <NotificationBell email={proEmail} />}
 
           {!isSignedIn ? (
             <button
-              onClick={() => setShowSignInModal(true)}
+              onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
             >
               Sign In
@@ -658,7 +670,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
       {/* Mobile Menu Dropdown */}
       {isOpen && (
-        <div className="lg:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
+        <div className="xl:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
           <div className="flex flex-col p-4 gap-2">
 
             {/* Pet Sitting (mobile) */}

@@ -96,19 +96,6 @@ export default function Home() {
           </h1>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2 mb-4 relative z-10">
-            <a 
-              href="https://play.google.com/store/apps/details?id=net.lumobites.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200"
-            >
-              <img 
-                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                alt="Get it on Google Play"
-                height="60"
-                className="h-[52px] w-auto"
-              />
-            </a>
             <span className="text-xs text-gray-400 font-medium">iOS App Store — Coming Soon</span>
           </div>
         </div>
