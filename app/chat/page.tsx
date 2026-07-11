@@ -494,25 +494,6 @@ export default function ChatPage() {
 
   const progress = getProgressPercentage(step);
 
-  if (checking) return null;
-
-  if (!proEmailAuth) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#FDFAF7' }}>
-        <MobileFoodNav />
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-3">Sign in to continue</p>
-          <button
-            onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-            className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-          >
-            Sign In — It's Free
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div 
       className="pt-[92px] md:pt-[40px] px-5 pb-10"

@@ -10,15 +10,6 @@ import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/c
 import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
 
 export default function ScanPage() {
-  const [authEmail, setAuthEmail] = useState('');
-  const [checkingAuth, setCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    const email = localStorage.getItem('lumo_pro_email') || '';
-    setAuthEmail(email);
-    setCheckingAuth(false);
-  }, []);
-
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [product, setProduct] = useState<ScoredProduct | null>(null);
   const [loading, setLoading] = useState(false);
@@ -888,27 +879,6 @@ export default function ScanPage() {
       }
     }, 300);
   };
-
-  if (checkingAuth) return null;
-
-  if (!authEmail) {
-    return (
-      <div className="min-h-screen bg-[#FDFAF7] pb-10">
-        <MobileFoodNav />
-        <div className="pt-24 px-5 flex flex-col items-center justify-center">
-          <div className="text-center py-8">
-            <p className="text-gray-500 mb-3">Sign in to continue</p>
-            <button
-              onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-              className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-            >
-              Sign In — It's Free
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] pb-12 pt-[52px] md:pt-0">
