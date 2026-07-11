@@ -12,6 +12,38 @@ import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/c
 const STORAGE_KEY = 'lumobites_last_search';
 
 export default function ChatPage() {
+  const [proEmail, setProEmail] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const email = localStorage.getItem('lumo_pro_email') || ''
+    setProEmail(email)
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  if (!proEmail) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
+        <p className="text-gray-500 mb-4">Sign in to use the AI Pet Food Assistant</p>
+        <button
+          onClick={() => {
+            localStorage.setItem('lumo_redirect_after_login', '/chat')
+            window.location.href = '/?signin=true'
+          }}
+          className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+        >
+          Sign In — It's Free
+        </button>
+      </div>
+    )
+  }
+
+  return <ChatPageContent />
+}
+
+function ChatPageContent() {
   const router = useRouter();
   const [flow, setFlow] = useState<'selection' | 'questions' | 'photo'>('selection');
   const [photoFile, setPhotoFile] = useState<File | null>(null);

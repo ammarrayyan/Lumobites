@@ -286,7 +286,10 @@ export default function PostLostPet() {
         <div className="text-center py-8">
           <p className="text-gray-500 mb-3">Sign in to continue</p>
           <button
-            onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+            onClick={() => {
+              localStorage.setItem('lumo_redirect_after_login', '/lost-pets/post')
+              window.location.href = '/?signin=true'
+            }}
             className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
           >
             Sign In — It's Free

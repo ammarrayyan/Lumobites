@@ -26,7 +26,10 @@ export default function ScanPage() {
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
         <p className="text-gray-500 mb-4">Sign in to use the Pet Food Safety Scanner</p>
         <button
-          onClick={() => window.location.href = '/'}
+          onClick={() => {
+            localStorage.setItem('lumo_redirect_after_login', '/scan')
+            window.location.href = '/?signin=true'
+          }}
           className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
         >
           Sign In — It's Free

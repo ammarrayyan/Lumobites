@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X } from 'lucide-react';
@@ -54,6 +55,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ initialEmail = '' }: NavbarProps) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
   const [isPro, setIsPro] = useState(() => {
@@ -118,6 +120,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
   useEffect(() => {
     syncStatus();
+    
+    if (typeof window !== 'undefined' && window.location.search.includes('signin=true')) {
+      setShowSignInModal(true);
+      setSignInStep('email');
+      setSignInError('');
+    }
     
     const match = document.cookie.match(/(?:^|;)\s*googtrans=([^;]*)/);
     if (match) {
@@ -395,6 +403,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       setIsSignedIn(true);
       setProEmail(signInEmail);
       window.dispatchEvent(new Event('lumo-pro-update'));
+      
+      const redirect = localStorage.getItem('lumo_redirect_after_login');
+      if (redirect) {
+        localStorage.removeItem('lumo_redirect_after_login');
+        router.push(redirect);
+      }
       
     } catch(err: any) {
       setSignInError(err.message);
