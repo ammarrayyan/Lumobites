@@ -284,44 +284,9 @@ export default function TwinPage() {
     };
   }, []);
 
-  // Limit checker: returns true if allowed to match, false if blocked (shows modal)
+  // Limit checker: fully open, always return true
   const checkTwinLimit = (): boolean => {
-    console.log('[Lumo Twin Limit] Evaluating checkTwinLimit. Current isPro state:', isPro);
-    if (isPro) {
-      console.log('[Lumo Twin Limit] User is PRO. Bypassing limit.');
-      return true;
-    }
-
-    try {
-      const countStr = localStorage.getItem('lumo_twin_count');
-      const dateStr = localStorage.getItem('lumo_twin_date');
-      
-      const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const today = `${year}-${month}-${day}`;
-
-      let count = countStr ? parseInt(countStr, 10) : 0;
-      console.log(`[Lumo Twin Limit] Read from localStorage - count: ${count}, date: ${dateStr}, today: ${today}`);
-
-      if (dateStr !== today) {
-        console.log('[Lumo Twin Limit] Midnight reset triggered (date mismatch). Resetting count to 0.');
-        count = 0;
-      }
-
-      if (count >= 1) {
-        console.log('[Lumo Twin Limit] Limit exceeded! Displaying the Pro Upgrade Modal.');
-        setShowUpgradeModal(true);
-        return false;
-      }
-
-      console.log('[Lumo Twin Limit] Under limit. Access granted.');
-      return true;
-    } catch (err) {
-      console.error('[Lumo Twin Limit] Error reading limit from localStorage:', err);
-      return true;
-    }
+    return true;
   };
 
   // Record twin match usage
@@ -720,10 +685,6 @@ export default function TwinPage() {
         recordTwinUsage();
         setResult(data);
         setStep('result');
-        const emailCaptured = localStorage.getItem('lumo_twin_email_captured') === 'true';
-        if (!emailCaptured) {
-          setShowEmailModal(true);
-        }
       } else {
         setError(data.error || 'Failed to detect matching breed.');
         setStep('upload');
@@ -1318,19 +1279,7 @@ export default function TwinPage() {
           )}
 
           {/* STEP 3: RESULT SCREEN */}
-          {step === 'result' && result && !proEmail && (
-            <div className="text-center py-12 px-4">
-              <p className="text-gray-500 mb-4">Sign in to see your Pet Twin result</p>
-              <button
-                onClick={() => window.location.href = '/'}
-                className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-              >
-                Sign In — It's Free
-              </button>
-            </div>
-          )}
-
-          {step === 'result' && result && proEmail && (
+          {step === 'result' && result && (
             <div className="flex flex-col items-center gap-6 w-full relative">
               
               {/* Web UI Preview Card */}
@@ -1721,48 +1670,7 @@ export default function TwinPage() {
         </div>
       </main>
 
-      {/* ── UPGRADE TO PRO MODAL ── */}
-      {showUpgradeModal && (
-        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in pointer-events-auto">
-          <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
-            
-            {!modalLoading && (
-              <button 
-                onClick={() => {
-                  setShowUpgradeModal(false);
-                  setModalStep('paywall');
-                  setModalMessage(null);
-                  setVerificationCode('');
-                }}
-                className="absolute right-5 top-5 text-gray-400 hover:text-gray-600 font-extrabold text-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
 
-            {isPro && (
-              <div className="flex flex-col gap-5 py-4">
-                <div>
-                  <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                    You are a Member!
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-                    Thank you for supporting Lumo Bites. You have unlimited Pet Twin matches and member features active.
-                  </p>
-                </div>
-                <Link
-                  href="/account"
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer text-center"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Manage Account
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ========================================================
           1080x1080 INSTAGRAM SQUARE SHARE CARD TEMPLATE (OFF-SCREEN)
@@ -2365,73 +2273,7 @@ export default function TwinPage() {
         </div>
       )}
 
-      {/* EMAIL CAPTURE MODAL OVERLAY */}
-      {showEmailModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in">
-          <div className="w-full max-w-[440px] bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 md:p-8 flex flex-col items-center text-center animate-scale-up relative">
-            
-            {/* Lumo Bites logo + trademark at the top */}
-            <div className="flex items-center justify-center mb-6 relative">
-              <img src="/Logo.png" alt="Lumo Bites Logo" className="h-9 object-contain" />
-              <sup className="text-[9px] text-[#8B5A2B] font-bold align-self-start -mt-1 ml-0.5 select-none">™</sup>
-            </div>
 
-            {/* Title */}
-            <h3 className="text-xl md:text-2xl font-[900] text-[#191919] tracking-tight mb-2 flex items-center justify-center gap-1.5">
-              Your Pet Twin is Ready! <Footprints className="w-5 h-5 text-[#8B5E3C]" />
-            </h3>
-
-            {/* Subtitle */}
-            <p className="text-[13px] md:text-sm text-[#666666] leading-relaxed mb-6 max-w-[340px]">
-              Enter your email to reveal your match and get free FDA recall alerts for your pet
-            </p>
-
-            {/* Email form */}
-            <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-3">
-              {modalError && (
-                <div className="text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg p-2.5 mb-1 text-center">
-                  {modalError}
-                </div>
-              )}
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setModalError('');
-                }}
-                placeholder="your@email.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#333333] transition-all bg-gray-50/50"
-                disabled={isSubmittingEmail}
-              />
-              <button
-                type="submit"
-                disabled={isSubmittingEmail}
-                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 px-6 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(139,94,60,0.15)] disabled:bg-gray-400 cursor-pointer text-sm"
-              >
-                {isSubmittingEmail ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Revealing...
-                  </>
-                ) : (
-                  <>Reveal My Match →</>
-                )}
-              </button>
-            </form>
-
-            {/* Skip button */}
-            <button
-              onClick={handleEmailSkip}
-              disabled={isSubmittingEmail}
-              className="mt-4 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-            >
-              Skip for now
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Embedded CSS animations for the modal */}
       <style>{`
