@@ -61,7 +61,26 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         } catch (e) {}
       }
     }
-  }, []);
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'lumo_pro_email' && e.newValue) {
+        setUserEmail(e.newValue);
+      }
+    };
+    const handleFocus = () => {
+      const email = localStorage.getItem('lumo_pro_email') || '';
+      if (email !== userEmail) {
+        setUserEmail(email);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [userEmail]);
 
   const handleReportPost = async () => {
     if (!pet) return;

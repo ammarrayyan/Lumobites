@@ -394,6 +394,28 @@ export default function LostPetsFeed() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [fetchPets]);
 
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'lumo_pro_email' && e.newValue) {
+        setUserEmail(e.newValue);
+        fetchPets(false);
+      }
+    };
+    const handleFocus = () => {
+      const email = localStorage.getItem('lumo_pro_email') || '';
+      if (email !== userEmail) {
+        setUserEmail(email);
+        fetchPets(false);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [userEmail, fetchPets]);
+
   // Pull-to-refresh
   const handleTouchStart = (e: React.TouchEvent) => {
     if (window.scrollY === 0) { isPullingRef.current = true; pullStartYRef.current = e.touches[0].clientY; }
