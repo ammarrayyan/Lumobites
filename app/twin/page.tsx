@@ -1279,7 +1279,26 @@ export default function TwinPage() {
           )}
 
           {/* STEP 3: RESULT SCREEN */}
-          {step === 'result' && result && (
+          {step === 'result' && result && !proEmail && (
+            <div className="text-center py-12 px-4">
+              <p className="text-lg font-medium text-[#4A3E3D] mb-2">
+                Your Pet Twin is ready!
+              </p>
+              <p className="text-gray-500 mb-6">
+                Sign in to reveal your match
+              </p>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new Event('lumo-open-signin'))
+                }}
+                className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium cursor-pointer shadow-md transition-all hover:bg-[#734A2E]"
+              >
+                Sign In to Reveal
+              </button>
+            </div>
+          )}
+
+          {step === 'result' && result && proEmail && (
             <div className="flex flex-col items-center gap-6 w-full relative">
               
               {/* Web UI Preview Card */}
