@@ -10,6 +10,35 @@ import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/c
 import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
 
 export default function ScanPage() {
+  const [proEmail, setProEmail] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const email = localStorage.getItem('lumo_pro_email') || ''
+    setProEmail(email)
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
+  if (!proEmail) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
+        <p className="text-gray-500 mb-4">Sign in to use the Pet Food Safety Scanner</p>
+        <button
+          onClick={() => window.location.href = '/'}
+          className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+        >
+          Sign In — It's Free
+        </button>
+      </div>
+    )
+  }
+
+  return <ScanPageContent />
+}
+
+function ScanPageContent() {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [product, setProduct] = useState<ScoredProduct | null>(null);
   const [loading, setLoading] = useState(false);
