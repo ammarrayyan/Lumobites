@@ -1318,23 +1318,21 @@ export default function TwinPage() {
           )}
 
           {/* STEP 3: RESULT SCREEN */}
-          {step === 'result' && result && (
+          {step === 'result' && result && !proEmail && (
+            <div className="text-center py-12 px-4">
+              <p className="text-gray-500 mb-4">Sign in to see your Pet Twin result</p>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
+              >
+                Sign In — It's Free
+              </button>
+            </div>
+          )}
+
+          {step === 'result' && result && proEmail && (
             <div className="flex flex-col items-center gap-6 w-full relative">
               
-              {!proEmail && (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 mb-3">Sign in to continue</p>
-                  <button
-                    onClick={() => { window.location.href = '/' }}
-                    className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-                  >
-                    Sign In — It's Free
-                  </button>
-                </div>
-              )}
-              
-              {proEmail && (
-                <>
               {/* Web UI Preview Card */}
               <div className="w-full bg-white border border-[#EBEBEB] rounded-3xl p-6 md:p-8 flex flex-col items-center gap-6 shadow-md relative overflow-hidden">
                 
@@ -1716,8 +1714,6 @@ export default function TwinPage() {
                   </button>
                 </div>
               </div>
-              </>
-              )}
 
             </div>
           )}
