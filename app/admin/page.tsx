@@ -100,12 +100,27 @@ export default function AdminPage() {
             <Settings className="w-8 h-8 text-blue-600" />
             Lumo Bites Admin
           </h1>
-          <button
-            onClick={handleLogout}
-            className="text-gray-500 hover:text-[#191919] transition-colors text-sm font-medium"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/admin/run-pet-matches', {
+                  method: 'POST',
+                  headers: { 'x-admin-secret': 'Lumo2026@' }
+                })
+                const data = await res.json()
+                alert(`Done! AI calls used: ${data.aiCallsUsed}, Matches found: ${data.matchesFound}`)
+              }}
+              className="bg-[#8B5E3C] text-white px-4 py-2 rounded-xl text-sm"
+            >
+              Run Daily Pet Match Check
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-gray-500 hover:text-[#191919] transition-colors text-sm font-medium"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
