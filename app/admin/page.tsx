@@ -49,6 +49,23 @@ export default function AdminPage() {
     }
   }, [isAuthenticated, activeTab, password]);
 
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'pet-matching') {
+      fetch('/api/admin/pet-matches-stats', {
+        headers: { 'x-admin-key': password }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setActiveLostPets(data.activeLostPets);
+          setRecentFoundPets(data.recentFoundPets);
+          setTotalMatches(data.totalMatches);
+        }
+      })
+      .catch(err => console.error('Failed to fetch pet match stats:', err));
+    }
+  }, [isAuthenticated, activeTab, password]);
+
   const [matchResults, setMatchResults] = useState<any>(null)
   const [matchLoading, setMatchLoading] = useState(false)
 
