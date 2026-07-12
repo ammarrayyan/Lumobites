@@ -112,6 +112,11 @@ export async function POST(request: Request) {
       const scoreText = matchData.content?.[0]?.text?.trim()
       const score = parseInt(scoreText) || 0
 
+      console.log(`AI score for lost pet ${lostPet.id} vs found pet ${foundPet.id}: ${score}`)
+      console.log(`Score type: ${typeof score}`)
+      console.log(`Raw AI response: ${matchData.content?.[0]?.text}`)
+      console.log(`Score >= 70: ${score >= 70}`)
+
       if (score >= 70) {
         // Send email notification
         await resend.emails.send({
