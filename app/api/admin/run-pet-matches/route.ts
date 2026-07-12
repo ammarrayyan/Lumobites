@@ -16,16 +16,16 @@ export async function POST(request: Request) {
   const MAX_AI_CALLS = 100 // Hard cap
   const results = []
 
-  // Get found pets posted in last 24 hours
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
+  // Get found pets posted in last 7 days
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
   const { data: foundPets } = await supabaseAdmin
     .from('lost_pets')
     .select('*')
     .eq('pet_type', 'found')
     .eq('status', 'active')
-    .gte('created_at', yesterday.toISOString())
+    .gte('created_at', sevenDaysAgo.toISOString())
     .limit(50) // Max 50 found pets per run
 
   if (!foundPets || foundPets.length === 0) {

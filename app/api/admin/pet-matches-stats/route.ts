@@ -16,16 +16,16 @@ export async function GET(request: Request) {
       .eq('pet_type', 'lost')
       .eq('status', 'active');
 
-    // 2. Found Pets (24hrs)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    // 2. Found Pets (7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
     const { count: recentFoundPets } = await supabaseAdmin
       .from('lost_pets')
       .select('*', { count: 'exact', head: true })
       .eq('pet_type', 'found')
       .eq('status', 'active')
-      .gte('created_at', yesterday.toISOString());
+      .gte('created_at', sevenDaysAgo.toISOString());
 
     // 3. Total Matches Sent (SUM of notification_count)
     // Supabase JS doesn't have a direct SUM aggregate without RPC, 

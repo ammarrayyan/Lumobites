@@ -300,7 +300,7 @@ export default function AdminPage() {
                 </div>
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-center">
                   <p className="text-2xl font-bold text-[#8B5E3C]">{recentFoundPets}</p>
-                  <p className="text-xs text-gray-500">Found Pets (24hrs)</p>
+                  <p className="text-xs text-gray-500">Found Pets (7 days)</p>
                 </div>
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-center">
                   <p className="text-2xl font-bold text-[#8B5E3C]">{totalMatches}</p>
@@ -312,7 +312,7 @@ export default function AdminPage() {
               <div className="bg-white border border-[#E8DDD4] rounded-xl p-6">
                 <h3 className="font-bold text-[#4A3E3D] mb-2">Run Match Check</h3>
                 <p className="text-xs text-gray-500 mb-4">
-                  Checks all found pets from last 24 hours against active lost pets. 
+                  Checks all found pets from last 7 days against active lost pets. 
                   Hard cap: 100 AI calls per run.
                 </p>
                 <button
