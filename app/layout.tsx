@@ -90,9 +90,13 @@ export default async function RootLayout({
             <p className="mt-1 font-semibold text-[#8B5E3C]">
               Report inappropriate content: <a href="mailto:info@lumobitespet.com" className="underline hover:text-[#734A2E]">info@lumobitespet.com</a>
             </p>
-            <div className="mt-3 flex justify-center space-x-4">
-              <a href="/privacy" className="text-xs text-gray-400 hover:text-[#8B5E3C]">Privacy Policy</a>
-              <a href="/terms" className="text-xs text-gray-400 hover:text-[#8B5E3C]">Terms of Service</a>
+            <div className="flex gap-4 items-center justify-center flex-wrap mt-3">
+              <a href="/privacy" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
+                Privacy Policy
+              </a>
+              <a href="/terms" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
+                Terms of Service
+              </a>
               <a href="/partnerships" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
                 Partnerships & Press
               </a>
