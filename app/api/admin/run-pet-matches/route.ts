@@ -123,6 +123,22 @@ export async function POST(request: Request) {
           `
         })
 
+        // Send push notification
+        await fetch(`${process.env.NEXT_PUBLIC_URL}/api/push/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: lostPet.contact_email,
+            title: `🐾 Possible Match Found — ${score}%`,
+            body: `A ${foundPet.pet_type_species} was found near where you lost yours. Tap to view.`,
+            data: {
+              type: 'lost_pet_match',
+              foundPetId: foundPet.id,
+              score
+            }
+          })
+        })
+
         // Update notification count
         await supabaseAdmin
           .from('lost_pets')
