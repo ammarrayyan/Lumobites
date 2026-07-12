@@ -65,9 +65,7 @@ export async function POST(request: Request) {
         })
       }
 
-      // Basic filter 1 — same species
-      console.log(`Lost pet ${lostPet.id} - species match: ${foundPet.pet_type_species === lostPet.pet_type_species}`)
-      if (foundPet.pet_type_species !== lostPet.pet_type_species) continue
+      // Basic filter 1 — same species (REMOVED: pet_type_species column doesn't exist)
 
       // Basic filter 2 — within 10 miles
       console.log(`Lost pet ${lostPet.id} - has coordinates: ${!!lostPet.latitude}`)
@@ -125,7 +123,7 @@ export async function POST(request: Request) {
           subject: `🐾 Possible Match Found — ${score}% Similar`,
           html: `
             <h2>Possible Match Found for Your Lost Pet!</h2>
-            <p>A ${foundPet.pet_type_species} was found near your area.</p>
+            <p>A pet matching your description was found near your area.</p>
             <p>Similarity score: <strong>${score}%</strong></p>
             <p><a href="https://lumobites.net/lost-pets/${foundPet.id}">
               Click here to view the found pet
@@ -141,7 +139,7 @@ export async function POST(request: Request) {
           body: JSON.stringify({
             email: lostPet.contact_email,
             title: `🐾 Possible Match Found — ${score}%`,
-            body: `A ${foundPet.pet_type_species} was found near where you lost yours. Tap to view.`,
+            body: `A pet matching your description was found near where you lost yours. Tap to view.`,
             data: {
               type: 'lost_pet_match',
               foundPetId: foundPet.id,
