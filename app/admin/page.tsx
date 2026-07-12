@@ -46,6 +46,25 @@ export default function AdminPage() {
     }
   }, [isAuthenticated, activeTab, password]);
 
+  const [matchResults, setMatchResults] = useState<any>(null)
+  const [matchLoading, setMatchLoading] = useState(false)
+
+  const handleRunMatches = async () => {
+    setMatchLoading(true)
+    setMatchResults(null)
+    try {
+      const res = await fetch('/api/admin/run-pet-matches', {
+        method: 'POST',
+        headers: { 'x-admin-secret': 'Lumo2026@' }
+      })
+      const data = await res.json()
+      setMatchResults(data)
+    } catch (err) {
+      setMatchResults({ error: 'Failed to run match check' })
+    }
+    setMatchLoading(false)
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) return;
@@ -100,26 +119,32 @@ export default function AdminPage() {
             <Settings className="w-8 h-8 text-blue-600" />
             Lumo Bites Admin
           </h1>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={async () => {
-                const res = await fetch('/api/admin/run-pet-matches', {
-                  method: 'POST',
-                  headers: { 'x-admin-secret': 'Lumo2026@' }
-                })
-                const data = await res.json()
-                alert(`Done! AI calls used: ${data.aiCallsUsed}, Matches found: ${data.matchesFound}`)
-              }}
-              className="bg-[#8B5E3C] text-white px-4 py-2 rounded-xl text-sm"
-            >
-              Run Daily Pet Match Check
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-[#191919] transition-colors text-sm font-medium"
-            >
-              Logout
-            </button>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleRunMatches}
+                disabled={matchLoading}
+                className="bg-[#8B5E3C] text-white px-4 py-2 rounded-xl text-sm"
+              >
+                {matchLoading ? 'Running...' : 'Run Daily Pet Match Check'}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="text-gray-500 hover:text-[#191919] transition-colors text-sm font-medium"
+              >
+                Logout
+              </button>
+            </div>
+            {matchResults && (
+              <div className="mt-3 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm w-full max-w-sm text-left">
+                <p><strong>AI calls used:</strong> {matchResults.aiCallsUsed || 0}</p>
+                <p><strong>Matches found:</strong> {matchResults.matchesFound || 0}</p>
+                <p><strong>Message:</strong> {matchResults.message || 'Complete'}</p>
+                {matchResults.error && (
+                  <p className="text-red-500"><strong>Error:</strong> {matchResults.error}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
