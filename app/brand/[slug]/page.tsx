@@ -99,7 +99,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
             <Link href="/scan" className="hover:text-white transition-colors">Is My Pet&apos;s Food Safe?</Link>
             <Link href="/recalls" className="hover:text-white transition-colors">Recall Alerts</Link>
             <Link href="/chat" className="hover:text-white transition-colors">Find Food</Link>
-            <Link href="/affiliate" className="hover:text-white transition-colors">Affiliate Program</Link>
+            <Link href="/affiliate" className="hidden hover:text-white transition-colors">Affiliate Program</Link>
           </div>
         </div>
       </footer>
