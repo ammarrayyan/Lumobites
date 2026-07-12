@@ -58,7 +58,10 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/admin/run-pet-matches', {
         method: 'POST',
-        headers: { 'x-admin-secret': 'Lumo2026@' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-secret': 'Lumo2026@' 
+        }
       })
       const data = await res.json()
       setMatchResults(data)

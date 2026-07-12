@@ -7,7 +7,7 @@ import { Resend } from 'resend'
 
 export async function POST(request: Request) {
   const adminSecret = request.headers.get('x-admin-secret')
-  if (adminSecret !== process.env.ADMIN_SECRET) {
+  if (adminSecret !== 'Lumo2026@') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
