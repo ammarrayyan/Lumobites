@@ -137,7 +137,7 @@ export default function LostPetsFeed() {
     }
   };
 
-  const [aiRadius, setAiRadius] = useState('any');
+  const [aiRadius, setAiRadius] = useState('10');
   const [aiTimeframe, setAiTimeframe] = useState('any');
   const [aiSpecies, setAiSpecies] = useState('all');
   const [aiMinScore, setAiMinScore] = useState(20);
@@ -791,7 +791,6 @@ export default function LostPetsFeed() {
                           <option value="10">Within 10 miles</option>
                           <option value="25">Within 25 miles</option>
                           <option value="50">Within 50 miles</option>
-                          <option value="any">Any distance</option>
                         </select>
                         {!aiLocationVerified && <p className="text-[10px] text-[#8B7E7D] mt-1">Set location above to enable</p>}
                       </div>
@@ -832,7 +831,12 @@ export default function LostPetsFeed() {
                 {/* Action row */}
                 <div className="mt-6 pt-4 border-t border-[#E8DDD4] flex flex-col sm:flex-row items-center justify-between gap-4">
                   {aiError && <span className="text-xs font-bold text-red-600 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> {aiError}</span>}
-                  {!aiError && (
+                  {!aiError && !aiLocationVerified && (
+                    <span className="text-sm text-gray-500">
+                      Please use "Use My Location" or enter a city to search
+                    </span>
+                  )}
+                  {!aiError && aiLocationVerified && (
                     <span className="text-xs text-[#8B7E7D]">
                       {aiSearchTab === 'photo'
                         ? 'Note: Max size 5MB. AI will analyze the picture characteristics.'
@@ -848,7 +852,8 @@ export default function LostPetsFeed() {
                     <button
                       type="button"
                       onClick={handleAIMatchSearch}
-                      className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 cursor-pointer text-sm"
+                      disabled={!aiLocationVerified}
+                      className={`bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-full transition-transform transform shadow-md flex items-center gap-2 text-sm ${!aiLocationVerified ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 cursor-pointer'}`}
                     >
                       <Sparkles className="w-4 h-4" />
                       <span>Scan &amp; Match Pet</span>
