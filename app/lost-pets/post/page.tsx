@@ -43,6 +43,7 @@ export default function PostLostPet() {
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [notifyMatches, setNotifyMatches] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -239,7 +240,8 @@ export default function PostLostPet() {
           city: finalCity, zip_code: zipCode, date_lost_found: dateLostFound,
           contact_email: contactEmail, contact_phone: contactPhone,
           photo_urls: photoUrls,
-          latitude: finalLat, longitude: finalLng
+          latitude: finalLat, longitude: finalLng,
+          notify_matches: notifyMatches
         })
       });
       
@@ -523,6 +525,23 @@ export default function PostLostPet() {
                     <input type="tel" value={contactPhone} onChange={e => setContactPhone(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="(555) 555-5555" />
                   </div>
                 </div>
+              </div>
+
+              <div className="flex items-start gap-2 mt-4">
+                <input
+                  type="checkbox"
+                  id="notify_matches"
+                  name="notify_matches"
+                  checked={notifyMatches}
+                  onChange={(e) => setNotifyMatches(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="notify_matches" className="text-sm text-gray-600">
+                  Notify me when a possible match is found nearby
+                  <span className="text-xs text-gray-400 block mt-0.5">
+                    We'll only notify you for strong matches (70%+ similarity) within 10 miles. Max 3 alerts per day.
+                  </span>
+                </label>
               </div>
             </div>
 

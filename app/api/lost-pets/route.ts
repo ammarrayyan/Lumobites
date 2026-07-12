@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const {
       type, pet_name, species, photo_url, photo_urls, description,
       city, zip_code, contact_email, contact_phone, date_lost_found,
-      latitude, longitude
+      latitude, longitude, notify_matches
     } = body;
 
     // Parse incoming photo targets: supports single and array formats
@@ -182,7 +182,8 @@ export async function POST(request: NextRequest) {
         contact_phone: contact_phone || null,
         date_lost_found,
         status: 'active',
-        edit_token: editToken
+        edit_token: editToken,
+        notify_matches: notify_matches !== undefined ? notify_matches : true
       }).select().single();
       
       data = response.data;
