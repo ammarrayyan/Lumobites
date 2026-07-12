@@ -53,7 +53,11 @@
 	<string>We need photo library access to let you select and upload existing pet photos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need photo library access to allow you to save photos to your library.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Lumo Bites uses your location to find pet sitters and lost pets near you.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to search for sitters, lost pets, and pet food supplies near you.</string>
+	<string>Lumo Bites uses your location to find pet sitters and lost pets near you.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Lumo Bites uses your location to find pet sitters and lost pets near you.</string>
 </dict>
 </plist>
