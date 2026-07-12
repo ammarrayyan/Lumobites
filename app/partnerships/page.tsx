@@ -51,6 +51,15 @@ export default async function PartnershipsPage({
               We'd love to connect.
             </p>
           </div>
+          <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-5">
+            <h3 className="font-bold text-[#4A3E3D] mb-2">Lost Pet Networks</h3>
+            <p className="text-sm text-gray-500">
+              Partner with Lumo Bites to connect your lost pet 
+              network with our AI photo matching technology — 
+              helping reunite more pets with their families faster 
+              across your entire community.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -102,6 +111,7 @@ export default async function PartnershipsPage({
                 <option>Pet Brand Partnership</option>
                 <option>Veterinary Clinic Licensing</option>
                 <option>Animal Shelter Integration</option>
+                <option>Lost Pet Network Partnership</option>
                 <option>Investment Inquiry</option>
                 <option>Press & Media</option>
                 <option>Other</option>
