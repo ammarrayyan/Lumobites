@@ -49,6 +49,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, message: 'No active lost pets' })
   }
 
+  console.log('Found pets to check:', foundPets?.length)
+  console.log('Lost pets to check:', lostPets?.length)
+
   // For each found pet → basic filter first then AI
   for (const foundPet of foundPets) {
     for (const lostPet of lostPets) {
@@ -63,14 +66,17 @@ export async function POST(request: Request) {
       }
 
       // Basic filter 1 — same species
+      console.log(`Lost pet ${lostPet.id} - species match: ${foundPet.pet_type_species === lostPet.pet_type_species}`)
       if (foundPet.pet_type_species !== lostPet.pet_type_species) continue
 
       // Basic filter 2 — within 10 miles
+      console.log(`Lost pet ${lostPet.id} - has coordinates: ${!!lostPet.latitude}`)
       if (foundPet.latitude && lostPet.latitude) {
         const distance = calculateDistance(
           lostPet.latitude, lostPet.longitude,
           foundPet.latitude, foundPet.longitude
         )
+        console.log(`Lost pet ${lostPet.id} - distance: ${distance} miles`)
         if (distance > 10) continue
       }
 
