@@ -400,7 +400,7 @@ export default function AdminPage() {
             <div className="space-y-6">
               <h2 className="text-xl font-bold text-[#4A3E3D]">Email Outreach</h2>
               <p className="text-sm text-gray-500">
-                Send outreach emails to shelters, rescues, and organizations from info@lumobitespet.com
+                Send outreach emails to shelters, rescues, and organizations from info@lumobites.net
               </p>
 
               <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
@@ -410,7 +410,7 @@ export default function AdminPage() {
                   <label className="text-sm font-medium text-[#4A3E3D]">From</label>
                   <input 
                     type="text" 
-                    value="info@lumobitespet.com" 
+                    value="info@lumobites.net" 
                     disabled
                     className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm bg-gray-100"
                   />

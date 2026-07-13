@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   for (const email of emails) {
     try {
       await resend.emails.send({
-        from: 'Lumo Bites <info@lumobitespet.com>',
+        from: 'Lumo Bites <info@lumobites.net>',
         to: email.trim(),
         subject: subject,
         html: `
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
             <br/><br/>
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;"/>
             <p style="font-size: 12px; color: #999;">
-              Lumo Bites | lumobites.net | info@lumobitespet.com
+              Lumo Bites | lumobites.net | info@lumobites.net
             </p>
           </div>
         `
