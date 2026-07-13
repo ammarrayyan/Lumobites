@@ -76,6 +76,7 @@ export async function POST(request: Request) {
   try {
     await supabaseAdmin.from('outreach_logs').insert({
       subject: subject,
+      message: message,
       recipients: emails,
       total_sent: sent,
       total_failed: failed

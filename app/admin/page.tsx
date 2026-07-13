@@ -545,6 +545,20 @@ export default function AdminPage() {
                             ))}
                           </div>
                         </details>
+
+                        {/* Show message preview */}
+                        {log.message && (
+                          <details className="mt-2">
+                            <summary className="text-xs text-[#8B5E3C] cursor-pointer">
+                              View message
+                            </summary>
+                            <div className="mt-2 bg-white border border-[#E8DDD4] rounded-lg p-3">
+                              <p className="text-xs text-gray-600 whitespace-pre-wrap">
+                                {log.message}
+                              </p>
+                            </div>
+                          </details>
+                        )}
                       </div>
                     ))}
                   </div>
