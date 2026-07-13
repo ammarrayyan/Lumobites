@@ -4553,6 +4553,20 @@ export default function PetSitting() {
                             {/* COLLAPSIBLE - only show when expanded */}
                             {expandedRequests.has(req.id) && (
                               <div className="border-t border-[#E8DDD4] pt-3 space-y-3">
+                                {/* Show message button prominently near top for accepted bookings */}
+                                {isAccepted && (
+                                  <button
+                                    onClick={() => {
+                                      setActiveChatBooking(req);
+                                      setActiveChatRole('sitter');
+                                      setChatModalOpen(true);
+                                    }}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl text-sm flex items-center justify-center gap-2 mb-3"
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Message Owner
+                                  </button>
+                                )}
 
                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#8B7E7D]">
                                {req.pet_details?.pets && req.pet_details.pets.length > 1 ? (
@@ -4652,25 +4666,7 @@ export default function PetSitting() {
                                })()}
                             </div>
 
-                            {/* Messaging */}
-                            {isAccepted && (
-                              <div className="text-xs bg-white p-3 rounded-xl border border-[#E8DDD4] flex flex-col sm:flex-row justify-between items-center gap-3">
-                                <div className="space-y-1">
-                                  <div className="font-bold text-[#3B2410] mb-0.5 flex items-center gap-1.5"><MessageSquare className="w-4 h-4 text-[#8B5E3C]" /> Message Owner</div>
-                                  <div className="text-[#8B7E7D] text-[10px]">Communicate directly with the owner to coordinate details</div>
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    setActiveChatBooking(req);
-                                    setActiveChatRole('sitter');
-                                    setChatModalOpen(true);
-                                  }}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-xs transition-colors whitespace-nowrap shadow-sm w-full sm:w-auto"
-                                >
-                                  Message Owner
-                                </button>
-                              </div>
-                            )}
+
 
                             {isCompleted && req.owner_name && (
                               <div className="text-xs bg-white p-2.5 rounded-xl border border-[#E8DDD4] space-y-1">
