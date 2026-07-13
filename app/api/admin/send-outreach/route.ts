@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     try {
       await resend.emails.send({
         from: 'Lumo Bites <info@lumobites.net>',
+        replyTo: 'info@lumobitespet.com',
         to: email.trim(),
         subject: subject,
         html: `
