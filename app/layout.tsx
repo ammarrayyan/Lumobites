@@ -81,7 +81,7 @@ export default async function RootLayout({
         <PwaSplashScreen />
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
-        <div className="pt-[72px] pb-24 lg:pb-0 min-h-[calc(100vh-72px)] flex flex-col justify-between">
+        <div className="pt-[72px] pb-24 lg:pb-0 min-h-[calc(100dvh-72px)] flex flex-col justify-between">
           <div className="flex-grow">
             {children}
           </div>

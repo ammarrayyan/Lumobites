@@ -27,7 +27,13 @@ export default function ChatPage() {
     return (
       <div 
         className="fixed inset-0 flex flex-col items-center justify-center text-center px-4"
-        style={{ zIndex: 50, backgroundColor: 'white' }}
+        style={{ 
+          zIndex: 50, 
+          backgroundColor: 'white',
+          paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+          paddingTop: 'env(safe-area-inset-top, 20px)',
+          minHeight: '100dvh'
+        }}
       >
         <p className="text-lg font-medium text-[#4A3E3D] mb-2">
           AI Pet Food Assistant
@@ -41,6 +47,9 @@ export default function ChatPage() {
             window.location.href = '/?signin=true'
           }}
           className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium"
+          style={{
+            marginBottom: 'env(safe-area-inset-bottom, 20px)'
+          }}
         >
           Sign In — It's Free
         </button>

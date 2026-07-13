@@ -574,6 +574,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                           <button
                             onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
                             className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                            style={{
+                              marginBottom: 'env(safe-area-inset-bottom, 20px)'
+                            }}
                           >
                             Sign in to access your account →
                           </button>
@@ -636,6 +639,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             <button
               onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
+              style={{
+                marginBottom: 'env(safe-area-inset-bottom, 20px)'
+              }}
             >
               Sign In
             </button>
@@ -684,7 +690,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
       {/* Mobile Menu Dropdown */}
       {isOpen && (
-        <div className="xl:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in">
+        <div 
+          className="xl:hidden absolute top-[72px] left-0 w-full bg-white border-b border-[#EEEEEE] shadow-lg z-50 animate-fade-in"
+          style={{
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+          }}
+        >
           <div className="flex flex-col p-4 gap-2">
 
             {/* Pet Sitting (mobile) */}
@@ -827,8 +838,15 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       </div>
     )}
       {showSignInModal && (
-        <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
-          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
+        <div 
+          className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4 overflow-y-auto"
+          style={{
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+            paddingTop: 'env(safe-area-inset-top, 20px)',
+            minHeight: '100dvh'
+          }}
+        >
+          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative my-auto">
             <button 
               onClick={() => { setShowSignInModal(false); setSignInStep('email'); setSignInError(''); setAlreadyProMsg(false); }}
               className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
