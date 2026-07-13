@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY)
@@ -70,6 +71,17 @@ export async function POST(request: Request) {
       failed++
       errors.push({ email, error: err.message })
     }
+  }
+
+  try {
+    await supabaseAdmin.from('outreach_logs').insert({
+      subject: subject,
+      recipients: emails,
+      total_sent: sent,
+      total_failed: failed
+    })
+  } catch (err) {
+    console.error('Failed to log outreach to database:', err)
   }
 
   return Response.json({ sent, failed, errors })

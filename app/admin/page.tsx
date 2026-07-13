@@ -94,6 +94,25 @@ export default function AdminPage() {
   const [outreachLoading, setOutreachLoading] = useState(false)
   const [outreachSentCount, setOutreachSentCount] = useState(0)
   const [outreachResults, setOutreachResults] = useState<any>(null)
+  const [outreachHistory, setOutreachHistory] = useState<any[]>([])
+
+  // Fetch outreach history
+  const fetchOutreachHistory = async () => {
+    try {
+      const { data } = await fetch('/api/admin/outreach-history', {
+        headers: { 'x-admin-secret': 'Lumo2026@' }
+      }).then(r => r.json())
+      setOutreachHistory(data || [])
+    } catch (err) {
+      console.error('Failed to fetch outreach history:', err)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'outreach') {
+      fetchOutreachHistory()
+    }
+  }, [activeTab])
 
   const handleSendOutreach = async () => {
     const emails = outreachEmails.split('\n').filter(e => e.trim())
@@ -122,6 +141,7 @@ export default function AdminPage() {
     const data = await res.json()
     setOutreachResults(data)
     setOutreachLoading(false)
+    fetchOutreachHistory()
   }
 
   const handleLogin = (e: React.FormEvent) => {
@@ -479,6 +499,54 @@ export default function AdminPage() {
                         ))}
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+
+              {/* Outreach History */}
+              <div className="bg-white border border-[#E8DDD4] rounded-xl p-6">
+                <h3 className="font-bold text-[#4A3E3D] mb-4">Outreach History</h3>
+                
+                {outreachHistory.length === 0 ? (
+                  <p className="text-sm text-gray-400">No outreach emails sent yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {outreachHistory.map((log: any) => (
+                      <div 
+                        key={log.id} 
+                        className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-sm text-[#4A3E3D]">{log.subject}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(log.sent_at).toLocaleDateString('en-US', { 
+                                month: 'short', day: 'numeric', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-green-600 font-medium">✅ {log.total_sent} sent</p>
+                            {log.total_failed > 0 && (
+                              <p className="text-xs text-red-500">❌ {log.total_failed} failed</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Show recipients collapsed */}
+                        <details className="mt-2">
+                          <summary className="text-xs text-[#8B5E3C] cursor-pointer">
+                            View {log.recipients?.length} recipients
+                          </summary>
+                          <div className="mt-2 space-y-1">
+                            {log.recipients?.map((email: string, i: number) => (
+                              <p key={i} className="text-xs text-gray-500">{email}</p>
+                            ))}
+                          </div>
+                        </details>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
