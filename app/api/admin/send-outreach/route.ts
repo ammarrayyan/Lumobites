@@ -56,9 +56,6 @@ export async function POST(request: Request) {
                   <p style="margin: 4px 0; font-size: 13px; color: #555;">
                     🌐 <a href="https://lumobites.net" style="color: #8B5E3C; text-decoration: none;">lumobites.net</a>
                   </p>
-                  <p style="margin: 4px 0; font-size: 13px; color: #888;">
-                    Premier Pet Nutrition LLC
-                  </p>
                 </td>
               </tr>
             </table>
