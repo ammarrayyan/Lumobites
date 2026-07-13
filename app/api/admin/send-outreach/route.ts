@@ -23,13 +23,46 @@ export async function POST(request: Request) {
         to: email.trim(),
         subject: subject,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            
             ${message.replace(/\n/g, '<br/>')}
+            
             <br/><br/>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;"/>
-            <p style="font-size: 12px; color: #999;">
-              Lumo Bites | lumobites.net | info@lumobites.net
-            </p>
+            <p style="margin: 0; color: #333;">Best regards,</p>
+            <br/>
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right: 15px; vertical-align: middle;">
+                  <img 
+                    src="https://lumobites.net/Logo.png" 
+                    alt="Lumo Bites" 
+                    width="70" 
+                    style="display: block;"
+                  />
+                </td>
+                <td style="vertical-align: middle;">
+                  <p style="margin: 0; font-weight: bold; color: #8B5E3C; font-size: 16px;">
+                    Lumo Bites™ Team
+                  </p>
+                  <p style="margin: 6px 0 0 0; font-size: 13px; color: #999;">
+                    ─────────────────────
+                  </p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #555;">
+                    📧 <a href="mailto:info@lumobitespet.com" style="color: #8B5E3C; text-decoration: none;">info@lumobitespet.com</a>
+                  </p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #555;">
+                    🌐 <a href="https://lumobites.com" style="color: #8B5E3C; text-decoration: none;">lumobites.com</a>
+                  </p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #555;">
+                    🌐 <a href="https://lumobites.net" style="color: #8B5E3C; text-decoration: none;">lumobites.net</a>
+                  </p>
+                  <p style="margin: 4px 0; font-size: 13px; color: #888;">
+                    Premier Pet Nutrition LLC
+                  </p>
+                </td>
+              </tr>
+            </table>
+
           </div>
         `
       })
