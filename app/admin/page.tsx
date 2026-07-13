@@ -17,7 +17,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -86,6 +86,42 @@ export default function AdminPage() {
       setMatchResults({ error: 'Failed to run match check' })
     }
     setMatchLoading(false)
+  }
+
+  const [outreachSubject, setOutreachSubject] = useState('Free lost pet tool — would love your thoughts')
+  const [outreachEmails, setOutreachEmails] = useState('')
+  const [outreachMessage, setOutreachMessage] = useState('')
+  const [outreachLoading, setOutreachLoading] = useState(false)
+  const [outreachSentCount, setOutreachSentCount] = useState(0)
+  const [outreachResults, setOutreachResults] = useState<any>(null)
+
+  const handleSendOutreach = async () => {
+    const emails = outreachEmails.split('\n').filter(e => e.trim())
+    if (!emails.length || !outreachSubject || !outreachMessage) {
+      alert('Please fill in all fields')
+      return
+    }
+    if (!window.confirm(`Send to ${emails.length} recipients?`)) return
+    
+    setOutreachLoading(true)
+    setOutreachSentCount(0)
+    
+    const res = await fetch('/api/admin/send-outreach', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-admin-secret': 'Lumo2026@'
+      },
+      body: JSON.stringify({
+        emails,
+        subject: outreachSubject,
+        message: outreachMessage
+      })
+    })
+    
+    const data = await res.json()
+    setOutreachResults(data)
+    setOutreachLoading(false)
   }
 
   const handleLogin = (e: React.FormEvent) => {
@@ -269,6 +305,16 @@ export default function AdminPage() {
           >
             Pet Matching
           </button>
+          <button
+            onClick={() => setActiveTab('outreach')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'outreach'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            Outreach
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -341,6 +387,95 @@ export default function AdminPage() {
                             <p>Match score: <strong>{r.score}%</strong></p>
                             <p>Notified: {r.notified}</p>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'outreach' && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold text-[#4A3E3D]">Email Outreach</h2>
+              <p className="text-sm text-gray-500">
+                Send outreach emails to shelters, rescues, and organizations from info@lumobitespet.com
+              </p>
+
+              <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
+                
+                {/* From */}
+                <div>
+                  <label className="text-sm font-medium text-[#4A3E3D]">From</label>
+                  <input 
+                    type="text" 
+                    value="info@lumobitespet.com" 
+                    disabled
+                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm bg-gray-100"
+                  />
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label className="text-sm font-medium text-[#4A3E3D]">Subject</label>
+                  <input
+                    type="text"
+                    value={outreachSubject}
+                    onChange={(e) => setOutreachSubject(e.target.value)}
+                    placeholder="Free lost pet tool — would love your thoughts"
+                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                  />
+                </div>
+
+                {/* Recipients */}
+                <div>
+                  <label className="text-sm font-medium text-[#4A3E3D]">
+                    Recipients (one email per line)
+                  </label>
+                  <textarea
+                    value={outreachEmails}
+                    onChange={(e) => setOutreachEmails(e.target.value)}
+                    rows={6}
+                    placeholder={`info.hsny@verizon.net\ngivemeshelterproject@gmail.com\ncontact@socialteesnyc.org\ninfo@anjelliclecats.com`}
+                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    {outreachEmails.split('\n').filter(e => e.trim()).length} recipients
+                  </p>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="text-sm font-medium text-[#4A3E3D]">Message</label>
+                  <textarea
+                    value={outreachMessage}
+                    onChange={(e) => setOutreachMessage(e.target.value)}
+                    rows={10}
+                    placeholder="Write your outreach email here..."
+                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                  />
+                </div>
+
+                {/* Send Button */}
+                <button
+                  onClick={handleSendOutreach}
+                  disabled={outreachLoading}
+                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium w-full"
+                >
+                  {outreachLoading ? `Sending... (${outreachSentCount} sent)` : 'Send to All Recipients'}
+                </button>
+
+                {/* Results */}
+                {outreachResults && (
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
+                    <p><strong>✅ Sent:</strong> {outreachResults.sent}</p>
+                    <p><strong>❌ Failed:</strong> {outreachResults.failed}</p>
+                    {outreachResults.errors?.length > 0 && (
+                      <div>
+                        <p className="font-bold mt-2">Failed emails:</p>
+                        {outreachResults.errors.map((e: any, i: number) => (
+                          <p key={i} className="text-red-500 text-xs">{e.email}: {e.error}</p>
                         ))}
                       </div>
                     )}
