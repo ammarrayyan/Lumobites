@@ -7,12 +7,18 @@ import { ShieldCheck, AlertTriangle } from 'lucide-react';
 export default function TermsModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [showAgeCheck, setShowAgeCheck] = useState(false);
+  const [ageDenied, setAgeDenied] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const accepted = localStorage.getItem('lumo_terms_accepted') === 'true';
-      if (!accepted) {
+      const ageConfirmed = localStorage.getItem('lumo_age_confirmed') === 'true';
+      if (!accepted || !ageConfirmed) {
         setIsOpen(true);
+        if (accepted && !ageConfirmed) {
+          setShowAgeCheck(true);
+        }
       }
     }
   }, []);
@@ -23,10 +29,58 @@ export default function TermsModal() {
       localStorage.setItem('lumo_terms_accepted', 'true');
       window.dispatchEvent(new Event('lumo-terms-accepted-update'));
     }
+    setShowAgeCheck(true);
+  };
+
+  const handleAgeConfirm = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lumo_age_confirmed', 'true');
+    }
     setIsOpen(false);
   };
 
   if (!isOpen) return null;
+
+  if (ageDenied) {
+    return (
+      <div className="fixed inset-0 bg-white z-[999999] flex flex-col items-center justify-center text-center px-6 font-sans">
+        <h2 className="text-xl font-bold text-[#4A3E3D] mb-3">
+          Access Restricted
+        </h2>
+        <p className="text-gray-500">
+          Sorry, you must be 18 or older to use Lumo Bites.
+        </p>
+      </div>
+    );
+  }
+
+  if (showAgeCheck) {
+    return (
+      <div className="fixed inset-0 bg-white z-[999999] flex flex-col items-center justify-center text-center px-6 font-sans">
+        <img src="/Logo.png" alt="Lumo Bites" className="w-20 mb-6" />
+        <h2 className="text-xl font-bold text-[#4A3E3D] mb-3">
+          Age Verification
+        </h2>
+        <p className="text-gray-500 mb-8">
+          You must be 18 or older to use Lumo Bites
+        </p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button
+            onClick={handleAgeConfirm}
+            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-3 rounded-xl font-medium w-full cursor-pointer shadow-md"
+          >
+            I am 18 or older
+          </button>
+          <button
+            onClick={() => setAgeDenied(true)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-8 py-3 rounded-xl font-medium w-full cursor-pointer"
+          >
+            I am under 18
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[999999] bg-[#000000]/65 backdrop-blur-md flex items-center justify-center p-4">
