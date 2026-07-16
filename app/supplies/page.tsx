@@ -87,7 +87,12 @@ export default function SuppliesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans pt-[52px] md:pt-0">
+    <div 
+      className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
+      }}
+    >
             <MobileFoodNav />
 
       <main className="max-w-[800px] mx-auto px-6 py-12">
