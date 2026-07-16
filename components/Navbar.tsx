@@ -420,17 +420,11 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   return (
     <>
     <nav 
-      className="border-b border-[#EEEEEE]"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        background: 'rgba(253, 250, 247, 0.95)',
-        backdropFilter: 'blur(8px)',
-        boxShadow: '0 1px 10px rgba(0,0,0,0.08)',
-        paddingTop: 'env(safe-area-inset-top, 0px)',
+      className="fixed top-0 left-0 right-0 z-50 border-b border-[#EEEEEE]"
+      style={{ 
+        paddingTop: 'max(env(safe-area-inset-top), 20px)',
+        backgroundColor: 'white',
+        boxShadow: '0 1px 10px rgba(0,0,0,0.08)'
       }}
     >
       {/* Desktop & Mobile Header Container */}
