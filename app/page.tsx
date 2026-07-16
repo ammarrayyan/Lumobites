@@ -95,8 +95,34 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2 mb-4 relative z-10">
-            <span className="text-xs text-gray-400 font-medium">iOS App Store — Coming Soon</span>
+          <div className="flex flex-wrap gap-3 justify-center items-center mt-4">
+            {/* Google Play Badge */}
+            <a 
+              href="https://play.google.com/store/apps/details?id=net.lumobites.app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                alt="Get it on Google Play"
+                height="50"
+                style={{ height: '50px' }}
+              />
+            </a>
+
+            {/* App Store Badge */}
+            <a 
+              href="https://apps.apple.com/app/lumo-bites/id6780612179"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
+                alt="Download on the App Store"
+                height="50"
+                style={{ height: '50px' }}
+              />
+            </a>
           </div>
         </div>
       </section>
