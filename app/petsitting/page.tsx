@@ -7,7 +7,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -1972,6 +1972,58 @@ export default function PetSitting() {
     }, 2000);
   };
 
+  const handleBlockSitter = async (email: string) => {
+    if (!email) return;
+    if (!confirm(`Block this user? They won't be able to contact you or appear in your search results.`)) return;
+
+    try {
+      const res = await fetch('/api/petsitting/block', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          blockerEmail: reqEmail, 
+          blockedEmail: email 
+        })
+      });
+      if (res.ok) {
+        alert('User blocked successfully');
+        fetchSitters(reqEmail);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to block user.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
+  const handleBlockOwner = async (email: string) => {
+    if (!email) return;
+    if (!confirm(`Block this user? They won't be able to contact you or request your services.`)) return;
+
+    try {
+      const res = await fetch('/api/petsitting/block', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          blockerEmail: sitterEmail, 
+          blockedEmail: email 
+        })
+      });
+      if (res.ok) {
+        alert('User blocked successfully');
+        if (sitterId) {
+          fetchSitterRequests(sitterId);
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to block user.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
   const handleMarkAsCompleted = async (id: string) => {
     if (!confirm('Are you sure you want to mark this booking as completed? This will increase your completed bookings counter.')) {
       return;
@@ -3786,16 +3838,32 @@ export default function PetSitting() {
                         {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
                           <div className="mt-3 flex flex-col gap-2">
                             {isOwnerPro ? (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedSitter(sitter);
-                                  setRequestModalOpen(true);
-                                }}
-                                className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                              >
-                                <span>Request Sitter</span>
-                              </button>
+                              <div className="flex flex-col gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedSitter(sitter);
+                                    setRequestModalOpen(true);
+                                  }}
+                                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                                >
+                                  <span>Request Sitter</span>
+                                </button>
+                                {sitter.email && (
+                                  <div className="flex justify-end">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleBlockSitter(sitter.email);
+                                      }}
+                                      className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                                    >
+                                      <Ban className="w-3 h-3" />
+                                      Block Sitter
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             ) : (
                               <div className="text-center py-3 border-t border-[#E8DDD4] mt-3">
                                 <button
@@ -4819,7 +4887,20 @@ export default function PetSitting() {
                                     </div>
                                   );
                                 })()}
-
+                             {req.owner_email && (
+                               <div className="flex justify-end pt-2 border-t border-[#E8DDD4]/50">
+                                 <button
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     handleBlockOwner(req.owner_email);
+                                   }}
+                                   className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                                 >
+                                   <Ban className="w-3 h-3" />
+                                   Block Owner
+                                 </button>
+                               </div>
+                             )}
 
                             </div>
                           </div>

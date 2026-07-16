@@ -22,12 +22,26 @@ export async function GET(request: NextRequest) {
     const day = request.nextUrl.searchParams.get('day');
     const serviceType = request.nextUrl.searchParams.get('service_type');
 
+    // Get blocked sitters for this owner
+    let blockedEmails: string[] = [];
+    if (ownerEmail) {
+      const { data: blocked } = await supabase
+        .from('blocked_users')
+        .select('blocked_email')
+        .eq('blocker_email', ownerEmail.toLowerCase().trim());
+      blockedEmails = blocked?.map(b => b.blocked_email.toLowerCase().trim()) || [];
+    }
+
     let query = supabase
       .from('sitters')
-      .select('id, name, photo_url, cover_photo_url, cover_photo_position, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
+      .select('id, email, name, photo_url, cover_photo_url, cover_photo_position, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
       .eq('approval_status', 'approved')
       // .eq('is_pro', true) // FREE LAUNCH: BYPASSED
       .eq('availability', true);
+
+    if (blockedEmails.length > 0) {
+      query = query.not('email', 'in', `(${blockedEmails.join(',')})`);
+    }
 
     if (id) {
       query = query.eq('id', id);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info } from 'lucide-react';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban } from 'lucide-react';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -47,6 +47,50 @@ export default function AccountPage() {
 
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
   const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+
+  const fetchBlockedUsers = async (userEmail: string) => {
+    try {
+      const res = await fetch(`/api/petsitting/block?email=${encodeURIComponent(userEmail)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBlockedUsers(data.blocked || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch blocked users:', e);
+    }
+  };
+
+  const handleUnblockUser = async (blockedEmail: string) => {
+    if (!blockedEmail) return;
+    if (!confirm(`Unblock this user?`)) return;
+
+    try {
+      const res = await fetch('/api/petsitting/block', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blockerEmail: email,
+          blockedEmail: blockedEmail
+        })
+      });
+      if (res.ok) {
+        alert('User unblocked successfully');
+        fetchBlockedUsers(email);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to unblock user.');
+      }
+    } catch (e) {
+      alert('An error occurred.');
+    }
+  };
+
+  useEffect(() => {
+    if (step === 'dashboard' && email) {
+      fetchBlockedUsers(email);
+    }
+  }, [step, email]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -677,7 +721,34 @@ export default function AccountPage() {
                       ) : null}
                     </>
                   )}
-                  {/* Blocked Users Section */}
+                   {/* Blocked Pet Sitters & Owners (Pet Sitting) */}
+                   <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
+                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                       <Ban className="w-3.5 h-3.5" /> Blocked Sitters & Owners (Pet Sitting)
+                     </span>
+                     {blockedUsers.length === 0 ? (
+                       <p className="text-xs text-gray-400 font-medium">No blocked users</p>
+                     ) : (
+                       <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                         {blockedUsers.map((user: any) => (
+                           <div key={user.id} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                             <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={user.blocked_email}>
+                               {user.blocked_email}
+                             </span>
+                             <button
+                               type="button"
+                               onClick={() => handleUnblockUser(user.blocked_email)}
+                               className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                             >
+                               Unblock
+                             </button>
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                   </div>
+
+                   {/* Blocked Users Section */}
                   {blockedEmails.length > 0 && (
                     <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Users</span>
