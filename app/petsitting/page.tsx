@@ -4651,16 +4651,29 @@ export default function PetSitting() {
                                          ))}
                                        </div>
                                      )}
-                                      {req.care_plan && (
-                                        <div className="col-span-1 sm:col-span-2 mt-3 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl text-left">
-                                          <div className="font-bold text-[#8B5E3C] flex items-center gap-1.5 text-xs">
-                                            <Sparkles className="w-4 h-4 text-[#8B5E3C]" /> 📋 Pet Care Plan
+                                      {req.care_plan && (() => {
+                                        const showCarePlan = !!expandedCarePlans[req.id];
+                                        return (
+                                          <div className="col-span-1 sm:col-span-2 mt-3 text-left">
+                                            <button
+                                              onClick={() => setExpandedCarePlans(prev => ({ ...prev, [req.id]: !prev[req.id] }))}
+                                              className="flex items-center gap-2 text-sm text-[#8B5E3C] font-medium"
+                                            >
+                                              <FileText className="w-4 h-4" />
+                                              {showCarePlan ? 'Hide Care Plan' : 'View Pet Care Plan'}
+                                              <ChevronDown className={`w-4 h-4 transition-transform ${showCarePlan ? 'rotate-180' : ''}`} />
+                                            </button>
+                                            
+                                            {showCarePlan && (
+                                              <div className="mt-2 bg-gradient-to-br from-[#FAF6F4] to-white border border-[#E8DDD4] p-4 rounded-xl text-left">
+                                                <div className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                                  {req.care_plan}
+                                                </div>
+                                              </div>
+                                            )}
                                           </div>
-                                          <div className="border-t border-[#E8DDD4] my-2 pt-2 text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                            {req.care_plan}
-                                          </div>
-                                        </div>
-                                      )}
+                                        );
+                                      })()}
                                    </>
                                  );
                                })()}
