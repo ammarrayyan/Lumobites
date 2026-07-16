@@ -6697,8 +6697,22 @@ export default function PetSitting() {
 
       {/* REVIEWS MODAL */}
       {reviewsModalOpen && selectedSitterForReviews && (
-        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setReviewsModalOpen(false)}>
-          <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-xl sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div 
+          className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in" 
+          onClick={() => setReviewsModalOpen(false)}
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          <div 
+            className="bg-white rounded-3xl w-full max-w-xl flex flex-col shadow-2xl overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxHeight: '85vh',
+              marginTop: 'env(safe-area-inset-top)'
+            }}
+          >
             {/* Cover Banner */}
             <div className="h-32 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
               {isOwnerPro && selectedSitterForReviews.cover_photo_url ? (
