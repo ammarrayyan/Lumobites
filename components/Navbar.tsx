@@ -434,8 +434,8 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           className="p-2 rounded-full bg-gray-100 text-[#4A3E3D] border-none cursor-pointer flex items-center justify-center"
           style={{
             position: 'absolute',
-            top: 'max(env(safe-area-inset-top), 16px)',
-            right: '16px',
+            top: 'calc(env(safe-area-inset-top) + 60px)',
+            left: '16px',
             zIndex: 9999,
           }}
         >
