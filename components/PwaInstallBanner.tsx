@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 export default function PwaInstallBanner() {
   const [showBanner, setShowBanner] = useState(false);
@@ -11,6 +12,10 @@ export default function PwaInstallBanner() {
   useEffect(() => {
     // 1. SSR check
     if (typeof window === 'undefined') return;
+
+    // Check if running as native app
+    const isNativeApp = Capacitor.isNativePlatform();
+    if (isNativeApp) return;
 
     // 2. Check if dismissed previously
     const isDismissed = localStorage.getItem('lumo_pwa_dismissed') === 'true';
