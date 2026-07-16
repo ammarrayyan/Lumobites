@@ -185,7 +185,13 @@ export default function ChatModal({
   });
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-6 p-0">
+    <div 
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
@@ -195,8 +201,12 @@ export default function ChatModal({
 
       {/* Modal — compact on mobile so no zoom needed */}
       <div
-        className="relative flex flex-col bg-white sm:rounded-2xl rounded-t-[24px] overflow-hidden shadow-2xl w-full max-w-[420px]"
-        style={{ height: 'min(520px, 75svh)', animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
+        className="relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
+        style={{ 
+          maxHeight: '80vh',
+          height: 'min(520px, 75svh)', 
+          animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' 
+        }}
         onClick={e => e.stopPropagation()}
       >
 
