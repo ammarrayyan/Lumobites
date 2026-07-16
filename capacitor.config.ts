@@ -7,6 +7,9 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://lumobites.net',
     cleartext: true
+  },
+  ios: {
+    contentInset: 'always'
   }
 };
 

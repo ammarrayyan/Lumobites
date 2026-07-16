@@ -430,6 +430,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
         background: 'rgba(253, 250, 247, 0.95)',
         backdropFilter: 'blur(8px)',
         boxShadow: '0 1px 10px rgba(0,0,0,0.08)',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
       }}
     >
       {/* Desktop & Mobile Header Container */}

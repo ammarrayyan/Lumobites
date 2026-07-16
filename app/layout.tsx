@@ -74,7 +74,7 @@ export default async function RootLayout({
           `}
         </Script>
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <TermsModal />
         <PwaRegister />
         <PushManager />
