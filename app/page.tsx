@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
@@ -11,8 +12,10 @@ export default function Home() {
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isNativeApp, setIsNativeApp] = useState(false);
 
   useEffect(() => {
+    setIsNativeApp(Capacitor.isNativePlatform());
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     const cachedSitter = localStorage.getItem('lumo_sitter_email');
     if (cachedEmail || cachedSitter) {
@@ -95,35 +98,37 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
-          <div className="flex flex-wrap gap-3 justify-center items-center mt-4">
-            {/* Google Play Badge */}
-            <a 
-              href="https://play.google.com/store/apps/details?id=net.lumobites.app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img 
-                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-                alt="Get it on Google Play"
-                height="50"
-                style={{ height: '50px' }}
-              />
-            </a>
+          {!isNativeApp && (
+            <div className="flex flex-wrap gap-3 justify-center items-center mt-4">
+              {/* Google Play Badge */}
+              <a 
+                href="https://play.google.com/store/apps/details?id=net.lumobites.app"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img 
+                  src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                  alt="Get it on Google Play"
+                  height="50"
+                  style={{ height: '50px' }}
+                />
+              </a>
 
-            {/* App Store Badge */}
-            <a 
-              href="https://apps.apple.com/app/lumo-bites/id6780612179"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img 
-                src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
-                alt="Download on the App Store"
-                height="50"
-                style={{ height: '50px' }}
-              />
-            </a>
-          </div>
+              {/* App Store Badge */}
+              <a 
+                href="https://apps.apple.com/app/lumo-bites/id6780612179"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img 
+                  src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
+                  alt="Download on the App Store"
+                  height="50"
+                  style={{ height: '50px' }}
+                />
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
