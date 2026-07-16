@@ -923,6 +923,62 @@ export default function PetSitting() {
     }
   }, [ownerPets]);
 
+  // Handle URL section scroll and tab switches on custom navigation events (like notification bell clicks)
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const section = params.get('section');
+      const tabParam = params.get('tab');
+
+      if (section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
+        setActiveTab('become');
+        setHasScrolledToSection(false);
+      } else if (section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
+        setActiveTab('find');
+        setOwnerActiveTab('bookings');
+        if (tabParam === 'bookings' || tabParam === 'pets') {
+          setOwnerActiveTab(tabParam as 'bookings' | 'pets');
+        }
+        setHasScrolledToSection(false);
+      } else if (section === 'messages') {
+        const chatBookingId = localStorage.getItem('open_chat_booking_id');
+        if (chatBookingId) {
+          const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
+          if (foundSitterReq) {
+            localStorage.removeItem('open_chat_booking_id');
+            if (foundSitterReq.status === 'cancelled') {
+              alert('This booking has been cancelled');
+              setActiveTab('become');
+              return;
+            }
+            setActiveChatBooking(foundSitterReq);
+            setActiveChatRole('sitter');
+            setChatModalOpen(true);
+          } else {
+            const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
+            if (foundOwnerReq) {
+              localStorage.removeItem('open_chat_booking_id');
+              if (foundOwnerReq.status === 'cancelled') {
+                alert('This booking has been cancelled');
+                setActiveTab('find');
+                setOwnerActiveTab('bookings');
+                return;
+              }
+              setActiveChatBooking(foundOwnerReq);
+              setActiveChatRole('owner');
+              setChatModalOpen(true);
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('lumo-section-navigate', handleUrlChange);
+    return () => {
+      window.removeEventListener('lumo-section-navigate', handleUrlChange);
+    };
+  }, [sitterRequests, ownerRequests]);
+
   const handleClearSavedInfo = async (e: React.MouseEvent) => {
     e.preventDefault();
     

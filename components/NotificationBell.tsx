@@ -133,6 +133,10 @@ export default function NotificationBell({ email }: { email: string }) {
         router.push('/petsitting');
     }
     
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('lumo-section-navigate'));
+    }, 150);
+    
     // Close the notification dropdown
     setShowDropdown(false);
   };
