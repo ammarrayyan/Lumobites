@@ -4887,22 +4887,20 @@ export default function PetSitting() {
                                     </div>
                                   );
                                 })()}
-                             {req.owner_email && (
-                               <div className="flex justify-end pt-2 border-t border-[#E8DDD4]/50">
-                                 <button
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     handleBlockOwner(req.owner_email);
-                                   }}
-                                   className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 bg-transparent border-none cursor-pointer"
-                                 >
-                                   <Ban className="w-3 h-3" />
-                                   Block Owner
-                                 </button>
-                               </div>
-                             )}
-
                             </div>
+
+                            {req.owner_email && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleBlockOwner(req.owner_email);
+                                }}
+                                className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 mt-2 bg-transparent border-none cursor-pointer"
+                              >
+                                <Ban className="w-3 h-3" />
+                                Block this owner
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
