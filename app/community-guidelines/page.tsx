@@ -4,7 +4,12 @@ import { ShieldCheck, MessageSquare, AlertOctagon, HelpCircle } from 'lucide-rea
 
 export default function CommunityGuidelinesPage() {
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans">
+    <div 
+      className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
+      }}
+    >
       <main className="max-w-[800px] mx-auto px-6 py-16">
         <div className="text-center mb-12 flex flex-col items-center">
           <ShieldCheck className="w-12 h-12 text-[#8B5E3C] mb-4" />

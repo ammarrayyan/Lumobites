@@ -13,7 +13,12 @@ export default function MobileCommunityNav() {
   ];
 
   return (
-    <div className="md:hidden fixed top-[72px] left-0 right-0 h-[52px] z-40 flex items-center justify-between gap-2 p-2 bg-[#FAF6F0] border-b border-[#E8DDD4] shadow-sm">
+    <div 
+      className="md:hidden fixed left-0 right-0 h-[52px] z-40 flex items-center justify-between gap-2 p-2 bg-[#FAF6F0] border-b border-[#E8DDD4] shadow-sm"
+      style={{
+        top: 'calc(max(env(safe-area-inset-top), 44px) + 72px)'
+      }}
+    >
       {items.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
