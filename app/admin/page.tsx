@@ -96,6 +96,44 @@ export default function AdminPage() {
   const [outreachResults, setOutreachResults] = useState<any>(null)
   const [outreachHistory, setOutreachHistory] = useState<any[]>([])
 
+  const [smsNumbers, setSmsNumbers] = useState('')
+  const [smsMessage, setSmsMessage] = useState('')
+  const [smsLoading, setSmsLoading] = useState(false)
+  const [smsResults, setSmsResults] = useState<any>(null)
+
+  const handleSendSMS = async () => {
+    const numbers = smsNumbers.split('\n').filter(n => n.trim())
+    if (!numbers.length || !smsMessage) {
+      alert('Please fill in all fields')
+      return
+    }
+    if (!window.confirm(`Send SMS to ${numbers.length} recipients?`)) return
+    
+    setSmsLoading(true)
+    setSmsResults(null)
+    
+    try {
+      const res = await fetch('/api/admin/send-sms', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-secret': 'Lumo2026@'
+        },
+        body: JSON.stringify({
+          numbers,
+          message: smsMessage
+        })
+      })
+      
+      const data = await res.json()
+      setSmsResults(data)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to send SMS')
+    }
+    setSmsLoading(false)
+  }
+
   // Fetch outreach history
   const fetchOutreachHistory = async () => {
     try {
@@ -418,89 +456,175 @@ export default function AdminPage() {
 
           {activeTab === 'outreach' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold text-[#4A3E3D]">Email Outreach</h2>
-              <p className="text-sm text-gray-500">
-                Send outreach emails to shelters, rescues, and organizations from info@lumobites.net
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Email Outreach Block */}
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#4A3E3D]">Email Outreach</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Send outreach emails to shelters, rescues, and organizations from info@lumobites.net
+                    </p>
+                  </div>
 
-              <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
-                
-                {/* From */}
-                <div>
-                  <label className="text-sm font-medium text-[#4A3E3D]">From</label>
-                  <input 
-                    type="text" 
-                    value="info@lumobites.net" 
-                    disabled
-                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm bg-gray-100"
-                  />
-                </div>
+                  <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
+                    {/* From */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">From</label>
+                      <input 
+                        type="text" 
+                        value="info@lumobites.net" 
+                        disabled
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm bg-gray-100"
+                      />
+                    </div>
 
-                {/* Subject */}
-                <div>
-                  <label className="text-sm font-medium text-[#4A3E3D]">Subject</label>
-                  <input
-                    type="text"
-                    value={outreachSubject}
-                    onChange={(e) => setOutreachSubject(e.target.value)}
-                    placeholder="Free lost pet tool — would love your thoughts"
-                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
-                  />
-                </div>
+                    {/* Subject */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">Subject</label>
+                      <input
+                        type="text"
+                        value={outreachSubject}
+                        onChange={(e) => setOutreachSubject(e.target.value)}
+                        placeholder="Free lost pet tool — would love your thoughts"
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                      />
+                    </div>
 
-                {/* Recipients */}
-                <div>
-                  <label className="text-sm font-medium text-[#4A3E3D]">
-                    Recipients (one email per line)
-                  </label>
-                  <textarea
-                    value={outreachEmails}
-                    onChange={(e) => setOutreachEmails(e.target.value)}
-                    rows={6}
-                    placeholder={`info.hsny@verizon.net\ngivemeshelterproject@gmail.com\ncontact@socialteesnyc.org\ninfo@anjelliclecats.com`}
-                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    {outreachEmails.split('\n').filter(e => e.trim()).length} recipients
-                  </p>
-                </div>
+                    {/* Recipients */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">
+                        Recipients (one email per line)
+                      </label>
+                      <textarea
+                        value={outreachEmails}
+                        onChange={(e) => setOutreachEmails(e.target.value)}
+                        rows={6}
+                        placeholder={`info.hsny@verizon.net\ngivemeshelterproject@gmail.com\ncontact@socialteesnyc.org\ninfo@anjelliclecats.com`}
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        {outreachEmails.split('\n').filter(e => e.trim()).length} recipients
+                      </p>
+                    </div>
 
-                {/* Message */}
-                <div>
-                  <label className="text-sm font-medium text-[#4A3E3D]">Message</label>
-                  <textarea
-                    value={outreachMessage}
-                    onChange={(e) => setOutreachMessage(e.target.value)}
-                    rows={10}
-                    placeholder="Write your outreach email here..."
-                    className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
-                  />
-                </div>
+                    {/* Message */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">Message</label>
+                      <textarea
+                        value={outreachMessage}
+                        onChange={(e) => setOutreachMessage(e.target.value)}
+                        rows={6}
+                        placeholder="Write your outreach email here..."
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                      />
+                    </div>
 
-                {/* Send Button */}
-                <button
-                  onClick={handleSendOutreach}
-                  disabled={outreachLoading}
-                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium w-full"
-                >
-                  {outreachLoading ? `Sending... (${outreachSentCount} sent)` : 'Send to All Recipients'}
-                </button>
+                    {/* Send Button */}
+                    <button
+                      onClick={handleSendOutreach}
+                      disabled={outreachLoading}
+                      className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium w-full shadow-sm hover:bg-[#7A5234] transition-colors"
+                    >
+                      {outreachLoading ? `Sending... (${outreachSentCount} sent)` : 'Send to All Recipients'}
+                    </button>
 
-                {/* Results */}
-                {outreachResults && (
-                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
-                    <p><strong>✅ Sent:</strong> {outreachResults.sent}</p>
-                    <p><strong>❌ Failed:</strong> {outreachResults.failed}</p>
-                    {outreachResults.errors?.length > 0 && (
-                      <div>
-                        <p className="font-bold mt-2">Failed emails:</p>
-                        {outreachResults.errors.map((e: any, i: number) => (
-                          <p key={i} className="text-red-500 text-xs">{e.email}: {e.error}</p>
-                        ))}
+                    {/* Results */}
+                    {outreachResults && (
+                      <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
+                        <p><strong>✅ Sent:</strong> {outreachResults.sent}</p>
+                        <p><strong>❌ Failed:</strong> {outreachResults.failed}</p>
+                        {outreachResults.errors?.length > 0 && (
+                          <div>
+                            <p className="font-bold mt-2">Failed emails:</p>
+                            {outreachResults.errors.map((e: any, i: number) => (
+                              <p key={i} className="text-red-500 text-xs">{e.email}: {e.error}</p>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
+                </div>
+
+                {/* SMS Outreach Block */}
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#4A3E3D]">SMS Outreach</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Send SMS to opted-in users only. $0.0079 per message.
+                    </p>
+                  </div>
+
+                  <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
+                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-xs space-y-1">
+                      <p className="font-medium text-[#4A3E3D]">Twilio Account Stats</p>
+                      <p className="text-gray-400">
+                        Current balance: $19.83 (~2,500 messages)
+                      </p>
+                    </div>
+
+                    {/* Phone numbers */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">
+                        Phone Numbers (one per line, include country code)
+                      </label>
+                      <textarea
+                        value={smsNumbers}
+                        onChange={(e) => setSmsNumbers(e.target.value)}
+                        rows={6}
+                        placeholder={"+15025551234\n+15025555678\n+12125559012"}
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        {smsNumbers.split('\n').filter(n => n.trim()).length} recipients
+                      </p>
+                    </div>
+
+                    {/* Message */}
+                    <div>
+                      <label className="text-sm font-medium text-[#4A3E3D]">
+                        Message (160 chars max per SMS)
+                      </label>
+                      <textarea
+                        value={smsMessage}
+                        onChange={(e) => setSmsMessage(e.target.value)}
+                        rows={4}
+                        maxLength={160}
+                        placeholder="Your message here... lumobites.net"
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        {smsMessage.length}/160 characters
+                      </p>
+                    </div>
+
+                    {/* Send button */}
+                    <button
+                      onClick={handleSendSMS}
+                      disabled={smsLoading}
+                      className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium w-full shadow-sm hover:bg-[#7A5234] transition-colors"
+                    >
+                      {smsLoading ? 'Sending...' : 'Send SMS to All'}
+                    </button>
+
+                    {/* Results */}
+                    {smsResults && (
+                      <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
+                        <p><strong>✅ Sent:</strong> {smsResults.sent}</p>
+                        <p><strong>❌ Failed:</strong> {smsResults.failed}</p>
+                        <p><strong>💰 Cost:</strong> ~${(smsResults.sent * 0.0079).toFixed(4)}</p>
+                        {smsResults.errors?.length > 0 && (
+                          <div>
+                            <p className="font-bold mt-2">Failed deliveries:</p>
+                            {smsResults.errors.map((e: any, i: number) => (
+                              <p key={i} className="text-red-500 text-xs">{e.number}: {e.error}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Outreach History */}
