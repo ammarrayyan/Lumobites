@@ -2,13 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
-
-const SHARE_URL = 'https://lumobites.net';
-const SHARE_MSG = "Check if your pet's food is safe — free ingredient checker + FDA recall alerts 🐾 lumobites.net";
+import { Capacitor } from '@capacitor/core';
 
 export default function ShareButton() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareText, setShareText] = useState("Check out Lumo Bites — free AI-powered pet care app! 🐾\n\n🌐 https://lumobites.net");
   const ref = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -20,15 +19,24 @@ export default function ShareButton() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Detect platform and set appropriate share message
+  useEffect(() => {
+    const platform = Capacitor.getPlatform(); // 'ios', 'android', or 'web'
+    const text = platform === 'ios'
+      ? `Check out Lumo Bites — free AI-powered pet care app! 🐾\n\n📱 Download on App Store:\nhttps://apps.apple.com/app/lumo-bites/id6780612179\n\n🌐 https://lumobites.net`
+      : `Check out Lumo Bites — free AI-powered pet care app! 🐾\n\n📱 iPhone: https://apps.apple.com/app/lumo-bites/id6780612179\n📱 Android: https://play.google.com/store/apps/details?id=net.lumobites.app\n\n🌐 https://lumobites.net`;
+    setShareText(text);
+  }, []);
+
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(SHARE_URL);
+      await navigator.clipboard.writeText(shareText);
       setCopied(true);
       setTimeout(() => { setCopied(false); setOpen(false); }, 1800);
     } catch {
       // Fallback for Safari/older browsers
       const el = document.createElement('textarea');
-      el.value = SHARE_URL;
+      el.value = shareText;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
@@ -39,17 +47,17 @@ export default function ShareButton() {
   };
 
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(SHARE_MSG)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
     setOpen(false);
   };
 
   const shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}&quote=${encodeURIComponent(SHARE_MSG)}`, '_blank');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lumobites.net')}&quote=${encodeURIComponent(shareText)}`, '_blank');
     setOpen(false);
   };
 
   const shareSMS = () => {
-    window.open(`sms:?body=${encodeURIComponent(SHARE_MSG)}`, '_self');
+    window.open(`sms:?body=${encodeURIComponent(shareText)}`, '_self');
     setOpen(false);
   };
 
