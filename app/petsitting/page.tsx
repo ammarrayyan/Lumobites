@@ -5624,8 +5624,22 @@ export default function PetSitting() {
 
       {/* REQUEST MODAL */}
       {requestModalOpen && selectedSitter && (
-        <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center sm:p-4 p-0 animate-fade-in" onClick={() => setRequestModalOpen(false)}>
-          <div className="bg-white sm:rounded-3xl rounded-none w-full max-w-md sm:max-h-[90vh] h-full sm:h-auto flex flex-col shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div 
+          className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" 
+          onClick={() => setRequestModalOpen(false)}
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+          }}
+        >
+          <div 
+            className="bg-white rounded-3xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden" 
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxHeight: '85vh',
+              marginTop: 'env(safe-area-inset-top)'
+            }}
+          >
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
               <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {formatSitterName(selectedSitter.name)}</h3>
               <p className="text-[#8B7E7D] text-xs sm:text-sm">You'll be notified instantly when the sitter responds. You can also message them directly through the app.</p>
