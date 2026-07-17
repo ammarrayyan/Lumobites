@@ -835,30 +835,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             </Link>
 
             
-            {isPro && (
-              <div className="mt-2 pt-2 border-t border-gray-100 flex flex-col gap-1 animate-fade-in">
-                <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                  {proEmail || "Pro Member"}
-                </div>
-                <Link 
-                  href="/account"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-3 text-[#555555] font-bold hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in gap-2"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <Settings className="w-4 h-4 text-[#8B5E3C]" /> Manage Subscription
-                </Link>
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleSignOut();
-                  }}
-                  className="w-full px-4 py-3 text-left text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center bg-transparent border-none cursor-pointer animate-fade-in gap-2"
-                >
-                  <LogOut className="w-4 h-4 text-red-600" /> Sign Out
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
