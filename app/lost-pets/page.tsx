@@ -458,10 +458,10 @@ export default function LostPetsFeed() {
         <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12 w-full">
 
           {/* ── Page Header ── */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 md:gap-6">
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-black text-[#4A3E3D] mb-3">Community Pet Board</h1>
-              <p className="text-[#8B5E3C] font-medium text-lg">Help reunite lost pets with their families in your neighborhood.</p>
+              <h1 className="text-2xl md:text-5xl font-black text-[#4A3E3D] mb-1 md:mb-3">Community Pet Board</h1>
+              <p className="text-[#8B5E3C] font-medium text-sm md:text-lg">Help reunite lost pets with their families in your neighborhood.</p>
             </div>
             <Link 
               href="/lost-pets/post" 
@@ -471,9 +471,9 @@ export default function LostPetsFeed() {
                   setShowSignInModal(true);
                 }
               }}
-              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-4 px-8 rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0"
+              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0"
             >
-              <Megaphone className="w-5 h-5" /> Report Lost/Found Pet
+              <Megaphone className="w-4 h-4 md:w-5 md:h-5" /> Report Lost/Found Pet
             </Link>
           </div>
 
