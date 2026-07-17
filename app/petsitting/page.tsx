@@ -563,7 +563,7 @@ export default function PetSitting() {
   const [requestFilter, setRequestFilter] = useState('all');
   const [historyFilter, setHistoryFilter] = useState('all');
   const [ownerActiveTab, setOwnerActiveTab] = useState<'bookings' | 'pets'>('bookings');
-  const [sitterSubTab, setSitterSubTab] = useState<'profile' | 'requests'>('profile');
+  const [sitterSubTab, setSitterSubTab] = useState<'profile' | 'requests' | 'availability'>('profile');
   const [hasScrolledToSection, setHasScrolledToSection] = useState(false);
   const [highlightedBookingId, setHighlightedBookingId] = useState<string | null>(null);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
@@ -4302,6 +4302,16 @@ export default function PetSitting() {
                           </span>
                         )}
                       </button>
+                      <button
+                        onClick={() => setSitterSubTab('availability')}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                          sitterSubTab === 'availability' 
+                            ? 'bg-[#8B5E3C] text-white shadow-sm' 
+                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                        }`}
+                      >
+                        Availability
+                      </button>
                     </div>
                   );
                 })()}
@@ -4501,7 +4511,11 @@ export default function PetSitting() {
                     </div>
                   )}
                 </div>
+                </>
+                )}
 
+                {sitterSubTab === 'availability' && (
+                  <>
                 {/* Sitter Availability Calendar Section */}
                 <div className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
                   <h3 className="text-xl font-black text-[#4A3E3D] mb-2 flex items-center gap-2">
