@@ -533,36 +533,6 @@ export default function LostPetsFeed() {
             </div>
           </div>
 
-          {/* SMS Alerts Opt-in */}
-          <div className="bg-white border border-[#E8DDD4] rounded-2xl p-6 my-6 mx-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">🐾</span>
-              <h3 className="text-lg font-bold text-[#4A3E3D]">
-                Get Lost Pet Alerts Near You!
-              </h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
-              Get SMS alerts when a lost or found pet is reported in your area — free and instant.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="tel"
-                placeholder="Your phone number"
-                value={smsOptInPhone}
-                onChange={(e) => setSmsOptInPhone(e.target.value)}
-                className="flex-1 border border-[#E8DDD4] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#8B5E3C]"
-              />
-              <button
-                onClick={handleSmsOptIn}
-                className="bg-[#8B5E3C] text-white px-6 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap hover:bg-[#6B4A2E] transition-colors"
-              >
-                Get Alerts
-              </button>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Reply STOP to unsubscribe anytime. US numbers only.
-            </p>
-          </div>
 
           {/* ══════════════════════════════════════════════════════════════════
               TAB 1 — Lost & Found Board
