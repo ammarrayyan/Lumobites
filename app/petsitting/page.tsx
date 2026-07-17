@@ -564,6 +564,7 @@ export default function PetSitting() {
   const [historyFilter, setHistoryFilter] = useState('all');
   const [ownerActiveTab, setOwnerActiveTab] = useState<'bookings' | 'pets'>('bookings');
   const [hasScrolledToSection, setHasScrolledToSection] = useState(false);
+  const [highlightedBookingId, setHighlightedBookingId] = useState<string | null>(null);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [activeChatBooking, setActiveChatBooking] = useState<any>(null);
@@ -771,18 +772,30 @@ export default function PetSitting() {
     const section = params.get('section');
     const statusParam = params.get('status');
     const tabParam = params.get('tab');
-    if (params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
+    const bookingId = params.get('booking');
+    const chatId = params.get('chat');
+
+    if (tabParam === 'sitter' || params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
       setActiveTab('become');
       if (section === 'requests') {
         setProfilePreviewMode(true);
       }
-    } else if (section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
+    } else if (tabParam === 'owner' || section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
       setActiveTab('find');
       setOwnerActiveTab('bookings');
-      if (section === 'owner-dashboard' && (tabParam === 'bookings' || tabParam === 'pets')) {
+      if ((tabParam === 'bookings' || tabParam === 'pets')) {
         setOwnerActiveTab(tabParam as 'bookings' | 'pets');
       }
     }
+
+    if (bookingId) {
+      setHighlightedBookingId(bookingId);
+    }
+
+    if (chatId) {
+      localStorage.setItem('open_chat_booking_id', chatId);
+    }
+
     if (statusParam) {
       setRequestFilter(statusParam);
       setHistoryFilter(statusParam);
@@ -801,6 +814,21 @@ export default function PetSitting() {
       fetchOwnerPets(reqEmail);
     }
   }, [reqEmail]);
+
+  // Scroll to highlighted booking once requests are loaded and rendered
+  useEffect(() => {
+    if (!highlightedBookingId) return;
+    const el = document.getElementById(`booking-${highlightedBookingId}`);
+    if (el) {
+      const timer = setTimeout(() => {
+        el.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'center' 
+        });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedBookingId, sitterRequests, ownerRequests]);
 
   // Automatically open chat modal if 'chat' or 'booking_id' booking ID is present in URL query params
   useEffect(() => {
@@ -4097,7 +4125,11 @@ export default function PetSitting() {
                         })();
 
                         return (
-                          <div key={req.id} className="bg-white border border-[#E8DDD4] rounded-2xl overflow-hidden shadow-sm">
+                          <div 
+                            key={req.id} 
+                            id={`booking-${req.id}`} 
+                            className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all ${highlightedBookingId === req.id ? 'border-[#D97706] ring-2 ring-[#D97706]/20' : 'border-[#E8DDD4]'}`}
+                          >
                             {/* Header: booking number + status */}
                             <div className="flex items-center justify-between px-4 py-3 bg-[#FAF6F4] border-b border-[#E8DDD4]">
                               <span className="text-xs font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 8)}`}</span>
@@ -4626,7 +4658,11 @@ export default function PetSitting() {
 
 
                         return (
-                          <div key={req.id} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 space-y-3">
+                          <div 
+                            key={req.id} 
+                            id={`booking-${req.id}`} 
+                            className={`bg-[#FAF6F4] border rounded-2xl p-4 space-y-3 transition-all ${highlightedBookingId === req.id ? 'border-[#D97706] ring-2 ring-[#D97706]/20' : 'border-[#E8DDD4]'}`}
+                          >
                             {/* ALWAYS VISIBLE - clickable summary header */}
                             <div 
                               className="flex justify-between items-center flex-wrap gap-2 cursor-pointer select-none"

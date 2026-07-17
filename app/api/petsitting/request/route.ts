@@ -294,7 +294,7 @@ formatting, or emojis. Keep it clean, professional and digital.`
         type: 'booking_request',
         title: 'New Booking Request! 🐾',
         message: `${owner_name || 'An owner'} has sent you a pet sitting request`,
-        link: '/petsitting?section=sitter-dashboard&tab=requests',
+        link: `/petsitting?booking=${insertedReq.id}&tab=sitter`,
         booking_id: insertedReq.id
       });
       if (notifErr) {

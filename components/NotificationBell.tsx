@@ -88,64 +88,22 @@ export default function NotificationBell({
     } catch (e) {
       console.error('Failed to mark notification as read:', e);
     }
-    
-    // For message notifications — check if booking still exists
-    if ((notification.type === 'new_message' || notification.type === 'message') && notification.booking_id) {
-      try {
-        const res = await fetch(`/api/petsitting/request?id=${notification.booking_id}`);
-        const data = await res.json();
-        
-        if (!res.ok || !data || data.status === 'cancelled') {
-          showToast('This conversation is no longer available — the booking was cancelled', 'error');
-          setIsOpen(false);
-          return;
-        }
-        if (data.status === 'completed') {
-          showToast('This booking has been completed. Messages are read-only.', 'info');
-        }
-        // Store booking ID to auto-open chat
-        localStorage.setItem('open_chat_booking_id', notification.booking_id);
-      } catch (err) {
-        showToast('Unable to open this conversation', 'error');
-        setIsOpen(false);
-        return;
-      }
+    setIsOpen(false);
+
+    // If booking was cancelled — show message, no navigation
+    if (notification.type === 'booking_cancelled') {
+      alert('This booking was cancelled — no further action needed.');
+      return;
     }
 
-    // Navigate based on type
-    switch(notification.type) {
-      case 'new_message':
-      case 'message':
-        router.push('/petsitting?section=messages');
-        break;
-      case 'booking_request':
-        router.push('/petsitting?section=sitter-requests');
-        break;
-      case 'booking_accepted':
-      case 'booking_declined':
-      case 'booking_cancelled':
-      case 'booking_completed':
-        if (notification.type === 'booking_cancelled') {
-          showToast('This booking was cancelled', 'info');
-        }
-        router.push('/petsitting?section=owner-bookings');
-        break;
-      case 'no_show':
-        router.push('/petsitting?section=sitter-requests');
-        break;
-      case 'review_request':
-        router.push(`/petsitting/review/${notification.sitter_id}`);
-        break;
-      default:
-        router.push('/petsitting');
+    // If has a link → go there directly
+    if (notification.link) {
+      window.location.href = notification.link;
+      return;
     }
-    
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('lumo-section-navigate'));
-    }, 150);
-    
-    // Close the notification dropdown
-    setIsOpen(false);
+
+    // Fallback
+    window.location.href = '/petsitting';
   };
 
   const markAllAsRead = async () => {

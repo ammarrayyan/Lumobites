@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
           type: 'booking_accepted',
           title: 'Booking Accepted! 🎉',
           message: `${fullSitterNameStr} has accepted your request for ${reqRow.pet_name || 'your pet'}`,
-          link: '/petsitting?section=owner-dashboard&tab=bookings',
+          link: `/petsitting?booking=${reqRow.id}&tab=owner`,
           booking_id: reqRow.id
         });
         if (notifErr) {

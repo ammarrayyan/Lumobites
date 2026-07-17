@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
           type: 'booking_cancelled',
           title: title,
           message: message,
-          link: link,
+          link: null,
           booking_id: reqRow.id
         });
       } catch (err) {

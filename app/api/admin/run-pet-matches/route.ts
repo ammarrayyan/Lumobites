@@ -148,6 +148,20 @@ export async function POST(request: Request) {
           })
         })
 
+        // Insert DB notification
+        try {
+          await supabaseAdmin.from('notifications').insert({
+            recipient_email: lostPet.contact_email,
+            type: 'lost_pet_match',
+            title: '🐾 Possible Match Found!',
+            message: `Possible match found for your lost pet! (${score}% similarity)`,
+            link: `/lost-pets/${foundPet.id}`,
+            read: false
+          });
+        } catch (err) {
+          console.error('[Run Pet Matches] Notification insert error:', err);
+        }
+
         // Update notification count
         await supabaseAdmin
           .from('lost_pets')

@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
           type: 'booking_completed',
           title: 'Booking Completed 🎉',
           message: `Your booking with ${sitterName} is complete`,
-          link: '/petsitting#owner-history'
+          link: `/petsitting?booking=${reqRow.id}&tab=owner`,
+          booking_id: reqRow.id
         });
         if (notifErr) {
           console.error('[Complete Booking] Notification insert error:', notifErr);

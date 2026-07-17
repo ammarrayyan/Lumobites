@@ -115,10 +115,10 @@ export async function POST(request: NextRequest) {
       .from('notifications')
       .insert({
         recipient_email: receiver_email,
-        type: 'message',
+        type: 'new_message',
         title: `New message from ${senderName}`,
         message: `New message about ${petName}'s booking`,
-        link: `/petsitting?chat=${booking_id}#messages`,
+        link: `/petsitting?chat=${booking_id}`,
         read: false
       });
 
