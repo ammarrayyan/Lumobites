@@ -6,11 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://lumobites.net',
-    cleartext: true
+    cleartext: false,
+    allowNavigation: ['lumobites.net']
   },
   ios: {
     contentInset: 'always',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+    limitsNavigationsToAppBoundDomains: false
   }
 };
 
