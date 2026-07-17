@@ -7,12 +7,37 @@ import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Ma
 import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
+  const [smsOptInPhone, setSmsOptInPhone] = useState('');
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
+
+  const handleSmsOptIn = async () => {
+    if (!smsOptInPhone.trim()) {
+      alert('Please enter a phone number');
+      return;
+    }
+    try {
+      const res = await fetch('/api/sms-optin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: smsOptInPhone })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Success! You've been opted in to receive SMS alerts. 🐾");
+        setSmsOptInPhone('');
+      } else {
+        alert(data.error || 'Failed to opt in. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred. Please try again.');
+    }
+  };
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
@@ -217,6 +242,39 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* SMS Alerts Opt-in */}
+      <section className="w-full px-6 md:px-8 lg:px-12 pb-6">
+        <div className="max-w-[700px] mx-auto bg-white border border-[#E8DDD4] rounded-2xl p-6 my-6 mx-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">🐾</span>
+            <h3 className="text-lg font-bold text-[#4A3E3D]">
+              Get Lost Pet Alerts Near You!
+            </h3>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Get SMS alerts when a lost or found pet is reported in your area — free and instant.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="tel"
+              placeholder="Your phone number"
+              value={smsOptInPhone}
+              onChange={(e) => setSmsOptInPhone(e.target.value)}
+              className="flex-1 border border-[#E8DDD4] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#8B5E3C]"
+            />
+            <button
+              onClick={handleSmsOptIn}
+              className="bg-[#8B5E3C] text-white px-6 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap hover:bg-[#6B4A2E] transition-colors"
+            >
+              Get Alerts
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Reply STOP to unsubscribe anytime. US numbers only.
+          </p>
         </div>
       </section>
 

@@ -534,30 +534,33 @@ export default function LostPetsFeed() {
           </div>
 
           {/* SMS Alerts Opt-in */}
-          <div className="bg-gradient-to-r from-[#8B5E3C] to-[#6B4A2E] rounded-2xl p-6 text-white text-center my-6">
-            <h3 className="text-lg font-bold mb-1">
-              🐾 Get Lost Pet Alerts Near You!
-            </h3>
-            <p className="text-sm text-white/80 mb-4">
-              Get SMS alerts when a lost or found pet is reported in your area
+          <div className="bg-white border border-[#E8DDD4] rounded-2xl p-6 my-6 mx-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-2xl">🐾</span>
+              <h3 className="text-lg font-bold text-[#4A3E3D]">
+                Get Lost Pet Alerts Near You!
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Get SMS alerts when a lost or found pet is reported in your area — free and instant.
             </p>
-            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="tel"
-                placeholder="+1 (502) 555-0000"
+                placeholder="Your phone number"
                 value={smsOptInPhone}
                 onChange={(e) => setSmsOptInPhone(e.target.value)}
-                className="flex-1 px-4 py-2 rounded-xl text-gray-800 text-sm"
+                className="flex-1 border border-[#E8DDD4] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#8B5E3C]"
               />
               <button
                 onClick={handleSmsOptIn}
-                className="bg-white text-[#8B5E3C] px-6 py-2 rounded-xl font-bold text-sm"
+                className="bg-[#8B5E3C] text-white px-6 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap hover:bg-[#6B4A2E] transition-colors"
               >
                 Get Alerts
               </button>
             </div>
-            <p className="text-xs text-white/60 mt-2">
-              By signing up you agree to receive SMS alerts. Reply STOP to unsubscribe anytime.
+            <p className="text-xs text-gray-400 mt-2">
+              Reply STOP to unsubscribe anytime. US numbers only.
             </p>
           </div>
 
