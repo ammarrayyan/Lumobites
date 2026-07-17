@@ -708,11 +708,27 @@ export default function LostPetsFeed() {
                 </div>
 
                 {/* Photo / Text tabs */}
-                <div className="flex gap-4 border-b border-[#E8DDD4] mb-6">
-                  <button type="button" onClick={() => setAiSearchTab('photo')} className={`pb-2 font-bold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${aiSearchTab === 'photo' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
+                <div className="flex gap-2 mb-6 border-b border-[#E8DDD4] pb-2">
+                  <button
+                    type="button"
+                    onClick={() => setAiSearchTab('photo')}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                      aiSearchTab === 'photo'
+                        ? 'bg-[#8B5E3C] text-white shadow-sm'
+                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                    }`}
+                  >
                     <Camera className="w-3.5 h-3.5" /> Search by Photo
                   </button>
-                  <button type="button" onClick={() => setAiSearchTab('text')} className={`pb-2 font-bold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${aiSearchTab === 'text' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}>
+                  <button
+                    type="button"
+                    onClick={() => setAiSearchTab('text')}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                      aiSearchTab === 'text'
+                        ? 'bg-[#8B5E3C] text-white shadow-sm'
+                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                    }`}
+                  >
                     <PenLine className="w-3.5 h-3.5" /> Describe Pet instead
                   </button>
                 </div>
