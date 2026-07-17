@@ -670,7 +670,7 @@ export default function LostPetsFeed() {
                     </div>
 
                     {/* Interactive Map */}
-                    <div className="w-full md:w-[45%] md:sticky md:top-24 h-[400px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                    <div className="w-full md:w-[45%] md:sticky md:top-24 h-[300px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
                       <LostPetsMap pets={pets} searchCoords={searchCoords} searchRadius={searchRadius} />
                     </div>
                   </div>
