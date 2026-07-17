@@ -563,6 +563,7 @@ export default function PetSitting() {
   const [requestFilter, setRequestFilter] = useState('all');
   const [historyFilter, setHistoryFilter] = useState('all');
   const [ownerActiveTab, setOwnerActiveTab] = useState<'bookings' | 'pets'>('bookings');
+  const [sitterSubTab, setSitterSubTab] = useState<'profile' | 'requests'>('profile');
   const [hasScrolledToSection, setHasScrolledToSection] = useState(false);
   const [highlightedBookingId, setHighlightedBookingId] = useState<string | null>(null);
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
@@ -790,6 +791,7 @@ export default function PetSitting() {
 
     if (bookingId) {
       setHighlightedBookingId(bookingId);
+      setSitterSubTab('requests');
     }
 
     if (chatId) {
@@ -4254,6 +4256,42 @@ export default function PetSitting() {
             </div>
             {profilePreviewMode ? (
               <div className="animate-fade-in text-center">
+                {/* Sitter Sub-tabs */}
+                {(() => {
+                  const pendingCount = sitterRequests.filter(req => req.status === 'pending').length;
+                  return (
+                    <div className="flex justify-center gap-2 mb-6 border-b border-[#E8DDD4] pb-4">
+                      <button
+                        onClick={() => setSitterSubTab('profile')}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                          sitterSubTab === 'profile' 
+                            ? 'bg-[#8B5E3C] text-white shadow-sm' 
+                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#F0E6DD]'
+                        }`}
+                      >
+                        My Profile
+                      </button>
+                      <button
+                        onClick={() => setSitterSubTab('requests')}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                          sitterSubTab === 'requests' 
+                            ? 'bg-[#8B5E3C] text-white shadow-sm' 
+                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#F0E6DD]'
+                        }`}
+                      >
+                        Booking Requests
+                        {pendingCount > 0 && (
+                          <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                            {pendingCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                {sitterSubTab === 'profile' && (
+                  <>
                 {profileSuccessMessage && (
                   <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 mb-6 text-sm font-semibold animate-fade-in max-w-sm mx-auto">
                     ✨ {profileSuccessMessage}
@@ -4598,7 +4636,11 @@ export default function PetSitting() {
                     </div>
                   </div>
                 </div>
+                </>
+                )}
 
+                {sitterSubTab === 'requests' && (
+                  <>
                 {/* Sitter Booking Tracker Section */}
                 <div id="sitter-dashboard" className="border-t border-[#F0E8E0] pt-8 mt-8 text-left w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -4945,6 +4987,8 @@ export default function PetSitting() {
                     </div>
                   )}
                 </div>
+                </>
+                )}
               </div>
             ) : (
               <>
