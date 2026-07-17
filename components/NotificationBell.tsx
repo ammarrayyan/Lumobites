@@ -127,7 +127,7 @@ export default function NotificationBell({
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600"
+        className="relative z-50 p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
@@ -138,7 +138,13 @@ export default function NotificationBell({
       </button>
 
       {isOpen && (
-        <div className="fixed sm:absolute right-4 sm:right-0 top-[60px] sm:top-auto sm:mt-2 sm:w-80 w-[calc(100vw-32px)] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[300] overflow-hidden flex flex-col text-left mx-auto sm:mx-0">
+        <div 
+          className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-left"
+          style={{
+            top: '100%',
+            zIndex: 40
+          }}
+        >
           <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
             {unreadCount > 0 && (
