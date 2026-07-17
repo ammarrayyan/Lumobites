@@ -478,15 +478,15 @@ export default function LostPetsFeed() {
           </div>
 
           {/* ── Tab Switcher ── */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white p-1 rounded-full shadow-sm inline-flex border border-[#E8DDD4]">
+          <div className="flex justify-center mb-8 border-b border-[#E8DDD4] pb-2 w-full">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setActiveTab('board')}
-                className={`flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'board'
-                    ? 'bg-[#8B5E3C] text-white shadow-md'
-                    : 'text-[#666666] hover:text-[#8B5E3C]'
+                    ? 'bg-[#8B5E3C] text-white shadow-sm'
+                    : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                 }`}
               >
                 <PawPrint className="w-4 h-4" />
@@ -495,10 +495,10 @@ export default function LostPetsFeed() {
               <button
                 type="button"
                 onClick={() => setActiveTab('ai')}
-                className={`flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'ai'
-                    ? 'bg-[#8B5E3C] text-white shadow-md'
-                    : 'text-[#666666] hover:text-[#8B5E3C]'
+                    ? 'bg-[#8B5E3C] text-white shadow-sm'
+                    : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                 }`}
               >
                 <Search className="w-4 h-4" />

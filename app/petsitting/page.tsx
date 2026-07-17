@@ -3426,17 +3426,25 @@ export default function PetSitting() {
         </div>
 
         {/* Custom Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white p-1 rounded-full shadow-sm inline-flex border border-[#E8DDD4]">
+        <div className="flex justify-center mb-8 border-b border-[#E8DDD4] pb-2 w-full">
+          <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('find')}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'find' ? 'bg-[#8B5E3C] text-white shadow-md' : 'text-[#666666] hover:text-[#8B5E3C]'}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                activeTab === 'find'
+                  ? 'bg-[#8B5E3C] text-white shadow-sm'
+                  : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+              }`}
             >
               Find a Sitter
             </button>
             <button
               onClick={() => setActiveTab('become')}
-              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'become' ? 'bg-[#8B5E3C] text-white shadow-md' : 'text-[#666666] hover:text-[#8B5E3C]'}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                activeTab === 'become'
+                  ? 'bg-[#8B5E3C] text-white shadow-sm'
+                  : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+              }`}
             >
               Become a Pet Sitter
             </button>
@@ -3447,13 +3455,13 @@ export default function PetSitting() {
         {activeTab === 'find' && (
           <div className="animate-fade-in">
             {reqEmail && (
-              <div className="flex justify-center border-b border-[#E8DDD4] mb-8 max-w-lg mx-auto">
+              <div className="flex justify-center gap-2 mb-8 max-w-lg mx-auto border-b border-[#E8DDD4] pb-2">
                 <button
                   onClick={() => setOwnerSubTab('search')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold border-b-2 transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     ownerSubTab === 'search'
-                      ? 'border-[#8B5E3C] text-[#8B5E3C]'
-                      : 'border-transparent text-[#6B7280] hover:text-[#4A3E3D]'
+                      ? 'bg-[#8B5E3C] text-white shadow-sm'
+                      : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                   }`}
                 >
                   <Search className="w-4 h-4" />
@@ -3461,10 +3469,10 @@ export default function PetSitting() {
                 </button>
                 <button
                   onClick={() => setOwnerSubTab('dashboard')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold border-b-2 transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                     ownerSubTab === 'dashboard'
-                      ? 'border-[#8B5E3C] text-[#8B5E3C]'
-                      : 'border-transparent text-[#6B7280] hover:text-[#4A3E3D]'
+                      ? 'bg-[#8B5E3C] text-white shadow-sm'
+                      : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                   }`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
@@ -3940,16 +3948,24 @@ export default function PetSitting() {
               </div>
               <div className="space-y-6">
                   {/* Tabs Navigation */}
-                  <div className="flex gap-6 border-b border-[#E8DDD4]">
+                  <div className="flex gap-2 border-b border-[#E8DDD4] pb-2">
                     <button 
                       onClick={() => setOwnerActiveTab('bookings')} 
-                      className={`pb-3 font-bold text-sm transition-colors border-b-2 flex items-center gap-2 ${ownerActiveTab === 'bookings' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+                        ownerActiveTab === 'bookings' 
+                          ? 'bg-[#8B5E3C] text-white shadow-sm' 
+                          : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                      }`}
                     >
                       📅 My Bookings
                     </button>
                     <button 
                       onClick={() => setOwnerActiveTab('pets')} 
-                      className={`pb-3 font-bold text-sm transition-colors border-b-2 flex items-center gap-2 ${ownerActiveTab === 'pets' ? 'border-[#8B5E3C] text-[#8B5E3C]' : 'border-transparent text-[#8B7E7D] hover:text-[#4A3E3D]'}`}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+                        ownerActiveTab === 'pets' 
+                          ? 'bg-[#8B5E3C] text-white shadow-sm' 
+                          : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                      }`}
                     >
                       🐾 My Pets
                     </button>
@@ -4260,23 +4276,23 @@ export default function PetSitting() {
                 {(() => {
                   const pendingCount = sitterRequests.filter(req => req.status === 'pending').length;
                   return (
-                    <div className="flex justify-center gap-2 mb-6 border-b border-[#E8DDD4] pb-4">
+                    <div className="flex justify-center gap-2 mb-6 border-b border-[#E8DDD4] pb-2">
                       <button
                         onClick={() => setSitterSubTab('profile')}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                           sitterSubTab === 'profile' 
                             ? 'bg-[#8B5E3C] text-white shadow-sm' 
-                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#F0E6DD]'
+                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                         }`}
                       >
                         My Profile
                       </button>
                       <button
                         onClick={() => setSitterSubTab('requests')}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
                           sitterSubTab === 'requests' 
                             ? 'bg-[#8B5E3C] text-white shadow-sm' 
-                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#F0E6DD]'
+                            : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
                         }`}
                       >
                         Booking Requests
