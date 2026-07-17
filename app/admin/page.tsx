@@ -610,14 +610,14 @@ export default function AdminPage() {
                     {/* Results */}
                     {smsResults && (
                       <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
-                        <p><strong>✅ Sent:</strong> {smsResults.sent}</p>
-                        <p><strong>❌ Failed:</strong> {smsResults.failed}</p>
-                        <p><strong>💰 Cost:</strong> ~${(smsResults.sent * 0.0079).toFixed(4)}</p>
+                        <p>✅ Sent: <strong>{smsResults.sent ?? 0}</strong></p>
+                        <p>❌ Failed: <strong>{smsResults.failed ?? 0}</strong></p>
+                        <p>💰 Cost: ~$<strong>{((smsResults.sent ?? 0) * 0.0079).toFixed(4)}</strong></p>
                         {smsResults.errors?.length > 0 && (
-                          <div>
-                            <p className="font-bold mt-2">Failed deliveries:</p>
+                          <div className="mt-2">
+                            <p className="font-bold text-red-500">Failed numbers:</p>
                             {smsResults.errors.map((e: any, i: number) => (
-                              <p key={i} className="text-red-500 text-xs">{e.number}: {e.error}</p>
+                              <p key={i} className="text-red-400 text-xs">{e.number}: {e.error}</p>
                             ))}
                           </div>
                         )}
