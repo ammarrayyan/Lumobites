@@ -471,9 +471,9 @@ export default function LostPetsFeed() {
                   setShowSignInModal(true);
                 }
               }}
-              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-full transition-transform transform hover:scale-105 shadow-md flex items-center gap-2 flex-shrink-0"
+              className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
             >
-              <Megaphone className="w-4 h-4 md:w-5 md:h-5" /> Report Lost/Found Pet
+              🐾 Report Lost/Found Pet
             </Link>
           </div>
 
