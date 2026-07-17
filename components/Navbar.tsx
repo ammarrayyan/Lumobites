@@ -57,7 +57,35 @@ interface NavbarProps {
 export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isBellOpen, setIsBellOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
+
+  // Toggle hamburger — close bell if open
+  const handleHamburgerClick = () => {
+    setIsBellOpen(false);
+    setIsOpen(!isOpen);
+  };
+
+  // Toggle bell — close hamburger if open
+  const handleBellClick = (openState: boolean) => {
+    setIsOpen(false);
+    setIsBellOpen(openState);
+  };
+
+  // Toggle sign in — close everything else
+  const handleSignInClick = (show: boolean) => {
+    setIsOpen(false);
+    setIsBellOpen(false);
+    setShowUpgradeMenu(false);
+    setShowSignInModal(show);
+  };
+
+  // Toggle upgrade menu — close everything else
+  const handleUpgradeMenuClick = (show: boolean) => {
+    setIsOpen(false);
+    setIsBellOpen(false);
+    setShowUpgradeMenu(show);
+  };
   const [isPro, setIsPro] = useState(() => {
     if (initialEmail) {
       const isOwnerEmail = initialEmail.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || initialEmail.toLowerCase().trim() === 'reviewer@lumobites.net';
@@ -206,7 +234,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     }
 
     const handleOpenSignIn = () => {
-      setShowSignInModal(true);
+      handleSignInClick(true);
       setSignInStep('email');
       setSignInError('');
     };
@@ -300,7 +328,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     setSignInStep('email');
     setSignInError('');
     setAlreadyProMsg(false);
-    setShowSignInModal(true);
+    handleSignInClick(true);
   };
 
   const handleSignInSendCode = async (e: React.FormEvent) => {
@@ -448,7 +476,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           {/* Hamburger Menu Toggle */}
           <button 
             className="xl:hidden mr-3 text-[#8B5E3C] p-2 hover:bg-[#FDF9F5] rounded-lg transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={handleHamburgerClick}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -535,14 +563,20 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4" suppressHydrationWarning={true}>
             <ShareButton />
-            {proEmail && <NotificationBell email={proEmail} />}
+            {proEmail && (
+              <NotificationBell 
+                email={proEmail} 
+                isOpen={isBellOpen} 
+                setIsOpen={handleBellClick} 
+              />
+            )}
             
             {!isPro && (
               <>
                 {/* Desktop only - simplified */}
                 <div className="hidden md:flex flex-col items-center relative group">
                   <button 
-                    onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
+                    onClick={() => { handleSignInClick(true); setSignInStep('email'); setSignInError(''); }}
                     className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-6 py-2 rounded-xl font-medium transition-colors shadow-sm"
                   >
                     Sign In
@@ -558,7 +592,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                 {/* Mobile - keep exactly as is */}
                 <div className="md:hidden relative">
                   <button
-                    onClick={() => setShowUpgradeMenu(!showUpgradeMenu)}
+                    onClick={() => handleUpgradeMenuClick(!showUpgradeMenu)}
                     className="bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors flex items-center gap-1"
                   >
                     Create Free Account <Sparkles className="w-3 h-3" />
@@ -582,7 +616,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                         <div className="px-3 pb-2 pt-1 text-center flex flex-col gap-1.5">
                           <span className="text-[11px] text-gray-500 font-bold leading-tight">Already have an account?</span>
                           <button
-                            onClick={() => { setShowUpgradeMenu(false); setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
+                            onClick={() => { setShowUpgradeMenu(false); handleSignInClick(true); setSignInStep('email'); setSignInError(''); }}
                             className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
                             style={{
                               marginBottom: 'env(safe-area-inset-bottom, 20px)'
@@ -643,11 +677,17 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
         <div className="flex xl:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
-          {proEmail && <NotificationBell email={proEmail} />}
+          {proEmail && (
+            <NotificationBell 
+              email={proEmail} 
+              isOpen={isBellOpen} 
+              setIsOpen={handleBellClick} 
+            />
+          )}
 
           {!isSignedIn ? (
             <button
-              onClick={() => { setShowSignInModal(true); setSignInStep('email'); setSignInError(''); }}
+              onClick={() => { handleSignInClick(true); setSignInStep('email'); setSignInError(''); }}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
               style={{
                 marginBottom: 'env(safe-area-inset-bottom, 20px)'

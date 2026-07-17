@@ -17,9 +17,16 @@ interface Notification {
   sitter_id?: string;
 }
 
-export default function NotificationBell({ email }: { email: string }) {
+export default function NotificationBell({ 
+  email,
+  isOpen,
+  setIsOpen
+}: { 
+  email: string; 
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -47,12 +54,12 @@ export default function NotificationBell({ email }: { email: string }) {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
+        setIsOpen(false);
       }
     };
-    if (showDropdown) document.addEventListener('mousedown', handleClickOutside);
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showDropdown]);
+  }, [isOpen]);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
@@ -90,7 +97,7 @@ export default function NotificationBell({ email }: { email: string }) {
         
         if (!res.ok || !data || data.status === 'cancelled') {
           showToast('This conversation is no longer available — the booking was cancelled', 'error');
-          setShowDropdown(false);
+          setIsOpen(false);
           return;
         }
         if (data.status === 'completed') {
@@ -100,7 +107,7 @@ export default function NotificationBell({ email }: { email: string }) {
         localStorage.setItem('open_chat_booking_id', notification.booking_id);
       } catch (err) {
         showToast('Unable to open this conversation', 'error');
-        setShowDropdown(false);
+        setIsOpen(false);
         return;
       }
     }
@@ -138,7 +145,7 @@ export default function NotificationBell({ email }: { email: string }) {
     }, 150);
     
     // Close the notification dropdown
-    setShowDropdown(false);
+    setIsOpen(false);
   };
 
   const markAllAsRead = async () => {
@@ -161,7 +168,7 @@ export default function NotificationBell({ email }: { email: string }) {
   return (
     <div className="relative" ref={dropdownRef}>
       <button 
-        onClick={() => setShowDropdown(!showDropdown)}
+        onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600"
       >
         <Bell size={20} />
@@ -172,7 +179,7 @@ export default function NotificationBell({ email }: { email: string }) {
         )}
       </button>
 
-      {showDropdown && (
+      {isOpen && (
         <div className="fixed sm:absolute right-4 sm:right-0 top-[60px] sm:top-auto sm:mt-2 sm:w-80 w-[calc(100vw-32px)] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[300] overflow-hidden flex flex-col text-left mx-auto sm:mx-0">
           <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
