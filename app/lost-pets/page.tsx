@@ -18,6 +18,32 @@ export default function LostPetsFeed() {
   const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
   const [showSignInModal, setShowSignInModal] = useState(false);
 
+  const [smsOptInPhone, setSmsOptInPhone] = useState('');
+
+  const handleSmsOptIn = async () => {
+    if (!smsOptInPhone.trim()) {
+      alert('Please enter a phone number');
+      return;
+    }
+    try {
+      const res = await fetch('/api/sms-optin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: smsOptInPhone })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Success! You've been opted in to receive SMS alerts. 🐾");
+        setSmsOptInPhone('');
+      } else {
+        alert(data.error || 'Failed to opt in. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred. Please try again.');
+    }
+  };
+
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
   const [pets, setPets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -505,6 +531,34 @@ export default function LostPetsFeed() {
                 <span>AI Pet Search</span>
               </button>
             </div>
+          </div>
+
+          {/* SMS Alerts Opt-in */}
+          <div className="bg-gradient-to-r from-[#8B5E3C] to-[#6B4A2E] rounded-2xl p-6 text-white text-center my-6">
+            <h3 className="text-lg font-bold mb-1">
+              🐾 Get Lost Pet Alerts Near You!
+            </h3>
+            <p className="text-sm text-white/80 mb-4">
+              Get SMS alerts when a lost or found pet is reported in your area
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+              <input
+                type="tel"
+                placeholder="+1 (502) 555-0000"
+                value={smsOptInPhone}
+                onChange={(e) => setSmsOptInPhone(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-xl text-gray-800 text-sm"
+              />
+              <button
+                onClick={handleSmsOptIn}
+                className="bg-white text-[#8B5E3C] px-6 py-2 rounded-xl font-bold text-sm"
+              >
+                Get Alerts
+              </button>
+            </div>
+            <p className="text-xs text-white/60 mt-2">
+              By signing up you agree to receive SMS alerts. Reply STOP to unsubscribe anytime.
+            </p>
           </div>
 
           {/* ══════════════════════════════════════════════════════════════════
