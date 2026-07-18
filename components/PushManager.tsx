@@ -16,6 +16,18 @@ export default function PushManager() {
         const isCapacitor = typeof window !== 'undefined' && !!(window as any).Capacitor;
         console.log('[PushManager] setupPush running. isCapacitor:', isCapacitor);
 
+        // Send debug info to server so we can see it in Vercel logs
+        await fetch('/api/push/debug', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            isCapacitor,
+            platform: (window as any).Capacitor?.getPlatform() ?? null,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          })
+        }).catch(() => {});
+
         if (isCapacitor) {
           console.log('[PushManager] Capacitor native environment detected');
           const { PushNotifications } = await import('@capacitor/push-notifications');
