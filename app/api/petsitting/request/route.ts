@@ -291,19 +291,23 @@ formatting, or emojis. Keep it clean, professional and digital.`
       }
     }
 
+    // Around line 294
+    console.log('=== REACHED NOTIFICATION SECTION ===')
+    console.log('Sitter email:', sitter.email)
+    console.log('Inserted request ID:', insertedReq?.id)
+
     // Notification
     try {
-      const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
+      const { data: notifData, error: notifErr } = await supabaseAdmin.from('notifications').insert({
         recipient_email: sitter.email,
         type: 'booking_request',
         title: 'New Booking Request! 🐾',
         message: `${owner_name || 'An owner'} has sent you a pet sitting request`,
         link: `/petsitting?booking=${insertedReq.id}&tab=sitter`,
         booking_id: insertedReq.id
-      });
-      if (notifErr) {
-        console.error('[PetSitting Request] Notification insert error:', notifErr);
-      }
+      }).select();
+      
+      console.log('=== NOTIFICATION INSERT RESULT ===', JSON.stringify({ notifData, notifErr }))
     } catch (err) {
       console.error('[PetSitting Request] Notification exception:', err);
     }
