@@ -14,21 +14,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             FirebaseApp.configure()
         }
         
+        print("🔥 AppDelegate: didFinishLaunchingWithOptions called")
+        
         // Push notification registration
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOptions, completionHandler: { _, _ in })
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
+            print("🔥 AppDelegate: Push auth granted: \(granted), error: \(String(describing: error))")
+        }
         application.registerForRemoteNotifications()
+        print("🔥 AppDelegate: registerForRemoteNotifications() called")
         
         // Override point for customization after application launch.
         return true
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("🔥 AppDelegate: didRegisterForRemoteNotifications - APNs token: \(tokenString)")
         NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("🔥 AppDelegate: didFailToRegisterForRemoteNotifications - error: \(error)")
         NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 

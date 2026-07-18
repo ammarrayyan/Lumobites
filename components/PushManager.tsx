@@ -6,7 +6,11 @@ import { app, getToken, onMessage, getMessaging } from '@/lib/firebase';
 export default function PushManager() {
   useEffect(() => {
     console.log('[PushManager] *** MOUNTING ***');
-
+    console.log('[PushManager] Platform check:', 
+      typeof window !== 'undefined' ? (window as any).Capacitor?.getPlatform() ?? 'Capacitor not detected' : 'no window'
+    );
+    console.log('[PushManager] window.Capacitor exists:', typeof window !== 'undefined' && !!(window as any).Capacitor);
+    console.log('[PushManager] User agent:', typeof navigator !== 'undefined' ? navigator.userAgent : 'no navigator');
     const setupPush = async () => {
       try {
         const isCapacitor = typeof window !== 'undefined' && !!(window as any).Capacitor;
