@@ -22,8 +22,6 @@ export default function PushManager() {
           return;
         }
 
-        await PushNotifications.register();
-
         // Listen for registration success
         PushNotifications.addListener('registration', async (token) => {
           console.log('[PushManager] Native push registration token (APNs on iOS, FCM on Android):', token.value);
@@ -63,6 +61,8 @@ export default function PushManager() {
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
           console.log('[PushManager] Native push notification received:', notification);
         });
+
+        await PushNotifications.register();
 
       } else if ('serviceWorker' in navigator && 'PushManager' in window) {
         // Only proceed automatically if permission is already granted
