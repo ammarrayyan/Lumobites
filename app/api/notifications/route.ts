@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { data: notifications, error } = await supabaseAdmin
       .from('notifications')
       .select('*')
-      .eq('recipient_email', email)
+      .ilike('recipient_email', email.toLowerCase())
       .order('created_at', { ascending: false })
       .limit(20);
 
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest) {
       const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read: true })
-        .eq('recipient_email', email)
+        .ilike('recipient_email', email.toLowerCase())
         .eq('read', false);
         
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -139,6 +139,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       setIsSignedIn(true);
       setProEmail(cachedEmail);
       // isPro state will be handled by the API call in useEffect
+    } else if (cachedSitter && cachedSitter !== 'undefined' && cachedSitter !== 'null' && cachedSitter.trim() !== '') {
+      setIsSignedIn(true);
+      setProEmail('');
     } else {
       setIsPro(false);
       setIsSignedIn(false);
@@ -563,9 +566,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
           <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4" suppressHydrationWarning={true}>
             <ShareButton />
-            {proEmail && (
+            {(proEmail || sitterEmail) && (
               <NotificationBell 
-                email={proEmail} 
+                email={proEmail || sitterEmail} 
                 isOpen={isBellOpen} 
                 setIsOpen={handleBellClick} 
               />
@@ -677,9 +680,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
         <div className="flex xl:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
           <ShareButton />
-          {proEmail && (
+          {(proEmail || sitterEmail) && (
             <NotificationBell 
-              email={proEmail} 
+              email={proEmail || sitterEmail} 
               isOpen={isBellOpen} 
               setIsOpen={handleBellClick} 
             />
