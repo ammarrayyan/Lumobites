@@ -6,15 +6,20 @@ import { app, getToken, onMessage, getMessaging } from '@/lib/firebase';
 export default function PushManager() {
   const setupPush = async () => {
     try {
-      const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor;
+      const isCapacitor = typeof window !== 'undefined' && !!(window as any).Capacitor;
+      console.log('[PushManager] setupPush running. isCapacitor:', isCapacitor);
 
       if (isCapacitor) {
         console.log('[PushManager] Capacitor native environment detected');
         const { PushNotifications } = await import('@capacitor/push-notifications');
         
         let permStatus = await PushNotifications.checkPermissions();
+        console.log('[PushManager] Initial native permission status:', JSON.stringify(permStatus));
+
         if (permStatus.receive === 'prompt') {
+          console.log('[PushManager] Requesting native permissions...');
           permStatus = await PushNotifications.requestPermissions();
+          console.log('[PushManager] Native permission response status:', JSON.stringify(permStatus));
         }
 
         if (permStatus.receive !== 'granted') {
@@ -23,14 +28,25 @@ export default function PushManager() {
         }
 
         // Listen for registration success
-        PushNotifications.addListener('registration', async (token) => {
-          console.log('[PushManager] Native push registration token (APNs on iOS, FCM on Android):', token.value);
+        console.log('[PushManager] Adding native push listeners...');
+        
+        // Remove existing listeners first to avoid duplicate handler accumulation
+        try {
+          await PushNotifications.removeAllListeners();
+          console.log('[PushManager] Existing native listeners removed successfully');
+        } catch (e) {
+          console.log('[PushManager] No existing listeners to remove or failed to remove:', e);
+        }
+
+        await PushNotifications.addListener('registration', async (token) => {
+          console.log('[PushManager] Native push registration token event triggered! Token:', token.value);
           
           const platform = (window as any).Capacitor.getPlatform();
           let finalToken = token.value;
 
           if (platform === 'ios') {
             try {
+              console.log('[PushManager] Fetching FCM token via @capacitor-community/fcm...');
               const { FCM } = await import('@capacitor-community/fcm');
               const fcmTokenRes = await FCM.getToken();
               finalToken = fcmTokenRes.token;
@@ -45,16 +61,24 @@ export default function PushManager() {
           const email = proEmail || sitterEmail;
           const deviceName = platform === 'ios' ? 'iOS (Capacitor)' : platform === 'android' ? 'Android (Capacitor)' : 'Capacitor';
           
+          console.log('[PushManager] Found user email for registration:', email);
+
           if (email) {
-            await fetch('/api/push/register', {
+            console.log('[PushManager] Sending registration call to /api/push/register...');
+            const res = await fetch('/api/push/register', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, token: finalToken, device: deviceName })
             });
-            console.log('[PushManager] Registered native token for:', email);
+            console.log('[PushManager] Registration API response status:', res.status);
           } else {
+            console.log('[PushManager] Storing pending push token in localStorage');
             localStorage.setItem('lumo_pending_push_token', finalToken);
           }
+        });
+
+        PushNotifications.addListener('registrationError', (error) => {
+          console.error('[PushManager] Native registration error:', JSON.stringify(error));
         });
 
         // Handle incoming notifications
@@ -62,9 +86,12 @@ export default function PushManager() {
           console.log('[PushManager] Native push notification received:', notification);
         });
 
+        console.log('[PushManager] Triggering PushNotifications.register()...');
         await PushNotifications.register();
+        console.log('[PushManager] PushNotifications.register() call completed');
 
       } else if ('serviceWorker' in navigator && 'PushManager' in window) {
+        console.log('[PushManager] Web push environment detected');
         // Only proceed automatically if permission is already granted
         if (Notification.permission === 'granted') {
           console.log('[PushManager] Permission already granted, syncing push token');
@@ -109,7 +136,7 @@ export default function PushManager() {
   };
 
   useEffect(() => {
-    console.log('[PushManager] Component mounted');
+    console.log('[PushManager] *** MOUNTING ***');
     setupPush();
 
     // Listen to custom updates or storage updates so we register the token when they log in!
@@ -118,6 +145,7 @@ export default function PushManager() {
       const sitterEmail = localStorage.getItem('lumo_sitter_email');
       const email = proEmail || sitterEmail;
       
+      console.log('[PushManager] handleLogin listener triggered. Email:', email);
       if (!email) return;
 
       // Re-run full push setup on login
