@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
             <div class="info-item">Message <strong>${reqRow.owner_name ? formatSitterName(reqRow.owner_name) : 'the owner'}</strong> directly on your Lumo Bites dashboard to coordinate details.</div>
           </div>
 
-          <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
+          <a href="/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
         </div>
       </body>
       </html>

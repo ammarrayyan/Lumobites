@@ -1994,12 +1994,21 @@ export default function PetSitting() {
   };
 
   const handleSitterResponse = async (id: string, action: 'accept' | 'decline', token: string) => {
-    window.open(`/api/petsitting/request/${action}?id=${id}&token=${token}`, '_blank');
-    setTimeout(() => {
-      if (sitterId) {
-        fetchSitterRequests(sitterId);
+    if (!confirm(`Are you sure you want to ${action} this request?`)) return;
+    try {
+      const res = await fetch(`/api/petsitting/request/${action}?id=${id}&token=${token}`);
+      if (res.ok) {
+        alert(`Successfully ${action === 'accept' ? 'accepted' : 'declined'} request!`);
+        if (sitterId) {
+          fetchSitterRequests(sitterId);
+        }
+      } else {
+        alert(`Failed to ${action} request.`);
       }
-    }, 2000);
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred.');
+    }
   };
 
   const handleBlockSitter = async (email: string) => {

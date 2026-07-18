@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
           <p>You have successfully declined the pet sitting request for <strong>${reqRow.pet_name || 'their pet'}</strong>.</p>
           <p>We've notified the owner that you are unavailable for these dates.</p>
  
-          <a href="https://lumobites.net/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
+          <a href="/petsitting" class="btn-secondary">Go to Sitter Dashboard</a>
         </div>
       </body>
       </html>
