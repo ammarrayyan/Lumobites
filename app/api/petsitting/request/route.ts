@@ -305,6 +305,8 @@ formatting, or emojis. Keep it clean, professional and digital.`
     }
 
     try {
+      console.log('=== ABOUT TO SEND PUSH ===')
+      console.log('Sitter email:', sitter.email)
       await sendPushNotification(
         sitter.email,
         'New Booking Request! 🐾',
@@ -312,6 +314,7 @@ formatting, or emojis. Keep it clean, professional and digital.`
         '/petsitting?section=sitter-dashboard&tab=requests',
         { type: 'booking_request', requestId: insertedReq.id }
       );
+      console.log('=== PUSH SENT ===')
     } catch (err) {
       console.error('[PetSitting Request] Push error:', err);
     }
