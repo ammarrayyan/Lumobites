@@ -9,9 +9,13 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('=== REQUEST BODY ===');
+    console.log(JSON.stringify(body, null, 2));
+
     const { sitter_id, owner_email, pet_name, pet_type, dates, special_notes, phone_number, owner_name, time_slot, pet_id, pet_details } = body;
 
     if (!sitter_id || !owner_email || !pet_name || !pet_type || !dates) {
+      console.warn('=== MISSING REQUIRED FIELDS ===', { sitter_id, owner_email, pet_name, pet_type, dates });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
