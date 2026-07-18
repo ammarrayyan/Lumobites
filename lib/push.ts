@@ -13,22 +13,28 @@ export async function sendPushNotification(email: string, title: string, body: s
   }
   console.log('✅ Firebase Admin initialized');
 
-  // Look up tokens (case-insensitive)
+  // Look up ONLY the most recent token (case-insensitive)
   const { data: tokens, error } = await supabaseAdmin
     .from('push_tokens')
-    .select('token')
-    .ilike('email', email.toLowerCase());
+    .select('token, device, created_at')
+    .ilike('email', email.toLowerCase())
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-  console.log('Tokens found:', tokens?.length || 0);
-  if (error) console.log('Token lookup error:', error);
+  if (error) {
+    console.log('Token lookup error:', error);
+  }
 
   if (!tokens || tokens.length === 0) {
     console.log('❌ No tokens found for email:', email);
     return;
   }
 
+  console.log('Most recent token:', tokens[0].token.substring(0, 30) + '...');
+  console.log('Device:', tokens[0].device);
+  console.log('Created:', tokens[0].created_at);
+
   const tokenStrings = tokens.map(t => t.token);
-  console.log('Sending to tokens:', tokenStrings.map(t => t.substring(0, 20) + '...'));
 
   const message = {
     notification: { title, body },
@@ -41,13 +47,19 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   try {
     const response = await admin.messaging().sendEachForMulticast(message);
-    console.log('✅ Push sent:', response.successCount, 'success,', response.failureCount, 'failed');
+    console.log('Firebase result:', JSON.stringify(response));
+
+    response.responses.forEach((r, i) => {
+      console.log(`Token ${i}: success=${r.success}`);
+      if (!r.success) {
+        console.log(`Error:`, JSON.stringify(r.error));
+      }
+    });
 
     if (response.failureCount > 0) {
       const failedTokens: string[] = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
-          console.log('❌ Token failed:', resp.error?.message, '| Token:', tokenStrings[idx].substring(0, 20) + '...');
           failedTokens.push(tokenStrings[idx]);
         }
       });
