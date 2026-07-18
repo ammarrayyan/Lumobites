@@ -9,11 +9,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email or token' }, { status: 400 });
     }
 
-    // Attempt to upsert
+    const normalizedEmail = email.toLowerCase();
+
+    // Attempt to upsert with normalized lowercase email
     const { error } = await supabaseAdmin
       .from('push_tokens')
       .upsert(
-        { email, token, device, created_at: new Date().toISOString() },
+        { email: normalizedEmail, token, device, created_at: new Date().toISOString() },
         { onConflict: 'email,token' }
       );
 

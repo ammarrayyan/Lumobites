@@ -10,11 +10,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get all tokens for this email
+    const normalizedEmail = email.toLowerCase();
+
+    // Get all tokens for this email (case-insensitive)
     const { data: tokens, error } = await supabaseAdmin
       .from('push_tokens')
       .select('token')
-      .eq('email', email);
+      .ilike('email', normalizedEmail);
 
     if (error || !tokens || tokens.length === 0) {
       return NextResponse.json({ success: true, message: 'No push tokens found for user' });

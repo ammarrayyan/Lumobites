@@ -6,7 +6,7 @@ export async function sendPushNotification(email: string, title: string, body: s
     const { data: tokens } = await supabaseAdmin
       .from('push_tokens')
       .select('token')
-      .eq('email', email);
+      .ilike('email', email.toLowerCase());
 
     if (!tokens || tokens.length === 0) return;
 
