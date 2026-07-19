@@ -33,7 +33,8 @@ export default function NotificationBell({
   const fetchNotifications = async () => {
     if (!email) return;
     try {
-      const res = await fetch(`/api/notifications?email=${encodeURIComponent(email)}`);
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}`);
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -109,10 +110,11 @@ export default function NotificationBell({
 
   const markAllAsRead = async () => {
     try {
+      const normalizedEmail = email.trim().toLowerCase();
       await fetch('/api/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, all: true })
+        body: JSON.stringify({ email: normalizedEmail, all: true })
       });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (e) {
@@ -122,7 +124,8 @@ export default function NotificationBell({
 
   const clearAllNotifications = async () => {
     try {
-      await fetch(`/api/notifications?email=${encodeURIComponent(email)}`, {
+      const normalizedEmail = email.trim().toLowerCase();
+      await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}`, {
         method: 'DELETE'
       });
       setNotifications([]);

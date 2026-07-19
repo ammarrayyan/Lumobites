@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { data: notifications, error } = await supabaseAdmin
       .from('notifications')
       .select('*')
-      .ilike('recipient_email', email.toLowerCase())
+      .ilike('recipient_email', email.trim().toLowerCase())
       .order('created_at', { ascending: false })
       .limit(20);
 
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest) {
       const { error } = await supabaseAdmin
         .from('notifications')
         .update({ read: true })
-        .ilike('recipient_email', email.toLowerCase())
+        .ilike('recipient_email', email.trim().toLowerCase())
         .eq('read', false);
         
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -75,7 +75,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabaseAdmin
       .from('notifications')
       .delete()
-      .ilike('recipient_email', email.toLowerCase());
+      .ilike('recipient_email', email.trim().toLowerCase());
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
