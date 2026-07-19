@@ -54,7 +54,10 @@ export default function NotificationBell({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        // Prevent closing if we are clicking any bell button (to avoid collision between desktop/mobile bells)
+        if (!(e.target as HTMLElement).closest('.bell-btn')) {
+          setIsOpen(false);
+        }
       }
     };
     if (isOpen) document.addEventListener('mousedown', handleClickOutside);
@@ -98,12 +101,12 @@ export default function NotificationBell({
 
     // If has a link → go there directly
     if (notification.link) {
-      window.location.href = notification.link;
+      router.push(notification.link);
       return;
     }
 
     // Fallback
-    window.location.href = '/petsitting';
+    router.push('/petsitting');
   };
 
   const markAllAsRead = async () => {
@@ -127,7 +130,7 @@ export default function NotificationBell({
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative z-50 p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600"
+        className="relative z-50 p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 bell-btn"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
@@ -190,9 +193,15 @@ export default function NotificationBell({
             )}
           </div>
           <div className="p-2 border-t border-gray-100 bg-gray-50/50 text-center">
-            <a href="/petsitting" className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors">
+            <button 
+              onClick={() => {
+                setIsOpen(false);
+                router.push('/petsitting');
+              }}
+              className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors bg-transparent border-none cursor-pointer"
+            >
               See all activity →
-            </a>
+            </button>
           </div>
         </div>
       )}
