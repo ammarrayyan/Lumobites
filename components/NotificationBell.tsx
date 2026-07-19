@@ -79,18 +79,8 @@ export default function NotificationBell({
     }
   }, [toast]);
 
-  const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read first
-    try {
-      await fetch('/api/notifications', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: notification.id })
-      });
-      setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
-    } catch (e) {
-      console.error('Failed to mark notification as read:', e);
-    }
+  const handleNotificationClick = (notification: Notification) => {
+    // Navigate immediately
     setIsOpen(false);
 
     // If booking was cancelled — show message, no navigation
@@ -99,14 +89,22 @@ export default function NotificationBell({
       return;
     }
 
-    // If has a link → go there directly
     if (notification.link) {
       router.push(notification.link);
-      return;
+    } else {
+      router.push('/petsitting');
     }
 
-    // Fallback
-    router.push('/petsitting');
+    // Mark as read in background (don't await)
+    fetch('/api/notifications', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: notification.id })
+    })
+      .then(() => {
+        setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
+      })
+      .catch((e) => console.error('Failed to mark read in background:', e));
   };
 
   const markAllAsRead = async () => {
@@ -119,6 +117,17 @@ export default function NotificationBell({
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const clearAllNotifications = async () => {
+    try {
+      await fetch(`/api/notifications?email=${encodeURIComponent(email)}`, {
+        method: 'DELETE'
+      });
+      setNotifications([]);
+    } catch (e) {
+      console.error('Failed to clear notifications:', e);
     }
   };
 
@@ -150,14 +159,24 @@ export default function NotificationBell({
         >
           <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
             <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
-            {unreadCount > 0 && (
-              <button 
-                onClick={markAllAsRead}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-              >
-                <Check size={12} /> Mark all read
-              </button>
-            )}
+            <div className="flex gap-2">
+              {unreadCount > 0 && (
+                <button 
+                  onClick={markAllAsRead}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                >
+                  <Check size={12} /> Mark read
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button 
+                  onClick={clearAllNotifications}
+                  className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="max-h-[400px] overflow-y-auto">
@@ -170,11 +189,11 @@ export default function NotificationBell({
                 <button
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)}
-                  className={`w-full text-left p-3 border-b border-gray-50 last:border-none transition-colors \${notif.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50'}`}
+                  className={`w-full text-left p-3 border-b border-gray-50 last:border-none transition-colors ${notif.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50'}`}
                 >
                   <div className="flex gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm mb-0.5 \${notif.read ? 'text-gray-700 font-medium' : 'text-gray-900 font-bold'}`}>
+                      <p className={`text-sm mb-0.5 ${notif.read ? 'text-gray-700 font-medium' : 'text-gray-900 font-bold'}`}>
                         {notif.title}
                       </p>
                       <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
