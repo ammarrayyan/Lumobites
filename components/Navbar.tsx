@@ -452,21 +452,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
         boxShadow: '0 1px 10px rgba(0,0,0,0.08)'
       }}
     >
-      {/* Make sure X button is clearly visible when menu is open */}
-      {isOpen && (
-        <button
-          onClick={() => setIsOpen(false)}
-          className="p-2 rounded-full bg-gray-100 text-[#4A3E3D] border-none cursor-pointer flex items-center justify-center"
-          style={{
-            position: 'absolute',
-            top: 'calc(env(safe-area-inset-top) + 60px)',
-            left: '16px',
-            zIndex: 9999,
-          }}
-        >
-          <X className="w-6 h-6" />
-        </button>
-      )}
       {/* Desktop & Mobile Header Container */}
       <div className="px-4 md:px-6 xl:px-[48px] h-[72px] flex items-center justify-between">
         <div className="flex items-center">
