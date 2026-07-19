@@ -42,17 +42,23 @@ export default function PushManager() {
           }
 
           if (permStatus.receive !== 'granted') {
-            console.warn('[PushManager] Push notification permission not granted natively');
+            const msg = `[PushManager] Permission NOT granted: ${permStatus.receive}`;
+            console.warn(msg);
+            fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'permission_denied', receive: permStatus.receive, timestamp: new Date().toISOString() }) }).catch(() => {});
             return;
           }
+
+          fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'permission_granted', receive: permStatus.receive, timestamp: new Date().toISOString() }) }).catch(() => {});
 
           console.log('[PushManager] Triggering PushNotifications.register()...');
           await PushNotifications.register();
           console.log('[PushManager] PushNotifications.register() call completed');
+          fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'register_called', timestamp: new Date().toISOString() }) }).catch(() => {});
 
           // Listen for registration success
           PushNotifications.addListener('registration', async (token) => {
-            console.log('[PushManager] Native push registration token event triggered! Token:', token.value);
+            console.log('[PushManager] Native push registration token event triggered! Token:', token.value.substring(0, 20) + '...');
+            fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'apns_token_received', tokenPrefix: token.value.substring(0, 20), timestamp: new Date().toISOString() }) }).catch(() => {});
             
             const platform = (window as any).Capacitor.getPlatform();
             let finalToken = token.value;
@@ -92,6 +98,7 @@ export default function PushManager() {
 
           PushNotifications.addListener('registrationError', (error) => {
             console.error('[PushManager] Native registration error:', JSON.stringify(error));
+            fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'registration_error', error: JSON.stringify(error), timestamp: new Date().toISOString() }) }).catch(() => {});
           });
 
           // Handle incoming notifications
