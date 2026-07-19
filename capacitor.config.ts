@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
     allowNavigation: ['lumobites.net']
   },
   ios: {
-    contentInset: 'always',
+    contentInset: 'never',
     backgroundColor: '#ffffff',
     limitsNavigationsToAppBoundDomains: false
   }
