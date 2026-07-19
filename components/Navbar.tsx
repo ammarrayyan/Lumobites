@@ -91,17 +91,11 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       const isOwnerEmail = initialEmail.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || initialEmail.toLowerCase().trim() === 'reviewer@lumobites.net';
       if (isOwnerEmail) return true;
     }
-    return getInitialIsPro();
+    return false;
   });
-  const [isSignedIn, setIsSignedIn] = useState(() => {
-    if (initialEmail) return true;
-    return getInitialIsSignedIn();
-  });
-  const [proEmail, setProEmail] = useState(() => {
-    if (initialEmail) return initialEmail;
-    return getInitialProEmail();
-  });
-  const [sitterEmail, setSitterEmail] = useState(getInitialSitterEmail);
+  const [isSignedIn, setIsSignedIn] = useState(!!initialEmail);
+  const [proEmail, setProEmail] = useState(initialEmail);
+  const [sitterEmail, setSitterEmail] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -574,7 +568,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               />
             )}
             
-            {!isPro && (
+            {!isSignedIn && (
               <>
                 {/* Desktop only - simplified */}
                 <div className="hidden md:flex flex-col items-center relative group">
