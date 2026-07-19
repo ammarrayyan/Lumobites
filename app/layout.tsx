@@ -77,14 +77,20 @@ export default async function RootLayout({
           `}
         </Script>
       </head>
-      <body className={inter.className} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <body className={inter.className}>
         <TermsModal />
         <PwaRegister />
         <PushManager />
         <PwaSplashScreen />
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
-        <div className="pt-[72px] pb-24 lg:pb-0 min-h-[calc(100dvh-72px)] flex flex-col justify-between">
+        <div 
+          className="pb-24 lg:pb-0 min-h-[calc(100dvh-72px)] flex flex-col justify-between"
+          style={{
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
+          }}
+        >
           <div className="flex-grow">
             {children}
           </div>

@@ -45,7 +45,12 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: var(--text-body);
   line-height: 1.6 !important;
-  padding-top: var(--sat);
+}
+
+@media (max-width: 1023px) {
+  .floating-qr-btn {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 96px) !important;
+  }
 }
 
 .body-text, p {

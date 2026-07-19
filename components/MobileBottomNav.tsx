@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
       className="lg:hidden px-2 flex items-center justify-evenly w-[calc(100%-32px)] max-w-[420px] h-[68px]"
       style={{
         position: 'fixed',
-        bottom: '20px',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 9999,
