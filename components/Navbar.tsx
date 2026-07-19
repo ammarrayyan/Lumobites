@@ -447,7 +447,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     <nav 
       className="fixed top-0 left-0 right-0 z-50 border-b border-[#EEEEEE]"
       style={{ 
-        paddingTop: 'max(env(safe-area-inset-top), 44px)',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
         backgroundColor: 'white',
         boxShadow: '0 1px 10px rgba(0,0,0,0.08)'
       }}
