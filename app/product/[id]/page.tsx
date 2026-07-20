@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '280px' }}>
       {/* Header */}
-      <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 30, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4' }}>
+      <header style={{ backgroundColor: '#FFFFFF', position: 'sticky', top: 'calc(env(safe-area-inset-top, 0px) + 72px)', zIndex: 30, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4' }}>
         <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B5E3C', flexShrink: 0 }}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '24px', height: '24px' }}>
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />

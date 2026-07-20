@@ -94,7 +94,7 @@ export default function GalleryClient() {
   return (
     <div className="min-h-screen bg-[#FAF6F4]">
       {/* Header */}
-      <div className="bg-white border-b border-[#E8DDD4] sticky top-0 z-30">
+      <div className="bg-white border-b border-[#E8DDD4] sticky top-[calc(env(safe-area-inset-top,0px)+72px)] z-30">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <NextLink
             href="/"

@@ -163,7 +163,7 @@ export default function ResultsPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '48px' }}>
       {/* Header */}
-      <header style={{ backgroundColor: '#FFFFFF', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4', position: 'sticky', top: 0, zIndex: 30, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+      <header style={{ backgroundColor: '#FFFFFF', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4', position: 'sticky', top: 'calc(env(safe-area-inset-top, 0px) + 72px)', zIndex: 30, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
         <Link href="/chat" style={{ color: '#8B5E3C', textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '24px', height: '24px' }}>
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />

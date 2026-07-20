@@ -161,3 +161,11 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.sticky-secondary-header {
+  position: sticky !important;
+  top: calc(env(safe-area-inset-top, 0px) + 72px) !important;
+  z-index: 40 !important;
+  background-color: #FFFFFF !important;
+}
+
+

@@ -3428,36 +3428,36 @@ export default function PetSitting() {
         </div>
       )}
 
+      {/* Sticky Secondary Nav Bar */}
+      <div className="sticky-secondary-header border-b border-[#E8DDD4] w-full flex justify-center py-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('find')}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              activeTab === 'find'
+                ? 'bg-[#8B5E3C] text-white shadow-sm'
+                : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+            }`}
+          >
+            Find a Sitter
+          </button>
+          <button
+            onClick={() => setActiveTab('become')}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              activeTab === 'become'
+                ? 'bg-[#8B5E3C] text-white shadow-sm'
+                : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+            }`}
+          >
+            Become a Pet Sitter
+          </button>
+        </div>
+      </div>
+
       <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
         <div className="text-center mb-10">
           <h1 className="text-2xl md:text-5xl font-black text-[#4A3E3D] mb-4">Lumo Bites Pet Sitting</h1>
           <p className="text-[#8B5E3C] font-medium text-sm md:text-lg">Connect with trusted, local pet sitters in your community.</p>
-        </div>
-
-        {/* Custom Tabs */}
-        <div className="flex justify-center mb-8 border-b border-[#E8DDD4] pb-2 w-full">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('find')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                activeTab === 'find'
-                  ? 'bg-[#8B5E3C] text-white shadow-sm'
-                  : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-              }`}
-            >
-              Find a Sitter
-            </button>
-            <button
-              onClick={() => setActiveTab('become')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                activeTab === 'become'
-                  ? 'bg-[#8B5E3C] text-white shadow-sm'
-                  : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-              }`}
-            >
-              Become a Pet Sitter
-            </button>
-          </div>
         </div>
 
         {/* FIND A SITTER TAB */}

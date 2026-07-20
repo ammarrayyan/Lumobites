@@ -834,7 +834,7 @@ function ChatPageContent() {
           )}
 
           {/* Header */}
-          <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', padding: '16px 24px', position: 'sticky', top: 0, zIndex: 20, display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #F5EDE4' }}>
+          <header style={{ backgroundColor: '#FFFFFF', padding: '16px 24px', position: 'sticky', top: 'calc(env(safe-area-inset-top, 0px) + 72px)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #F5EDE4' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <button
                 onClick={() => { setFlow('selection'); }}
