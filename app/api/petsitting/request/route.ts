@@ -9,6 +9,15 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Add this as first line inside POST handler
+    await supabaseAdmin.from('push_logs').insert({
+      email: 'DEBUG_REQUEST_START',
+      success: 0,
+      failed: 0,
+      error: 'Request handler started'
+    }).catch(() => {})
+
     console.log('=== REQUEST BODY ===');
     console.log(JSON.stringify(body, null, 2));
 
@@ -315,6 +324,14 @@ formatting, or emojis. Keep it clean, professional and digital.`
     try {
       console.log('=== ABOUT TO SEND PUSH ===')
       console.log('Sitter email:', sitter.email)
+      
+      await supabaseAdmin.from('push_logs').insert({
+        email: sitter.email,
+        success: 0,
+        failed: 0,
+        error: 'ABOUT_TO_SEND_PUSH'
+      }).catch(() => {})
+
       await sendPushNotification(
         sitter.email,
         'New Booking Request! 🐾',
