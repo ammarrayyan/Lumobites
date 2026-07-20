@@ -9,13 +9,15 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   if (!admin.apps.length) {
     console.log('❌ Firebase Admin not initialized');
-    await supabaseAdmin.from('push_logs').insert({
-      email,
-      success: 0,
-      failed: 0,
-      error: 'Firebase Admin not initialized',
-      created_at: new Date().toISOString()
-    }).catch(() => {});
+    try {
+      await supabaseAdmin.from('push_logs').insert({
+        email,
+        success: 0,
+        failed: 0,
+        error: 'Firebase Admin not initialized',
+        created_at: new Date().toISOString()
+      });
+    } catch (e) {}
     return;
   }
   console.log('✅ Firebase Admin initialized');
@@ -34,13 +36,15 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   if (!tokens || tokens.length === 0) {
     console.log('❌ No tokens found for email:', email);
-    await supabaseAdmin.from('push_logs').insert({
-      email,
-      success: 0,
-      failed: 0,
-      error: `No tokens found in push_tokens table${error ? `: ${error.message}` : ''}`,
-      created_at: new Date().toISOString()
-    }).catch(() => {});
+    try {
+      await supabaseAdmin.from('push_logs').insert({
+        email,
+        success: 0,
+        failed: 0,
+        error: `No tokens found in push_tokens table${error ? `: ${error.message}` : ''}`,
+        created_at: new Date().toISOString()
+      });
+    } catch (e) {}
     return;
   }
 
@@ -64,13 +68,17 @@ export async function sendPushNotification(email: string, title: string, body: s
     console.log('Firebase result:', JSON.stringify(response));
 
     // Save result to Supabase for debugging
-    await supabaseAdmin.from('push_logs').insert({
-      email,
-      success: response.successCount,
-      failed: response.failureCount,
-      error: response.responses[0]?.error?.message || null,
-      created_at: new Date().toISOString()
-    }).catch((e) => console.error('Failed to log push to DB:', e));
+    try {
+      await supabaseAdmin.from('push_logs').insert({
+        email,
+        success: response.successCount,
+        failed: response.failureCount,
+        error: response.responses[0]?.error?.message || null,
+        created_at: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error('Failed to log push to DB:', e);
+    }
 
     response.responses.forEach((r, i) => {
       console.log(`Token ${i}: success=${r.success}`);
@@ -93,12 +101,14 @@ export async function sendPushNotification(email: string, title: string, body: s
     }
   } catch (err: any) {
     console.log('❌ Push send error:', err?.message || err);
-    await supabaseAdmin.from('push_logs').insert({
-      email,
-      success: 0,
-      failed: 1,
-      error: err?.message || String(err),
-      created_at: new Date().toISOString()
-    }).catch(() => {});
+    try {
+      await supabaseAdmin.from('push_logs').insert({
+        email,
+        success: 0,
+        failed: 1,
+        error: err?.message || String(err),
+        created_at: new Date().toISOString()
+      });
+    } catch (e) {}
   }
 }

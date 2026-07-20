@@ -11,12 +11,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Add this as first line inside POST handler
-    await supabaseAdmin.from('push_logs').insert({
-      email: 'DEBUG_REQUEST_START',
-      success: 0,
-      failed: 0,
-      error: 'Request handler started'
-    }).catch(() => {})
+    try {
+      await supabaseAdmin.from('push_logs').insert({
+        email: 'DEBUG_REQUEST_START',
+        success: 0,
+        failed: 0,
+        error: 'Request handler started'
+      });
+    } catch (e) {}
 
     console.log('=== REQUEST BODY ===');
     console.log(JSON.stringify(body, null, 2));
@@ -325,12 +327,14 @@ formatting, or emojis. Keep it clean, professional and digital.`
       console.log('=== ABOUT TO SEND PUSH ===')
       console.log('Sitter email:', sitter.email)
       
-      await supabaseAdmin.from('push_logs').insert({
-        email: sitter.email,
-        success: 0,
-        failed: 0,
-        error: 'ABOUT_TO_SEND_PUSH'
-      }).catch(() => {})
+      try {
+        await supabaseAdmin.from('push_logs').insert({
+          email: sitter.email,
+          success: 0,
+          failed: 0,
+          error: 'ABOUT_TO_SEND_PUSH'
+        });
+      } catch (e) {}
 
       await sendPushNotification(
         sitter.email,
