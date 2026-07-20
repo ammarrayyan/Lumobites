@@ -9,6 +9,13 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   if (!admin.apps.length) {
     console.log('❌ Firebase Admin not initialized');
+    await supabaseAdmin.from('push_logs').insert({
+      email,
+      success: 0,
+      failed: 0,
+      error: 'Firebase Admin not initialized',
+      created_at: new Date().toISOString()
+    }).catch(() => {});
     return;
   }
   console.log('✅ Firebase Admin initialized');
@@ -27,6 +34,13 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   if (!tokens || tokens.length === 0) {
     console.log('❌ No tokens found for email:', email);
+    await supabaseAdmin.from('push_logs').insert({
+      email,
+      success: 0,
+      failed: 0,
+      error: `No tokens found in push_tokens table${error ? `: ${error.message}` : ''}`,
+      created_at: new Date().toISOString()
+    }).catch(() => {});
     return;
   }
 
