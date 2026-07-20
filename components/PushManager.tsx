@@ -13,7 +13,8 @@ export default function PushManager() {
     console.log('[PushManager] User agent:', typeof navigator !== 'undefined' ? navigator.userAgent : 'no navigator');
     const setupPush = async () => {
       try {
-        const isCapacitor = typeof window !== 'undefined' && !!(window as any).Capacitor;
+        const isCapacitor = typeof window !== 'undefined' && 
+          (window as any).Capacitor?.isNativePlatform?.() === true;
         console.log('[PushManager] setupPush running. isCapacitor:', isCapacitor);
 
         // Send debug info to server so we can see it in Vercel logs

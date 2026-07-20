@@ -55,8 +55,10 @@ export default function NotificationBell({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        // Prevent closing if we are clicking any bell button (to avoid collision between desktop/mobile bells)
-        if (!(e.target as HTMLElement).closest('.bell-btn')) {
+        // Prevent closing if we are clicking any bell button or inside any bell dropdown
+        // (to avoid collision between desktop/mobile bells rendering simultaneously)
+        const target = e.target as HTMLElement;
+        if (!target.closest('.bell-btn') && !target.closest('.bell-dropdown')) {
           setIsOpen(false);
         }
       }
@@ -160,7 +162,7 @@ export default function NotificationBell({
 
       {isOpen && (
         <div 
-          className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-left"
+          className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-left bell-dropdown"
           style={{
             top: '100%',
             zIndex: 40
