@@ -78,6 +78,18 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
+        {/* Status bar background - solid white */}
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 'env(safe-area-inset-top, 0px)',
+            backgroundColor: '#ffffff',
+            zIndex: 9999
+          }} 
+        />
         <TermsModal />
         <PwaRegister />
         <PushManager />
