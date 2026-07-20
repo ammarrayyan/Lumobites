@@ -827,6 +827,17 @@ export default function PetSitting() {
           behavior: 'smooth',
           block: 'center' 
         });
+
+        // Clean up URL search parameters and hash to prevent scrolling on page refresh
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+
+        // Remove the highlight border/ring after 3 seconds
+        const clearTimer = setTimeout(() => {
+          setHighlightedBookingId(null);
+        }, 3000);
+
+        return () => clearTimeout(clearTimer);
       }, 500);
       return () => clearTimeout(timer);
     }
