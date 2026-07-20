@@ -541,18 +541,17 @@ function ChatPageContent() {
     return 100;
   };
 
-  const progress = getProgressPercentage(step);
+          const progress = getProgressPercentage(step);
 
   return (
     <div 
-      className="px-5 pb-10 w-full"
+      className="px-5 pb-10 w-full pt-[52px] md:pt-0"
       style={{ 
         minHeight: '100vh', 
         backgroundColor: '#FDFAF7', 
         display: 'flex', 
         flexDirection: 'column', 
-        alignItems: 'center',
-        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
+        alignItems: 'center'
       }}
     >
       <MobileFoodNav />

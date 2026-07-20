@@ -374,10 +374,9 @@ export default function RecallsPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#FDFAF7]" 
+      className="min-h-screen bg-[#FDFAF7] pt-[52px] md:pt-0" 
       style={{ 
-        fontFamily: 'Inter, -apple-system, sans-serif',
-        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
+        fontFamily: 'Inter, -apple-system, sans-serif'
       }}
     >
 

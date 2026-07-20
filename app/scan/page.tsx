@@ -931,10 +931,7 @@ function ScanPageContent() {
 
   return (
     <div 
-      className="min-h-screen bg-[#FDFAF7] pb-12"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
-      }}
+      className="min-h-screen bg-[#FDFAF7] pb-12 pt-[52px] md:pt-0"
     >
             <MobileFoodNav />
 

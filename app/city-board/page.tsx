@@ -369,10 +369,7 @@ export default function CityBoardPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#F5F0E8] font-sans flex flex-col relative"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
-      }}
+      className="min-h-screen bg-[#F5F0E8] font-sans flex flex-col relative pt-[52px] md:pt-0"
     >
             <MobileCommunityNav />
 
