@@ -87,7 +87,7 @@ export default async function RootLayout({
             right: 0,
             height: 'env(safe-area-inset-top, 0px)',
             backgroundColor: '#ffffff',
-            zIndex: 9999
+            zIndex: 999999
           }} 
         />
         <TermsModal />
