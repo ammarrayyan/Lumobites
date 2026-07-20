@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { Resend } from 'resend'
+import twilio from 'twilio'
 
 // Admin triggers this manually first for testing
 // Later will be scheduled via Vercel Cron
@@ -12,6 +13,12 @@ export async function POST(request: Request) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY || 're_123')
+  const accountSid = process.env.TWILIO_ACCOUNT_SID
+  const authToken = process.env.TWILIO_AUTH_TOKEN
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER
+
+  const hasTwilio = !!(accountSid && authToken && fromNumber)
+  const twilioClient = hasTwilio ? twilio(accountSid, authToken) : null
   let aiCallCount = 0
   const MAX_AI_CALLS = 100 // Hard cap
   const results = []
@@ -160,6 +167,24 @@ export async function POST(request: Request) {
           });
         } catch (err) {
           console.error('[Run Pet Matches] Notification insert error:', err);
+        }
+
+        // Send SMS notification if opted-in
+        if (lostPet.contact_phone && lostPet.notify_matches) {
+          if (twilioClient && fromNumber) {
+            try {
+              await twilioClient.messages.create({
+                body: "Lumo Bites: A possible match was found for your lost pet! Check lumobites.net/lost-pets for details. Msg&Data rates may apply. Reply STOP to unsubscribe.",
+                from: fromNumber,
+                to: lostPet.contact_phone.trim()
+              });
+              console.log(`[Run Pet Matches] SMS notification sent to ${lostPet.contact_phone}`);
+            } catch (smsErr: any) {
+              console.error('[Run Pet Matches] Twilio SMS error:', smsErr.message || smsErr);
+            }
+          } else {
+            console.warn('[Run Pet Matches] Twilio is not configured. Skipping SMS.');
+          }
         }
 
         // Update notification count
