@@ -27,8 +27,17 @@ export default function NotificationBell({
   setIsOpen: (open: boolean) => void;
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showMarkConfirm, setShowMarkConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShowClearConfirm(false);
+      setShowMarkConfirm(false);
+    }
+  }, [isOpen]);
 
   const fetchNotifications = async () => {
     if (!email) return;
@@ -83,8 +92,6 @@ export default function NotificationBell({
   }, [toast]);
 
   const handleNotificationClick = (notification: Notification) => {
-    console.log('[NotificationBell] Clicked notification:', notification);
-    alert('Clicked notification link: ' + notification.link + ' | email: ' + email);
     // Navigate immediately
     setIsOpen(false);
 
@@ -113,8 +120,6 @@ export default function NotificationBell({
   };
 
   const markAllAsRead = async () => {
-    console.log('[NotificationBell] Mark all as read called, email:', email);
-    alert('Mark all read called, email: ' + email);
     try {
       const normalizedEmail = email.trim().toLowerCase();
       await fetch('/api/notifications', {
@@ -129,8 +134,6 @@ export default function NotificationBell({
   };
 
   const clearAllNotifications = async () => {
-    console.log('[NotificationBell] Clear all called, email:', email);
-    alert('Clear all called, email: ' + email);
     try {
       const normalizedEmail = email.trim().toLowerCase();
       await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}`, {
@@ -168,26 +171,66 @@ export default function NotificationBell({
             zIndex: 40
           }}
         >
-          <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-            <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
-            <div className="flex gap-2">
-              {unreadCount > 0 && (
-                <button 
-                  onClick={markAllAsRead}
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                >
-                  <Check size={12} /> Mark read
-                </button>
-              )}
-              {notifications.length > 0 && (
-                <button 
-                  onClick={clearAllNotifications}
-                  className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
+          <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 min-h-[46px]">
+            {showMarkConfirm ? (
+              <div className="flex items-center justify-between w-full animate-fade-in">
+                <span className="text-xs font-bold text-gray-700">Mark all as read?</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { markAllAsRead(); setShowMarkConfirm(false); }}
+                    className="text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
+                  >
+                    Yes
+                  </button>
+                  <button 
+                    onClick={() => setShowMarkConfirm(false)}
+                    className="text-[11px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : showClearConfirm ? (
+              <div className="flex items-center justify-between w-full animate-fade-in">
+                <span className="text-xs font-bold text-red-600">Clear all notifications?</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => { clearAllNotifications(); setShowClearConfirm(false); }}
+                    className="text-[11px] bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
+                  >
+                    Yes
+                  </button>
+                  <button 
+                    onClick={() => setShowClearConfirm(false)}
+                    className="text-[11px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
+                <div className="flex gap-2">
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={() => { setShowMarkConfirm(true); setShowClearConfirm(false); }}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                    >
+                      <Check size={12} /> Mark read
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={() => { setShowClearConfirm(true); setShowMarkConfirm(false); }}
+                      className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
           
           <div className="max-h-[400px] overflow-y-auto">
@@ -225,8 +268,6 @@ export default function NotificationBell({
           <div className="p-2 border-t border-gray-100 bg-gray-50/50 text-center">
             <button 
               onClick={() => {
-                console.log('[NotificationBell] See all activity clicked');
-                alert('See all activity clicked');
                 setIsOpen(false);
                 router.push('/petsitting');
               }}
