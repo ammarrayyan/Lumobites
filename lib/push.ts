@@ -49,6 +49,15 @@ export async function sendPushNotification(email: string, title: string, body: s
     const response = await admin.messaging().sendEachForMulticast(message);
     console.log('Firebase result:', JSON.stringify(response));
 
+    // Save result to Supabase for debugging
+    await supabaseAdmin.from('push_logs').insert({
+      email,
+      success: response.successCount,
+      failed: response.failureCount,
+      error: response.responses[0]?.error?.message || null,
+      created_at: new Date().toISOString()
+    }).catch((e) => console.error('Failed to log push to DB:', e));
+
     response.responses.forEach((r, i) => {
       console.log(`Token ${i}: success=${r.success}`);
       if (!r.success) {
@@ -70,5 +79,12 @@ export async function sendPushNotification(email: string, title: string, body: s
     }
   } catch (err: any) {
     console.log('❌ Push send error:', err?.message || err);
+    await supabaseAdmin.from('push_logs').insert({
+      email,
+      success: 0,
+      failed: 1,
+      error: err?.message || String(err),
+      created_at: new Date().toISOString()
+    }).catch(() => {});
   }
 }
