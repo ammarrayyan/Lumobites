@@ -229,6 +229,10 @@ export default function PostLostPet() {
       setError('Please provide the last seen location.');
       return;
     }
+    if (notifyMatches && !contactPhone.trim()) {
+      setError('Please provide a phone number if you would like to receive match notifications.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -541,12 +545,13 @@ export default function PostLostPet() {
                   type="checkbox"
                   id="notify_matches"
                   name="notify_matches"
-                  checked={notifyMatches}
+                  checked={notifyMatches && contactPhone.trim() !== ''}
+                  disabled={contactPhone.trim() === ''}
                   onChange={(e) => setNotifyMatches(e.target.checked)}
-                  className="mt-1"
+                  className="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <label htmlFor="notify_matches" className="text-sm text-gray-600">
-                  Notify me when a possible match is found nearby
+                <label htmlFor="notify_matches" className={`text-sm ${contactPhone.trim() === '' ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600'}`}>
+                  Notify me when a possible match is found nearby (requires phone number)
                   <span className="text-xs text-gray-400 block mt-0.5">
                     We'll only notify you for strong matches (70%+ similarity) within 10 miles. Max 3 alerts per day.
                   </span>
