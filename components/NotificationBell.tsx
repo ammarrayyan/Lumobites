@@ -81,6 +81,8 @@ export default function NotificationBell({
   }, [toast]);
 
   const handleNotificationClick = (notification: Notification) => {
+    console.log('[NotificationBell] Clicked notification:', notification);
+    alert('Clicked notification link: ' + notification.link + ' | email: ' + email);
     // Navigate immediately
     setIsOpen(false);
 
@@ -109,6 +111,8 @@ export default function NotificationBell({
   };
 
   const markAllAsRead = async () => {
+    console.log('[NotificationBell] Mark all as read called, email:', email);
+    alert('Mark all read called, email: ' + email);
     try {
       const normalizedEmail = email.trim().toLowerCase();
       await fetch('/api/notifications', {
@@ -123,6 +127,8 @@ export default function NotificationBell({
   };
 
   const clearAllNotifications = async () => {
+    console.log('[NotificationBell] Clear all called, email:', email);
+    alert('Clear all called, email: ' + email);
     try {
       const normalizedEmail = email.trim().toLowerCase();
       await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}`, {
@@ -217,6 +223,8 @@ export default function NotificationBell({
           <div className="p-2 border-t border-gray-100 bg-gray-50/50 text-center">
             <button 
               onClick={() => {
+                console.log('[NotificationBell] See all activity clicked');
+                alert('See all activity clicked');
                 setIsOpen(false);
                 router.push('/petsitting');
               }}
