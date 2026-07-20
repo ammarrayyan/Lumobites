@@ -95,17 +95,12 @@ export default function NotificationBell({
     // Navigate immediately
     setIsOpen(false);
 
-    // If booking was cancelled — show message, no navigation
-    if (notification.type === 'booking_cancelled') {
-      alert('This booking was cancelled — no further action needed.');
-      return;
-    }
-
     if (notification.link) {
       router.push(notification.link);
     } else {
       router.push('/petsitting');
     }
+    router.refresh();
 
     // Mark as read in background (don't await)
     fetch('/api/notifications', {

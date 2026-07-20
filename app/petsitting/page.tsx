@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import ChatModal from '@/components/ChatModal';
@@ -312,7 +313,7 @@ const formatPhoneNumber = (value: string) => {
   return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
 };
 
-export default function PetSitting() {
+export function PetSittingContent() {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
   const [ownerSubTab, setOwnerSubTab] = useState<'search' | 'dashboard'>('search');
 
@@ -768,15 +769,22 @@ export default function PetSitting() {
     };
     window.addEventListener('storage', onStorage);
 
-    // Set activeTab and filters from URL search params or hash
-    const params = new URLSearchParams(window.location.search);
-    const section = params.get('section');
-    const statusParam = params.get('status');
-    const tabParam = params.get('tab');
-    const bookingId = params.get('booking');
-    const chatId = params.get('chat');
+    return () => {
+      window.removeEventListener('lumo-pro-update', initializeSession);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
-    if (tabParam === 'sitter' || params.get('tab') === 'become' || window.location.hash === '#become' || section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
+  // Listen for search parameters changes to support in-page navigation (e.g. notification clicks)
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const bookingId = searchParams.get('booking');
+    const chatId = searchParams.get('chat');
+    const section = searchParams.get('section');
+    const statusParam = searchParams.get('status');
+
+    if (tabParam === 'sitter' || searchParams.get('tab') === 'become' || section === 'requests' || section === 'sitter-dashboard' || section === 'sitter-requests') {
       setActiveTab('become');
       if (section === 'requests') {
         setProfilePreviewMode(true);
@@ -802,12 +810,7 @@ export default function PetSitting() {
       setRequestFilter(statusParam);
       setHistoryFilter(statusParam);
     }
-
-    return () => {
-      window.removeEventListener('lumo-pro-update', initializeSession);
-      window.removeEventListener('storage', onStorage);
-    };
-  }, []);
+  }, [searchParams]);
 
   // Automatically fetch owner's booking history and pets whenever their email is authenticated
   useEffect(() => {
@@ -7467,5 +7470,18 @@ export default function PetSitting() {
 
       </div>
     </div>
+  );
+}
+
+export default function PetSitting() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FDFAF7] flex flex-col items-center justify-center gap-2.5">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B5E3C]" />
+        <span className="text-sm font-bold text-[#8B5E3C] tracking-wide">Loading Sitter Directory...</span>
+      </div>
+    }>
+      <PetSittingContent />
+    </Suspense>
   );
 }
