@@ -135,22 +135,48 @@ export default function Home() {
       {/* MOBILE QUICK ACCESS BUTTONS */}
       <section className="md:hidden w-full px-6 pb-8">
         <div className="flex flex-col gap-3">
-          <Link href="/petsitting" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] text-[#664333] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-sm hover:shadow-md transition-all cursor-pointer">
-              <PawPrint className="w-5 h-5 text-[#C27353]" />
-              <span>Find a Pet Sitter</span>
-            </div>
-          </Link>
-          <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] text-[#3B5237] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-sm hover:shadow-md transition-all cursor-pointer">
-              <HomeIcon className="w-5 h-5 text-[#63825D]" />
-              <span>Become a Pet Sitter</span>
-            </div>
-          </Link>
+          {/* 1. Post or Find Lost Pet (Primary CTA) */}
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
-            <div className="w-full min-h-[56px] bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] text-[#3B5461] font-bold rounded-2xl flex items-center justify-center gap-3 px-4 shadow-sm hover:shadow-md transition-all cursor-pointer">
-              <MapPin className="w-5 h-5 text-[#517685]" />
-              <span>Post or Find Lost Pet</span>
+            <div 
+              style={{
+                fontFamily: 'Georgia, serif',
+                boxShadow: '0 4px 10px rgba(163, 76, 55, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+              }}
+              className="w-full min-h-[64px] bg-[#A34C37] border border-[#8F3B27] text-white font-bold rounded-xl flex items-center justify-center gap-3 px-5 hover:bg-[#92402E] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <PawPrint className="w-5 h-5 text-white/90" />
+              <span className="w-px h-5 bg-white/30" />
+              <span className="text-base font-extrabold tracking-wide">Post or Find Lost Pet</span>
+            </div>
+          </Link>
+
+          {/* 2. Find a Pet Sitter */}
+          <Link href="/petsitting" style={{ textDecoration: 'none' }}>
+            <div 
+              style={{
+                fontFamily: 'Georgia, serif',
+                boxShadow: '0 4px 10px rgba(44, 71, 57, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
+              }}
+              className="w-full min-h-[58px] bg-[#2C4739] border border-[#1F3329] text-white font-bold rounded-xl flex items-center justify-center gap-3 px-5 hover:bg-[#233A2E] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <PawPrint className="w-4 h-4 text-white/80" />
+              <span className="w-px h-4 bg-white/20" />
+              <span className="text-[15px] font-bold">Find a Pet Sitter</span>
+            </div>
+          </Link>
+
+          {/* 3. Become a Pet Sitter */}
+          <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
+            <div 
+              style={{
+                fontFamily: 'Georgia, serif',
+                boxShadow: '0 2px 6px rgba(74, 54, 41, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+              }}
+              className="w-full min-h-[58px] bg-[#F8F3EC] border border-[#D8CBBF] text-[#4A3629] font-bold rounded-xl flex items-center justify-center gap-3 px-5 hover:bg-[#EFE7DC] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <PawPrint className="w-4 h-4 text-[#8B6E58]" />
+              <span className="w-px h-4 bg-[#D8CBBF]" />
+              <span className="text-[15px] font-bold">Become a Pet Sitter</span>
             </div>
           </Link>
         </div>
