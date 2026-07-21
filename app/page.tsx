@@ -140,12 +140,12 @@ export default function Home() {
             <div 
               style={{
                 fontFamily: 'Georgia, serif',
-                boxShadow: '0 2px 6px rgba(92, 50, 37, 0.06)'
+                boxShadow: '0 2px 4px rgba(92, 50, 37, 0.04)'
               }}
-              className="min-h-[48px] px-6 bg-[#F3E1DC] border border-[#E6C4BC] text-[#5C3225] font-semibold rounded-lg flex items-center justify-center gap-2 hover:bg-[#EBD7D2] active:scale-[0.98] transition-all cursor-pointer"
+              className="w-[260px] min-h-[46px] px-4 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
             >
-              <PawPrint style={{ width: '18px', height: '18px' }} className="text-[#8F5545]" />
-              <span className="text-sm font-bold tracking-wide">Post or Find Lost Pet</span>
+              <PawPrint className="w-4 h-4 text-[#5C4533]" />
+              <span className="text-[13.5px] tracking-wide">Post or Find Lost Pet</span>
             </div>
           </Link>
 
@@ -154,12 +154,12 @@ export default function Home() {
             <div 
               style={{
                 fontFamily: 'Georgia, serif',
-                boxShadow: '0 2px 6px rgba(43, 61, 53, 0.05)'
+                boxShadow: '0 2px 4px rgba(43, 61, 53, 0.03)'
               }}
-              className="min-h-[46px] px-5 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2B3D35] font-semibold rounded-lg flex items-center justify-center gap-2 hover:bg-[#D9E5E0] active:scale-[0.98] transition-all cursor-pointer"
+              className="w-[260px] min-h-[46px] px-4 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#466355]" />
-              <span className="text-[13.5px] font-bold">Find a Pet Sitter</span>
+              <PawPrint className="w-4 h-4 text-[#5C4533]" />
+              <span className="text-[13.5px] tracking-wide">Find a Pet Sitter</span>
             </div>
           </Link>
 
@@ -168,12 +168,12 @@ export default function Home() {
             <div 
               style={{
                 fontFamily: 'Georgia, serif',
-                boxShadow: '0 2px 6px rgba(74, 54, 41, 0.04)'
+                boxShadow: '0 2px 4px rgba(74, 54, 41, 0.03)'
               }}
-              className="min-h-[46px] px-5 bg-[#F8F3EC] border border-[#EADBCE] text-[#4A3629] font-semibold rounded-lg flex items-center justify-center gap-2 hover:bg-[#EFE7DC] active:scale-[0.98] transition-all cursor-pointer"
+              className="w-[260px] min-h-[46px] px-4 bg-[#F8F3EC] border border-[#EADBCE] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#8B6E58]" />
-              <span className="text-[13.5px] font-bold">Become a Pet Sitter</span>
+              <PawPrint className="w-4 h-4 text-[#5C4533]" />
+              <span className="text-[13.5px] tracking-wide">Become a Pet Sitter</span>
             </div>
           </Link>
         </div>
