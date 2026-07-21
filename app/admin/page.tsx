@@ -12,12 +12,13 @@ import RequestsManagement from '@/components/admin/RequestsManagement';
 import TwinGalleryManagement from '@/components/admin/TwinGalleryManagement';
 import AffiliatesManagement from '@/components/admin/AffiliatesManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
+import BroadcastManagement from '@/components/admin/BroadcastManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -373,6 +374,16 @@ export default function AdminPage() {
           >
             Outreach
           </button>
+          <button
+            onClick={() => setActiveTab('broadcast')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'broadcast'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            Broadcast
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -387,6 +398,7 @@ export default function AdminPage() {
           {activeTab === 'twin-gallery' && <TwinGalleryManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'affiliates' && <AffiliatesManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'reports' && <ReportsManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'broadcast' && <BroadcastManagement adminKey={password} onUnauthorized={handleLogout} />}
           
           {activeTab === 'pet-matching' && (
             <div className="space-y-6">
