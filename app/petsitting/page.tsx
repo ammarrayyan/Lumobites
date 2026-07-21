@@ -792,6 +792,7 @@ export function PetSittingContent() {
     } else if (tabParam === 'owner' || section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
       setActiveTab('find');
       setOwnerActiveTab('bookings');
+      setOwnerSubTab('dashboard');
       if ((tabParam === 'bookings' || tabParam === 'pets')) {
         setOwnerActiveTab(tabParam as 'bookings' | 'pets');
       }
@@ -980,6 +981,7 @@ export function PetSittingContent() {
       } else if (section === 'history' || section === 'owner-dashboard' || section === 'owner-bookings') {
         setActiveTab('find');
         setOwnerActiveTab('bookings');
+        setOwnerSubTab('dashboard');
         if (tabParam === 'bookings' || tabParam === 'pets') {
           setOwnerActiveTab(tabParam as 'bookings' | 'pets');
         }
