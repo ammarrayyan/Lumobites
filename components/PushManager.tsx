@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { app, getToken, onMessage, getMessaging } from '@/lib/firebase';
 
 export default function PushManager() {
+  const router = useRouter();
   useEffect(() => {
     console.log('[PushManager] *** MOUNTING ***');
     console.log('[PushManager] Platform check:', 
@@ -100,6 +102,17 @@ export default function PushManager() {
           // Handle incoming notifications
           PushNotifications.addListener('pushNotificationReceived', (notification) => {
             console.log('[PushManager] Native push notification received:', notification);
+          });
+
+          // Handle notification click / action
+          PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+            console.log('[PushManager] Native push notification action performed:', action);
+            const data = action.notification.data;
+            const link = data?.link;
+            if (link) {
+              console.log('[PushManager] Redirecting tapped notification to link:', link);
+              router.push(link);
+            }
           });
 
           console.log('[PushManager] Triggering PushNotifications.register()...');
