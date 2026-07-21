@@ -808,7 +808,7 @@ function ChatPageContent() {
       )}
 
       {flow === 'questions' && (
-        <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px' }}>
+        <div style={{ width: '100%', maxWidth: '400px', height: 'calc(100dvh - 140px)', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px' }}>
           {/* Returning User Banner */}
           {returnBanner && step === 0 && (
             <div style={{ background: '#F5EDE4', borderBottom: '1px solid #E8D5C0', padding: '14px 20px' }}>
