@@ -51,11 +51,6 @@ export default function PushManager() {
 
           fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'permission_granted', receive: permStatus.receive, timestamp: new Date().toISOString() }) }).catch(() => {});
 
-          console.log('[PushManager] Triggering PushNotifications.register()...');
-          await PushNotifications.register();
-          console.log('[PushManager] PushNotifications.register() call completed');
-          fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'register_called', timestamp: new Date().toISOString() }) }).catch(() => {});
-
           // Listen for registration success
           PushNotifications.addListener('registration', async (token) => {
             console.log('[PushManager] Native push registration token event triggered! Token:', token.value.substring(0, 20) + '...');
@@ -106,6 +101,11 @@ export default function PushManager() {
           PushNotifications.addListener('pushNotificationReceived', (notification) => {
             console.log('[PushManager] Native push notification received:', notification);
           });
+
+          console.log('[PushManager] Triggering PushNotifications.register()...');
+          await PushNotifications.register();
+          console.log('[PushManager] PushNotifications.register() call completed');
+          fetch('/api/push/debug', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'register_called', timestamp: new Date().toISOString() }) }).catch(() => {});
 
         } else if ('serviceWorker' in navigator && 'PushManager' in window) {
           console.log('[PushManager] Web push environment detected');
