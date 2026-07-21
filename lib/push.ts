@@ -79,15 +79,19 @@ export async function sendPushNotification(email: string, title: string, body: s
 
   try {
     const response = await admin.messaging().sendEachForMulticast(message);
-    console.log('Firebase result:', JSON.stringify(response));
+    console.log('Full Firebase response:', JSON.stringify(response, null, 2));
 
-    // Save result to Supabase for debugging
+    // Save full response details to push_logs
     try {
       await supabaseAdmin.from('push_logs').insert({
         email,
         success: response.successCount,
         failed: response.failureCount,
-        error: response.responses[0]?.error?.message || null,
+        error: JSON.stringify(response.responses.map(r => ({
+          success: r.success,
+          messageId: r.messageId || null,
+          error: r.error ? { code: r.error.code, message: r.error.message } : null
+        }))),
         created_at: new Date().toISOString()
       });
     } catch (e) {
