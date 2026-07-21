@@ -139,7 +139,6 @@ export default function Home() {
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
             <div 
               style={{
-                fontFamily: 'Georgia, serif',
                 boxShadow: '0 2px 4px rgba(92, 50, 37, 0.04)'
               }}
               className="w-[260px] min-h-[46px] px-4 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
@@ -153,7 +152,6 @@ export default function Home() {
           <Link href="/petsitting" style={{ textDecoration: 'none' }}>
             <div 
               style={{
-                fontFamily: 'Georgia, serif',
                 boxShadow: '0 2px 4px rgba(43, 61, 53, 0.03)'
               }}
               className="w-[260px] min-h-[46px] px-4 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
@@ -167,7 +165,6 @@ export default function Home() {
           <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
             <div 
               style={{
-                fontFamily: 'Georgia, serif',
                 boxShadow: '0 2px 4px rgba(74, 54, 41, 0.03)'
               }}
               className="w-[260px] min-h-[46px] px-4 bg-[#F8F3EC] border border-[#EADBCE] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
