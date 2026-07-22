@@ -88,6 +88,35 @@ export default function ChatModal({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
+  // Lock background body scroll when chat modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
+  // Track visualViewport height on mobile to keep modal stable when software keyboard opens
+  useEffect(() => {
+    if (!isOpen) return;
+    const updateViewportHeight = () => {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      }
+    };
+    updateViewportHeight();
+    window.visualViewport?.addEventListener('resize', updateViewportHeight);
+    window.visualViewport?.addEventListener('scroll', updateViewportHeight);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateViewportHeight);
+      window.visualViewport?.removeEventListener('scroll', updateViewportHeight);
+    };
+  }, [isOpen]);
+
   const fetchMessages = useCallback(async (silent = false) => {
     if (!bookingId || !currentUserEmail) return;
     try {
@@ -186,10 +215,11 @@ export default function ChatModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 overflow-hidden"
       style={{
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
+        height: viewportHeight ? `${viewportHeight}px` : '100dvh',
+        overscrollBehavior: 'none',
+        touchAction: 'none'
       }}
     >
       {/* Backdrop */}
@@ -199,13 +229,14 @@ export default function ChatModal({
         onClick={onClose}
       />
 
-      {/* Modal — compact on mobile so no zoom needed */}
+      {/* Modal — fixed viewport height overlay */}
       <div
         className="relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
         style={{ 
-          maxHeight: '80vh',
-          height: 'min(520px, 75svh)', 
-          animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)' 
+          height: 'min(540px, 85%)',
+          maxHeight: '100%',
+          animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+          touchAction: 'auto'
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -257,10 +288,11 @@ export default function ChatModal({
         {/* ── MESSAGES ── */}
         <div
           id="chat-messages"
-          className="flex-1 overflow-y-auto py-3 px-3 space-y-[2px] flex flex-col scroll-smooth"
+          className="flex-1 overflow-y-auto py-3 px-3 space-y-[2px] flex flex-col scroll-smooth min-h-0"
           style={{ 
             background: 'linear-gradient(180deg, #f8faff 0%, #f0f2f5 100%)',
-            height: '400px'
+            overscrollBehavior: 'contain',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           {isLoading ? (
@@ -366,7 +398,7 @@ export default function ChatModal({
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-28 sm:pb-2.5">
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] sm:pb-2.5">
           <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
             newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
           }`}>
@@ -405,8 +437,8 @@ export default function ChatModal({
         {/* ── PET CARE PROFILE DRAWER ── */}
         {showPetProfile && petDetails && (
           <div 
-            className="absolute inset-x-0 bottom-0 top-[60px] bg-white z-20 flex flex-col p-4 pb-28 sm:pb-4 overflow-y-auto border-t border-gray-100"
-            style={{ animation: 'slideUp 0.2s ease-out' }}
+            className="absolute inset-x-0 bottom-0 top-[60px] bg-white z-20 flex flex-col p-4 pb-4 overflow-y-auto border-t border-gray-100"
+            style={{ animation: 'slideUp 0.2s ease-out', overscrollBehavior: 'contain' }}
           >
             <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
               <h4 className="font-black text-gray-800 text-[15px] flex items-center gap-1.5">
