@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2 } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 
@@ -235,9 +235,38 @@ function AdoptionContent() {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = () => {
-      setUploadedPhoto(reader.result as string);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          setUploadedPhoto(compressedBase64);
+        } else {
+          setUploadedPhoto(event.target?.result as string);
+        }
+      };
+      img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -740,24 +769,103 @@ function AdoptionContent() {
               <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
                 <Camera className="w-5 h-5 text-[#8B5E3C]" /> AI Photo Visual Matcher
               </h3>
-              <button onClick={() => setIsVisualModalOpen(false)} className="text-xs font-bold text-gray-400 hover:text-gray-600 cursor-pointer border-none bg-transparent">Close</button>
+              <button
+                onClick={() => {
+                  setIsVisualModalOpen(false);
+                  setUploadedPhoto(null);
+                  setVisualMatches([]);
+                  setVisualEmptyMessage('');
+                }}
+                className="text-xs font-bold text-gray-400 hover:text-gray-600 cursor-pointer border-none bg-transparent"
+              >
+                Close
+              </button>
             </div>
 
-            <p className="text-xs text-gray-500">Upload a photo of the type of pet you love to find visually similar candidates from our local shelter listings.</p>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              Upload or snap a photo of a pet you love to find visually similar adoptable candidates from local shelters.
+            </p>
 
-            <div className="space-y-3">
-              <input type="file" accept="image/*" onChange={handlePhotoUpload} className="text-xs text-gray-600" />
-              {uploadedPhoto && (
-                <img src={uploadedPhoto} alt="Uploaded target" className="w-24 h-24 rounded-2xl object-cover border border-gray-200" />
+            <div className="space-y-4">
+              {/* Hidden file inputs for Camera and Gallery */}
+              <input
+                id="visual-camera-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <input
+                id="visual-file-input"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+
+              {!uploadedPhoto ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('visual-camera-input')?.click()}
+                    className="p-4 rounded-2xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#8B5E3C] font-bold text-xs flex flex-col items-center justify-center gap-2 cursor-pointer transition-all shadow-2xs"
+                  >
+                    <Camera className="w-6 h-6 text-[#8B5E3C]" />
+                    <span>Take Photo (Camera)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('visual-file-input')?.click()}
+                    className="p-4 rounded-2xl bg-[#FAF6F0] hover:bg-[#F5EDE4] border border-gray-200 text-gray-700 font-bold text-xs flex flex-col items-center justify-center gap-2 cursor-pointer transition-all shadow-2xs"
+                  >
+                    <Upload className="w-6 h-6 text-gray-500" />
+                    <span>Choose from Library</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="relative bg-[#FAF6F0] p-3 rounded-2xl border border-gray-200 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src={uploadedPhoto} alt="Uploaded target" className="w-20 h-20 rounded-xl object-cover border border-amber-200" />
+                    <div>
+                      <p className="font-extrabold text-xs text-gray-900">Photo Attached</p>
+                      <p className="text-[11px] text-gray-500">Ready for visual AI comparison</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadedPhoto(null);
+                      setVisualMatches([]);
+                      setVisualEmptyMessage('');
+                    }}
+                    className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold border border-red-200 cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Remove
+                  </button>
+                </div>
               )}
 
               <button
                 onClick={handleRunVisualMatch}
                 disabled={!uploadedPhoto || isVisualLoading}
-                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl text-xs cursor-pointer border-none flex items-center justify-center gap-2"
+                className={`w-full font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border-none transition-all ${
+                  uploadedPhoto && !isVisualLoading
+                    ? 'bg-[#8B5E3C] hover:bg-[#734A2E] text-white cursor-pointer shadow-xs'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
               >
-                {isVisualLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                {isVisualLoading ? 'Comparing Visual Features…' : 'Find Visually Similar Pets'}
+                {isVisualLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Analyzing Visual Features…</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>{uploadedPhoto ? 'Find Visually Similar Pets' : 'Select or Take a Photo First'}</span>
+                  </>
+                )}
               </button>
             </div>
 
