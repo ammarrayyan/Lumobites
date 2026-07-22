@@ -24,9 +24,12 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [tableError, setTableError] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const fetchShelters = async () => {
     setLoading(true);
+    setTableError(null);
     try {
       const res = await fetch('/api/admin/shelters', {
         headers: { 'x-admin-key': adminKey }
@@ -34,8 +37,13 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
       if (res.ok) {
         const data = await res.json();
         setShelters(data.shelters || []);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        if (errData.error && errData.error.includes('schema cache')) {
+          setTableError("Database table 'shelters' does not exist in Supabase yet. Please execute the SQL migration script in your Supabase Dashboard SQL Editor.");
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch shelters:', err);
     } finally {
       setLoading(false);
@@ -102,6 +110,43 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
           ))}
         </div>
       </div>
+
+      {/* SQL Migration Needed Banner */}
+      {tableError && (
+        <div className="bg-amber-50 border border-amber-300 p-5 rounded-2xl space-y-3 text-amber-900 text-xs">
+          <div className="flex items-center justify-between gap-2 font-bold text-sm text-amber-900">
+            <span>⚠️ Database Table Setup Required</span>
+            <button
+              onClick={fetchShelters}
+              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-1.5 px-3 rounded-xl text-xs cursor-pointer border-none"
+            >
+              Re-check Status
+            </button>
+          </div>
+          <p className="leading-relaxed">
+            The <strong>shelters</strong>, <strong>adoption_pets</strong>, and <strong>adoption_messages</strong> tables do not exist in your live Supabase database yet. Please copy the script below and run it in your <strong>Supabase Dashboard &rarr; SQL Editor</strong>.
+          </p>
+
+          <div className="relative bg-gray-900 text-amber-300 p-4 rounded-xl font-mono text-[11px] overflow-x-auto">
+            <button
+              onClick={() => {
+                const sqlText = `CREATE TABLE IF NOT EXISTS shelters (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  org_name TEXT NOT NULL,\n  tax_id TEXT,\n  email TEXT UNIQUE NOT NULL,\n  phone TEXT,\n  address TEXT,\n  city TEXT NOT NULL,\n  state TEXT,\n  zip TEXT,\n  website TEXT,\n  status TEXT DEFAULT 'pending',\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nCREATE TABLE IF NOT EXISTS adoption_pets (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  shelter_id UUID REFERENCES shelters(id) ON DELETE CASCADE,\n  name TEXT NOT NULL,\n  species TEXT NOT NULL DEFAULT 'dog',\n  breed TEXT,\n  age TEXT NOT NULL DEFAULT 'adult',\n  size TEXT NOT NULL DEFAULT 'medium',\n  sex TEXT NOT NULL DEFAULT 'male',\n  spayed_neutered BOOLEAN DEFAULT TRUE,\n  temperament TEXT,\n  description TEXT,\n  adoption_fee TEXT,\n  adoption_process TEXT,\n  photo_urls TEXT[] DEFAULT '{}',\n  status TEXT DEFAULT 'available',\n  city TEXT NOT NULL,\n  state TEXT,\n  zip TEXT,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nCREATE TABLE IF NOT EXISTS adoption_messages (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  pet_id UUID REFERENCES adoption_pets(id) ON DELETE CASCADE,\n  shelter_id UUID REFERENCES shelters(id) ON DELETE CASCADE,\n  sender_email TEXT NOT NULL,\n  receiver_email TEXT NOT NULL,\n  message TEXT NOT NULL,\n  read BOOLEAN DEFAULT FALSE,\n  created_at TIMESTAMPTZ DEFAULT NOW()\n);`;
+                navigator.clipboard.writeText(sqlText);
+                setCopySuccess(true);
+                setTimeout(() => setCopySuccess(false), 3000);
+              }}
+              className="absolute right-3 top-3 bg-amber-600 hover:bg-amber-700 text-white font-sans text-xs font-bold py-1 px-3 rounded-lg border-none cursor-pointer"
+            >
+              {copySuccess ? '✓ Copied to Clipboard!' : 'Copy SQL Script'}
+            </button>
+            <pre className="whitespace-pre leading-relaxed">
+{`CREATE TABLE IF NOT EXISTS shelters (...);
+CREATE TABLE IF NOT EXISTS adoption_pets (...);
+CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
+            </pre>
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative max-w-md">

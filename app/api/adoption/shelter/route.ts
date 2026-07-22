@@ -67,6 +67,11 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('[Shelter API] POST error:', error);
+      if (error.code === 'PGRST205') {
+        return NextResponse.json({
+          error: "Database table 'shelters' does not exist in Supabase yet. Please run scratch/create-adoption-tables.sql in Supabase SQL Editor."
+        }, { status: 400 });
+      }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
