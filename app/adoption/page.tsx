@@ -107,6 +107,36 @@ function AdoptionContent() {
   // Listings data
   const [localPets, setLocalPets] = useState<PetListing[]>([]);
   const [petfinderPets, setPetfinderPets] = useState<PetListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [petfinderFallbackMessage, setPetfinderFallbackMessage] = useState('');
+
+  // AI Matcher Modals
+  const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
+  const [lifestylePrompt, setLifestylePrompt] = useState('');
+  const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
+  const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
+
+  const [isVisualModalOpen, setIsVisualModalOpen] = useState(false);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [visualMatches, setVisualMatches] = useState<any[]>([]);
+  const [isVisualLoading, setIsVisualLoading] = useState(false);
+  const [visualEmptyMessage, setVisualEmptyMessage] = useState('');
+
+  // Shelter Registration Modal & Persistent User Shelter
+  const [isShelterRegOpen, setIsShelterRegOpen] = useState(false);
+  const [shelterFormData, setShelterFormData] = useState({
+    org_name: '',
+    tax_id: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    website: ''
+  });
+  const [shelterRegSuccess, setShelterRegSuccess] = useState(false);
+  const [userShelter, setUserShelter] = useState<{ status: string; org_name: string } | null>(null);
   const fetchListings = async () => {
     setLoading(true);
     try {
