@@ -226,8 +226,12 @@ function AdoptionContent() {
         body: JSON.stringify(shelterFormData)
       });
       if (res.ok) {
+        const data = await res.json();
         setShelterRegSuccess(true);
         localStorage.setItem('lumo_shelter_email', shelterFormData.email);
+        if (data.shelter) {
+          setUserShelter(data.shelter);
+        }
         setTimeout(() => {
           setShelterRegSuccess(false);
           setIsShelterRegOpen(false);
@@ -275,15 +279,45 @@ function AdoptionContent() {
           {/* PERSISTENT SHELTER ENTRY POINT LINK */}
           <div className="pt-3">
             {userShelter ? (
-              <Link
-                href="/adoption/shelter/dashboard"
-                className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
-              >
-                <Building2 className="w-4 h-4 text-[#8B5E3C]" />
-                {userShelter.status === 'approved' && `Go to ${userShelter.org_name} Dashboard →`}
-                {userShelter.status === 'pending' && `${userShelter.org_name} Application Under Review →`}
-                {userShelter.status === 'rejected' && `${userShelter.org_name} Status Update (Not Approved) →`}
-              </Link>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {userShelter.status === 'approved' && (
+                  <Link
+                    href="/adoption/shelter/dashboard"
+                    className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
+                  >
+                    <Building2 className="w-4 h-4 text-[#8B5E3C]" /> Go to {userShelter.org_name} Dashboard &rarr;
+                  </Link>
+                )}
+                {userShelter.status === 'pending' && (
+                  <Link
+                    href="/adoption/shelter/dashboard"
+                    className="text-xs font-bold text-amber-800 hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
+                  >
+                    <Building2 className="w-4 h-4 text-amber-800" /> {userShelter.org_name} Application Under Review &rarr;
+                  </Link>
+                )}
+                {userShelter.status === 'rejected' && (
+                  <button
+                    onClick={() => {
+                      setShelterFormData({
+                        org_name: userShelter.org_name || '',
+                        tax_id: (userShelter as any).tax_id || '',
+                        email: (userShelter as any).email || '',
+                        phone: (userShelter as any).phone || '',
+                        address: (userShelter as any).address || '',
+                        city: (userShelter as any).city || '',
+                        state: (userShelter as any).state || '',
+                        zip: (userShelter as any).zip || '',
+                        website: (userShelter as any).website || ''
+                      });
+                      setIsShelterRegOpen(true);
+                    }}
+                    className="text-xs font-bold text-red-700 hover:underline flex items-center justify-center gap-1.5 mx-auto bg-red-50 border border-red-200 py-2 px-4 rounded-xl transition-all shadow-2xs cursor-pointer"
+                  >
+                    <Building2 className="w-4 h-4 text-red-600" /> {userShelter.org_name} Application Not Approved — Click to Update & Re-apply &rarr;
+                  </button>
+                )}
+              </div>
             ) : (
               <button
                 onClick={() => setIsShelterRegOpen(true)}

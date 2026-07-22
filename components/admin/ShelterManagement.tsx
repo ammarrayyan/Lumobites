@@ -15,6 +15,7 @@ interface Shelter {
   zip?: string;
   website?: string;
   org_photo_url?: string;
+  rejection_reason?: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }
@@ -27,6 +28,8 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [tableError, setTableError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const fetchShelters = async () => {
     setLoading(true);
@@ -55,7 +58,7 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
     fetchShelters();
   }, [adminKey]);
 
-  const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
+  const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected', reason?: string) => {
     setProcessingId(id);
     try {
       const res = await fetch('/api/admin/shelters', {
@@ -64,10 +67,12 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
           'Content-Type': 'application/json',
           'x-admin-key': adminKey
         },
-        body: JSON.stringify({ id, status })
+        body: JSON.stringify({ id, status, rejection_reason: reason })
       });
       if (res.ok) {
-        setShelters(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+        setShelters(prev => prev.map(s => s.id === id ? { ...s, status, rejection_reason: reason } : s));
+        setRejectingId(null);
+        setRejectionReason('');
       }
     } catch (err) {
       alert('Failed to update status');
@@ -209,6 +214,11 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
                       </div>
                     )}
                   </div>
+                  {shelter.status === 'rejected' && shelter.rejection_reason && (
+                    <div className="bg-red-50 p-2.5 rounded-xl border border-red-200 text-xs text-red-900 mt-2">
+                      <span className="font-bold">Rejection Note:</span> "{shelter.rejection_reason}"
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -225,7 +235,7 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
                 )}
                 {shelter.status !== 'rejected' && (
                   <button
-                    onClick={() => handleUpdateStatus(shelter.id, 'rejected')}
+                    onClick={() => setRejectingId(shelter.id)}
                     disabled={processingId === shelter.id}
                     className="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs py-2 px-4 rounded-xl transition-all border border-red-200 flex items-center gap-1.5 cursor-pointer"
                   >
@@ -235,6 +245,41 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* REJECTION REASON MODAL */}
+      {rejectingId && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4">
+            <h3 className="text-base font-extrabold text-gray-900">Reject Shelter Application</h3>
+            <p className="text-xs text-gray-500">Provide an optional reason/note for the shelter explaining why their application was not approved.</p>
+
+            <textarea
+              rows={3}
+              placeholder="e.g. Invalid EIN tax ID, unverified website domain…"
+              value={rejectionReason}
+              onChange={e => setRejectionReason(e.target.value)}
+              className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-[#8B5E3C]"
+            />
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus(rejectingId, 'rejected', rejectionReason)}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs"
+              >
+                Confirm Rejection
+              </button>
+              <button
+                type="button"
+                onClick={() => { setRejectingId(null); setRejectionReason(''); }}
+                className="bg-gray-100 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

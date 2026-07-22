@@ -33,14 +33,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id, status } = await request.json();
+    const { id, status, rejection_reason } = await request.json();
     if (!id || !status) {
       return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
     }
 
+    const updatePayload: any = { status };
+    if (status === 'rejected') {
+      updatePayload.rejection_reason = rejection_reason || 'Application did not meet verification criteria.';
+    } else if (status === 'approved') {
+      updatePayload.rejection_reason = null;
+    }
+
     const { data: shelter, error } = await supabaseAdmin
       .from('shelters')
-      .update({ status })
+      .update(updatePayload)
       .eq('id', id)
       .select('*')
       .single();
@@ -53,7 +60,7 @@ export async function POST(request: NextRequest) {
       if (status === 'approved') {
         sendShelterApprovalEmail(shelter.email, shelter.org_name);
       } else if (status === 'rejected') {
-        sendShelterRejectionEmail(shelter.email, shelter.org_name);
+        sendShelterRejectionEmail(shelter.email, shelter.org_name, shelter.rejection_reason);
       }
     }
 

@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS shelters (
   zip TEXT,
   website TEXT,
   org_photo_url TEXT,
+  rejection_reason TEXT,
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -62,6 +62,46 @@ export default function ShelterDashboardPage() {
     city: ''
   });
 
+  // Re-application Modal State
+  const [isReapplyOpen, setIsReapplyOpen] = useState(false);
+  const [reapplyFormData, setReapplyFormData] = useState({
+    org_name: '',
+    tax_id: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    website: '',
+    org_photo_url: ''
+  });
+  const [reapplySubmitting, setReapplySubmitting] = useState(false);
+
+  const handleReapplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReapplySubmitting(true);
+    try {
+      const res = await fetch('/api/adoption/shelter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reapplyFormData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setShelterInfo(data.shelter);
+        setIsReapplyOpen(false);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(`Re-submission failed: ${err.error || 'Check details'}`);
+      }
+    } catch {
+      alert('Network error while re-submitting.');
+    } finally {
+      setReapplySubmitting(false);
+    }
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
@@ -466,17 +506,47 @@ export default function ShelterDashboardPage() {
             <p className="text-xs text-gray-600 leading-relaxed">
               Thank you for your interest. At this time, the application for <strong>{shelterInfo.org_name}</strong> was not approved for partner posting access.
             </p>
-            <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-xs text-red-900 text-left space-y-1">
+            
+            {shelterInfo.rejection_reason && (
+              <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-xs text-red-900 text-left space-y-1">
+                <p className="font-bold text-red-800">Reason Provided by Reviewer:</p>
+                <p className="italic">"{shelterInfo.rejection_reason}"</p>
+              </div>
+            )}
+
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs text-gray-700 text-left space-y-1">
               <p><strong>Organization:</strong> {shelterInfo.org_name}</p>
               <p><strong>Email:</strong> {shelterInfo.email}</p>
-              <p><strong>Status:</strong> <span className="bg-red-200 text-red-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">NOT APPROVED</span></p>
+              <p><strong>Status:</strong> <span className="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">NOT APPROVED</span></p>
             </div>
+
             <p className="text-xs text-gray-500">
-              If you believe this is an error or would like to re-submit updated organization credentials, you may re-apply from the public adoption page.
+              You may update your organization information or credentials and re-submit your application for review anytime below.
             </p>
-            <div className="pt-2">
-              <Link href="/adoption" className="text-xs font-bold text-[#8B5E3C] hover:underline">
-                Re-apply on Adoption Page &rarr;
+
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setReapplyFormData({
+                    org_name: shelterInfo.org_name || '',
+                    tax_id: shelterInfo.tax_id || '',
+                    email: shelterInfo.email || '',
+                    phone: shelterInfo.phone || '',
+                    address: shelterInfo.address || '',
+                    city: shelterInfo.city || '',
+                    state: shelterInfo.state || '',
+                    zip: shelterInfo.zip || '',
+                    website: shelterInfo.website || '',
+                    org_photo_url: shelterInfo.org_photo_url || ''
+                  });
+                  setIsReapplyOpen(true);
+                }}
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-4 rounded-xl transition-all border-none cursor-pointer text-xs"
+              >
+                Update Details & Re-apply Now &rarr;
+              </button>
+              <Link href="/adoption" className="text-xs font-bold text-gray-500 hover:underline">
+                &larr; Return to Public Adoption Page
               </Link>
             </div>
           </div>
@@ -946,6 +1016,100 @@ export default function ShelterDashboardPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* RE-APPLICATION FORM MODAL */}
+      {isReapplyOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-extrabold text-gray-900">Update Info & Re-apply</h3>
+            <p className="text-xs text-gray-500">Update your organization details below to re-submit your application for admin review.</p>
+
+            <form onSubmit={handleReapplySubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Organization Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={reapplyFormData.org_name}
+                  onChange={e => setReapplyFormData({ ...reapplyFormData, org_name: e.target.value })}
+                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-[#8B5E3C]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Email *</label>
+                  <input
+                    type="email"
+                    required
+                    readOnly
+                    value={reapplyFormData.email}
+                    className="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-gray-500 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Tax ID / EIN</label>
+                  <input
+                    type="text"
+                    value={reapplyFormData.tax_id}
+                    onChange={e => setReapplyFormData({ ...reapplyFormData, tax_id: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={reapplyFormData.phone}
+                    onChange={e => setReapplyFormData({ ...reapplyFormData, phone: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">City *</label>
+                  <input
+                    type="text"
+                    required
+                    value={reapplyFormData.city}
+                    onChange={e => setReapplyFormData({ ...reapplyFormData, city: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-gray-700 block mb-1">Website / Social URL</label>
+                <input
+                  type="text"
+                  value={reapplyFormData.website}
+                  onChange={e => setReapplyFormData({ ...reapplyFormData, website: e.target.value })}
+                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-3">
+                <button
+                  type="submit"
+                  disabled={reapplySubmitting}
+                  className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all border-none cursor-pointer text-xs"
+                >
+                  {reapplySubmitting ? 'Submitting…' : 'Submit Re-application'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsReapplyOpen(false)}
+                  className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl border-none cursor-pointer text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

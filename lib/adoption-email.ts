@@ -90,7 +90,7 @@ export async function sendShelterApprovalEmail(toEmail: string, orgName: string)
 /**
  * 3. On Shelter Application Rejected
  */
-export async function sendShelterRejectionEmail(toEmail: string, orgName: string) {
+export async function sendShelterRejectionEmail(toEmail: string, orgName: string, rejectionReason?: string) {
   if (!process.env.RESEND_API_KEY) return;
   try {
     const subject = `Update on your Lumo Bites Shelter Application`;
@@ -99,8 +99,15 @@ export async function sendShelterRejectionEmail(toEmail: string, orgName: string
       preheader: `Update regarding your shelter application for ${orgName}`,
       body: `
         <h1 style="${emailStyles.h1}">Shelter Application Update</h1>
-        <p style="${emailStyles.p}">Thank you for submitting an application for <strong>${orgName}</strong> to join Lumo Bites.</p>
-        <p style="${emailStyles.p}">At this time, we are unable to approve your application. If you believe this is an error or would like to submit additional organization credentials, please reply to support.</p>
+        <p style="${emailStyles.p}">Thank you for submitting an application for <strong>${orgName}</strong> to join Lumo Bites as a rescue partner.</p>
+        <p style="${emailStyles.p}">At this time, we are unable to approve your application.</p>
+        
+        ${rejectionReason ? emailStyles.infoBox(`
+          <p style="${emailStyles.pSmall}"><strong>Reviewer Note:</strong></p>
+          <p style="font-size:14px;line-height:1.6;color:#854D0E;margin:0;">"${rejectionReason}"</p>
+        `) : ''}
+
+        <p style="${emailStyles.p}">If you believe this is an error or would like to update your organization credentials and re-apply, you may re-submit your details anytime directly on Lumo Bites.</p>
       `
     });
 
