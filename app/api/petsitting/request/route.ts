@@ -409,7 +409,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabaseAdmin
       .from('sitting_requests')
-      .select('status')
+      .select('*, sitters(id, name, email, phone_number, city)')
       .eq('id', id)
       .single();
 
@@ -422,7 +422,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, status: data.status });
+    return NextResponse.json({ success: true, status: data.status, booking: data });
   } catch (err: any) {
     console.error('[Request GET] Error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

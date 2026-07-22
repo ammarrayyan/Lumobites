@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         type: 'new_message',
         title: `New message from ${senderName}`,
         message: `New message about ${petName}'s booking`,
-        link: `/petsitting?chat=${booking_id}`,
+        link: `/petsitting/messages/${booking_id}`,
         read: false
       });
 
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         receiver_email,
         `New message from ${senderName}`,
         `New message about ${petName}'s booking`,
-        `/petsitting?chat=${booking_id}#messages`
+        `/petsitting/messages/${booking_id}`
       );
     } catch (err) {
       console.error('[Messages API] Push notification error:', err);

@@ -847,50 +847,19 @@ export function PetSittingContent() {
     }
   }, [highlightedBookingId, sitterRequests, ownerRequests]);
 
-  // Automatically open chat modal if 'chat' or 'booking_id' booking ID is present in URL query params
+  // Automatically redirect to chat page if 'chat' or 'booking_id' booking ID is present in URL query params
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const chatBookingId = params.get('chat') || (params.get('section') === 'messages' ? params.get('booking_id') : null);
     if (!chatBookingId) return;
 
-    // Find the booking request in either sitterRequests or ownerRequests
-    const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
-    if (foundSitterReq) {
-      if (foundSitterReq.status === 'cancelled') {
-        // Silently strip the stale chat/booking params — booking is cancelled, nothing to open
-        const newUrl = window.location.pathname + window.location.hash;
-        window.history.replaceState({ path: newUrl }, '', newUrl);
-        return;
-      }
-      setActiveChatBooking(foundSitterReq);
-      setActiveChatRole('sitter');
-      setChatModalOpen(true);
-      
-      // Clean up search param without page reload so we don't reopen it on reload
-      const newUrl = window.location.pathname + window.location.hash;
-      window.history.replaceState({ path: newUrl }, '', newUrl);
-      return;
-    }
+    // Clean up search param without full reload
+    const newUrl = window.location.pathname + window.location.hash;
+    window.history.replaceState({ path: newUrl }, '', newUrl);
 
-    const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
-    if (foundOwnerReq) {
-      if (foundOwnerReq.status === 'cancelled') {
-        // Silently strip the stale chat/booking params — booking is cancelled, nothing to open
-        const newUrl = window.location.pathname + window.location.hash;
-        window.history.replaceState({ path: newUrl }, '', newUrl);
-        return;
-      }
-      setActiveChatBooking(foundOwnerReq);
-      setActiveChatRole('owner');
-      setChatModalOpen(true);
-      
-      // Clean up search param without page reload
-      const newUrl = window.location.pathname + window.location.hash;
-      window.history.replaceState({ path: newUrl }, '', newUrl);
-      return;
-    }
-  }, [sitterRequests, ownerRequests]);
+    router.push(`/petsitting/messages/${chatBookingId}`);
+  }, [router]);
 
   // Handle open_chat_booking_id from localStorage
   useEffect(() => {
@@ -902,38 +871,9 @@ export function PetSittingContent() {
     const chatBookingId = localStorage.getItem('open_chat_booking_id');
     if (!chatBookingId) return;
 
-    // Find the booking request in either sitterRequests or ownerRequests
-    const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
-    if (foundSitterReq) {
-      localStorage.removeItem('open_chat_booking_id');
-      if (foundSitterReq.status === 'cancelled') {
-        alert('This booking has been cancelled');
-        // Navigate to booking history instead of opening chat
-        setActiveTab('become'); // sitter dashboard
-        return;
-      }
-      setActiveChatBooking(foundSitterReq);
-      setActiveChatRole('sitter');
-      setChatModalOpen(true);
-      return;
-    }
-
-    const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
-    if (foundOwnerReq) {
-      localStorage.removeItem('open_chat_booking_id');
-      if (foundOwnerReq.status === 'cancelled') {
-        alert('This booking has been cancelled');
-        // Navigate to booking history instead of opening chat
-        setActiveTab('find');
-        setOwnerActiveTab('bookings');
-        return;
-      }
-      setActiveChatBooking(foundOwnerReq);
-      setActiveChatRole('owner');
-      setChatModalOpen(true);
-      return;
-    }
-  }, [sitterRequests, ownerRequests]);
+    localStorage.removeItem('open_chat_booking_id');
+    router.push(`/petsitting/messages/${chatBookingId}`);
+  }, [router]);
 
   // Handle URL section scroll on load
   useEffect(() => {
@@ -989,32 +929,8 @@ export function PetSittingContent() {
       } else if (section === 'messages') {
         const chatBookingId = localStorage.getItem('open_chat_booking_id');
         if (chatBookingId) {
-          const foundSitterReq = sitterRequests.find(r => r.id === chatBookingId);
-          if (foundSitterReq) {
-            localStorage.removeItem('open_chat_booking_id');
-            if (foundSitterReq.status === 'cancelled') {
-              alert('This booking has been cancelled');
-              setActiveTab('become');
-              return;
-            }
-            setActiveChatBooking(foundSitterReq);
-            setActiveChatRole('sitter');
-            setChatModalOpen(true);
-          } else {
-            const foundOwnerReq = ownerRequests.find(r => r.id === chatBookingId);
-            if (foundOwnerReq) {
-              localStorage.removeItem('open_chat_booking_id');
-              if (foundOwnerReq.status === 'cancelled') {
-                alert('This booking has been cancelled');
-                setActiveTab('find');
-                setOwnerActiveTab('bookings');
-                return;
-              }
-              setActiveChatBooking(foundOwnerReq);
-              setActiveChatRole('owner');
-              setChatModalOpen(true);
-            }
-          }
+          localStorage.removeItem('open_chat_booking_id');
+          router.push(`/petsitting/messages/${chatBookingId}`);
         }
       }
     };
@@ -4235,7 +4151,7 @@ export function PetSittingContent() {
                             {req.status === 'accepted' && (
                               <div className="px-4 pb-4">
                                 <button
-                                  onClick={() => { setActiveChatBooking(req); setActiveChatRole('owner'); setChatModalOpen(true); }}
+                                  onClick={() => router.push(`/petsitting/messages/${req.id}`)}
                                   className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
                                 >
                                   <MessageSquare className="w-4 h-4 text-white" /> Message Sitter
