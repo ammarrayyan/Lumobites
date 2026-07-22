@@ -302,7 +302,7 @@ export default function ShelterDashboardPage() {
   };
 
   // Bulk operations
-  const handleBulkAction = async (action: 'adopted' | 'delete') => {
+  const handleBulkAction = async (action: 'available' | 'pending' | 'adopted' | 'delete') => {
     if (selectedIds.length === 0) return;
     if (action === 'delete' && !confirm(`Delete ${selectedIds.length} selected listings?`)) return;
 
@@ -313,7 +313,7 @@ export default function ShelterDashboardPage() {
         body: JSON.stringify({
           ids: selectedIds,
           action: action === 'delete' ? 'delete' : undefined,
-          status: action === 'adopted' ? 'adopted' : undefined
+          status: action !== 'delete' ? action : undefined
         })
       });
       if (res.ok) {
@@ -626,9 +626,21 @@ export default function ShelterDashboardPage() {
 
         {/* BULK ACTIONS BAR */}
         {selectedIds.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl flex items-center justify-between text-xs text-amber-900 animate-fade-in">
+          <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 animate-fade-in">
             <span className="font-bold">{selectedIds.length} listings selected</span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleBulkAction('available')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+              >
+                Mark Available
+              </button>
+              <button
+                onClick={() => handleBulkAction('pending')}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+              >
+                Mark Pending
+              </button>
               <button
                 onClick={() => handleBulkAction('adopted')}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
@@ -671,7 +683,7 @@ export default function ShelterDashboardPage() {
               <span className="flex-1">Pet Listing</span>
               <span className="w-24 text-center hidden sm:inline">Status</span>
               <span className="w-28 text-center hidden md:inline">Posted</span>
-              <span className="w-48 text-right">Quick Actions</span>
+              <span className="w-56 text-right">Quick Actions</span>
             </div>
 
             <div className="divide-y divide-gray-100">
@@ -709,28 +721,35 @@ export default function ShelterDashboardPage() {
                     {getDaysAgo(pet.created_at)}
                   </div>
 
-                  {/* Actions */}
-                  <div className="w-48 flex items-center justify-end gap-1.5 shrink-0">
-                    {pet.status !== 'adopted' && (
-                      <button
-                        onClick={() => handleStatusChange(pet.id, 'adopted')}
-                        title="Mark Adopted"
-                        className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold cursor-pointer border border-emerald-200"
-                      >
-                        Adopted
-                      </button>
-                    )}
+                  {/* Actions & Status Selector */}
+                  <div className="w-56 flex items-center justify-end gap-1.5 shrink-0">
+                    <select
+                      value={pet.status}
+                      onChange={e => handleStatusChange(pet.id, e.target.value as 'available' | 'pending' | 'adopted')}
+                      className={`text-xs font-bold py-1.5 px-2 rounded-xl border cursor-pointer focus:outline-none transition-all ${
+                        pet.status === 'adopted'
+                          ? 'bg-purple-50 text-purple-800 border-purple-200'
+                          : pet.status === 'pending'
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      }`}
+                      title="Change status"
+                    >
+                      <option value="available">Available</option>
+                      <option value="pending">Pending</option>
+                      <option value="adopted">Adopted</option>
+                    </select>
                     <button
                       onClick={() => handleOpenEditModal(pet)}
                       title="Edit"
-                      className="p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold cursor-pointer border-none"
+                      className="p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold cursor-pointer border-none shrink-0"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeletePet(pet.id)}
                       title="Delete"
-                      className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold cursor-pointer border-none"
+                      className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold cursor-pointer border-none shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

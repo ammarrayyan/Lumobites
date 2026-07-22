@@ -75,6 +75,8 @@ export async function GET(request: NextRequest) {
     }
     if (status) {
       query = query.eq('status', status);
+    } else if (!shelter_id) {
+      query = query.eq('status', 'available');
     }
     if (species && species !== 'all') {
       query = query.ilike('species', `%${species}%`);
