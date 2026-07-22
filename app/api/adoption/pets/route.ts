@@ -131,6 +131,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields (shelter_id, name, species)' }, { status: 400 });
     }
 
+    // Verify shelter status server-side — only approved shelters can post pets
+    const { data: shelterOrg } = await supabaseAdmin
+      .from('shelters')
+      .select('status, org_name')
+      .eq('id', shelter_id)
+      .single();
+
+    if (!shelterOrg) {
+      return NextResponse.json({ error: 'Shelter organization not found.' }, { status: 404 });
+    }
+
+    if (shelterOrg.status !== 'approved') {
+      return NextResponse.json({
+        error: `Posting denied: Shelter '${shelterOrg.org_name}' status is currently '${shelterOrg.status}'. Only approved rescue partners can post adoptable pets.`
+      }, { status: 403 });
+    }
+
     const finalPhotoUrls = await processPhotoUrls(photo_urls || []);
 
     const { data: pet, error } = await supabaseAdmin

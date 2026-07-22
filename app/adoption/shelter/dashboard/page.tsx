@@ -380,13 +380,110 @@ export default function ShelterDashboardPage() {
 
           <button
             onClick={handleOpenAddModal}
-            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+            disabled={shelterInfo?.status !== 'approved'}
+            className={`py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 border-none text-xs ${
+              shelterInfo?.status === 'approved'
+                ? 'bg-[#8B5E3C] hover:bg-[#734A2E] text-white cursor-pointer'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
           >
             <Plus className="w-4 h-4" /> Post a Pet for Adoption
           </button>
         </div>
 
-        {/* STATUS TABS */}
+        {/* ACCESS CONTROL BRANCHING */}
+        {!shelterInfo ? (
+          <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-md mx-auto space-y-4">
+            <Building2 className="w-12 h-12 text-[#8B5E3C] mx-auto" />
+            <h2 className="text-lg font-black text-gray-900">Shelter Partner Access</h2>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              Enter your registered shelter organization email to access your management dashboard.
+            </p>
+
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                const input = (e.target as any).email.value.trim();
+                if (input) {
+                  localStorage.setItem('lumo_shelter_email', input);
+                  setShelterEmail(input);
+                  fetchShelterDetails(input);
+                }
+              }}
+              className="space-y-3 pt-2"
+            >
+              <input
+                name="email"
+                type="email"
+                required
+                placeholder="shelter@example.org"
+                defaultValue={shelterEmail}
+                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-[#8B5E3C]"
+              />
+              <button
+                type="submit"
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all cursor-pointer border-none text-xs"
+              >
+                Access Dashboard
+              </button>
+            </form>
+
+            <div className="pt-3 border-t border-gray-100">
+              <Link href="/adoption" className="text-xs text-[#8B5E3C] font-bold hover:underline">
+                Not a rescue partner yet? Apply on the Adoption page &rarr;
+              </Link>
+            </div>
+          </div>
+        ) : shelterInfo.status === 'pending' ? (
+          <div className="bg-white p-8 md:p-12 rounded-3xl border border-amber-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 mx-auto font-bold">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-black text-gray-900">Application Under Review</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Your application for <strong>{shelterInfo.org_name}</strong> has been received and is currently under review by our team.
+            </p>
+            <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-1">
+              <p><strong>Registered Email:</strong> {shelterInfo.email}</p>
+              <p><strong>Location:</strong> {shelterInfo.city}{shelterInfo.state ? `, ${shelterInfo.state}` : ''}</p>
+              <p><strong>Status:</strong> <span className="bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">PENDING APPROVAL</span></p>
+            </div>
+            <p className="text-xs text-gray-400">
+              We will send an email confirmation to <strong>{shelterInfo.email}</strong> as soon as your account is approved. Posting pets will be enabled once approved.
+            </p>
+            <div className="pt-2">
+              <Link href="/adoption" className="text-xs font-bold text-[#8B5E3C] hover:underline">
+                &larr; Return to Adoption Page
+              </Link>
+            </div>
+          </div>
+        ) : shelterInfo.status === 'rejected' ? (
+          <div className="bg-white p-8 md:p-12 rounded-3xl border border-red-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mx-auto font-bold">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-black text-gray-900">Application Not Approved</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Thank you for your interest. At this time, the application for <strong>{shelterInfo.org_name}</strong> was not approved for partner posting access.
+            </p>
+            <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-xs text-red-900 text-left space-y-1">
+              <p><strong>Organization:</strong> {shelterInfo.org_name}</p>
+              <p><strong>Email:</strong> {shelterInfo.email}</p>
+              <p><strong>Status:</strong> <span className="bg-red-200 text-red-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">NOT APPROVED</span></p>
+            </div>
+            <p className="text-xs text-gray-500">
+              If you believe this is an error or would like to re-submit updated organization credentials, you may re-apply from the public adoption page.
+            </p>
+            <div className="pt-2">
+              <Link href="/adoption" className="text-xs font-bold text-[#8B5E3C] hover:underline">
+                Re-apply on Adoption Page &rarr;
+              </Link>
+            </div>
+          </div>
+        ) : (
+          /* APPROVED SHELTER DASHBOARD (FULL ACCESS) */
+          <>
+            {/* STATUS TABS */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
           <div className="flex gap-2">
             {(['available', 'pending', 'adopted', 'all'] as const).map(tab => (
@@ -580,6 +677,8 @@ export default function ShelterDashboardPage() {
               ))}
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
 

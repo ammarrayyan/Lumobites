@@ -67,8 +67,24 @@ function AdoptionContent() {
   });
   const [shelterRegSuccess, setShelterRegSuccess] = useState(false);
 
+  // Persistent Shelter Check
+  const [userShelter, setUserShelter] = useState<{ status: string; org_name: string } | null>(null);
+
   useEffect(() => {
     fetchListings();
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
+      if (email) {
+        fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && data.shelter) {
+              setUserShelter(data.shelter);
+            }
+          })
+          .catch(() => {});
+      }
+    }
   }, [species, age, size, citySearch]);
 
   const fetchListings = async () => {
@@ -256,14 +272,26 @@ function AdoptionContent() {
             </button>
           </div>
 
-          {/* SECONDARY SHELTER SIGNUP LINK */}
+          {/* PERSISTENT SHELTER ENTRY POINT LINK */}
           <div className="pt-3">
-            <button
-              onClick={() => setIsShelterRegOpen(true)}
-              className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer border-none bg-transparent"
-            >
-              <Building2 className="w-4 h-4" /> Are you a shelter or rescue? List your pets here &rarr;
-            </button>
+            {userShelter ? (
+              <Link
+                href="/adoption/shelter/dashboard"
+                className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
+              >
+                <Building2 className="w-4 h-4 text-[#8B5E3C]" />
+                {userShelter.status === 'approved' && `Go to ${userShelter.org_name} Dashboard →`}
+                {userShelter.status === 'pending' && `${userShelter.org_name} Application Under Review →`}
+                {userShelter.status === 'rejected' && `${userShelter.org_name} Status Update (Not Approved) →`}
+              </Link>
+            ) : (
+              <button
+                onClick={() => setIsShelterRegOpen(true)}
+                className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer border-none bg-transparent"
+              >
+                <Building2 className="w-4 h-4" /> Are you a shelter or rescue? List your pets here &rarr;
+              </button>
+            )}
           </div>
         </div>
       </section>
