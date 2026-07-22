@@ -1,5 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { randomUUID } from 'crypto';
+
+async function processPhotoUrls(incomingUrls: string[]): Promise<string[]> {
+  if (!incomingUrls || !Array.isArray(incomingUrls)) return [];
+  const processed: string[] = [];
+
+  for (const url of incomingUrls) {
+    if (url && typeof url === 'string' && url.startsWith('data:image/')) {
+      try {
+        const matches = url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+          const base64Data = matches[2];
+          const buffer = Buffer.from(base64Data, 'base64');
+          const fileName = `adoption_${Date.now()}_${randomUUID()}.${fileExt}`;
+
+          const { error: uploadError } = await supabaseAdmin.storage
+            .from('adoption-pets')
+            .upload(fileName, buffer, {
+              contentType: `image/${matches[1]}`,
+              upsert: true
+            });
+
+          if (!uploadError) {
+            const { data: publicUrlData } = supabaseAdmin.storage
+              .from('adoption-pets')
+              .getPublicUrl(fileName);
+            processed.push(publicUrlData.publicUrl);
+            continue;
+          }
+
+          // Fallback to lost-pets bucket
+          const { error: fallbackErr } = await supabaseAdmin.storage
+            .from('lost-pets')
+            .upload(fileName, buffer, {
+              contentType: `image/${matches[1]}`,
+              upsert: true
+            });
+
+          if (!fallbackErr) {
+            const { data: publicUrlData } = supabaseAdmin.storage
+              .from('lost-pets')
+              .getPublicUrl(fileName);
+            processed.push(publicUrlData.publicUrl);
+            continue;
+          }
+        }
+      } catch (err) {
+        console.warn('[Adoption Pets API] Storage upload warning:', err);
+      }
+      processed.push(url);
+    } else if (url && typeof url === 'string' && url.trim() !== '') {
+      processed.push(url.trim());
+    }
+  }
+  return processed;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,6 +131,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields (shelter_id, name, species)' }, { status: 400 });
     }
 
+    const finalPhotoUrls = await processPhotoUrls(photo_urls || []);
+
     const { data: pet, error } = await supabaseAdmin
       .from('adoption_pets')
       .insert({
@@ -89,7 +148,7 @@ export async function POST(request: NextRequest) {
         description: description || '',
         adoption_fee: adoption_fee || '',
         adoption_process: adoption_process || '',
-        photo_urls: photo_urls || [],
+        photo_urls: finalPhotoUrls,
         status: 'available',
         city: city || 'Local',
         state: state || '',
@@ -134,6 +193,9 @@ export async function PATCH(request: NextRequest) {
 
     const updatePayload: any = { ...updates };
     if (status) updatePayload.status = status;
+    if (updates.photo_urls && Array.isArray(updates.photo_urls)) {
+      updatePayload.photo_urls = await processPhotoUrls(updates.photo_urls);
+    }
 
     const { data: pet, error } = await supabaseAdmin
       .from('adoption_pets')

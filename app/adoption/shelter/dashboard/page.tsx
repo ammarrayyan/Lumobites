@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare } from 'lucide-react';
+import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 
 interface ShelterPet {
@@ -146,6 +146,52 @@ export default function ShelterDashboardPage() {
     setIsModalOpen(true);
   };
 
+  const handlePhotoFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be under 10MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          if (width > height) {
+            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+          } else {
+            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const base64 = canvas.toDataURL('image/jpeg', 0.8);
+          setFormData(prev => ({
+            ...prev,
+            photo_urls: [...prev.photo_urls.filter(u => u.trim() !== ''), base64]
+          }));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photo_urls: prev.photo_urls.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSavePet = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!shelterInfo?.id) {
@@ -153,11 +199,17 @@ export default function ShelterDashboardPage() {
       return;
     }
 
+    const validPhotos = formData.photo_urls.filter(u => u.trim() !== '');
+    if (validPhotos.length === 0) {
+      alert('At least one pet photo is required before posting an adoption listing.');
+      return;
+    }
+
     try {
       const payload = {
         ...formData,
         shelter_id: shelterInfo.id,
-        photo_urls: formData.photo_urls.filter(u => u.trim() !== '')
+        photo_urls: validPhotos
       };
 
       const url = '/api/adoption/pets';
@@ -617,15 +669,82 @@ export default function ShelterDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">Photo Image URL</label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={formData.photo_urls[0] || ''}
-                  onChange={e => setFormData({ ...formData, photo_urls: [e.target.value] })}
-                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                />
+              {/* PET PHOTOS UPLOAD CONTROL */}
+              <div className="space-y-2">
+                <label className="font-bold text-gray-700 block text-xs">
+                  Pet Photos <span className="text-red-500 font-extrabold">* (At least 1 photo required)</span>
+                </label>
+                
+                {/* Photo Previews Grid */}
+                {formData.photo_urls.filter(u => u.trim() !== '').length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+                    {formData.photo_urls.filter(u => u.trim() !== '').map((url, idx) => (
+                      <div key={idx} className="relative group w-full h-24 rounded-2xl overflow-hidden border border-amber-200 bg-gray-100 shadow-xs">
+                        <img src={url} alt={`Pet preview ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(idx)}
+                          className="absolute top-1 right-1 bg-black/70 hover:bg-red-600 text-white rounded-full p-1 border-none cursor-pointer transition-all shadow-xs"
+                          title="Remove photo"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload Action Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  {/* Take Photo (Camera on Mobile) */}
+                  <label className="flex-1 min-w-[130px] bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#8B5E3C] font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
+                    <Camera className="w-4 h-4 text-[#8B5E3C]" />
+                    <span>Take Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handlePhotoFiles}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Choose from Library / Desktop File Picker */}
+                  <label className="flex-1 min-w-[130px] bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
+                    <Upload className="w-4 h-4 text-gray-500" />
+                    <span>Choose Photos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoFiles}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Optional Image URL Input */}
+                <div className="pt-1">
+                  <input
+                    type="url"
+                    placeholder="Or paste image URL (https://…) & press Enter"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) {
+                          setFormData(prev => ({
+                            ...prev,
+                            photo_urls: [...prev.photo_urls.filter(u => u.trim() !== ''), val]
+                          }));
+                          (e.target as HTMLInputElement).value = '';
+                        }
+                      }
+                    }}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">Tip: Press Enter to add pasted image URL.</p>
+                </div>
               </div>
 
               <div>
