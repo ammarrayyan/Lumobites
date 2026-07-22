@@ -173,6 +173,19 @@ export default function Home() {
               <span className="text-[13.5px] tracking-wide">Become a Pet Sitter</span>
             </div>
           </Link>
+
+          {/* 4. Find a Pet to Adopt */}
+          <Link href="/adoption" style={{ textDecoration: 'none' }}>
+            <div 
+              style={{
+                boxShadow: '0 2px 4px rgba(139, 94, 60, 0.03)'
+              }}
+              className="w-[260px] min-h-[46px] px-4 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+            >
+              <PawPrint className="w-4 h-4 text-[#5C4533]" />
+              <span className="text-[13.5px] tracking-wide">Find a Pet to Adopt</span>
+            </div>
+          </Link>
         </div>
       </section>
 

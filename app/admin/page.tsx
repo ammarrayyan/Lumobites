@@ -13,12 +13,13 @@ import TwinGalleryManagement from '@/components/admin/TwinGalleryManagement';
 import AffiliatesManagement from '@/components/admin/AffiliatesManagement';
 import ReportsManagement from '@/components/admin/ReportsManagement';
 import BroadcastManagement from '@/components/admin/BroadcastManagement';
+import ShelterManagement from '@/components/admin/ShelterManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'requests' | 'accounts' | 'lost-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -270,6 +271,16 @@ export default function AdminPage() {
             Sitter Management
           </button>
           <button
+            onClick={() => setActiveTab('shelters')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'shelters'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            Shelters & Rescues
+          </button>
+          <button
             onClick={() => setActiveTab('requests')}
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'requests'
@@ -390,6 +401,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
           {activeTab === 'stats' && <StatisticsDashboard adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'sitters' && <SitterManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'shelters' && <ShelterManagement adminKey={password} />}
           {activeTab === 'requests' && <RequestsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'accounts' && <AccountManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'lost-pets' && <LostPetsManagement adminKey={password} onUnauthorized={handleLogout} />}

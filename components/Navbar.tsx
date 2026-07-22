@@ -483,6 +483,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             Pet Sitting
           </Link>
 
+          {/* Adoption */}
+          <Link href="/adoption" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
+            <Footprints className="w-4 h-4 inline-block mr-1.5 align-middle text-[#8B5E3C]" />
+            Adoption
+          </Link>
+
           {/* Safety Check */}
           <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -736,6 +742,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
               Pet Sitting
+            </Link>
+
+            {/* Adoption (mobile) */}
+            <Link href="/adoption" onClick={() => setIsOpen(false)} className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center gap-2 text-decoration-none">
+              <Footprints className="w-4 h-4 inline-block align-middle text-[#8B5E3C]" />
+              Adoption
             </Link>
 
             <Link 

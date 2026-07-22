@@ -6,6 +6,7 @@ import PetTwinPreview from '@/components/PetTwinPreview';
 import LostPetsPreview from '@/components/LostPetsPreview';
 import PetSittingPreview from '@/components/PetSittingPreview';
 import CityBoardPreview from '@/components/CityBoardPreview';
+import AdoptionPreview from '@/components/AdoptionPreview';
 import BrandMarquee from '@/components/BrandMarquee';
 import { Compass, Sparkles, Footprints, Home as HomeIcon, MessageSquare, Target, Search, AlertTriangle, ShoppingBag } from 'lucide-react';
 
@@ -72,6 +73,9 @@ export default function ExplorePage() {
 
         {/* 4. City Board Discussion Preview */}
         <CityBoardPreview />
+
+        {/* 5. Pet Adoption Preview */}
+        <AdoptionPreview />
       </div>
 
       {/* BRAND LOGOS STRIP */}
