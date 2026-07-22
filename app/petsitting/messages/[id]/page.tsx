@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, ShieldAlert, Lock } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 
 interface Message {
@@ -267,6 +267,26 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     } catch {}
   };
 
+  if (booking?.status === 'cancelled') {
+    return (
+      <div className="min-h-screen bg-[#FDF9F5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-600">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Booking Cancelled</h2>
+        <p className="text-sm text-gray-600 max-w-md mb-6">
+          This booking has been cancelled. The conversation is no longer available.
+        </p>
+        <button
+          onClick={() => router.push('/petsitting')}
+          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Pet Sitting
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FDF9F5] flex flex-col justify-between">
       {/* ── HEADER BAR ── */}
@@ -527,43 +547,52 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
       </main>
 
       {/* ── STICKY INPUT FOOTER ── */}
-      <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 md:p-4">
-        <div className="max-w-2xl mx-auto">
-          <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2.5 ${
-            newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
-          }`}>
-            <textarea
-              ref={textareaRef}
-              value={newMessage}
-              onChange={handleTextareaChange}
-              placeholder={`Message ${displayName}…`}
-              rows={1}
-              className="flex-1 bg-transparent border-none focus:outline-none resize-none text-sm text-gray-800 placeholder-gray-400 leading-relaxed py-1"
-              style={{ maxHeight: '120px' }}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 border-none ${
-                newMessage.trim() && !isSending
-                  ? 'bg-[#8B5E3C] hover:bg-[#734A2E] active:scale-95 text-white shadow-sm cursor-pointer'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isSending
-                ? <div className="w-4 h-4 border-[2px] border-white/40 border-t-white rounded-full animate-spin" />
-                : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
-              }
-            </button>
+      {booking?.status === 'completed' ? (
+        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-4 text-center shadow-sm">
+          <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/80 py-3 px-4 rounded-xl border border-amber-200">
+            <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+            This booking has been completed. Messaging is closed.
           </div>
-          <p className="text-center text-[10px] text-gray-400 mt-2 select-none font-medium">
-            Press Enter to send &middot; Shift+Enter for line break
-          </p>
-        </div>
-      </footer>
+        </footer>
+      ) : (
+        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 md:p-4">
+          <div className="max-w-2xl mx-auto">
+            <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2.5 ${
+              newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
+            }`}>
+              <textarea
+                ref={textareaRef}
+                value={newMessage}
+                onChange={handleTextareaChange}
+                placeholder={`Message ${displayName}…`}
+                rows={1}
+                className="flex-1 bg-transparent border-none focus:outline-none resize-none text-sm text-gray-800 placeholder-gray-400 leading-relaxed py-1"
+                style={{ maxHeight: '120px' }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 border-none ${
+                  newMessage.trim() && !isSending
+                    ? 'bg-[#8B5E3C] hover:bg-[#734A2E] active:scale-95 text-white shadow-sm cursor-pointer'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isSending
+                  ? <div className="w-4 h-4 border-[2px] border-white/40 border-t-white rounded-full animate-spin" />
+                  : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
+                }
+              </button>
+            </div>
+            <p className="text-center text-[10px] text-gray-400 mt-2 select-none font-medium">
+              Press Enter to send &middot; Shift+Enter for line break
+            </p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

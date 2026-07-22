@@ -55,9 +55,13 @@ export async function POST(request: NextRequest) {
     // Fetch booking request details
     const { data: booking } = await supabaseAdmin
       .from('sitting_requests')
-      .select('owner_email, owner_name, sitter_id, pet_name, sitters(name)')
+      .select('owner_email, owner_name, sitter_id, pet_name, status, sitters(name)')
       .eq('id', booking_id)
       .single();
+
+    if (booking && (booking.status === 'cancelled' || booking.status === 'completed')) {
+      return NextResponse.json({ error: `Cannot send messages for a ${booking.status} booking` }, { status: 400 });
+    }
 
     if (!receiver_email && booking) {
       if (sender_email === booking.owner_email) {
