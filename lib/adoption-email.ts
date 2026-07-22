@@ -28,14 +28,20 @@ export async function sendShelterRegistrationEmail(toEmail: string, orgName: str
       `
     });
 
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],
       subject,
       html
     });
+
+    if (res.error) {
+      console.warn('[Adoption Email] Registration email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Adoption Email] Registration email sent successfully:', res.data?.id);
+    }
   } catch (err) {
-    console.error('[Adoption Email] Registration email failed:', err);
+    console.error('[Adoption Email] Registration email threw exception:', err);
   }
 }
 
@@ -64,14 +70,20 @@ export async function sendShelterApprovalEmail(toEmail: string, orgName: string)
       `
     });
 
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],
       subject,
       html
     });
+
+    if (res.error) {
+      console.warn('[Adoption Email] Approval email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Adoption Email] Approval email sent successfully:', res.data?.id);
+    }
   } catch (err) {
-    console.error('[Adoption Email] Approval email failed:', err);
+    console.error('[Adoption Email] Approval email threw exception:', err);
   }
 }
 
@@ -92,14 +104,20 @@ export async function sendShelterRejectionEmail(toEmail: string, orgName: string
       `
     });
 
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],
       subject,
       html
     });
+
+    if (res.error) {
+      console.warn('[Adoption Email] Rejection email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Adoption Email] Rejection email sent successfully:', res.data?.id);
+    }
   } catch (err) {
-    console.error('[Adoption Email] Rejection email failed:', err);
+    console.error('[Adoption Email] Rejection email threw exception:', err);
   }
 }
 
@@ -138,13 +156,19 @@ export async function sendAdoptionInquiryEmail(
       `
     });
 
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],
       subject,
       html
     });
+
+    if (res.error) {
+      console.warn('[Adoption Email] Inquiry email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Adoption Email] Inquiry email sent successfully:', res.data?.id);
+    }
   } catch (err) {
-    console.error('[Adoption Email] Inquiry email failed:', err);
+    console.error('[Adoption Email] Inquiry email threw exception:', err);
   }
 }
