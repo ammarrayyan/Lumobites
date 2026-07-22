@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 
@@ -35,8 +35,58 @@ function AdoptionContent() {
   const [size, setSize] = useState('all');
   const [citySearch, setCitySearch] = useState('');
 
-  // View mode toggle
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  // Inline Map & Location Autocomplete State
+  const [showMap, setShowMap] = useState(true);
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+  const [showCityOptions, setShowCityOptions] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+
+  const fetchCitySuggestions = async (input: string) => {
+    if (!input || input.trim().length < 2) {
+      setCityOptions([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(input)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCityOptions(data.options || []);
+      }
+    } catch {
+      setCityOptions([]);
+    }
+  };
+
+  const handleGPSDetect = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`/api/petsitting/geocode?latlng=${pos.coords.latitude},${pos.coords.longitude}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.city) {
+              setCitySearch(data.city);
+              setShowCityOptions(false);
+            }
+          }
+        } catch (e) {
+          console.error('Reverse geocode error:', e);
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (err) => {
+        console.error('GPS error:', err);
+        setIsLocating(false);
+        alert('Could not detect location. Please type your city name manually.');
+      }
+    );
+  };
 
   // Listings data
   const [localPets, setLocalPets] = useState<PetListing[]>([]);
@@ -374,49 +424,71 @@ function AdoptionContent() {
               <option value="medium">Medium</option>
               <option value="large">Large</option>
             </select>
-          </div>
+          </div>          <div className="relative w-full sm:w-72">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search city (e.g. Austin, TX)…"
+                value={citySearch}
+                onChange={e => {
+                  setCitySearch(e.target.value);
+                  fetchCitySuggestions(e.target.value);
+                  setShowCityOptions(true);
+                }}
+                onFocus={() => setShowCityOptions(true)}
+                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-8 pr-8 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
+              />
+              <button
+                type="button"
+                onClick={handleGPSDetect}
+                disabled={isLocating}
+                title="Detect current location"
+                className="absolute right-2 top-1.5 text-[#8B5E3C] hover:text-[#734A2E] p-1 rounded-md bg-transparent border-none cursor-pointer"
+              >
+                {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+              </button>
+            </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search by city or zip…"
-              value={citySearch}
-              onChange={e => setCitySearch(e.target.value)}
-              className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
-            />
+            {/* City Autocomplete Dropdown */}
+            {showCityOptions && cityOptions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-40 mt-1 bg-white border border-[#E8DDD4] rounded-2xl shadow-lg max-h-48 overflow-y-auto divide-y divide-gray-100 text-xs">
+                {cityOptions.map((opt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setCitySearch(opt);
+                      setShowCityOptions(false);
+                    }}
+                    className="w-full text-left p-2.5 hover:bg-amber-50 text-gray-700 font-medium cursor-pointer border-none bg-transparent flex items-center gap-1.5"
+                  >
+                    <Building2 className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
+                    <span className="truncate">{opt}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* MAIN CONTENT FEED */}
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* VIEW MODE TOGGLE TOOLBAR */}
+        {/* INLINE MAP TOGGLE BAR */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-[#E8DDD4]">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Display:</span>
-            <div className="bg-[#FAF6F0] p-1 rounded-2xl border border-gray-200 flex items-center gap-1">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border-none cursor-pointer ${
-                  viewMode === 'list'
-                    ? 'bg-[#8B5E3C] text-white shadow-2xs'
-                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" /> List View
-              </button>
-              <button
-                onClick={() => setViewMode('map')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border-none cursor-pointer ${
-                  viewMode === 'map'
-                    ? 'bg-[#8B5E3C] text-white shadow-2xs'
-                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
-                }`}
-              >
-                <MapIcon className="w-3.5 h-3.5" /> Map View
-              </button>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="bg-[#FAF6F0] hover:bg-[#F5EDE4] text-[#8B5E3C] border border-[#E8DDD4] font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
+            >
+              <MapIcon className="w-4 h-4 text-[#8B5E3C]" />
+              <span>{showMap ? 'Hide Map' : 'Show Map'}</span>
+              {showMap ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+            <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+              Interactive map pins match your selected filters below
+            </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
@@ -426,39 +498,46 @@ function AdoptionContent() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-[#8B5E3C]" />
-            <p className="text-xs text-gray-400 font-bold">Loading adoptable pets near you…</p>
-          </div>
-        ) : viewMode === 'map' ? (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
-                  <MapIcon className="w-6 h-6 text-[#8B5E3C]" /> Interactive Adoptable Pet Map
-                </h2>
-                <p className="text-xs text-gray-500">Pins match your current species, age, size, and city filters</p>
+        {/* INLINE EXPANDABLE MAP SECTION */}
+        {showMap && !loading && (
+          <section className="space-y-3 bg-white p-4 rounded-3xl border border-[#E8DDD4] shadow-2xs">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-[#8B5E3C]" /> Pet Locations Map
+              </h3>
+              <div className="flex items-center gap-3 text-[11px] font-bold">
+                <span className="flex items-center gap-1 text-[#8B5E3C]">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#8B5E3C]"></span> Lumo Bites Shelter
+                </span>
+                <span className="flex items-center gap-1 text-amber-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span> Petfinder
+                </span>
               </div>
             </div>
-
             <AdoptionPetsMap
               pets={[...localPets, ...petfinderPets]}
               citySearch={citySearch}
             />
           </section>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-[#8B5E3C]" />
+            <p className="text-xs text-gray-400 font-bold">Loading adoptable pets near you…</p>
+          </div>
         ) : (
           <>
             {/* SECTION 1: LOCAL RESCUES ON LUMO BITES */}
-            <section className="space-y-4">
+            <section className="space-y-4 bg-amber-50/50 p-5 md:p-6 rounded-3xl border border-amber-200/80 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
                     <Building2 className="w-6 h-6 text-[#8B5E3C]" /> Local Rescues on Lumo Bites
                   </h2>
-                  <p className="text-xs text-gray-500">Direct shelter listings — contact shelters directly in-app</p>
+                  <p className="text-xs text-gray-600">Direct shelter partner listings — message shelter in-app</p>
                 </div>
-                <span className="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-[#8B5E3C] text-white text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
                   {localPets.length} local pets
                 </span>
               </div>
@@ -472,9 +551,14 @@ function AdoptionContent() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {localPets.map(pet => (
-                    <div key={pet.id} className="bg-white rounded-3xl border border-[#E8DDD4] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                    <div key={pet.id} className="bg-white rounded-3xl border border-amber-200 hover:border-[#8B5E3C] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
                       <div className="p-4 space-y-3">
-                        <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-full h-48 rounded-2xl" />
+                        <div className="relative">
+                          <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-full h-48 rounded-2xl" />
+                          <span className="absolute top-2 left-2 bg-[#8B5E3C] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
+                            🏠 Lumo Bites Shelter
+                          </span>
+                        </div>
                         <div>
                           <div className="flex items-center justify-between">
                             <h3 className="font-extrabold text-base text-gray-900 truncate">{pet.name}</h3>
@@ -512,15 +596,15 @@ function AdoptionContent() {
             </section>
 
             {/* SECTION 2: MORE PETS NEARBY (VIA PETFINDER) */}
-            <section className="space-y-4 pt-6 border-t border-[#E8DDD4]">
+            <section className="space-y-4 bg-[#FAF6F0]/70 p-5 md:p-6 rounded-3xl border border-amber-300/40 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-[#8B5E3C]" /> More Pets Nearby (via Petfinder)
+                    <Heart className="w-6 h-6 text-amber-600" /> More Pets Nearby (via Petfinder)
                   </h2>
-                  <p className="text-xs text-gray-500">External partner listings — click full listing to contact rescue</p>
+                  <p className="text-xs text-gray-600">External partner listings — click full listing to contact rescue</p>
                 </div>
-                <span className="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
                   {petfinderPets.length} pets
                 </span>
               </div>
@@ -533,9 +617,14 @@ function AdoptionContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {petfinderPets.map(pet => (
-                  <div key={pet.id} className="bg-white rounded-3xl border border-[#E8DDD4] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                  <div key={pet.id} className="bg-white rounded-3xl border border-amber-200/80 hover:border-amber-500 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
                     <div className="p-4 space-y-3">
-                      <img src={pet.photo || '/placeholder-pet.png'} alt={pet.name} className="w-full h-48 rounded-2xl object-cover" />
+                      <div className="relative">
+                        <img src={pet.photo || '/placeholder-pet.png'} alt={pet.name} className="w-full h-48 rounded-2xl object-cover" />
+                        <span className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
+                          🔗 Petfinder Partner
+                        </span>
+                      </div>
                       <div>
                         <div className="flex items-center justify-between">
                           <h3 className="font-extrabold text-base text-gray-900 truncate">{pet.name}</h3>
@@ -558,7 +647,7 @@ function AdoptionContent() {
                         href={pet.url || 'https://www.petfinder.com'}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full bg-[#FAF6F0] hover:bg-[#F5EDE4] text-[#8B5E3C] font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-[#E8DDD4] no-underline transition-all"
+                        className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-amber-200 no-underline transition-all"
                       >
                         <ExternalLink className="w-4 h-4" /> View Full Listing
                       </a>
