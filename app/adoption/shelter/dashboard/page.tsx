@@ -418,17 +418,14 @@ export default function ShelterDashboardPage() {
             </div>
           </div>
 
-          <button
-            onClick={handleOpenAddModal}
-            disabled={shelterInfo?.status !== 'approved'}
-            className={`py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 border-none text-xs ${
-              shelterInfo?.status === 'approved'
-                ? 'bg-[#8B5E3C] hover:bg-[#734A2E] text-white cursor-pointer'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <Plus className="w-4 h-4" /> Post a Pet for Adoption
-          </button>
+          {shelterInfo?.status === 'approved' && (
+            <button
+              onClick={handleOpenAddModal}
+              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+            >
+              <Plus className="w-4 h-4" /> Post a Pet for Adoption
+            </button>
+          )}
         </div>
 
         {/* ACCESS CONTROL BRANCHING */}
@@ -491,11 +488,6 @@ export default function ShelterDashboardPage() {
             <p className="text-xs text-gray-400">
               We will send an email confirmation to <strong>{shelterInfo.email}</strong> as soon as your account is approved. Posting pets will be enabled once approved.
             </p>
-            <div className="pt-2">
-              <Link href="/adoption" className="text-xs font-bold text-[#8B5E3C] hover:underline">
-                &larr; Return to Adoption Page
-              </Link>
-            </div>
           </div>
         ) : shelterInfo.status === 'rejected' ? (
           <div className="bg-white p-8 md:p-12 rounded-3xl border border-red-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
