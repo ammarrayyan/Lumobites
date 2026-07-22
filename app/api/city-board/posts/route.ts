@@ -19,8 +19,42 @@ export async function GET(req: NextRequest) {
       .from('city_board_posts')
       .select('*, city_board_replies(count)');
 
+    const SYNONYM_MAP: Record<string, { terms: string[]; category?: string }> = {
+      lost: { terms: ['lost', 'found', 'missing', 'reward', 'sighting'], category: 'Lost & Found' },
+      found: { terms: ['found', 'lost', 'missing', 'reunite', 'sighting'], category: 'Lost & Found' },
+      missing: { terms: ['missing', 'lost', 'found', 'reward'], category: 'Lost & Found' },
+      sitter: { terms: ['sitter', 'sitting', 'board', 'boarding', 'walk', 'walker', 'care'], category: 'Pet Sitters' },
+      sitting: { terms: ['sitting', 'sitter', 'board', 'boarding', 'walk', 'walker', 'care'], category: 'Pet Sitters' },
+      walker: { terms: ['walker', 'walking', 'walk', 'sitter', 'sitting'], category: 'Pet Sitters' },
+      vet: { terms: ['vet', 'veterinarian', 'doctor', 'clinic', 'hospital', 'vaccine', 'shot'], category: 'Vet Recommendations' },
+      doctor: { terms: ['doctor', 'vet', 'veterinarian', 'clinic', 'hospital'], category: 'Vet Recommendations' },
+      groomer: { terms: ['groomer', 'grooming', 'wash', 'bath', 'trim', 'haircut'], category: 'Groomers' },
+      grooming: { terms: ['grooming', 'groomer', 'wash', 'bath', 'trim', 'haircut'], category: 'Groomers' },
+      food: { terms: ['food', 'diet', 'nutrition', 'kibble', 'raw', 'treat'], category: 'Diet & Nutrition' },
+      diet: { terms: ['diet', 'food', 'nutrition', 'kibble', 'raw', 'treat'], category: 'Diet & Nutrition' },
+      nutrition: { terms: ['nutrition', 'food', 'diet', 'kibble', 'raw'], category: 'Diet & Nutrition' },
+      park: { terms: ['park', 'parks', 'activity', 'play', 'trail', 'run'], category: 'Parks & Activities' },
+      activity: { terms: ['activity', 'park', 'parks', 'play', 'trail', 'run'], category: 'Parks & Activities' },
+    };
+
     if (keyword) {
-      query = query.or(`city.ilike.%${keyword}%,content.ilike.%${keyword}%`);
+      const kwLower = keyword.toLowerCase().trim();
+      const mapping = SYNONYM_MAP[kwLower];
+      const terms = Array.from(new Set([kwLower, ...(mapping?.terms || [])]));
+      const conditions: string[] = [];
+
+      if (mapping?.category) {
+        conditions.push(`category.ilike.%${mapping.category}%`);
+      }
+
+      terms.forEach(t => {
+        if (t) {
+          conditions.push(`content.ilike.%${t}%`);
+          conditions.push(`city.ilike.%${t}%`);
+        }
+      });
+
+      query = query.or(conditions.join(','));
     } else if (city) {
       query = query.ilike('city', `%${city}%`);
     }

@@ -25,7 +25,7 @@ export default function ExplorePage() {
           <div className="w-14 h-14 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mb-4 shadow-inner">
             <Compass className="w-7 h-7 text-[#8B5E3C]" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-[#191919] tracking-tight mb-3">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#191919] tracking-tight mb-3">
             Explore the Community
           </h1>
           <p className="text-[#666666] text-sm md:text-base max-w-[600px] leading-relaxed">
@@ -38,22 +38,22 @@ export default function ExplorePage() {
       <section className="w-full bg-[#F5EDE4] border-b border-[#E8D5C0] py-5">
         <div className="max-w-[1200px] mx-auto flex flex-wrap items-center justify-center gap-6 md:gap-12 text-center">
           <div className="flex flex-col items-center">
-            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">Built for Pet Lovers</span>
+            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">Built for Pet Lovers</span>
             <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Community Powered</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">AI Driven</span>
+            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">AI Driven</span>
             <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Smart Recommendations</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">Free to Join</span>
+            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">Free to Join</span>
             <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>No Hidden Fees</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-[18px] md:text-[20px] font-[800] text-[#8B5E3C] tracking-tight">FDA Monitored</span>
+            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">FDA Monitored</span>
             <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Real Time Recall Alerts</span>
           </div>
         </div>
@@ -82,40 +82,40 @@ export default function ExplorePage() {
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
             <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
-            <h2 className="font-[800] text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto" style={{ fontSize: 'clamp(20px, 2.5vw, 28px)' }}>
+            <h2 className="text-xl md:text-2xl font-extrabold text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto">
               Personalized recommendations, not generic lists.
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <Target className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Matched to your pet</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Matched to your pet</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <Search className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Ingredient Safety Check</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <AlertTriangle className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2">FDA Recall Alerts</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">FDA Recall Alerts</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <Sparkles className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Find Your Pet Twin</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Find Your Pet Twin</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
             </div>
             <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
               <ShoppingBag className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2">Curated Pet Supplies</h3>
-              <p className="text-[#666666] text-base leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Curated Pet Supplies</h3>
+              <p className="text-[#666666] text-sm leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
             </div>
             <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
               <HomeIcon className="w-9 h-9 text-[#8B5E3C] mb-5 relative z-10" />
-              <h3 className="text-[#191919] font-bold text-xl mb-2 relative z-10">Sitting & Community</h3>
-              <p className="text-[#666666] text-base leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
+              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2 relative z-10">Sitting & Community</h3>
+              <p className="text-[#666666] text-sm leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
             </Link>
           </div>
         </div>
@@ -124,10 +124,10 @@ export default function ExplorePage() {
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
         <div className="max-w-[700px] mx-auto">
-          <h2 className="font-[800] tracking-[-0.02em] leading-tight mb-4" style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: '#FFFFFF' }}>
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-[-0.02em] leading-tight mb-4 text-white">
             Ready to find the perfect food?
           </h2>
-          <p className="text-[18px] mb-10 max-w-[480px] mx-auto" style={{ color: 'rgba(255,255,255,0.85)' }}>
+          <p className="text-sm md:text-base mb-10 max-w-[480px] mx-auto text-white/85">
             Join thousands of pet owners who found their pet&apos;s favorite food.
           </p>
           <Link href="/chat" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>

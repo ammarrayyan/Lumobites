@@ -128,10 +128,10 @@ export default function PetTwinPreview() {
           <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-4">
             AI Pet Twin Matcher
           </div>
-          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2 flex-wrap">
-            <Sparkles className="w-8 h-8 text-amber-500 shrink-0" /> Discover Your Perfect Pet Twin Match
+          <h2 className="text-2xl md:text-3xl font-bold text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2 flex-wrap">
+            <Sparkles className="w-7 h-7 text-amber-500 shrink-0" /> Discover Your Perfect Pet Twin Match
           </h2>
-          <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
+          <p className="text-[#666666] text-sm md:text-base leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Upload a selfie to find which dog or cat breed matches your personality and facial features. Check out real matches shared by our community!
           </p>
           <div className="flex justify-center md:justify-start">

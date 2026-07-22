@@ -89,10 +89,10 @@ export default function PetSittingPreview() {
           <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-4">
             Pet Sitting & Care
           </div>
-          <h2 className="text-3xl md:text-4xl font-[800] text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2">
-            <Home className="w-8 h-8 text-[#8B5E3C] flex-shrink-0" /> Find a Sitter or Make Money Sitting Pets
+          <h2 className="text-2xl md:text-3xl font-bold text-[#191919] tracking-[-0.02em] leading-tight mb-4 flex items-center justify-center md:justify-start gap-2">
+            <Home className="w-7 h-7 text-[#8B5E3C] flex-shrink-0" /> Find a Sitter or Make Money Sitting Pets
           </h2>
-          <p className="text-[#666666] text-lg leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
+          <p className="text-[#666666] text-sm md:text-base leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
             Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join. Or, sign up as a sitter to earn money doing what you love!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
