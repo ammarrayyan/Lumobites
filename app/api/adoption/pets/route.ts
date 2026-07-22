@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const shelter_id = searchParams.get('shelter_id');
     const status = searchParams.get('status');
 
-    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(org_name, phone, email, website)');
+    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(org_name, phone, email, website, org_photo_url)');
 
     if (shelter_id) {
       query = query.eq('shelter_id', shelter_id);

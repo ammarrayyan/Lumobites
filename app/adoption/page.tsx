@@ -95,6 +95,7 @@ function AdoptionContent() {
           sex: p.sex,
           photo_urls: p.photo_urls || [],
           shelter_name: p.shelters?.org_name || 'Local Rescue Partner',
+          shelter_photo_url: p.shelters?.org_photo_url || '',
           description: p.description,
           temperament: p.temperament,
           city: p.city,
@@ -363,9 +364,14 @@ function AdoptionContent() {
                             <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full capitalize">{pet.age}</span>
                           </div>
                           <p className="text-xs text-gray-500 font-medium">{pet.breed} &bull; {pet.size} &bull; {pet.sex}</p>
-                          <p className="text-[11px] text-[#8B5E3C] font-bold mt-1 flex items-center gap-1">
-                            <Building2 className="w-3.5 h-3.5 shrink-0" /> {pet.shelter_name}
-                          </p>
+                          <div className="text-[11px] text-[#8B5E3C] font-bold mt-1.5 flex items-center gap-1.5">
+                            {(pet as any).shelter_photo_url ? (
+                              <img src={(pet as any).shelter_photo_url} alt={pet.shelter_name} className="w-4 h-4 rounded-full object-cover shrink-0 border border-amber-200" />
+                            ) : (
+                              <Building2 className="w-3.5 h-3.5 shrink-0 text-[#8B5E3C]" />
+                            )}
+                            <span className="truncate">{pet.shelter_name}</span>
+                          </div>
                           {pet.temperament && (
                             <p className="text-xs text-gray-600 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed">
                               {pet.temperament}

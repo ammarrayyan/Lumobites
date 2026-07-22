@@ -268,23 +268,62 @@ export default function ShelterDashboardPage() {
     return days === 0 ? 'Today' : `${days} d ago`;
   };
 
+  // Org photo edit state
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+
+  const handleSaveOrgPhoto = async () => {
+    if (!shelterInfo?.id) return;
+    try {
+      const res = await fetch('/api/adoption/shelter', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: shelterInfo.id, org_photo_url: editPhotoUrl })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setShelterInfo(data.shelter);
+        setShowPhotoModal(false);
+      }
+    } catch {
+      alert('Failed to update organization photo.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-4 md:p-8" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 64px)' }}>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-xs">
-          <div>
-            <div className="flex items-center gap-2">
-              <Link href="/adoption" className="text-[#8B5E3C] hover:underline text-xs font-bold flex items-center gap-1">
-                <ArrowLeft className="w-3.5 h-3.5" /> Back to Adoption
-              </Link>
+          <div className="flex items-center gap-4">
+            {shelterInfo?.org_photo_url ? (
+              <img src={shelterInfo.org_photo_url} alt={shelterInfo.org_name} className="w-14 h-14 rounded-2xl object-cover border border-amber-200 shrink-0" />
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-bold">
+                <Building2 className="w-7 h-7" />
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                <Link href="/adoption" className="text-[#8B5E3C] hover:underline text-xs font-bold flex items-center gap-1">
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back to Adoption
+                </Link>
+              </div>
+              <h1 className="text-2xl font-black text-gray-900 mt-1 flex items-center gap-2">
+                {shelterInfo?.org_name || 'Shelter Management Dashboard'}
+              </h1>
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                <span>{shelterInfo ? `Status: ${shelterInfo.status.toUpperCase()}` : 'Rescue Partner Portal'}</span>
+                {shelterInfo && (
+                  <button
+                    onClick={() => { setEditPhotoUrl(shelterInfo.org_photo_url || ''); setShowPhotoModal(true); }}
+                    className="text-[#8B5E3C] underline font-bold cursor-pointer border-none bg-transparent"
+                  >
+                    Edit Logo/Photo
+                  </button>
+                )}
+              </div>
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mt-1 flex items-center gap-2">
-              <Building2 className="w-7 h-7 text-[#8B5E3C]" /> Shelter Management Dashboard
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {shelterInfo ? `${shelterInfo.org_name} (${shelterInfo.status.toUpperCase()})` : 'Rescue Partner Portal'}
-            </p>
           </div>
 
           <button
@@ -649,6 +688,46 @@ export default function ShelterDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT SHELTER LOGO / PHOTO MODAL */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4">
+            <h3 className="text-base font-extrabold text-gray-900">Organization Logo / Photo</h3>
+            <p className="text-xs text-gray-500">Enter a direct image URL for your rescue or shelter logo.</p>
+
+            <div className="space-y-3 text-xs">
+              {editPhotoUrl && (
+                <img src={editPhotoUrl} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border border-amber-200 mx-auto" />
+              )}
+              <input
+                type="url"
+                placeholder="https://..."
+                value={editPhotoUrl}
+                onChange={e => setEditPhotoUrl(e.target.value)}
+                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+              />
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveOrgPhoto}
+                  className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 rounded-xl border-none cursor-pointer"
+                >
+                  Save Photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPhotoModal(false)}
+                  className="bg-gray-100 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

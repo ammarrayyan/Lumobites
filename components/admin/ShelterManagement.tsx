@@ -14,6 +14,7 @@ interface Shelter {
   state?: string;
   zip?: string;
   website?: string;
+  org_photo_url?: string;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }
@@ -172,33 +173,42 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
         <div className="space-y-4">
           {filtered.map(shelter => (
             <div key={shelter.id} className="bg-white rounded-2xl border border-[#E8DDD4] p-5 shadow-xs flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
-              <div className="space-y-2 min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-extrabold text-base text-gray-900">{shelter.org_name}</h3>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
-                    shelter.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : shelter.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {shelter.status}
-                  </span>
-                  {shelter.tax_id && (
-                    <span className="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-0.5 rounded-md">
-                      EIN/ID: {shelter.tax_id}
+              <div className="flex items-start md:items-center gap-4 min-w-0 flex-1">
+                {shelter.org_photo_url ? (
+                  <img src={shelter.org_photo_url} alt={shelter.org_name} className="w-12 h-12 rounded-xl object-cover border border-gray-200 shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-bold">
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                )}
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-extrabold text-base text-gray-900">{shelter.org_name}</h3>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
+                      shelter.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : shelter.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {shelter.status}
                     </span>
-                  )}
-                </div>
+                    {shelter.tax_id && (
+                      <span className="bg-gray-100 text-gray-700 text-[11px] font-bold px-2 py-0.5 rounded-md">
+                        EIN/ID: {shelter.tax_id}
+                      </span>
+                    )}
+                  </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600">
-                  <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.email}</div>
-                  {shelter.phone && <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.phone}</div>}
-                  <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.city}{shelter.state ? `, ${shelter.state}` : ''} {shelter.zip}</div>
-                  {shelter.website && (
-                    <div className="flex items-center gap-1.5 sm:col-span-2">
-                      <Globe className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <a href={shelter.website.startsWith('http') ? shelter.website : `https://${shelter.website}`} target="_blank" rel="noreferrer" className="text-blue-600 underline font-medium truncate">
-                        {shelter.website}
-                      </a>
-                    </div>
-                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600">
+                    <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.email}</div>
+                    {shelter.phone && <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.phone}</div>}
+                    <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.city}{shelter.state ? `, ${shelter.state}` : ''} {shelter.zip}</div>
+                    {shelter.website && (
+                      <div className="flex items-center gap-1.5 sm:col-span-2">
+                        <Globe className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <a href={shelter.website.startsWith('http') ? shelter.website : `https://${shelter.website}`} target="_blank" rel="noreferrer" className="text-blue-600 underline font-medium truncate">
+                          {shelter.website}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
