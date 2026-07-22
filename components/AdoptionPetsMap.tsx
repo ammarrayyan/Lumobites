@@ -96,7 +96,8 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
             return { ...pet, lat, lng };
           }
 
-          const city = pet.city || citySearch || 'New York, NY';
+          const rawCity = pet.city || citySearch;
+          const city = (typeof rawCity === 'string' && rawCity.trim()) ? rawCity.trim() : 'New York, NY';
           if (cityCache[city]) {
             // Apply slight offset for multiple pets in the same city so pins don't overlap perfectly
             const offsetLat = (index % 5) * 0.008 - 0.016;

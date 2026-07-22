@@ -34,12 +34,21 @@ function AdoptionContent() {
   const [age, setAge] = useState('all');
   const [size, setSize] = useState('all');
   const [citySearch, setCitySearch] = useState('');
+  const [debouncedCitySearch, setDebouncedCitySearch] = useState('');
 
   // Inline Map & Location Autocomplete State
   const [showMap, setShowMap] = useState(true);
   const [cityOptions, setCityOptions] = useState<string[]>([]);
   const [showCityOptions, setShowCityOptions] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+
+  // Debounce citySearch by 300ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedCitySearch(citySearch);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [citySearch]);
 
   const fetchCitySuggestions = async (input: string) => {
     if (!input || input.trim().length < 2) {
@@ -50,7 +59,13 @@ function AdoptionContent() {
       const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(input)}`);
       if (res.ok) {
         const data = await res.json();
-        setCityOptions(data.options || []);
+        const rawOptions = data.options || [];
+        const stringOptions: string[] = rawOptions.map((opt: any) =>
+          typeof opt === 'string'
+            ? opt
+            : (opt?.clean_city || opt?.formatted_address || '')
+        ).filter((str: string) => str && str.trim() !== '');
+        setCityOptions(stringOptions);
       }
     } catch {
       setCityOptions([]);
@@ -71,6 +86,7 @@ function AdoptionContent() {
             const data = await res.json();
             if (data.city) {
               setCitySearch(data.city);
+              setDebouncedCitySearch(data.city);
               setShowCityOptions(false);
             }
           }
@@ -91,56 +107,6 @@ function AdoptionContent() {
   // Listings data
   const [localPets, setLocalPets] = useState<PetListing[]>([]);
   const [petfinderPets, setPetfinderPets] = useState<PetListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [petfinderFallbackMessage, setPetfinderFallbackMessage] = useState('');
-
-  // AI Matcher Modals
-  const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
-  const [lifestylePrompt, setLifestylePrompt] = useState('');
-  const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
-  const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
-
-  const [isVisualModalOpen, setIsVisualModalOpen] = useState(false);
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [visualMatches, setVisualMatches] = useState<any[]>([]);
-  const [isVisualLoading, setIsVisualLoading] = useState(false);
-  const [visualEmptyMessage, setVisualEmptyMessage] = useState('');
-
-  // Shelter Registration Modal
-  const [isShelterRegOpen, setIsShelterRegOpen] = useState(false);
-  const [shelterFormData, setShelterFormData] = useState({
-    org_name: '',
-    tax_id: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    website: ''
-  });
-  const [shelterRegSuccess, setShelterRegSuccess] = useState(false);
-
-  // Persistent Shelter Check
-  const [userShelter, setUserShelter] = useState<{ status: string; org_name: string } | null>(null);
-
-  useEffect(() => {
-    fetchListings();
-    if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
-      if (email) {
-        fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (data && data.shelter) {
-              setUserShelter(data.shelter);
-            }
-          })
-          .catch(() => {});
-      }
-    }
-  }, [species, age, size, citySearch]);
-
   const fetchListings = async () => {
     setLoading(true);
     try {
@@ -149,7 +115,7 @@ function AdoptionContent() {
       if (species !== 'all') localParams.append('species', species);
       if (age !== 'all') localParams.append('age', age);
       if (size !== 'all') localParams.append('size', size);
-      if (citySearch) localParams.append('city', citySearch);
+      if (debouncedCitySearch) localParams.append('city', debouncedCitySearch);
       localParams.append('status', 'available');
 
       const localRes = await fetch(`/api/adoption/pets?${localParams.toString()}`);
@@ -180,7 +146,7 @@ function AdoptionContent() {
       if (species !== 'all') pfParams.append('type', species);
       if (age !== 'all') pfParams.append('age', age);
       if (size !== 'all') pfParams.append('size', size);
-      if (citySearch) pfParams.append('location', citySearch);
+      if (debouncedCitySearch) pfParams.append('location', debouncedCitySearch);
 
       const pfRes = await fetch(`/api/petfinder?${pfParams.toString()}`);
       if (pfRes.ok) {
@@ -202,6 +168,23 @@ function AdoptionContent() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchListings();
+    if (typeof window !== 'undefined') {
+      const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
+      if (email) {
+        fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
+          .then(r => (r.ok ? r.json() : null))
+          .then(data => {
+            if (data && data.shelter) {
+              setUserShelter(data.shelter);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [species, age, size, debouncedCitySearch]);
 
   // Run AI Text Matcher
   const handleRunLifestyleMatch = async () => {
@@ -453,7 +436,8 @@ function AdoptionContent() {
               <option value="medium">Medium</option>
               <option value="large">Large</option>
             </select>
-          </div>          <div className="relative w-full sm:w-72">
+          </div>
+          <div className="relative w-full sm:w-72">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
               <input
@@ -466,36 +450,64 @@ function AdoptionContent() {
                   setShowCityOptions(true);
                 }}
                 onFocus={() => setShowCityOptions(true)}
-                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-8 pr-8 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    setShowCityOptions(false);
+                    setDebouncedCitySearch(citySearch);
+                  }
+                }}
+                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-8 pr-14 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
               />
-              <button
-                type="button"
-                onClick={handleGPSDetect}
-                disabled={isLocating}
-                title="Detect current location"
-                className="absolute right-2 top-1.5 text-[#8B5E3C] hover:text-[#734A2E] p-1 rounded-md bg-transparent border-none cursor-pointer"
-              >
-                {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
-              </button>
+              <div className="absolute right-2 top-1.5 flex items-center gap-1">
+                {citySearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCitySearch('');
+                      setDebouncedCitySearch('');
+                      setCityOptions([]);
+                      setShowCityOptions(false);
+                    }}
+                    title="Clear location filter"
+                    className="text-gray-400 hover:text-gray-600 p-0.5 rounded-md bg-transparent border-none cursor-pointer text-xs font-bold"
+                  >
+                    X
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleGPSDetect}
+                  disabled={isLocating}
+                  title="Detect current location"
+                  className="text-[#8B5E3C] hover:text-[#734A2E] p-1 rounded-md bg-transparent border-none cursor-pointer"
+                >
+                  {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
 
             {/* City Autocomplete Dropdown */}
             {showCityOptions && cityOptions.length > 0 && (
               <div className="absolute top-full left-0 right-0 z-40 mt-1 bg-white border border-[#E8DDD4] rounded-2xl shadow-lg max-h-48 overflow-y-auto divide-y divide-gray-100 text-xs">
-                {cityOptions.map((opt, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setCitySearch(opt);
-                      setShowCityOptions(false);
-                    }}
-                    className="w-full text-left p-2.5 hover:bg-amber-50 text-gray-700 font-medium cursor-pointer border-none bg-transparent flex items-center gap-1.5"
-                  >
-                    <Building2 className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
-                    <span className="truncate">{opt}</span>
-                  </button>
-                ))}
+                {cityOptions.map((opt, i) => {
+                  const displayText = typeof opt === 'string' ? opt : ((opt as any)?.clean_city || (opt as any)?.formatted_address || '');
+                  if (!displayText) return null;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setCitySearch(displayText);
+                        setDebouncedCitySearch(displayText);
+                        setShowCityOptions(false);
+                      }}
+                      className="w-full text-left p-2.5 hover:bg-amber-50 text-gray-700 font-medium cursor-pointer border-none bg-transparent flex items-center gap-1.5"
+                    >
+                      <Building2 className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
+                      <span className="truncate">{displayText}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -874,7 +886,7 @@ function AdoptionContent() {
               <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900 font-medium text-center">
                 ℹ️ {visualEmptyMessage}
               </div>
-            ) : visualMatches.length > 0 && (
+            ) : visualMatches.length > 0 ? (
               <div className="space-y-3 pt-2 border-t border-gray-100">
                 <h4 className="font-bold text-xs text-gray-800">Visually Similar Local Shelter Candidates:</h4>
                 <div className="grid grid-cols-2 gap-3 max-h-60 overflow-y-auto">
@@ -896,7 +908,7 @@ function AdoptionContent() {
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
