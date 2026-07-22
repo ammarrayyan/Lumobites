@@ -3,8 +3,9 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
+import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 
 interface PetListing {
   id: string;
@@ -33,6 +34,9 @@ function AdoptionContent() {
   const [age, setAge] = useState('all');
   const [size, setSize] = useState('all');
   const [citySearch, setCitySearch] = useState('');
+
+  // View mode toggle
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Listings data
   const [localPets, setLocalPets] = useState<PetListing[]>([]);
@@ -386,12 +390,63 @@ function AdoptionContent() {
       </section>
 
       {/* MAIN CONTENT FEED */}
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-12">
+      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        {/* VIEW MODE TOGGLE TOOLBAR */}
+        <div className="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-[#E8DDD4]">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Display:</span>
+            <div className="bg-[#FAF6F0] p-1 rounded-2xl border border-gray-200 flex items-center gap-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border-none cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-[#8B5E3C] text-white shadow-2xs'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" /> List View
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all border-none cursor-pointer ${
+                  viewMode === 'map'
+                    ? 'bg-[#8B5E3C] text-white shadow-2xs'
+                    : 'text-gray-600 hover:text-gray-900 bg-transparent'
+                }`}
+              >
+                <MapIcon className="w-3.5 h-3.5" /> Map View
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+            <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full">
+              {localPets.length + petfinderPets.length} adoptable pets listed
+            </span>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-[#8B5E3C]" />
             <p className="text-xs text-gray-400 font-bold">Loading adoptable pets near you…</p>
           </div>
+        ) : viewMode === 'map' ? (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+                  <MapIcon className="w-6 h-6 text-[#8B5E3C]" /> Interactive Adoptable Pet Map
+                </h2>
+                <p className="text-xs text-gray-500">Pins match your current species, age, size, and city filters</p>
+              </div>
+            </div>
+
+            <AdoptionPetsMap
+              pets={[...localPets, ...petfinderPets]}
+              citySearch={citySearch}
+            />
+          </section>
         ) : (
           <>
             {/* SECTION 1: LOCAL RESCUES ON LUMO BITES */}
