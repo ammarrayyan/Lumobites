@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import ChatModal from '@/components/ChatModal';
@@ -314,6 +314,7 @@ const formatPhoneNumber = (value: string) => {
 };
 
 export function PetSittingContent() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
   const [ownerSubTab, setOwnerSubTab] = useState<'search' | 'dashboard'>('search');
 
