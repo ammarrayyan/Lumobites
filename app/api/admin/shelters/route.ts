@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendShelterApprovalEmail, sendShelterRejectionEmail } from '@/lib/adoption-email';
 
 const ADMIN_SECRET = 'Lumo2026@';
 
@@ -46,6 +47,14 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (shelter && shelter.email) {
+      if (status === 'approved') {
+        sendShelterApprovalEmail(shelter.email, shelter.org_name);
+      } else if (status === 'rejected') {
+        sendShelterRejectionEmail(shelter.email, shelter.org_name);
+      }
     }
 
     return NextResponse.json({ shelter });

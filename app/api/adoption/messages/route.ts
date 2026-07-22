@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendAdoptionInquiryEmail } from '@/lib/adoption-email';
 
 export async function GET(request: NextRequest) {
   try {
@@ -101,6 +102,17 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('[Adoption Messages API] POST error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Send email notification to recipient if targetReceiver is available
+    if (targetReceiver) {
+      sendAdoptionInquiryEmail(
+        targetReceiver,
+        pet?.name || 'Pet',
+        pet_id,
+        sender_email,
+        message
+      );
     }
 
     return NextResponse.json({ message: newMsg });

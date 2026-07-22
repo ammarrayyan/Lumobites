@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendShelterRegistrationEmail } from '@/lib/adoption-email';
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,6 +75,9 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Send email notification to shelter
+    sendShelterRegistrationEmail(cleanEmail, org_name);
 
     return NextResponse.json({ shelter, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {
