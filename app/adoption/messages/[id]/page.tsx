@@ -83,8 +83,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     if (typeof window === 'undefined') return;
     const pro = localStorage.getItem('lumo_pro_email') || '';
     const sitter = localStorage.getItem('lumo_sitter_email') || '';
-    const shelter = localStorage.getItem('lumo_shelter_email') || '';
-    const email = (shelter || pro || sitter || '').toLowerCase().trim();
+    const email = (pro || sitter || '').toLowerCase().trim();
     setCurrentUserEmail(email);
   }, []);
 

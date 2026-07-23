@@ -102,9 +102,23 @@ export default function ShelterDashboardPage() {
     }
   };
 
+  const handleSwitchAccount = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lumo_pro_email');
+      localStorage.removeItem('lumo_sitter_email');
+      localStorage.removeItem('lumo_shelter_email');
+      localStorage.removeItem('lumo_sitter_id');
+      localStorage.removeItem('lumo_admin_bypass');
+      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      router.push('/account');
+    }
+  };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
+    // Always authenticate against the active logged-in account (lumo_pro_email or lumo_sitter_email)
+    const email = (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '').trim();
     setShelterEmail(email);
 
     if (email) {
@@ -115,6 +129,7 @@ export default function ShelterDashboardPage() {
   }, []);
 
   const fetchShelterDetails = async (email: string) => {
+    setLoading(true);
     try {
       const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`);
       if (res.ok) {
@@ -125,8 +140,12 @@ export default function ShelterDashboardPage() {
         } else {
           setLoading(false);
         }
+      } else {
+        setShelterInfo(null);
+        setLoading(false);
       }
     } catch {
+      setShelterInfo(null);
       setLoading(false);
     }
   };
@@ -429,46 +448,48 @@ export default function ShelterDashboardPage() {
         </div>
 
         {/* ACCESS CONTROL BRANCHING */}
-        {!shelterInfo ? (
+        {loading ? (
+          <div className="bg-white p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-md mx-auto space-y-3">
+            <Building2 className="w-10 h-10 text-[#8B5E3C] animate-bounce mx-auto" />
+            <p className="text-xs text-gray-500 font-bold">Verifying shelter administrator credentials...</p>
+          </div>
+        ) : !shelterEmail ? (
           <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-md mx-auto space-y-4">
-            <Building2 className="w-12 h-12 text-[#8B5E3C] mx-auto" />
-            <h2 className="text-lg font-black text-gray-900">Shelter Partner Access</h2>
+            <ShieldCheck className="w-12 h-12 text-[#8B5E3C] mx-auto" />
+            <h2 className="text-lg font-black text-gray-900">Sign In Required</h2>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Enter your registered shelter organization email to access your management dashboard.
+              Please sign in with your account to access your shelter or rescue organization dashboard.
             </p>
-
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                const input = (e.target as any).email.value.trim();
-                if (input) {
-                  localStorage.setItem('lumo_shelter_email', input);
-                  setShelterEmail(input);
-                  fetchShelterDetails(input);
-                }
-              }}
-              className="space-y-3 pt-2"
-            >
-              <input
-                name="email"
-                type="email"
-                required
-                placeholder="shelter@example.org"
-                defaultValue={shelterEmail}
-                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-[#8B5E3C]"
-              />
-              <button
-                type="submit"
-                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all cursor-pointer border-none text-xs"
+            <div className="pt-2">
+              <Link
+                href="/account"
+                className="inline-block bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-2xl text-xs transition-all shadow-sm no-underline"
               >
-                Access Dashboard
-              </button>
-            </form>
-
-            <div className="pt-3 border-t border-gray-100">
-              <Link href="/adoption" className="text-xs text-[#8B5E3C] font-bold hover:underline">
-                Not a rescue partner yet? Apply on the Adoption page &rarr;
+                Sign In / Register Account
               </Link>
+            </div>
+          </div>
+        ) : !shelterInfo ? (
+          <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-lg mx-auto space-y-4">
+            <Building2 className="w-12 h-12 text-amber-700 mx-auto" />
+            <h2 className="text-lg font-black text-gray-900">Shelter Access Restricted</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              You are currently signed in as <strong className="text-gray-900">{shelterEmail}</strong>, but this account is not registered as an approved rescue partner.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
+              <Link
+                href="/adoption"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl text-xs no-underline transition-all shadow-2xs"
+              >
+                Apply as a Shelter Partner
+              </Link>
+              <button
+                type="button"
+                onClick={handleSwitchAccount}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-5 rounded-2xl text-xs border-none cursor-pointer transition-all"
+              >
+                Sign Out / Switch Account
+              </button>
             </div>
           </div>
         ) : shelterInfo.status === 'pending' ? (

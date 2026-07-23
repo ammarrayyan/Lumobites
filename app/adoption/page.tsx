@@ -202,16 +202,20 @@ function AdoptionContent() {
   useEffect(() => {
     fetchListings();
     if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_shelter_email') || localStorage.getItem('lumo_pro_email') || '';
+      const email = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
       if (email) {
         fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
           .then(r => (r.ok ? r.json() : null))
           .then(data => {
             if (data && data.shelter) {
               setUserShelter(data.shelter);
+            } else {
+              setUserShelter(null);
             }
           })
-          .catch(() => {});
+          .catch(() => setUserShelter(null));
+      } else {
+        setUserShelter(null);
       }
     }
   }, [species, age, size, debouncedCitySearch]);
