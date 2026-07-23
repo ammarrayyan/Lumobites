@@ -222,9 +222,40 @@ function AdoptionContent() {
     }
   }, [species, age, size, debouncedCitySearch]);
 
+  // Helper to require sign-in for AI tools
+  const checkAuthAndRun = (action: () => void) => {
+    if (typeof window === 'undefined') return;
+    const userEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      localStorage.getItem('lumo_shelter_email') ||
+      ''
+    ).trim();
+
+    if (!userEmail) {
+      localStorage.setItem('lumo_redirect_after_login', '/adoption');
+      window.location.href = '/?signin=true';
+      return;
+    }
+    action();
+  };
+
   // Run AI Text Matcher
   const handleRunLifestyleMatch = async () => {
     if (!lifestylePrompt.trim()) return;
+    const userEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      localStorage.getItem('lumo_shelter_email') ||
+      ''
+    ).trim();
+
+    if (!userEmail) {
+      localStorage.setItem('lumo_redirect_after_login', '/adoption');
+      window.location.href = '/?signin=true';
+      return;
+    }
+
     setIsLifestyleLoading(true);
     setLifestyleMatches([]);
 
@@ -292,6 +323,19 @@ function AdoptionContent() {
 
   const handleRunVisualMatch = async () => {
     if (!uploadedPhoto) return;
+    const userEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      localStorage.getItem('lumo_shelter_email') ||
+      ''
+    ).trim();
+
+    if (!userEmail) {
+      localStorage.setItem('lumo_redirect_after_login', '/adoption');
+      window.location.href = '/?signin=true';
+      return;
+    }
+
     setIsVisualLoading(true);
     setVisualMatches([]);
     setVisualEmptyMessage('');
@@ -366,13 +410,13 @@ function AdoptionContent() {
           {/* AI MATCHERS TRIGGERS */}
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <button
-              onClick={() => setIsLifestyleModalOpen(true)}
+              onClick={() => checkAuthAndRun(() => setIsLifestyleModalOpen(true))}
               className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 text-xs cursor-pointer border-none"
             >
               <Sparkles className="w-4 h-4 text-amber-300" /> AI Lifestyle Matcher
             </button>
             <button
-              onClick={() => setIsVisualModalOpen(true)}
+              onClick={() => checkAuthAndRun(() => setIsVisualModalOpen(true))}
               className="bg-white hover:bg-amber-50 text-[#8B5E3C] font-bold py-3 px-5 rounded-2xl transition-all border border-[#E8DDD4] shadow-xs flex items-center gap-2 text-xs cursor-pointer"
             >
               <Camera className="w-4 h-4 text-[#8B5E3C]" /> AI Photo Visual Matcher
