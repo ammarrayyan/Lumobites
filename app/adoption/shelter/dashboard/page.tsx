@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 
 interface ShelterPet {
   id: string;
@@ -1069,15 +1070,12 @@ export default function ShelterDashboardPage() {
                     className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
                   />
                 </div>
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">City / Location</label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={e => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                  />
-                </div>
+                <CityAutocompleteInput
+                  label="City / Location"
+                  value={formData.city}
+                  onChange={val => setFormData({ ...formData, city: val })}
+                  placeholder="Search city (e.g. Austin, TX)…"
+                />
               </div>
 
               <div className="flex gap-2 pt-3">
@@ -1191,16 +1189,13 @@ export default function ShelterDashboardPage() {
                     className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
                   />
                 </div>
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">City *</label>
-                  <input
-                    type="text"
-                    required
-                    value={reapplyFormData.city}
-                    onChange={e => setReapplyFormData({ ...reapplyFormData, city: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                  />
-                </div>
+                <CityAutocompleteInput
+                  label="City *"
+                  required
+                  value={reapplyFormData.city}
+                  onChange={val => setReapplyFormData({ ...reapplyFormData, city: val })}
+                  placeholder="Search city (e.g. Austin, TX)…"
+                />
               </div>
 
               <div>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2 } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 
 interface PetListing {
   id: string;
@@ -1009,16 +1010,13 @@ function AdoptionContent() {
                       className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
                     />
                   </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">City *</label>
-                    <input
-                      type="text"
-                      required
-                      value={shelterFormData.city}
-                      onChange={e => setShelterFormData({ ...shelterFormData, city: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                    />
-                  </div>
+                  <CityAutocompleteInput
+                    label="City *"
+                    required
+                    value={shelterFormData.city}
+                    onChange={val => setShelterFormData({ ...shelterFormData, city: val })}
+                    placeholder="Search city (e.g. Austin, TX)…"
+                  />
                 </div>
 
                 <div>
