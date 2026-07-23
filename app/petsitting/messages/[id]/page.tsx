@@ -291,8 +291,8 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     <div className="min-h-screen bg-[#FDF9F5] flex flex-col justify-between">
       {/* ── HEADER BAR ── */}
       <header 
-        className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 flex items-center justify-between shadow-sm"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)' }}
+        className="sticky z-30 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 flex items-center justify-between shadow-sm"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <button
