@@ -8,18 +8,30 @@ export async function GET(request: NextRequest) {
     const pet_id = searchParams.get('pet_id');
     const user_email = searchParams.get('user_email');
     const shelter_email = searchParams.get('shelter_email');
+    const shelter_id = searchParams.get('shelter_id');
 
-    if (!pet_id) {
-      return NextResponse.json({ error: 'Missing pet_id' }, { status: 400 });
+    if (!pet_id && !shelter_id && !shelter_email) {
+      return NextResponse.json({ error: 'Missing required query parameter (pet_id, shelter_id, or shelter_email)' }, { status: 400 });
     }
 
-    let query = supabaseAdmin.from('adoption_messages').select('*').eq('pet_id', pet_id);
+    let query = supabaseAdmin.from('adoption_messages').select('*, adoption_pets(name, photo_urls, species)');
+
+    if (pet_id) {
+      query = query.eq('pet_id', pet_id);
+    }
+    if (shelter_id) {
+      query = query.eq('shelter_id', shelter_id);
+    } else if (shelter_email) {
+      const cleanEmail = shelter_email.toLowerCase().trim();
+      query = query.or(`receiver_email.eq.${cleanEmail},sender_email.eq.${cleanEmail}`);
+    }
 
     if (user_email) {
-      query = query.or(`sender_email.eq.${user_email},receiver_email.eq.${user_email}`);
+      const cleanUser = user_email.toLowerCase().trim();
+      query = query.or(`sender_email.eq.${cleanUser},receiver_email.eq.${cleanUser}`);
     }
 
-    query = query.order('created_at', { ascending: true });
+    query = query.order('created_at', { ascending: false });
 
     const { data: messages, error } = await query;
 
@@ -28,8 +40,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ messages: [] });
     }
 
-    // Mark unread messages as read
-    if (user_email || shelter_email) {
+    // Mark unread messages as read when viewing specific pet thread
+    if (pet_id && (user_email || shelter_email)) {
       const activeEmail = (user_email || shelter_email)?.toLowerCase().trim();
       await supabaseAdmin
         .from('adoption_messages')

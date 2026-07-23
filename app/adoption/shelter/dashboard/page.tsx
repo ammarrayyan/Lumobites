@@ -33,7 +33,9 @@ export default function ShelterDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   // Filters & Controls
-  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'all'>('available');
+  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'inquiries' | 'all'>('available');
+  const [inquiries, setInquiries] = useState<any[]>([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('all');
@@ -137,6 +139,7 @@ export default function ShelterDashboardPage() {
         setShelterInfo(data.shelter);
         if (data.shelter?.id) {
           fetchShelterPets(data.shelter.id);
+          fetchShelterInquiries(data.shelter.id, data.shelter.email);
         } else {
           setLoading(false);
         }
@@ -147,6 +150,21 @@ export default function ShelterDashboardPage() {
     } catch {
       setShelterInfo(null);
       setLoading(false);
+    }
+  };
+
+  const fetchShelterInquiries = async (shelterId: string, email: string) => {
+    setInquiriesLoading(true);
+    try {
+      const res = await fetch(`/api/adoption/messages?shelter_id=${shelterId}&shelter_email=${encodeURIComponent(email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setInquiries(data.messages || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch shelter inquiries:', err);
+    } finally {
+      setInquiriesLoading(false);
     }
   };
 
@@ -565,134 +583,202 @@ export default function ShelterDashboardPage() {
           </div>
         ) : (
           /* APPROVED SHELTER DASHBOARD (FULL ACCESS) */
-          <>
+          <div className="space-y-6">
             {/* STATUS TABS */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
-          <div className="flex gap-2">
-            {(['available', 'pending', 'adopted', 'all'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => { setActiveTab(tab); setSelectedIds([]); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer border-none ${
-                  activeTab === tab ? 'bg-[#8B5E3C] text-white shadow-xs' : 'bg-transparent text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {tab} ({pets.filter(p => tab === 'all' || p.status === tab).length})
-              </button>
-            ))}
+          <div className="flex gap-2 flex-wrap">
+            {(['available', 'pending', 'adopted', 'inquiries', 'all'] as const).map(tab => {
+              const count = tab === 'inquiries'
+                ? inquiries.length
+                : pets.filter(p => tab === 'all' || p.status === tab).length;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => { setActiveTab(tab); setSelectedIds([]); }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer border-none flex items-center gap-1.5 ${
+                    activeTab === tab ? 'bg-[#8B5E3C] text-white shadow-xs' : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {tab === 'inquiries' ? (
+                    <>
+                      <MessageSquare className="w-3.5 h-3.5" /> Inquiries ({count})
+                    </>
+                  ) : (
+                    <>{tab} ({count})</>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Sort Dropdown */}
-          <div className="flex items-center gap-2 text-xs text-gray-600">
-            <span className="font-bold">Sort:</span>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-semibold"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="alpha">Alphabetical</option>
-            </select>
-          </div>
-        </div>
-
-        {/* FILTERS & SEARCH BAR */}
-        <div className="bg-white p-4 rounded-2xl border border-[#E8DDD4] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-          <div className="relative">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search by pet name/breed…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-[#8B5E3C]"
-            />
-          </div>
-
-          <select
-            value={speciesFilter}
-            onChange={e => setSpeciesFilter(e.target.value)}
-            className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
-          >
-            <option value="all">All Species</option>
-            <option value="dog">Dog</option>
-            <option value="cat">Cat</option>
-            <option value="other">Other</option>
-          </select>
-
-          <select
-            value={ageFilter}
-            onChange={e => setAgeFilter(e.target.value)}
-            className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
-          >
-            <option value="all">All Ages</option>
-            <option value="puppy">Puppy/Kitten</option>
-            <option value="young">Young</option>
-            <option value="adult">Adult</option>
-            <option value="senior">Senior</option>
-          </select>
-
-          <select
-            value={sizeFilter}
-            onChange={e => setSizeFilter(e.target.value)}
-            className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
-          >
-            <option value="all">All Sizes</option>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-          </select>
-        </div>
-
-        {/* BULK ACTIONS BAR */}
-        {selectedIds.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 animate-fade-in">
-            <span className="font-bold">{selectedIds.length} listings selected</span>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleBulkAction('available')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+          {activeTab !== 'inquiries' && (
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <span className="font-bold">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as any)}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-semibold"
               >
-                Mark Available
-              </button>
-              <button
-                onClick={() => handleBulkAction('pending')}
-                className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
-              >
-                Mark Pending
-              </button>
-              <button
-                onClick={() => handleBulkAction('adopted')}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
-              >
-                Mark Adopted
-              </button>
-              <button
-                onClick={() => handleBulkAction('delete')}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
-              >
-                Delete Selected
-              </button>
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="alpha">Alphabetical</option>
+              </select>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* LIST VIEW */}
-        {loading ? (
-          <div className="text-center py-20 text-xs text-gray-400 font-medium">Loading shelter listings…</div>
-        ) : filteredPets.length === 0 ? (
-          <div className="bg-white p-12 rounded-3xl border border-[#E8DDD4] text-center space-y-3">
-            <PawPrint className="w-10 h-10 text-gray-300 mx-auto" />
-            <p className="font-bold text-gray-800 text-sm">No pet listings match this view</p>
-            <button
-              onClick={handleOpenAddModal}
-              className="bg-[#8B5E3C] text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer border-none"
-            >
-              Add First Pet
-            </button>
+        {activeTab === 'inquiries' ? (
+          <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-[#8B5E3C]" /> Adopter Inquiries & Messages
+                </h3>
+                <p className="text-xs text-gray-500">Incoming messages from prospective adopters regarding your listings</p>
+              </div>
+              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
+                {inquiries.length} inquiries
+              </span>
+            </div>
+
+            {inquiriesLoading ? (
+              <div className="text-center py-10 text-xs text-gray-400 font-bold">Loading inquiries…</div>
+            ) : inquiries.length === 0 ? (
+              <div className="text-center py-12 bg-amber-50/50 rounded-2xl border border-amber-200/60 space-y-2">
+                <MessageSquare className="w-8 h-8 text-amber-700/40 mx-auto" />
+                <p className="font-bold text-xs text-gray-700">No adopter inquiries yet</p>
+                <p className="text-[11px] text-gray-400">When prospective adopters message you about a pet, their messages will appear here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+                {inquiries.map(inq => (
+                  <div key={inq.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-900">{inq.sender_email}</span>
+                        <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(inq.created_at)}</span>
+                        {!inq.read && (
+                          <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">NEW</span>
+                        )}
+                      </div>
+                      <p className="text-gray-700 font-medium line-clamp-2">"{inq.message}"</p>
+                      {inq.adoption_pets?.name && (
+                        <p className="text-[11px] text-[#8B5E3C] font-bold">
+                          Regarding: {inq.adoption_pets.name} ({inq.adoption_pets.species})
+                        </p>
+                      )}
+                    </div>
+
+                    <Link
+                      href={`/adoption/messages/${inq.pet_id}`}
+                      className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> View & Reply &rarr;
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
+          <div className="space-y-4">
+            {/* FILTERS & SEARCH BAR */}
+            <div className="bg-white p-4 rounded-2xl border border-[#E8DDD4] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div className="relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search by pet name/breed…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-[#8B5E3C]"
+                />
+              </div>
+
+              <select
+                value={speciesFilter}
+                onChange={e => setSpeciesFilter(e.target.value)}
+                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+              >
+                <option value="all">All Species</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="other">Other</option>
+              </select>
+
+              <select
+                value={ageFilter}
+                onChange={e => setAgeFilter(e.target.value)}
+                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+              >
+                <option value="all">All Ages</option>
+                <option value="puppy">Puppy/Kitten</option>
+                <option value="young">Young</option>
+                <option value="adult">Adult</option>
+                <option value="senior">Senior</option>
+              </select>
+
+              <select
+                value={sizeFilter}
+                onChange={e => setSizeFilter(e.target.value)}
+                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+              >
+                <option value="all">All Sizes</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+
+            {/* BULK ACTIONS BAR */}
+            {selectedIds.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 animate-fade-in">
+                <span className="font-bold">{selectedIds.length} listings selected</span>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleBulkAction('available')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+                  >
+                    Mark Available
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('pending')}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+                  >
+                    Mark Pending
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('adopted')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+                  >
+                    Mark Adopted
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('delete')}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer"
+                  >
+                    Delete Selected
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* LIST VIEW */}
+            {loading ? (
+              <div className="text-center py-20 text-xs text-gray-400 font-medium">Loading shelter listings…</div>
+            ) : filteredPets.length === 0 ? (
+              <div className="bg-white p-12 rounded-3xl border border-[#E8DDD4] text-center space-y-3">
+                <PawPrint className="w-10 h-10 text-gray-300 mx-auto" />
+                <p className="font-bold text-gray-800 text-sm">No pet listings match this view</p>
+                <button
+                  onClick={handleOpenAddModal}
+                  className="bg-[#8B5E3C] text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer border-none"
+                >
+                  Add First Pet
+                </button>
+              </div>
+            ) : (
           <div className="bg-white rounded-3xl border border-[#E8DDD4] overflow-hidden shadow-xs">
             <div className="p-3 bg-[#FAF6F0] border-b border-[#E8DDD4] flex items-center gap-3 text-xs font-bold text-gray-600">
               <input
@@ -780,9 +866,11 @@ export default function ShelterDashboardPage() {
             </div>
           </div>
         )}
-        </>
+          </div>
         )}
       </div>
+    )}
+  </div>
 
       {/* POST / EDIT PET MODAL */}
       {isModalOpen && (
