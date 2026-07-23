@@ -589,8 +589,18 @@ export default function ShelterDashboardPage() {
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
           <div className="flex gap-2 flex-wrap">
             {(['available', 'pending', 'adopted', 'inquiries', 'all'] as const).map(tab => {
+              const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
+              const sortedInqMsgs = [...inquiries].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+              const threadKeys = new Set<string>();
+              sortedInqMsgs.forEach(m => {
+                const s = (m.sender_email || '').toLowerCase().trim();
+                const r = (m.receiver_email || '').toLowerCase().trim();
+                const adopter = s === cleanShelterEmail ? r : s;
+                if (adopter) threadKeys.add(`${m.pet_id}_${adopter}`);
+              });
+
               const count = tab === 'inquiries'
-                ? inquiries.length
+                ? threadKeys.size
                 : pets.filter(p => tab === 'all' || p.status === tab).length;
               return (
                 <button
@@ -631,56 +641,111 @@ export default function ShelterDashboardPage() {
 
         {activeTab === 'inquiries' ? (
           <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-[#8B5E3C]" /> Adopter Inquiries & Messages
-                </h3>
-                <p className="text-xs text-gray-500">Incoming messages from prospective adopters regarding your listings</p>
-              </div>
-              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
-                {inquiries.length} inquiries
-              </span>
-            </div>
+            {(() => {
+              const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
+              const sortedInqMsgs = [...inquiries].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+              const threadMap = new Map<string, {
+                threadId: string;
+                petId: string;
+                adopterEmail: string;
+                petName: string;
+                species: string;
+                latestMessage: string;
+                latestTimestamp: string;
+                unreadCount: number;
+                messageCount: number;
+              }>();
 
-            {inquiriesLoading ? (
-              <div className="text-center py-10 text-xs text-gray-400 font-bold">Loading inquiries…</div>
-            ) : inquiries.length === 0 ? (
-              <div className="text-center py-12 bg-amber-50/50 rounded-2xl border border-amber-200/60 space-y-2">
-                <MessageSquare className="w-8 h-8 text-amber-700/40 mx-auto" />
-                <p className="font-bold text-xs text-gray-700">No adopter inquiries yet</p>
-                <p className="text-[11px] text-gray-400">When prospective adopters message you about a pet, their messages will appear here.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-                {inquiries.map(inq => (
-                  <div key={inq.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900">{inq.sender_email}</span>
-                        <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(inq.created_at)}</span>
-                        {!inq.read && (
-                          <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">NEW</span>
-                        )}
-                      </div>
-                      <p className="text-gray-700 font-medium line-clamp-2">"{inq.message}"</p>
-                      {inq.adoption_pets?.name && (
-                        <p className="text-[11px] text-[#8B5E3C] font-bold">
-                          Regarding: {inq.adoption_pets.name} ({inq.adoption_pets.species})
-                        </p>
-                      )}
+              for (const msg of sortedInqMsgs) {
+                const sender = (msg.sender_email || '').toLowerCase().trim();
+                const receiver = (msg.receiver_email || '').toLowerCase().trim();
+                const adopterEmail = sender === cleanShelterEmail ? receiver : sender;
+                if (!adopterEmail) continue;
+
+                const threadKey = `${msg.pet_id}_${adopterEmail}`;
+                if (!threadMap.has(threadKey)) {
+                  threadMap.set(threadKey, {
+                    threadId: threadKey,
+                    petId: msg.pet_id,
+                    adopterEmail: adopterEmail,
+                    petName: msg.adoption_pets?.name || 'Pet',
+                    species: msg.adoption_pets?.species || 'pet',
+                    latestMessage: msg.message,
+                    latestTimestamp: msg.created_at,
+                    unreadCount: (!msg.read && receiver === cleanShelterEmail) ? 1 : 0,
+                    messageCount: 1
+                  });
+                } else {
+                  const existing = threadMap.get(threadKey)!;
+                  existing.messageCount += 1;
+                  if (!msg.read && receiver === cleanShelterEmail) {
+                    existing.unreadCount += 1;
+                  }
+                }
+              }
+
+              const threads = Array.from(threadMap.values()).sort(
+                (a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime()
+              );
+
+              return (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-[#8B5E3C]" /> Adopter Inquiries & Messages
+                      </h3>
+                      <p className="text-xs text-gray-500">Incoming conversation threads from prospective adopters</p>
                     </div>
-
-                    <Link
-                      href={`/adoption/messages/${inq.pet_id}`}
-                      className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> View & Reply &rarr;
-                    </Link>
+                    <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
+                      {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {inquiriesLoading ? (
+                    <div className="text-center py-10 text-xs text-gray-400 font-bold">Loading conversation threads…</div>
+                  ) : threads.length === 0 ? (
+                    <div className="text-center py-12 bg-amber-50/50 rounded-2xl border border-amber-200/60 space-y-2">
+                      <MessageSquare className="w-8 h-8 text-amber-700/40 mx-auto" />
+                      <p className="font-bold text-xs text-gray-700">No adopter inquiries yet</p>
+                      <p className="text-[11px] text-gray-400">When prospective adopters message you about a pet, conversation threads will appear here.</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+                      {threads.map(thread => (
+                        <div key={thread.threadId} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-gray-900">{thread.adopterEmail}</span>
+                              <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(thread.latestTimestamp)}</span>
+                              {thread.unreadCount > 0 && (
+                                <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+                                  {thread.unreadCount > 1 ? `${thread.unreadCount} NEW` : 'NEW'}
+                                </span>
+                              )}
+                              <span className="bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                                {thread.messageCount} {thread.messageCount === 1 ? 'msg' : 'msgs'}
+                              </span>
+                            </div>
+                            <p className="text-gray-700 font-medium line-clamp-2 italic">"{thread.latestMessage}"</p>
+                            <p className="text-[11px] text-[#8B5E3C] font-bold">
+                              Regarding: {thread.petName} ({thread.species})
+                            </p>
+                          </div>
+
+                          <Link
+                            href={`/adoption/messages/${thread.petId}?adopter=${encodeURIComponent(thread.adopterEmail)}`}
+                            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" /> View Thread &rarr;
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         ) : (
           <div className="space-y-4">

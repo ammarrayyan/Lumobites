@@ -70,6 +70,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
 
   const [pet, setPet] = useState<PetDetails | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [targetAdopter, setTargetAdopter] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -81,10 +82,15 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const shelter = localStorage.getItem('lumo_shelter_email') || '';
     const pro = localStorage.getItem('lumo_pro_email') || '';
     const sitter = localStorage.getItem('lumo_sitter_email') || '';
-    const email = (pro || sitter || '').toLowerCase().trim();
+    const email = (shelter || pro || sitter || '').toLowerCase().trim();
     setCurrentUserEmail(email);
+
+    const params = new URLSearchParams(window.location.search);
+    const adopterParam = params.get('adopter') || params.get('user_email') || '';
+    if (adopterParam) setTargetAdopter(adopterParam.toLowerCase().trim());
   }, []);
 
   // Fetch pet details
@@ -110,8 +116,10 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const fetchMessages = useCallback(async (silent = false) => {
     if (!petId) return;
     try {
-      const emailQuery = currentUserEmail ? `&user_email=${encodeURIComponent(currentUserEmail)}` : '';
-      const res = await fetch(`/api/adoption/messages?pet_id=${petId}${emailQuery}&t=${Date.now()}`);
+      const activeUser = targetAdopter || currentUserEmail;
+      const emailQuery = activeUser ? `&user_email=${encodeURIComponent(activeUser)}` : '';
+      const shelterQuery = currentUserEmail ? `&shelter_email=${encodeURIComponent(currentUserEmail)}` : '';
+      const res = await fetch(`/api/adoption/messages?pet_id=${petId}${emailQuery}${shelterQuery}&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
@@ -120,7 +128,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     finally {
       if (!silent) setIsLoading(false);
     }
-  }, [petId, currentUserEmail]);
+  }, [petId, currentUserEmail, targetAdopter]);
 
   useEffect(() => {
     if (!petId) return;
@@ -151,13 +159,15 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     setNewMessage('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
+    const recipient = targetAdopter || ((pet.shelters as any)?.email || '');
+
     const tempId = 'temp-' + Date.now();
     setMessages(prev => [...prev, {
       id: tempId,
       pet_id: petId,
       shelter_id: pet.shelters ? (pet as any).shelter_id : '',
       sender_email: currentUserEmail,
-      receiver_email: (pet.shelters as any)?.email || '',
+      receiver_email: recipient,
       message: msgText,
       read: false,
       created_at: new Date().toISOString(),
@@ -171,6 +181,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
           pet_id: petId,
           shelter_id: (pet as any).shelter_id,
           sender_email: currentUserEmail,
+          receiver_email: recipient,
           message: msgText
         }),
       });
@@ -192,16 +203,19 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   };
 
   const isShelter = pet?.shelters?.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
-  const displayName = isShelter ? 'Adopter' : (pet?.shelters?.org_name || 'Rescue Partner');
+  const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
   const isAdopted = pet?.status === 'adopted';
 
   return (
-    <div className="min-h-screen bg-[#FDF9F5] flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FDFAF7] flex flex-col">
       {/* HEADER */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 flex items-center justify-between shadow-xs">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-2.5 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3 min-w-0">
           <button
-            onClick={() => router.push('/adoption')}
+            onClick={() => {
+              if (isShelter) router.push('/adoption/shelter/dashboard');
+              else router.push('/adoption');
+            }}
             className="p-1.5 rounded-xl hover:bg-[#FAF6F0] text-[#8B5E3C] transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -226,23 +240,23 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
 
       {/* PET INFO CARD */}
       {pet && (
-        <div className="bg-white border-b border-[#E8DDD4] p-3 px-4 shadow-2xs">
+        <div className="bg-white border-b border-[#E8DDD4] p-2.5 px-4 shadow-2xs">
           <div className="max-w-2xl mx-auto flex items-center gap-3">
-            <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-12 h-12 rounded-xl shrink-0" />
+            <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-10 h-10 rounded-xl shrink-0" />
             <div className="min-w-0 flex-1 text-xs">
-              <h2 className="font-bold text-gray-900 text-sm">{pet.name}</h2>
-              <p className="text-gray-500 truncate">{pet.breed} &bull; {pet.age} &bull; {pet.size}</p>
+              <h2 className="font-bold text-gray-900 text-xs sm:text-sm">{pet.name}</h2>
+              <p className="text-gray-500 truncate text-[11px]">{pet.breed} &bull; {pet.age} &bull; {pet.size}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* MESSAGES BODY */}
-      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-3">
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-3 pb-24">
         {isLoading ? (
-          <div className="py-20 text-center text-xs text-gray-400">Loading conversation…</div>
+          <div className="py-12 text-center text-xs text-gray-400 font-bold">Loading conversation…</div>
         ) : messages.length === 0 ? (
-          <div className="py-16 text-center text-gray-500 text-xs space-y-1">
+          <div className="py-12 text-center text-gray-500 text-xs space-y-1">
             <p className="font-bold text-sm text-gray-800">Start an inquiry with {displayName}</p>
             <p>Ask about temperament, adoption fees, or schedule a visit.</p>
           </div>
@@ -268,14 +282,14 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
 
       {/* FOOTER */}
       {isAdopted ? (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-4 text-center">
-          <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/90 py-3 px-4 rounded-xl border border-amber-200">
+        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 text-center">
+          <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200">
             <Lock className="w-4 h-4 text-amber-700 shrink-0" />
             This pet has been adopted! Messaging is closed.
           </div>
         </footer>
       ) : (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 md:p-4">
+        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3">
           <div className="max-w-2xl mx-auto flex items-center gap-2">
             <textarea
               ref={textareaRef}
@@ -301,3 +315,4 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     </div>
   );
 }
+

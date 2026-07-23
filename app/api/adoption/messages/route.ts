@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendAdoptionInquiryEmail } from '@/lib/adoption-email';
+import { sendPushNotification } from '@/lib/push';
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,7 +32,8 @@ export async function GET(request: NextRequest) {
       query = query.or(`sender_email.eq.${cleanUser},receiver_email.eq.${cleanUser}`);
     }
 
-    query = query.order('created_at', { ascending: false });
+    // Sort ascending for thread view (pet_id present), descending for inbox list
+    query = query.order('created_at', { ascending: !!pet_id });
 
     const { data: messages, error } = await query;
 
@@ -98,13 +100,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const cleanReceiver = (targetReceiver || '').toLowerCase().trim();
+
     const { data: newMsg, error } = await supabaseAdmin
       .from('adoption_messages')
       .insert({
         pet_id,
         shelter_id: shelter_id || pet?.shelter_id,
         sender_email: sender_email.toLowerCase().trim(),
-        receiver_email: (targetReceiver || '').toLowerCase().trim(),
+        receiver_email: cleanReceiver,
         message,
         read: false
       })
@@ -116,15 +120,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send email notification to recipient if targetReceiver is available
-    if (targetReceiver) {
+    if (cleanReceiver) {
+      // 1. Send email notification to recipient
       sendAdoptionInquiryEmail(
-        targetReceiver,
+        cleanReceiver,
         pet?.name || 'Pet',
         pet_id,
         sender_email,
         message
       );
+
+      // 2. Insert in-app notification (triggers bell icon badge)
+      const petName = pet?.name || 'Pet';
+      const senderLabel = sender_email.split('@')[0];
+      const notifTitle = `New message regarding ${petName}`;
+      const notifMsg = `New message from ${senderLabel}: "${message.slice(0, 80)}"`;
+      const notifLink = `/adoption/messages/${pet_id}`;
+
+      await supabaseAdmin.from('notifications').insert({
+        recipient_email: cleanReceiver,
+        type: 'new_message',
+        title: notifTitle,
+        message: notifMsg,
+        link: notifLink,
+        read: false
+      });
+
+      // 3. Send push notification
+      try {
+        await sendPushNotification(cleanReceiver, notifTitle, notifMsg, notifLink);
+      } catch (err) {
+        console.error('[Adoption Messages API] Push notification error:', err);
+      }
     }
 
     return NextResponse.json({ message: newMsg });
@@ -132,3 +159,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
