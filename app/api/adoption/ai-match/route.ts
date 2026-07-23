@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // Fetch Lumo Bites shelter listings
     const { data: localPets } = await supabaseAdmin
       .from('adoption_pets')
-      .select('*, shelters(org_name, phone, email, website)')
+      .select('*, shelters(org_name, phone, email, website, city)')
       .eq('status', 'available');
 
     const formattedLocalPets = (localPets || []).map((p: any) => ({
@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
       description: p.description,
       photo: p.photo_urls?.[0] || '/placeholder-pet.png',
       source: 'lumo_bites',
-      shelter_name: p.shelters?.org_name || 'Local Rescue'
+      shelter_name: p.shelters?.org_name || 'Local Rescue',
+      city: p.city || p.shelters?.city || ''
     }));
 
     const formattedPetfinder = (petfinderPets || []).map((p: any) => ({
@@ -43,10 +44,26 @@ export async function POST(request: NextRequest) {
       photo: p.photo,
       url: p.url,
       source: 'petfinder',
-      shelter_name: p.shelter_name
+      shelter_name: p.shelter_name,
+      city: p.city || p.contact?.address?.city || ''
     }));
 
     const allCandidates = [...formattedLocalPets, ...formattedPetfinder];
+
+    const candidatesForPrompt = allCandidates.map((c, i) => ({
+      index: i,
+      id: c.id,
+      name: c.name,
+      species: c.species,
+      breed: c.breed,
+      age: c.age,
+      size: c.size,
+      sex: c.sex,
+      city: c.city || 'Location unspecified',
+      shelter_name: c.shelter_name,
+      temperament: c.temperament,
+      description: c.description ? c.description.slice(0, 150) : ''
+    }));
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -54,15 +71,30 @@ export async function POST(request: NextRequest) {
       const queryLower = prompt.toLowerCase();
       const scored = allCandidates.map(c => {
         let score = 50;
-        const text = `${c.name} ${c.breed} ${c.species} ${c.age} ${c.size} ${c.temperament} ${c.description}`.toLowerCase();
+        const text = `${c.name} ${c.breed} ${c.species} ${c.age} ${c.size} ${c.temperament} ${c.description} ${c.city} ${c.shelter_name}`.toLowerCase();
         if (queryLower.includes('dog') && c.species.toLowerCase() === 'dog') score += 20;
         if (queryLower.includes('cat') && c.species.toLowerCase() === 'cat') score += 20;
         if (queryLower.includes('small') && c.size.toLowerCase() === 'small') score += 15;
         if (queryLower.includes('low energy') && text.includes('calm')) score += 15;
+
+        // Check if query contains city/location matching pet's city
+        if (c.city) {
+          const cityLower = c.city.toLowerCase();
+          const cityWords = cityLower.split(/[\s,]+/);
+          const hasCityMatch = cityWords.some(w => w.length > 2 && queryLower.includes(w));
+          if (hasCityMatch) {
+            score += 25;
+          }
+        }
+
+        let reason = `Matches your search for ${c.species} (${c.breed}, ${c.size})`;
+        if (c.city) {
+          reason += ` in ${c.city}`;
+        }
         return {
           pet: c,
-          score,
-          reason: `Matches your search for ${c.species} (${c.breed}, ${c.size})`
+          score: Math.min(score, 99),
+          reason
         };
       }).sort((a, b) => b.score - a.score);
 
@@ -82,17 +114,25 @@ export async function POST(request: NextRequest) {
         max_tokens: 1000,
         messages: [{
           role: 'user',
-          content: `You are an AI Pet Adoption Matcher. Match user lifestyle query against candidate pets.
+          content: `You are an AI Pet Adoption Matcher. Match user lifestyle and search query against candidate pets.
 User query: "${prompt}"
 
 Candidate Pets:
-${JSON.stringify(allCandidates.map((c, i) => ({ index: i, id: c.id, name: c.name, species: c.species, breed: c.breed, age: c.age, size: c.size, temperament: c.temperament })), null, 2)}
+${JSON.stringify(candidatesForPrompt, null, 2)}
 
-Return a JSON array of up to 6 matches ordered by highest relevance score (0-100).
+MATCHING & SCORING RULES:
+1. Pay strict attention to species, breed, color, age, size, temperament, and LOCATION/CITY mentioned in the query.
+2. LOCATION/CITY EVALUATION:
+   - If the user query specifies a city or location (e.g. "in Lexington", "near Austin", "Lexington KY"):
+     - Pets located IN or NEAR the requested city should be heavily prioritized with higher match scores (85-100).
+     - If a candidate pet matches the pet attributes (e.g. species/color) BUT is located in a DIFFERENT city/location, lower its match score (e.g. 50-70) and explicitly note in the "reason" field that the pet is NOT in the requested city (e.g. "Great match for an orange cat, but located in Austin, TX instead of Lexington").
+     - If no pets exist in or near the requested city, explicitly state in the reason field that no direct matches were found in that city and list the closest matching pet with its actual location noted.
+3. Return a JSON array of up to 6 matches ordered by highest relevance score (0-100).
+
 JSON Format MUST be:
 {
   "matches": [
-    { "index": 0, "score": 95, "reason": "Small, calm dog ideal for apartments and great with children." }
+    { "index": 0, "score": 95, "reason": "Orange cat matching your criteria, located in Lexington, KY." }
   ]
 }`
         }]
