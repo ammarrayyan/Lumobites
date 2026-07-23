@@ -209,7 +209,10 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   return (
     <div className="min-h-screen bg-[#FDFAF7] flex flex-col">
       {/* PINNED TOP HEADER & PET INFO CONTAINER */}
-      <div className="sticky top-0 z-30 bg-white border-b border-[#E8DDD4] shadow-xs">
+      <div 
+        className="sticky top-0 z-30 bg-white border-b border-[#E8DDD4] shadow-xs"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
         {/* HEADER */}
         <header className="px-4 py-2.5 flex items-center justify-between border-b border-gray-100">
           <div className="flex items-center gap-3 min-w-0">
