@@ -37,6 +37,7 @@ export default function ShelterDashboardPage() {
   const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'inquiries' | 'all'>('available');
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('all');
@@ -650,10 +651,12 @@ export default function ShelterDashboardPage() {
                 adopterEmail: string;
                 petName: string;
                 species: string;
+                petStatus: string;
                 latestMessage: string;
                 latestTimestamp: string;
                 unreadCount: number;
                 messageCount: number;
+                shelterReplied: boolean;
               }>();
 
               for (const msg of sortedInqMsgs) {
@@ -662,6 +665,7 @@ export default function ShelterDashboardPage() {
                 const adopterEmail = sender === cleanShelterEmail ? receiver : sender;
                 if (!adopterEmail) continue;
 
+                const isShelterSender = sender === cleanShelterEmail;
                 const threadKey = `${msg.pet_id}_${adopterEmail}`;
                 if (!threadMap.has(threadKey)) {
                   threadMap.set(threadKey, {
@@ -670,23 +674,33 @@ export default function ShelterDashboardPage() {
                     adopterEmail: adopterEmail,
                     petName: msg.adoption_pets?.name || 'Pet',
                     species: msg.adoption_pets?.species || 'pet',
+                    petStatus: msg.adoption_pets?.status || 'available',
                     latestMessage: msg.message,
                     latestTimestamp: msg.created_at,
-                    unreadCount: (!msg.read && receiver === cleanShelterEmail) ? 1 : 0,
-                    messageCount: 1
+                    unreadCount: (!msg.read && !isShelterSender) ? 1 : 0,
+                    messageCount: 1,
+                    shelterReplied: isShelterSender
                   });
                 } else {
                   const existing = threadMap.get(threadKey)!;
                   existing.messageCount += 1;
-                  if (!msg.read && receiver === cleanShelterEmail) {
+                  if (!msg.read && !isShelterSender) {
                     existing.unreadCount += 1;
+                  }
+                  if (isShelterSender) {
+                    existing.shelterReplied = true;
                   }
                 }
               }
 
-              const threads = Array.from(threadMap.values()).sort(
-                (a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime()
-              );
+              let threads = Array.from(threadMap.values());
+              if (inquiryFilter === 'unread') {
+                threads = threads.filter(t => t.unreadCount > 0);
+              } else if (inquiryFilter === 'replied') {
+                threads = threads.filter(t => t.shelterReplied);
+              }
+              
+              threads.sort((a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime());
 
               return (
                 <>
@@ -697,9 +711,16 @@ export default function ShelterDashboardPage() {
                       </h3>
                       <p className="text-xs text-gray-500">Incoming conversation threads from prospective adopters</p>
                     </div>
-                    <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
-                      {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
-                    </span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex bg-gray-100 p-1 rounded-xl">
+                        <button onClick={() => setInquiryFilter('all')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
+                        <button onClick={() => setInquiryFilter('unread')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Unread</button>
+                        <button onClick={() => setInquiryFilter('replied')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Replied</button>
+                      </div>
+                      <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
+                        {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
+                      </span>
+                    </div>
                   </div>
 
                   {inquiriesLoading ? (
@@ -707,40 +728,63 @@ export default function ShelterDashboardPage() {
                   ) : threads.length === 0 ? (
                     <div className="text-center py-12 bg-amber-50/50 rounded-2xl border border-amber-200/60 space-y-2">
                       <MessageSquare className="w-8 h-8 text-amber-700/40 mx-auto" />
-                      <p className="font-bold text-xs text-gray-700">No adopter inquiries yet</p>
-                      <p className="text-[11px] text-gray-400">When prospective adopters message you about a pet, conversation threads will appear here.</p>
+                      <p className="font-bold text-xs text-gray-700">No adopter inquiries found</p>
+                      <p className="text-[11px] text-gray-400">Try changing your filters or check back later.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-                      {threads.map(thread => (
-                        <div key={thread.threadId} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                          <div className="space-y-1 min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-gray-900">{thread.adopterEmail}</span>
-                              <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(thread.latestTimestamp)}</span>
-                              {thread.unreadCount > 0 && (
-                                <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                                  {thread.unreadCount > 1 ? `${thread.unreadCount} NEW` : 'NEW'}
+                    <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto pr-2">
+                      {threads.map(thread => {
+                        const isStale = thread.petStatus === 'adopted' && !thread.shelterReplied;
+                        
+                        return (
+                          <div key={thread.threadId} className={`py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-opacity ${isStale ? 'opacity-50 grayscale hover:opacity-75' : ''}`}>
+                            <div className="space-y-1 min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {thread.unreadCount > 0 ? (
+                                  <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
+                                ) : (
+                                  <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                                )}
+                                <span className="font-bold text-gray-900 text-sm">{thread.adopterEmail}</span>
+                                <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(thread.latestTimestamp)}</span>
+                                {thread.unreadCount > 0 && (
+                                  <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                    {thread.unreadCount > 1 ? `${thread.unreadCount} New` : 'New'}
+                                  </span>
+                                )}
+                                <span className="bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                                  {thread.messageCount} {thread.messageCount === 1 ? 'msg' : 'msgs'}
                                 </span>
-                              )}
-                              <span className="bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                                {thread.messageCount} {thread.messageCount === 1 ? 'msg' : 'msgs'}
-                              </span>
+                                {isStale && (
+                                  <span className="text-[10px] font-bold text-gray-400 italic">
+                                    Pet has since been adopted
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-gray-700 font-medium line-clamp-2 italic ml-4">"{thread.latestMessage}"</p>
+                              <div className="flex items-center gap-1.5 ml-4 mt-1">
+                                <p className="text-[11px] text-[#8B5E3C] font-bold">
+                                  Regarding: {thread.petName}
+                                </p>
+                                <span className={`text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold ${
+                                  thread.petStatus === 'available' ? 'bg-emerald-100 text-emerald-800' :
+                                  thread.petStatus === 'pending' ? 'bg-amber-100 text-amber-800' :
+                                  'bg-purple-100 text-purple-800'
+                                }`}>
+                                  {thread.petStatus}
+                                </span>
+                              </div>
                             </div>
-                            <p className="text-gray-700 font-medium line-clamp-2 italic">"{thread.latestMessage}"</p>
-                            <p className="text-[11px] text-[#8B5E3C] font-bold">
-                              Regarding: {thread.petName} ({thread.species})
-                            </p>
-                          </div>
 
-                          <Link
-                            href={`/adoption/messages/${thread.petId}?adopter=${encodeURIComponent(thread.adopterEmail)}`}
-                            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" /> View Thread &rarr;
-                          </Link>
-                        </div>
-                      ))}
+                            <Link
+                              href={`/adoption/messages/${thread.petId}?adopter=${encodeURIComponent(thread.adopterEmail)}`}
+                              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" /> View Thread &rarr;
+                            </Link>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </>

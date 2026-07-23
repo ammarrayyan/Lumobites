@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required query parameter (pet_id, shelter_id, or shelter_email)' }, { status: 400 });
     }
 
-    let query = supabaseAdmin.from('adoption_messages').select('*, adoption_pets(name, photo_urls, species)');
+    let query = supabaseAdmin.from('adoption_messages').select('*, adoption_pets(name, photo_urls, species, status)');
 
     if (pet_id) {
       query = query.eq('pet_id', pet_id);
