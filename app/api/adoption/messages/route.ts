@@ -64,7 +64,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { pet_id, shelter_id, sender_email, receiver_email, message } = body;
 
-    if (!pet_id || !sender_email || !message) {
+    const cleanSender = (sender_email || '').toLowerCase().trim();
+    const cleanMessage = (message || '').trim();
+
+    if (!pet_id || !cleanSender || !cleanMessage) {
       return NextResponse.json({ error: 'Missing required fields (pet_id, sender_email, message)' }, { status: 400 });
     }
 
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
     let targetReceiver = receiver_email;
     if (!targetReceiver && pet && pet.shelters) {
       const shelterEmail = (pet.shelters as any).email;
-      if (sender_email.toLowerCase().trim() === shelterEmail.toLowerCase().trim()) {
+      if (cleanSender === shelterEmail.toLowerCase().trim()) {
         // Sender is shelter, receiver is user — find latest message sender
         const { data: lastMsg } = await supabaseAdmin
           .from('adoption_messages')
@@ -102,14 +105,29 @@ export async function POST(request: NextRequest) {
 
     const cleanReceiver = (targetReceiver || '').toLowerCase().trim();
 
+    // 2. Check if this is the first message in this conversation thread
+    let isFirstMessage = true;
+    if (cleanReceiver) {
+      const { count } = await supabaseAdmin
+        .from('adoption_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('pet_id', pet_id)
+        .or(`sender_email.eq.${cleanSender},receiver_email.eq.${cleanSender}`);
+
+      if (count && count > 0) {
+        isFirstMessage = false;
+      }
+    }
+
+    // 3. Save to adoption_messages
     const { data: newMsg, error } = await supabaseAdmin
       .from('adoption_messages')
       .insert({
         pet_id,
         shelter_id: shelter_id || pet?.shelter_id,
-        sender_email: sender_email.toLowerCase().trim(),
+        sender_email: cleanSender,
         receiver_email: cleanReceiver,
-        message,
+        message: cleanMessage,
         read: false
       })
       .select('*')
@@ -121,20 +139,22 @@ export async function POST(request: NextRequest) {
     }
 
     if (cleanReceiver) {
-      // 1. Send email notification to recipient
-      sendAdoptionInquiryEmail(
-        cleanReceiver,
-        pet?.name || 'Pet',
-        pet_id,
-        sender_email,
-        message
-      );
+      // 4. Send email notification ONLY on the first message of a new inquiry thread
+      if (isFirstMessage) {
+        sendAdoptionInquiryEmail(
+          cleanReceiver,
+          pet?.name || 'Pet',
+          pet_id,
+          cleanSender,
+          cleanMessage
+        );
+      }
 
-      // 2. Insert in-app notification (triggers bell icon badge)
+      // 5. Always insert in-app notification (triggers bell icon & unread badge)
       const petName = pet?.name || 'Pet';
-      const senderLabel = sender_email.split('@')[0];
+      const senderLabel = cleanSender.split('@')[0];
       const notifTitle = `New message regarding ${petName}`;
-      const notifMsg = `New message from ${senderLabel}: "${message.slice(0, 80)}"`;
+      const notifMsg = `New message from ${senderLabel}: "${cleanMessage.slice(0, 80)}"`;
       const notifLink = `/adoption/messages/${pet_id}`;
 
       await supabaseAdmin.from('notifications').insert({
@@ -146,7 +166,7 @@ export async function POST(request: NextRequest) {
         read: false
       });
 
-      // 3. Send push notification
+      // 6. Always send push notification
       try {
         await sendPushNotification(cleanReceiver, notifTitle, notifMsg, notifLink);
       } catch (err) {

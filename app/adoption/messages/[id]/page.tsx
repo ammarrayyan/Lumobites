@@ -79,6 +79,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isSendingRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -147,14 +148,16 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   }, [messages]);
 
   const handleSend = async () => {
+    if (isSendingRef.current) return;
     const msgText = newMessage.trim();
-    if (!msgText || isSending || !pet) return;
+    if (!msgText || !pet) return;
 
     if (pet.status === 'adopted') {
       alert('This pet has been adopted. Messaging is closed.');
       return;
     }
 
+    isSendingRef.current = true;
     setIsSending(true);
     setNewMessage('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -162,7 +165,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     const recipient = targetAdopter || ((pet.shelters as any)?.email || '');
 
     const tempId = 'temp-' + Date.now();
-    setMessages(prev => [...prev, {
+    const tempMsg: Message = {
       id: tempId,
       pet_id: petId,
       shelter_id: pet.shelters ? (pet as any).shelter_id : '',
@@ -171,7 +174,9 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
       message: msgText,
       read: false,
       created_at: new Date().toISOString(),
-    }]);
+    };
+
+    setMessages(prev => [...prev, tempMsg]);
 
     try {
       const res = await fetch('/api/adoption/messages', {
@@ -198,6 +203,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
       setMessages(prev => prev.filter(m => m.id !== tempId));
       setNewMessage(msgText);
     } finally {
+      isSendingRef.current = false;
       setIsSending(false);
     }
   };
