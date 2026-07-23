@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, Sparkles } from 'lucide-react';
+import { MessageSquare, Sparkles, Heart } from 'lucide-react';
 
 export default function MobileCommunityNav() {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ export default function MobileCommunityNav() {
   const items = [
     { label: 'City Board', icon: MessageSquare, href: '/city-board' },
     { label: 'Pet Twin', icon: Sparkles, href: '/twin' },
+    { label: 'Adoption', icon: Heart, href: '/adoption' },
   ];
 
   return (

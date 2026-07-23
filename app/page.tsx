@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AnimatedPets from '@/components/AnimatedPets';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
@@ -132,9 +132,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MOBILE QUICK ACCESS BUTTONS */}
-      <section className="md:hidden w-full px-6 pb-8">
-        <div className="flex flex-col gap-2.5 items-center">
+      {/* QUICK ACCESS BUTTONS */}
+      <section className="w-full px-6 pb-8">
+        <div className="flex flex-wrap gap-2.5 items-center justify-center max-w-5xl mx-auto">
           {/* 1. Post or Find Lost Pet (Primary CTA) */}
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
             <div 
@@ -182,7 +182,7 @@ export default function Home() {
               }}
               className="w-[260px] min-h-[46px] px-4 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#5C4533]" />
+              <Heart className="w-4 h-4 text-[#8B5E3C]" />
               <span className="text-[13.5px] tracking-wide">Find a Pet to Adopt</span>
             </div>
           </Link>
@@ -194,15 +194,15 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
 
           {/* 1. Pet Sitting */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-5 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10 mt-2">
               <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
                 <HomeIcon className="w-6 h-6 text-[#C27353]" />
               </div>
               <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Find trusted, ID-verified pet sitters in your neighborhood. Describe what you need and AI finds the perfect match instantly. No commission — sitters keep 100%.
+            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+              Find trusted, ID-verified pet sitters in your neighborhood. AI finds the perfect match instantly. Sitters keep 100%.
             </p>
             <div className="mt-auto relative z-10">
               <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
@@ -212,15 +212,15 @@ export default function Home() {
           </div>
 
           {/* 2. Lost Pets */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
                 <Footprints className="w-6 h-6 text-[#517685]" />
               </div>
               <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
             </div>
-            <p className="text-[#627985] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Post a lost or found pet instantly and let AI search all found pet reports using photo recognition. The fastest way to reunite with your pet.
+            <p className="text-[#627985] leading-relaxed relative flex-1 z-10 text-sm">
+              Post a lost or found pet instantly. AI searches found pet reports using photo recognition to reunite you faster.
             </p>
             <div className="mt-auto relative z-10">
               <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#517685] to-[#426270] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
@@ -230,22 +230,37 @@ export default function Home() {
           </div>
 
           {/* 3. Pet Food & Safety */}
-          <div className="col-span-12 md:col-span-12 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
                 <Utensils className="w-6 h-6 text-[#63825D]" />
               </div>
-              <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food & Safety</h3>
+              <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food</h3>
             </div>
-            <p className="text-[#61755E] leading-relaxed relative flex-1 z-10 text-sm md:text-base">
-              Scan any pet food label — AI instantly flags hidden toxins and harmful ingredients. Get AI-powered food recommendations personalized for your pet. Live FDA recall alerts included.
+            <p className="text-[#61755E] leading-relaxed relative flex-1 z-10 text-sm">
+              Scan pet food labels to flag hidden toxins. Get AI recommendations and live FDA recall alerts.
             </p>
             <div className="mt-auto flex flex-col gap-2 relative z-10">
               <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#63825D] to-[#516E4C] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Food &rarr;
               </Link>
-              <Link href="/scan" className="block w-full py-2.5 rounded-xl border border-[#63825D]/30 text-[#63825D] font-bold text-center hover:bg-[#F2F6F1] hover:border-[#63825D]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
-                Scan Label &rarr;
+            </div>
+          </div>
+
+          {/* 4. Pet Adoption */}
+          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#FAF5EE] to-[#FDF8F3] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center shadow-inner">
+                <Heart className="w-6 h-6 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#664333] font-extrabold text-xl">Pet Adoption</h3>
+            </div>
+            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+              Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
+            </p>
+            <div className="mt-auto relative z-10">
+              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5E3C] to-[#734A2E] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                Find to Adopt &rarr;
               </Link>
             </div>
           </div>

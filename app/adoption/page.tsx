@@ -7,6 +7,7 @@ import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, B
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import MobileCommunityNav from '@/components/MobileCommunityNav';
 
 interface PetListing {
   id: string;
@@ -348,6 +349,7 @@ function AdoptionContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 64px)' }}>
+      <MobileCommunityNav />
       {/* HERO SECTION */}
       <section className="bg-gradient-to-b from-[#FAF5EE] to-[#FDFAF7] border-b border-[#E8DDD4] px-6 py-12">
         <div className="max-w-5xl mx-auto text-center space-y-4">

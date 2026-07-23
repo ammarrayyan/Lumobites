@@ -8,7 +8,7 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
 
   const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies' || pathname === '/recalls';
-  const isCommunityActive = pathname === '/city-board' || pathname === '/twin';
+  const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
 
   const tabs = [
     { label: 'Home', icon: Home, href: '/', isActive: pathname === '/' },
