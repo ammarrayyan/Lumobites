@@ -132,9 +132,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* QUICK ACCESS BUTTONS */}
-      <section className="w-full px-6 pb-8">
-        <div className="flex flex-wrap gap-2.5 items-center justify-center max-w-5xl mx-auto">
+      {/* MOBILE QUICK ACCESS BUTTONS */}
+      <section className="md:hidden w-full px-6 pb-8">
+        <div className="flex flex-col gap-2.5 items-center">
           {/* 1. Post or Find Lost Pet (Primary CTA) */}
           <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
             <div 
@@ -204,9 +204,12 @@ export default function Home() {
             <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
               Find trusted, ID-verified pet sitters in your neighborhood. AI finds the perfect match instantly. Sitters keep 100%.
             </p>
-            <div className="mt-auto relative z-10">
-              <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+            <div className="mt-auto flex flex-col gap-2 relative z-10">
+              <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Sitters &rarr;
+              </Link>
+              <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl border border-[#C27353]/30 text-[#C27353] font-bold text-center hover:bg-[#FAF2EB] hover:border-[#C27353]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
+                Become a Sitter &rarr;
               </Link>
             </div>
           </div>
