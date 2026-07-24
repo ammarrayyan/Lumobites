@@ -90,6 +90,12 @@ export async function POST(request: Request) {
       const lastNotif = lostPet.last_notification_at
         ? new Date(lostPet.last_notification_at).toDateString()
         : null
+      
+      // If it's a new day, reset the memory count so they get their full 3 alerts today
+      if (lastNotif !== today) {
+        lostPet.notification_count = 0;
+      }
+
       if (lastNotif === today && (lostPet.notification_count || 0) >= 3) continue
 
       // Basic filter 4 — Duplicate prevention (already notified for this found pet)
