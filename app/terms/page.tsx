@@ -5,107 +5,139 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[#FDFAF7] font-sans text-[#555555]">
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px' }}>
         <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '8px', color: '#191919' }}>Terms of Service</h1>
-        <p style={{ color: '#888', marginBottom: '40px' }}>Last updated: {currentDate}</p>
+        <p style={{ color: '#888', marginBottom: '40px' }}>Effective Date: July 24, 2026<br/>Last Updated: {currentDate}</p>
+
+        <p className="mb-8">Lumo Bites is operated by Premier Pet Nutrition LLC ("Lumo Bites," "we," "us," or "our").</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>1. Acceptance of Terms</h2>
         <p className="mt-2">By signing up or using Lumo Bites, you agree to abide by these Terms of Service.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>2. Platform Connection Disclaimer</h2>
-        <p className="mt-2">Lumo Bites serves strictly as a connection platform to facilitate introductions between pet sitters and pet owners. We are not a party to any agreement or transaction between sitters and owners. Lumo Bites is a marketplace platform that connects pet owners with independent pet sitters. Lumo Bites verifies sitter identity but does not conduct criminal background checks and does not guarantee the behavior, reliability or quality of any sitter. Users engage with sitters at their own risk.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>2. Marketplace & Connection Disclaimer</h2>
+        <p className="mt-2">Lumo Bites is a platform that facilitates connections between pet owners, pet sitters, adopters, and shelters/rescues. We are not a party to any agreement or transaction between users. Lumo Bites does not inspect homes, pets, shelters, or sitters, and does not guarantee the behavior, reliability, quality, or outcome of any interaction between users. Users engage with one another at their own risk.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>3. Identity Verification & No Background Checks</h2>
-        <p className="mt-2">While Lumo Bites conducts basic government-issued ID verification for pet sitters, we do not perform criminal background checks, background screenings, or reference checks on pet sitters or pet owners. Sitters and owners interact entirely at their own risk. It is the responsibility of both parties to vet each other appropriately.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>3. Identity & Organization Verification</h2>
+        <p className="mt-2">While Lumo Bites may verify certain identity or organizational information for select account types, we do not perform criminal background checks, background screenings, or reference checks. It is the responsibility of all parties to exercise appropriate judgment and vet one another as they see fit.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Membership Fees & Refunds</h2>
-        <p className="mt-2">Membership and subscription fees (including Lumo Bites PRO and Lumo Sitter Pro) are non-refundable. However, upon cancellation, members retain full access to all PRO features until the end of their current billing period. No partial refunds are issued for unused days within a billing cycle. Shelter/Rescue accounts and Adoption features are currently offered free of charge; Lumo Bites reserves the right to introduce fees for these or any other features in the future, with advance notice to affected users.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Membership Fees & Subscriptions</h2>
+        <p className="mt-2">Membership and subscription fees are non-refundable, though members retain access to paid features through the end of their current billing period upon cancellation. Subscription renewals continue automatically until canceled. Users may cancel at any time through their App Store, Google Play, or Stripe billing settings, as applicable. Certain features may currently be offered free of charge; Lumo Bites reserves the right to introduce or change fees, or booking/marketplace charges, for any feature in the future, with reasonable advance notice where required.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. Account Removal & Zero Tolerance Policy</h2>
-        <p className="mt-2">We enforce a strict zero-tolerance policy for objectionable content or abusive users. We reserve the right to remove any post, message, or review, and to immediately suspend or permanently ban any user account that violates our safety standards, engages in harassment, or demonstrates abusive behavior. Reported violations are moderated and acted upon within 24 hours.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. Payments Between Users</h2>
+        <p className="mt-2">Where Lumo Bites facilitates payments between users (such as pet sitting bookings) through a third-party payment processor, Lumo Bites is not responsible for disputes between users regarding those payments, beyond facilitating the technical transaction.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6. Veterinary Disclaimer</h2>
-        <p className="mt-2">Our food recommendations are for informational purposes only and do not constitute veterinary advice. Always consult your veterinarian before making significant changes to your pet's diet.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6. Account Removal & Content Moderation</h2>
+        <p className="mt-2">We enforce a zero-tolerance policy for objectionable content or abusive behavior. We reserve the right to remove any post, message, or review, and to suspend or terminate any account that violates our safety standards or these Terms. Reports are reviewed and addressed within a reasonable time.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6b. FDA Recall Information Disclaimer</h2>
-        <p className="mt-2">FDA recall information displayed on Lumo Bites is sourced from the FDA's public enforcement database. While we strive to keep this information current, Lumo Bites does not guarantee the completeness, accuracy, or timeliness of recall information. Users should always verify recall information directly at fda.gov. This information is provided for informational purposes only.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>7. Feature-Specific Disclaimers</h2>
+        <p className="mt-2">Certain features are provided for informational or entertainment purposes and do not constitute professional advice (including but not limited to nutritional, veterinary, or legal advice). This includes features such as breed/appearance matching, food recommendations, recall alerts, lost pet reunification tools, and adoption matching. Lumo Bites does not guarantee any particular outcome from these features, including but not limited to pet reunification, adoption outcomes, or match accuracy.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6c. Pet Twin Disclaimer</h2>
-        <p className="mt-2">The Pet Twin feature uses artificial intelligence to generate breed matches for entertainment purposes only. Results are not scientifically validated and do not constitute any professional assessment. Lumo Bites makes no claims about the accuracy of Pet Twin results.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>8. AI-Powered Features</h2>
+        <p className="mt-2">Lumo Bites uses artificial intelligence to power certain features. AI-generated results are provided for informational purposes only, may not always be accurate, and should not replace independent judgment or professional advice.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6d. Lost Pets Disclaimer</h2>
-        <p className="mt-2">Lumo Bites provides a community platform for posting lost and found pet information. We do not guarantee the reunification of lost pets, the accuracy of posted information, or any specific outcome. Users post and respond to listings at their own discretion and risk.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>9. Beta & Experimental Features; No Guarantee of Availability</h2>
+        <p className="mt-2">Certain features may be offered on an experimental or beta basis. Features may be modified, suspended, or discontinued at any time without liability.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6e. City Board Disclaimer</h2>
-        <p className="mt-2">Content posted on the City Board is user-generated and not verified by Lumo Bites. We are not responsible for the accuracy, completeness, or appropriateness of community posts. Do not rely on community advice as a substitute for professional veterinary or legal advice.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>10. Organization Accounts</h2>
+        <p className="mt-2">Organizations registering an account (such as a Shelter/Rescue partner) represent that they are a legitimate organization and that the information provided is accurate. Individuals registering on behalf of an organization represent that they are authorized to do so and are at least 18 years old. Lumo Bites reserves the right to approve, reject, or revoke any organization account at its sole discretion.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6f. Adoption Disclaimer</h2>
-        <p className="mt-2">Lumo Bites provides a platform connecting prospective adopters with local shelters/rescues and third-party listing services (including Petfinder and RescueGroups.org). Lumo Bites does not own, operate, or control any shelter or rescue organization, and is not a party to any adoption transaction. We do not guarantee the accuracy of pet listings, the outcome of any adoption, or the conduct of any shelter, rescue, or adopter. Users engage with shelters, rescues, and other users at their own discretion and risk.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>11. Governing Law & Venue</h2>
+        <p className="mt-2">These Terms are governed by the laws of the State of Kentucky, United States. Any legal action arising under these Terms shall be brought exclusively in the state or federal courts located in Jefferson County, Kentucky, unless otherwise required by applicable law.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6g. Shelter/Rescue Accounts</h2>
-        <p className="mt-2">Organizations registering as a Shelter/Rescue partner represent that they are a legitimate animal shelter or rescue organization and that all information provided during registration is accurate. Individuals registering a Shelter/Rescue account represent that they are at least 18 years of age and are authorized to act on behalf of the organization they represent. Lumo Bites reserves the right to approve, reject, or revoke shelter/rescue account access at its sole discretion. Shelters and rescues are solely responsible for the accuracy of their pet listings and for their own adoption processes, fees, and requirements.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>12. User Conduct</h2>
+        <p className="mt-2">Users must not post false or misleading information, harass others, post objectionable content, use the platform for unlawful purposes, post fraudulent listings, or attempt to circumvent the platform's systems or membership requirements. We reserve the right to remove content and take action against accounts that violate these rules.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6h. AI Matching Features Disclaimer</h2>
-        <p className="mt-2">The AI Lifestyle Matcher and AI Photo Visual Matcher use artificial intelligence to suggest potentially compatible pets based on user-provided preferences or photos. These matches are suggestions only, are not guaranteed to be accurate, and do not constitute professional advice regarding pet compatibility, temperament, or suitability. Users should independently verify all pet information and meet any pet in person before making an adoption decision.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>13. User-Generated Content License</h2>
+        <p className="mt-2">By posting any photo, text, or other content on Lumo Bites &mdash; including lost/found pet posts, adoption listings, reviews, community board posts, and profile images &mdash; you grant Lumo Bites a non-exclusive, royalty-free license to use, display, reproduce, and distribute that content solely for the purpose of operating, improving, and promoting the platform, including in marketing and social media. You represent that you own or have the right to share any content you post.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>7. Governing Law</h2>
-        <p className="mt-2">These Terms of Service and any separate agreements whereby we provide you services shall be governed by and construed in accordance with the laws of the state of Kentucky, United States.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>14. Copyright Complaints</h2>
+        <p className="mt-2">If you believe content on Lumo Bites infringes your copyright, please contact us with a description of the material and your ownership claim. We will review and remove infringing content as appropriate.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>8. User Conduct & Content Moderation</h2>
-        <p className="mt-2">Users must not post false or misleading information, harass other users, post objectionable or abusive content, use the platform for illegal purposes, post fraudulent adoption listings or shelter registrations, or attempt to bypass the membership system. Lumo Bites actively moderates community content, and we reserve the absolute right to remove content and ban users violating these conduct rules within 24 hours of a report.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>15. Reverse Engineering & Automated Access</h2>
+        <p className="mt-2">Users may not scrape, reverse engineer, copy, automate access to, interfere with, or attempt to bypass the security of the platform.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>9. Age Requirement</h2>
-        <p className="mt-2">You must be at least 18 years old to use Lumo Bites. By using this platform you confirm you are 18 or older.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>16. Account Security</h2>
+        <p className="mt-2">You are responsible for maintaining the confidentiality of your login credentials and for all activity occurring under your account.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>10. Sitter Independence</h2>
-        <p className="mt-2">All sitters on Lumo Bites are independent contractors and not employees or agents of Lumo Bites. Sitters are independent individuals, and Lumo Bites does not endorse, recommend, or guarantee any sitter listed on the platform.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Age Requirement</h2>
+        <p className="mt-2">You must be at least 18 years old to use Lumo Bites.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>11. Pet Owner Responsibility</h2>
-        <p className="mt-2">Pet owners are solely responsible for the behavior of their pets. Any damage, injury, or loss caused by a pet during a sitting arrangement is the sole responsibility of the pet owner.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>18. Independent Parties</h2>
+        <p className="mt-2">Sitters, adopters, shelters, rescues, and all other users interacting through the platform are independent parties. They are not employees or agents of Lumo Bites, and Lumo Bites does not endorse, recommend, or guarantee any user or organization listed on the platform.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>12. Insurance</h2>
-        <p className="mt-2">Lumo Bites does not provide insurance for any pet sitting arrangements. Both sitters and pet owners are strongly encouraged to obtain appropriate insurance coverage before engaging in any arrangement.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>19. Responsibility for Pets & Property</h2>
+        <p className="mt-2">Pet owners are solely responsible for the behavior of their pets. Any damage, injury, or loss occurring during an arrangement facilitated through the platform is the sole responsibility of the relevant parties involved.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>13. Limitation of Liability</h2>
-        <p className="mt-2">To the fullest extent permitted by law, Lumo Bites shall not be liable for any direct, indirect, incidental, or consequential damages arising from use of the platform including but not limited to pet injury, death, property damage, or personal injury. Lumo Bites is not liable for any damage, injury, loss or harm caused by or resulting from interactions between pet owners, sitters, adopters, and shelters/rescues.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>20. Insurance</h2>
+        <p className="mt-2">Lumo Bites does not provide insurance for any arrangement facilitated through the platform. Users are encouraged to obtain appropriate insurance coverage independently.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>13b. Platform Provided As-Is</h2>
-        <p className="mt-2">Lumo Bites is provided 'as-is' and 'as available' without warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>21. Location Data</h2>
+        <p className="mt-2">Certain features require access to your device's location to function. Declining location permission may limit certain functionality.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>13c. Class Action Waiver</h2>
-        <p className="mt-2">To the extent permitted by applicable law, you waive your right to participate as a plaintiff or class member in any purported class action lawsuit, class-wide arbitration, or any other representative proceeding against Lumo Bites.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>22. Limitation of Liability</h2>
+        <p className="mt-2">To the fullest extent permitted by law, Lumo Bites is not liable for any direct, indirect, incidental, or consequential damages arising from use of the platform or interactions between users.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>14. Indemnification</h2>
-        <p className="mt-2">You agree to indemnify and hold harmless Lumo Bites from any claims, damages, or expenses arising from your use of the platform, your interactions with other users, or your violation of these Terms.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>23. Platform Provided As-Is; Availability</h2>
+        <p className="mt-2">Lumo Bites is provided "as-is" and "as available," without warranties of any kind. We do not guarantee uninterrupted or error-free service.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>15. Termination</h2>
-        <p className="mt-2">Users may delete their account at any time. Lumo Bites reserves the right to terminate any account without notice for violations of these Terms. Outstanding subscription fees are non-refundable upon termination.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>24. Class Action Waiver</h2>
+        <p className="mt-2">To the extent permitted by law, you waive your right to participate in a class action, class-wide arbitration, or representative proceeding against Lumo Bites.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>16. Dispute Resolution</h2>
-        <p className="mt-2">Any disputes between sitters, pet owners, adopters, and shelters/rescues are solely between those parties. Lumo Bites is not responsible for resolving user disputes. For disputes with Lumo Bites directly contact <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>info@lumobitespet.com</a>.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>25. Indemnification</h2>
+        <p className="mt-2">You agree to indemnify and hold harmless Lumo Bites from claims, damages, or expenses arising from your use of the platform or violation of these Terms.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Changes to Terms</h2>
-        <p className="mt-2">We reserve the right to update these Terms at any time. Users will be notified of significant changes via email. Continued use after changes constitutes acceptance. By continuing to use Lumo Bites after any changes to these Terms, you acknowledge and agree to be bound by the updated Terms.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>26. Termination</h2>
+        <p className="mt-2">You may delete your account at any time. Lumo Bites reserves the right to terminate any account for violation of these Terms. Outstanding fees are non-refundable upon termination.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>18. Data Collection & Cookies</h2>
-        <p className="mt-2">Lumo Bites collects personal information including email addresses and government-issued ID documents as described in our Privacy Policy. By using the platform you consent to this data collection. For full details visit <a href="/privacy" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>lumobites.net/privacy</a>.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>27. Dispute Resolution</h2>
+        <p className="mt-2">Disputes between users are solely between those parties. For disputes with Lumo Bites directly, contact us using the information below.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>19. SMS Communications</h2>
-        <p className="mt-2">By providing your phone number for identity verification, you consent to receiving SMS messages from Lumo Bites via our SMS service provider (Twilio) for account security purposes. Standard carrier message and data rates may apply.</p>
-        <p className="mt-2">Separately, users who post a lost or found pet report may optionally provide their phone number and opt in to receive SMS alerts when a possible match (70%+ similarity, within 10 miles) is found for their reported pet, limited to a maximum of 3 alerts per day. This opt-in is entirely voluntary and is not required to submit a lost or found pet report. Users may reply STOP at any time to unsubscribe from these alerts. Phone numbers collected for either purpose will not be used for marketing without explicit separate consent.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>28. Electronic Communications</h2>
+        <p className="mt-2">By using the platform, you agree to receive electronic communications from us, including emails, in-app notifications, and SMS messages you have opted into. You agree that these communications satisfy any legal requirement that such communication be in writing.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>20. Third Party Services</h2>
-        <p className="mt-2">Lumo Bites integrates with third-party services including but not limited to Stripe (payments), Twilio (SMS), Firebase (notifications), Amazon (product recommendations), Petfinder and RescueGroups.org (adoptable pet listings), and Anthropic (AI-powered matching and content features). Your use of these services is subject to their respective terms of service and privacy policies. Lumo Bites is not responsible for the practices of these third-party providers.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>29. Taxes</h2>
+        <p className="mt-2">Users who receive payment through the platform (such as pet sitters) are solely responsible for reporting and paying any applicable taxes on their earnings.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>21. User-Generated Content License</h2>
-        <p className="mt-2">By posting any photo, text, or other content on Lumo Bites (including lost/found pet posts, Pet Twin images, adoption listings, reviews, and City Board posts), you grant Lumo Bites a non-exclusive, royalty-free, worldwide license to display, reproduce, and distribute that content within the platform for the purpose of operating our services. You represent that you own or have the right to share any content you post.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>30. Intellectual Property</h2>
+        <p className="mt-2">Lumo Bites owns all trademarks, logos, software, branding, code, and platform content. Users may not copy, reproduce, or redistribute this material without permission.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>22. Amazon Affiliate Disclosure</h2>
-        <p className="mt-2">Lumo Bites participates in the Amazon Associates affiliate program. Some product links on the platform may earn Lumo Bites a commission on qualifying purchases, at no additional cost to you. Product recommendations are provided for informational purposes and do not constitute an endorsement or guarantee of any product's quality or safety.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>31. Force Majeure</h2>
+        <p className="mt-2">Lumo Bites is not liable for any failure or delay in performance resulting from causes beyond our reasonable control, including outages of third-party service providers, natural disasters, or other events beyond our control.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>23. Copyright Complaints</h2>
-        <p className="mt-2">If you believe content on Lumo Bites infringes your copyright, please contact <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>info@lumobitespet.com</a> with a description of the material and your ownership claim. We will review and remove infringing content as appropriate.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>32. App Store Disclaimer</h2>
+        <p className="mt-2">Apple, Google, and their respective app stores are not responsible for the operation, maintenance, or support of Lumo Bites.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>24. Location Data</h2>
-        <p className="mt-2">Certain features (including Lost Pets, Pet Sitting, and Adoption search) may request access to your device's location to provide location-based results. Location access is optional and can be declined; declining may limit certain search functionality.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>33. Export Compliance</h2>
+        <p className="mt-2">You may not use the platform where prohibited by applicable law or export control regulations.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>34. Third-Party Services</h2>
+        <p className="mt-2">Lumo Bites integrates with a variety of third-party services to operate the platform, which may include payment processing, SMS delivery, notification services, database hosting, email delivery, affiliate programs, AI service providers, and pet listing data providers. Your use of these integrated services is subject to their respective terms and privacy policies. Lumo Bites is not responsible for the practices of these third parties.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>35. Changes to These Terms</h2>
+        <p className="mt-2">We may update these Terms at any time. Users will be notified of significant changes. Continued use after changes constitutes acceptance of the updated Terms.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>36. Entire Agreement</h2>
+        <p className="mt-2">These Terms constitute the entire agreement between you and Lumo Bites regarding your use of the platform.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>37. Severability</h2>
+        <p className="mt-2">If any provision of these Terms is found invalid or unenforceable, the remaining provisions will remain in full force and effect.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>38. Waiver</h2>
+        <p className="mt-2">Failure to enforce any provision of these Terms does not constitute a waiver of that provision or any other.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>39. Assignment</h2>
+        <p className="mt-2">Lumo Bites may assign these Terms in connection with a merger, acquisition, or sale of assets.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>40. Survival</h2>
+        <p className="mt-2">Provisions relating to liability, intellectual property, and indemnification survive termination of your account or these Terms.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>41. Related Documents</h2>
+        <p className="mt-2">Please review our <a href="/privacy" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>Privacy Policy</a> to understand how we collect and use your information.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>42. Contact Information</h2>
+        <div className="mt-2">
+          <p>Premier Pet Nutrition LLC</p>
+          <p>Louisville, Kentucky, USA</p>
+          <p className="font-bold text-[#191919] mt-2">Email: <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C' }}>info@lumobitespet.com</a></p>
+        </div>
       </div>
     </div>
   );
