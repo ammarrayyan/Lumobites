@@ -25,7 +25,7 @@ export interface AdoptionMapPet {
   lat?: number;
   lng?: number;
   url?: string;
-  source: 'lumo_bites' | 'petfinder';
+  source: 'lumo_bites' | 'rescuegroups';
 }
 
 interface AdoptionPetsMapProps {
@@ -33,9 +33,9 @@ interface AdoptionPetsMapProps {
   citySearch?: string;
 }
 
-const getMarkerIcon = (source: 'lumo_bites' | 'petfinder', isSelected: boolean) => {
+const getMarkerIcon = (source: 'lumo_bites' | 'rescuegroups', isSelected: boolean) => {
   const isLocal = source === 'lumo_bites';
-  const color = isLocal ? '%238B5E3C' : '%23D97706'; // Warm Brown for Local, Amber for Petfinder
+  const color = isLocal ? '%238B5E3C' : '%23D97706'; // Warm Brown for Local, Amber for RescueGroups
   const strokeColor = '%23FFFFFF';
   const size = isSelected ? 40 : 32;
 
@@ -217,7 +217,7 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
                   <span className={`absolute top-1.5 left-1.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase text-white shadow-xs ${
                     activePet.source === 'lumo_bites' ? 'bg-[#8B5E3C]' : 'bg-amber-600'
                   }`}>
-                    {activePet.source === 'lumo_bites' ? 'Local Shelter' : 'Petfinder'}
+                    {activePet.source === 'lumo_bites' ? 'Local Shelter' : 'RescueGroups Partner'}
                   </span>
                 </div>
 
@@ -244,8 +244,8 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
                         <MessageSquare className="w-3.5 h-3.5" /> Ask About Pet
                       </button>
                     ) : (
-                      <a
-                        href={activePet.url || 'https://www.petfinder.com'}
+                      <a 
+                        href={activePet.url || 'https://www.rescuegroups.org'}
                         target="_blank"
                         rel="noreferrer"
                         className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 no-underline border-none shadow-2xs text-center"

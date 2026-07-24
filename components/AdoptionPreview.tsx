@@ -44,7 +44,7 @@ export default function AdoptionPreview() {
               Adopt a Pet in Your Area
             </h2>
             <p className="text-[#666666] text-sm md:text-base mt-1 max-w-2xl leading-relaxed">
-              Find adoptable pets from verified local shelters and Petfinder partners. Use AI lifestyle matching or visual photo comparison to find your perfect match.
+              Find adoptable pets from verified local shelters and RescueGroups partners. Use AI lifestyle matching or visual photo comparison to find your perfect match.
             </p>
           </div>
 

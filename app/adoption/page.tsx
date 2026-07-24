@@ -841,7 +841,7 @@ function AdoptionContent() {
                         </button>
                       ) : (
                         <a
-                          href={match.pet.url || 'https://www.petfinder.com'}
+                          href={match.pet.url || 'https://www.rescuegroups.org'}
                           target="_blank"
                           rel="noreferrer"
                           className="bg-gray-200 text-gray-800 font-bold text-[11px] py-1.5 px-3 rounded-xl shrink-0 no-underline"
