@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, species, rescueGroupsPets } = await request.json();
+    const { prompt, species } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Please describe what type of pet you are looking for.' }, { status: 400 });
@@ -31,26 +31,7 @@ export async function POST(request: NextRequest) {
       city: p.city || p.shelters?.city || ''
     }));
 
-    const formattedRescueGroups = (rescueGroupsPets || []).map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      species: p.species,
-      breed: p.breed,
-      age: p.age,
-      size: p.size,
-      sex: p.sex,
-      temperament: p.description,
-      description: p.description,
-      photo: p.photo,
-      url: p.url,
-      source: 'rescuegroups',
-      shelter_name: p.shelter_name,
-      city: p.city || p.contact?.address?.city || ''
-    }));
-
-    const allCandidates = [...formattedLocalPets, ...formattedRescueGroups];
-
-    const candidatesForPrompt = allCandidates.map((c, i) => ({
+    const candidatesForPrompt = formattedLocalPets.map((c: any, i: number) => ({
       index: i,
       id: c.id,
       name: c.name,
@@ -69,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (!apiKey) {
       // Fallback ranking if Anthropic key is missing
       const queryLower = prompt.toLowerCase();
-      const scored = allCandidates.map(c => {
+      const scored = formattedLocalPets.map((c: any) => {
         let score = 50;
         const text = `${c.name} ${c.breed} ${c.species} ${c.age} ${c.size} ${c.temperament} ${c.description} ${c.city} ${c.shelter_name}`.toLowerCase();
         if (queryLower.includes('dog') && c.species.toLowerCase() === 'dog') score += 20;
@@ -141,7 +122,7 @@ JSON Format MUST be:
 
     if (!res.ok) {
       console.error('[AI Lifestyle Matcher] Anthropic error:', res.statusText);
-      return NextResponse.json({ matches: allCandidates.slice(0, 6).map(c => ({ pet: c, score: 85, reason: 'Great match for your lifestyle preferences' })) });
+      return NextResponse.json({ matches: formattedLocalPets.slice(0, 6).map((c: any) => ({ pet: c, score: 85, reason: 'Great match for your lifestyle preferences' })) });
     }
 
     const data = await res.json();
@@ -151,14 +132,14 @@ JSON Format MUST be:
     try {
       const parsed = JSON.parse(cleanJsonStr);
       const rankedMatches = (parsed.matches || []).map((m: any) => ({
-        pet: allCandidates[m.index] || allCandidates[0],
+        pet: formattedLocalPets[m.index] || formattedLocalPets[0],
         score: m.score,
         reason: m.reason
       })).filter((m: any) => m.pet);
 
       return NextResponse.json({ matches: rankedMatches });
     } catch {
-      return NextResponse.json({ matches: allCandidates.slice(0, 6).map(c => ({ pet: c, score: 80, reason: 'Matches your pet criteria' })) });
+      return NextResponse.json({ matches: formattedLocalPets.slice(0, 6).map((c: any) => ({ pet: c, score: 80, reason: 'Matches your pet criteria' })) });
     }
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

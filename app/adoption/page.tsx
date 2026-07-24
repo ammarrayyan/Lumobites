@@ -266,8 +266,7 @@ function AdoptionContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: lifestylePrompt,
-          species: species !== 'all' ? species : undefined,
-          rescueGroupsPets
+          species: species !== 'all' ? species : undefined
         })
       });
 
