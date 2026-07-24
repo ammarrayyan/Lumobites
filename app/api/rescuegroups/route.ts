@@ -89,6 +89,15 @@ export async function GET(request: NextRequest) {
       criteria: "Available"
     });
 
+    // Exclude stale/abandoned listings (not updated in the last year)
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    filters.push({
+      fieldName: "animals.updatedDate",
+      operation: "greaterthan",
+      criteria: oneYearAgo.toISOString()
+    });
+
     if (type && type.toLowerCase() !== 'all') {
       filters.push({
         fieldName: "species.singular",
