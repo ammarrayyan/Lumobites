@@ -98,10 +98,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (age && age.toLowerCase() !== 'any age') {
+      const criteriaAge = age.toLowerCase() === 'puppy' ? 'Baby' : normalizeSentenceCase(age);
       filters.push({
         fieldName: "animals.ageGroup",
         operation: "equals",
-        criteria: normalizeSentenceCase(age)
+        criteria: criteriaAge
       });
     }
 
@@ -183,7 +184,7 @@ export async function GET(request: NextRequest) {
         name: petName,
         species: species,
         breed: attrs.breedPrimary || attrs.breedString || 'Mixed',
-        age: attrs.ageString || 'Not specified',
+        age: attrs.ageGroup || attrs.ageString || 'Not specified',
         size: attrs.sizeGroup || 'Not specified',
         sex: attrs.sex || 'Not specified',
         photo: photoUrl,
