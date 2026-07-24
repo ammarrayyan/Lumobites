@@ -81,11 +81,35 @@ export async function GET(request: NextRequest) {
 
     // Map frontend filters to RescueGroups V5 format
     const filters = [];
+    
+    // Always filter for Available pets only (per user request)
+    filters.push({
+      fieldName: "statuses.name",
+      operation: "equals",
+      criteria: "Available"
+    });
+
     if (type && type.toLowerCase() !== 'all') {
       filters.push({
-        fieldName: "species.name",
+        fieldName: "species.singular",
         operation: "equals",
         criteria: type.toLowerCase() === 'dog' ? 'Dog' : 'Cat'
+      });
+    }
+
+    if (age && age.toLowerCase() !== 'any age') {
+      filters.push({
+        fieldName: "animals.ageGroup",
+        operation: "equals",
+        criteria: normalizeSentenceCase(age)
+      });
+    }
+
+    if (size && size.toLowerCase() !== 'any size') {
+      filters.push({
+        fieldName: "animals.sizeGroup",
+        operation: "equals",
+        criteria: normalizeSentenceCase(size)
       });
     }
     
