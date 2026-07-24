@@ -15,12 +15,13 @@ import ReportsManagement from '@/components/admin/ReportsManagement';
 import BroadcastManagement from '@/components/admin/BroadcastManagement';
 import ShelterManagement from '@/components/admin/ShelterManagement';
 import AdoptionPetsManagement from '@/components/admin/AdoptionPetsManagement';
+import IntegrationsManagement from '@/components/admin/IntegrationsManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast' | 'integrations'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -406,6 +407,16 @@ export default function AdminPage() {
           >
             Broadcast
           </button>
+          <button
+            onClick={() => setActiveTab('integrations')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'integrations'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            Integrations
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -423,6 +434,7 @@ export default function AdminPage() {
           {activeTab === 'affiliates' && <AffiliatesManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'reports' && <ReportsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'broadcast' && <BroadcastManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'integrations' && <IntegrationsManagement adminKey={password} onUnauthorized={handleLogout} />}
           
           {activeTab === 'pet-matching' && (
             <div className="space-y-6">
