@@ -638,6 +638,7 @@ function AdoptionContent() {
             </div>
             <div className="h-[400px] w-full">
               <AdoptionPetsMap 
+                key={`${species}-${age}-${size}-${debouncedCitySearch}`}
                 pets={[...localPets, ...rescueGroupsPets]}
                 citySearch={citySearch}
               />
