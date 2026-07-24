@@ -89,20 +89,11 @@ export async function GET(request: NextRequest) {
       criteria: "Available"
     });
 
-    // Exclude stale/abandoned listings (not updated in the last year)
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    filters.push({
-      fieldName: "animals.updatedDate",
-      operation: "greaterthan",
-      criteria: oneYearAgo.toISOString()
-    });
-
     if (type && type.toLowerCase() !== 'all') {
       filters.push({
         fieldName: "species.singular",
         operation: "equals",
-        criteria: type.toLowerCase() === 'dog' ? 'Dog' : 'Cat'
+        criteria: normalizeSentenceCase(type)
       });
     }
 
@@ -134,21 +125,30 @@ export async function GET(request: NextRequest) {
 
     const res = await fetch('https://api.rescuegroups.org/v5/public/animals/search', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/vnd.api+json',
-        'Authorization': apiKey
+        'Authorization': process.env.RESCUEGROUPS_API_KEY || ''
       },
       body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
-      console.error('[RescueGroups API] request failed:', res.statusText);
+      console.error('[RescueGroups API] Error response:', res.status, await res.text());
       return NextResponse.json({ pets: [] });
     }
 
     const json = await res.json();
-    const animals = json.data || [];
+    let animals = json.data || [];
     const included = json.included || [];
+
+    // Filter out stale/abandoned listings (not updated in the last year)
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    animals = animals.filter((animal: any) => {
+      if (!animal.attributes?.updatedDate) return true; // Keep if no date available
+      const updatedDate = new Date(animal.attributes.updatedDate);
+      return updatedDate >= oneYearAgo;
+    });
 
     // Map JSON:API to our flat frontend PetListing structure
     const pets = animals.map((animal: any) => {
