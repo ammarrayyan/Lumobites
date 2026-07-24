@@ -727,6 +727,7 @@ function AdoptionContent() {
                     <Heart className="w-6 h-6 text-amber-600" /> More Pets Nearby (via RescueGroups)
                   </h2>
                   <p className="text-xs text-gray-600">External partner listings — click full listing to contact rescue</p>
+                  <p className="text-[10px] text-amber-600/80 mt-1 italic font-medium">*Note: Partner listings are periodically synced and may occasionally reflect pets that have just been adopted.</p>
                 </div>
                 <span className="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
                   {rescueGroupsPets.length} pets

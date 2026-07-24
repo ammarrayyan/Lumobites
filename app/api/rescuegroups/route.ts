@@ -166,7 +166,9 @@ export async function GET(request: NextRequest) {
         shelter_name: orgName,
         url: finalUrl,
         description: description,
-        city: city
+        city: city,
+        lat: org?.attributes?.lat,
+        lng: org?.attributes?.lon
       };
     });
 
