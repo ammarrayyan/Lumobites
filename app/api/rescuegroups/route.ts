@@ -1,5 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function decodeHTMLEntities(text: string) {
+  if (!text) return text;
+  return text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function normalizeSentenceCase(text: string) {
+  if (!text) return text;
+  // If the text is 80%+ uppercase, consider it ALL CAPS and normalize
+  const upperCount = (text.match(/[A-Z]/g) || []).length;
+  const alphaCount = (text.match(/[a-zA-Z]/g) || []).length;
+  if (alphaCount > 0 && (upperCount / alphaCount) > 0.8) {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+  return text;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,16 +48,16 @@ export async function GET(request: NextRequest) {
         criteria: type.toLowerCase() === 'dog' ? 'Dog' : 'Cat'
       });
     }
-    // Note: RescueGroups age/size might require more complex mapping in production.
     
     // Construct the RescueGroups V5 API request payload
+    // Default to Louisville ZIP (40202) instead of LA (90210) to match Lumo Bites local area
     const payload: any = {
       data: {
         filters: filters,
         filterProcessing: "1",
         filterRadius: {
-          miles: 25,
-          postalcode: location || "90210" // Default to a zip if location is empty
+          miles: 50,
+          postalcode: location || "40202"
         }
       }
     };
@@ -68,25 +90,42 @@ export async function GET(request: NextRequest) {
 
       // Find included org
       const org = included.find((inc: any) => inc.type === 'orgs' && inc.id === orgId);
-      const orgName = org?.attributes?.name || 'Local Rescue';
+      const orgName = org?.attributes?.name || 'Local Rescue Partner';
       const city = org?.attributes?.city || 'Local Area';
+      const orgUrl = org?.attributes?.url || org?.attributes?.websiteUrl;
 
       // Find included picture
       const pic = included.find((inc: any) => inc.type === 'pictures' && inc.id === pictureId);
       const photoUrl = pic?.attributes?.original?.url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
 
+      // Clean up description
+      let description = attrs.descriptionText || 'No description provided.';
+      description = decodeHTMLEntities(description);
+      description = normalizeSentenceCase(description);
+
+      // Guess species if missing
+      let species = attrs.speciesString || 'Not specified';
+      if (species === 'Not specified' && attrs.searchString) {
+        if (attrs.searchString.toLowerCase().includes('dog')) species = 'Dog';
+        if (attrs.searchString.toLowerCase().includes('cat')) species = 'Cat';
+      }
+
+      // Find a working URL
+      // Fallback to searching Google for the rescue if no direct URL is provided
+      const finalUrl = attrs.url || orgUrl || `https://www.google.com/search?q=${encodeURIComponent(orgName + ' ' + city + ' pet adoption')}`;
+
       return {
         id: animal.id,
-        name: attrs.name || 'Unknown',
-        species: attrs.speciesString || 'Unknown',
-        breed: attrs.breedPrimaryString || 'Mixed',
-        age: attrs.ageString || 'Unknown',
-        size: attrs.sizeString || 'Unknown',
-        sex: attrs.sexString || 'Unknown',
+        name: normalizeSentenceCase(attrs.name || 'Not specified'),
+        species: species,
+        breed: attrs.breedPrimary || attrs.breedString || 'Mixed',
+        age: attrs.ageString || 'Not specified',
+        size: attrs.sizeGroup || 'Not specified',
+        sex: attrs.sex || 'Not specified',
         photo: photoUrl,
         shelter_name: orgName,
-        url: attrs.url || 'https://rescuegroups.org',
-        description: attrs.descriptionText || 'No description provided.',
+        url: finalUrl,
+        description: description,
         city: city
       };
     });
