@@ -92,6 +92,14 @@ export async function POST(request: Request) {
         : null
       if (lastNotif === today && (lostPet.notification_count || 0) >= 3) continue
 
+      // Basic filter 4 — Duplicate prevention (already notified for this found pet)
+      const notifiedFoundPets = lostPet.notified_found_pets || []
+      if (notifiedFoundPets.includes(foundPet.id)) {
+        console.log(`Lost pet ${lostPet.id} already notified for found pet ${foundPet.id}. Skipping.`)
+        continue
+      }
+
+
       // Passed basic filters → now use AI
       aiCallCount++
 
@@ -187,12 +195,20 @@ export async function POST(request: Request) {
           }
         }
 
-        // Update notification count
+        // Update notification count and append to notified_found_pets array
+        const updatedNotifiedFoundPets = [...(lostPet.notified_found_pets || []), foundPet.id]
+        
+        // Mutate in memory so subsequent loop iterations this run don't notify again
+        lostPet.notified_found_pets = updatedNotifiedFoundPets
+        lostPet.notification_count = (lostPet.notification_count || 0) + 1
+        lostPet.last_notification_at = new Date().toISOString()
+
         await supabaseAdmin
           .from('lost_pets')
           .update({
-            notification_count: (lostPet.notification_count || 0) + 1,
-            last_notification_at: new Date().toISOString()
+            notification_count: lostPet.notification_count,
+            last_notification_at: lostPet.last_notification_at,
+            notified_found_pets: updatedNotifiedFoundPets
           })
           .eq('id', lostPet.id)
 
