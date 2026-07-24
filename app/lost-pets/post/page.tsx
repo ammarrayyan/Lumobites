@@ -284,41 +284,7 @@ export default function PostLostPet() {
     );
   }
 
-  if (checking) return null;
 
-  if (!proEmailAuth) {
-    return (
-      <div 
-        className="fixed inset-0 flex flex-col items-center justify-center text-center px-4"
-        style={{ 
-          zIndex: 50, 
-          backgroundColor: 'white',
-          paddingBottom: 'env(safe-area-inset-bottom, 20px)',
-          paddingTop: 'env(safe-area-inset-top, 20px)',
-          minHeight: '100dvh'
-        }}
-      >
-        <p className="text-lg font-medium text-[#4A3E3D] mb-2">
-          Post a Lost or Found Pet
-        </p>
-        <p className="text-gray-500 mb-6">
-          Sign in to continue
-        </p>
-        <button
-          onClick={() => {
-            localStorage.setItem('lumo_redirect_after_login', '/lost-pets/post')
-            window.location.href = '/?signin=true'
-          }}
-          className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium"
-          style={{
-            marginBottom: 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
-          Sign In — It's Free
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] font-sans">
