@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') || searchParams.get('species');
     const age = searchParams.get('age');
     const size = searchParams.get('size');
-    const location = searchParams.get('location') || searchParams.get('city');
+    const locationParam = searchParams.get('location') || searchParams.get('city') || '';
+    const isZip = /^\d{5}$/.test(locationParam.trim());
+    const location = isZip ? locationParam.trim() : "40202";
 
     const apiKey = process.env.RESCUEGROUPS_API_KEY;
 
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
         filterProcessing: "1",
         filterRadius: {
           miles: 50,
-          postalcode: location || "40202"
+          postalcode: location
         }
       }
     };
@@ -92,7 +94,6 @@ export async function GET(request: NextRequest) {
       const org = included.find((inc: any) => inc.type === 'orgs' && inc.id === orgId);
       const orgName = org?.attributes?.name || 'Local Rescue Partner';
       const city = org?.attributes?.city || 'Local Area';
-      const orgUrl = org?.attributes?.url || org?.attributes?.websiteUrl;
 
       // Find included picture
       const pic = included.find((inc: any) => inc.type === 'pictures' && inc.id === pictureId);
@@ -111,12 +112,17 @@ export async function GET(request: NextRequest) {
       }
 
       // Find a working URL
-      // Fallback to searching Google for the rescue if no direct URL is provided
-      const finalUrl = attrs.url || orgUrl || `https://www.google.com/search?q=${encodeURIComponent(orgName + ' ' + city + ' pet adoption')}`;
+      // If no pet-specific URL exists, perform a targeted Google search for the EXACT pet at that shelter
+      // This is much better than dumping the user on a generic shelter homepage where they have to hunt.
+      const petName = normalizeSentenceCase(attrs.name || 'Not specified');
+      let finalUrl = attrs.animalUrl || attrs.url;
+      if (!finalUrl) {
+        finalUrl = `https://www.google.com/search?q=${encodeURIComponent(`"${attrs.name}" adopt "${orgName}" ${city}`)}`;
+      }
 
       return {
         id: animal.id,
-        name: normalizeSentenceCase(attrs.name || 'Not specified'),
+        name: petName,
         species: species,
         breed: attrs.breedPrimary || attrs.breedString || 'Mixed',
         age: attrs.ageString || 'Not specified',
