@@ -1,50 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MOCK_RESCUEGROUPS_PETS = [
-  {
-    id: 'rg-101',
-    name: 'Buddy',
-    species: 'Dog',
-    breed: 'Golden Retriever Mix',
-    age: 'Young',
-    size: 'Medium',
-    sex: 'Male',
-    photo: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=600&q=80',
-    shelter_name: 'Happy Paws Rescue',
-    url: 'https://rescuegroups.org',
-    description: 'Friendly, energetic golden mix looking for a loving home with a yard.',
-    city: 'Local Area'
-  },
-  {
-    id: 'rg-102',
-    name: 'Luna',
-    species: 'Cat',
-    breed: 'Domestic Shorthair',
-    age: 'Adult',
-    size: 'Small',
-    sex: 'Female',
-    photo: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=600&q=80',
-    shelter_name: 'City Animal Shelter',
-    url: 'https://rescuegroups.org',
-    description: 'Calm and affectionate tabby kitten who loves snuggling on warm laps.',
-    city: 'Local Area'
-  },
-  {
-    id: 'rg-103',
-    name: 'Milo',
-    species: 'Dog',
-    breed: 'Beagle / Terrier',
-    age: 'Puppy',
-    size: 'Small',
-    sex: 'Male',
-    photo: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=600&q=80',
-    shelter_name: 'Second Chance Pet Haven',
-    url: 'https://rescuegroups.org',
-    description: 'Playful pup who gets along great with other pets and kids.',
-    city: 'Local Area'
-  }
-];
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -56,22 +11,9 @@ export async function GET(request: NextRequest) {
     const apiKey = process.env.RESCUEGROUPS_API_KEY;
 
     if (!apiKey) {
-      // Filter mock pets if filters applied
-      let results = [...MOCK_RESCUEGROUPS_PETS];
-      
-      if (type && type.toLowerCase() !== 'all') {
-        results = results.filter(p => p.species.toLowerCase() === type.toLowerCase());
-      }
-      if (age && age.toLowerCase() !== 'all') {
-        results = results.filter(p => p.age.toLowerCase() === age.toLowerCase());
-      }
-      if (size && size.toLowerCase() !== 'all') {
-        results = results.filter(p => p.size.toLowerCase() === size.toLowerCase());
-      }
-
       return NextResponse.json({
-        pets: results,
-        message: 'RescueGroups API key not configured yet. Showing sample local pets.'
+        pets: [],
+        message: "We're connecting with more rescue partners soon — check back for more adoptable pets nearby!"
       });
     }
 
