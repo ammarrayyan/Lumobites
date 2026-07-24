@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    const res = await fetch('https://api.rescuegroups.org/v5/public/animals/search', {
+    const res = await fetch('https://api.rescuegroups.org/v5/public/animals/search?limit=250', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/vnd.api+json',
@@ -149,6 +149,9 @@ export async function GET(request: NextRequest) {
       const updatedDate = new Date(animal.attributes.updatedDate);
       return updatedDate >= oneYearAgo;
     });
+
+    // Ensure we don't overwhelm the UI, cap at 25 like the original default
+    animals = animals.slice(0, 25);
 
     // Map JSON:API to our flat frontend PetListing structure
     const pets = animals.map((animal: any) => {
