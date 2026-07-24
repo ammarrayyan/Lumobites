@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     const payload: any = {
       data: {
         filters: filters,
-        filterProcessing: "1",
+        filterProcessing: "2",
         filterRadius: filterRadius
       }
     };
