@@ -93,7 +93,11 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
           const lat = pet.latitude || pet.lat;
           const lng = pet.longitude || pet.lng;
           if (lat && lng) {
-            return { ...pet, lat, lng };
+            // Apply slight offset for multiple pets at the exact same shelter coordinates
+            // so their map pins don't perfectly overlap and hide each other
+            const offsetLat = (index % 5) * 0.0008 - 0.0016;
+            const offsetLng = Math.floor((index % 25) / 5) * 0.0008 - 0.0016;
+            return { ...pet, lat: lat + offsetLat, lng: lng + offsetLng };
           }
 
           const rawCity = pet.city || citySearch;

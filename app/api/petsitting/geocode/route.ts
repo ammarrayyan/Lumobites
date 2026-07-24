@@ -45,13 +45,28 @@ export async function GET(request: NextRequest) {
       const addressComponents = data.results[0].address_components || [];
       const formatted_address = data.results[0].formatted_address;
       
-      let city = '';
+      let locality = '';
+      let state = '';
       
       for (const component of addressComponents) {
-        if (component.types.includes('locality') || component.types.includes('postal_town') || component.types.includes('neighborhood') || component.types.includes('administrative_area_level_3')) {
-          city = component.long_name;
-          break;
+        if (component.types.includes('locality')) {
+          locality = component.long_name;
+        } else if (component.types.includes('postal_town') && !locality) {
+          locality = component.long_name;
+        } else if (component.types.includes('administrative_area_level_3') && !locality) {
+          locality = component.long_name;
+        } else if (component.types.includes('neighborhood') && !locality) {
+          locality = component.long_name;
         }
+
+        if (component.types.includes('administrative_area_level_1')) {
+          state = component.short_name;
+        }
+      }
+
+      let city = locality;
+      if (locality && state) {
+        city = `${locality}, ${state}`;
       }
 
       if (!city) {
