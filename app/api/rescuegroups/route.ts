@@ -30,7 +30,45 @@ export async function GET(request: NextRequest) {
     const size = searchParams.get('size');
     const locationParam = searchParams.get('location') || searchParams.get('city') || '';
     const isZip = /^\d{5}$/.test(locationParam.trim());
-    const location = isZip ? locationParam.trim() : "40202";
+    
+    let filterRadius: any = {
+      miles: 50,
+      postalcode: "40202"
+    };
+
+    if (isZip) {
+      filterRadius.postalcode = locationParam.trim();
+    } else if (locationParam.trim().length > 0) {
+      // Geocode the city name to lat/lon since RescueGroups strictly requires a zip or lat/lon
+      let geocoded = false;
+      try {
+        const googleKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
+        if (googleKey) {
+          const geocodeRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationParam)}&region=us&key=${googleKey}`);
+          const geocodeData = await geocodeRes.json();
+          if (geocodeData.status === 'OK' && geocodeData.results?.length > 0) {
+            const loc = geocodeData.results[0].geometry.location;
+            filterRadius = {
+              miles: 50,
+              lat: loc.lat,
+              lon: loc.lng
+            };
+            geocoded = true;
+          } else {
+             console.error('[RescueGroups Geocode error] Google API returned:', geocodeData.status);
+          }
+        }
+      } catch (e) {
+        console.error('[RescueGroups Geocode error]', e);
+      }
+      
+      if (!geocoded) {
+         return NextResponse.json({
+           pets: [],
+           message: "Could not find that location. Please try searching with a 5-digit zip code."
+         });
+      }
+    }
 
     const apiKey = process.env.RESCUEGROUPS_API_KEY;
 
@@ -52,15 +90,11 @@ export async function GET(request: NextRequest) {
     }
     
     // Construct the RescueGroups V5 API request payload
-    // Default to Louisville ZIP (40202) instead of LA (90210) to match Lumo Bites local area
     const payload: any = {
       data: {
         filters: filters,
         filterProcessing: "1",
-        filterRadius: {
-          miles: 50,
-          postalcode: location
-        }
+        filterRadius: filterRadius
       }
     };
 
