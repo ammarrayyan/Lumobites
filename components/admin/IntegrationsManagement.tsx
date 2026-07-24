@@ -16,7 +16,6 @@ interface IntegrationStatus {
 }
 
 interface IntegrationsResponse {
-  petfinder: IntegrationStatus;
   rescuegroups: IntegrationStatus;
   amazon: IntegrationStatus;
   error?: string;
@@ -94,33 +93,7 @@ export default function IntegrationsManagement({ adminKey, onUnauthorized }: Int
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B5E3C]"></div>
         </div>
       ) : statuses ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Petfinder */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">Petfinder API</h3>
-              {getStatusIcon(statuses.petfinder.status)}
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Configured:</span>
-                <span className="font-medium">{statuses.petfinder.configured ? 'Yes' : 'No'}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Status:</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(statuses.petfinder.status)}`}>
-                  {statuses.petfinder.status}
-                </span>
-              </div>
-              {statuses.petfinder.error && (
-                <div className="mt-4 p-3 bg-red-50 rounded text-xs text-red-600 break-words">
-                  <span className="font-bold block mb-1">Error Details:</span>
-                  {statuses.petfinder.error}
-                </div>
-              )}
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* RescueGroups */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">

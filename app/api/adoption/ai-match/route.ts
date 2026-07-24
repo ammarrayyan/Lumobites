@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, species, petfinderPets } = await request.json();
+    const { prompt, species, rescueGroupsPets } = await request.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Please describe what type of pet you are looking for.' }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       city: p.city || p.shelters?.city || ''
     }));
 
-    const formattedPetfinder = (petfinderPets || []).map((p: any) => ({
+    const formattedRescueGroups = (rescueGroupsPets || []).map((p: any) => ({
       id: p.id,
       name: p.name,
       species: p.species,
@@ -43,12 +43,12 @@ export async function POST(request: NextRequest) {
       description: p.description,
       photo: p.photo,
       url: p.url,
-      source: 'petfinder',
+      source: 'rescuegroups',
       shelter_name: p.shelter_name,
       city: p.city || p.contact?.address?.city || ''
     }));
 
-    const allCandidates = [...formattedLocalPets, ...formattedPetfinder];
+    const allCandidates = [...formattedLocalPets, ...formattedRescueGroups];
 
     const candidatesForPrompt = allCandidates.map((c, i) => ({
       index: i,

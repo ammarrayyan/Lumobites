@@ -24,7 +24,7 @@ interface PetListing {
   description?: string;
   temperament?: string;
   city?: string;
-  source: 'lumo_bites' | 'petfinder';
+  source: 'lumo_bites' | 'rescuegroups';
   status?: string;
 }
 
@@ -108,9 +108,9 @@ function AdoptionContent() {
 
   // Listings data
   const [localPets, setLocalPets] = useState<PetListing[]>([]);
-  const [petfinderPets, setPetfinderPets] = useState<PetListing[]>([]);
+  const [rescueGroupsPets, setRescueGroupsPets] = useState<PetListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [petfinderFallbackMessage, setPetfinderFallbackMessage] = useState('');
+  const [rescueGroupsFallbackMessage, setRescueGroupsFallbackMessage] = useState('');
 
   // AI Matcher Modals
   const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
@@ -173,26 +173,27 @@ function AdoptionContent() {
         setLocalPets(formatted);
       }
 
-      // 2. Fetch Petfinder pets
-      const pfParams = new URLSearchParams();
-      if (species !== 'all') pfParams.append('type', species);
-      if (age !== 'all') pfParams.append('age', age);
-      if (size !== 'all') pfParams.append('size', size);
-      if (debouncedCitySearch) pfParams.append('location', debouncedCitySearch);
+      // 2. Fetch RescueGroups pets
+      const rgParams = new URLSearchParams();
+      if (species !== 'all') rgParams.append('type', species);
+      if (age !== 'all') rgParams.append('age', age);
+      if (size !== 'all') rgParams.append('size', size);
+      if (debouncedCitySearch) rgParams.append('location', debouncedCitySearch);
 
-      const pfRes = await fetch(`/api/petfinder?${pfParams.toString()}`);
-      if (pfRes.ok) {
-        const pfData = await pfRes.json();
-        if (pfData.fallback) {
-          setPetfinderFallbackMessage(pfData.message || '');
+      const rgRes = await fetch(`/api/rescuegroups?${rgParams.toString()}`);
+      if (rgRes.ok) {
+        const rgData = await rgRes.json();
+        if (rgData.message) {
+          setRescueGroupsFallbackMessage(rgData.message || '');
         } else {
-          setPetfinderFallbackMessage('');
+          setRescueGroupsFallbackMessage('');
         }
-        const formattedPf = (pfData.animals || []).map((p: any) => ({
+        
+        const formattedRg = (rgData.pets || []).map((p: any) => ({
           ...p,
-          source: 'petfinder' as const
+          source: 'rescuegroups' as const
         }));
-        setPetfinderPets(formattedPf);
+        setRescueGroupsPets(formattedRg);
       }
     } catch (err) {
       console.error('Failed to load listings:', err);
@@ -265,8 +266,8 @@ function AdoptionContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: lifestylePrompt,
-          species,
-          petfinderPets
+          species: species !== 'all' ? species : undefined,
+          rescueGroupsPets
         })
       });
 
@@ -404,7 +405,7 @@ function AdoptionContent() {
             Find Your New Best Friend
           </h1>
           <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-            Search adoptable pets from verified local shelters and Petfinder partners. Use AI lifestyle matching or visual photo recognition to find your match.
+            Search adoptable pets from verified local shelters and RescueGroups partners. Use AI lifestyle matching or visual photo recognition to find your match.
           </p>
 
           {/* AI MATCHERS TRIGGERS */}
@@ -615,7 +616,7 @@ function AdoptionContent() {
 
           <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
             <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full">
-              {localPets.length + petfinderPets.length} adoptable pets listed
+              {localPets.length + rescueGroupsPets.length} adoptable pets listed
             </span>
           </div>
         </div>
@@ -628,18 +629,20 @@ function AdoptionContent() {
                 <MapPin className="w-4 h-4 text-[#8B5E3C]" /> Pet Locations Map
               </h3>
               <div className="flex items-center gap-3 text-[11px] font-bold">
-                <span className="flex items-center gap-1 text-[#8B5E3C]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#8B5E3C]"></span> Lumo Bites Shelter
-                </span>
-                <span className="flex items-center gap-1 text-amber-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span> Petfinder
-                </span>
+                <div className="flex items-center gap-1 text-[#8B5E3C]">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#8B5E3C]"></span> Lumo Bites Local
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span> RescueGroups
+                </div>
               </div>
             </div>
-            <AdoptionPetsMap
-              pets={[...localPets, ...petfinderPets]}
-              citySearch={citySearch}
-            />
+            <div className="h-[400px] w-full">
+              <AdoptionPetsMap 
+                pets={[...localPets, ...rescueGroupsPets]}
+                citySearch={citySearch}
+              />
+            </div>
           </section>
         )}
 
@@ -668,7 +671,7 @@ function AdoptionContent() {
                 <div className="bg-white p-8 rounded-3xl border border-[#E8DDD4] text-center space-y-2">
                   <PawPrint className="w-8 h-8 text-gray-300 mx-auto" />
                   <p className="font-bold text-sm text-gray-700">No local shelter listings matching your filter</p>
-                  <p className="text-xs text-gray-400">Check back soon as local shelters add new pets, or browse Petfinder listings below.</p>
+                  <p className="text-xs text-gray-400">Check back soon as local shelters add new pets, or browse RescueGroups listings below.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -717,34 +720,34 @@ function AdoptionContent() {
               )}
             </section>
 
-            {/* SECTION 2: MORE PETS NEARBY (VIA PETFINDER) */}
+            {/* SECTION 2: MORE PETS NEARBY (VIA RESCUEGROUPS) */}
             <section className="space-y-4 bg-[#FAF6F0]/70 p-5 md:p-6 rounded-3xl border border-amber-300/40 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
-                    <Heart className="w-6 h-6 text-amber-600" /> More Pets Nearby (via Petfinder)
+                    <Heart className="w-6 h-6 text-amber-600" /> More Pets Nearby (via RescueGroups)
                   </h2>
                   <p className="text-xs text-gray-600">External partner listings — click full listing to contact rescue</p>
                 </div>
                 <span className="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
-                  {petfinderPets.length} pets
+                  {rescueGroupsPets.length} pets
                 </span>
               </div>
 
-              {petfinderFallbackMessage && (
+              {rescueGroupsFallbackMessage && (
                 <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl text-xs text-amber-900 font-medium">
-                  ℹ️ {petfinderFallbackMessage}
+                  ℹ️ {rescueGroupsFallbackMessage}
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {petfinderPets.map(pet => (
+                {rescueGroupsPets.map(pet => (
                   <div key={pet.id} className="bg-white rounded-3xl border border-amber-200/80 hover:border-amber-500 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
                     <div className="p-4 space-y-3">
                       <div className="relative">
                         <img src={pet.photo || '/placeholder-pet.png'} alt={pet.name} className="w-full h-48 rounded-2xl object-cover" />
                         <span className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
-                          🔗 Petfinder Partner
+                          🔗 RescueGroups Partner
                         </span>
                       </div>
                       <div>
@@ -766,7 +769,7 @@ function AdoptionContent() {
 
                     <div className="p-4 pt-0">
                       <a
-                        href={pet.url || 'https://www.petfinder.com'}
+                        href={pet.url || 'https://rescuegroups.org'}
                         target="_blank"
                         rel="noreferrer"
                         className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-amber-200 no-underline transition-all"
