@@ -188,7 +188,7 @@ export async function POST(request: Request) {
           if (twilioClient && fromNumber) {
             try {
               await twilioClient.messages.create({
-                body: "Lumo Bites: A possible match was found for your lost pet! Check lumobites.net/lost-pets for details. Msg&Data rates may apply. Reply STOP to unsubscribe.",
+                body: `Lumo Bites: We found a possible match for your lost pet! View it here: lumobites.net/lost-pets/${foundPet.id}. Msg&Data rates may apply. Reply STOP to unsubscribe.`,
                 from: fromNumber,
                 to: lostPet.contact_phone.trim()
               });
