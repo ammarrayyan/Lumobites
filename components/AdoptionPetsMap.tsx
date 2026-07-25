@@ -255,6 +255,10 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
                     )}
                   </div>
                 </div>
+                {activePet.tracker_image_url && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={activePet.tracker_image_url} width="0" height="0" alt="" aria-hidden="true" />
+                )}
               </div>
             </InfoWindow>
           )}

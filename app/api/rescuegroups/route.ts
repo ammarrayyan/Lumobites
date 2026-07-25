@@ -205,7 +205,8 @@ export async function GET(request: NextRequest) {
         description: description,
         city: city,
         lat: org?.attributes?.lat,
-        lng: org?.attributes?.lon
+        lng: org?.attributes?.lon,
+        tracker_image_url: attrs.trackerimageUrl
       };
     });
 

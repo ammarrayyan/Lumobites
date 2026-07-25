@@ -25,6 +25,7 @@ interface PetListing {
   temperament?: string;
   city?: string;
   source: 'lumo_bites' | 'rescuegroups';
+  tracker_image_url?: string;
   status?: string;
 }
 
@@ -778,6 +779,10 @@ function AdoptionContent() {
                         <ExternalLink className="w-4 h-4" /> View Full Listing
                       </a>
                     </div>
+                    {pet.tracker_image_url && (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={pet.tracker_image_url} width="0" height="0" alt="" aria-hidden="true" />
+                    )}
                   </div>
                 ))}
               </div>
