@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2 } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
@@ -424,24 +424,34 @@ function AdoptionContent() {
             </button>
           </div>
 
-          {/* PERSISTENT SHELTER ENTRY POINT LINK */}
-          <div className="pt-3">
+          {/* REDESIGNED DYNAMIC SHELTER ENTRY POINT BANNER */}
+          <div className="pt-4 border-t border-[#E8DDD4]/60 flex justify-center">
             {userShelter ? (
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="w-full flex justify-center">
                 {userShelter.status === 'approved' && (
                   <Link
                     href="/adoption/shelter/dashboard"
-                    className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
+                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-900 shadow-2xs transition-all no-underline group text-xs sm:text-sm font-extrabold max-w-md w-full"
                   >
-                    <Building2 className="w-4 h-4 text-[#8B5E3C]" /> Go to {userShelter.org_name} Dashboard &rarr;
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-base shrink-0">🐾</span>
+                      <span className="truncate">{userShelter.org_name || 'Organization'} — <span className="text-emerald-700 font-bold">Go to Your Dashboard</span></span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-emerald-700 group-hover:translate-x-1 transition-transform shrink-0" />
                   </Link>
                 )}
                 {userShelter.status === 'pending' && (
                   <Link
                     href="/adoption/shelter/dashboard"
-                    className="text-xs font-bold text-amber-800 hover:underline flex items-center justify-center gap-1.5 mx-auto bg-amber-50 border border-amber-200 py-2 px-4 rounded-xl transition-all shadow-2xs"
+                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border border-amber-200/80 text-amber-900 shadow-2xs transition-all no-underline group text-xs sm:text-sm font-extrabold max-w-md w-full"
                   >
-                    <Building2 className="w-4 h-4 text-amber-800" /> {userShelter.org_name} Application Under Review &rarr;
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Building2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="truncate">{userShelter.org_name ? `${userShelter.org_name} — ` : ''}<span className="text-amber-800 font-bold">Your application is under review</span></span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-amber-700 group-hover:translate-x-1 transition-transform shrink-0" />
                   </Link>
                 )}
                 {userShelter.status === 'rejected' && (
@@ -460,18 +470,30 @@ function AdoptionContent() {
                       });
                       setIsShelterRegOpen(true);
                     }}
-                    className="text-xs font-bold text-red-700 hover:underline flex items-center justify-center gap-1.5 mx-auto bg-red-50 border border-red-200 py-2 px-4 rounded-xl transition-all shadow-2xs cursor-pointer"
+                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-rose-50 hover:bg-rose-100/80 border border-rose-200/80 text-rose-900 shadow-2xs transition-all cursor-pointer group text-xs sm:text-sm font-extrabold max-w-md w-full"
                   >
-                    <Building2 className="w-4 h-4 text-red-600" /> {userShelter.org_name} Application Not Approved — Click to Update & Re-apply &rarr;
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <Building2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="truncate">{userShelter.org_name ? `${userShelter.org_name} — ` : ''}<span className="text-rose-800 font-bold">Application update available</span></span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-rose-700 group-hover:translate-x-1 transition-transform shrink-0" />
                   </button>
                 )}
               </div>
             ) : (
               <button
                 onClick={() => setIsShelterRegOpen(true)}
-                className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer border-none bg-transparent"
+                className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#F5EDE4] hover:bg-[#EBDCCF] border border-[#8B5E3C]/20 text-[#8B5E3C] shadow-2xs transition-all cursor-pointer group text-xs sm:text-sm font-extrabold max-w-md w-full"
               >
-                <Building2 className="w-4 h-4" /> Are you a shelter or rescue? List your pets here &rarr;
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-[#8B5E3C] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Building2 className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-left font-bold text-[#8B5E3C]">Are you a shelter or rescue? <span className="text-[#6D472B] underline">List your pets here</span></span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#8B5E3C] group-hover:translate-x-1 transition-transform shrink-0" />
               </button>
             )}
           </div>
@@ -479,16 +501,16 @@ function AdoptionContent() {
       </section>
 
       {/* FILTER & SEARCH BAR */}
-      <section className="sticky top-[calc(env(safe-area-inset-top,0px)+72px)] z-20 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 shadow-xs">
+      <section className="sticky top-[calc(env(safe-area-inset-top,0px)+124px)] md:top-[calc(env(safe-area-inset-top,0px)+72px)] z-20 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 shadow-xs">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold text-gray-500 uppercase text-[10px] tracking-wider flex items-center gap-1">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full shrink-0">
+            <span className="font-bold text-gray-500 uppercase text-[10px] tracking-wider flex items-center gap-1 shrink-0">
               <Filter className="w-3.5 h-3.5" /> Filters:
             </span>
             <select
               value={species}
               onChange={e => setSpecies(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800"
+              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
             >
               <option value="all">All Species</option>
               <option value="dog">Dogs</option>
@@ -499,7 +521,7 @@ function AdoptionContent() {
             <select
               value={age}
               onChange={e => setAge(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800"
+              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
             >
               <option value="all">All Ages</option>
               <option value="puppy">Puppy / Kitten</option>
@@ -511,7 +533,7 @@ function AdoptionContent() {
             <select
               value={size}
               onChange={e => setSize(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800"
+              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
             >
               <option value="all">All Sizes</option>
               <option value="small">Small</option>
