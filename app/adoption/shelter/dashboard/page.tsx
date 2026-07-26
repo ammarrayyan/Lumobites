@@ -994,11 +994,11 @@ export default function ShelterDashboardPage() {
       {/* POST / EDIT PET MODAL */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-lg w-full flex flex-col max-h-[92dvh] shadow-2xl overflow-hidden my-auto border border-gray-200"
+            className="bg-white rounded-3xl max-w-lg w-full flex flex-col max-h-[78dvh] sm:max-h-[90dvh] shadow-2xl overflow-hidden my-auto border border-gray-200"
             onClick={e => e.stopPropagation()}
           >
             {/* STICKY HEADER WITH CLOSE BUTTON */}
@@ -1224,18 +1224,18 @@ export default function ShelterDashboardPage() {
             </div>
 
             {/* STICKY FOOTER ACTIONS */}
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 shrink-0">
+            <div className="p-4 sm:p-5 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 shrink-0 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] sm:pb-5">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-800 font-extrabold px-5 py-2.5 rounded-xl border border-gray-300 cursor-pointer text-xs transition-colors shadow-xs"
+                className="bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-800 font-extrabold px-5 py-2.5 rounded-xl border border-gray-300 cursor-pointer text-xs transition-colors shadow-xs min-h-[42px] flex items-center justify-center"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 form="petForm"
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold px-6 py-2.5 rounded-xl transition-all cursor-pointer border-none text-xs shadow-md"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold px-6 py-2.5 rounded-xl transition-all cursor-pointer border-none text-xs shadow-md min-h-[42px] flex items-center justify-center"
               >
                 {editingPet ? 'Save Changes' : 'Post Pet'}
               </button>
@@ -1247,11 +1247,11 @@ export default function ShelterDashboardPage() {
       {/* EDIT SHELTER LOGO / PHOTO MODAL */}
       {showPhotoModal && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
           onClick={() => setShowPhotoModal(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative"
+            className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative my-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -1303,11 +1303,11 @@ export default function ShelterDashboardPage() {
       {/* RE-APPLICATION FORM MODAL */}
       {isReapplyOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
           onClick={() => setIsReapplyOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl relative"
+            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl relative my-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
