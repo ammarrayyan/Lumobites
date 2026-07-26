@@ -393,7 +393,7 @@ function AdoptionContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 64px)' }}>
+    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans">
       <MobileCommunityNav />
       {/* HERO SECTION */}
       <section className="bg-gradient-to-b from-[#FAF5EE] to-[#FDFAF7] border-b border-[#E8DDD4] px-6 py-12">
@@ -479,7 +479,7 @@ function AdoptionContent() {
       </section>
 
       {/* FILTER & SEARCH BAR */}
-      <section className="sticky top-[64px] z-20 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 shadow-xs">
+      <section className="sticky top-[calc(env(safe-area-inset-top,0px)+72px)] z-20 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 shadow-xs">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-bold text-gray-500 uppercase text-[10px] tracking-wider flex items-center gap-1">

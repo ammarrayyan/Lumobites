@@ -38,7 +38,8 @@
   }
 }
 
-body {
+html, body {
+  background-color: #FDFAF7;
   color: var(--foreground);
   background: var(--background);
   font-family: -apple-system, 'Inter', sans-serif;

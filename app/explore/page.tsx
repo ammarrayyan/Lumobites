@@ -14,9 +14,6 @@ export default function ExplorePage() {
   return (
     <div 
       className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]"
-      style={{
-        paddingTop: 'calc(env(safe-area-inset-top) + 64px)'
-      }}
     >
       {/* NAVBAR */}
       
