@@ -939,11 +939,11 @@ export default function ShelterDashboardPage() {
                   </div>
 
                   {/* Actions & Status Selector */}
-                  <div className="w-56 flex items-center justify-end gap-1.5 shrink-0">
+                  <div className="flex items-center justify-end gap-2.5 shrink-0 ml-auto sm:ml-0">
                     <select
                       value={pet.status}
                       onChange={e => handleStatusChange(pet.id, e.target.value as 'available' | 'pending' | 'adopted')}
-                      className={`text-xs font-bold py-1.5 px-2 rounded-xl border cursor-pointer focus:outline-none transition-all ${
+                      className={`text-xs font-bold py-2 px-3 rounded-xl border cursor-pointer focus:outline-none transition-all ${
                         pet.status === 'adopted'
                           ? 'bg-purple-50 text-purple-800 border-purple-200'
                           : pet.status === 'pending'
@@ -956,20 +956,25 @@ export default function ShelterDashboardPage() {
                       <option value="pending">Pending</option>
                       <option value="adopted">Adopted</option>
                     </select>
-                    <button
-                      onClick={() => handleOpenEditModal(pet)}
-                      title="Edit"
-                      className="p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold cursor-pointer border-none shrink-0"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePet(pet.id)}
-                      title="Delete"
-                      className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold cursor-pointer border-none shrink-0"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleOpenEditModal(pet)}
+                        title="Edit Listing"
+                        aria-label="Edit listing"
+                        className="p-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 text-xs font-bold cursor-pointer border-none shrink-0 transition-colors flex items-center justify-center min-w-[38px] min-h-[38px]"
+                      >
+                        <Edit3 className="w-4 h-4 text-gray-700" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePet(pet.id)}
+                        title="Delete Listing"
+                        aria-label="Delete listing"
+                        className="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 text-xs font-bold cursor-pointer border-none shrink-0 transition-colors flex items-center justify-center min-w-[38px] min-h-[38px]"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -984,234 +989,273 @@ export default function ShelterDashboardPage() {
 
       {/* POST / EDIT PET MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-extrabold text-gray-900">
-              {editingPet ? `Edit Listing — ${editingPet.name}` : 'Post Pet for Adoption'}
-            </h3>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-lg w-full flex flex-col max-h-[90dvh] shadow-2xl overflow-hidden my-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* STICKY HEADER WITH CLOSE BUTTON */}
+            <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+              <h3 className="text-base sm:text-lg font-extrabold text-gray-900 pr-2 truncate">
+                {editingPet ? `Edit Listing — ${editingPet.name}` : 'Post Pet for Adoption'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-500 hover:text-gray-900 flex items-center justify-center border-none cursor-pointer shrink-0 transition-colors"
+                aria-label="Close modal"
+                title="Close"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
 
-            <form onSubmit={handleSavePet} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">Pet Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-[#8B5E3C]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            {/* SCROLLABLE BODY */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs flex-1">
+              <form id="petForm" onSubmit={handleSavePet} className="space-y-4">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Species *</label>
-                  <select
-                    value={formData.species}
-                    onChange={e => setFormData({ ...formData, species: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                  >
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Breed</label>
+                  <label className="font-bold text-gray-700 block mb-1">Pet Name *</label>
                   <input
                     type="text"
-                    value={formData.breed}
-                    onChange={e => setFormData({ ...formData, breed: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                    placeholder="e.g. Mixed / Labrador"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-[#8B5E3C]"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Age</label>
-                  <select
-                    value={formData.age}
-                    onChange={e => setFormData({ ...formData, age: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
-                  >
-                    <option value="puppy">Puppy/Kitten</option>
-                    <option value="young">Young</option>
-                    <option value="adult">Adult</option>
-                    <option value="senior">Senior</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Size</label>
-                  <select
-                    value={formData.size}
-                    onChange={e => setFormData({ ...formData, size: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
-                  >
-                    <option value="small">Small</option>
-                    <option value="medium">Medium</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Sex</label>
-                  <select
-                    value={formData.sex}
-                    onChange={e => setFormData({ ...formData, sex: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
-                  >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* PET PHOTOS UPLOAD CONTROL */}
-              <div className="space-y-2">
-                <label className="font-bold text-gray-700 block text-xs">
-                  Pet Photos <span className="text-red-500 font-extrabold">* (At least 1 photo required)</span>
-                </label>
-                
-                {/* Photo Previews Grid */}
-                {formData.photo_urls.filter(u => u.trim() !== '').length > 0 && (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
-                    {formData.photo_urls.filter(u => u.trim() !== '').map((url, idx) => (
-                      <div key={idx} className="relative group w-full h-24 rounded-2xl overflow-hidden border border-amber-200 bg-gray-100 shadow-xs">
-                        <img src={url} alt={`Pet preview ${idx + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePhoto(idx)}
-                          className="absolute top-1 right-1 bg-black/70 hover:bg-red-600 text-white rounded-full p-1 border-none cursor-pointer transition-all shadow-xs"
-                          title="Remove photo"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Species *</label>
+                    <select
+                      value={formData.species}
+                      onChange={e => setFormData({ ...formData, species: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                    >
+                      <option value="dog">Dog</option>
+                      <option value="cat">Cat</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
-                )}
-
-                {/* Upload Action Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  {/* Take Photo (Camera on Mobile) */}
-                  <label className="flex-1 min-w-[130px] bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#8B5E3C] font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
-                    <Camera className="w-4 h-4 text-[#8B5E3C]" />
-                    <span>Take Photo</span>
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Breed</label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handlePhotoFiles}
-                      className="hidden"
+                      type="text"
+                      value={formData.breed}
+                      onChange={e => setFormData({ ...formData, breed: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                      placeholder="e.g. Mixed / Labrador"
                     />
-                  </label>
-
-                  {/* Choose from Library / Desktop File Picker */}
-                  <label className="flex-1 min-w-[130px] bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
-                    <Upload className="w-4 h-4 text-gray-500" />
-                    <span>Choose Photos</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handlePhotoFiles}
-                      className="hidden"
-                    />
-                  </label>
+                  </div>
                 </div>
 
-                {/* Optional Image URL Input */}
-                <div className="pt-1">
-                  <input
-                    type="url"
-                    placeholder="Or paste image URL (https://…) & press Enter"
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const val = (e.target as HTMLInputElement).value.trim();
-                        if (val) {
-                          setFormData(prev => ({
-                            ...prev,
-                            photo_urls: [...prev.photo_urls.filter(u => u.trim() !== ''), val]
-                          }));
-                          (e.target as HTMLInputElement).value = '';
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Age</label>
+                    <select
+                      value={formData.age}
+                      onChange={e => setFormData({ ...formData, age: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                    >
+                      <option value="puppy">Puppy/Kitten</option>
+                      <option value="young">Young</option>
+                      <option value="adult">Adult</option>
+                      <option value="senior">Senior</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Size</label>
+                    <select
+                      value={formData.size}
+                      onChange={e => setFormData({ ...formData, size: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                    >
+                      <option value="small">Small</option>
+                      <option value="medium">Medium</option>
+                      <option value="large">Large</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Sex</label>
+                    <select
+                      value={formData.sex}
+                      onChange={e => setFormData({ ...formData, sex: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                    >
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* PET PHOTOS UPLOAD CONTROL */}
+                <div className="space-y-2">
+                  <label className="font-bold text-gray-700 block text-xs">
+                    Pet Photos <span className="text-red-500 font-extrabold">* (At least 1 photo required)</span>
+                  </label>
+                  
+                  {/* Photo Previews Grid */}
+                  {formData.photo_urls.filter(u => u.trim() !== '').length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2">
+                      {formData.photo_urls.filter(u => u.trim() !== '').map((url, idx) => (
+                        <div key={idx} className="relative group w-full h-24 rounded-2xl overflow-hidden border border-amber-200 bg-gray-100 shadow-xs">
+                          <img src={url} alt={`Pet preview ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(idx)}
+                            className="absolute top-1 right-1 bg-black/70 hover:bg-red-600 text-white rounded-full p-1 border-none cursor-pointer transition-all shadow-xs"
+                            title="Remove photo"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Upload Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {/* Take Photo (Camera on Mobile) */}
+                    <label className="flex-1 min-w-[130px] bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[#8B5E3C] font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
+                      <Camera className="w-4 h-4 text-[#8B5E3C]" />
+                      <span>Take Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handlePhotoFiles}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {/* Choose from Library / Desktop File Picker */}
+                    <label className="flex-1 min-w-[130px] bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-all shadow-2xs">
+                      <Upload className="w-4 h-4 text-gray-500" />
+                      <span>Choose Photos</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoFiles}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Optional Image URL Input */}
+                  <div className="pt-1">
+                    <input
+                      type="url"
+                      placeholder="Or paste image URL (https://…) & press Enter"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          if (val) {
+                            setFormData(prev => ({
+                              ...prev,
+                              photo_urls: [...prev.photo_urls.filter(u => u.trim() !== ''), val]
+                            }));
+                            (e.target as HTMLInputElement).value = '';
+                          }
                         }
-                      }
-                    }}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">Tip: Press Enter to add pasted image URL.</p>
+                      }}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Tip: Press Enter to add pasted image URL.</p>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">Temperament / Notes</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Good with kids, low energy, apartment friendly"
-                  value={formData.temperament}
-                  onChange={e => setFormData({ ...formData, temperament: e.target.value })}
-                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
-                  placeholder="Tell adopters about this pet's story and personality…"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Adoption Fee ($)</label>
+                  <label className="font-bold text-gray-700 block mb-1">Temperament / Notes</label>
                   <input
                     type="text"
-                    placeholder="$150"
-                    value={formData.adoption_fee}
-                    onChange={e => setFormData({ ...formData, adoption_fee: e.target.value })}
+                    placeholder="e.g. Good with kids, low energy, apartment friendly"
+                    value={formData.temperament}
+                    onChange={e => setFormData({ ...formData, temperament: e.target.value })}
                     className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
                   />
                 </div>
-                <CityAutocompleteInput
-                  label="City / Location"
-                  value={formData.city}
-                  onChange={val => setFormData({ ...formData, city: val })}
-                  placeholder="Search city (e.g. Austin, TX)…"
-                />
-              </div>
 
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all cursor-pointer border-none"
-                >
-                  {editingPet ? 'Save Changes' : 'Post Pet'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Description</label>
+                  <textarea
+                    rows={3}
+                    value={formData.description}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                    placeholder="Tell adopters about this pet's story and personality…"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Adoption Fee ($)</label>
+                    <input
+                      type="text"
+                      placeholder="$150"
+                      value={formData.adoption_fee}
+                      onChange={e => setFormData({ ...formData, adoption_fee: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5"
+                    />
+                  </div>
+                  <CityAutocompleteInput
+                    label="City / Location"
+                    value={formData.city}
+                    onChange={val => setFormData({ ...formData, city: val })}
+                    placeholder="Search city (e.g. Austin, TX)…"
+                  />
+                </div>
+              </form>
+            </div>
+
+            {/* STICKY FOOTER ACTIONS */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 font-bold px-5 py-2.5 rounded-xl border border-gray-200 cursor-pointer text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="petForm"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer border-none text-xs shadow-2xs"
+              >
+                {editingPet ? 'Save Changes' : 'Post Pet'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* EDIT SHELTER LOGO / PHOTO MODAL */}
       {showPhotoModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4">
-            <h3 className="text-base font-extrabold text-gray-900">Organization Logo / Photo</h3>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setShowPhotoModal(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-gray-900">Organization Logo / Photo</h3>
+              <button
+                type="button"
+                onClick={() => setShowPhotoModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center border-none cursor-pointer shrink-0 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
             <p className="text-xs text-gray-500">Enter a direct image URL for your rescue or shelter logo.</p>
 
             <div className="space-y-3 text-xs">
@@ -1249,9 +1293,25 @@ export default function ShelterDashboardPage() {
 
       {/* RE-APPLICATION FORM MODAL */}
       {isReapplyOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-extrabold text-gray-900">Update Info & Re-apply</h3>
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setIsReapplyOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-extrabold text-gray-900">Update Info & Re-apply</h3>
+              <button
+                type="button"
+                onClick={() => setIsReapplyOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center border-none cursor-pointer shrink-0 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
             <p className="text-xs text-gray-500">Update your organization details below to re-submit your application for admin review.</p>
 
             <form onSubmit={handleReapplySubmit} className="space-y-3 text-xs">
@@ -1328,7 +1388,7 @@ export default function ShelterDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsReapplyOpen(false)}
-                  className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl border-none cursor-pointer text-xs"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-xl border-none cursor-pointer text-xs"
                 >
                   Cancel
                 </button>
