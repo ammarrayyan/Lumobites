@@ -905,27 +905,29 @@ export default function ShelterDashboardPage() {
 
             <div className="divide-y divide-gray-100">
               {filteredPets.map(pet => (
-                <div key={pet.id} className="p-4 flex items-center gap-3 hover:bg-amber-50/30 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(pet.id)}
-                    onChange={() => toggleSelectPet(pet.id)}
-                    className="rounded text-[#8B5E3C]"
-                  />
+                <div key={pet.id} className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-amber-50/30 transition-colors">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(pet.id)}
+                      onChange={() => toggleSelectPet(pet.id)}
+                      className="rounded text-[#8B5E3C] w-4 h-4"
+                    />
 
-                  <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.species} className="w-14 h-14 rounded-2xl shrink-0" />
+                    <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.species} className="w-14 h-14 rounded-2xl shrink-0" />
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-sm text-gray-900 truncate">{pet.name}</h3>
-                      <span className="text-xs text-gray-400">({pet.sex})</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm text-gray-900 truncate">{pet.name}</h3>
+                        <span className="text-xs text-gray-400">({pet.sex})</span>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{pet.breed} &bull; {pet.age} &bull; {pet.size}</p>
+                      {pet.adoption_fee && <p className="text-[11px] font-bold text-[#8B5E3C]">Fee: {pet.adoption_fee}</p>}
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{pet.breed} &bull; {pet.age} &bull; {pet.size}</p>
-                    {pet.adoption_fee && <p className="text-[11px] font-bold text-[#8B5E3C]">Fee: {pet.adoption_fee}</p>}
                   </div>
 
-                  {/* Status Badge */}
-                  <div className="w-24 text-center shrink-0">
+                  {/* Status Badge - Hidden on mobile, visible on sm+ */}
+                  <div className="w-24 text-center shrink-0 hidden sm:block">
                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold capitalize ${
                       pet.status === 'adopted' ? 'bg-purple-100 text-purple-800' : pet.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                     }`}>
@@ -933,13 +935,13 @@ export default function ShelterDashboardPage() {
                     </span>
                   </div>
 
-                  {/* Posted duration */}
+                  {/* Posted duration - Hidden on mobile/tablet */}
                   <div className="w-28 text-center text-xs text-gray-400 font-medium hidden md:block">
                     {getDaysAgo(pet.created_at)}
                   </div>
 
                   {/* Actions & Status Selector */}
-                  <div className="flex items-center justify-end gap-2.5 shrink-0 ml-auto sm:ml-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t border-gray-100 sm:border-0 w-full sm:w-auto">
                     <select
                       value={pet.status}
                       onChange={e => handleStatusChange(pet.id, e.target.value as 'available' | 'pending' | 'adopted')}
@@ -962,17 +964,19 @@ export default function ShelterDashboardPage() {
                         onClick={() => handleOpenEditModal(pet)}
                         title="Edit Listing"
                         aria-label="Edit listing"
-                        className="p-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300 text-xs font-bold cursor-pointer border-none shrink-0 transition-colors flex items-center justify-center min-w-[38px] min-h-[38px]"
+                        className="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 active:bg-amber-300 text-amber-900 text-xs font-bold cursor-pointer border border-amber-300 shrink-0 transition-colors flex items-center justify-center gap-1.5 min-w-[42px] min-h-[42px]"
                       >
-                        <Edit3 className="w-4 h-4 text-gray-700" />
+                        <Edit3 className="w-4 h-4 text-amber-900" />
+                        <span className="sm:hidden">Edit</span>
                       </button>
                       <button
                         onClick={() => handleDeletePet(pet.id)}
                         title="Delete Listing"
                         aria-label="Delete listing"
-                        className="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200 text-xs font-bold cursor-pointer border-none shrink-0 transition-colors flex items-center justify-center min-w-[38px] min-h-[38px]"
+                        className="px-3 py-2 rounded-xl bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-800 text-xs font-bold cursor-pointer border border-red-300 shrink-0 transition-colors flex items-center justify-center gap-1.5 min-w-[42px] min-h-[42px]"
                       >
-                        <Trash2 className="w-4 h-4 text-red-600" />
+                        <Trash2 className="w-4 h-4 text-red-700" />
+                        <span className="sm:hidden">Delete</span>
                       </button>
                     </div>
                   </div>
@@ -990,26 +994,31 @@ export default function ShelterDashboardPage() {
       {/* POST / EDIT PET MODAL */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-lg w-full flex flex-col max-h-[90dvh] shadow-2xl overflow-hidden my-auto"
+            className="bg-white rounded-3xl max-w-lg w-full flex flex-col max-h-[92dvh] shadow-2xl overflow-hidden my-auto border border-gray-200"
             onClick={e => e.stopPropagation()}
           >
             {/* STICKY HEADER WITH CLOSE BUTTON */}
-            <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
-              <h3 className="text-base sm:text-lg font-extrabold text-gray-900 pr-2 truncate">
-                {editingPet ? `Edit Listing — ${editingPet.name}` : 'Post Pet for Adoption'}
-              </h3>
+            <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center justify-between bg-amber-50/60 shrink-0">
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-[#8B5E3C]/10 text-[#8B5E3C] flex items-center justify-center shrink-0">
+                  <Edit3 className="w-4 h-4 text-[#8B5E3C]" />
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-gray-900 truncate">
+                  {editingPet ? `Edit Listing — ${editingPet.name}` : 'Post Pet for Adoption'}
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-500 hover:text-gray-900 flex items-center justify-center border-none cursor-pointer shrink-0 transition-colors"
+                className="w-9 h-9 rounded-full bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 hover:text-gray-900 flex items-center justify-center border border-gray-300 cursor-pointer shrink-0 transition-colors shadow-xs"
                 aria-label="Close modal"
                 title="Close"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5 text-gray-700 stroke-[2.5]" />
               </button>
             </div>
 
@@ -1215,18 +1224,18 @@ export default function ShelterDashboardPage() {
             </div>
 
             {/* STICKY FOOTER ACTIONS */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2.5 shrink-0">
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 font-bold px-5 py-2.5 rounded-xl border border-gray-200 cursor-pointer text-xs transition-colors"
+                className="bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-800 font-extrabold px-5 py-2.5 rounded-xl border border-gray-300 cursor-pointer text-xs transition-colors shadow-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 form="petForm"
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold px-6 py-2.5 rounded-xl transition-all cursor-pointer border-none text-xs shadow-2xs"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold px-6 py-2.5 rounded-xl transition-all cursor-pointer border-none text-xs shadow-md"
               >
                 {editingPet ? 'Save Changes' : 'Post Pet'}
               </button>
