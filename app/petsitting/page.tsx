@@ -3414,13 +3414,15 @@ export function PetSittingContent() {
           </button>
           <a
             href="/vet-boarding/dashboard"
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              false
-                ? 'bg-[#8B5E3C] text-white shadow-sm'
-                : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-            }`}
+            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap"
           >
             🏥 Vet Clinic Portal
+          </a>
+          <a
+            href="/pet-daycare/dashboard"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap"
+          >
+            🐕 Pet Daycare Portal
           </a>
         </div>
       </div>
