@@ -101,6 +101,32 @@ export default function Home() {
     router.push('/vet-boarding');
   };
 
+  const handleSelectDaycare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setPartnerModalOpen(false);
+    const activeEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      ''
+    ).trim();
+
+    if (activeEmail) {
+      try {
+        const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(activeEmail)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.daycare && data.daycare.status === 'approved') {
+            router.push('/pet-daycare/dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Daycare check error:', e);
+      }
+    }
+    router.push('/pet-daycare');
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
 
@@ -220,35 +246,28 @@ export default function Home() {
                 </div>
               </Link>
 
-              {/* Option 3: Pet Daycare (Placeholder) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setPartnerModalOpen(false);
-                  setDaycareNoticeOpen(true);
-                }}
-                className="w-full p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F0FDF4] border border-[#E8DDD4] hover:border-emerald-400 transition-all text-left group border-none cursor-pointer"
+              {/* Option 3: Pet Daycare */}
+              <Link
+                href="/pet-daycare"
+                onClick={handleSelectDaycare}
+                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F0FDF4] border border-[#E8DDD4] hover:border-emerald-400 transition-all text-left group"
+                style={{ textDecoration: 'none' }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
                     <span className="text-xl">🐕</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-emerald-700 transition-colors">
-                        Pet Daycare
-                      </p>
-                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Coming Soon
-                      </span>
-                    </div>
+                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-emerald-700 transition-colors">
+                      Pet Daycare Facility
+                    </p>
                     <p className="text-xs text-[#8B7E7D]">
                       Daycare & playgroup listings for local pet owners
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-emerald-700 group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -406,6 +406,8 @@ export function PetSittingContent() {
   const [sitters, setSitters] = useState<Sitter[]>([]);
   const [vetClinics, setVetClinics] = useState<any[]>([]);
   const [inquiringClinic, setInquiringClinic] = useState<any | null>(null);
+  const [petDaycares, setPetDaycares] = useState<any[]>([]);
+  const [inquiringDaycare, setInquiringDaycare] = useState<any | null>(null);
   const [loadingSitters, setLoadingSitters] = useState(false);
   const [aiSitterSearch, setAiSitterSearch] = useState('');
   const [aiSitterResults, setAiSitterResults] = useState<Sitter[] | null>(null);
@@ -1311,6 +1313,18 @@ export function PetSittingContent() {
     }
   };
 
+  const fetchPetDaycares = async () => {
+    try {
+      const res = await fetch('/api/petsitting/daycares');
+      if (res.ok) {
+        const data = await res.json();
+        setPetDaycares(data.daycares || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch pet daycares');
+    }
+  };
+
   const fetchSitters = async (email?: string, dayOverride?: string, serviceOverride?: string) => {
     setLoadingSitters(true);
     try {
@@ -1324,7 +1338,7 @@ export function PetSittingContent() {
       if (qService && qService !== 'all') params.append('service_type', qService);
 
       const url = `/api/petsitting/sitters?${params.toString()}`;
-      const [res] = await Promise.all([fetch(url), fetchVetClinics()]);
+      const [res] = await Promise.all([fetch(url), fetchVetClinics(), fetchPetDaycares()]);
       if (res.ok) {
         const data = await res.json();
         setSitters(data.sitters);
@@ -3543,6 +3557,7 @@ export function PetSittingContent() {
                   <option value="Dog walking">Dog walking</option>
                   <option value="Sitter's home boarding">Sitter's home boarding</option>
                   <option value="Veterinary Boarding">Veterinary Boarding</option>
+                  <option value="Pet Daycare">Pet Daycare</option>
                 </select>
               </div>
             </div>
@@ -3962,6 +3977,91 @@ export function PetSittingContent() {
                                 <button
                                   onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
                                   className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200"
+                                >
+                                  Sign in to Inquire
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─── Pet Daycare Facilities ─────────────────────────── */}
+                  {petDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare') && (
+                    <div className="mt-8">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-base font-black text-[#4A3E3D]">🐕 Pet Daycare Facilities Near You</span>
+                        <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">Verified Daycares</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {petDaycares.map((daycare: any) => (
+                          <div
+                            key={daycare.id}
+                            className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                            onClick={() => {
+                              if (!reqEmail) {
+                                window.dispatchEvent(new Event('lumo-open-signin'));
+                                return;
+                              }
+                              setInquiringDaycare(daycare);
+                            }}
+                          >
+                            <div className="flex gap-4">
+                              <div className="shrink-0">
+                                {daycare.logo_url ? (
+                                  <img src={daycare.logo_url} alt={daycare.business_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
+                                ) : (
+                                  <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                                    <span className="text-2xl">🐕</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                  <h3 className="text-base font-bold text-[#4A3E3D]">{daycare.business_name}</h3>
+                                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                    <ShieldCheck className="w-3 h-3" /> Verified
+                                  </span>
+                                  {daycare.today_status === 'full' ? (
+                                    <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
+                                      ⛔ Full today — ask about other dates
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                      ✅ Available today
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
+                                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                  {daycare.city}{daycare.state ? `, ${daycare.state}` : ''}
+                                </p>
+                                {daycare.description && (
+                                  <p className="text-sm text-[#555555] line-clamp-2 mb-2">{daycare.description}</p>
+                                )}
+                                {daycare.services && daycare.services.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {daycare.services.slice(0, 4).map((s: string) => (
+                                      <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="mt-4">
+                              {isOwnerPro ? (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer"
+                                >
+                                  <MessageSquare className="w-4 h-4" /> Inquire About Daycare
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
+                                  className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer"
                                 >
                                   Sign in to Inquire
                                 </button>
@@ -7504,6 +7604,14 @@ export function PetSittingContent() {
         />
       )}
 
+      {inquiringDaycare && (
+        <DaycareInquiryModal
+          daycare={inquiringDaycare}
+          ownerEmail={reqEmail}
+          onClose={() => setInquiringDaycare(null)}
+        />
+      )}
+
       </div>
     </div>
   );
@@ -7614,6 +7722,126 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
             onClick={handleStartInquiry}
             disabled={loading}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer disabled:opacity-50"
+          >
+            {loading ? 'Opening...' : (<><MessageSquare className="w-4 h-4" /> Start Conversation</>)}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#4A3E3D] font-bold py-3 rounded-xl transition-colors text-sm border-none cursor-pointer"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Pet Daycare Inquiry Modal (additive, self-contained) ────────────────────
+interface DaycareInquiryModalProps {
+  daycare: any;
+  ownerEmail: string;
+  onClose: () => void;
+}
+
+function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryModalProps) {
+  const [step, setStep] = React.useState<'confirm' | 'chat'>('confirm');
+  const [inquiryId, setInquiryId] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const activeEmail = (
+    ownerEmail ||
+    (typeof window !== 'undefined'
+      ? localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')
+      : '') ||
+    ''
+  ).trim();
+
+  const handleStartInquiry = async () => {
+    if (!activeEmail) {
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      onClose();
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/pet-daycare/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ daycare_id: daycare.id, owner_email: activeEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to start inquiry');
+      setInquiryId(data.inquiry.id);
+      setStep('chat');
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (step === 'chat' && inquiryId) {
+    return (
+      <ChatModal
+        isOpen={true}
+        onClose={onClose}
+        bookingId={inquiryId}
+        bookingDetails={`Pet Daycare Inquiry • ${daycare.business_name}`}
+        currentUserEmail={ownerEmail}
+        otherUserName={daycare.business_name}
+        otherUserEmail={daycare.email}
+        otherUserType="sitter"
+        onReport={() => {}}
+      />
+    );
+  }
+
+  return (
+    <div className="modal-overlay fixed inset-0 z-[1050] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center gap-3 mb-4">
+          {daycare.logo_url ? (
+            <img src={daycare.logo_url} alt={daycare.business_name} className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+              <span className="text-2xl">🐕</span>
+            </div>
+          )}
+          <div>
+            <h2 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h2>
+            <p className="text-sm text-[#8B7E7D]">{daycare.city}{daycare.state ? `, ${daycare.state}` : ''}</p>
+          </div>
+        </div>
+
+        <p className="text-sm text-[#555555] mb-4">
+          You&apos;re about to open a messaging thread with <strong>{daycare.business_name}</strong> to inquire about pet daycare services.
+        </p>
+
+        {daycare.services && daycare.services.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {daycare.services.map((s: string) => (
+              <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
+            ))}
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleStartInquiry}
+            disabled={loading}
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer disabled:opacity-50"
           >
             {loading ? 'Opening...' : (<><MessageSquare className="w-4 h-4" /> Start Conversation</>)}
           </button>
