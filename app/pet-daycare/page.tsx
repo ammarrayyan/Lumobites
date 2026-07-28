@@ -25,12 +25,12 @@ export default function DaycareRegistrationPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // OTP Sign-In State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [daycareEmail, setDaycareEmail] = useState('');
   const [otpStep, setOtpStep] = useState<'email' | 'code'>('email');
   const [otpCode, setOtpCode] = useState('');
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
   const [otpError, setOtpError] = useState('');
 
   // Form State
@@ -54,6 +54,7 @@ export default function DaycareRegistrationPage() {
       if (cached) {
         setDaycareEmail(cached);
         setForm(prev => ({ ...prev, email: cached }));
+        setIsAuthenticated(true);
         fetchExistingDaycare(cached);
       } else {
         setLoading(false);
@@ -116,7 +117,6 @@ export default function DaycareRegistrationPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to send verification code.');
       setOtpStep('code');
-      setOtpSent(true);
     } catch (err: any) {
       setOtpError(err.message || 'Error sending code.');
     } finally {
@@ -147,6 +147,7 @@ export default function DaycareRegistrationPage() {
       document.cookie = `lumo_pro_email=${encodeURIComponent(trimmedEmail)}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
       window.dispatchEvent(new Event('lumo-pro-update'));
 
+      setIsAuthenticated(true);
       setForm(prev => ({ ...prev, email: trimmedEmail }));
       await fetchExistingDaycare(trimmedEmail);
     } catch (err: any) {
@@ -164,10 +165,10 @@ export default function DaycareRegistrationPage() {
       document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       window.dispatchEvent(new Event('lumo-pro-update'));
       setDaycareEmail('');
+      setIsAuthenticated(false);
       setExistingDaycare(null);
       setOtpStep('email');
       setOtpCode('');
-      setOtpSent(false);
       setForm({
         business_name: '', license_number: '', email: '', phone: '',
         address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
@@ -221,8 +222,8 @@ export default function DaycareRegistrationPage() {
     );
   }
 
-  // Not signed in -> Show OTP Sign-In Portal
-  if (!daycareEmail || (!existingDaycare && otpStep === 'email' && !otpSent)) {
+  // Not authenticated -> Show OTP Sign-In Portal
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#FDFAF7] py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#E8DDD4]">
