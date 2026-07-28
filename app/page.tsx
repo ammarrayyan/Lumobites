@@ -49,6 +49,58 @@ export default function Home() {
     setPartnerModalOpen(true);
   };
 
+  const handleSelectShelter = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setPartnerModalOpen(false);
+    const activeEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      ''
+    ).trim();
+
+    if (activeEmail) {
+      try {
+        const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(activeEmail)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.shelter && data.shelter.status === 'approved') {
+            router.push('/adoption/shelter/dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Shelter check error:', e);
+      }
+    }
+    router.push('/adoption?register=shelter');
+  };
+
+  const handleSelectVet = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setPartnerModalOpen(false);
+    const activeEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      ''
+    ).trim();
+
+    if (activeEmail) {
+      try {
+        const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(activeEmail)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.clinic && data.clinic.status === 'approved') {
+            router.push('/vet-boarding/dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Vet clinic check error:', e);
+      }
+    }
+    router.push('/vet-boarding');
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
 
@@ -125,7 +177,7 @@ export default function Home() {
               {/* Option 1: Shelter / Rescue */}
               <Link
                 href="/adoption?register=shelter"
-                onClick={() => setPartnerModalOpen(false)}
+                onClick={handleSelectShelter}
                 className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F5EDE4] border border-[#E8DDD4] hover:border-[#8B5E3C] transition-all text-left group"
                 style={{ textDecoration: 'none' }}
               >
@@ -148,7 +200,7 @@ export default function Home() {
               {/* Option 2: Vet Clinic */}
               <Link
                 href="/vet-boarding"
-                onClick={() => setPartnerModalOpen(false)}
+                onClick={handleSelectVet}
                 className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#EEF4FF] border border-[#E8DDD4] hover:border-blue-400 transition-all text-left group"
                 style={{ textDecoration: 'none' }}
               >

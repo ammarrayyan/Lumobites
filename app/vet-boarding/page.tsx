@@ -75,6 +75,10 @@ export default function VetBoardingRegisterPage() {
         const data = await res.json();
         if (data.clinic) {
           setExistingClinic(data.clinic);
+          if (data.clinic.status === 'approved') {
+            router.replace('/vet-boarding/dashboard');
+            return;
+          }
           setForm({
             clinic_name: data.clinic.clinic_name || '',
             license_number: data.clinic.license_number || '',
