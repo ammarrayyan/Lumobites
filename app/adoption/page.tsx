@@ -198,6 +198,25 @@ function AdoptionContent() {
       window.dispatchEvent(new Event('lumo-pro-update'));
 
       setShelterFormData(prev => ({ ...prev, email: trimmedEmail }));
+
+      // Immediately check if this email is an existing approved shelter
+      try {
+        const shelterRes = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(trimmedEmail)}`);
+        if (shelterRes.ok) {
+          const shelterData = await shelterRes.json();
+          if (shelterData && shelterData.shelter) {
+            setUserShelter(shelterData.shelter);
+            if (shelterData.shelter.status === 'approved') {
+              setIsShelterRegOpen(false);
+              router.push('/adoption/shelter/dashboard');
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to check shelter status after verification:', e);
+      }
+
       setShelterOtpStep('form');
     } catch (err: any) {
       setShelterOtpError(err.message || 'Verification failed.');
