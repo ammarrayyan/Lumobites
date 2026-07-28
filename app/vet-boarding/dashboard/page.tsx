@@ -531,7 +531,7 @@ export default function VetBoardingDashboardPage() {
               </div>
 
               {/* Legend */}
-              <div className="flex items-center gap-6 mb-4 text-xs font-medium border-t border-b border-gray-100 py-3">
+              <div className="flex flex-wrap items-center gap-5 mb-4 text-xs font-medium border-t border-b border-gray-100 py-3">
                 <div className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block"></span>
                   <span className="text-[#4A3E3D]">Available (Default)</span>
@@ -539,6 +539,10 @@ export default function VetBoardingDashboardPage() {
                 <div className="flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-rose-500 inline-block"></span>
                   <span className="text-[#4A3E3D]">Full / Blocked</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-gray-300 inline-block"></span>
+                  <span className="text-gray-400">Past Date (Non-editable)</span>
                 </div>
               </div>
 
@@ -582,21 +586,24 @@ export default function VetBoardingDashboardPage() {
 
                         const isFull = fullDates.includes(dateStr);
                         const isToday = dateStr === todayStr;
+                        const isPast = dateStr < todayStr;
                         const isToggling = togglingDate === dateStr;
 
                         return (
                           <button
                             key={dateStr}
-                            disabled={isToggling}
-                            onClick={() => toggleDateAvailability(dateStr)}
+                            disabled={isPast || isToggling}
+                            onClick={() => !isPast && toggleDateAvailability(dateStr)}
                             className={`h-16 rounded-2xl p-2 flex flex-col justify-between items-start transition-all border text-left relative ${
-                              isFull
-                                ? 'bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-800'
-                                : 'bg-emerald-50/60 border-emerald-100 hover:bg-emerald-100/80 text-emerald-900'
+                              isPast
+                                ? 'bg-gray-50/70 border-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                                : isFull
+                                ? 'bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-800 cursor-pointer'
+                                : 'bg-emerald-50/60 border-emerald-100 hover:bg-emerald-100/80 text-emerald-900 cursor-pointer'
                             } ${isToday ? 'ring-2 ring-blue-500 shadow-sm' : ''}`}
                           >
                             <div className="w-full flex items-center justify-between">
-                              <span className={`text-xs font-black ${isToday ? 'text-blue-600' : 'text-[#4A3E3D]'}`}>
+                              <span className={`text-xs font-black ${isPast ? 'text-gray-400 font-normal' : isToday ? 'text-blue-600' : 'text-[#4A3E3D]'}`}>
                                 {dayNum}
                               </span>
                               {isToday && (
@@ -604,7 +611,11 @@ export default function VetBoardingDashboardPage() {
                               )}
                             </div>
                             <div className="w-full mt-1">
-                              {isToggling ? (
+                              {isPast ? (
+                                <span className="text-[9px] font-medium text-gray-400 block text-center uppercase tracking-wider">
+                                  Passed
+                                </span>
+                              ) : isToggling ? (
                                 <span className="text-[9px] text-gray-400 animate-pulse font-medium">Updating...</span>
                               ) : isFull ? (
                                 <span className="text-[9px] font-black bg-rose-200 text-rose-900 px-1.5 py-0.5 rounded border border-rose-300 block text-center uppercase tracking-wider">
