@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { extractOgImage } from '@/lib/og-fetcher';
+import { sendDaycareRegistrationEmail, sendAdminNewPartnerNotificationEmail } from '@/lib/adoption-email';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: updateErr.message }, { status: 500 });
       }
 
+      sendDaycareRegistrationEmail(cleanEmail, business_name);
+      sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, city, state, phone, website);
+
       return NextResponse.json({
         daycare: updatedDaycare,
         message: 'Application re-submitted! Pending admin review.'
@@ -141,6 +145,9 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    sendDaycareRegistrationEmail(cleanEmail, business_name);
+    sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, city, state, phone, website);
 
     return NextResponse.json({ daycare, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {

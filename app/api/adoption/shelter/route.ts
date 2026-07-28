@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendShelterRegistrationEmail } from '@/lib/adoption-email';
+import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
 
 export async function GET(request: NextRequest) {
@@ -89,8 +89,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: updateErr.message }, { status: 500 });
       }
 
-      // Send confirmation email on re-application
+      // Send confirmation email to applicant & notification to admin
       sendShelterRegistrationEmail(cleanEmail, org_name);
+      sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, city, state, phone, website);
 
       return NextResponse.json({
         shelter: updatedShelter,
@@ -126,8 +127,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send email notification to shelter
+    // Send email notification to shelter & admin
     sendShelterRegistrationEmail(cleanEmail, org_name);
+    sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, city, state, phone, website);
 
     return NextResponse.json({ shelter, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {

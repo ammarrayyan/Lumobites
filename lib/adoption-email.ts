@@ -289,3 +289,177 @@ export async function sendVetClinicRejectionEmail(toEmail: string, clinicName: s
     console.error('[Vet Email] Rejection email threw exception:', err);
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin Notification Email for New Partner Applications
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * 8. Admin Email Notification on New Partner Application Submission
+ */
+export async function sendAdminNewPartnerNotificationEmail(
+  partnerType: 'Shelter' | 'Vet Clinic' | 'Pet Daycare',
+  orgName: string,
+  applicantEmail: string,
+  city: string,
+  state?: string,
+  phone?: string,
+  website?: string
+) {
+  if (!process.env.RESEND_API_KEY) return;
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'info@lumobitespet.com';
+  try {
+    const locationStr = [city, state].filter(Boolean).join(', ');
+    const subject = `New ${partnerType} Application — ${orgName}`;
+    const adminUrl = `https://lumobites.net/admin`;
+
+    const html = brandedEmail({
+      subject,
+      preheader: `New ${partnerType} application pending review: ${orgName}`,
+      body: `
+        <h1 style="${emailStyles.h1}">New ${partnerType} Application 📋</h1>
+        <p style="${emailStyles.p}">A new partner application has been submitted and is waiting for your review in the Admin Panel.</p>
+
+        ${emailStyles.infoBox(`
+          <p style="${emailStyles.pSmall}"><strong>Type:</strong> ${partnerType}</p>
+          <p style="${emailStyles.pSmall}"><strong>Name:</strong> ${orgName}</p>
+          <p style="${emailStyles.pSmall}"><strong>Email:</strong> ${applicantEmail}</p>
+          <p style="${emailStyles.pSmall}"><strong>Location:</strong> ${locationStr || 'N/A'}</p>
+          ${phone ? `<p style="${emailStyles.pSmall}"><strong>Phone:</strong> ${phone}</p>` : ''}
+          ${website ? `<p style="${emailStyles.pSmall}"><strong>Website:</strong> <a href="${website}" style="color:#8B5E3C;text-decoration:underline;">${website}</a></p>` : ''}
+        `)}
+
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${adminUrl}" style="background-color:#8B5E3C;color:#FFFFFF;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 28px;border-radius:12px;display:inline-block;">
+            Open Admin Panel to Review &rarr;
+          </a>
+        </div>
+      `
+    });
+
+    const res = await resend.emails.send({
+      from: fromEmail,
+      to: [adminEmail],
+      subject,
+      html
+    });
+
+    if (res.error) {
+      console.warn(`[Admin Email] New ${partnerType} notification notice:`, res.error.message || res.error);
+    } else {
+      console.log(`[Admin Email] New ${partnerType} notification sent successfully to ${adminEmail}:`, res.data?.id);
+    }
+  } catch (err) {
+    console.error(`[Admin Email] New ${partnerType} notification email threw exception:`, err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pet Daycare Email Notifications
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * 9. On Pet Daycare Registration Submission
+ */
+export async function sendDaycareRegistrationEmail(toEmail: string, businessName: string) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    const subject = `Application Received — Lumo Bites Pet Daycare Partner`;
+    const html = brandedEmail({
+      subject,
+      preheader: `We've received your application for ${businessName}`,
+      body: `
+        <h1 style="${emailStyles.h1}">Application Received</h1>
+        <p style="${emailStyles.p}">Thank you for applying to join Lumo Bites as a verified Pet Daycare partner!</p>
+
+        ${emailStyles.infoBox(`
+          <p style="${emailStyles.pSmall}"><strong>Business:</strong> ${businessName}</p>
+          <p style="${emailStyles.pSmall}"><strong>Status:</strong> Under Review</p>
+        `)}
+
+        <p style="${emailStyles.p}">Our team will review your daycare details. Once approved, you will receive an email confirmation and your daycare will appear in our Pet Daycare search.</p>
+        <p style="${emailStyles.pSmall}">If you have any questions in the meantime, please reach out to support.</p>
+      `
+    });
+
+    const res = await resend.emails.send({ from: fromEmail, to: [toEmail], subject, html });
+    if (res.error) {
+      console.warn('[Daycare Email] Registration email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Daycare Email] Registration email sent successfully:', res.data?.id);
+    }
+  } catch (err) {
+    console.error('[Daycare Email] Registration email threw exception:', err);
+  }
+}
+
+/**
+ * 10. On Pet Daycare Application Approved
+ */
+export async function sendDaycareApprovalEmail(toEmail: string, businessName: string) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    const subject = `Congratulations! Your Pet Daycare is Approved — Lumo Bites`;
+    const dashboardUrl = `https://lumobites.net/pet-daycare/dashboard`;
+    const html = brandedEmail({
+      subject,
+      preheader: `${businessName} is now an approved Pet Daycare partner on Lumo Bites`,
+      body: `
+        <h1 style="${emailStyles.h1}">Daycare Approved! 🎉</h1>
+        <p style="${emailStyles.p}">Great news! <strong>${businessName}</strong> has been approved as an official Pet Daycare partner on Lumo Bites.</p>
+
+        <p style="${emailStyles.p}">Your daycare will now appear in our Pet Services search alongside verified sitters, with a 🐕 Pet Daycare badge so pet owners can send inquiries directly.</p>
+
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${dashboardUrl}" style="background-color:#8B5E3C;color:#FFFFFF;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 28px;border-radius:12px;display:inline-block;">
+            Go to Daycare Dashboard &rarr;
+          </a>
+        </div>
+      `
+    });
+
+    const res = await resend.emails.send({ from: fromEmail, to: [toEmail], subject, html });
+    if (res.error) {
+      console.warn('[Daycare Email] Approval email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Daycare Email] Approval email sent successfully:', res.data?.id);
+    }
+  } catch (err) {
+    console.error('[Daycare Email] Approval email threw exception:', err);
+  }
+}
+
+/**
+ * 11. On Pet Daycare Application Rejected
+ */
+export async function sendDaycareRejectionEmail(toEmail: string, businessName: string, rejectionReason?: string) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    const subject = `Update on your Lumo Bites Pet Daycare Application`;
+    const html = brandedEmail({
+      subject,
+      preheader: `Update regarding your pet daycare application for ${businessName}`,
+      body: `
+        <h1 style="${emailStyles.h1}">Application Update</h1>
+        <p style="${emailStyles.p}">Thank you for submitting an application for <strong>${businessName}</strong> to join Lumo Bites as a Pet Daycare partner.</p>
+        <p style="${emailStyles.p}">At this time, we are unable to approve your application.</p>
+
+        ${rejectionReason ? emailStyles.infoBox(`
+          <p style="${emailStyles.pSmall}"><strong>Reviewer Note:</strong></p>
+          <p style="font-size:14px;line-height:1.6;color:#854D0E;margin:0;">"${rejectionReason}"</p>
+        `) : ''}
+
+        <p style="${emailStyles.p}">If you believe this is an error or would like to update your daycare credentials and re-apply, you may re-submit your details anytime directly on Lumo Bites.</p>
+      `
+    });
+
+    const res = await resend.emails.send({ from: fromEmail, to: [toEmail], subject, html });
+    if (res.error) {
+      console.warn('[Daycare Email] Rejection email notice:', res.error.message || res.error);
+    } else {
+      console.log('[Daycare Email] Rejection email sent successfully:', res.data?.id);
+    }
+  } catch (err) {
+    console.error('[Daycare Email] Rejection email threw exception:', err);
+  }
+}

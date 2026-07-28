@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { extractOgImage } from '@/lib/og-fetcher';
 import {
   sendVetClinicRegistrationEmail,
+  sendAdminNewPartnerNotificationEmail,
 } from '@/lib/adoption-email';
 
 export const dynamic = 'force-dynamic';
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
       }
 
       sendVetClinicRegistrationEmail(cleanEmail, clinic_name);
+      sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, city, state, phone, website);
       return NextResponse.json({ clinic: updated, message: 'Application re-submitted! Pending admin review.' });
     }
 
@@ -133,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     sendVetClinicRegistrationEmail(cleanEmail, clinic_name);
+    sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, city, state, phone, website);
     return NextResponse.json({ clinic, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
