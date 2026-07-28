@@ -435,12 +435,7 @@ export default function ShelterDashboardPage() {
               </div>
             )}
             <div>
-              <div className="flex items-center gap-2">
-                <Link href="/adoption" className="text-[#8B5E3C] hover:underline text-xs font-bold flex items-center gap-1">
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back to Adoption
-                </Link>
-              </div>
-              <h1 className="text-2xl font-black text-gray-900 mt-1 flex items-center gap-2">
+              <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
                 {shelterInfo?.org_name || 'Shelter Management Dashboard'}
               </h1>
               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">

@@ -235,9 +235,6 @@ export default function VetBoardingDashboardPage() {
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="p-2 rounded-xl hover:bg-blue-50 transition-colors">
-              <ArrowLeft className="w-5 h-5 text-[#4A3E3D]" />
-            </Link>
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
               <Stethoscope className="w-4 h-4 text-white" />
             </div>

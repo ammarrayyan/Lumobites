@@ -306,16 +306,11 @@ export default function VetBoardingRegisterPage() {
     <div className="min-h-screen pb-28" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="p-2 rounded-xl hover:bg-blue-50 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-[#4A3E3D]" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Stethoscope className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-black text-[#4A3E3D]">Veterinary Boarding Partner</span>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+            <Stethoscope className="w-4 h-4 text-white" />
           </div>
+          <span className="font-black text-[#4A3E3D]">Veterinary Boarding Partner</span>
         </div>
 
         {isAuthenticated && (

@@ -227,10 +227,6 @@ export default function DaycareRegistrationPage() {
     return (
       <div className="min-h-screen bg-[#FDFAF7] py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#E8DDD4]">
-          <Link href="/petsitting" className="inline-flex items-center gap-2 text-xs font-bold text-[#8B7E7D] hover:text-[#4A3E3D] mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back to Pet Services
-          </Link>
-
           <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
             <span className="text-3xl">🐕</span>
           </div>
@@ -334,17 +330,10 @@ export default function DaycareRegistrationPage() {
           <p className="text-sm text-[#8B7E7D] leading-relaxed mb-6">
             Thank you for applying! <strong>{existingDaycare.business_name}</strong> is currently under review by our admin team. You will receive an email once approved.
           </p>
-          <div className="flex gap-3">
-            <Link
-              href="/petsitting"
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#4A3E3D] font-bold py-3 rounded-xl text-center text-sm transition-colors"
-              style={{ textDecoration: 'none' }}
-            >
-              Back to Home
-            </Link>
+          <div className="flex justify-center">
             <button
               onClick={handleSignOut}
-              className="px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-bold flex items-center gap-1.5 cursor-pointer"
+              className="px-6 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <LogOut className="w-4 h-4" /> Sign Out
             </button>
@@ -358,10 +347,7 @@ export default function DaycareRegistrationPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF7] py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#E8DDD4]">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/petsitting" className="inline-flex items-center gap-2 text-xs font-bold text-[#8B7E7D] hover:text-[#4A3E3D]">
-            <ArrowLeft className="w-4 h-4" /> Back to Pet Services
-          </Link>
+        <div className="flex items-center justify-end mb-6">
           <button
             onClick={handleSignOut}
             className="text-xs font-bold text-gray-500 hover:text-gray-700 flex items-center gap-1 border-none bg-transparent cursor-pointer"
