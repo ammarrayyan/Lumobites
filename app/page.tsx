@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
+  const router = useRouter();
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
+  const [partnerModalOpen, setPartnerModalOpen] = useState(false);
+  const [partnerLoading, setPartnerLoading] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
@@ -39,6 +43,46 @@ export default function Home() {
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (notifyEmail) setNotifySubmitted(true);
+  };
+
+  const handlePartnerPortalClick = async () => {
+    const activeEmail = (
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      ''
+    ).trim();
+
+    if (activeEmail) {
+      setPartnerLoading(true);
+      try {
+        const [shelterRes, vetRes] = await Promise.all([
+          fetch(`/api/adoption/shelter?email=${encodeURIComponent(activeEmail)}`),
+          fetch(`/api/vet-boarding?email=${encodeURIComponent(activeEmail)}`),
+        ]);
+
+        if (shelterRes.ok) {
+          const sData = await shelterRes.json();
+          if (sData.shelter && sData.shelter.status === 'approved') {
+            router.push('/adoption/shelter/dashboard');
+            return;
+          }
+        }
+
+        if (vetRes.ok) {
+          const vData = await vetRes.json();
+          if (vData.clinic && vData.clinic.status === 'approved') {
+            router.push('/vet-boarding/dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Partner portal routing check failed:', e);
+      } finally {
+        setPartnerLoading(false);
+      }
+    }
+
+    setPartnerModalOpen(true);
   };
 
   return (
@@ -85,21 +129,109 @@ export default function Home() {
         </div>
       )}
 
-      {/* NAVBAR */}
-      
+      {/* PARTNER PORTAL CHOICE MODAL */}
+      {partnerModalOpen && (
+        <div
+          className="modal-overlay fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setPartnerModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-[440px] w-full shadow-2xl relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setPartnerModalOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+              <Building2 className="w-7 h-7 text-blue-600" />
+            </div>
+
+            <h3 className="text-xl font-black text-[#4A3E3D] text-center mb-1">
+              Partner Portal
+            </h3>
+            <p className="text-[#8B7E7D] text-xs text-center mb-6">
+              Select your organization type to access your portal or submit a partner application:
+            </p>
+
+            <div className="space-y-3">
+              {/* Option 1: Shelter / Rescue */}
+              <Link
+                href="/adoption/shelter"
+                onClick={() => setPartnerModalOpen(false)}
+                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F5EDE4] border border-[#E8DDD4] hover:border-[#8B5E3C] transition-all text-left group"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+                    <span className="text-xl">🏛️</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-[#8B5E3C] transition-colors">
+                      Shelter or Rescue
+                    </p>
+                    <p className="text-xs text-[#8B7E7D]">
+                      Post pets for adoption & manage adoption inquiries
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-[#8B5E3C] group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+              </Link>
+
+              {/* Option 2: Vet Clinic */}
+              <Link
+                href="/vet-boarding"
+                onClick={() => setPartnerModalOpen(false)}
+                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#EEF4FF] border border-[#E8DDD4] hover:border-blue-400 transition-all text-left group"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                    <span className="text-xl">🏥</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-blue-600 transition-colors">
+                      Veterinary Boarding Clinic
+                    </p>
+                    <p className="text-xs text-[#8B7E7D]">
+                      List boarding services & manage owner inquiries
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HERO SECTION */}
       <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6 md:px-8 lg:px-12">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 
-          <h1 className="font-[800] leading-[1.1] mb-6 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(30px, 4vw, 48px)' }}>
+          <h1 className="font-[800] leading-[1.1] mb-4 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(30px, 4vw, 48px)' }}>
             <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
+          {/* Desktop Partner Portal Button (Secondary) */}
+          <button
+            type="button"
+            onClick={handlePartnerPortalClick}
+            disabled={partnerLoading}
+            className="hidden md:inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-[#F5EDE4] hover:bg-[#EBDDCF] border border-[#E8DDD4] text-[#8B5E3C] font-bold text-xs transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <Building2 className="w-3.5 h-3.5 text-[#8B5E3C]" />
+            <span>{partnerLoading ? 'Checking Account...' : 'Partner Portal (Shelters & Vet Clinics)'}</span>
+          </button>
+
           {!isNativeApp && (
-            <div className="flex flex-wrap gap-3 justify-center items-center mt-4">
+            <div className="flex flex-wrap gap-3 justify-center items-center mt-2">
               {/* Google Play Badge */}
               <a 
                 href="https://play.google.com/store/apps/details?id=net.lumobites.app"
@@ -186,6 +318,20 @@ export default function Home() {
               <span className="text-[13.5px] tracking-wide">Find a Pet to Adopt</span>
             </div>
           </Link>
+
+          {/* 5. Partner Portal (Secondary CTA) */}
+          <button
+            type="button"
+            onClick={handlePartnerPortalClick}
+            disabled={partnerLoading}
+            style={{ textDecoration: 'none' }}
+            className="w-[260px] min-h-[46px] px-4 bg-[#F5EFE8] border border-[#E0D4C8] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+          >
+            <Building2 className="w-4 h-4 text-[#8B5E3C]" />
+            <span className="text-[13.5px] tracking-wide">
+              {partnerLoading ? 'Loading Portal...' : 'Partner Portal'}
+            </span>
+          </button>
         </div>
       </section>
 
