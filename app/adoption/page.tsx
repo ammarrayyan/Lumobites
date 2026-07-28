@@ -206,6 +206,10 @@ function AdoptionContent() {
   useEffect(() => {
     fetchListings();
     if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('register') === 'shelter' || urlParams.get('shelter') === 'true') {
+        setIsShelterRegOpen(true);
+      }
       const email = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
       if (email) {
         fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)

@@ -124,7 +124,7 @@ export default function Home() {
             <div className="space-y-3">
               {/* Option 1: Shelter / Rescue */}
               <Link
-                href="/adoption/shelter"
+                href="/adoption?register=shelter"
                 onClick={() => setPartnerModalOpen(false)}
                 className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F5EDE4] border border-[#E8DDD4] hover:border-[#8B5E3C] transition-all text-left group"
                 style={{ textDecoration: 'none' }}
