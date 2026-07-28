@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
   const router = useRouter();
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
-  const [partnerLoading, setPartnerLoading] = useState(false);
+  const [daycareNoticeOpen, setDaycareNoticeOpen] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
@@ -45,43 +45,7 @@ export default function Home() {
     if (notifyEmail) setNotifySubmitted(true);
   };
 
-  const handlePartnerPortalClick = async () => {
-    const activeEmail = (
-      localStorage.getItem('lumo_pro_email') ||
-      localStorage.getItem('lumo_sitter_email') ||
-      ''
-    ).trim();
-
-    if (activeEmail) {
-      setPartnerLoading(true);
-      try {
-        const [shelterRes, vetRes] = await Promise.all([
-          fetch(`/api/adoption/shelter?email=${encodeURIComponent(activeEmail)}`),
-          fetch(`/api/vet-boarding?email=${encodeURIComponent(activeEmail)}`),
-        ]);
-
-        if (shelterRes.ok) {
-          const sData = await shelterRes.json();
-          if (sData.shelter && sData.shelter.status === 'approved') {
-            router.push('/adoption/shelter/dashboard');
-            return;
-          }
-        }
-
-        if (vetRes.ok) {
-          const vData = await vetRes.json();
-          if (vData.clinic && vData.clinic.status === 'approved') {
-            router.push('/vet-boarding/dashboard');
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('Partner portal routing check failed:', e);
-      } finally {
-        setPartnerLoading(false);
-      }
-    }
-
+  const handleOpenPartnerPortal = () => {
     setPartnerModalOpen(true);
   };
 
@@ -91,8 +55,8 @@ export default function Home() {
       {/* PET SITTING COMING SOON MODAL */}
       {petSittingModalOpen && (
         <div className="modal-overlay fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4" onClick={() => setPetSittingModalOpen(false)}>
-          <div className="bg-white rounded-3xl p-8 max-w-[420px] w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setPetSittingModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <div className="bg-white rounded-3xl p-8 max-w-[420px] w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setPetSittingModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div className="w-14 h-14 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mx-auto mb-5">
@@ -115,7 +79,7 @@ export default function Home() {
                   placeholder="Enter your email"
                   className="w-full bg-[#FDFAF7] border border-[#E8DDD4] rounded-full px-5 py-3 text-sm outline-none focus:border-[#8B5E3C] transition-colors"
                 />
-                <button type="submit" className="w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-full hover:bg-[#7A5234] transition-colors">
+                <button type="submit" className="w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-full hover:bg-[#7A5234] transition-colors border-none cursor-pointer">
                   Notify Me When It Launches
                 </button>
               </form>
@@ -146,8 +110,8 @@ export default function Home() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
-              <Building2 className="w-7 h-7 text-blue-600" />
+            <div className="w-14 h-14 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E8DDD4]">
+              <Building2 className="w-7 h-7 text-[#8B5E3C]" />
             </div>
 
             <h3 className="text-xl font-black text-[#4A3E3D] text-center mb-1">
@@ -203,7 +167,76 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
               </Link>
+
+              {/* Option 3: Pet Daycare (Placeholder) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setPartnerModalOpen(false);
+                  setDaycareNoticeOpen(true);
+                }}
+                className="w-full p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F0FDF4] border border-[#E8DDD4] hover:border-emerald-400 transition-all text-left group border-none cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <span className="text-xl">🐕</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-emerald-700 transition-colors">
+                        Pet Daycare
+                      </p>
+                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#8B7E7D]">
+                      Daycare & playgroup listings for local pet owners
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-emerald-700 group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PET DAYCARE PLACEHOLDER NOTICE MODAL */}
+      {daycareNoticeOpen && (
+        <div
+          className="modal-overlay fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setDaycareNoticeOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-[400px] w-full shadow-2xl relative text-center"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setDaycareNoticeOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-200">
+              <span className="text-3xl">🐕</span>
+            </div>
+
+            <h3 className="text-xl font-black text-[#4A3E3D] mb-2">
+              Pet Daycare Portal — Coming Soon!
+            </h3>
+            <p className="text-[#8B7E7D] text-sm leading-relaxed mb-6">
+              We&apos;re building a dedicated partner portal for local pet daycare and playgroup providers. Stay tuned for launch updates!
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setDaycareNoticeOpen(false)}
+              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-2xl transition-colors border-none cursor-pointer text-sm"
+            >
+              Got It
+            </button>
           </div>
         </div>
       )}
@@ -219,15 +252,14 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
-          {/* Desktop Partner Portal Button (Secondary) */}
+          {/* Desktop Partner Portal Button (Secondary - Earthy Palette) */}
           <button
             type="button"
-            onClick={handlePartnerPortalClick}
-            disabled={partnerLoading}
-            className="hidden md:inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-[#F5EDE4] hover:bg-[#EBDDCF] border border-[#E8DDD4] text-[#8B5E3C] font-bold text-xs transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            onClick={handleOpenPartnerPortal}
+            className="hidden md:inline-flex items-center gap-2 mb-4 px-5 py-2.5 rounded-full bg-[#F8F3EC] hover:bg-[#EADBCE] border border-[#EADBCE] text-[#5C4533] font-bold text-xs tracking-wide transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98] cursor-pointer"
           >
-            <Building2 className="w-3.5 h-3.5 text-[#8B5E3C]" />
-            <span>{partnerLoading ? 'Checking Account...' : 'Partner Portal (Shelters & Vet Clinics)'}</span>
+            <Building2 className="w-3.5 h-3.5 text-[#5C4533]" />
+            <span>Partner Portal (Shelters, Vets & Daycares)</span>
           </button>
 
           {!isNativeApp && (
@@ -319,18 +351,15 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* 5. Partner Portal (Secondary CTA) */}
+          {/* 5. Partner Portal (Secondary CTA - Matching Palette) */}
           <button
             type="button"
-            onClick={handlePartnerPortalClick}
-            disabled={partnerLoading}
+            onClick={handleOpenPartnerPortal}
             style={{ textDecoration: 'none' }}
-            className="w-[260px] min-h-[46px] px-4 bg-[#F5EFE8] border border-[#E0D4C8] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+            className="w-[260px] min-h-[46px] px-4 bg-[#FAF5EE] border border-[#EADBCE] text-[#5C4533] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
           >
-            <Building2 className="w-4 h-4 text-[#8B5E3C]" />
-            <span className="text-[13.5px] tracking-wide">
-              {partnerLoading ? 'Loading Portal...' : 'Partner Portal'}
-            </span>
+            <Building2 className="w-4 h-4 text-[#5C4533]" />
+            <span className="text-[13.5px] tracking-wide">Partner Portal</span>
           </button>
         </div>
       </section>
