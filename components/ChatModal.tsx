@@ -170,7 +170,7 @@ export default function ChatModal({
       const res = await fetch('/api/petsitting/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ booking_id: bookingId, sender_email: currentUserEmail, message: msgText }),
+        body: JSON.stringify({ booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText }),
       });
       if (res.ok) {
         await fetchMessages(true);

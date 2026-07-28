@@ -23,7 +23,15 @@ interface SitterMapProps {
   highlightedSitterId?: string | null;
 }
 
-const getMarkerIcon = (isHighlighted: boolean) => {
+const getMarkerIcon = (isHighlighted: boolean, isVetClinic?: boolean) => {
+  if (isVetClinic) {
+    // Distinct blue cross/clinic pin for vet clinics
+    const color = isHighlighted ? '%231D4ED8' : '%232563EB';
+    const strokeColor = isHighlighted ? '%23FFFFFF' : '%2393C5FD';
+    const size = isHighlighted ? 44 : 34;
+    const crossSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><path fill="${color}" stroke="${strokeColor}" stroke-width="1.5" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><rect fill="%23FFFFFF" x="10.5" y="5.5" width="3" height="7" rx="1"/><rect fill="%23FFFFFF" x="7.5" y="8.5" width="9" height="3" rx="1"/></svg>`;
+    return `data:image/svg+xml;utf-8,${crossSvg}`;
+  }
   const color = isHighlighted ? '%238B5E3C' : '%233B2410';
   const strokeColor = isHighlighted ? '%23FFFFFF' : '%23C17D3C';
   const size = isHighlighted ? 44 : 32;
@@ -134,14 +142,14 @@ export default function SitterMap({ sitters, searchCoords, searchRadius, onSelec
                 onClick={() => onSelectSitter(sitter)}
                 zIndex={isHighlighted ? 1000 : 1}
                 icon={{
-                  url: getMarkerIcon(isHighlighted),
+                  url: getMarkerIcon(isHighlighted, !!sitter.isVetClinic),
                   scaledSize: {
-                    width: isHighlighted ? 44 : 32,
-                    height: isHighlighted ? 44 : 32,
+                    width: isHighlighted ? 44 : (sitter.isVetClinic ? 34 : 32),
+                    height: isHighlighted ? 44 : (sitter.isVetClinic ? 34 : 32),
                   } as any,
                   anchor: {
-                    x: isHighlighted ? 22 : 16,
-                    y: isHighlighted ? 44 : 32,
+                    x: isHighlighted ? 22 : (sitter.isVetClinic ? 17 : 16),
+                    y: isHighlighted ? 44 : (sitter.isVetClinic ? 34 : 32),
                   } as any,
                 }}
               />
