@@ -215,7 +215,7 @@ export default function ChatModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
+      className="fixed inset-0 z-[100000] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
       style={{
         height: viewportHeight ? `${viewportHeight}px` : '100dvh',
         overscrollBehavior: 'none',
@@ -233,7 +233,7 @@ export default function ChatModal({
       <div
         className="relative flex flex-col bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
         style={{ 
-          height: viewportHeight ? `${Math.min(viewportHeight * 0.9, 580)}px` : 'min(580px, 90dvh)',
+          height: viewportHeight ? `${Math.min(viewportHeight * 0.95, 600)}px` : 'min(600px, 92dvh)',
           maxHeight: '100dvh',
           animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
           touchAction: 'auto'
@@ -398,7 +398,7 @@ export default function ChatModal({
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[max(12px,calc(env(safe-area-inset-bottom,0px)+10px))] sm:pb-3">
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
           <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
             newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
           }`}>
