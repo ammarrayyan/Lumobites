@@ -3390,11 +3390,11 @@ export function PetSittingContent() {
       )}
 
       {/* Sticky Secondary Nav Bar */}
-      <div className="sticky-secondary-header border-b border-[#E8DDD4] w-full flex justify-center py-3">
-        <div className="flex gap-2">
+      <div className="sticky-secondary-header border-b border-[#E8DDD4] w-full flex justify-center py-3 px-4">
+        <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 px-1 justify-start sm:justify-center">
           <button
             onClick={() => setActiveTab('find')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors shrink-0 ${
               activeTab === 'find'
                 ? 'bg-[#8B5E3C] text-white shadow-sm'
                 : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
@@ -3404,7 +3404,7 @@ export function PetSittingContent() {
           </button>
           <button
             onClick={() => setActiveTab('become')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors shrink-0 ${
               activeTab === 'become'
                 ? 'bg-[#8B5E3C] text-white shadow-sm'
                 : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
@@ -3414,13 +3414,13 @@ export function PetSittingContent() {
           </button>
           <a
             href="/vet-boarding/dashboard"
-            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap shrink-0"
           >
             🏥 Vet Clinic Portal
           </a>
           <a
             href="/pet-daycare/dashboard"
-            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap"
+            className="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4] whitespace-nowrap shrink-0"
           >
             🐕 Pet Daycare Portal
           </a>
@@ -7672,7 +7672,7 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
         onClose={onClose}
         bookingId={inquiryId}
         bookingDetails={`Veterinary Boarding Inquiry • ${clinic.clinic_name}`}
-        currentUserEmail={ownerEmail}
+        currentUserEmail={activeEmail}
         otherUserName={clinic.clinic_name}
         otherUserEmail={clinic.email}
         otherUserType="sitter"
@@ -7792,7 +7792,7 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
         onClose={onClose}
         bookingId={inquiryId}
         bookingDetails={`Pet Daycare Inquiry • ${daycare.business_name}`}
-        currentUserEmail={ownerEmail}
+        currentUserEmail={activeEmail}
         otherUserName={daycare.business_name}
         otherUserEmail={daycare.email}
         otherUserType="sitter"

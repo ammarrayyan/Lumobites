@@ -215,7 +215,7 @@ export default function ChatModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 overflow-hidden"
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
       style={{
         height: viewportHeight ? `${viewportHeight}px` : '100dvh',
         overscrollBehavior: 'none',
@@ -231,10 +231,10 @@ export default function ChatModal({
 
       {/* Modal — fixed viewport height overlay */}
       <div
-        className="relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
+        className="relative flex flex-col bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
         style={{ 
-          height: 'min(540px, 85%)',
-          maxHeight: '100%',
+          height: viewportHeight ? `${Math.min(viewportHeight * 0.9, 580)}px` : 'min(580px, 90dvh)',
+          maxHeight: '100dvh',
           animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
           touchAction: 'auto'
         }}
@@ -398,7 +398,7 @@ export default function ChatModal({
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] sm:pb-2.5">
+        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[max(12px,calc(env(safe-area-inset-bottom,0px)+10px))] sm:pb-3">
           <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
             newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
           }`}>
@@ -417,7 +417,7 @@ export default function ChatModal({
             <button
               onClick={handleSend}
               disabled={!newMessage.trim() || isSending}
-              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 cursor-pointer ${
                 newMessage.trim() && !isSending
                   ? 'bg-blue-500 hover:bg-blue-600 active:scale-90 text-white shadow-md shadow-blue-200'
                   : 'bg-gray-100 text-gray-300 cursor-not-allowed'
@@ -425,11 +425,11 @@ export default function ChatModal({
             >
               {isSending
                 ? <div className="w-3.5 h-3.5 border-[2px] border-white/30 border-t-white rounded-full animate-spin" />
-                : <Send size={14} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
+                : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
               }
             </button>
           </div>
-          <p className="text-center text-[10px] text-gray-300 mt-1.5 select-none">
+          <p className="text-center text-[10px] text-gray-400 mt-1 select-none hidden sm:block">
             Enter to send &middot; Shift+Enter for new line
           </p>
         </div>
