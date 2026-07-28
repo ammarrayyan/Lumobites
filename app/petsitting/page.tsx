@@ -8,7 +8,7 @@ import ChatModal from '@/components/ChatModal';
 import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import { loadStripe } from '@stripe/stripe-js';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -7522,14 +7522,27 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
 
+  const activeEmail = (
+    ownerEmail ||
+    (typeof window !== 'undefined'
+      ? localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')
+      : '') ||
+    ''
+  ).trim();
+
   const handleStartInquiry = async () => {
+    if (!activeEmail) {
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      onClose();
+      return;
+    }
     setLoading(true);
     setError('');
     try {
       const res = await fetch('/api/vet-boarding/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clinic_id: clinic.id, owner_email: ownerEmail }),
+        body: JSON.stringify({ clinic_id: clinic.id, owner_email: activeEmail }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to start inquiry');

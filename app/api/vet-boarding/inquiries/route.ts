@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('clinic_id', clinic_id)
       .eq('owner_email', cleanEmail)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json({ inquiry: existing, existed: true });

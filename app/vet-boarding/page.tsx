@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Stethoscope, Building2, CheckCircle2, Clock, XCircle,
-  ArrowLeft, Loader2, LayoutGrid, ChevronRight, ShieldCheck,
+  ArrowLeft, Loader2, LayoutGrid, ChevronRight, ShieldCheck, Key, Mail, RefreshCw, LogOut,
 } from 'lucide-react';
 
 const VET_SERVICES = [
@@ -28,6 +28,14 @@ export default function VetBoardingRegisterPage() {
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // OTP Verification state
+  const [otpStep, setOtpStep] = useState<'email' | 'code'>('email');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+
   const [form, setForm] = useState({
     clinic_name: '',
     license_number: '',
@@ -42,13 +50,12 @@ export default function VetBoardingRegisterPage() {
     services: [] as string[],
   });
 
-  // Load saved email from localStorage on mount
+  // Load saved authenticated email from localStorage on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const savedEmail = (
       localStorage.getItem('lumo_pro_email') ||
       localStorage.getItem('lumo_sitter_email') ||
-      localStorage.getItem('lumo_shelter_email') ||
       ''
     ).trim();
     if (savedEmail) {
@@ -68,7 +75,6 @@ export default function VetBoardingRegisterPage() {
         const data = await res.json();
         if (data.clinic) {
           setExistingClinic(data.clinic);
-          // Pre-fill form for re-application
           setForm({
             clinic_name: data.clinic.clinic_name || '',
             license_number: data.clinic.license_number || '',
@@ -82,6 +88,8 @@ export default function VetBoardingRegisterPage() {
             description: data.clinic.description || '',
             services: data.clinic.services || [],
           });
+        } else {
+          setExistingClinic(null);
         }
       }
     } catch (e) {
@@ -91,12 +99,81 @@ export default function VetBoardingRegisterPage() {
     }
   };
 
-  const handleEmailLookup = async () => {
+  const handleSendOtp = async () => {
     const trimmed = clinicEmail.trim().toLowerCase();
-    if (!trimmed) return;
-    localStorage.setItem('lumo_pro_email', trimmed);
-    setForm(prev => ({ ...prev, email: trimmed }));
-    await fetchExistingClinic(trimmed);
+    if (!trimmed || !trimmed.includes('@')) {
+      setOtpError('Please enter a valid email address.');
+      return;
+    }
+    setOtpError('');
+    setOtpSending(true);
+    try {
+      const res = await fetch('/api/petsitting/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmed, type: 'owner' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send verification code.');
+      setOtpStep('code');
+      setOtpSent(true);
+    } catch (err: any) {
+      setOtpError(err.message || 'Error sending code.');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const trimmedEmail = clinicEmail.trim().toLowerCase();
+    const trimmedCode = otpCode.trim();
+    if (!trimmedCode || trimmedCode.length < 6) {
+      setOtpError('Please enter the 6-digit code.');
+      return;
+    }
+    setOtpError('');
+    setOtpVerifying(true);
+    try {
+      const res = await fetch('/api/petsitting/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: trimmedEmail, code: trimmedCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
+
+      // Successfully authenticated!
+      localStorage.setItem('lumo_pro_email', trimmedEmail);
+      document.cookie = `lumo_pro_email=${encodeURIComponent(trimmedEmail)}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+      window.dispatchEvent(new Event('lumo-pro-update'));
+
+      setForm(prev => ({ ...prev, email: trimmedEmail }));
+      await fetchExistingClinic(trimmedEmail);
+    } catch (err: any) {
+      setOtpError(err.message || 'Verification failed.');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lumo_pro_email');
+      localStorage.removeItem('lumo_sitter_email');
+      localStorage.removeItem('lumo_shelter_email');
+      localStorage.removeItem('lumo_sitter_id');
+      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      setClinicEmail('');
+      setExistingClinic(null);
+      setOtpStep('email');
+      setOtpCode('');
+      setOtpSent(false);
+      setForm({
+        clinic_name: '', license_number: '', email: '', phone: '',
+        address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
+      });
+    }
   };
 
   const toggleService = (svc: string) => {
@@ -163,10 +240,10 @@ export default function VetBoardingRegisterPage() {
             Go to Dashboard
           </Link>
           <button
-            onClick={() => { localStorage.removeItem('lumo_pro_email'); setExistingClinic(null); setClinicEmail(''); setLoading(false); }}
-            className="mt-3 text-xs text-[#8B7E7D] hover:underline"
+            onClick={handleSignOut}
+            className="mt-4 text-xs text-red-600 hover:underline flex items-center justify-center gap-1 mx-auto"
           >
-            Use a different email
+            <LogOut className="w-3.5 h-3.5" /> Sign out / Switch Account
           </button>
         </div>
       </div>
@@ -188,10 +265,10 @@ export default function VetBoardingRegisterPage() {
             Return Home
           </Link>
           <button
-            onClick={() => { localStorage.removeItem('lumo_pro_email'); setExistingClinic(null); setClinicEmail(''); }}
-            className="mt-3 text-xs text-[#8B7E7D] hover:underline"
+            onClick={handleSignOut}
+            className="mt-4 text-xs text-red-600 hover:underline flex items-center justify-center gap-1 mx-auto"
           >
-            Use a different email
+            <LogOut className="w-3.5 h-3.5" /> Sign out / Switch Account
           </button>
         </div>
       </div>
@@ -219,20 +296,32 @@ export default function VetBoardingRegisterPage() {
   }
 
   const isRejected = existingClinic?.status === 'rejected';
+  const isAuthenticated = !!form.email;
 
   return (
     <div className="min-h-screen pb-28" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100 px-4 py-3 flex items-center gap-3">
-        <Link href="/" className="p-2 rounded-xl hover:bg-blue-50 transition-colors">
-          <ArrowLeft className="w-5 h-5 text-[#4A3E3D]" />
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-            <Stethoscope className="w-4 h-4 text-white" />
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="p-2 rounded-xl hover:bg-blue-50 transition-colors">
+            <ArrowLeft className="w-5 h-5 text-[#4A3E3D]" />
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+              <Stethoscope className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-black text-[#4A3E3D]">Veterinary Boarding Partner</span>
           </div>
-          <span className="font-black text-[#4A3E3D]">Veterinary Boarding Partner</span>
         </div>
+
+        {isAuthenticated && (
+          <button
+            onClick={handleSignOut}
+            className="text-xs font-bold text-gray-500 hover:text-red-600 border border-gray-200 bg-white px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1"
+          >
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          </button>
+        )}
       </div>
 
       <div className="max-w-lg mx-auto px-4 pt-8">
@@ -262,31 +351,93 @@ export default function VetBoardingRegisterPage() {
           </div>
         )}
 
-        {/* Email gate — if no email yet */}
-        {!form.email && (
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-blue-100 mb-6">
-            <p className="text-sm font-bold text-[#4A3E3D] mb-3">What&apos;s your clinic email?</p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                value={clinicEmail}
-                onChange={e => setClinicEmail(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleEmailLookup()}
-                placeholder="clinic@example.com"
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
-              <button
-                onClick={handleEmailLookup}
-                className="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-colors text-sm"
-              >
-                Continue
-              </button>
+        {/* 🔐 Secure OTP Sign In Gate (if not authenticated) */}
+        {!isAuthenticated && (
+          <div className="bg-white rounded-3xl p-6 shadow-xl border border-blue-100 mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Key className="w-5 h-5 text-blue-600" />
+              <h2 className="text-base font-black text-[#4A3E3D]">Sign In to Clinic Portal</h2>
             </div>
+            <p className="text-xs text-[#8B7E7D] mb-4">
+              Enter your clinic email to receive a 6-digit verification code. This ensures secure access to your partner account.
+            </p>
+
+            {otpStep === 'email' ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Clinic Email</label>
+                  <input
+                    type="email"
+                    value={clinicEmail}
+                    onChange={e => setClinicEmail(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
+                    placeholder="clinic@example.com"
+                    className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+                {otpError && <p className="text-xs text-red-600 font-medium">{otpError}</p>}
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={otpSending}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer disabled:opacity-60"
+                >
+                  {otpSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  Send Verification Code
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-800 flex items-center justify-between">
+                  <span>Code sent to <strong>{clinicEmail}</strong></span>
+                  <button
+                    onClick={() => { setOtpStep('email'); setOtpError(''); }}
+                    className="text-blue-600 font-bold hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">6-Digit Verification Code</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
+                    placeholder="123456"
+                    className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-center text-lg font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+
+                {otpError && <p className="text-xs text-red-600 font-medium">{otpError}</p>}
+
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={otpVerifying}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer disabled:opacity-60"
+                >
+                  {otpVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                  Verify & Sign In
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={otpSending}
+                  className="w-full text-xs text-[#8B7E7D] hover:text-blue-600 font-medium py-1"
+                >
+                  Resend code
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Registration form */}
-        {form.email && (
+        {/* Registration form (only visible when authenticated via OTP) */}
+        {isAuthenticated && (
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Clinic Info */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-blue-100">
@@ -326,13 +477,13 @@ export default function VetBoardingRegisterPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Email *</label>
+                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Email (Authenticated)</label>
                   <input
                     required
+                    readOnly
                     type="email"
                     value={form.email}
-                    onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                    className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="mt-1 w-full border border-gray-200 bg-gray-50 text-gray-500 rounded-xl px-4 py-2.5 text-sm cursor-not-allowed"
                   />
                 </div>
                 <div>

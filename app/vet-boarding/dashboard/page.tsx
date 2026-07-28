@@ -209,7 +209,10 @@ export default function VetBoardingDashboardPage() {
       localStorage.removeItem('lumo_pro_email');
       localStorage.removeItem('lumo_sitter_email');
       localStorage.removeItem('lumo_shelter_email');
-      router.push('/account');
+      localStorage.removeItem('lumo_sitter_id');
+      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      router.push('/vet-boarding');
     }
   };
 
