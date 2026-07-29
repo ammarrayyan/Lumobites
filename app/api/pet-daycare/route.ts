@@ -32,6 +32,62 @@ export async function GET(request: NextRequest) {
   }
 }
 
+async function geocodeLocation(fullAddress: string) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
+  if (!apiKey || !fullAddress) return null;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'OK' && data.results && data.results.length > 0) {
+      const result = data.results[0];
+      const location = result.geometry?.location;
+      const addressComponents = result.address_components || [];
+      const formatted_address = result.formatted_address;
+
+      let locality = '';
+      let state = '';
+      let postal_code = '';
+
+      for (const comp of addressComponents) {
+        const types = comp.types || [];
+        if (types.includes('locality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('sublocality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('neighborhood')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('administrative_area_level_2')) {
+          locality = comp.long_name;
+        }
+
+        if (types.includes('administrative_area_level_1')) {
+          state = comp.short_name;
+        }
+        if (types.includes('postal_code')) {
+          postal_code = comp.long_name;
+        }
+      }
+
+      const city = locality && state ? `${locality}, ${state}` : locality || fullAddress;
+
+      return {
+        lat: location?.lat || null,
+        lng: location?.lng || null,
+        city,
+        state,
+        zip: postal_code,
+        formatted_address
+      };
+    }
+  } catch (err) {
+    console.error('[Geocode Helper] Error:', err);
+  }
+  return null;
+}
+
 // ─── POST /api/pet-daycare — Register or Re-apply ──────────────────────────────
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     let { logo_url } = body;
 
-    if (!business_name || !email || !city) {
+    if (!business_name || !email || (!city && !address)) {
       return NextResponse.json({ error: 'Missing required fields (business_name, email, city)' }, { status: 400 });
     }
 
@@ -67,6 +123,17 @@ export async function POST(request: NextRequest) {
         console.log('[PetDaycare API] OG Image extraction skipped:', e);
       }
     }
+
+    // Geocode location
+    const locationQuery = (address || city || '').trim();
+    const geo = await geocodeLocation(locationQuery);
+
+    const finalCity = geo?.city || city || locationQuery;
+    const finalState = geo?.state || state || '';
+    const finalZip = geo?.zip || zip || '';
+    const finalAddress = geo?.formatted_address || address || locationQuery;
+    const finalLat = geo?.lat || null;
+    const finalLng = geo?.lng || null;
 
     // Check if already registered
     const { data: existing } = await supabaseAdmin
@@ -90,10 +157,12 @@ export async function POST(request: NextRequest) {
           business_name,
           license_number: license_number || existing.license_number || '',
           phone: phone || existing.phone || '',
-          address: address || existing.address || '',
-          city,
-          state: state || existing.state || '',
-          zip: zip || existing.zip || '',
+          address: finalAddress,
+          city: finalCity,
+          state: finalState,
+          zip: finalZip,
+          lat: finalLat,
+          lng: finalLng,
           website: website || existing.website || '',
           description: description || existing.description || '',
           services: services || existing.services || [],
@@ -109,7 +178,7 @@ export async function POST(request: NextRequest) {
       }
 
       sendDaycareRegistrationEmail(cleanEmail, business_name);
-      sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, city, state, phone, website);
+      sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, finalCity, finalState, phone, website);
 
       return NextResponse.json({
         daycare: updatedDaycare,
@@ -124,10 +193,12 @@ export async function POST(request: NextRequest) {
         license_number: license_number || '',
         email: cleanEmail,
         phone: phone || '',
-        address: address || '',
-        city,
-        state: state || '',
-        zip: zip || '',
+        address: finalAddress,
+        city: finalCity,
+        state: finalState,
+        zip: finalZip,
+        lat: finalLat,
+        lng: finalLng,
         website: website || '',
         description: description || '',
         services: services || [],
@@ -147,7 +218,7 @@ export async function POST(request: NextRequest) {
     }
 
     sendDaycareRegistrationEmail(cleanEmail, business_name);
-    sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, city, state, phone, website);
+    sendAdminNewPartnerNotificationEmail('Pet Daycare', business_name, cleanEmail, finalCity, finalState, phone, website);
 
     return NextResponse.json({ daycare, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {
@@ -192,15 +263,31 @@ export async function PATCH(request: NextRequest) {
     if (business_name !== undefined) updateFields.business_name = business_name;
     if (license_number !== undefined) updateFields.license_number = license_number;
     if (phone !== undefined) updateFields.phone = phone;
-    if (address !== undefined) updateFields.address = address;
-    if (city !== undefined) updateFields.city = city;
-    if (state !== undefined) updateFields.state = state;
-    if (zip !== undefined) updateFields.zip = zip;
     if (website !== undefined) updateFields.website = website;
     if (description !== undefined) updateFields.description = description;
     if (services !== undefined) updateFields.services = services;
     if (updatedLogo !== undefined) updateFields.logo_url = updatedLogo;
     if (is_paused !== undefined) updateFields.is_paused = is_paused;
+
+    if (city !== undefined || address !== undefined) {
+      const locString = ((address || '') + ' ' + (city || '')).trim();
+      if (locString) {
+        const geo = await geocodeLocation(locString);
+        if (geo) {
+          updateFields.city = geo.city;
+          updateFields.state = geo.state;
+          updateFields.zip = geo.zip;
+          updateFields.address = geo.formatted_address;
+          if (geo.lat) updateFields.lat = geo.lat;
+          if (geo.lng) updateFields.lng = geo.lng;
+        } else {
+          if (city !== undefined) updateFields.city = city;
+          if (address !== undefined) updateFields.address = address;
+          if (state !== undefined) updateFields.state = state;
+          if (zip !== undefined) updateFields.zip = zip;
+        }
+      }
+    }
 
     let query = supabaseAdmin.from('pet_daycares').update(updateFields);
 

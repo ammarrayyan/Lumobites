@@ -34,6 +34,62 @@ export async function GET(request: NextRequest) {
   }
 }
 
+async function geocodeLocation(fullAddress: string) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
+  if (!apiKey || !fullAddress) return null;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'OK' && data.results && data.results.length > 0) {
+      const result = data.results[0];
+      const location = result.geometry?.location;
+      const addressComponents = result.address_components || [];
+      const formatted_address = result.formatted_address;
+
+      let locality = '';
+      let state = '';
+      let postal_code = '';
+
+      for (const comp of addressComponents) {
+        const types = comp.types || [];
+        if (types.includes('locality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('sublocality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('neighborhood')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('administrative_area_level_2')) {
+          locality = comp.long_name;
+        }
+
+        if (types.includes('administrative_area_level_1')) {
+          state = comp.short_name;
+        }
+        if (types.includes('postal_code')) {
+          postal_code = comp.long_name;
+        }
+      }
+
+      const city = locality && state ? `${locality}, ${state}` : locality || fullAddress;
+
+      return {
+        lat: location?.lat || null,
+        lng: location?.lng || null,
+        city,
+        state,
+        zip: postal_code,
+        formatted_address
+      };
+    }
+  } catch (err) {
+    console.error('[Geocode Helper] Error:', err);
+  }
+  return null;
+}
+
 // ─── POST /api/vet-boarding — Register a new clinic ──────────────────────────
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +100,7 @@ export async function POST(request: NextRequest) {
     } = body;
     let { org_photo_url } = body;
 
-    if (!clinic_name || !email || !city) {
+    if (!clinic_name || !email || (!city && !address)) {
       return NextResponse.json(
         { error: 'Missing required fields (clinic_name, email, city)' },
         { status: 400 },
@@ -62,6 +118,17 @@ export async function POST(request: NextRequest) {
         console.log('[VetBoarding API] OG image fetch skipped:', e);
       }
     }
+
+    // Geocode location
+    const locationQuery = (address || city || '').trim();
+    const geo = await geocodeLocation(locationQuery);
+
+    const finalCity = geo?.city || city || locationQuery;
+    const finalState = geo?.state || state || '';
+    const finalZip = geo?.zip || zip || '';
+    const finalAddress = geo?.formatted_address || address || locationQuery;
+    const finalLat = geo?.lat || null;
+    const finalLng = geo?.lng || null;
 
     // Check for existing registration
     const { data: existing } = await supabaseAdmin
@@ -85,10 +152,12 @@ export async function POST(request: NextRequest) {
           clinic_name,
           license_number: license_number || existing.license_number || '',
           phone: phone || existing.phone || '',
-          address: address || existing.address || '',
-          city,
-          state: state || existing.state || '',
-          zip: zip || existing.zip || '',
+          address: finalAddress,
+          city: finalCity,
+          state: finalState,
+          zip: finalZip,
+          lat: finalLat,
+          lng: finalLng,
           website: website || existing.website || '',
           description: description || existing.description || '',
           services: services || existing.services || [],
@@ -105,7 +174,7 @@ export async function POST(request: NextRequest) {
       }
 
       sendVetClinicRegistrationEmail(cleanEmail, clinic_name);
-      sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, city, state, phone, website);
+      sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, finalCity, finalState, phone, website);
       return NextResponse.json({ clinic: updated, message: 'Application re-submitted! Pending admin review.' });
     }
 
@@ -116,10 +185,12 @@ export async function POST(request: NextRequest) {
         license_number: license_number || '',
         email: cleanEmail,
         phone: phone || '',
-        address: address || '',
-        city,
-        state: state || '',
-        zip: zip || '',
+        address: finalAddress,
+        city: finalCity,
+        state: finalState,
+        zip: finalZip,
+        lat: finalLat,
+        lng: finalLng,
         website: website || '',
         description: description || '',
         services: services || [],
@@ -135,7 +206,7 @@ export async function POST(request: NextRequest) {
     }
 
     sendVetClinicRegistrationEmail(cleanEmail, clinic_name);
-    sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, city, state, phone, website);
+    sendAdminNewPartnerNotificationEmail('Vet Clinic', clinic_name, cleanEmail, finalCity, finalState, phone, website);
     return NextResponse.json({ clinic, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -173,10 +244,26 @@ export async function PATCH(request: NextRequest) {
     if (services !== undefined) updatePayload.services = services;
     if (status !== undefined) updatePayload.status = status;
     if (phone !== undefined) updatePayload.phone = phone;
-    if (address !== undefined) updatePayload.address = address;
-    if (city !== undefined) updatePayload.city = city;
-    if (state !== undefined) updatePayload.state = state;
-    if (zip !== undefined) updatePayload.zip = zip;
+
+    if (city !== undefined || address !== undefined) {
+      const locString = ((address || '') + ' ' + (city || '')).trim();
+      if (locString) {
+        const geo = await geocodeLocation(locString);
+        if (geo) {
+          updatePayload.city = geo.city;
+          updatePayload.state = geo.state;
+          updatePayload.zip = geo.zip;
+          updatePayload.address = geo.formatted_address;
+          if (geo.lat) updatePayload.lat = geo.lat;
+          if (geo.lng) updatePayload.lng = geo.lng;
+        } else {
+          if (city !== undefined) updatePayload.city = city;
+          if (address !== undefined) updatePayload.address = address;
+          if (state !== undefined) updatePayload.state = state;
+          if (zip !== undefined) updatePayload.zip = zip;
+        }
+      }
+    }
 
     let query = supabaseAdmin.from('vet_clinics').update(updatePayload);
     if (id) {

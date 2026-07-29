@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut } from 'lucide-react';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 
 const DAYCARE_SERVICES = [
   'Group Play',
@@ -440,54 +441,19 @@ export default function DaycareRegistrationPage() {
             </div>
           </div>
 
-          {/* Section 3: Address & Location */}
+          {/* Section 3: Location */}
           <div>
             <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider mb-3">Location</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Street Address</label>
-                <input
-                  type="text"
-                  value={form.address}
-                  onChange={e => setForm({ ...form, address: e.target.value })}
-                  placeholder="123 Bark Avenue"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-1 sm:col-span-1">
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">City *</label>
-                  <input
-                    type="text"
-                    required
-                    value={form.city}
-                    onChange={e => setForm({ ...form, city: e.target.value })}
-                    placeholder="New York"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">State</label>
-                  <input
-                    type="text"
-                    value={form.state}
-                    onChange={e => setForm({ ...form, state: e.target.value })}
-                    placeholder="NY"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Zip Code</label>
-                  <input
-                    type="text"
-                    value={form.zip}
-                    onChange={e => setForm({ ...form, zip: e.target.value })}
-                    placeholder="10001"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-            </div>
+            <CityAutocompleteInput
+              label="Address / Location *"
+              required
+              value={form.city}
+              onChange={val => {
+                setForm(p => ({ ...p, city: val, address: val }));
+              }}
+              placeholder="e.g. 1239 Lexington Rd, Louisville, KY or Louisville, KY"
+              inputClassName="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
+            />
           </div>
 
           {/* Section 4: Website & Description */}

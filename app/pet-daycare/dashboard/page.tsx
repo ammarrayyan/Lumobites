@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import {
   Building2,
   Calendar,
@@ -691,13 +692,13 @@ export default function DaycareDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Address</label>
-                    <input
-                      type="text"
-                      value={editForm.address || ''}
-                      onChange={e => setEditForm({ ...editForm, address: e.target.value })}
-                      placeholder="123 Main St"
-                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                    <CityAutocompleteInput
+                      label="Location / Address *"
+                      required
+                      value={editForm.city || editForm.address || ''}
+                      onChange={val => setEditForm({ ...editForm, city: val, address: val })}
+                      placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
+                      inputClassName="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>

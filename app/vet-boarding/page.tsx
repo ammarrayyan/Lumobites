@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import {
   Stethoscope, Building2, CheckCircle2, Clock, XCircle,
   ArrowLeft, Loader2, LayoutGrid, ChevronRight, ShieldCheck, Key, Mail, RefreshCw, LogOut,
@@ -500,48 +501,14 @@ export default function VetBoardingRegisterPage() {
             {/* Location */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-blue-100">
               <h2 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider mb-4">📍 Location</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Street Address</label>
-                  <input
-                    value={form.address}
-                    onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
-                    placeholder="123 Main St"
-                    className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">City *</label>
-                    <input
-                      required
-                      value={form.city}
-                      onChange={e => setForm(p => ({ ...p, city: e.target.value }))}
-                      placeholder="Austin"
-                      className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">State</label>
-                    <input
-                      value={form.state}
-                      onChange={e => setForm(p => ({ ...p, state: e.target.value }))}
-                      placeholder="TX"
-                      maxLength={2}
-                      className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">ZIP Code</label>
-                  <input
-                    value={form.zip}
-                    onChange={e => setForm(p => ({ ...p, zip: e.target.value }))}
-                    placeholder="78701"
-                    className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  />
-                </div>
-              </div>
+              <CityAutocompleteInput
+                label="Address / Location *"
+                required
+                value={form.city}
+                onChange={val => setForm(p => ({ ...p, city: val, address: val }))}
+                placeholder="e.g. 1239 Lexington Rd, Louisville, KY or Louisville, KY"
+                inputClassName="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
             </div>
 
             {/* Services */}

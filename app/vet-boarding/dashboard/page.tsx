@@ -10,6 +10,7 @@ import {
   Mail, AlertCircle, Star,
 } from 'lucide-react';
 import ChatModal from '@/components/ChatModal';
+import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 
 const VET_SERVICES = [
   'Veterinary Boarding',
@@ -716,29 +717,20 @@ export default function VetBoardingDashboardPage() {
             {/* Location */}
             <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm space-y-3">
               <h3 className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider">Location</h3>
-              <ProfileField label="Address" value={editForm.address || ''} editing={isEditing} onChange={v => setEditForm((p: any) => ({ ...p, address: v }))} />
-              <div className="grid grid-cols-3 gap-3">
-                {isEditing ? (
-                  <>
-                    <div>
-                      <label className="text-xs text-[#8B7E7D] font-semibold">City</label>
-                      <input value={editForm.city || ''} onChange={e => setEditForm((p: any) => ({ ...p, city: e.target.value }))} className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                    </div>
-                    <div>
-                      <label className="text-xs text-[#8B7E7D] font-semibold">State</label>
-                      <input value={editForm.state || ''} onChange={e => setEditForm((p: any) => ({ ...p, state: e.target.value }))} maxLength={2} className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                    </div>
-                    <div>
-                      <label className="text-xs text-[#8B7E7D] font-semibold">ZIP</label>
-                      <input value={editForm.zip || ''} onChange={e => setEditForm((p: any) => ({ ...p, zip: e.target.value }))} className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-                    </div>
-                  </>
-                ) : (
-                  <p className="col-span-3 text-sm text-[#4A3E3D]">
-                    {[editForm.city, editForm.state, editForm.zip].filter(Boolean).join(', ') || '—'}
-                  </p>
-                )}
-              </div>
+              {isEditing ? (
+                <CityAutocompleteInput
+                  label="Location / Address *"
+                  required
+                  value={editForm.city || editForm.address || ''}
+                  onChange={val => setEditForm((p: any) => ({ ...p, city: val, address: val }))}
+                  placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
+                  inputClassName="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              ) : (
+                <p className="text-sm text-[#4A3E3D]">
+                  {[editForm.address, editForm.city, editForm.state, editForm.zip].filter(Boolean).join(', ') || '—'}
+                </p>
+              )}
             </div>
 
             {/* Services */}
