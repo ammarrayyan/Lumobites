@@ -448,7 +448,7 @@ export default function Home() {
               <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
             </div>
             <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
-              Find trusted, ID-verified pet sitters in your neighborhood. AI finds the perfect match instantly. Sitters keep 100%.
+              Find trusted, ID-verified pet sitters, licensed vet boarding, and daycare facilities near you. AI finds the perfect match instantly. Sitters keep 100%.
             </p>
             <div className="mt-auto flex flex-col gap-2 relative z-10">
               <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
