@@ -8,6 +8,7 @@ import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
+import ChatModal from '@/components/ChatModal';
 
 interface PetListing {
   id: string;
@@ -124,6 +125,26 @@ function AdoptionContent() {
   const [visualMatches, setVisualMatches] = useState<any[]>([]);
   const [isVisualLoading, setIsVisualLoading] = useState(false);
   const [visualEmptyMessage, setVisualEmptyMessage] = useState('');
+
+  // Active Pet Chat Modal State
+  const [activeChatPet, setActiveChatPet] = useState<any>(null);
+
+  const handleInquirePet = (pet: any) => {
+    if (typeof window !== 'undefined') {
+      const activeEmail = (
+        localStorage.getItem('lumo_pro_email') ||
+        localStorage.getItem('lumo_sitter_email') ||
+        localStorage.getItem('lumo_shelter_email') ||
+        ''
+      ).trim();
+
+      if (!activeEmail) {
+        window.dispatchEvent(new Event('lumo-open-signin'));
+        return;
+      }
+    }
+    setActiveChatPet(pet);
+  };
 
   // Shelter Registration Modal & Persistent User Shelter
   const [isShelterRegOpen, setIsShelterRegOpen] = useState(false);
@@ -859,7 +880,7 @@ function AdoptionContent() {
 
                       <div className="p-4 pt-0">
                         <button
-                          onClick={() => router.push(`/adoption/messages/${pet.id}`)}
+                          onClick={() => handleInquirePet(pet)}
                           className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer border-none transition-all shadow-xs"
                         >
                           <MessageSquare className="w-4 h-4" /> Ask About {pet.name}
@@ -989,7 +1010,7 @@ function AdoptionContent() {
                       </div>
                       {match.pet.source === 'lumo_bites' ? (
                         <button
-                          onClick={() => { setIsLifestyleModalOpen(false); router.push(`/adoption/messages/${match.pet.id}`); }}
+                          onClick={() => { setIsLifestyleModalOpen(false); handleInquirePet(match.pet); }}
                           className="bg-[#8B5E3C] text-white font-bold text-[11px] py-1.5 px-3 rounded-xl shrink-0 border-none cursor-pointer"
                         >
                           Inquire
@@ -1139,7 +1160,7 @@ function AdoptionContent() {
                         <p className="text-[10px] text-emerald-700 font-bold mt-1">{m.similarityScore}% Visual Match</p>
                       </div>
                       <button
-                        onClick={() => { setIsVisualModalOpen(false); router.push(`/adoption/messages/${m.pet.id}`); }}
+                        onClick={() => { setIsVisualModalOpen(false); handleInquirePet(m.pet); }}
                         className="w-full bg-[#8B5E3C] text-white font-bold py-1.5 rounded-xl text-[11px] border-none cursor-pointer"
                       >
                         Ask About {m.pet.name}
@@ -1256,7 +1277,7 @@ function AdoptionContent() {
                     disabled={shelterOtpVerifying}
                     className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm transition-all"
                   >
-                    {shelterOtpVerifying ? 'Verifying...' : 'Verify Code & Continue'}
+                    {shelterOtpVerifying ? 'Verifying...' : 'Verify Code & Proceed'}
                   </button>
                   <button
                     type="button"
@@ -1268,40 +1289,39 @@ function AdoptionContent() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleShelterRegisterSubmit} className="space-y-3 text-xs">
+              <form onSubmit={handleShelterRegSubmit} className="space-y-3 text-xs">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Organization Name *</label>
+                  <label className="font-bold text-gray-700 block mb-1">Organization / Rescue Name *</label>
                   <input
                     type="text"
                     required
                     value={shelterFormData.org_name}
                     onChange={e => setShelterFormData({ ...shelterFormData, org_name: e.target.value })}
                     className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="e.g. Happy Paws Animal Rescue"
+                    placeholder="e.g. City Animal Rescue"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">EIN / Non-Profit ID</label>
-                    <input
-                      type="text"
-                      value={shelterFormData.tax_id}
-                      onChange={e => setShelterFormData({ ...shelterFormData, tax_id: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                      placeholder="XX-XXXXXXX"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Contact Email (Verified)</label>
-                    <input
-                      type="email"
-                      required
-                      disabled
-                      value={shelterFormData.email}
-                      className="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-gray-600 cursor-not-allowed"
-                    />
-                  </div>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">EIN / Tax ID (Optional)</label>
+                  <input
+                    type="text"
+                    value={shelterFormData.tax_id}
+                    onChange={e => setShelterFormData({ ...shelterFormData, tax_id: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                    placeholder="12-3456789"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Contact Email *</label>
+                  <input
+                    type="email"
+                    required
+                    readOnly
+                    value={shelterFormData.email}
+                    className="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-gray-600 cursor-not-allowed font-medium"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -1312,19 +1332,25 @@ function AdoptionContent() {
                       value={shelterFormData.phone}
                       onChange={e => setShelterFormData({ ...shelterFormData, phone: e.target.value })}
                       className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="(555) 000-0000"
                     />
                   </div>
-                  <CityAutocompleteInput
-                    label="City *"
-                    required
-                    value={shelterFormData.city}
-                    onChange={val => setShelterFormData({ ...shelterFormData, city: val })}
-                    placeholder="Search city (e.g. Austin, TX)…"
-                  />
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">City *</label>
+                    <input
+                      type="text"
+                      required
+                      value={shelterFormData.city}
+                      onChange={e => setShelterFormData({ ...shelterFormData, city: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="e.g. Austin"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Website / Social Profile</label>
+                  <label className="font-bold text-gray-700 block mb-1">Website (Optional)</label>
                   <input
                     type="url"
                     value={shelterFormData.website}
@@ -1353,6 +1379,28 @@ function AdoptionContent() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ADOPTION PET INQUIRY CHAT MODAL */}
+      {activeChatPet && (
+        <ChatModal
+          isOpen={true}
+          onClose={() => setActiveChatPet(null)}
+          bookingId={activeChatPet.id}
+          bookingDetails={`Adoption Inquiry • ${activeChatPet.name}`}
+          currentUserEmail={
+            (typeof window !== 'undefined'
+              ? localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || localStorage.getItem('lumo_shelter_email')
+              : '') || ''
+          }
+          otherUserName={activeChatPet.shelter_name || activeChatPet.shelters?.org_name || 'Rescue Partner'}
+          otherUserEmail={activeChatPet.shelter_email || activeChatPet.shelters?.email || ''}
+          otherUserType="shelter"
+          onReport={() => {}}
+          petDetails={activeChatPet}
+          chatType="adoption"
+          shelterId={activeChatPet.shelter_id}
+        />
       )}
     </div>
   );

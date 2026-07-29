@@ -1,21 +1,4 @@
-'use client';
-
-import React, { useState, useEffect, useRef, useCallback, use } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, Lock, Building2 } from 'lucide-react';
-import PetPhotoCarousel from '@/components/PetPhotoCarousel';
-
-interface Message {
-  id: string;
-  pet_id: string;
-  shelter_id: string;
-  sender_email: string;
-  receiver_email: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-}
+import ChatModal from '@/components/ChatModal';
 
 interface PetDetails {
   id: string;
@@ -29,48 +12,12 @@ interface PetDetails {
   photo_urls?: string[];
   description?: string;
   temperament?: string;
+  shelter_id?: string;
   shelters?: {
     org_name: string;
     phone?: string;
     email: string;
   };
-}
-
-function formatName(email: string, isShelter: boolean, orgName?: string): string {
-  if (isShelter && orgName) return orgName;
-  if (!email) return 'User';
-  const namePart = email.split('@')[0];
-  return namePart.charAt(0).toUpperCase() + namePart.slice(1);
-}
-
-function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
-  const initials = name ? name.slice(0, 2).toUpperCase() : '?';
-  const colors = [
-    'from-amber-500 to-orange-600',
-    'from-emerald-500 to-teal-600',
-    'from-blue-500 to-indigo-600',
-  ];
-  const colorIdx = name.charCodeAt(0) % colors.length;
-  const sz = size === 'sm' ? 'w-8 h-8 text-[11px]' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-xs';
-  return (
-    <div className={`${sz} rounded-full bg-gradient-to-br ${colors[colorIdx]} flex items-center justify-center text-white font-bold shrink-0 shadow-xs`}>
-      {initials}
-    </div>
-  );
-}
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-function formatDateLabel(iso: string) {
-  const d = new Date(iso);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
 export default function AdoptionMessagePage({ params }: { params: Promise<{ id: string }> }) {
@@ -81,15 +28,6 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const [pet, setPet] = useState<PetDetails | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [targetAdopter, setTargetAdopter] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isSendingRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -99,8 +37,8 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     const email = (shelter || pro || sitter || '').toLowerCase().trim();
     setCurrentUserEmail(email);
 
-    const params = new URLSearchParams(window.location.search);
-    const adopterParam = params.get('adopter') || params.get('user_email') || '';
+    const searchParams = new URLSearchParams(window.location.search);
+    const adopterParam = searchParams.get('adopter') || searchParams.get('user_email') || '';
     if (adopterParam) setTargetAdopter(adopterParam.toLowerCase().trim());
   }, []);
 
@@ -123,270 +61,29 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     loadPet();
   }, [petId]);
 
-  // Fetch messages
-  const fetchMessages = useCallback(async (silent = false) => {
-    if (!petId) return;
-    try {
-      const activeUser = targetAdopter || currentUserEmail;
-      const emailQuery = activeUser ? `&user_email=${encodeURIComponent(activeUser)}` : '';
-      const shelterQuery = currentUserEmail ? `&shelter_email=${encodeURIComponent(currentUserEmail)}` : '';
-      const res = await fetch(`/api/adoption/messages?pet_id=${petId}${emailQuery}${shelterQuery}&t=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages || []);
-      }
-    } catch {}
-    finally {
-      if (!silent) setIsLoading(false);
-    }
-  }, [petId, currentUserEmail, targetAdopter]);
-
-  useEffect(() => {
-    if (!petId) return;
-    setIsLoading(true);
-    fetchMessages();
-    pollIntervalRef.current = setInterval(() => fetchMessages(true), 3000);
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
-  }, [petId, fetchMessages]);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewMessage(e.target.value);
-    e.target.style.height = 'auto';
-    e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
-  };
-
-  const handleSend = async () => {
-    if (isSendingRef.current) return;
-    const msgText = newMessage.trim();
-    if (!msgText || !pet) return;
-
-    if (pet.status === 'adopted') {
-      alert('This pet has been adopted. Messaging is closed.');
-      return;
-    }
-
-    isSendingRef.current = true;
-    setIsSending(true);
-    setNewMessage('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
-    const recipient = targetAdopter || ((pet.shelters as any)?.email || '');
-
-    const tempId = 'temp-' + Date.now();
-    const tempMsg: Message = {
-      id: tempId,
-      pet_id: petId,
-      shelter_id: pet.shelters ? (pet as any).shelter_id : '',
-      sender_email: currentUserEmail,
-      receiver_email: recipient,
-      message: msgText,
-      read: false,
-      created_at: new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, tempMsg]);
-
-    try {
-      const res = await fetch('/api/adoption/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pet_id: petId,
-          shelter_id: (pet as any).shelter_id,
-          sender_email: currentUserEmail,
-          receiver_email: recipient,
-          message: msgText
-        }),
-      });
-
-      if (res.ok) {
-        await fetchMessages(true);
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(`Failed to send: ${errData.error || 'Please try again'}`);
-        setMessages(prev => prev.filter(m => m.id !== tempId));
-        setNewMessage(msgText);
-      }
-    } catch {
-      setMessages(prev => prev.filter(m => m.id !== tempId));
-      setNewMessage(msgText);
-    } finally {
-      isSendingRef.current = false;
-      setIsSending(false);
-    }
-  };
-
   const isShelter = pet?.shelters?.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
   const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
-  const isAdopted = pet?.status === 'adopted';
-
-  // Group messages by date
-  const groups: { date: string; msgs: Message[] }[] = [];
-  messages.forEach(msg => {
-    const dateLabel = formatDateLabel(msg.created_at);
-    const last = groups[groups.length - 1];
-    if (last && last.date === dateLabel) {
-      last.msgs.push(msg);
-    } else {
-      groups.push({ date: dateLabel, msgs: [msg] });
-    }
-  });
+  const targetEmail = targetAdopter || ((pet?.shelters as any)?.email || '');
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] flex flex-col">
-      {/* PINNED TOP HEADER & PET INFO CONTAINER */}
-      <div 
-        className="sticky z-30 bg-white border-b border-[#E8DDD4] shadow-xs"
-        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}
-      >
-        {/* HEADER */}
-        <header className="px-4 py-2.5 flex items-center justify-between border-b border-gray-100">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => {
-                if (isShelter) router.push('/adoption/shelter/dashboard');
-                else router.push('/adoption');
-              }}
-              className="p-1.5 rounded-xl hover:bg-[#FAF6F0] text-[#8B5E3C] transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <Avatar name={displayName} size="sm" />
-            <div className="min-w-0 flex-1">
-              <h1 className="font-bold text-gray-900 text-sm md:text-base leading-tight truncate">{displayName}</h1>
-              <p className="text-[11px] text-[#8B7E7D] truncate font-medium">Inquiry about {pet?.name || 'Pet'}</p>
-            </div>
-          </div>
-
-          {pet && (
-            <div className="flex items-center gap-2">
-              <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${
-                isAdopted ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800'
-              }`}>
-                {pet.status}
-              </span>
-            </div>
-          )}
-        </header>
-
-        {/* PET INFO CARD */}
-        {pet && (
-          <div className="p-2.5 px-4 bg-[#FAF6F0]/60 border-t border-gray-100">
-            <div className="max-w-2xl mx-auto flex items-center gap-3">
-              <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-10 h-10 rounded-xl shrink-0" />
-              <div className="min-w-0 flex-1 text-xs">
-                <h2 className="font-bold text-gray-900 text-xs sm:text-sm">{pet.name}</h2>
-                <p className="text-gray-500 truncate text-[11px]">{pet.breed} &bull; {pet.age} &bull; {pet.size}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* MESSAGES BODY */}
-      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4 pb-32" style={{ background: 'linear-gradient(180deg, #FDFAF7 0%, #F5EBE1 100%)' }}>
-        {isLoading ? (
-          <div className="py-12 text-center text-xs text-gray-400 font-bold">Loading conversation…</div>
-        ) : messages.length === 0 ? (
-          <div className="py-12 text-center text-gray-500 text-xs space-y-1">
-            <p className="font-bold text-sm text-gray-800">Start an inquiry with {displayName}</p>
-            <p>Ask about temperament, adoption fees, or schedule a visit.</p>
-          </div>
-        ) : (
-          groups.map((group, gi) => (
-            <React.Fragment key={gi}>
-              {/* Date Header Badge */}
-              <div className="flex justify-center my-3">
-                <span className="text-[10px] font-bold text-[#8B5E3C] bg-white/90 px-3 py-1 rounded-full border border-[#E8DDD4] shadow-2xs select-none">
-                  {group.date}
-                </span>
-              </div>
-
-              {group.msgs.map(msg => {
-                const isMine = msg.sender_email.toLowerCase() === currentUserEmail.toLowerCase();
-                const isOptimistic = msg.id.startsWith('temp-');
-
-                return (
-                  <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                      isMine ? 'bg-[#8B5E3C] text-white rounded-br-xs shadow-xs' : 'bg-white text-gray-900 border border-[#E8DDD4] shadow-xs rounded-bl-xs'
-                    }`}>
-                      <p className="whitespace-pre-wrap break-words">{msg.message}</p>
-                      <div className={`flex items-center gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                        <span className={`text-[10px] ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
-                          {isOptimistic ? 'Sending…' : formatTime(msg.created_at)}
-                        </span>
-                        {isMine && !isOptimistic && (
-                          msg.read
-                            ? <CheckCheck size={13} className="text-white/90" />
-                            : <Check size={13} className="text-white/60" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </React.Fragment>
-          ))
-        )}
-        <div ref={messagesEndRef} />
-      </main>
-
-      {/* FOOTER — WITH SAFE AREA & MOBILE BOTTOM NAV CLEARANCE */}
-      {isAdopted ? (
-        <footer className="sticky bottom-0 z-40 bg-white border-t border-[#E8DDD4] p-3 text-center pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
-          <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200">
-            <Lock className="w-4 h-4 text-amber-700 shrink-0" />
-            This pet has been adopted! Messaging is closed.
-          </div>
-        </footer>
-      ) : (
-        <footer className="sticky bottom-0 z-40 bg-white border-t border-[#E8DDD4] px-3 py-2.5 pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
-          <div className="max-w-2xl mx-auto">
-            <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2 ${
-              newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
-            }`}>
-              <textarea
-                ref={textareaRef}
-                value={newMessage}
-                onChange={handleTextareaChange}
-                placeholder={`Ask about ${pet?.name || 'this pet'}…`}
-                rows={1}
-                className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
-                style={{ maxHeight: '128px' }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-                }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!newMessage.trim() || isSending}
-                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 cursor-pointer border-none ${
-                  newMessage.trim() && !isSending
-                    ? 'bg-[#8B5E3C] hover:bg-[#734A2E] active:scale-95 text-white shadow-sm'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {isSending
-                  ? <div className="w-3.5 h-3.5 border-[2px] border-white/40 border-t-white rounded-full animate-spin" />
-                  : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
-                }
-              </button>
-            </div>
-            <p className="text-center text-[10px] text-gray-400 mt-1 select-none hidden sm:block font-medium">
-              Press Enter to send &middot; Shift+Enter for new line
-            </p>
-          </div>
-        </footer>
-      )}
+    <div className="min-h-screen bg-[#FDFAF7]">
+      <ChatModal
+        isOpen={true}
+        onClose={() => {
+          if (isShelter) router.push('/adoption/shelter/dashboard');
+          else router.push('/adoption');
+        }}
+        bookingId={petId}
+        bookingDetails={`Adoption Inquiry • ${pet?.name || 'Pet'}`}
+        currentUserEmail={currentUserEmail}
+        otherUserName={displayName}
+        otherUserEmail={targetEmail}
+        otherUserType={isShelter ? 'user' : 'shelter'}
+        onReport={() => {}}
+        petDetails={pet}
+        chatType="adoption"
+        shelterId={(pet as any)?.shelter_id}
+      />
     </div>
   );
 }

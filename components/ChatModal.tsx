@@ -30,9 +30,11 @@ interface ChatModalProps {
   otherUserName: string;
   bookingDetails: string;
   otherUserEmail: string;
-  otherUserType: 'sitter' | 'user';
-  onReport: (email: string, type: 'sitter' | 'user') => void;
+  otherUserType: 'sitter' | 'user' | 'shelter';
+  onReport: (email: string, type: 'sitter' | 'user' | 'shelter') => void;
   petDetails?: any;
+  chatType?: 'petsitting' | 'adoption';
+  shelterId?: string;
 }
 
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
@@ -78,6 +80,8 @@ export default function ChatModal({
   otherUserType,
   onReport,
   petDetails,
+  chatType = 'petsitting',
+  shelterId,
 }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showPetProfile, setShowPetProfile] = useState(false);
@@ -120,16 +124,19 @@ export default function ChatModal({
   const fetchMessages = useCallback(async (silent = false) => {
     if (!bookingId || !currentUserEmail) return;
     try {
-      const res = await fetch(
-        `/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`
-      );
+      const isAdoption = chatType === 'adoption';
+      const endpoint = isAdoption
+        ? `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`
+        : `/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
+
+      const res = await fetch(endpoint);
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
       }
     } catch {}
     finally { if (!silent) setIsLoading(false); }
-  }, [bookingId, currentUserEmail]);
+  }, [bookingId, currentUserEmail, chatType]);
 
   useEffect(() => {
     if (!isOpen || !bookingId) return;
@@ -138,7 +145,7 @@ export default function ChatModal({
     fetchMessages();
     pollIntervalRef.current = setInterval(() => fetchMessages(true), 4000);
     return () => { if (pollIntervalRef.current) clearInterval(pollIntervalRef.current); };
-  }, [isOpen, bookingId]);
+  }, [isOpen, bookingId, fetchMessages]);
 
   useEffect(() => {
     const chatContainer = document.getElementById('chat-messages');
@@ -167,10 +174,16 @@ export default function ChatModal({
     }]);
 
     try {
-      const res = await fetch('/api/petsitting/messages', {
+      const isAdoption = chatType === 'adoption';
+      const endpoint = isAdoption ? '/api/adoption/messages' : '/api/petsitting/messages';
+      const body = isAdoption
+        ? { pet_id: bookingId, shelter_id: shelterId || (petDetails as any)?.shelter_id || '', sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText }
+        : { booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         await fetchMessages(true);
