@@ -122,20 +122,20 @@ function ShelterDashboardContent() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // Always authenticate against the active logged-in account (lumo_pro_email or lumo_sitter_email)
     const email = (
       localStorage.getItem('lumo_shelter_email') ||
       localStorage.getItem('lumo_pro_email') ||
       localStorage.getItem('lumo_sitter_email') ||
       ''
     ).trim();
-    setShelterEmail(email);
 
-    if (email) {
-      fetchShelterDetails(email);
-    } else {
-      setLoading(false);
+    if (!email) {
+      router.push('/adoption');
+      return;
     }
+
+    setShelterEmail(email);
+    fetchShelterDetails(email);
   }, []);
 
   const fetchShelterDetails = async (email: string) => {
@@ -144,19 +144,21 @@ function ShelterDashboardContent() {
       const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
-        setShelterInfo(data.shelter);
-        if (data.shelter?.id) {
-          fetchShelterPets(data.shelter.id);
-          fetchShelterInquiries(data.shelter.id, data.shelter.email);
+        if (data.shelter) {
+          setShelterInfo(data.shelter);
+          if (data.shelter.id) {
+            fetchShelterPets(data.shelter.id);
+            fetchShelterInquiries(data.shelter.id, data.shelter.email);
+          }
         } else {
-          setLoading(false);
+          router.push('/adoption');
         }
       } else {
-        setShelterInfo(null);
-        setLoading(false);
+        router.push('/adoption');
       }
     } catch {
-      setShelterInfo(null);
+      router.push('/adoption');
+    } finally {
       setLoading(false);
     }
   };
