@@ -5890,20 +5890,12 @@ export function PetSittingContent() {
       {/* REQUEST MODAL */}
       {requestModalOpen && selectedSitter && (
         <div 
-          className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" 
+          className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs z-[100000] flex items-center justify-center p-4 overflow-hidden" 
           onClick={() => setRequestModalOpen(false)}
-          style={{
-            paddingTop: 'env(safe-area-inset-top)',
-            paddingBottom: 'env(safe-area-inset-bottom)',
-          }}
         >
           <div 
-            className="bg-white rounded-3xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden" 
+            className="bg-white rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden" 
             onClick={e => e.stopPropagation()}
-            style={{
-              maxHeight: '85vh',
-              marginTop: 'env(safe-area-inset-top)'
-            }}
           >
             <div className="p-4 sm:p-6 border-b border-[#E8DDD4] relative sticky top-0 bg-white z-10 pr-12">
               <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] mb-1">Request {formatSitterName(selectedSitter.name)}</h3>
@@ -7683,44 +7675,51 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
   }
 
   return (
-    <div className="modal-overlay fixed inset-0 z-[1050] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="modal-overlay fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-hidden">
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-100 relative shrink-0">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        <div className="flex items-center gap-3 mb-4">
-          {clinic.org_photo_url ? (
-            <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />
-          ) : (
-            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
-              <span className="text-2xl">🏥</span>
+          <div className="flex items-center gap-3">
+            {clinic.org_photo_url ? (
+              <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
+                <span className="text-2xl">🏥</span>
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-black text-[#4A3E3D] truncate">{clinic.clinic_name}</h2>
+              <p className="text-sm text-[#8B7E7D] truncate">{clinic.city}{clinic.state ? `, ${clinic.state}` : ''}</p>
             </div>
-          )}
-          <div>
-            <h2 className="text-lg font-black text-[#4A3E3D]">{clinic.clinic_name}</h2>
-            <p className="text-sm text-[#8B7E7D]">{clinic.city}{clinic.state ? `, ${clinic.state}` : ''}</p>
           </div>
         </div>
 
-        <p className="text-sm text-[#555555] mb-4">
-          You&apos;re about to open a messaging thread with <strong>{clinic.clinic_name}</strong> to inquire about veterinary boarding services.
-        </p>
+        {/* Inner Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 text-sm text-[#555555]">
+          <p>
+            You&apos;re about to open a messaging thread with <strong>{clinic.clinic_name}</strong> to inquire about veterinary boarding services.
+          </p>
 
-        {clinic.services && clinic.services.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {clinic.services.map((s: string) => (
-              <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{s}</span>
-            ))}
-          </div>
-        )}
+          {clinic.services && clinic.services.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {clinic.services.map((s: string) => (
+                <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{s}</span>
+              ))}
+            </div>
+          )}
 
-        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+          {error && <p className="text-sm text-red-600 font-semibold">{error}</p>}
+        </div>
 
-        <div className="flex gap-3">
+        {/* Sticky Action Footer */}
+        <div className="p-4 sm:p-6 border-t border-gray-100 bg-white shrink-0 flex gap-3">
           <button
             onClick={handleStartInquiry}
             disabled={loading}
@@ -7803,44 +7802,51 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
   }
 
   return (
-    <div className="modal-overlay fixed inset-0 z-[1050] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="modal-overlay fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-hidden">
+      <div className="bg-white rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-gray-100 relative shrink-0">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors border-none cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        <div className="flex items-center gap-3 mb-4">
-          {daycare.logo_url ? (
-            <img src={daycare.logo_url} alt={daycare.business_name} className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />
-          ) : (
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
-              <span className="text-2xl">🐕</span>
+          <div className="flex items-center gap-3">
+            {daycare.logo_url ? (
+              <img src={daycare.logo_url} alt={daycare.business_name} className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+                <span className="text-2xl">🐕</span>
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-black text-[#4A3E3D] truncate">{daycare.business_name}</h2>
+              <p className="text-sm text-[#8B7E7D] truncate">{daycare.city}{daycare.state ? `, ${daycare.state}` : ''}</p>
             </div>
-          )}
-          <div>
-            <h2 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h2>
-            <p className="text-sm text-[#8B7E7D]">{daycare.city}{daycare.state ? `, ${daycare.state}` : ''}</p>
           </div>
         </div>
 
-        <p className="text-sm text-[#555555] mb-4">
-          You&apos;re about to open a messaging thread with <strong>{daycare.business_name}</strong> to inquire about pet daycare services.
-        </p>
+        {/* Inner Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 text-sm text-[#555555]">
+          <p>
+            You&apos;re about to open a messaging thread with <strong>{daycare.business_name}</strong> to inquire about pet daycare services.
+          </p>
 
-        {daycare.services && daycare.services.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {daycare.services.map((s: string) => (
-              <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
-            ))}
-          </div>
-        )}
+          {daycare.services && daycare.services.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {daycare.services.map((s: string) => (
+                <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
+              ))}
+            </div>
+          )}
 
-        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+          {error && <p className="text-sm text-red-600 font-semibold">{error}</p>}
+        </div>
 
-        <div className="flex gap-3">
+        {/* Sticky Action Footer */}
+        <div className="p-4 sm:p-6 border-t border-gray-100 bg-white shrink-0 flex gap-3">
           <button
             onClick={handleStartInquiry}
             disabled={loading}
