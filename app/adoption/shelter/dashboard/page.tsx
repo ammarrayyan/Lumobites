@@ -1500,7 +1500,8 @@ function ShelterDashboardContent() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* EDIT SHELTER LOGO / PHOTO MODAL */}
