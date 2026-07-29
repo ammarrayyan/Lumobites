@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data: daycares, error } = await supabaseAdmin
       .from('pet_daycares')
-      .select('id, business_name, email, city, state, logo_url, description, services, website')
+      .select('id, business_name, email, city, state, logo_url, description, services, website, lat, lng')
       .eq('status', 'approved')
       .eq('is_paused', false)
       .order('created_at', { ascending: false });
