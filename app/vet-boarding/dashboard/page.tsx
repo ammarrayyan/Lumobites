@@ -680,14 +680,16 @@ export default function VetBoardingDashboardPage() {
               <ProfileField
                 label="Clinic Name"
                 value={editForm.clinic_name || ''}
-                editing={isEditing}
+                editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
                 onChange={v => setEditForm((p: any) => ({ ...p, clinic_name: v }))}
+                readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
               />
               <ProfileField
                 label="License Number"
                 value={editForm.license_number || ''}
-                editing={isEditing}
+                editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
                 onChange={v => setEditForm((p: any) => ({ ...p, license_number: v }))}
+                readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
               />
               <ProfileField
                 label="Phone"
@@ -826,6 +828,7 @@ function ProfileField({
   onChange,
   href,
   placeholder,
+  readOnlyNote,
 }: {
   label: string;
   value: string;
@@ -833,6 +836,7 @@ function ProfileField({
   onChange: (v: string) => void;
   href?: string;
   placeholder?: string;
+  readOnlyNote?: string;
 }) {
   return (
     <div>
@@ -850,7 +854,14 @@ function ProfileField({
             {value}
           </a>
         ) : (
-          <p className="text-sm text-[#4A3E3D] mt-0.5">{value || '—'}</p>
+          <div>
+            <p className="text-sm font-bold text-[#4A3E3D] mt-0.5">{value || '—'}</p>
+            {readOnlyNote && (
+              <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">
+                {readOnlyNote}
+              </p>
+            )}
+          </div>
         )
       )}
     </div>

@@ -624,13 +624,39 @@ export default function DaycareDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Business Name</label>
-                    <input
-                      type="text"
-                      value={editForm.business_name || ''}
-                      onChange={e => setEditForm({ ...editForm, business_name: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
-                    />
+                    {(daycare.status === 'approved' || daycare.status === 'paused') ? (
+                      <div>
+                        <p className="text-sm font-bold text-[#4A3E3D] py-1">{editForm.business_name || daycare.business_name || '—'}</p>
+                        <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">Contact support to update your business name or license number</p>
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={editForm.business_name || ''}
+                        onChange={e => setEditForm({ ...editForm, business_name: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      />
+                    )}
                   </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">License Number</label>
+                    {(daycare.status === 'approved' || daycare.status === 'paused') ? (
+                      <div>
+                        <p className="text-sm font-bold text-[#4A3E3D] py-1">{editForm.license_number || daycare.license_number || '—'}</p>
+                        <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">Contact support to update your business name or license number</p>
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={editForm.license_number || ''}
+                        onChange={e => setEditForm({ ...editForm, license_number: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Logo / Photo URL</label>
                     <input
@@ -638,6 +664,39 @@ export default function DaycareDashboard() {
                       value={editForm.logo_url || ''}
                       onChange={e => setEditForm({ ...editForm, logo_url: e.target.value })}
                       placeholder="https://..."
+                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      value={editForm.phone || ''}
+                      onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                      placeholder="(555) 555-5555"
+                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Website</label>
+                    <input
+                      type="url"
+                      value={editForm.website || ''}
+                      onChange={e => setEditForm({ ...editForm, website: e.target.value })}
+                      placeholder="https://..."
+                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Address</label>
+                    <input
+                      type="text"
+                      value={editForm.address || ''}
+                      onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                      placeholder="123 Main St"
                       className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
                     />
                   </div>
