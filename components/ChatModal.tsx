@@ -125,9 +125,12 @@ export default function ChatModal({
     if (!bookingId || !currentUserEmail) return;
     try {
       const isAdoption = chatType === 'adoption';
-      const endpoint = isAdoption
-        ? `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`
-        : `/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
+      let endpoint = `/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
+      if (isAdoption) {
+        const userEmailParam = otherUserType === 'user' ? otherUserEmail : currentUserEmail;
+        const shelterEmailParam = otherUserType === 'user' ? currentUserEmail : otherUserEmail;
+        endpoint = `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(userEmailParam || '')}&shelter_email=${encodeURIComponent(shelterEmailParam || '')}${shelterId ? `&shelter_id=${encodeURIComponent(shelterId)}` : ''}&t=${Date.now()}`;
+      }
 
       const res = await fetch(endpoint);
       if (res.ok) {
@@ -136,7 +139,7 @@ export default function ChatModal({
       }
     } catch {}
     finally { if (!silent) setIsLoading(false); }
-  }, [bookingId, currentUserEmail, chatType]);
+  }, [bookingId, currentUserEmail, otherUserEmail, otherUserType, chatType, shelterId]);
 
   useEffect(() => {
     if (!isOpen || !bookingId) return;

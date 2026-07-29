@@ -1,3 +1,7 @@
+'use client';
+
+import React, { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
 
 interface PetDetails {
@@ -61,7 +65,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     loadPet();
   }, [petId]);
 
-  const isShelter = pet?.shelters?.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim();
+  const isShelter = targetAdopter ? true : (pet?.shelters?.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim());
   const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
   const targetEmail = targetAdopter || ((pet?.shelters as any)?.email || '');
 
