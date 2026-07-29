@@ -271,6 +271,36 @@ function AdoptionContent() {
     }
   };
 
+  const handleShelterRegSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/adoption/shelter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shelterFormData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setShelterRegSuccess(true);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('lumo_shelter_email', shelterFormData.email);
+          localStorage.setItem('lumo_pro_email', shelterFormData.email);
+        }
+        setTimeout(() => {
+          setIsShelterRegOpen(false);
+          if (data.shelter?.status === 'approved') {
+            router.push('/adoption/shelter/dashboard');
+          }
+        }, 1500);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to submit registration application.');
+      }
+    } catch {
+      alert('Error submitting shelter registration.');
+    }
+  };
+
   const fetchListings = async () => {
     setLoading(true);
     try {

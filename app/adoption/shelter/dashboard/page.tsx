@@ -488,14 +488,31 @@ function ShelterDashboardContent() {
             </div>
           </div>
 
-          {shelterInfo?.status?.toLowerCase() === 'approved' && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {shelterInfo && (
+              <button
+                onClick={handleDeleteShelterAccount}
+                className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3.5 py-2.5 rounded-2xl border border-red-200 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Delete Shelter Account & All Listed Pets"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </button>
+            )}
+            {shelterInfo?.status?.toLowerCase() === 'approved' && (
+              <button
+                onClick={handleOpenAddModal}
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+              >
+                <Plus className="w-4 h-4" /> Post a Pet for Adoption
+              </button>
+            )}
             <button
-              onClick={handleOpenAddModal}
-              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+              onClick={handleSwitchAccount}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3.5 py-2.5 rounded-2xl text-xs flex items-center gap-1.5 transition-all border-none cursor-pointer"
             >
-              <Plus className="w-4 h-4" /> Post a Pet for Adoption
+              Sign Out
             </button>
-          )}
+          </div>
         </div>
 
         {/* ACCESS CONTROL BRANCHING */}
