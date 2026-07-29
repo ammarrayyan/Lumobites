@@ -132,7 +132,7 @@ export default function CityBoardPage() {
       }
       setIsLocatingNewCity(true);
       try {
-        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}`);
+        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}&type=cities`);
         const data = await res.json();
         if (data.options && data.options.length > 0) {
           setNewCityOptions(data.options);
@@ -158,7 +158,7 @@ export default function CityBoardPage() {
       }
       setIsLocatingSearchCity(true);
       try {
-        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}`);
+        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(trimmedInput)}&type=cities`);
         const data = await res.json();
         if (data.options && data.options.length > 0) {
           setSearchCityOptions(data.options);

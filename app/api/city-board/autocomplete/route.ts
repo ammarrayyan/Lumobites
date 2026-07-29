@@ -4,35 +4,46 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const input = searchParams.get('input');
+    const type = searchParams.get('type'); // 'cities' | 'address' | null
 
-    if (!input) {
+    if (!input || input.trim().length < 2) {
       return NextResponse.json({ options: [] });
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ options: [] });
     }
 
-    // Removed &components=country:US to support global search
-    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input)}&key=${apiKey}`);
+    // 1. Try Google Place Autocomplete API first
+    try {
+      const typeParam = type === 'cities' ? '&types=(cities)' : '';
+      const placesUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input.trim())}${typeParam}&key=${apiKey}`;
+      const placesRes = await fetch(placesUrl);
+      const placesData = await placesRes.json();
+
+      if (placesData.status === 'OK' && placesData.predictions && placesData.predictions.length > 0) {
+        const placeOptions = placesData.predictions.map((p: any) => ({
+          formatted_address: p.description,
+          clean_city: p.description
+        }));
+        return NextResponse.json({ options: placeOptions });
+      }
+    } catch (e) {
+      console.log('[Autocomplete API] Place autocomplete fetch error, falling back to geocode:', e);
+    }
+
+    // 2. Fallback to Google Geocoding API if Place Autocomplete returns no predictions
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(input.trim())}&key=${apiKey}`;
+    const res = await fetch(geocodeUrl);
     const data = await res.json();
 
-    if (data.results) {
-      // 1. Only accept real cities
-      // 3. Validate it is actually a city (locality or administrative_area_level_2)
-      const validResults = data.results.filter((r: any) => {
-        return r.types.includes('locality') || 
-               r.types.includes('administrative_area_level_2') ||
-               r.types.includes('sublocality') ||
-               r.types.includes('administrative_area_level_3');
-      });
-
-      const options = validResults.map((r: any) => {
+    if (data.results && data.results.length > 0) {
+      const options = data.results.map((r: any) => {
         let city = '';
         let state = '';
         let country = '';
-        
+
         for (const comp of (r.address_components || [])) {
           if (comp.types.includes('locality')) {
             city = comp.long_name;
@@ -40,14 +51,12 @@ export async function GET(req: NextRequest) {
             city = comp.long_name;
           } else if (!city && comp.types.includes('sublocality')) {
             city = comp.long_name;
-          } else if (!city && comp.types.includes('administrative_area_level_3')) {
-            city = comp.long_name;
           }
-          
+
           if (comp.types.includes('administrative_area_level_1')) {
             state = comp.short_name;
           }
-          
+
           if (comp.types.includes('country')) {
             if (comp.short_name === 'US') country = 'USA';
             else if (comp.short_name === 'GB') country = 'UK';
@@ -55,36 +64,27 @@ export async function GET(req: NextRequest) {
             else country = comp.long_name;
           }
         }
-        
-        // 2. Consistent format for all cities
-        const parts = [];
-        if (city) parts.push(city);
-        if (state) parts.push(state);
-        if (country) parts.push(country);
-        
-        const clean_city = parts.join(', ');
-        
-        return { 
-          formatted_address: clean_city, // Never show zip codes
-          clean_city: clean_city
+
+        const formatted = r.formatted_address || [city, state, country].filter(Boolean).join(', ');
+        return {
+          formatted_address: formatted,
+          clean_city: formatted
         };
       });
 
-      // Filter out invalid ones, and remove duplicates by formatted_address
-      const validOptions = options.filter(o => o.formatted_address && o.clean_city);
       const uniqueOptionsMap = new Map();
-      validOptions.forEach((o: any) => {
-        if (!uniqueOptionsMap.has(o.formatted_address)) {
+      options.forEach(o => {
+        if (o.formatted_address && !uniqueOptionsMap.has(o.formatted_address)) {
           uniqueOptionsMap.set(o.formatted_address, o);
         }
       });
-        
+
       return NextResponse.json({ options: Array.from(uniqueOptionsMap.values()) });
     }
 
     return NextResponse.json({ options: [] });
-  } catch (err: any) {
-    console.error('[City Board Autocomplete Error]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: any) {
+    console.error('Autocomplete Error:', error);
+    return NextResponse.json({ options: [] }, { status: 500 });
   }
 }
