@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, org_photo_url, website } = body;
+    const { id, email, org_name, tax_id, phone, org_photo_url, website, address, city, state, zip } = body;
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing shelter id or email' }, { status: 400 });
@@ -219,13 +219,40 @@ export async function PATCH(request: NextRequest) {
 
     let updatedPhoto = org_photo_url;
     if (!updatedPhoto && website) {
-      updatedPhoto = await extractOgImage(website);
+      try {
+        const fetchedOgPhoto = await extractOgImage(website);
+        if (fetchedOgPhoto) updatedPhoto = fetchedOgPhoto;
+      } catch (e) {}
     }
 
-    let query = supabaseAdmin.from('shelters').update({
-      org_photo_url: updatedPhoto || '',
-      ...(website ? { website } : {})
-    });
+    const updateFields: any = {};
+    if (org_name !== undefined) updateFields.org_name = org_name;
+    if (tax_id !== undefined) updateFields.tax_id = tax_id;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (website !== undefined) updateFields.website = website;
+    if (updatedPhoto !== undefined) updateFields.org_photo_url = updatedPhoto;
+
+    if (city !== undefined || address !== undefined) {
+      const locString = ((address || '') + ' ' + (city || '')).trim();
+      if (locString) {
+        const geo = await geocodeLocation(locString);
+        if (geo) {
+          updateFields.city = geo.city;
+          updateFields.state = geo.state;
+          updateFields.zip = geo.zip;
+          updateFields.address = geo.formatted_address;
+          if (geo.lat) updateFields.lat = geo.lat;
+          if (geo.lng) updateFields.lng = geo.lng;
+        } else {
+          if (city !== undefined) updateFields.city = city;
+          if (address !== undefined) updateFields.address = address;
+          if (state !== undefined) updateFields.state = state;
+          if (zip !== undefined) updateFields.zip = zip;
+        }
+      }
+    }
+
+    let query = supabaseAdmin.from('shelters').update(updateFields);
 
     if (id) {
       query = query.eq('id', id);

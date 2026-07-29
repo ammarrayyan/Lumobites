@@ -35,7 +35,11 @@ function ShelterDashboardContent() {
   const [loading, setLoading] = useState(true);
 
   // Filters & Controls
-  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'inquiries' | 'all'>('available');
+  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'inquiries' | 'profile' | 'all'>('available');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState<any>({});
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState('');
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
@@ -146,6 +150,7 @@ function ShelterDashboardContent() {
         const data = await res.json();
         if (data.shelter) {
           setShelterInfo(data.shelter);
+          setProfileForm(data.shelter);
           if (data.shelter.id) {
             fetchShelterPets(data.shelter.id);
             fetchShelterInquiries(data.shelter.id, data.shelter.email);
@@ -175,6 +180,40 @@ function ShelterDashboardContent() {
       console.error('Failed to fetch shelter inquiries:', err);
     } finally {
       setInquiriesLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!shelterInfo) return;
+    setSavingProfile(true);
+    setProfileSaveError('');
+    try {
+      const res = await fetch('/api/adoption/shelter', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: shelterInfo.id,
+          email: shelterInfo.email,
+          org_name: profileForm.org_name,
+          tax_id: profileForm.tax_id,
+          phone: profileForm.phone,
+          website: profileForm.website,
+          org_photo_url: profileForm.org_photo_url,
+          city: profileForm.city,
+          address: profileForm.address,
+          state: profileForm.state,
+          zip: profileForm.zip,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update shelter profile');
+      setShelterInfo(data.shelter);
+      setProfileForm(data.shelter);
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      setProfileSaveError(err.message || 'Error updating profile');
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -476,14 +515,6 @@ function ShelterDashboardContent() {
               </h1>
               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                 <span>{shelterInfo?.status ? `Status: ${String(shelterInfo.status).toUpperCase()}` : 'Rescue Partner Portal'}</span>
-                {shelterInfo && (
-                  <button
-                    onClick={() => { setEditPhotoUrl(shelterInfo.org_photo_url || ''); setShowPhotoModal(true); }}
-                    className="text-[#8B5E3C] underline font-bold cursor-pointer border-none bg-transparent"
-                  >
-                    Edit Logo/Photo
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -637,7 +668,7 @@ function ShelterDashboardContent() {
             {/* STATUS TABS */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
           <div className="flex gap-2 flex-wrap">
-            {(['available', 'pending', 'adopted', 'inquiries', 'all'] as const).map(tab => {
+            {(['available', 'pending', 'adopted', 'inquiries', 'profile', 'all'] as const).map(tab => {
               const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
               const sortedInqMsgs = [...inquiries].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
               const threadKeys = new Set<string>();
@@ -650,6 +681,8 @@ function ShelterDashboardContent() {
 
               const count = tab === 'inquiries'
                 ? threadKeys.size
+                : tab === 'profile'
+                ? null
                 : pets.filter(p => tab === 'all' || p.status === tab).length;
               return (
                 <button
@@ -662,6 +695,10 @@ function ShelterDashboardContent() {
                   {tab === 'inquiries' ? (
                     <>
                       <MessageSquare className="w-3.5 h-3.5" /> Inquiries ({count})
+                    </>
+                  ) : tab === 'profile' ? (
+                    <>
+                      <Building2 className="w-3.5 h-3.5" /> Profile
                     </>
                   ) : (
                     <>{tab} ({count})</>
@@ -838,6 +875,180 @@ function ShelterDashboardContent() {
                 </>
               );
             })()}
+          </div>
+        ) : activeTab === 'profile' ? (
+          <div className="space-y-5">
+            {/* Header controls */}
+            <div className="bg-white rounded-3xl p-5 border border-[#E8DDD4] shadow-xs flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Shelter & Organization Profile
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Update your contact details, website, logo photo, and organization location.
+                </p>
+              </div>
+
+              {!isEditingProfile ? (
+                <button
+                  onClick={() => { setIsEditingProfile(true); setProfileForm({ ...shelterInfo }); setProfileSaveError(''); }}
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] px-4 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer border-none"
+                >
+                  <Edit3 className="w-4 h-4" /> Edit Profile
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setIsEditingProfile(false); setProfileForm({ ...shelterInfo }); setProfileSaveError(''); }}
+                    className="text-xs font-bold text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile}
+                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] disabled:opacity-60 px-4 py-2 rounded-xl transition-all shadow-xs cursor-pointer border-none"
+                  >
+                    {savingProfile ? 'Saving…' : 'Save Changes'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {profileSaveError && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-xs text-red-600 font-bold">
+                {profileSaveError}
+              </div>
+            )}
+
+            {/* Basic Info Card */}
+            <div className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Organization Information</h3>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">Organization / Rescue Name</label>
+                {isEditingProfile && shelterInfo?.status !== 'approved' ? (
+                  <input
+                    type="text"
+                    value={profileForm.org_name || ''}
+                    onChange={e => setProfileForm({ ...profileForm, org_name: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                  />
+                ) : (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{profileForm.org_name || '—'}</p>
+                    {shelterInfo?.status === 'approved' && (
+                      <p className="text-[11px] text-gray-400 mt-0.5">Contact support to update your verified organization name or EIN/Tax ID.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">EIN / Tax ID</label>
+                {isEditingProfile && shelterInfo?.status !== 'approved' ? (
+                  <input
+                    type="text"
+                    value={profileForm.tax_id || ''}
+                    onChange={e => setProfileForm({ ...profileForm, tax_id: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                    placeholder="12-3456789"
+                  />
+                ) : (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{profileForm.tax_id || '—'}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">Contact Email</label>
+                <p className="text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-2.5 inline-block">
+                  {profileForm.email || '—'}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Verified email associated with account login credentials.</p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">Phone Number</label>
+                {isEditingProfile ? (
+                  <input
+                    type="tel"
+                    value={profileForm.phone || ''}
+                    onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                    placeholder="(555) 000-0000"
+                  />
+                ) : (
+                  <p className="text-sm font-semibold text-gray-900">{profileForm.phone || '—'}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">Website URL</label>
+                {isEditingProfile ? (
+                  <input
+                    type="url"
+                    value={profileForm.website || ''}
+                    onChange={e => setProfileForm({ ...profileForm, website: e.target.value })}
+                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                    placeholder="https://..."
+                  />
+                ) : profileForm.website ? (
+                  <a href={profileForm.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#8B5E3C] hover:underline">
+                    {profileForm.website}
+                  </a>
+                ) : (
+                  <p className="text-sm text-gray-400">—</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700 block mb-1">Organization Logo / Photo URL</label>
+                {isEditingProfile ? (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      value={profileForm.org_photo_url || ''}
+                      onChange={e => setProfileForm({ ...profileForm, org_photo_url: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="https://... or leave blank to auto-fetch from website"
+                    />
+                    {profileForm.org_photo_url && (
+                      <div className="flex items-center gap-2">
+                        <img src={profileForm.org_photo_url} alt="Logo preview" className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
+                        <span className="text-[11px] text-gray-500 font-medium">Logo Preview</span>
+                      </div>
+                    )}
+                  </div>
+                ) : profileForm.org_photo_url ? (
+                  <div className="flex items-center gap-3">
+                    <img src={profileForm.org_photo_url} alt="Shelter logo" className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-2xs" />
+                    <span className="text-xs text-gray-600 font-medium">{profileForm.org_photo_url}</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">—</p>
+                )}
+              </div>
+            </div>
+
+            {/* Location Card */}
+            <div className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-xs space-y-4">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Organization Location</h3>
+              {isEditingProfile ? (
+                <CityAutocompleteInput
+                  label="Address / Location *"
+                  value={profileForm.city || profileForm.address || ''}
+                  onChange={val => setProfileForm({ ...profileForm, city: val, address: val })}
+                  placeholder="Enter city or full street address (e.g. 1239 Lexington Rd, Louisville, KY)"
+                  required
+                />
+              ) : (
+                <p className="text-sm font-semibold text-gray-900">
+                  {[profileForm.address, profileForm.city, profileForm.state, profileForm.zip].filter(Boolean).join(', ') || '—'}
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
