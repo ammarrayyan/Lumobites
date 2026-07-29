@@ -3317,26 +3317,86 @@ export function PetSittingContent() {
   });
 
 
+  let filteredVetClinics = [...vetClinics];
+  let filteredPetDaycares = [...petDaycares];
+
   if (searchZip.trim()) {
     if (isGeocoding || searchLocationError || !searchCoords) {
       // User is typing, or geocoding failed/pending -> wait for verification before showing results
       filteredSitters = [];
+      filteredVetClinics = [];
+      filteredPetDaycares = [];
     } else {
-      // Verified! Filter using haversine if radius applies
+      // Verified! Filter Sitters using haversine if radius applies
       filteredSitters = filteredSitters.map(s => {
         if (s.lat && s.lng) {
-          return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
+          return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(s.lat), Number(s.lng)) };
         }
         return s;
       });
 
       if (searchRadius !== 'any') {
         const radius = parseFloat(searchRadius);
-        filteredSitters = filteredSitters.filter(s => s.distance !== undefined && s.distance <= radius);
+        const searchCityQuery = searchZip.trim().toLowerCase();
+        filteredSitters = filteredSitters.filter(s => {
+          if (s.distance !== undefined) return s.distance <= radius;
+          if (s.city && searchCityQuery) return s.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(s.city.toLowerCase());
+          return false;
+        });
       }
-      
-      // Always sort by distance if available
       filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+      // Filter Vet Clinics by distance & location query
+      filteredVetClinics = filteredVetClinics.map(c => {
+        if (c.lat && c.lng) {
+          return { ...c, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(c.lat), Number(c.lng)) };
+        }
+        return c;
+      });
+
+      if (searchRadius !== 'any') {
+        const radius = parseFloat(searchRadius);
+        const searchCityQuery = searchZip.trim().toLowerCase();
+        filteredVetClinics = filteredVetClinics.filter(c => {
+          if (c.distance !== undefined) return c.distance <= radius;
+          if (c.city && searchCityQuery) return c.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(c.city.toLowerCase());
+          return false;
+        });
+      } else {
+        const searchCityQuery = searchZip.trim().toLowerCase();
+        filteredVetClinics = filteredVetClinics.filter(c => {
+          if (c.distance !== undefined) return c.distance <= 100;
+          if (c.city && searchCityQuery) return c.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(c.city.toLowerCase());
+          return true;
+        });
+      }
+      filteredVetClinics.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+      // Filter Pet Daycares by distance & location query
+      filteredPetDaycares = filteredPetDaycares.map(d => {
+        if (d.lat && d.lng) {
+          return { ...d, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(d.lat), Number(d.lng)) };
+        }
+        return d;
+      });
+
+      if (searchRadius !== 'any') {
+        const radius = parseFloat(searchRadius);
+        const searchCityQuery = searchZip.trim().toLowerCase();
+        filteredPetDaycares = filteredPetDaycares.filter(d => {
+          if (d.distance !== undefined) return d.distance <= radius;
+          if (d.city && searchCityQuery) return d.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(d.city.toLowerCase());
+          return false;
+        });
+      } else {
+        const searchCityQuery = searchZip.trim().toLowerCase();
+        filteredPetDaycares = filteredPetDaycares.filter(d => {
+          if (d.distance !== undefined) return d.distance <= 100;
+          if (d.city && searchCityQuery) return d.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(d.city.toLowerCase());
+          return true;
+        });
+      }
+      filteredPetDaycares.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
 
@@ -3349,8 +3409,8 @@ export function PetSittingContent() {
     });
   }
 
-  const showVetSection = vetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
-  const showDaycareSection = petDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
+  const showVetSection = filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
+  const showDaycareSection = filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
   const showSittersSection = (searchServiceType === 'all' || (searchServiceType !== 'Veterinary Boarding' && searchServiceType !== 'Pet Daycare')) && filteredSitters.length > 0;
   const hasAnySearchResults = showVetSection || showDaycareSection || showSittersSection;
 
@@ -3908,14 +3968,14 @@ export function PetSittingContent() {
                   )}
 
                   {/* ─── Veterinary Boarding Clinics ─────────────────────── */}
-                  {vetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding') && (
+                  {filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding') && (
                     <div className="mt-8">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-base font-black text-[#4A3E3D]">🏥 Veterinary Boarding Clinics Near You</span>
                         <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">Partner Clinics</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {vetClinics.map((clinic: any) => (
+                        {filteredVetClinics.map((clinic: any) => (
                           <div
                             key={clinic.id}
                             className="bg-white rounded-3xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
@@ -3993,14 +4053,14 @@ export function PetSittingContent() {
                   )}
 
                   {/* ─── Pet Daycare Facilities ─────────────────────────── */}
-                  {petDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare') && (
+                  {filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare') && (
                     <div className="mt-8">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-base font-black text-[#4A3E3D]">🐕 Pet Daycare Facilities Near You</span>
                         <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">Verified Daycares</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {petDaycares.map((daycare: any) => (
+                        {filteredPetDaycares.map((daycare: any) => (
                           <div
                             key={daycare.id}
                             className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
@@ -4082,8 +4142,8 @@ export function PetSittingContent() {
                 <div className="w-full md:w-[45%] md:sticky md:top-24 h-[300px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4] relative z-0" style={{ zIndex: 0 }}>
                   <SitterMap 
                     sitters={filteredSitters}
-                    vetClinics={showVetSection ? vetClinics : []}
-                    petDaycares={showDaycareSection ? petDaycares : []}
+                    vetClinics={showVetSection ? filteredVetClinics : []}
+                    petDaycares={showDaycareSection ? filteredPetDaycares : []}
                     searchCoords={searchCoords}
                     searchRadius={searchRadius}
                     onSelectSitter={handleSelectSitterFromMap}
