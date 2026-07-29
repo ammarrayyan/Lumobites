@@ -1240,28 +1240,41 @@ export function PetSittingContent() {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
 
+      console.log('[GPS Debug] Geolocation acquired:', { lat, lng });
+
+      // Always set coordinates from GPS position immediately!
+      skipGeocodeRef.current = true;
+      setSearchCoords({ lat, lng });
+      setSearchLocationError('');
+
+      let resolvedName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
       try {
         const res = await fetch(`/api/petsitting/geocode?latlng=${lat},${lng}`);
         const data = await res.json();
-        if (res.ok && data.lat && data.lng) {
-          const locationName = data.formatted_address || data.city || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-          skipGeocodeRef.current = true;
-          setSearchZip(locationName);
-          setSearchCoords({ lat: data.lat, lng: data.lng });
-          setSearchLocationName(locationName);
-          setSearchLocationError('');
-          if (sitters.length === 0) {
-            await fetchSitters();
-          }
-        } else {
-          setSearchLocationError('Could not determine your location name.');
+        console.log('[GPS Debug] Reverse geocode response:', data);
+
+        if (res.ok && data) {
+          resolvedName = data.city || data.formatted_address || resolvedName;
         }
       } catch (e) {
-        console.error('Reverse geocoding error:', e);
-        setSearchLocationError('Failed to parse your location name.');
+        console.error('[GPS Debug] Reverse geocoding fetch error:', e);
+      }
+
+      setSearchZip(resolvedName);
+      setSearchLocationName(resolvedName);
+
+      console.log('[GPS Search Executed]', {
+        searchCoords: { lat, lng },
+        searchZip: resolvedName,
+        searchLocationName: resolvedName,
+      });
+
+      if (sitters.length === 0) {
+        await fetchSitters();
       }
     } catch (error: any) {
-      console.error('Geolocation error:', error);
+      console.error('[GPS Debug] Geolocation error:', error);
       alert('Unable to get your location. Please enter your city manually.');
       document.getElementById('locationSearchInput')?.focus();
     } finally {
