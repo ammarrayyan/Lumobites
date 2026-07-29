@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
@@ -5888,7 +5889,7 @@ export function PetSittingContent() {
       </main>
 
       {/* REQUEST MODAL */}
-      {requestModalOpen && selectedSitter && (
+      {requestModalOpen && selectedSitter && typeof window !== 'undefined' && createPortal(
         <div 
           className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs z-[100000] flex items-center justify-center p-4 overflow-hidden" 
           onClick={() => setRequestModalOpen(false)}
@@ -6967,22 +6968,14 @@ export function PetSittingContent() {
       )}
 
       {/* REVIEWS MODAL */}
-      {reviewsModalOpen && selectedSitterForReviews && (
+      {reviewsModalOpen && selectedSitterForReviews && typeof window !== 'undefined' && createPortal(
         <div 
-          className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-fade-in" 
+          className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs z-[100000] flex items-center justify-center p-4 overflow-hidden" 
           onClick={() => setReviewsModalOpen(false)}
-          style={{
-            paddingTop: 'env(safe-area-inset-top)',
-            paddingBottom: 'env(safe-area-inset-bottom)',
-          }}
         >
           <div 
-            className="bg-white rounded-3xl w-full max-w-xl flex flex-col shadow-2xl overflow-hidden" 
+            className="bg-white rounded-3xl w-full max-w-xl max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden" 
             onClick={e => e.stopPropagation()}
-            style={{
-              maxHeight: '85vh',
-              marginTop: 'env(safe-area-inset-top)'
-            }}
           >
             {/* Cover Banner */}
             <div className="h-32 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
@@ -7216,7 +7209,8 @@ export function PetSittingContent() {
               })()}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* DELETE MODAL */}
@@ -7674,7 +7668,9 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
     );
   }
 
-  return (
+  if (typeof window === 'undefined') return null;
+
+  return createPortal(
     <div className="modal-overlay fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-hidden">
       <div className="bg-white rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
         {/* Header */}
@@ -7735,7 +7731,8 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -7801,7 +7798,9 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
     );
   }
 
-  return (
+  if (typeof window === 'undefined') return null;
+
+  return createPortal(
     <div className="modal-overlay fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-hidden">
       <div className="bg-white rounded-3xl w-full max-w-md max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
         {/* Header */}
@@ -7862,7 +7861,8 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
 import PetPhotoCarousel from './PetPhotoCarousel';
 
@@ -205,6 +206,7 @@ export default function ChatModal({
   };
 
   if (!isOpen) return null;
+  if (typeof window === 'undefined') return null;
 
   const displayName = formatName(otherUserName);
 
@@ -229,7 +231,7 @@ export default function ChatModal({
     if (d !== lastDate) { dateBoundaries.add(i); lastDate = d; }
   });
 
-  return (
+  return createPortal(
     <div 
       className="fixed inset-0 z-[100000] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
       style={{
@@ -538,6 +540,7 @@ export default function ChatModal({
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
