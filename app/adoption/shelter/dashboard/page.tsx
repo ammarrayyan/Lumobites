@@ -123,7 +123,12 @@ function ShelterDashboardContent() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     // Always authenticate against the active logged-in account (lumo_pro_email or lumo_sitter_email)
-    const email = (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '').trim();
+    const email = (
+      localStorage.getItem('lumo_shelter_email') ||
+      localStorage.getItem('lumo_pro_email') ||
+      localStorage.getItem('lumo_sitter_email') ||
+      ''
+    ).trim();
     setShelterEmail(email);
 
     if (email) {
@@ -440,7 +445,7 @@ function ShelterDashboardContent() {
                 {shelterInfo?.org_name || 'Shelter Management Dashboard'}
               </h1>
               <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                <span>{shelterInfo ? `Status: ${shelterInfo.status.toUpperCase()}` : 'Rescue Partner Portal'}</span>
+                <span>{shelterInfo?.status ? `Status: ${String(shelterInfo.status).toUpperCase()}` : 'Rescue Partner Portal'}</span>
                 {shelterInfo && (
                   <button
                     onClick={() => { setEditPhotoUrl(shelterInfo.org_photo_url || ''); setShowPhotoModal(true); }}
@@ -453,7 +458,7 @@ function ShelterDashboardContent() {
             </div>
           </div>
 
-          {shelterInfo?.status === 'approved' && (
+          {shelterInfo?.status?.toLowerCase() === 'approved' && (
             <button
               onClick={handleOpenAddModal}
               className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
@@ -508,7 +513,7 @@ function ShelterDashboardContent() {
               </button>
             </div>
           </div>
-        ) : shelterInfo.status === 'pending' ? (
+        ) : shelterInfo?.status?.toLowerCase() === 'pending' ? (
           <div className="bg-white p-8 md:p-12 rounded-3xl border border-amber-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 mx-auto font-bold">
               <ShieldCheck className="w-8 h-8" />
@@ -526,7 +531,7 @@ function ShelterDashboardContent() {
               We will send an email confirmation to <strong>{shelterInfo.email}</strong> as soon as your account is approved. Posting pets will be enabled once approved.
             </p>
           </div>
-        ) : shelterInfo.status === 'rejected' ? (
+        ) : shelterInfo?.status?.toLowerCase() === 'rejected' ? (
           <div className="bg-white p-8 md:p-12 rounded-3xl border border-red-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mx-auto font-bold">
               <Trash2 className="w-8 h-8" />
