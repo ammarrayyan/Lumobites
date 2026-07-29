@@ -81,6 +81,29 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
     }
   };
 
+  const handleDeleteShelter = async (shelter: Shelter) => {
+    if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${shelter.org_name}"?\n\nThis will permanently delete their shelter account, all posted adoption pets, and all inquiry threads.`)) {
+      return;
+    }
+    setProcessingId(shelter.id);
+    try {
+      const res = await fetch(`/api/admin/shelters?id=${shelter.id}`, {
+        method: 'DELETE',
+        headers: { 'x-admin-key': adminKey }
+      });
+      if (res.ok) {
+        setShelters(prev => prev.filter(s => s.id !== shelter.id));
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Failed to delete shelter account.');
+      }
+    } catch (err) {
+      alert('Failed to delete shelter account.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const filtered = shelters.filter(s => {
     const matchesSearch = s.org_name.toLowerCase().includes(search.toLowerCase()) || s.email.toLowerCase().includes(search.toLowerCase()) || s.city.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
