@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X } from 'lucide-react';
@@ -1175,210 +1176,217 @@ function AdoptionContent() {
       )}
 
       {/* SHELTER REGISTRATION MODAL */}
-      {isShelterRegOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto relative">
-            <button
-              onClick={() => setIsShelterRegOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+      {isShelterRegOpen && typeof window !== 'undefined' && createPortal(
+        <div className="modal-overlay fixed inset-0 z-[100000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-hidden">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-100 relative shrink-0">
+              <button
+                onClick={() => setIsShelterRegOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Rescue / Shelter Registration
-            </h3>
+              <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Rescue / Shelter Registration
+              </h3>
+            </div>
 
-            {shelterRegSuccess ? (
-              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2 text-xs text-emerald-900 font-medium">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <p className="font-bold text-sm">Application Submitted!</p>
-                <p>Your shelter application is pending admin review. You will receive an update once approved.</p>
-              </div>
-            ) : shelterOtpStep === 'email' ? (
-              <div className="space-y-4 text-xs">
-                <p className="text-gray-600">
-                  Enter your organization or contact email to receive a 6-digit verification code before registering.
-                </p>
-
-                {shelterOtpError && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-semibold">
-                    {shelterOtpError}
-                  </div>
-                )}
-
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1 uppercase tracking-wider">
-                    Contact / Organization Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={shelterOtpEmail}
-                    onChange={e => setShelterOtpEmail(e.target.value)}
-                    placeholder="contact@shelter.org"
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-sm text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                  />
+            {/* Scrollable Content Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 text-left">
+              {shelterRegSuccess ? (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2 text-xs text-emerald-900 font-medium">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                  <p className="font-bold text-sm">Application Submitted!</p>
+                  <p>Your shelter application is pending admin review. You will receive an update once approved.</p>
                 </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSendShelterOtp}
-                    disabled={shelterOtpSending}
-                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm transition-all"
-                  >
-                    {shelterOtpSending ? 'Sending Code...' : 'Send Verification Code'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsShelterRegOpen(false)}
-                    className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : shelterOtpStep === 'code' ? (
-              <div className="space-y-4 text-xs">
-                <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl text-center">
-                  <p className="text-orange-900 font-medium">
-                    Verification code sent to <strong>{shelterOtpEmail}</strong>
+              ) : shelterOtpStep === 'email' ? (
+                <div className="space-y-4 text-xs">
+                  <p className="text-gray-600">
+                    Enter your organization or contact email to receive a 6-digit verification code before registering.
                   </p>
-                  <button
-                    onClick={() => setShelterOtpStep('email')}
-                    className="text-[11px] font-bold text-[#8B5E3C] underline mt-1 border-none bg-transparent cursor-pointer"
-                  >
-                    Change Email
-                  </button>
-                </div>
 
-                {shelterOtpError && (
-                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-semibold">
-                    {shelterOtpError}
-                  </div>
-                )}
+                  {shelterOtpError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-semibold">
+                      {shelterOtpError}
+                    </div>
+                  )}
 
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1 uppercase tracking-wider">
-                    Enter 6-Digit Verification Code *
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={shelterOtpCode}
-                    onChange={e => setShelterOtpCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-center text-lg font-mono font-bold tracking-widest text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleVerifyShelterOtp}
-                    disabled={shelterOtpVerifying}
-                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm transition-all"
-                  >
-                    {shelterOtpVerifying ? 'Verifying...' : 'Verify Code & Proceed'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsShelterRegOpen(false)}
-                    className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleShelterRegSubmit} className="space-y-3 text-xs">
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Organization / Rescue Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={shelterFormData.org_name}
-                    onChange={e => setShelterFormData({ ...shelterFormData, org_name: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="e.g. City Animal Rescue"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">EIN / Tax ID (Optional)</label>
-                  <input
-                    type="text"
-                    value={shelterFormData.tax_id}
-                    onChange={e => setShelterFormData({ ...shelterFormData, tax_id: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="12-3456789"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Contact Email *</label>
-                  <input
-                    type="email"
-                    required
-                    readOnly
-                    value={shelterFormData.email}
-                    className="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-gray-600 cursor-not-allowed font-medium"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="font-bold text-gray-700 block mb-1">Phone Number</label>
+                    <label className="font-bold text-gray-700 block mb-1 uppercase tracking-wider">
+                      Contact / Organization Email *
+                    </label>
                     <input
-                      type="tel"
-                      value={shelterFormData.phone}
-                      onChange={e => setShelterFormData({ ...shelterFormData, phone: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                      placeholder="(555) 000-0000"
+                      type="email"
+                      value={shelterOtpEmail}
+                      onChange={e => setShelterOtpEmail(e.target.value)}
+                      placeholder="contact@shelter.org"
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-sm text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
                     />
                   </div>
 
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSendShelterOtp}
+                      disabled={shelterOtpSending}
+                      className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm transition-all"
+                    >
+                      {shelterOtpSending ? 'Sending Code...' : 'Send Verification Code'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsShelterRegOpen(false)}
+                      className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : shelterOtpStep === 'code' ? (
+                <div className="space-y-4 text-xs">
+                  <div className="bg-orange-50 border border-orange-100 p-3 rounded-xl text-center">
+                    <p className="text-orange-900 font-medium">
+                      Verification code sent to <strong>{shelterOtpEmail}</strong>
+                    </p>
+                    <button
+                      onClick={() => setShelterOtpStep('email')}
+                      className="text-[11px] font-bold text-[#8B5E3C] underline mt-1 border-none bg-transparent cursor-pointer"
+                    >
+                      Change Email
+                    </button>
+                  </div>
+
+                  {shelterOtpError && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 font-semibold">
+                      {shelterOtpError}
+                    </div>
+                  )}
+
                   <div>
-                    <label className="font-bold text-gray-700 block mb-1">City *</label>
+                    <label className="font-bold text-gray-700 block mb-1 uppercase tracking-wider">
+                      Enter 6-Digit Verification Code *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={shelterOtpCode}
+                      onChange={e => setShelterOtpCode(e.target.value)}
+                      placeholder="123456"
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-center text-lg font-mono font-bold tracking-widest text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleVerifyShelterOtp}
+                      disabled={shelterOtpVerifying}
+                      className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm transition-all"
+                    >
+                      {shelterOtpVerifying ? 'Verifying...' : 'Verify Code & Proceed'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsShelterRegOpen(false)}
+                      className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleShelterRegSubmit} className="space-y-3 text-xs">
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Organization / Rescue Name *</label>
                     <input
                       type="text"
                       required
-                      value={shelterFormData.city}
-                      onChange={e => setShelterFormData({ ...shelterFormData, city: e.target.value })}
+                      value={shelterFormData.org_name}
+                      onChange={e => setShelterFormData({ ...shelterFormData, org_name: e.target.value })}
                       className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                      placeholder="e.g. Austin"
+                      placeholder="e.g. City Animal Rescue"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Website (Optional)</label>
-                  <input
-                    type="url"
-                    value={shelterFormData.website}
-                    onChange={e => setShelterFormData({ ...shelterFormData, website: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="https://..."
-                  />
-                </div>
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">EIN / Tax ID (Optional)</label>
+                    <input
+                      type="text"
+                      value={shelterFormData.tax_id}
+                      onChange={e => setShelterFormData({ ...shelterFormData, tax_id: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="12-3456789"
+                    />
+                  </div>
 
-                <div className="flex gap-2 pt-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm"
-                  >
-                    Submit Application
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsShelterRegOpen(false)}
-                    className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Contact Email *</label>
+                    <input
+                      type="email"
+                      required
+                      readOnly
+                      value={shelterFormData.email}
+                      className="w-full bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-gray-600 cursor-not-allowed font-medium"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={shelterFormData.phone}
+                        onChange={e => setShelterFormData({ ...shelterFormData, phone: e.target.value })}
+                        className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                        placeholder="(555) 000-0000"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">City *</label>
+                      <input
+                        type="text"
+                        required
+                        value={shelterFormData.city}
+                        onChange={e => setShelterFormData({ ...shelterFormData, city: e.target.value })}
+                        className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                        placeholder="e.g. Austin"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Website (Optional)</label>
+                    <input
+                      type="url"
+                      value={shelterFormData.website}
+                      onChange={e => setShelterFormData({ ...shelterFormData, website: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl cursor-pointer border-none text-sm"
+                    >
+                      Submit Application
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsShelterRegOpen(false)}
+                      className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ADOPTION PET INQUIRY CHAT MODAL */}
