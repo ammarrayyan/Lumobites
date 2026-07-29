@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
@@ -26,7 +27,7 @@ interface ShelterPet {
   created_at: string;
 }
 
-export default function ShelterDashboardPage() {
+function ShelterDashboardContent() {
   const router = useRouter();
   const [shelterEmail, setShelterEmail] = useState('');
   const [shelterInfo, setShelterInfo] = useState<any>(null);
@@ -987,9 +988,9 @@ export default function ShelterDashboardPage() {
   </div>
 
       {/* POST / EDIT PET MODAL */}
-      {isModalOpen && (
+      {isModalOpen && typeof window !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
+          className="modal-overlay fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
           onClick={() => setIsModalOpen(false)}
         >
           <div
@@ -1292,13 +1293,14 @@ export default function ShelterDashboardPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* RE-APPLICATION FORM MODAL */}
-      {isReapplyOpen && (
+      {isReapplyOpen && typeof window !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
+          className="modal-overlay fixed inset-0 z-[100000] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 pb-[calc(env(safe-area-inset-bottom,0px)+96px)] sm:p-6 overflow-y-auto"
           onClick={() => setIsReapplyOpen(false)}
         >
           <div
@@ -1399,8 +1401,17 @@ export default function ShelterDashboardPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
+  );
+}
+
+export default function ShelterDashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs text-[#8B5E3C] font-bold">Loading Shelter Dashboard…</div>}>
+      <ShelterDashboardContent />
+    </Suspense>
   );
 }
