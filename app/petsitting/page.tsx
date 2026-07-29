@@ -3327,76 +3327,46 @@ export function PetSittingContent() {
       filteredVetClinics = [];
       filteredPetDaycares = [];
     } else {
-      // Verified! Filter Sitters using haversine if radius applies
-      filteredSitters = filteredSitters.map(s => {
-        if (s.lat && s.lng) {
-          return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(s.lat), Number(s.lng)) };
+      const radiusLimit = searchRadius !== 'any' ? parseFloat(searchRadius) : null;
+      const zipQuery = searchZip.trim().toLowerCase();
+      const locQuery = searchLocationName.trim().toLowerCase();
+
+      const checkLocationMatch = (item: any) => {
+        if (item.distance !== undefined) {
+          if (radiusLimit !== null) return item.distance <= radiusLimit;
+          return item.distance <= 100;
         }
-        return s;
-      });
+        if (!item.city) return radiusLimit === null;
+        const city = item.city.trim().toLowerCase();
+        if (zipQuery && (city.includes(zipQuery) || zipQuery.includes(city))) return true;
+        if (locQuery && (city.includes(locQuery) || locQuery.includes(city))) return true;
 
-      if (searchRadius !== 'any') {
-        const radius = parseFloat(searchRadius);
-        const searchCityQuery = searchZip.trim().toLowerCase();
-        filteredSitters = filteredSitters.filter(s => {
-          if (s.distance !== undefined) return s.distance <= radius;
-          if (s.city && searchCityQuery) return s.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(s.city.toLowerCase());
-          return false;
-        });
-      }
-      filteredSitters.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-
-      // Filter Vet Clinics by distance & location query
-      filteredVetClinics = filteredVetClinics.map(c => {
-        if (c.lat && c.lng) {
-          return { ...c, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(c.lat), Number(c.lng)) };
+        const tokens = city.split(/[\s,]+/);
+        for (const t of tokens) {
+          if (t.length > 2 && (zipQuery.includes(t) || locQuery.includes(t))) {
+            return true;
+          }
         }
-        return c;
-      });
+        return radiusLimit === null;
+      };
 
-      if (searchRadius !== 'any') {
-        const radius = parseFloat(searchRadius);
-        const searchCityQuery = searchZip.trim().toLowerCase();
-        filteredVetClinics = filteredVetClinics.filter(c => {
-          if (c.distance !== undefined) return c.distance <= radius;
-          if (c.city && searchCityQuery) return c.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(c.city.toLowerCase());
-          return false;
-        });
-      } else {
-        const searchCityQuery = searchZip.trim().toLowerCase();
-        filteredVetClinics = filteredVetClinics.filter(c => {
-          if (c.distance !== undefined) return c.distance <= 100;
-          if (c.city && searchCityQuery) return c.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(c.city.toLowerCase());
-          return true;
-        });
-      }
-      filteredVetClinics.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      // Sitters
+      filteredSitters = filteredSitters
+        .map(s => (s.lat && s.lng ? { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(s.lat), Number(s.lng)) } : s))
+        .filter(checkLocationMatch)
+        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
-      // Filter Pet Daycares by distance & location query
-      filteredPetDaycares = filteredPetDaycares.map(d => {
-        if (d.lat && d.lng) {
-          return { ...d, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(d.lat), Number(d.lng)) };
-        }
-        return d;
-      });
+      // Vet Clinics
+      filteredVetClinics = filteredVetClinics
+        .map(c => (c.lat && c.lng ? { ...c, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(c.lat), Number(c.lng)) } : c))
+        .filter(checkLocationMatch)
+        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
-      if (searchRadius !== 'any') {
-        const radius = parseFloat(searchRadius);
-        const searchCityQuery = searchZip.trim().toLowerCase();
-        filteredPetDaycares = filteredPetDaycares.filter(d => {
-          if (d.distance !== undefined) return d.distance <= radius;
-          if (d.city && searchCityQuery) return d.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(d.city.toLowerCase());
-          return false;
-        });
-      } else {
-        const searchCityQuery = searchZip.trim().toLowerCase();
-        filteredPetDaycares = filteredPetDaycares.filter(d => {
-          if (d.distance !== undefined) return d.distance <= 100;
-          if (d.city && searchCityQuery) return d.city.toLowerCase().includes(searchCityQuery) || searchCityQuery.includes(d.city.toLowerCase());
-          return true;
-        });
-      }
-      filteredPetDaycares.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      // Pet Daycares
+      filteredPetDaycares = filteredPetDaycares
+        .map(d => (d.lat && d.lng ? { ...d, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(d.lat), Number(d.lng)) } : d))
+        .filter(checkLocationMatch)
+        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
   }
 
