@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import {
   sendVetClinicApprovalEmail,
   sendVetClinicRejectionEmail,
+  sendPartnerAccountDeletionEmail,
 } from '@/lib/adoption-email';
 
 const ADMIN_SECRET = 'Lumo2026@';
@@ -76,6 +77,46 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ clinic });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const adminKey = request.headers.get('x-admin-key');
+    if (adminKey !== ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Missing clinic id' }, { status: 400 });
+    }
+
+    // 1. Fetch clinic details
+    const { data: clinic } = await supabaseAdmin.from('vet_clinics').select('*').eq('id', id).single();
+    if (!clinic) {
+      return NextResponse.json({ error: 'Vet clinic not found' }, { status: 404 });
+    }
+
+    // 2. Cascade cleanup: delete availability & inquiries
+    await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', id);
+    await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', id);
+
+    // 3. Delete clinic record
+    const { error: deleteErr } = await supabaseAdmin.from('vet_clinics').delete().eq('id', id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // 4. Send confirmation email
+    if (clinic.email) {
+      sendPartnerAccountDeletionEmail(clinic.email, clinic.clinic_name, 'Vet Boarding Clinic');
+    }
+
+    return NextResponse.json({ success: true, message: 'Vet clinic account and associated data deleted successfully.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search } from 'lucide-react';
+import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search, Trash2 } from 'lucide-react';
 
 interface Shelter {
   id: string;
@@ -242,6 +242,14 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
                     <XCircle className="w-4 h-4" /> Reject
                   </button>
                 )}
+                <button
+                  onClick={() => handleDeleteShelter(shelter)}
+                  disabled={processingId === shelter.id}
+                  className="bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold text-xs py-2 px-3 rounded-xl transition-all border border-gray-200 flex items-center gap-1.5 cursor-pointer"
+                  title="Delete Shelter Account & All Associated Data"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete
+                </button>
               </div>
             </div>
           ))}

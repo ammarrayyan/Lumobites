@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendDaycareApprovalEmail, sendDaycareRejectionEmail } from '@/lib/adoption-email';
+import { sendDaycareApprovalEmail, sendDaycareRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 export const dynamic = 'force-dynamic';
+const ADMIN_SECRET = 'Lumo2026@';
 
 // ─── GET /api/admin/daycares — Fetch all daycare applications ───────────────
 export async function GET(request: NextRequest) {
@@ -52,6 +53,46 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ daycare });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const adminKey = request.headers.get('x-admin-key');
+    if (adminKey !== ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Missing daycare id' }, { status: 400 });
+    }
+
+    // 1. Fetch daycare details
+    const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('*').eq('id', id).single();
+    if (!daycare) {
+      return NextResponse.json({ error: 'Pet daycare not found' }, { status: 404 });
+    }
+
+    // 2. Cascade cleanup: delete availability & inquiries
+    await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', id);
+    await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', id);
+
+    // 3. Delete daycare record
+    const { error: deleteErr } = await supabaseAdmin.from('pet_daycares').delete().eq('id', id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // 4. Send confirmation email
+    if (daycare.email) {
+      sendPartnerAccountDeletionEmail(daycare.email, daycare.business_name, 'Pet Daycare');
+    }
+
+    return NextResponse.json({ success: true, message: 'Pet daycare account and associated data deleted successfully.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

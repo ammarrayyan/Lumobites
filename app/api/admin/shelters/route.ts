@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendShelterApprovalEmail, sendShelterRejectionEmail } from '@/lib/adoption-email';
+import { sendShelterApprovalEmail, sendShelterRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 const ADMIN_SECRET = 'Lumo2026@';
 
@@ -65,6 +65,46 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ shelter });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const adminKey = request.headers.get('x-admin-key');
+    if (adminKey !== ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'Missing shelter id' }, { status: 400 });
+    }
+
+    // 1. Fetch shelter details
+    const { data: shelter } = await supabaseAdmin.from('shelters').select('*').eq('id', id).single();
+    if (!shelter) {
+      return NextResponse.json({ error: 'Shelter not found' }, { status: 404 });
+    }
+
+    // 2. Cascade cleanup: delete pets and inquiries
+    await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', id);
+    await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', id);
+
+    // 3. Delete shelter record
+    const { error: deleteErr } = await supabaseAdmin.from('shelters').delete().eq('id', id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // 4. Send confirmation email
+    if (shelter.email) {
+      sendPartnerAccountDeletionEmail(shelter.email, shelter.org_name, 'Shelter');
+    }
+
+    return NextResponse.json({ success: true, message: 'Shelter account and associated listings deleted successfully.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

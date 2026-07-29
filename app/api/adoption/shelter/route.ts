@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail } from '@/lib/adoption-email';
+import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
 
 export async function GET(request: NextRequest) {
@@ -169,6 +169,58 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json({ shelter });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const emailParam = searchParams.get('email');
+    let email = emailParam;
+    let id = searchParams.get('id');
+
+    if (!email && !id) {
+      try {
+        const body = await request.json();
+        email = body.email;
+        id = body.id;
+      } catch (e) {}
+    }
+
+    if (!email && !id) {
+      return NextResponse.json({ error: 'Missing email or id parameter' }, { status: 400 });
+    }
+
+    let query = supabaseAdmin.from('shelters').select('*');
+    if (id) {
+      query = query.eq('id', id);
+    } else if (email) {
+      query = query.eq('email', email.toLowerCase().trim());
+    }
+
+    const { data: shelter } = await query.single();
+    if (!shelter) {
+      return NextResponse.json({ error: 'Shelter not found' }, { status: 404 });
+    }
+
+    // Cascade cleanup
+    await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', shelter.id);
+    await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', shelter.id);
+
+    // Delete shelter record
+    const { error: deleteErr } = await supabaseAdmin.from('shelters').delete().eq('id', shelter.id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // Send confirmation email
+    if (shelter.email) {
+      sendPartnerAccountDeletionEmail(shelter.email, shelter.org_name, 'Shelter');
+    }
+
+    return NextResponse.json({ success: true, message: 'Shelter account deleted successfully.' });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

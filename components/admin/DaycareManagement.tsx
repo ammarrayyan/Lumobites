@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search, PauseCircle } from 'lucide-react';
+import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search, PauseCircle, Trash2 } from 'lucide-react';
 
 interface PetDaycare {
   id: string;
@@ -279,6 +279,33 @@ export default function DaycareManagement({ adminKey }: { adminKey: string }) {
                       ✕ Reject
                     </button>
                   )}
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${daycare.business_name}"?\n\nThis will permanently delete their daycare account, availability schedule, and inquiries.`)) return;
+                      setProcessingId(daycare.id);
+                      try {
+                        const res = await fetch(`/api/admin/daycares?id=${daycare.id}`, {
+                          method: 'DELETE',
+                          headers: { 'x-admin-key': adminKey }
+                        });
+                        if (res.ok) {
+                          setDaycares(prev => prev.filter(d => d.id !== daycare.id));
+                        } else {
+                          const errData = await res.json().catch(() => ({}));
+                          alert(errData.error || 'Failed to delete daycare account.');
+                        }
+                      } catch (e) {
+                        alert('Failed to delete daycare account.');
+                      } finally {
+                        setProcessingId(null);
+                      }
+                    }}
+                    disabled={processingId === daycare.id}
+                    className="bg-gray-100 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer border-none"
+                    title="Delete Daycare Account & All Data"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                  </button>
                 </div>
               </div>
 

@@ -283,3 +283,55 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const emailParam = searchParams.get('email');
+    let email = emailParam;
+    let id = searchParams.get('id');
+
+    if (!email && !id) {
+      try {
+        const body = await request.json();
+        email = body.email;
+        id = body.id;
+      } catch (e) {}
+    }
+
+    if (!email && !id) {
+      return NextResponse.json({ error: 'Missing email or id parameter' }, { status: 400 });
+    }
+
+    let query = supabaseAdmin.from('vet_clinics').select('*');
+    if (id) {
+      query = query.eq('id', id);
+    } else if (email) {
+      query = query.eq('email', email.toLowerCase().trim());
+    }
+
+    const { data: clinic } = await query.single();
+    if (!clinic) {
+      return NextResponse.json({ error: 'Vet clinic not found' }, { status: 404 });
+    }
+
+    // Cascade cleanup
+    await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', clinic.id);
+    await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', clinic.id);
+
+    // Delete clinic record
+    const { error: deleteErr } = await supabaseAdmin.from('vet_clinics').delete().eq('id', clinic.id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // Send confirmation email
+    if (clinic.email) {
+      sendPartnerAccountDeletionEmail(clinic.email, clinic.clinic_name, 'Vet Boarding Clinic');
+    }
+
+    return NextResponse.json({ success: true, message: 'Vet clinic account deleted successfully.' });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search, PauseCircle } from 'lucide-react';
+import { Building2, CheckCircle2, XCircle, Clock, Globe, Phone, Mail, MapPin, Search, PauseCircle, Trash2 } from 'lucide-react';
 
 interface VetClinic {
   id: string;
@@ -279,6 +279,33 @@ export default function VetClinicManagement({ adminKey }: { adminKey: string }) 
                       ✕ Reject
                     </button>
                   )}
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${clinic.clinic_name}"?\n\nThis will permanently delete their clinic account, availability schedule, and inquiries.`)) return;
+                      setProcessingId(clinic.id);
+                      try {
+                        const res = await fetch(`/api/admin/vet-clinics?id=${clinic.id}`, {
+                          method: 'DELETE',
+                          headers: { 'x-admin-key': adminKey }
+                        });
+                        if (res.ok) {
+                          setClinics(prev => prev.filter(c => c.id !== clinic.id));
+                        } else {
+                          const errData = await res.json().catch(() => ({}));
+                          alert(errData.error || 'Failed to delete clinic account.');
+                        }
+                      } catch (e) {
+                        alert('Failed to delete clinic account.');
+                      } finally {
+                        setProcessingId(null);
+                      }
+                    }}
+                    disabled={processingId === clinic.id}
+                    className="bg-gray-100 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    title="Delete Clinic Account & All Data"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                  </button>
                 </div>
               </div>
 

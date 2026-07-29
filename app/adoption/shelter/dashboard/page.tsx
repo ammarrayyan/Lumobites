@@ -429,6 +429,34 @@ function ShelterDashboardContent() {
     }
   };
 
+  const handleDeleteShelterAccount = async () => {
+    if (!shelterInfo || !shelterEmail) return;
+    const confirmName = prompt(`PERMANENT ACCOUNT DELETION WARNING:\n\nTo delete your shelter account and all posted pets, please type your organization name "${shelterInfo.org_name}" below to confirm:`);
+    if (confirmName !== shelterInfo.org_name) {
+      if (confirmName !== null) alert('Organization name mismatch. Deletion cancelled.');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(shelterEmail)}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        localStorage.removeItem('lumo_shelter_email');
+        localStorage.removeItem('lumo_pro_email');
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_sitter_id');
+        window.dispatchEvent(new Event('lumo-pro-update'));
+        alert('Your shelter account and all associated pets have been deleted.');
+        router.push('/adoption');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Failed to delete shelter account.');
+      }
+    } catch {
+      alert('Error deleting shelter account.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">

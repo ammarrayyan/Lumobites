@@ -7,7 +7,7 @@ import {
   Stethoscope, Building2, MessageSquare, Clock, CheckCircle2,
   XCircle, Edit3, Save, ArrowLeft, Loader2, RefreshCw,
   Phone, Globe, MapPin, ShieldCheck, LogOut, ChevronDown, ChevronUp,
-  Mail, AlertCircle, Star,
+  Mail, AlertCircle, Star, Trash2,
 } from 'lucide-react';
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
@@ -203,6 +203,34 @@ export default function VetBoardingDashboardPage() {
       const data = await res.json();
       if (res.ok) setClinic(data.clinic);
     } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteClinicAccount = async () => {
+    if (!clinic || !clinic.email) return;
+    const confirmName = prompt(`PERMANENT ACCOUNT DELETION WARNING:\n\nTo delete your veterinary clinic account and all availability schedules, please type your clinic name "${clinic.clinic_name}" below to confirm:`);
+    if (confirmName !== clinic.clinic_name) {
+      if (confirmName !== null) alert('Clinic name mismatch. Deletion cancelled.');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/vet-boarding?id=${clinic.id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        localStorage.removeItem('lumo_pro_email');
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_shelter_email');
+        localStorage.removeItem('lumo_sitter_id');
+        window.dispatchEvent(new Event('lumo-pro-update'));
+        alert('Your clinic account and all associated data have been deleted.');
+        router.push('/vet-boarding');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Failed to delete clinic account.');
+      }
+    } catch {
+      alert('Error deleting clinic account.');
+    }
   };
 
   const handleSignOut = () => {
@@ -782,14 +810,25 @@ export default function VetBoardingDashboardPage() {
             </div>
 
             {/* Danger zone */}
-            <div className="bg-red-50 rounded-3xl p-5 border border-red-100">
-              <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-3">Account</h3>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700"
-              >
-                <LogOut className="w-4 h-4" /> Sign out
-              </button>
+            <div className="bg-red-50 rounded-3xl p-5 border border-red-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account</h3>
+                <p className="text-xs text-red-500">Sign out or permanently delete your clinic account.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" /> Sign out
+                </button>
+                <button
+                  onClick={handleDeleteClinicAccount}
+                  className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete Account
+                </button>
+              </div>
             </div>
           </div>
         )}

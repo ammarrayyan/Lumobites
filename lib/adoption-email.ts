@@ -463,3 +463,43 @@ export async function sendDaycareRejectionEmail(toEmail: string, businessName: s
     console.error('[Daycare Email] Rejection email threw exception:', err);
   }
 }
+
+/**
+ * 12. On Partner Account Deleted (Shelter, Vet Boarding, Pet Daycare)
+ */
+export async function sendPartnerAccountDeletionEmail(
+  toEmail: string,
+  orgName: string,
+  partnerType: 'Shelter' | 'Vet Boarding Clinic' | 'Pet Daycare'
+) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    const subject = `Account Deletion Confirmation — ${orgName}`;
+    const html = brandedEmail({
+      subject,
+      preheader: `Your ${partnerType} account for ${orgName} has been deleted`,
+      body: `
+        <h1 style="${emailStyles.h1}">Account Deleted</h1>
+        <p style="${emailStyles.p}">This email confirms that your <strong>${partnerType}</strong> partner account for <strong>${orgName}</strong> has been deleted from Lumo Bites.</p>
+
+        ${emailStyles.infoBox(`
+          <p style="${emailStyles.pSmall}"><strong>Organization:</strong> ${orgName}</p>
+          <p style="${emailStyles.pSmall}"><strong>Account Type:</strong> ${partnerType}</p>
+          <p style="${emailStyles.pSmall}"><strong>Status:</strong> Permanently Removed</p>
+        `)}
+
+        <p style="${emailStyles.p}">All associated profile information, listings, availability schedules, and message records have been removed from our system.</p>
+        <p style="${emailStyles.pSmall}">If you did not request this deletion or have any questions, please contact support immediately.</p>
+      `
+    });
+
+    const res = await resend.emails.send({ from: fromEmail, to: [toEmail], subject, html });
+    if (res.error) {
+      console.warn('[Partner Deletion Email] Notice:', res.error.message || res.error);
+    } else {
+      console.log('[Partner Deletion Email] Confirmation email sent successfully:', res.data?.id);
+    }
+  } catch (err) {
+    console.error('[Partner Deletion Email] Threw exception:', err);
+  }
+}

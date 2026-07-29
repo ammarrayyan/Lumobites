@@ -20,7 +20,8 @@ import {
   MapPin,
   Globe,
   Phone,
-  CheckCircle2
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
 
 const DAYCARE_SERVICES = [
@@ -198,9 +199,38 @@ export default function DaycareDashboard() {
       localStorage.removeItem('lumo_pro_email');
       localStorage.removeItem('lumo_sitter_email');
       localStorage.removeItem('lumo_shelter_email');
+      localStorage.removeItem('lumo_daycare_email');
       document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       window.dispatchEvent(new Event('lumo-pro-update'));
       router.push('/pet-daycare');
+    }
+  };
+
+  const handleDeleteDaycareAccount = async () => {
+    if (!daycare || !daycare.email) return;
+    const confirmName = prompt(`PERMANENT ACCOUNT DELETION WARNING:\n\nTo delete your pet daycare account and all availability schedules, please type your business name "${daycare.business_name}" below to confirm:`);
+    if (confirmName !== daycare.business_name) {
+      if (confirmName !== null) alert('Business name mismatch. Deletion cancelled.');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/pet-daycare?id=${daycare.id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        localStorage.removeItem('lumo_pro_email');
+        localStorage.removeItem('lumo_sitter_email');
+        localStorage.removeItem('lumo_shelter_email');
+        localStorage.removeItem('lumo_daycare_email');
+        window.dispatchEvent(new Event('lumo-pro-update'));
+        alert('Your daycare account and all associated data have been deleted.');
+        router.push('/pet-daycare');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Failed to delete daycare account.');
+      }
+    } catch {
+      alert('Error deleting daycare account.');
     }
   };
 
@@ -738,6 +768,30 @@ export default function DaycareDashboard() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* Danger zone */}
+                <div className="bg-red-50 rounded-3xl p-5 border border-red-100 flex items-center justify-between mt-6">
+                  <div>
+                    <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account Danger Zone</h3>
+                    <p className="text-xs text-red-500">Sign out or permanently delete your daycare account and all listings.</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" /> Sign out
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteDaycareAccount}
+                      className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete Account
+                    </button>
                   </div>
                 </div>
               </div>

@@ -308,3 +308,55 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const emailParam = searchParams.get('email');
+    let email = emailParam;
+    let id = searchParams.get('id');
+
+    if (!email && !id) {
+      try {
+        const body = await request.json();
+        email = body.email;
+        id = body.id;
+      } catch (e) {}
+    }
+
+    if (!email && !id) {
+      return NextResponse.json({ error: 'Missing email or id parameter' }, { status: 400 });
+    }
+
+    let query = supabaseAdmin.from('pet_daycares').select('*');
+    if (id) {
+      query = query.eq('id', id);
+    } else if (email) {
+      query = query.eq('email', email.toLowerCase().trim());
+    }
+
+    const { data: daycare } = await query.single();
+    if (!daycare) {
+      return NextResponse.json({ error: 'Pet daycare not found' }, { status: 404 });
+    }
+
+    // Cascade cleanup
+    await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', daycare.id);
+    await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', daycare.id);
+
+    // Delete daycare record
+    const { error: deleteErr } = await supabaseAdmin.from('pet_daycares').delete().eq('id', daycare.id);
+    if (deleteErr) {
+      return NextResponse.json({ error: deleteErr.message }, { status: 500 });
+    }
+
+    // Send confirmation email
+    if (daycare.email) {
+      sendPartnerAccountDeletionEmail(daycare.email, daycare.business_name, 'Pet Daycare');
+    }
+
+    return NextResponse.json({ success: true, message: 'Pet daycare account deleted successfully.' });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
