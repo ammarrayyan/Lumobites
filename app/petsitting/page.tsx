@@ -3320,7 +3320,7 @@ export function PetSittingContent() {
   let filteredVetClinics = [...vetClinics];
   let filteredPetDaycares = [...petDaycares];
 
-  if (searchZip.trim()) {
+  if (searchZip.trim() || searchCoords) {
     if (isGeocoding || searchLocationError || !searchCoords) {
       // User is typing, or geocoding failed/pending -> wait for verification before showing results
       filteredSitters = [];
