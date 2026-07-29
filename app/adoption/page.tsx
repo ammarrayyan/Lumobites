@@ -149,6 +149,30 @@ function AdoptionContent() {
   const [shelterOtpVerifying, setShelterOtpVerifying] = useState(false);
   const [shelterOtpError, setShelterOtpError] = useState('');
 
+  const handleOpenShelterModal = () => {
+    if (typeof window !== 'undefined') {
+      const email = (
+        localStorage.getItem('lumo_pro_email') ||
+        localStorage.getItem('lumo_sitter_email') ||
+        localStorage.getItem('lumo_shelter_email') ||
+        ''
+      ).trim();
+
+      if (email) {
+        setShelterOtpEmail(email);
+        setShelterFormData(prev => ({ ...prev, email }));
+        if (userShelter?.status === 'approved') {
+          window.location.href = '/adoption/shelter/dashboard';
+          return;
+        }
+        setShelterOtpStep('form');
+      } else {
+        setShelterOtpStep('email');
+      }
+    }
+    setIsShelterRegOpen(true);
+  };
+
   const handleSendShelterOtp = async () => {
     const trimmed = shelterOtpEmail.trim().toLowerCase();
     if (!trimmed || !trimmed.includes('@')) {
@@ -293,9 +317,6 @@ function AdoptionContent() {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const isRegParam = urlParams.get('register') === 'shelter' || urlParams.get('shelter') === 'true';
-      if (isRegParam) {
-        setIsShelterRegOpen(true);
-      }
       const email = (
         localStorage.getItem('lumo_pro_email') ||
         localStorage.getItem('lumo_sitter_email') ||
@@ -306,6 +327,7 @@ function AdoptionContent() {
       if (email) {
         setShelterOtpEmail(email);
         setShelterFormData(prev => ({ ...prev, email }));
+        setShelterOtpStep('form');
         fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
           .then(r => (r.ok ? r.json() : null))
           .then(data => {
@@ -320,7 +342,12 @@ function AdoptionContent() {
           })
           .catch(() => setUserShelter(null));
       } else {
+        setShelterOtpStep('email');
         setUserShelter(null);
+      }
+
+      if (isRegParam) {
+        setIsShelterRegOpen(true);
       }
     }
   }, [species, age, size, debouncedCitySearch]);
@@ -585,7 +612,7 @@ function AdoptionContent() {
               </div>
             ) : (
               <button
-                onClick={() => setIsShelterRegOpen(true)}
+                onClick={handleOpenShelterModal}
                 className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#F5EDE4] hover:bg-[#EBDCCF] border border-[#8B5E3C]/20 text-[#8B5E3C] shadow-2xs transition-all cursor-pointer group text-xs sm:text-sm font-extrabold max-w-md w-full"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
