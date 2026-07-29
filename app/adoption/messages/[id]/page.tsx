@@ -63,6 +63,16 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function formatDateLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
 export default function AdoptionMessagePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const petId = resolvedParams.id;
@@ -147,6 +157,12 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
     }
   }, [messages]);
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+  };
+
   const handleSend = async () => {
     if (isSendingRef.current) return;
     const msgText = newMessage.trim();
@@ -212,6 +228,18 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
   const isAdopted = pet?.status === 'adopted';
 
+  // Group messages by date
+  const groups: { date: string; msgs: Message[] }[] = [];
+  messages.forEach(msg => {
+    const dateLabel = formatDateLabel(msg.created_at);
+    const last = groups[groups.length - 1];
+    if (last && last.date === dateLabel) {
+      last.msgs.push(msg);
+    } else {
+      groups.push({ date: dateLabel, msgs: [msg] });
+    }
+  });
+
   return (
     <div className="min-h-screen bg-[#FDFAF7] flex flex-col">
       {/* PINNED TOP HEADER & PET INFO CONTAINER */}
@@ -251,7 +279,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
 
         {/* PET INFO CARD */}
         {pet && (
-          <div className="p-2.5 px-4 bg-[#FAF6F0]/50">
+          <div className="p-2.5 px-4 bg-[#FAF6F0]/60 border-t border-gray-100">
             <div className="max-w-2xl mx-auto flex items-center gap-3">
               <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-10 h-10 rounded-xl shrink-0" />
               <div className="min-w-0 flex-1 text-xs">
@@ -264,7 +292,7 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
       </div>
 
       {/* MESSAGES BODY */}
-      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-3 pb-24">
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4 pb-32" style={{ background: 'linear-gradient(180deg, #FDFAF7 0%, #F5EBE1 100%)' }}>
         {isLoading ? (
           <div className="py-12 text-center text-xs text-gray-400 font-bold">Loading conversation…</div>
         ) : messages.length === 0 ? (
@@ -273,54 +301,89 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
             <p>Ask about temperament, adoption fees, or schedule a visit.</p>
           </div>
         ) : (
-          messages.map(msg => {
-            const isMine = msg.sender_email.toLowerCase() === currentUserEmail.toLowerCase();
-            return (
-              <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                  isMine ? 'bg-[#8B5E3C] text-white rounded-br-xs' : 'bg-white text-gray-900 border border-[#E8DDD4] shadow-xs rounded-bl-xs'
-                }`}>
-                  <p>{msg.message}</p>
-                  <span className={`text-[10px] block mt-1 ${isMine ? 'text-white/70 text-right' : 'text-gray-400'}`}>
-                    {formatTime(msg.created_at)}
-                  </span>
-                </div>
+          groups.map((group, gi) => (
+            <React.Fragment key={gi}>
+              {/* Date Header Badge */}
+              <div className="flex justify-center my-3">
+                <span className="text-[10px] font-bold text-[#8B5E3C] bg-white/90 px-3 py-1 rounded-full border border-[#E8DDD4] shadow-2xs select-none">
+                  {group.date}
+                </span>
               </div>
-            );
-          })
+
+              {group.msgs.map(msg => {
+                const isMine = msg.sender_email.toLowerCase() === currentUserEmail.toLowerCase();
+                const isOptimistic = msg.id.startsWith('temp-');
+
+                return (
+                  <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                      isMine ? 'bg-[#8B5E3C] text-white rounded-br-xs shadow-xs' : 'bg-white text-gray-900 border border-[#E8DDD4] shadow-xs rounded-bl-xs'
+                    }`}>
+                      <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                      <div className={`flex items-center gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                        <span className={`text-[10px] ${isMine ? 'text-white/70' : 'text-gray-400'}`}>
+                          {isOptimistic ? 'Sending…' : formatTime(msg.created_at)}
+                        </span>
+                        {isMine && !isOptimistic && (
+                          msg.read
+                            ? <CheckCheck size={13} className="text-white/90" />
+                            : <Check size={13} className="text-white/60" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))
         )}
         <div ref={messagesEndRef} />
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER — WITH SAFE AREA & MOBILE BOTTOM NAV CLEARANCE */}
       {isAdopted ? (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 text-center">
+        <footer className="sticky bottom-0 z-40 bg-white border-t border-[#E8DDD4] p-3 text-center pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
           <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200">
             <Lock className="w-4 h-4 text-amber-700 shrink-0" />
             This pet has been adopted! Messaging is closed.
           </div>
         </footer>
       ) : (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3">
-          <div className="max-w-2xl mx-auto flex items-center gap-2">
-            <textarea
-              ref={textareaRef}
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              placeholder={`Ask about ${pet?.name || 'this pet'}…`}
-              rows={1}
-              className="flex-1 bg-[#FAF6F0] border border-gray-200 rounded-2xl px-4 py-2.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C] resize-none"
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              className="w-10 h-10 rounded-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-none shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+        <footer className="sticky bottom-0 z-40 bg-white border-t border-[#E8DDD4] px-3 py-2.5 pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
+          <div className="max-w-2xl mx-auto">
+            <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2 ${
+              newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
+            }`}>
+              <textarea
+                ref={textareaRef}
+                value={newMessage}
+                onChange={handleTextareaChange}
+                placeholder={`Ask about ${pet?.name || 'this pet'}…`}
+                rows={1}
+                className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
+                style={{ maxHeight: '128px' }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 cursor-pointer border-none ${
+                  newMessage.trim() && !isSending
+                    ? 'bg-[#8B5E3C] hover:bg-[#734A2E] active:scale-95 text-white shadow-sm'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isSending
+                  ? <div className="w-3.5 h-3.5 border-[2px] border-white/40 border-t-white rounded-full animate-spin" />
+                  : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
+                }
+              </button>
+            </div>
+            <p className="text-center text-[10px] text-gray-400 mt-1 select-none hidden sm:block font-medium">
+              Press Enter to send &middot; Shift+Enter for new line
+            </p>
           </div>
         </footer>
       )}
