@@ -6799,7 +6799,8 @@ export function PetSittingContent() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* CAMERA CAPTURE MODAL */}
