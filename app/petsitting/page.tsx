@@ -3348,6 +3348,11 @@ export function PetSittingContent() {
     });
   }
 
+  const showVetSection = vetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
+  const showDaycareSection = petDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
+  const showSittersSection = (searchServiceType === 'all' || (searchServiceType !== 'Veterinary Boarding' && searchServiceType !== 'Pet Daycare')) && filteredSitters.length > 0;
+  const hasAnySearchResults = showVetSection || showDaycareSection || showSittersSection;
+
   const hasAnyRate = sitterRateDropins || sitterRateWalking || sitterRateOvernight || sitterRateBoarding || sitterRateDaycare;
   const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && (sitterIdPhoto || hasExistingIdPhoto) && sitterLocationInput.trim() && sitterLocationVerified && hasAnyRate && sitterBio.trim();
 
@@ -3680,24 +3685,30 @@ export function PetSittingContent() {
                   Type your city or zip code in the search bar above to see our network of local, loving sitters ready to help.
                 </p>
               </div>
-            ) : filteredSitters.length === 0 ? (
+            ) : !hasAnySearchResults ? (
               <div className="text-center bg-white p-12 rounded-3xl border border-[#E8DDD4]">
                 {aiSitterResults !== null ? (
                   <>
                     <Search className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found matching your description.</h3>
+                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No results found matching your description.</h3>
                     <p className="text-[#8B7E7D] mb-4">Try different keywords or check your spelling.</p>
                   </>
                 ) : (
                   <>
                     <Footprints className="w-10 h-10 text-[#8B5E3C] mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">No sitters found in your area yet.</h3>
-                    <p className="text-[#8B7E7D] mb-4">Try expanding your search distance.</p>
+                    <h3 className="text-xl font-bold text-[#4A3E3D] mb-2">
+                      {searchServiceType === 'Veterinary Boarding'
+                        ? 'No veterinary boarding clinics found in your area yet.'
+                        : searchServiceType === 'Pet Daycare'
+                        ? 'No pet daycare facilities found in your area yet.'
+                        : 'No sitters found in your area yet.'}
+                    </h3>
+                    <p className="text-[#8B7E7D] mb-4">Try expanding your search distance or selecting a different service type.</p>
                     <button 
                       onClick={() => setActiveTab('become')}
                       className="text-[#8B5E3C] font-bold hover:text-[#7A5234] flex items-center justify-center gap-1 mx-auto"
                     >
-                      Join free as an early sitter &rarr;
+                      Join free as an early partner &rarr;
                     </button>
                   </>
                 )}
@@ -3707,13 +3718,14 @@ export function PetSittingContent() {
                 {aiSitterResults !== null && aiSitterResults.length === 0 && (
                   <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-5 text-sm font-semibold flex items-center gap-2 mb-6">
                     <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                    <span>No exact matches found for "{aiSitterSearch}". Showing all sitters in your area instead.</span>
+                    <span>No exact matches found for "{aiSitterSearch}". Showing all results in your area instead.</span>
                   </div>
                 )}
                 <div className="flex flex-col md:flex-row gap-8">
                 {/* Sitters List (Left on desktop, Below on mobile) */}
                 <div className="flex-1 order-2 md:order-1">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {showSittersSection && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (
                       <div
                         key={sitter.id}
@@ -3892,6 +3904,7 @@ export function PetSittingContent() {
                       </div>
                     ))}
                   </div>
+                  )}
 
                   {/* ─── Veterinary Boarding Clinics ─────────────────────── */}
                   {vetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding') && (
