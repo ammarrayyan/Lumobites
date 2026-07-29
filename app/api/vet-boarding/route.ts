@@ -100,9 +100,9 @@ export async function POST(request: NextRequest) {
     } = body;
     let { org_photo_url } = body;
 
-    if (!clinic_name || !email || (!city && !address)) {
+    if (!clinic_name || !email || !license_number || (!city && !address)) {
       return NextResponse.json(
-        { error: 'Missing required fields (clinic_name, email, city)' },
+        { error: 'Missing required fields (clinic_name, license_number, email, location)' },
         { status: 400 },
       );
     }

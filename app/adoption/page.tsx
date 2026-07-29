@@ -1360,29 +1360,25 @@ function AdoptionContent() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="font-bold text-gray-700 block mb-1">Phone Number</label>
-                      <input
-                        type="tel"
-                        value={shelterFormData.phone}
-                        onChange={e => setShelterFormData({ ...shelterFormData, phone: e.target.value })}
-                        className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                        placeholder="(555) 000-0000"
-                      />
-                    </div>
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      value={shelterFormData.phone}
+                      onChange={e => setShelterFormData({ ...shelterFormData, phone: e.target.value })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
+                      placeholder="(555) 000-0000"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="font-bold text-gray-700 block mb-1">City *</label>
-                      <input
-                        type="text"
-                        required
-                        value={shelterFormData.city}
-                        onChange={e => setShelterFormData({ ...shelterFormData, city: e.target.value })}
-                        className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                        placeholder="e.g. Austin"
-                      />
-                    </div>
+                  <div>
+                    <CityAutocompleteInput
+                      label="Address / Location *"
+                      value={shelterFormData.city}
+                      onChange={val => setShelterFormData({ ...shelterFormData, city: val })}
+                      placeholder="Enter city or full street address (e.g. Austin, TX)"
+                      required
+                    />
                   </div>
 
                   <div>

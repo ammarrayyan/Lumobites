@@ -3,6 +3,62 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
 
+async function geocodeLocation(fullAddress: string) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
+  if (!apiKey || !fullAddress) return null;
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'OK' && data.results && data.results.length > 0) {
+      const result = data.results[0];
+      const location = result.geometry?.location;
+      const addressComponents = result.address_components || [];
+      const formatted_address = result.formatted_address;
+
+      let locality = '';
+      let state = '';
+      let postal_code = '';
+
+      for (const comp of addressComponents) {
+        const types = comp.types || [];
+        if (types.includes('locality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('sublocality')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('neighborhood')) {
+          locality = comp.long_name;
+        } else if (!locality && types.includes('administrative_area_level_2')) {
+          locality = comp.long_name;
+        }
+
+        if (types.includes('administrative_area_level_1')) {
+          state = comp.short_name;
+        }
+        if (types.includes('postal_code')) {
+          postal_code = comp.long_name;
+        }
+      }
+
+      const city = locality && state ? `${locality}, ${state}` : locality || fullAddress;
+
+      return {
+        lat: location?.lat || null,
+        lng: location?.lng || null,
+        formatted_address: formatted_address || fullAddress,
+        city,
+        state,
+        zip: postal_code,
+      };
+    }
+  } catch (e) {
+    console.error('Geocoding error:', e);
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -34,7 +90,7 @@ export async function POST(request: NextRequest) {
     const { org_name, tax_id, email, phone, address, city, state, zip, website } = body;
     let { org_photo_url } = body;
 
-    if (!org_name || !email || !city) {
+    if (!org_name || !email || (!city && !address)) {
       return NextResponse.json({ error: 'Missing required organization details (org_name, email, city)' }, { status: 400 });
     }
 
@@ -49,6 +105,17 @@ export async function POST(request: NextRequest) {
         console.log('[Shelter API] OG Image extraction skipped/failed:', e);
       }
     }
+
+    // Geocode location
+    const locationQuery = (address || city || '').trim();
+    const geo = await geocodeLocation(locationQuery);
+
+    const finalCity = geo?.city || city || locationQuery;
+    const finalState = geo?.state || state || '';
+    const finalZip = geo?.zip || zip || '';
+    const finalAddress = geo?.formatted_address || address || locationQuery;
+    const finalLat = geo?.lat || null;
+    const finalLng = geo?.lng || null;
 
     // Check if already registered
     const { data: existing } = await supabaseAdmin
@@ -72,10 +139,12 @@ export async function POST(request: NextRequest) {
           org_name,
           tax_id: tax_id || existing.tax_id || '',
           phone: phone || existing.phone || '',
-          address: address || existing.address || '',
-          city,
-          state: state || existing.state || '',
-          zip: zip || existing.zip || '',
+          address: finalAddress,
+          city: finalCity,
+          state: finalState,
+          zip: finalZip,
+          lat: finalLat,
+          lng: finalLng,
           website: website || existing.website || '',
           org_photo_url: org_photo_url || existing.org_photo_url || '',
           status: 'pending' // Reset to pending for admin review
@@ -91,7 +160,7 @@ export async function POST(request: NextRequest) {
 
       // Send confirmation email to applicant & notification to admin
       sendShelterRegistrationEmail(cleanEmail, org_name);
-      sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, city, state, phone, website);
+      sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, finalCity, finalState, phone, website);
 
       return NextResponse.json({
         shelter: updatedShelter,
@@ -106,10 +175,12 @@ export async function POST(request: NextRequest) {
         tax_id: tax_id || '',
         email: cleanEmail,
         phone: phone || '',
-        address: address || '',
-        city,
-        state: state || '',
-        zip: zip || '',
+        address: finalAddress,
+        city: finalCity,
+        state: finalState,
+        zip: finalZip,
+        lat: finalLat,
+        lng: finalLng,
         website: website || '',
         org_photo_url: org_photo_url || '',
         status: 'pending' // Requires admin approval
@@ -129,7 +200,7 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to shelter & admin
     sendShelterRegistrationEmail(cleanEmail, org_name);
-    sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, city, state, phone, website);
+    sendAdminNewPartnerNotificationEmail('Shelter', org_name, cleanEmail, finalCity, finalState, phone, website);
 
     return NextResponse.json({ shelter, message: 'Application submitted! Pending admin review.' });
   } catch (err: any) {

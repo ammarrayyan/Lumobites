@@ -193,8 +193,8 @@ export default function VetBoardingRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    if (!form.clinic_name.trim() || !form.email.trim() || !form.city.trim()) {
-      setErrorMsg('Clinic Name, Email, and City are required.');
+    if (!form.clinic_name.trim() || !form.license_number.trim() || !form.email.trim() || !form.city.trim()) {
+      setErrorMsg('Clinic Name, License Number, Email, and Location are required.');
       return;
     }
     setSubmitting(true);
@@ -458,8 +458,9 @@ export default function VetBoardingRegisterPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">License Number</label>
+                    <label className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">License Number *</label>
                     <input
+                      required
                       value={form.license_number}
                       onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))}
                       placeholder="VET-12345"
