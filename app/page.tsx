@@ -327,7 +327,7 @@ export default function Home() {
           <button
             type="button"
             onClick={handleOpenPartnerPortal}
-            className="hidden md:inline-flex items-center gap-2 mb-4 px-5 py-2.5 rounded-full bg-[#F8F3EC] hover:bg-[#EADBCE] border border-[#EADBCE] text-[#5C4533] font-bold text-xs tracking-wide transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98] cursor-pointer"
+            className="hidden md:inline-flex items-center gap-2 mb-4 px-5.5 py-2.5 rounded-full bg-[#FAF5EE] hover:bg-[#EADBCE] border border-[#EADBCE] text-[#5C4533] font-bold text-xs tracking-wide transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
           >
             <Building2 className="w-3.5 h-3.5 text-[#5C4533]" />
             <span>Partner Portal (Shelters, Vets & Daycares)</span>
