@@ -29,8 +29,11 @@ export default function NotificationBell({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showMarkConfirm, setShowMarkConfirm] = useState(false);
+  const [activePopNotif, setActivePopNotif] = useState<Notification | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const seenNotifIdsRef = useRef<Set<string>>(new Set());
+  const initialLoadRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -39,14 +42,58 @@ export default function NotificationBell({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+  }, []);
+
+  const playNotificationChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    } catch {}
+  };
+
   const fetchNotifications = async () => {
     if (!email) return;
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const res = await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}`);
+      const res = await fetch(`/api/notifications?email=${encodeURIComponent(normalizedEmail)}&t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data.notifications || []);
+        const freshList: Notification[] = data.notifications || [];
+        setNotifications(freshList);
+
+        const unreadItems = freshList.filter(n => !n.read);
+        if (!initialLoadRef.current) {
+          initialLoadRef.current = true;
+          unreadItems.forEach(n => seenNotifIdsRef.current.add(n.id));
+        } else {
+          const brandNew = unreadItems.find(n => !seenNotifIdsRef.current.has(n.id));
+          if (brandNew) {
+            seenNotifIdsRef.current.add(brandNew.id);
+            setActivePopNotif(brandNew);
+            playNotificationChime();
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification(brandNew.title, { body: brandNew.message });
+              } catch {}
+            }
+          }
+        }
       }
     } catch (e) {
       console.error('Error fetching notifications', e);
@@ -56,8 +103,22 @@ export default function NotificationBell({
   useEffect(() => {
     if (email) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      // Poll every 5 seconds on desktop while active
+      const interval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          fetchNotifications();
+        }
+      }, 5000);
+
+      const handleFocus = () => fetchNotifications();
+      window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', handleFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+        document.removeEventListener('visibilitychange', handleFocus);
+      };
     }
   }, [email]);
 
@@ -270,6 +331,37 @@ export default function NotificationBell({
             >
               See all activity →
             </button>
+          </div>
+        </div>
+      )}
+
+      {activePopNotif && (
+        <div
+          className="fixed bottom-6 right-6 z-[100000] max-w-sm w-full bg-white border border-blue-200 shadow-2xl rounded-2xl p-4 flex items-start gap-3 cursor-pointer hover:border-blue-400 transition-all"
+          style={{ animation: 'slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+          onClick={() => {
+            handleNotificationClick(activePopNotif);
+            setActivePopNotif(null);
+          }}
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-base font-bold shrink-0 shadow-md shadow-blue-200">
+            🔔
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-xs font-extrabold text-gray-900 truncate">{activePopNotif.title}</p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActivePopNotif(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-xs font-bold p-0.5 bg-transparent border-none cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{activePopNotif.message}</p>
+            <p className="text-[10px] font-bold text-blue-600 mt-1">Click to open inquiry →</p>
           </div>
         </div>
       )}
