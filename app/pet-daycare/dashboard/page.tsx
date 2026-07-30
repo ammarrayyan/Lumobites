@@ -21,7 +21,8 @@ import {
   Globe,
   Phone,
   CheckCircle2,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 
 const DAYCARE_SERVICES = [
@@ -434,9 +435,19 @@ export default function DaycareDashboard() {
                         </button>
                       </div>
 
-                      <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl">
-                        {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                          {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
+                        </span>
+                        <button
+                          onClick={() => daycare?.id && fetchInquiries(daycare.id)}
+                          className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer border-none"
+                          title="Refresh inquiries"
+                          disabled={inquiriesLoading}
+                        >
+                          <RefreshCw className={`w-4 h-4 text-gray-500 ${inquiriesLoading ? 'animate-spin' : ''}`} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 
@@ -802,9 +802,19 @@ function ShelterDashboardContent() {
                         <button onClick={() => setInquiryFilter('unread')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Unread</button>
                         <button onClick={() => setInquiryFilter('replied')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Replied</button>
                       </div>
-                      <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
-                        {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
+                          {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
+                        </span>
+                        <button
+                          onClick={() => shelterInfo?.id && fetchShelterInquiries(shelterInfo.id, shelterInfo.email)}
+                          className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer border-none"
+                          title="Refresh inquiries"
+                          disabled={inquiriesLoading}
+                        >
+                          <RefreshCw className={`w-4 h-4 text-gray-500 ${inquiriesLoading ? 'animate-spin' : ''}`} />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
