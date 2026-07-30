@@ -323,16 +323,6 @@ export default function Home() {
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
-          {/* Desktop Partner Portal Button (Secondary - Earthy Palette) */}
-          <button
-            type="button"
-            onClick={handleOpenPartnerPortal}
-            className="hidden md:inline-flex items-center gap-2 mb-4 px-5.5 py-2.5 rounded-full bg-[#FAF5EE] hover:bg-[#EADBCE] border border-[#EADBCE] text-[#5C4533] font-bold text-xs tracking-wide transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
-          >
-            <Building2 className="w-3.5 h-3.5 text-[#5C4533]" />
-            <span>Partner Portal (Shelters, Vets & Daycares)</span>
-          </button>
-
           {!isNativeApp && (
             <div className="flex flex-wrap gap-3 justify-center items-center mt-2">
               {/* Google Play Badge */}
@@ -440,10 +430,10 @@ export default function Home() {
 
       {/* SERVICES GRID SECTION */}
       <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-6">
+        <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
 
           {/* 1. Pet Sitting */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10 mt-2">
               <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
                 <HomeIcon className="w-6 h-6 text-[#C27353]" />
@@ -464,7 +454,7 @@ export default function Home() {
           </div>
 
           {/* 2. Lost Pets */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
                 <Footprints className="w-6 h-6 text-[#517685]" />
@@ -482,7 +472,7 @@ export default function Home() {
           </div>
 
           {/* 3. Pet Food & Safety */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
                 <Utensils className="w-6 h-6 text-[#63825D]" />
@@ -500,7 +490,7 @@ export default function Home() {
           </div>
 
           {/* 4. Pet Adoption */}
-          <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-gradient-to-b from-[#FAF5EE] to-[#FDF8F3] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#FAF5EE] to-[#FDF8F3] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center shadow-inner">
                 <Heart className="w-6 h-6 text-[#8B5E3C]" />
@@ -514,6 +504,28 @@ export default function Home() {
               <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5E3C] to-[#734A2E] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find to Adopt &rarr;
               </Link>
+            </div>
+          </div>
+
+          {/* 5. Partner Portal */}
+          <div className="bg-gradient-to-b from-[#FAF5EE] to-[#F5EDE4] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-12 h-12 rounded-2xl bg-[#EADBCE]/50 flex items-center justify-center shadow-inner">
+                <Building2 className="w-6 h-6 text-[#5C4533]" />
+              </div>
+              <h3 className="text-[#5C4533] font-extrabold text-xl">Partner Portal</h3>
+            </div>
+            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+              Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings & inquiries.
+            </p>
+            <div className="mt-auto relative z-10">
+              <button
+                type="button"
+                onClick={handleOpenPartnerPortal}
+                className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#5C4533] to-[#4A3728] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+              >
+                Partner Portal &rarr;
+              </button>
             </div>
           </div>
 
