@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 export default function Home() {
@@ -367,71 +367,74 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MOBILE QUICK ACCESS BUTTONS */}
-      <section className="md:hidden w-full px-6 pb-8">
-        <div className="flex flex-col gap-2.5 items-center">
-          {/* 1. Post or Find Lost Pet (Primary CTA) */}
-          <Link href="/lost-pets" style={{ textDecoration: 'none' }}>
+      {/* MOBILE QUICK ACCESS BUTTONS (3+3 Square Grid) */}
+      <section className="md:hidden w-full px-4 pb-8">
+        <div className="grid grid-cols-3 gap-2.5 max-w-sm mx-auto">
+          {/* 1. Lost Pets */}
+          <Link href="/lost-pets" className="block" style={{ textDecoration: 'none' }}>
             <div 
-              style={{
-                boxShadow: '0 2px 4px rgba(92, 50, 37, 0.04)'
-              }}
-              className="w-[260px] min-h-[46px] px-4 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+              style={{ boxShadow: '0 2px 6px rgba(92, 50, 37, 0.05)' }}
+              className="aspect-square w-full p-2 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#5C4533]" />
-              <span className="text-[13.5px] tracking-wide">Post or Find Lost Pet</span>
+              <Footprints className="w-5 h-5 text-[#5C4533]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Lost Pets</span>
             </div>
           </Link>
 
-          {/* 2. Find a Pet Sitter */}
-          <Link href="/petsitting" style={{ textDecoration: 'none' }}>
+          {/* 2. Find Sitter */}
+          <Link href="/petsitting" className="block" style={{ textDecoration: 'none' }}>
             <div 
-              style={{
-                boxShadow: '0 2px 4px rgba(43, 61, 53, 0.03)'
-              }}
-              className="w-[260px] min-h-[46px] px-4 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+              style={{ boxShadow: '0 2px 6px rgba(43, 61, 53, 0.04)' }}
+              className="aspect-square w-full p-2 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#5C4533]" />
-              <span className="text-[13.5px] tracking-wide">Find a Pet Sitter</span>
+              <PawPrint className="w-5 h-5 text-[#5C4533]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Find Sitter</span>
             </div>
           </Link>
 
-          {/* 3. Become a Pet Sitter */}
-          <Link href="/petsitting?tab=become" style={{ textDecoration: 'none' }}>
+          {/* 3. Become Sitter */}
+          <Link href="/petsitting?tab=become" className="block" style={{ textDecoration: 'none' }}>
             <div 
-              style={{
-                boxShadow: '0 2px 4px rgba(74, 54, 41, 0.03)'
-              }}
-              className="w-[260px] min-h-[46px] px-4 bg-[#F8F3EC] border border-[#EADBCE] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+              style={{ boxShadow: '0 2px 6px rgba(74, 54, 41, 0.04)' }}
+              className="aspect-square w-full p-2 bg-[#F8F3EC] border border-[#EADBCE] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
-              <PawPrint className="w-4 h-4 text-[#5C4533]" />
-              <span className="text-[13.5px] tracking-wide">Become a Pet Sitter</span>
+              <Sparkles className="w-5 h-5 text-[#5C4533]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Become Sitter</span>
             </div>
           </Link>
 
-          {/* 4. Find a Pet to Adopt */}
-          <Link href="/adoption" style={{ textDecoration: 'none' }}>
+          {/* 4. Adopt Pet */}
+          <Link href="/adoption" className="block" style={{ textDecoration: 'none' }}>
             <div 
-              style={{
-                boxShadow: '0 2px 4px rgba(139, 94, 60, 0.03)'
-              }}
-              className="w-[260px] min-h-[46px] px-4 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+              style={{ boxShadow: '0 2px 6px rgba(139, 94, 60, 0.04)' }}
+              className="aspect-square w-full p-2 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
-              <Heart className="w-4 h-4 text-[#8B5E3C]" />
-              <span className="text-[13.5px] tracking-wide">Find a Pet to Adopt</span>
+              <Heart className="w-5 h-5 text-[#8B5E3C]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Adopt Pet</span>
             </div>
           </Link>
 
-          {/* 5. Partner Portal (Secondary CTA - Matching Palette) */}
+          {/* 5. Partner Portal */}
           <button
             type="button"
             onClick={handleOpenPartnerPortal}
             style={{ textDecoration: 'none' }}
-            className="w-[260px] min-h-[46px] px-4 bg-[#FAF5EE] border border-[#EADBCE] text-[#5C4533] font-bold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] cursor-pointer"
+            className="aspect-square w-full p-2 bg-[#FAF5EE] border border-[#EADBCE] text-[#5C4533] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
           >
-            <Building2 className="w-4 h-4 text-[#5C4533]" />
-            <span className="text-[13.5px] tracking-wide">Partner Portal</span>
+            <Building2 className="w-5 h-5 text-[#5C4533]" />
+            <span className="text-[11px] leading-tight font-extrabold tracking-tight">Partner Portal</span>
           </button>
+
+          {/* 6. City Board */}
+          <Link href="/city-board" className="block" style={{ textDecoration: 'none' }}>
+            <div 
+              style={{ boxShadow: '0 2px 6px rgba(100, 80, 60, 0.04)' }}
+              className="aspect-square w-full p-2 bg-[#F2F5F8] border border-[#D9E2E8] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer"
+            >
+              <MessageSquare className="w-5 h-5 text-[#5C4533]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight">City Board</span>
+            </div>
+          </Link>
         </div>
       </section>
 
