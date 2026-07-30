@@ -96,6 +96,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const [isSignedIn, setIsSignedIn] = useState(!!initialEmail);
   const [proEmail, setProEmail] = useState(initialEmail);
   const [sitterEmail, setSitterEmail] = useState('');
+  const [shelterEmail, setShelterEmail] = useState('');
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -120,7 +121,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     if (typeof window === 'undefined') return;
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     const cachedSitter = localStorage.getItem('lumo_sitter_email');
+    const cachedShelter = localStorage.getItem('lumo_shelter_email');
     setSitterEmail(cachedSitter || '');
+    setShelterEmail(cachedShelter || '');
     
     const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
     const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
@@ -134,6 +137,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       setProEmail(cachedEmail);
       // isPro state will be handled by the API call in useEffect
     } else if (cachedSitter && cachedSitter !== 'undefined' && cachedSitter !== 'null' && cachedSitter.trim() !== '') {
+      setIsSignedIn(true);
+      setProEmail('');
+    } else if (cachedShelter && cachedShelter !== 'undefined' && cachedShelter !== 'null' && cachedShelter.trim() !== '') {
       setIsSignedIn(true);
       setProEmail('');
     } else {

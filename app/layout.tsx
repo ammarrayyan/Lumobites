@@ -49,8 +49,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const proEmail = cookieStore.get('lumo_pro_email')?.value || '';
+  let proEmail = '';
+  try {
+    const cookieStore = await cookies();
+    proEmail = cookieStore.get('lumo_pro_email')?.value || '';
+  } catch (err) {
+    // Suppress cookie store errors during static / edge rendering
+  }
 
   return (
     <html lang="en">
