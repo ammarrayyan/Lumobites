@@ -94,6 +94,8 @@ export default function ChatModal({
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [viewportTop, setViewportTop] = useState<number>(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   // Lock background body scroll when chat modal is open
   useEffect(() => {
@@ -105,20 +107,23 @@ export default function ChatModal({
     };
   }, [isOpen]);
 
-  // Track visualViewport height on mobile to keep modal stable when software keyboard opens
+  // Track visualViewport height & top offset on mobile to keep modal pinned above software keyboard
   useEffect(() => {
     if (!isOpen) return;
-    const updateViewportHeight = () => {
+    const updateViewport = () => {
       if (typeof window !== 'undefined' && window.visualViewport) {
-        setViewportHeight(window.visualViewport.height);
+        const vv = window.visualViewport;
+        setViewportHeight(vv.height);
+        setViewportTop(vv.offsetTop);
+        setIsKeyboardOpen(vv.height < window.innerHeight * 0.82);
       }
     };
-    updateViewportHeight();
-    window.visualViewport?.addEventListener('resize', updateViewportHeight);
-    window.visualViewport?.addEventListener('scroll', updateViewportHeight);
+    updateViewport();
+    window.visualViewport?.addEventListener('resize', updateViewport);
+    window.visualViewport?.addEventListener('scroll', updateViewport);
     return () => {
-      window.visualViewport?.removeEventListener('resize', updateViewportHeight);
-      window.visualViewport?.removeEventListener('scroll', updateViewportHeight);
+      window.visualViewport?.removeEventListener('resize', updateViewport);
+      window.visualViewport?.removeEventListener('scroll', updateViewport);
     };
   }, [isOpen]);
 
@@ -250,8 +255,9 @@ export default function ChatModal({
 
   return createPortal(
     <div 
-      className="fixed inset-0 z-[100000] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
+      className="fixed left-0 right-0 z-[100000] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden"
       style={{
+        top: typeof window !== 'undefined' && window.visualViewport ? `${viewportTop}px` : 0,
         height: viewportHeight ? `${viewportHeight}px` : '100dvh',
         overscrollBehavior: 'none',
         touchAction: 'none'
@@ -266,11 +272,10 @@ export default function ChatModal({
 
       {/* Modal — fixed viewport height overlay */}
       <div
-        className="relative flex flex-col bg-white rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl w-full max-w-lg"
+        className={`relative flex flex-col bg-white ${isKeyboardOpen ? 'rounded-none' : 'rounded-t-3xl sm:rounded-2xl'} overflow-hidden shadow-2xl w-full max-w-lg`}
         style={{ 
-          height: viewportHeight ? `${Math.min(viewportHeight * 0.95, 600)}px` : 'min(600px, 92dvh)',
-          maxHeight: '100dvh',
-          animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+          height: isKeyboardOpen && viewportHeight ? `${viewportHeight}px` : (viewportHeight ? `${Math.min(viewportHeight * 0.95, 600)}px` : 'min(600px, 92dvh)'),
+          maxHeight: '100%',
           touchAction: 'auto'
         }}
         onClick={e => e.stopPropagation()}
@@ -433,7 +438,11 @@ export default function ChatModal({
         </div>
 
         {/* ── INPUT BAR ── */}
-        <div className="shrink-0 bg-white border-t border-gray-100 px-3 py-2.5 pb-[max(20px,calc(env(safe-area-inset-bottom,0px)+96px))] sm:pb-3">
+        <div className={`shrink-0 bg-white border-t border-gray-100 px-3 py-2 ${
+          isKeyboardOpen
+            ? 'pb-2'
+            : 'pb-[max(12px,calc(env(safe-area-inset-bottom,0px)+8px))] sm:pb-3'
+        }`}>
           <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
             newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
           }`}>
@@ -441,6 +450,13 @@ export default function ChatModal({
               ref={textareaRef}
               value={newMessage}
               onChange={handleTextareaChange}
+              onFocus={() => {
+                setTimeout(() => {
+                  window.scrollTo(0, 0);
+                  const chatContainer = document.getElementById('chat-messages');
+                  if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 100);
+              }}
               placeholder={`Message ${displayName}…`}
               rows={1}
               className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
