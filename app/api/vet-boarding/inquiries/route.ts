@@ -32,7 +32,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ inquiries: inquiries || [] });
+    const enrichedInquiries = await Promise.all(
+      (inquiries || []).map(async (inq: any) => {
+        const clinicEmail = inq.vet_clinics?.email?.toLowerCase().trim();
+        const { data: msgs } = await supabaseAdmin
+          .from('messages')
+          .select('id, sender_email, receiver_email, read, message, created_at')
+          .eq('booking_id', inq.id)
+          .order('created_at', { ascending: false });
+
+        let unreadCount = 0;
+        let clinicReplied = inq.status !== 'pending';
+        let latestMessage = '';
+
+        if (msgs && msgs.length > 0) {
+          latestMessage = msgs[0].message;
+          for (const m of msgs) {
+            const sender = (m.sender_email || '').toLowerCase().trim();
+            if (clinicEmail && sender === clinicEmail) {
+              clinicReplied = true;
+            }
+            if (!m.read && sender !== clinicEmail) {
+              unreadCount += 1;
+            }
+          }
+        }
+
+        return {
+          ...inq,
+          unread_count: unreadCount,
+          clinic_replied: clinicReplied,
+          latest_message: latestMessage,
+        };
+      })
+    );
+
+    return NextResponse.json({ inquiries: enrichedInquiries }, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -45,6 +45,7 @@ export default function DaycareDashboard() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [activeInquiryId, setActiveInquiryId] = useState<string | null>(null);
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
 
   // Calendar Availability
   const [calMonthOffset, setCalMonthOffset] = useState(0);
@@ -397,39 +398,101 @@ export default function DaycareDashboard() {
         {/* ── Inquiries Tab ─────────────────────────────────────────────── */}
         {activeTab === 'inquiries' && (
           <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm">
-            <h2 className="text-base font-black text-[#4A3E3D] mb-4">Owner Inquiries</h2>
+            {(() => {
+              let filteredInquiries = [...inquiries];
+              if (inquiryFilter === 'unread') {
+                filteredInquiries = filteredInquiries.filter((i: any) => (i.unread_count || 0) > 0);
+              } else if (inquiryFilter === 'replied') {
+                filteredInquiries = filteredInquiries.filter((i: any) => i.daycare_replied);
+              }
 
-            {inquiriesLoading ? (
-              <div className="text-center py-8 text-xs text-gray-500">Loading inquiries...</div>
-            ) : inquiries.length === 0 ? (
-              <div className="text-center py-12 text-[#8B7E7D]">
-                <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-bold">No daycare inquiries yet</p>
-                <p className="text-xs">When pet owners send inquiries from your search card, they will appear here.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {inquiries.map((inq: any) => (
-                  <div
-                    key={inq.id}
-                    className="p-4 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4] flex items-center justify-between hover:border-emerald-400 transition-all"
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-[#4A3E3D]">{inq.owner_email}</p>
-                      <p className="text-xs text-[#8B7E7D] mt-0.5">
-                        Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
-                      </p>
+              return (
+                <>
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+                    <h2 className="text-base font-black text-[#4A3E3D]">Owner Inquiries</h2>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex bg-gray-100 p-1 rounded-xl">
+                        <button
+                          onClick={() => setInquiryFilter('all')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          All
+                        </button>
+                        <button
+                          onClick={() => setInquiryFilter('unread')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Unread
+                        </button>
+                        <button
+                          onClick={() => setInquiryFilter('replied')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Replied
+                        </button>
+                      </div>
+
+                      <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                        {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
+                      </span>
                     </div>
-                    <button
-                      onClick={() => setActiveInquiryId(inq.id)}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer"
-                    >
-                      Open Chat Thread
-                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {inquiriesLoading ? (
+                    <div className="text-center py-8 text-xs text-gray-500">Loading inquiries...</div>
+                  ) : filteredInquiries.length === 0 ? (
+                    <div className="text-center py-12 text-[#8B7E7D]">
+                      <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                      <p className="text-sm font-bold">No daycare inquiries found</p>
+                      <p className="text-xs">Try changing your filters or check back later.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredInquiries.map((inq: any) => (
+                        <div
+                          key={inq.id}
+                          className="p-4 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4] flex items-center justify-between hover:border-emerald-400 transition-all"
+                        >
+                          <div className="flex-1 min-w-0 pr-3">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {inq.unread_count > 0 ? (
+                                <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
+                              ) : (
+                                <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                              )}
+                              <p className="text-sm font-bold text-[#4A3E3D] truncate">{inq.owner_email}</p>
+                              {inq.unread_count > 0 && (
+                                <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                  {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-[#8B7E7D] mt-0.5">
+                              Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
+                            </p>
+                            {inq.latest_message && (
+                              <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
+                            )}
+                            {inq.daycare_replied && (
+                              <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                ✓ Replied
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => setActiveInquiryId(inq.id)}
+                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer shrink-0"
+                          >
+                            Open Chat Thread
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 

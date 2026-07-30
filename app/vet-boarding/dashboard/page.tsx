@@ -52,6 +52,7 @@ export default function VetBoardingDashboardPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
 
   // Chat modal
   const [chatOpen, setChatOpen] = useState(false);
@@ -461,61 +462,119 @@ export default function VetBoardingDashboardPage() {
         {/* ── Inquiries Tab ──────────────────────────────────────────── */}
         {activeTab === 'inquiries' && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-black text-[#4A3E3D]">{inquiries.length} {inquiries.length === 1 ? 'Inquiry' : 'Inquiries'}</p>
-              <button
-                onClick={() => clinic?.id && loadInquiries(clinic.id)}
-                className="p-2 rounded-xl hover:bg-white transition-colors"
-                disabled={inquiriesLoading}
-              >
-                <RefreshCw className={`w-4 h-4 text-[#8B7E7D] ${inquiriesLoading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
+            {(() => {
+              let filteredInquiries = [...inquiries];
+              if (inquiryFilter === 'unread') {
+                filteredInquiries = filteredInquiries.filter(i => (i.unread_count || 0) > 0);
+              } else if (inquiryFilter === 'replied') {
+                filteredInquiries = filteredInquiries.filter(i => i.clinic_replied);
+              }
 
-            {inquiriesLoading && (
-              <div className="bg-white rounded-3xl p-8 text-center border border-blue-100">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500 mx-auto" />
-              </div>
-            )}
+              return (
+                <>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                      <button
+                        onClick={() => setInquiryFilter('all')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        All
+                      </button>
+                      <button
+                        onClick={() => setInquiryFilter('unread')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Unread
+                      </button>
+                      <button
+                        onClick={() => setInquiryFilter('replied')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Replied
+                      </button>
+                    </div>
 
-            {!inquiriesLoading && inquiries.length === 0 && (
-              <div className="bg-white rounded-3xl p-10 border border-blue-100 shadow-sm text-center">
-                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <MessageSquare className="w-7 h-7 text-blue-300" />
-                </div>
-                <p className="font-bold text-[#4A3E3D]">No inquiries yet</p>
-                <p className="text-xs text-[#8B7E7D] mt-1">When pet owners reach out, their messages will appear here.</p>
-              </div>
-            )}
-
-            {!inquiriesLoading && inquiries.map(inq => (
-              <div key={inq.id} className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shrink-0">
-                    <span className="text-white font-black text-sm">{inq.owner_email?.[0]?.toUpperCase() || '?'}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-[#4A3E3D] text-sm">{inq.owner_email}</p>
-                    <p className="text-xs text-[#8B7E7D]">Inquired {new Date(inq.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    <div className="mt-1">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        inq.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                        inq.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {inq.status === 'pending' ? '⏳ Awaiting Reply' : inq.status === 'confirmed' ? '✅ Confirmed' : inq.status}
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                        {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
                       </span>
+                      <button
+                        onClick={() => clinic?.id && loadInquiries(clinic.id)}
+                        className="p-2 rounded-xl hover:bg-white transition-colors"
+                        disabled={inquiriesLoading}
+                      >
+                        <RefreshCw className={`w-4 h-4 text-[#8B7E7D] ${inquiriesLoading ? 'animate-spin' : ''}`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                    className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-2xl transition-colors shadow-md shadow-blue-200"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" /> Chat
-                  </button>
-                </div>
-              </div>
-            ))}
+
+                  {inquiriesLoading && (
+                    <div className="bg-white rounded-3xl p-8 text-center border border-blue-100">
+                      <Loader2 className="w-6 h-6 animate-spin text-blue-500 mx-auto" />
+                    </div>
+                  )}
+
+                  {!inquiriesLoading && filteredInquiries.length === 0 && (
+                    <div className="bg-white rounded-3xl p-10 border border-blue-100 shadow-sm text-center">
+                      <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <MessageSquare className="w-7 h-7 text-blue-300" />
+                      </div>
+                      <p className="font-bold text-[#4A3E3D]">No inquiries found</p>
+                      <p className="text-xs text-[#8B7E7D] mt-1">Try changing your filters or check back later.</p>
+                    </div>
+                  )}
+
+                  {!inquiriesLoading && filteredInquiries.map(inq => (
+                    <div key={inq.id} className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shrink-0">
+                          <span className="text-white font-black text-sm">{inq.owner_email?.[0]?.toUpperCase() || '?'}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {inq.unread_count > 0 ? (
+                              <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                            )}
+                            <p className="font-bold text-[#4A3E3D] text-sm truncate">{inq.owner_email}</p>
+                            {inq.unread_count > 0 && (
+                              <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-[#8B7E7D] mt-0.5">Inquired {new Date(inq.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          {inq.latest_message && (
+                            <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
+                          )}
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              inq.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                              inq.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {inq.status === 'pending' ? '⏳ Awaiting Reply' : inq.status === 'confirmed' ? '✅ Confirmed' : inq.status}
+                            </span>
+                            {inq.clinic_replied && (
+                              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                ✓ Replied
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                          className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-2xl transition-colors shadow-md shadow-blue-200"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" /> Chat
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </div>
         )}
 
