@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { formatPublicCity } from '@/lib/formatCity';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,17 +58,20 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    // Mask data if the owner is not PRO
+    // Mask data if the owner is not PRO & sanitize location to City, State
     const sitters = data?.map(sitter => {
+      const cleanCity = formatPublicCity(sitter.city);
       if (isOwnerPro) {
         return {
           ...sitter,
+          city: cleanCity,
           phone_number: sitter.phone_visible ? sitter.phone_number : null
         };
       }
       
       return {
         ...sitter,
+        city: cleanCity,
         name: 'Local Sitter',
         photo_url: '',
         bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",

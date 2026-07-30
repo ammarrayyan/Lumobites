@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { formatPublicCity } from '@/lib/formatCity';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       pet_types: s.pet_types,
       rating: s.avg_rating,
       price: s.rate_per_night,
-      location: s.city,
+      location: formatPublicCity(s.city),
       services: s.service_types
     }));
 

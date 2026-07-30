@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { formatPublicCity } from '@/lib/formatCity';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -274,7 +275,7 @@ export async function POST(request: NextRequest) {
         cover_photo_url: finalCoverPhotoUrl,
         cover_photo_position: cover_photo_position || 'center',
         id_photo_url: finalIdUrl,
-        city,
+        city: formatPublicCity(city),
         zip,
         country: resolvedCountry,
         lat,
