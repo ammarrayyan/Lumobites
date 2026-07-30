@@ -133,7 +133,7 @@ export default function ChatModal({
         endpoint = `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(userEmailParam || '')}&shelter_email=${encodeURIComponent(shelterEmailParam || '')}${shelterId ? `&shelter_id=${encodeURIComponent(shelterId)}` : ''}&t=${Date.now()}`;
       }
 
-      const res = await fetch(endpoint);
+      const res = await fetch(endpoint, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
@@ -147,8 +147,25 @@ export default function ChatModal({
     setIsLoading(true);
     setMessages([]);
     fetchMessages();
-    pollIntervalRef.current = setInterval(() => fetchMessages(true), 4000);
-    return () => { if (pollIntervalRef.current) clearInterval(pollIntervalRef.current); };
+
+    // Poll every 3 seconds for active chat
+    pollIntervalRef.current = setInterval(() => fetchMessages(true), 3000);
+
+    // Immediately refresh when app or window regains focus on mobile
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchMessages(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocusOrVisible);
+    document.addEventListener('visibilitychange', handleFocusOrVisible);
+
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      window.removeEventListener('focus', handleFocusOrVisible);
+      document.removeEventListener('visibilitychange', handleFocusOrVisible);
+    };
   }, [isOpen, bookingId, fetchMessages]);
 
   useEffect(() => {

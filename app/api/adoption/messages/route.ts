@@ -17,19 +17,26 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin.from('adoption_messages').select('*, adoption_pets(name, photo_urls, species, status)');
 
-    if (pet_id) {
-      query = query.eq('pet_id', pet_id);
-    }
-    if (shelter_id) {
-      query = query.eq('shelter_id', shelter_id);
-    } else if (shelter_email) {
-      const cleanEmail = shelter_email.toLowerCase().trim();
-      query = query.or(`receiver_email.eq.${cleanEmail},sender_email.eq.${cleanEmail}`);
-    }
+    const cleanUser = user_email ? user_email.toLowerCase().trim() : '';
+    const cleanShelter = shelter_email ? shelter_email.toLowerCase().trim() : '';
 
-    if (user_email) {
-      const cleanUser = user_email.toLowerCase().trim();
-      query = query.or(`sender_email.eq.${cleanUser},receiver_email.eq.${cleanUser}`);
+    if (pet_id && cleanUser && cleanShelter) {
+      query = query
+        .eq('pet_id', pet_id)
+        .or(`and(sender_email.eq.${cleanUser},receiver_email.eq.${cleanShelter}),and(sender_email.eq.${cleanShelter},receiver_email.eq.${cleanUser})`);
+    } else {
+      if (pet_id) {
+        query = query.eq('pet_id', pet_id);
+      }
+      if (shelter_id) {
+        query = query.eq('shelter_id', shelter_id);
+      } else if (cleanShelter) {
+        query = query.or(`receiver_email.eq.${cleanShelter},sender_email.eq.${cleanShelter}`);
+      }
+
+      if (cleanUser) {
+        query = query.or(`sender_email.eq.${cleanUser},receiver_email.eq.${cleanUser}`);
+      }
     }
 
     // Sort ascending for thread view (pet_id present), descending for inbox list
@@ -39,21 +46,33 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('[Adoption Messages API] GET error:', error);
-      return NextResponse.json({ messages: [] });
+      return NextResponse.json({ messages: [] }, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } });
     }
 
-    // Mark unread messages as read when viewing specific pet thread
-    if (pet_id && (user_email || shelter_email)) {
-      const activeEmail = (user_email || shelter_email)?.toLowerCase().trim();
-      await supabaseAdmin
-        .from('adoption_messages')
-        .update({ read: true })
-        .eq('pet_id', pet_id)
-        .eq('receiver_email', activeEmail)
-        .eq('read', false);
+    // Mark unread messages as read for both conversation participants when viewing thread
+    if (pet_id) {
+      if (cleanShelter) {
+        await supabaseAdmin
+          .from('adoption_messages')
+          .update({ read: true })
+          .eq('pet_id', pet_id)
+          .eq('receiver_email', cleanShelter)
+          .eq('read', false);
+      }
+      if (cleanUser) {
+        await supabaseAdmin
+          .from('adoption_messages')
+          .update({ read: true })
+          .eq('pet_id', pet_id)
+          .eq('receiver_email', cleanUser)
+          .eq('read', false);
+      }
     }
 
-    return NextResponse.json({ messages: messages || [] });
+    return NextResponse.json(
+      { messages: messages || [] },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

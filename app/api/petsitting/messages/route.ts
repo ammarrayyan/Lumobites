@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
         .eq('read', false);
     }
 
-    return NextResponse.json({ messages });
+    return NextResponse.json(
+      { messages },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
