@@ -541,30 +541,8 @@ export function PetSittingContent() {
   const [sitterLocationInput, setSitterLocationInput] = useState('');
   const [sitterLocationVerified, setSitterLocationVerified] = useState(false);
   const [sitterLocationOptions, setSitterLocationOptions] = useState<any[]>([]);
+  const [sitterSelectedLocation, setSitterSelectedLocation] = useState<any>(null);
   const [sitterIsLocating, setSitterIsLocating] = useState(false);
-  const [sitterLiveSuggestions, setSitterLiveSuggestions] = useState<any[]>([]);
-  const [showSitterLiveSuggestions, setShowSitterLiveSuggestions] = useState(false);
-
-  useEffect(() => {
-    if (!sitterLocationInput || sitterLocationInput.trim().length < 2 || sitterLocationVerified) {
-      setSitterLiveSuggestions([]);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/city-board/autocomplete?input=${encodeURIComponent(sitterLocationInput.trim())}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSitterLiveSuggestions(data.options || []);
-        }
-      } catch {
-        setSitterLiveSuggestions([]);
-      }
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, [sitterLocationInput, sitterLocationVerified]);
   const [sitterBio, setSitterBio] = useState('');
   const [sitterPetTypes, setSitterPetTypes] = useState('both');
   const [sitterAvailableDays, setSitterAvailableDays] = useState<string[]>([]);
@@ -5668,13 +5646,8 @@ export function PetSittingContent() {
                             setSitterLocationVerified(false);
                             setSitterSelectedLocation(null);
                             setSitterLocationOptions([]);
-                            setShowSitterLiveSuggestions(true);
                           }} 
-                          onFocus={() => setShowSitterLiveSuggestions(true)}
-                          onBlur={(e) => {
-                            handleSitterLocationBlur();
-                            setTimeout(() => setShowSitterLiveSuggestions(false), 200);
-                          }}
+                          onBlur={handleSitterLocationBlur}
                           className={`w-full bg-[#FAF6F4] border ${sitterLocationVerified ? 'border-green-500' : !!formErrors['location'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
                           placeholder="Enter city name OR 5-digit zip code..." 
                         />
@@ -5684,31 +5657,6 @@ export function PetSittingContent() {
                         {sitterLocationVerified && !sitterIsLocating && sitterSelectedLocation && (
                           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                          </div>
-                        )}
-
-                        {/* LIVE AUTOCOMPLETE SUGGESTIONS DROPDOWN */}
-                        {showSitterLiveSuggestions && sitterLiveSuggestions.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-[#E8DDD4] rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-gray-100 text-xs">
-                            {sitterLiveSuggestions.map((opt, i) => (
-                              <button
-                                key={i}
-                                type="button"
-                                onMouseDown={() => {
-                                  const raw = typeof opt === 'string' ? opt : opt?.clean_city || opt?.formatted_address || '';
-                                  const sanitized = formatPublicCity(raw);
-                                  setSitterSelectedLocation({ formatted_address: sanitized });
-                                  setSitterCity(sanitized);
-                                  setSitterLocationVerified(true);
-                                  setSitterLocationInput(sanitized);
-                                  setShowSitterLiveSuggestions(false);
-                                }}
-                                className="w-full text-left p-3 hover:bg-[#FAF6F4] text-[#4A3E3D] font-medium cursor-pointer border-none bg-transparent flex items-center gap-2 transition-colors"
-                              >
-                                <Building2 className="w-4 h-4 text-[#8B5E3C] shrink-0" />
-                                <span className="truncate">{typeof opt === 'string' ? opt : opt?.formatted_address || opt?.clean_city}</span>
-                              </button>
-                            ))}
                           </div>
                         )}
                       </div>
