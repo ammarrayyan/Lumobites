@@ -44,7 +44,8 @@ export default function DaycareDashboard() {
   // Inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
-  const [activeInquiryId, setActiveInquiryId] = useState<string | null>(null);
+  const [activeInquiry, setActiveInquiry] = useState<any>(null);
+  const [chatOpen, setChatOpen] = useState(false);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
 
   // Calendar Availability
@@ -481,7 +482,7 @@ export default function DaycareDashboard() {
                             )}
                           </div>
                           <button
-                            onClick={() => setActiveInquiryId(inq.id)}
+                            onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
                             className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer shrink-0"
                           >
                             Open Chat Thread
@@ -862,10 +863,17 @@ export default function DaycareDashboard() {
       </main>
 
       {/* CHAT MODAL FOR INQUIRY THREADS */}
-      {activeInquiryId && (
+      {chatOpen && activeInquiry && (
         <ChatModal
-          bookingId={activeInquiryId}
-          onClose={() => setActiveInquiryId(null)}
+          isOpen={chatOpen}
+          onClose={() => { setChatOpen(false); setActiveInquiry(null); }}
+          bookingId={activeInquiry.id}
+          bookingDetails={`Daycare Inquiry • ${daycare?.business_name || 'Pet Daycare'}`}
+          currentUserEmail={daycare?.email || ''}
+          otherUserName={activeInquiry.owner_email?.split('@')[0] || 'Pet Owner'}
+          otherUserEmail={activeInquiry.owner_email || ''}
+          otherUserType="user"
+          onReport={() => {}}
         />
       )}
     </div>
