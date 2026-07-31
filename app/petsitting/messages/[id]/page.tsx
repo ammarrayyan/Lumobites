@@ -86,6 +86,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     title: string;
     otherUserName: string;
     otherUserEmail: string;
+    otherUserType: 'sitter' | 'user';
   } | null>(null);
   const [isDetailsLoading, setIsDetailsLoading] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
@@ -119,6 +120,13 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     async function loadBooking() {
       setIsDetailsLoading(true);
       try {
+        const userEmail = (
+          localStorage.getItem('lumo_pro_email') ||
+          localStorage.getItem('lumo_sitter_email') ||
+          localStorage.getItem('lumo_owner_history_email') ||
+          ''
+        ).toLowerCase().trim();
+
         // 1. Check if this ID is a real Pet Sitting booking
         const res = await fetch(`/api/petsitting/request?id=${bookingId}`);
         if (res.ok) {
@@ -134,12 +142,17 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
         if (vetRes.ok) {
           const vetData = await vetRes.json();
           if (vetData.inquiry && isMounted) {
-            const clinic = vetData.inquiry.vet_clinics;
+            const inq = vetData.inquiry;
+            const clinic = inq.vet_clinics;
+            const clinicEmail = (clinic?.email || '').toLowerCase().trim();
+            const isClinicOwner = userEmail && clinicEmail && userEmail === clinicEmail;
+
             setInquiryData({
               type: 'vet',
-              title: `Veterinary Boarding Inquiry • ${clinic?.clinic_name || 'Clinic'}`,
-              otherUserName: clinic?.clinic_name || 'Veterinary Clinic',
-              otherUserEmail: clinic?.email || '',
+              title: `Boarding Inquiry • ${clinic?.clinic_name || 'Veterinary Clinic'}`,
+              otherUserName: isClinicOwner ? (inq.owner_email?.split('@')[0] || 'Pet Owner') : (clinic?.clinic_name || 'Veterinary Clinic'),
+              otherUserEmail: isClinicOwner ? (inq.owner_email || '') : (clinic?.email || ''),
+              otherUserType: isClinicOwner ? 'user' : 'sitter',
             });
             return;
           }
@@ -150,12 +163,17 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
         if (daycareRes.ok) {
           const daycareData = await daycareRes.json();
           if (daycareData.inquiry && isMounted) {
-            const daycare = daycareData.inquiry.pet_daycares;
+            const inq = daycareData.inquiry;
+            const daycare = inq.pet_daycares;
+            const daycareEmail = (daycare?.email || '').toLowerCase().trim();
+            const isDaycareOwner = userEmail && daycareEmail && userEmail === daycareEmail;
+
             setInquiryData({
               type: 'daycare',
-              title: `Pet Daycare Inquiry • ${daycare?.business_name || 'Daycare'}`,
-              otherUserName: daycare?.business_name || 'Pet Daycare',
-              otherUserEmail: daycare?.email || '',
+              title: `Daycare Inquiry • ${daycare?.business_name || 'Pet Daycare'}`,
+              otherUserName: isDaycareOwner ? (inq.owner_email?.split('@')[0] || 'Pet Owner') : (daycare?.business_name || 'Pet Daycare'),
+              otherUserEmail: isDaycareOwner ? (inq.owner_email || '') : (daycare?.email || ''),
+              otherUserType: isDaycareOwner ? 'user' : 'sitter',
             });
             return;
           }
@@ -323,7 +341,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
           currentUserEmail={currentUserEmail}
           otherUserName={inquiryData.otherUserName}
           otherUserEmail={inquiryData.otherUserEmail}
-          otherUserType="sitter"
+          otherUserType={inquiryData.otherUserType}
           onReport={() => {}}
         />
       </div>
