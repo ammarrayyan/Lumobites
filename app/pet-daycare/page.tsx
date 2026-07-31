@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut } from 'lucide-react';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import { formatPublicCity } from '@/lib/formatCity';
 
 const DAYCARE_SERVICES = [
   'Group Play',
@@ -447,9 +448,9 @@ export default function DaycareRegistrationPage() {
             <CityAutocompleteInput
               label="Address / Location *"
               required
-              value={form.city}
+              value={form.address || form.city}
               onChange={val => {
-                setForm(p => ({ ...p, city: val, address: val }));
+                setForm(p => ({ ...p, address: val, city: formatPublicCity(val) }));
               }}
               placeholder="e.g. 1239 Lexington Rd, Louisville, KY or Louisville, KY"
               inputClassName="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"

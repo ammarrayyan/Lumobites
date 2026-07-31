@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import { formatPublicCity } from '@/lib/formatCity';
 import {
   Building2,
   Calendar,
@@ -715,7 +716,7 @@ export default function DaycareDashboard() {
                     <h3 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h3>
                     {daycare.license_number && <p className="text-xs text-[#8B7E7D]">License: {daycare.license_number}</p>}
                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> {daycare.address}, {daycare.city}, {daycare.state} {daycare.zip}
+                      <MapPin className="w-3.5 h-3.5" /> {daycare.address || daycare.city || '—'}
                     </p>
                   </div>
                 </div>
@@ -811,8 +812,8 @@ export default function DaycareDashboard() {
                     <CityAutocompleteInput
                       label="Location / Address *"
                       required
-                      value={editForm.city || editForm.address || ''}
-                      onChange={val => setEditForm({ ...editForm, city: val, address: val })}
+                      value={editForm.address || editForm.city || ''}
+                      onChange={val => setEditForm({ ...editForm, address: val, city: formatPublicCity(val) })}
                       placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
                       inputClassName="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
                     />
