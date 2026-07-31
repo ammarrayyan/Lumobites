@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
         recipient_email: clinic.email,
         type: 'new_message',
         title: 'New Boarding Inquiry 🏥',
-        message: `${cleanEmail} has sent a boarding inquiry to ${clinic.clinic_name}`,
-        link: `/vet-boarding/dashboard`,
+        message: `${cleanEmail} sent a boarding inquiry for their pet — tap to view`,
+        link: `/vet-boarding/dashboard?inquiry=${inquiry.id}`,
         read: false,
       });
     }

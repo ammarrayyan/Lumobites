@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
         recipient_email: daycare.email,
         type: 'new_message',
         title: 'New Daycare Inquiry 🐕',
-        message: `${cleanEmail} has sent a daycare inquiry to ${daycare.business_name}`,
-        link: `/pet-daycare/dashboard`,
+        message: `${cleanEmail} sent a daycare inquiry for their pet — tap to view`,
+        link: `/pet-daycare/dashboard?inquiry=${inquiry.id}`,
         read: false,
       });
     }

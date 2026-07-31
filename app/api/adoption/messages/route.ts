@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       const senderLabel = cleanSender.split('@')[0];
       const notifTitle = `New message regarding ${petName}`;
       const notifMsg = `New message from ${senderLabel}: "${cleanMessage.slice(0, 80)}"`;
-      const notifLink = `/adoption/messages/${pet_id}`;
+      const notifLink = `/adoption/shelter/dashboard?inquiry=${pet_id}&adopter=${encodeURIComponent(cleanSender)}`;
 
       await supabaseAdmin.from('notifications').insert({
         recipient_email: cleanReceiver,

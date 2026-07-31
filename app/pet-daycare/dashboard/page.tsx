@@ -102,7 +102,20 @@ export default function DaycareDashboard() {
       const res = await fetch(`/api/pet-daycare/inquiries?daycare_id=${daycareId}`);
       if (res.ok) {
         const data = await res.json();
-        setInquiries(data.inquiries || []);
+        const loadedInqs = data.inquiries || [];
+        setInquiries(loadedInqs);
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const targetInquiryId = params.get('inquiry');
+          if (targetInquiryId) {
+            const match = loadedInqs.find((i: any) => i.id === targetInquiryId);
+            if (match) {
+              setActiveInquiry(match);
+              setChatOpen(true);
+            }
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to fetch inquiries:', e);

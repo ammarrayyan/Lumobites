@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import ChatModal from '@/components/ChatModal';
 
 interface ShelterPet {
   id: string;
@@ -42,6 +43,8 @@ function ShelterDashboardContent() {
   const [profileSaveError, setProfileSaveError] = useState('');
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [activeChatInquiry, setActiveChatInquiry] = useState<any>(null);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState('all');
@@ -174,7 +177,21 @@ function ShelterDashboardContent() {
       const res = await fetch(`/api/adoption/messages?shelter_id=${shelterId}&shelter_email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
-        setInquiries(data.messages || []);
+        const msgs = data.messages || [];
+        setInquiries(msgs);
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const targetInquiryId = params.get('inquiry');
+          const targetAdopter = params.get('adopter');
+          if (targetInquiryId) {
+            const match = msgs.find((m: any) => m.pet_id === targetInquiryId && (!targetAdopter || m.sender_email?.toLowerCase() === targetAdopter.toLowerCase() || m.receiver_email?.toLowerCase() === targetAdopter.toLowerCase()));
+            if (match) {
+              setActiveChatInquiry(match);
+              setChatOpen(true);
+            }
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to fetch shelter inquiries:', err);
@@ -1677,6 +1694,24 @@ function ShelterDashboardContent() {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* CHAT MODAL FOR SHELTER ADOPTER INQUIRIES */}
+      {chatOpen && activeChatInquiry && (
+        <ChatModal
+          isOpen={chatOpen}
+          onClose={() => { setChatOpen(false); setActiveChatInquiry(null); }}
+          bookingId={activeChatInquiry.pet_id}
+          bookingDetails={`Adoption Inquiry • ${activeChatInquiry.pets?.name || 'Pet'}`}
+          currentUserEmail={shelterInfo?.email || ''}
+          otherUserName={activeChatInquiry.sender_email === shelterInfo?.email ? (activeChatInquiry.receiver_email?.split('@')[0] || 'Adopter') : (activeChatInquiry.sender_email?.split('@')[0] || 'Adopter')}
+          otherUserEmail={activeChatInquiry.sender_email === shelterInfo?.email ? activeChatInquiry.receiver_email : activeChatInquiry.sender_email}
+          otherUserType="user"
+          onReport={() => {}}
+          petDetails={activeChatInquiry.pets}
+          chatType="adoption"
+          shelterId={shelterInfo?.id}
+        />
       )}
     </div>
   );
