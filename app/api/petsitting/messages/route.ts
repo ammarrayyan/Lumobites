@@ -101,6 +101,14 @@ export async function POST(request: NextRequest) {
 
     console.log('[Messages API] Message inserted successfully:', newMessage.id);
 
+    // Automatically un-archive parent inquiry thread if it was archived
+    try {
+      await supabaseAdmin.from('vet_inquiries').update({ archived: false }).eq('id', booking_id);
+      await supabaseAdmin.from('daycare_inquiries').update({ archived: false }).eq('id', booking_id);
+    } catch (unarchiveErr) {
+      console.error('[Messages API] Error un-archiving parent inquiry:', unarchiveErr);
+    }
+
     // 2. Create notification for receiver
     let senderName = 'User';
     const petName = booking?.pet_name || 'your pet';

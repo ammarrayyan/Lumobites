@@ -157,6 +157,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Automatically un-archive adoption thread if it was archived
+    try {
+      await supabaseAdmin
+        .from('messages')
+        .update({ archived: false })
+        .eq('booking_id', pet_id)
+        .or(`sender_email.eq.${cleanSender},receiver_email.eq.${cleanSender}`);
+    } catch (unarchiveErr) {
+      console.error('[Adoption Messages API] Error un-archiving thread:', unarchiveErr);
+    }
+
     if (cleanReceiver) {
       // 4. Send email notification ONLY on the first message of a new inquiry thread
       if (isFirstMessage) {

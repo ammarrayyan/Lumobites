@@ -125,6 +125,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (inquiry?.id) {
+      await supabaseAdmin.from('daycare_inquiries').update({ archived: false }).eq('id', inquiry.id);
+    }
+
     return NextResponse.json({ inquiry, existed: false });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
