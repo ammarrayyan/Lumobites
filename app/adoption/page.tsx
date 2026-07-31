@@ -120,6 +120,19 @@ function AdoptionContent() {
   const [lifestylePrompt, setLifestylePrompt] = useState('');
   const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
   const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const email = (
+        localStorage.getItem('lumo_pro_email') ||
+        localStorage.getItem('lumo_sitter_email') ||
+        localStorage.getItem('lumo_shelter_email') ||
+        ''
+      ).trim();
+      setIsLoggedIn(!!email);
+    }
+  }, []);
 
   const [isVisualModalOpen, setIsVisualModalOpen] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
@@ -812,7 +825,7 @@ function AdoptionContent() {
                             <span className="truncate">{pet.shelter_name}</span>
                           </div>
                           {pet.temperament && (
-                            <p className="text-xs text-gray-600 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed">
+                            <p className={`text-xs text-gray-600 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed ${!isLoggedIn ? 'blur-[3px] select-none' : ''}`}>
                               {pet.temperament}
                             </p>
                           )}
@@ -874,7 +887,7 @@ function AdoptionContent() {
                           <Building2 className="w-3.5 h-3.5 shrink-0" /> {pet.shelter_name}
                         </p>
                         {pet.description && (
-                          <p className="text-xs text-gray-600 line-clamp-2 mt-2 leading-relaxed">
+                          <p className={`text-xs text-gray-600 line-clamp-2 mt-2 leading-relaxed ${!isLoggedIn ? 'blur-[3px] select-none' : ''}`}>
                             {pet.description}
                           </p>
                         )}

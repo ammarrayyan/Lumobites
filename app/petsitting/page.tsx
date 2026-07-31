@@ -3993,10 +3993,10 @@ export function PetSittingContent() {
                                 </div>
                                 <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
                                   <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                  {clinic.city}{clinic.state ? `, ${clinic.state}` : ''}
+                                  {formatPublicCity(clinic.city || clinic.address)}
                                 </p>
                                 {clinic.description && (
-                                  <p className="text-sm text-[#555555] line-clamp-2 mb-2">{clinic.description}</p>
+                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
                                 )}
                                 {clinic.services && clinic.services.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
@@ -4078,10 +4078,10 @@ export function PetSittingContent() {
                                 </div>
                                 <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
                                   <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                  {daycare.city}{daycare.state ? `, ${daycare.state}` : ''}
+                                  {formatPublicCity(daycare.city || daycare.address)}
                                 </p>
                                 {daycare.description && (
-                                  <p className="text-sm text-[#555555] line-clamp-2 mb-2">{daycare.description}</p>
+                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                 )}
                                 {daycare.services && daycare.services.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
