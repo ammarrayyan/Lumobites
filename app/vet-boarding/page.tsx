@@ -79,7 +79,7 @@ export default function VetBoardingRegisterPage() {
           setExistingClinic(data.clinic);
           if (data.clinic.status === 'approved' || data.clinic.status === 'paused') {
             router.replace('/vet-boarding/dashboard');
-            return;
+            return; // Keep loading = true to prevent form flash while redirecting!
           }
           setForm({
             clinic_name: data.clinic.clinic_name || '',
@@ -100,9 +100,8 @@ export default function VetBoardingRegisterPage() {
       }
     } catch (e) {
       console.error('Failed to load clinic info');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleSendOtp = async () => {

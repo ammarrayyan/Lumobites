@@ -76,7 +76,7 @@ export default function DaycareRegistrationPage() {
           setExistingDaycare(data.daycare);
           if (data.daycare.status === 'approved') {
             router.replace('/pet-daycare/dashboard');
-            return;
+            return; // Keep loading = true to prevent form flash while redirecting!
           }
           setForm({
             business_name: data.daycare.business_name || '',
@@ -97,9 +97,8 @@ export default function DaycareRegistrationPage() {
       }
     } catch (e) {
       console.error('Failed to load daycare info');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleSendOtp = async () => {
