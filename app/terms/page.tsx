@@ -93,46 +93,49 @@ export default function TermsPage() {
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>28. Electronic Communications</h2>
         <p className="mt-2">By using the platform, you agree to receive electronic communications from us, including emails, in-app notifications, and SMS messages you have opted into. You agree that these communications satisfy any legal requirement that such communication be in writing.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>29. Taxes</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>29. SMS Messaging Program</h2>
+        <p className="mt-2">By opting in to receive SMS messages from Lumo Bites, you agree to receive text messages related to lost/found pet match alerts, pet sitting booking confirmations, and account notifications. Message frequency varies and may be up to several messages per week depending on your activity and preferences. Message and data rates may apply. Reply <strong>STOP</strong> at any time to cancel; you will receive one final message confirming your opt-out. Reply <strong>HELP</strong> for help, or contact us at info@lumobitespet.com. Carriers are not liable for delayed or undelivered messages.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>30. Taxes</h2>
         <p className="mt-2">Users who receive payment through the platform (such as pet sitters) are solely responsible for reporting and paying any applicable taxes on their earnings.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>30. Intellectual Property</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>31. Intellectual Property</h2>
         <p className="mt-2">Lumo Bites owns all trademarks, logos, software, branding, code, and platform content. Users may not copy, reproduce, or redistribute this material without permission.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>31. Force Majeure</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>32. Force Majeure</h2>
         <p className="mt-2">Lumo Bites is not liable for any failure or delay in performance resulting from causes beyond our reasonable control, including outages of third-party service providers, natural disasters, or other events beyond our control.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>32. App Store Disclaimer</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>33. App Store Disclaimer</h2>
         <p className="mt-2">Apple, Google, and their respective app stores are not responsible for the operation, maintenance, or support of Lumo Bites.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>33. Export Compliance</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>34. Export Compliance</h2>
         <p className="mt-2">You may not use the platform where prohibited by applicable law or export control regulations.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>34. Third-Party Services</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>35. Third-Party Services</h2>
         <p className="mt-2">Lumo Bites integrates with a variety of third-party services to operate the platform, which may include payment processing, SMS delivery, notification services, database hosting, email delivery, affiliate programs, AI service providers, and pet listing data providers. Your use of these integrated services is subject to their respective terms and privacy policies. Lumo Bites is not responsible for the practices of these third parties.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>35. Changes to These Terms</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>36. Changes to These Terms</h2>
         <p className="mt-2">We may update these Terms at any time. Users will be notified of significant changes. Continued use after changes constitutes acceptance of the updated Terms.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>36. Entire Agreement</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>37. Entire Agreement</h2>
         <p className="mt-2">These Terms constitute the entire agreement between you and Lumo Bites regarding your use of the platform.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>37. Severability</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>38. Severability</h2>
         <p className="mt-2">If any provision of these Terms is found invalid or unenforceable, the remaining provisions will remain in full force and effect.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>38. Waiver</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>39. Waiver</h2>
         <p className="mt-2">Failure to enforce any provision of these Terms does not constitute a waiver of that provision or any other.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>39. Assignment</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>40. Assignment</h2>
         <p className="mt-2">Lumo Bites may assign these Terms in connection with a merger, acquisition, or sale of assets.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>40. Survival</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>41. Survival</h2>
         <p className="mt-2">Provisions relating to liability, intellectual property, and indemnification survive termination of your account or these Terms.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>41. Related Documents</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>42. Related Documents</h2>
         <p className="mt-2">Please review our <a href="/privacy" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>Privacy Policy</a> to understand how we collect and use your information.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>42. Contact Information</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>43. Contact Information</h2>
         <div className="mt-2">
           <p>Premier Pet Nutrition LLC</p>
           <p>Louisville, Kentucky, USA</p>

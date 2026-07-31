@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <p className="mt-2">We use your information to operate our marketplace and community features, including connecting pet sitters with owners, connecting adopters with shelters and rescues, facilitating platform communication, and providing personalized recommendations.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6. SMS Communications</h2>
-        <p className="mt-2">We may send SMS messages for identity verification or for features you voluntarily opt into. SMS opt-in is always optional and is never required to use the core features of the platform. We may limit the number or frequency of messages sent. You may opt out at any time by following the instructions included in the message.</p>
+        <p className="mt-2">We may send SMS messages for identity verification or for features you voluntarily opt into. SMS opt-in is always optional and is never required to use the core features of the platform. We may limit the number or frequency of messages sent. You may opt out at any time by following the instructions included in the message. We do not share your phone number with third parties for marketing purposes. Your phone number is used solely to deliver the SMS notifications you have opted into and for identity verification.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>7. Push Notifications</h2>
         <p className="mt-2">We use third-party notification services to deliver push notifications to your device. You may disable push notifications at any time through your device settings.</p>
