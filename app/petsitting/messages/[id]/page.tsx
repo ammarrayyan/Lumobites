@@ -87,6 +87,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     otherUserName: string;
     otherUserEmail: string;
   } | null>(null);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -116,6 +117,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     let isMounted = true;
 
     async function loadBooking() {
+      setIsDetailsLoading(true);
       try {
         // 1. Check if this ID is a real Pet Sitting booking
         const res = await fetch(`/api/petsitting/request?id=${bookingId}`);
@@ -160,6 +162,8 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
         }
       } catch (err) {
         console.error('Error fetching booking/inquiry details:', err);
+      } finally {
+        if (isMounted) setIsDetailsLoading(false);
       }
     }
 
@@ -322,6 +326,19 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
           otherUserType="sitter"
           onReport={() => {}}
         />
+      </div>
+    );
+  }
+
+  if (isDetailsLoading && !booking) {
+    return (
+      <div className="min-h-screen bg-[#FDF9F5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="flex gap-1.5 mb-3">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="w-2.5 h-2.5 rounded-full bg-[#8B5E3C] animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+          ))}
+        </div>
+        <p className="text-xs font-bold text-[#8B7E7D]">Loading conversation...</p>
       </div>
     );
   }

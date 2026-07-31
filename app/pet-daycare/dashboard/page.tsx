@@ -87,6 +87,20 @@ export default function DaycareDashboard() {
         return;
       }
       fetchDaycareProfile(cachedEmail);
+
+      const params = new URLSearchParams(window.location.search);
+      const targetInquiryId = params.get('inquiry');
+      if (targetInquiryId) {
+        fetch(`/api/pet-daycare/inquiries?id=${targetInquiryId}`)
+          .then(r => r.json())
+          .then(data => {
+            if (data.inquiry) {
+              setActiveInquiry(data.inquiry);
+              setChatOpen(true);
+            }
+          })
+          .catch(() => {});
+      }
     }
   }, []);
 

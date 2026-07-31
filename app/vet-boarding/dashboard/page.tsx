@@ -92,6 +92,20 @@ export default function VetBoardingDashboardPage() {
     }
     setClinicEmail(email);
     loadClinic(email);
+
+    const params = new URLSearchParams(window.location.search);
+    const targetInquiryId = params.get('inquiry');
+    if (targetInquiryId) {
+      fetch(`/api/vet-boarding/inquiries?id=${targetInquiryId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.inquiry) {
+            setActiveInquiry(data.inquiry);
+            setChatOpen(true);
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const loadClinic = async (email: string) => {

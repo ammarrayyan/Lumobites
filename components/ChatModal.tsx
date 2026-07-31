@@ -148,7 +148,12 @@ export default function ChatModal({
   }, [bookingId, currentUserEmail, otherUserEmail, otherUserType, chatType, shelterId]);
 
   useEffect(() => {
-    if (!isOpen || !bookingId) return;
+    if (!isOpen) {
+      setMessages([]);
+      setIsLoading(true);
+      return;
+    }
+    if (!bookingId) return;
     setIsLoading(true);
     setMessages([]);
     fetchMessages();

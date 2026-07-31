@@ -161,6 +161,23 @@ function ShelterDashboardContent() {
 
     setShelterEmail(email);
     fetchShelterDetails(email);
+
+    const params = new URLSearchParams(window.location.search);
+    const targetInquiryId = params.get('inquiry');
+    const targetAdopter = params.get('adopter');
+    if (targetInquiryId && email) {
+      fetch(`/api/adoption/messages?pet_id=${targetInquiryId}&shelter_email=${encodeURIComponent(email)}`)
+        .then(r => r.json())
+        .then(data => {
+          const msgs = data.messages || [];
+          const match = msgs.find((m: any) => m.pet_id === targetInquiryId && (!targetAdopter || m.sender_email?.toLowerCase() === targetAdopter.toLowerCase() || m.receiver_email?.toLowerCase() === targetAdopter.toLowerCase()));
+          if (match) {
+            setActiveChatInquiry(match);
+            setChatOpen(true);
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const fetchShelterDetails = async (email: string) => {
