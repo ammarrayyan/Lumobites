@@ -77,7 +77,7 @@ export default function VetBoardingRegisterPage() {
         const data = await res.json();
         if (data.clinic) {
           setExistingClinic(data.clinic);
-          if (data.clinic.status === 'approved') {
+          if (data.clinic.status === 'approved' || data.clinic.status === 'paused') {
             router.replace('/vet-boarding/dashboard');
             return;
           }

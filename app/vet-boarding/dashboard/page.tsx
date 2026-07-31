@@ -117,7 +117,7 @@ export default function VetBoardingDashboardPage() {
         if (data.clinic) {
           setClinic(data.clinic);
           setEditForm({ ...data.clinic });
-          if (data.clinic.status === 'approved') {
+          if (data.clinic.status === 'approved' || data.clinic.status === 'paused') {
             loadInquiries(data.clinic.id);
             loadAvailability(data.clinic.id);
           }
