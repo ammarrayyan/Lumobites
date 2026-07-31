@@ -502,7 +502,7 @@ export default function CityBoardPage() {
                 onChange={e => {
                   setSearchCity(e.target.value);
                 }}
-                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
+                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
               />
               {isLocatingSearchCity && (
                 <div className="absolute right-3 top-2.5">
@@ -531,7 +531,7 @@ export default function CityBoardPage() {
             <select 
               value={searchCategory}
               onChange={e => setSearchCategory(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
+              className="bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
             >
               <option value="All">All Categories</option>
               {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -541,7 +541,7 @@ export default function CityBoardPage() {
               placeholder="#️⃣ ID (LB-...)" 
               value={searchPostId}
               onChange={e => setSearchPostId(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[140px] transition-all"
+              className="bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[140px] transition-all"
             />
           </div>
           <div className="flex items-center gap-2 px-2 border-t border-[#3B2410]/10 pt-3">

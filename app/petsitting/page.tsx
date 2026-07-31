@@ -3511,7 +3511,7 @@ export function PetSittingContent() {
                     id="locationSearchInput"
                     type="text"
                     placeholder="City or Zip Code (e.g. Louisville or 40202)"
-                    className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
+                    className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]"
                     value={searchZip}
                     onChange={(e) => setSearchZip(e.target.value)}
                   />
@@ -3519,7 +3519,7 @@ export function PetSittingContent() {
                     onClick={handleUseMyLocation}
                     type="button"
                     disabled={isDetectingLocation}
-                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm ${
+                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm ${
                       isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''
                     }`}
                     title="Use my current location"
@@ -3538,7 +3538,7 @@ export function PetSittingContent() {
                   </button>
                 </div>
                 <select
-                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] md:w-64 shrink-0"
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] md:w-64 shrink-0"
                   value={searchRadius}
                   onChange={(e) => setSearchRadius(e.target.value)}
                 >
@@ -3552,7 +3552,7 @@ export function PetSittingContent() {
               {/* Row 2: Detailed Filters in Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <select
-                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
                   value={searchPetType}
                   onChange={(e) => setSearchPetType(e.target.value)}
                 >
@@ -3561,7 +3561,7 @@ export function PetSittingContent() {
                   <option value="cat">Cats Only</option>
                 </select>
                 <select
-                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
                   value={searchDay}
                   onChange={(e) => { setSearchDay(e.target.value); fetchSitters(undefined, e.target.value, undefined); }}
                 >
@@ -3575,7 +3575,7 @@ export function PetSittingContent() {
                   <option value="Sunday">Sunday</option>
                 </select>
                 <select
-                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
                   value={searchTimeSlot}
                   onChange={(e) => setSearchTimeSlot(e.target.value)}
                 >
@@ -3587,7 +3587,7 @@ export function PetSittingContent() {
                   <option value="Overnight (9pm - 8am)">Overnight (9pm - 8am)</option>
                 </select>
                 <select
-                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
+                  className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] w-full"
                   value={searchServiceType}
                   onChange={(e) => { setSearchServiceType(e.target.value); fetchSitters(undefined, undefined, e.target.value); }}
                 >

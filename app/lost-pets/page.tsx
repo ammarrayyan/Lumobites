@@ -517,7 +517,7 @@ export default function LostPetsFeed() {
                       placeholder="Search by city or zip code..."
                       value={searchQuery}
                       onChange={(e) => { setSearchQuery(e.target.value); setLocationVerified(false); }}
-                      className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
+                      className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`}
                     />
                     {isGeocoding && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin" />
@@ -537,7 +537,7 @@ export default function LostPetsFeed() {
                     onClick={handleUseMyLocation}
                     type="button"
                     disabled={isDetectingLocation}
-                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 ${isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 ${isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
                     title="Use my current location"
                   >
                     {isDetectingLocation ? (
@@ -547,18 +547,18 @@ export default function LostPetsFeed() {
                     )}
                   </button>
                 </div>
-                <select value={searchRadius} onChange={(e) => setSearchRadius(e.target.value)} className={`bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={!searchCoords && !!searchQuery}>
+                <select value={searchRadius} onChange={(e) => setSearchRadius(e.target.value)} className={`bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={!searchCoords && !!searchQuery}>
                   <option value="10">Within 10 miles</option>
                   <option value="25">Within 25 miles</option>
                   <option value="50">Within 50 miles</option>
                   <option value="100">Within 100 miles</option>
                 </select>
-                <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold">
+                <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold">
                   <option value="all">All Types</option>
                   <option value="lost">Lost Pets</option>
                   <option value="found">Found Pets</option>
                 </select>
-                <select value={filterSpecies} onChange={(e) => setFilterSpecies(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold">
+                <select value={filterSpecies} onChange={(e) => setFilterSpecies(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-semibold">
                   <option value="all">All Species</option>
                   <option value="dog">Dogs</option>
                   <option value="cat">Cats</option>
