@@ -183,10 +183,6 @@ function AdoptionContent() {
       if (email) {
         setShelterOtpEmail(email);
         setShelterFormData(prev => ({ ...prev, email }));
-        if (userShelter?.status === 'approved') {
-          window.location.href = '/adoption/shelter/dashboard';
-          return;
-        }
         setShelterOtpStep('form');
       } else {
         setShelterOtpStep('email');
@@ -252,11 +248,6 @@ function AdoptionContent() {
           const shelterData = await shelterRes.json();
           if (shelterData && shelterData.shelter) {
             setUserShelter(shelterData.shelter);
-            if (shelterData.shelter.status === 'approved') {
-              setIsShelterRegOpen(false);
-              router.push('/adoption/shelter/dashboard');
-              return;
-            }
           }
         }
       } catch (e) {
@@ -280,7 +271,6 @@ function AdoptionContent() {
         body: JSON.stringify(shelterFormData)
       });
       if (res.ok) {
-        const data = await res.json();
         setShelterRegSuccess(true);
         if (typeof window !== 'undefined') {
           localStorage.setItem('lumo_shelter_email', shelterFormData.email);
@@ -288,9 +278,6 @@ function AdoptionContent() {
         }
         setTimeout(() => {
           setIsShelterRegOpen(false);
-          if (data.shelter?.status === 'approved') {
-            router.push('/adoption/shelter/dashboard');
-          }
         }, 1500);
       } else {
         const err = await res.json().catch(() => ({}));
@@ -385,9 +372,6 @@ function AdoptionContent() {
           .then(data => {
             if (data && data.shelter) {
               setUserShelter(data.shelter);
-              if (data.shelter.status === 'approved' && isRegParam) {
-                window.location.href = '/adoption/shelter/dashboard';
-              }
             } else {
               setUserShelter(null);
             }
@@ -602,80 +586,6 @@ function AdoptionContent() {
             >
               <Camera className="w-4 h-4 text-[#8B5E3C]" /> AI Photo Visual Matcher
             </button>
-          </div>
-
-          {/* REDESIGNED DYNAMIC SHELTER ENTRY POINT BANNER */}
-          <div className="pt-4 border-t border-[#E8DDD4]/60 flex justify-center">
-            {userShelter ? (
-              <div className="w-full flex justify-center">
-                {userShelter.status === 'approved' && (
-                  <Link
-                    href="/adoption/shelter/dashboard"
-                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-900 shadow-2xs transition-all no-underline group text-xs sm:text-sm font-extrabold max-w-md w-full"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-base shrink-0">🐾</span>
-                      <span className="truncate">{userShelter.org_name || 'Organization'} — <span className="text-emerald-700 font-bold">Go to Your Dashboard</span></span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-emerald-700 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </Link>
-                )}
-                {userShelter.status === 'pending' && (
-                  <Link
-                    href="/adoption/shelter/dashboard"
-                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border border-amber-200/80 text-amber-900 shadow-2xs transition-all no-underline group text-xs sm:text-sm font-extrabold max-w-md w-full"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <Building2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="truncate">{userShelter.org_name ? `${userShelter.org_name} — ` : ''}<span className="text-amber-800 font-bold">Your application is under review</span></span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-amber-700 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </Link>
-                )}
-                {userShelter.status === 'rejected' && (
-                  <button
-                    onClick={() => {
-                      setShelterFormData({
-                        org_name: userShelter.org_name || '',
-                        tax_id: (userShelter as any).tax_id || '',
-                        email: (userShelter as any).email || '',
-                        phone: (userShelter as any).phone || '',
-                        address: (userShelter as any).address || '',
-                        city: (userShelter as any).city || '',
-                        state: (userShelter as any).state || '',
-                        zip: (userShelter as any).zip || '',
-                        website: (userShelter as any).website || ''
-                      });
-                      setIsShelterRegOpen(true);
-                    }}
-                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-rose-50 hover:bg-rose-100/80 border border-rose-200/80 text-rose-900 shadow-2xs transition-all cursor-pointer group text-xs sm:text-sm font-extrabold max-w-md w-full"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <Building2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="truncate">{userShelter.org_name ? `${userShelter.org_name} — ` : ''}<span className="text-rose-800 font-bold">Application update available</span></span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-rose-700 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={handleOpenShelterModal}
-                className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#F5EDE4] hover:bg-[#EBDCCF] border border-[#8B5E3C]/20 text-[#8B5E3C] shadow-2xs transition-all cursor-pointer group text-xs sm:text-sm font-extrabold max-w-md w-full"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-[#8B5E3C] text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <Building2 className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-left font-bold text-[#8B5E3C]">Are you a shelter or rescue? <span className="text-[#6D472B] underline">List your pets here</span></span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#8B5E3C] group-hover:translate-x-1 transition-transform shrink-0" />
-              </button>
-            )}
           </div>
         </div>
       </section>
@@ -1212,7 +1122,7 @@ function AdoptionContent() {
             {/* Header */}
             <div className="p-6 border-b border-gray-100 relative shrink-0">
               <button
-                onClick={() => setIsShelterRegOpen(false)}
+                onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -1266,7 +1176,7 @@ function AdoptionContent() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsShelterRegOpen(false)}
+                      onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
                       className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
                     >
                       Cancel
@@ -1317,7 +1227,7 @@ function AdoptionContent() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsShelterRegOpen(false)}
+                      onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
                       className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
                     >
                       Cancel
@@ -1401,7 +1311,7 @@ function AdoptionContent() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setIsShelterRegOpen(false)}
+                      onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
                       className="bg-gray-100 text-gray-700 font-bold px-4 py-3 rounded-xl cursor-pointer border-none text-sm"
                     >
                       Cancel
