@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, ShieldAlert, Lock } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
+import ChatModal from '@/components/ChatModal';
 
 interface Message {
   id: string;
@@ -54,7 +55,7 @@ function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg'
   const colorIdx = name.charCodeAt(0) % colors.length;
   const sz = size === 'sm' ? 'w-8 h-8 text-[11px]' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-xs';
   return (
-    <div className={`${sz} rounded-full bg-gradient-to-br ${colors[colorIdx]} flex items-center justify-center text-white font-bold shrink-0 shadow-sm`}>
+    <div className={`${sz} rounded-full bg-gradient-to-br ${colors[colorIdx]} flex items-center justify-center text-[#FFFFFF] font-bold shrink-0 shadow-sm`}>
       {initials}
     </div>
   );
@@ -80,6 +81,12 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   const router = useRouter();
 
   const [booking, setBooking] = useState<SittingRequest | null>(null);
+  const [inquiryData, setInquiryData] = useState<{
+    type: 'vet' | 'daycare';
+    title: string;
+    otherUserName: string;
+    otherUserEmail: string;
+  } | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -103,22 +110,56 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     setCurrentUserEmail(email);
   }, []);
 
-  // Load booking info
+  // Load booking or inquiry info
   useEffect(() => {
     if (!bookingId) return;
     let isMounted = true;
 
     async function loadBooking() {
       try {
+        // 1. Check if this ID is a real Pet Sitting booking
         const res = await fetch(`/api/petsitting/request?id=${bookingId}`);
         if (res.ok) {
           const data = await res.json();
           if (data.booking && isMounted) {
             setBooking(data.booking);
+            return; // It's a sitting request! Keep existing Sitter UI completely untouched!
+          }
+        }
+
+        // 2. If not a sitting request, check if it's a Vet Boarding inquiry
+        const vetRes = await fetch(`/api/vet-boarding/inquiries?id=${bookingId}`);
+        if (vetRes.ok) {
+          const vetData = await vetRes.json();
+          if (vetData.inquiry && isMounted) {
+            const clinic = vetData.inquiry.vet_clinics;
+            setInquiryData({
+              type: 'vet',
+              title: `Veterinary Boarding Inquiry • ${clinic?.clinic_name || 'Clinic'}`,
+              otherUserName: clinic?.clinic_name || 'Veterinary Clinic',
+              otherUserEmail: clinic?.email || '',
+            });
+            return;
+          }
+        }
+
+        // 3. Check if it's a Pet Daycare inquiry
+        const daycareRes = await fetch(`/api/pet-daycare/inquiries?id=${bookingId}`);
+        if (daycareRes.ok) {
+          const daycareData = await daycareRes.json();
+          if (daycareData.inquiry && isMounted) {
+            const daycare = daycareData.inquiry.pet_daycares;
+            setInquiryData({
+              type: 'daycare',
+              title: `Pet Daycare Inquiry • ${daycare?.business_name || 'Daycare'}`,
+              otherUserName: daycare?.business_name || 'Pet Daycare',
+              otherUserEmail: daycare?.email || '',
+            });
+            return;
           }
         }
       } catch (err) {
-        console.error('Error fetching booking details:', err);
+        console.error('Error fetching booking/inquiry details:', err);
       }
     }
 
@@ -266,6 +307,24 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
       setTimeout(() => setReportSuccess(false), 4000);
     } catch {}
   };
+
+  if (inquiryData) {
+    return (
+      <div className="min-h-screen bg-[#FDFAF7]">
+        <ChatModal
+          isOpen={true}
+          onClose={() => router.push(inquiryData.type === 'vet' ? '/vet-boarding/dashboard' : '/pet-daycare/dashboard')}
+          bookingId={bookingId}
+          bookingDetails={inquiryData.title}
+          currentUserEmail={currentUserEmail}
+          otherUserName={inquiryData.otherUserName}
+          otherUserEmail={inquiryData.otherUserEmail}
+          otherUserType="sitter"
+          onReport={() => {}}
+        />
+      </div>
+    );
+  }
 
   if (booking?.status === 'cancelled') {
     return (

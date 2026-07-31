@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const clinic_id = searchParams.get('clinic_id');
     const owner_email = searchParams.get('owner_email');
+    const id = searchParams.get('id');
 
-    if (!clinic_id && !owner_email) {
-      return NextResponse.json({ error: 'Missing clinic_id or owner_email' }, { status: 400 });
+    if (!clinic_id && !owner_email && !id) {
+      return NextResponse.json({ error: 'Missing clinic_id, owner_email, or id' }, { status: 400 });
     }
 
     let query = supabaseAdmin
@@ -20,7 +21,9 @@ export async function GET(request: NextRequest) {
       .select('*, vet_clinics(clinic_name, email, org_photo_url)')
       .order('created_at', { ascending: false });
 
-    if (clinic_id) {
+    if (id) {
+      query = query.eq('id', id);
+    } else if (clinic_id) {
       query = query.eq('clinic_id', clinic_id);
     } else if (owner_email) {
       query = query.eq('owner_email', owner_email.toLowerCase().trim());
@@ -67,7 +70,10 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ inquiries: enrichedInquiries }, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } });
+    return NextResponse.json(
+      { inquiry: enrichedInquiries[0] || null, inquiries: enrichedInquiries },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

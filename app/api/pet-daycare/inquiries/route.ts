@@ -9,9 +9,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const daycare_id = searchParams.get('daycare_id');
     const owner_email = searchParams.get('owner_email');
+    const id = searchParams.get('id');
 
-    if (!daycare_id && !owner_email) {
-      return NextResponse.json({ error: 'Missing daycare_id or owner_email' }, { status: 400 });
+    if (!daycare_id && !owner_email && !id) {
+      return NextResponse.json({ error: 'Missing daycare_id, owner_email, or id' }, { status: 400 });
     }
 
     let query = supabaseAdmin
@@ -19,7 +20,9 @@ export async function GET(request: NextRequest) {
       .select('*, pet_daycares(business_name, email, logo_url)')
       .order('created_at', { ascending: false });
 
-    if (daycare_id) {
+    if (id) {
+      query = query.eq('id', id);
+    } else if (daycare_id) {
       query = query.eq('daycare_id', daycare_id);
     } else if (owner_email) {
       query = query.eq('owner_email', owner_email.toLowerCase().trim());
@@ -66,7 +69,10 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ inquiries: enrichedInquiries }, { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } });
+    return NextResponse.json(
+      { inquiry: enrichedInquiries[0] || null, inquiries: enrichedInquiries },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
