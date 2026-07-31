@@ -199,3 +199,33 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// ─── PATCH /api/adoption/messages — Archive or restore inquiry thread ──────────
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { pet_id, adopter_email, archived } = body;
+
+    if (!pet_id || !adopter_email || typeof archived !== 'boolean') {
+      return NextResponse.json({ error: 'Missing pet_id, adopter_email, or archived status' }, { status: 400 });
+    }
+
+    const cleanAdopter = adopter_email.trim().toLowerCase();
+
+    // Update all messages in this thread with archived state
+    const { data: updated, error } = await supabaseAdmin
+      .from('messages')
+      .update({ archived })
+      .eq('booking_id', pet_id)
+      .or(`sender_email.eq.${cleanAdopter},receiver_email.eq.${cleanAdopter}`)
+      .select('*');
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, count: updated?.length || 0 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+

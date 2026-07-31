@@ -53,11 +53,29 @@ export default function VetBoardingDashboardPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
 
   // Chat modal
   const [chatOpen, setChatOpen] = useState(false);
   const [activeInquiry, setActiveInquiry] = useState<any>(null);
+
+  const handleToggleArchiveInquiry = async (inqId: string, currentArchived: boolean) => {
+    if (!currentArchived) {
+      if (!confirm('Archive this inquiry? It will be moved to the Archived tab.')) return;
+    }
+    try {
+      const res = await fetch('/api/vet-boarding/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inqId, archived: !currentArchived })
+      });
+      if (res.ok) {
+        setInquiries(prev => prev.map(i => i.id === inqId ? { ...i, archived: !currentArchived } : i));
+      }
+    } catch (err) {
+      console.error('Failed to toggle archive status:', err);
+    }
+  };
 
   // ─── Load clinic on mount ──────────────────────────────────────────────────
   useEffect(() => {
@@ -478,10 +496,15 @@ export default function VetBoardingDashboardPage() {
           <div className="space-y-3">
             {(() => {
               let filteredInquiries = [...inquiries];
-              if (inquiryFilter === 'unread') {
-                filteredInquiries = filteredInquiries.filter(i => (i.unread_count || 0) > 0);
-              } else if (inquiryFilter === 'replied') {
-                filteredInquiries = filteredInquiries.filter(i => i.clinic_replied);
+              if (inquiryFilter === 'archived') {
+                filteredInquiries = filteredInquiries.filter(i => i.archived === true);
+              } else {
+                filteredInquiries = filteredInquiries.filter(i => !i.archived);
+                if (inquiryFilter === 'unread') {
+                  filteredInquiries = filteredInquiries.filter(i => (i.unread_count || 0) > 0);
+                } else if (inquiryFilter === 'replied') {
+                  filteredInquiries = filteredInquiries.filter(i => i.clinic_replied);
+                }
               }
 
               return (
@@ -505,6 +528,12 @@ export default function VetBoardingDashboardPage() {
                         className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         Replied
+                      </button>
+                      <button
+                        onClick={() => setInquiryFilter('archived')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Archived
                       </button>
                     </div>
 
@@ -577,12 +606,25 @@ export default function VetBoardingDashboardPage() {
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                          className="shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-2xl transition-colors shadow-md shadow-blue-200"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" /> Chat
-                        </button>
+                        <div className="shrink-0 flex items-center gap-2">
+                          <button
+                            onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-2xl transition-colors shadow-md shadow-blue-200 cursor-pointer"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" /> Chat
+                          </button>
+                          <button
+                            onClick={() => handleToggleArchiveInquiry(inq.id, !!inq.archived)}
+                            title={inq.archived ? 'Restore Inquiry' : 'Archive Inquiry'}
+                            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                              inq.archived
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                                : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200'
+                            }`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

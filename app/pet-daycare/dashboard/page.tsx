@@ -48,7 +48,25 @@ export default function DaycareDashboard() {
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [activeInquiry, setActiveInquiry] = useState<any>(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
+
+  const handleToggleArchiveInquiry = async (inqId: string, currentArchived: boolean) => {
+    if (!currentArchived) {
+      if (!confirm('Archive this inquiry? It will be moved to the Archived tab.')) return;
+    }
+    try {
+      const res = await fetch('/api/pet-daycare/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inqId, archived: !currentArchived })
+      });
+      if (res.ok) {
+        setInquiries(prev => prev.map(i => i.id === inqId ? { ...i, archived: !currentArchived } : i));
+      }
+    } catch (err) {
+      console.error('Failed to toggle archive status:', err);
+    }
+  };
 
   // Calendar Availability
   const [calMonthOffset, setCalMonthOffset] = useState(0);
@@ -416,10 +434,15 @@ export default function DaycareDashboard() {
           <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm">
             {(() => {
               let filteredInquiries = [...inquiries];
-              if (inquiryFilter === 'unread') {
-                filteredInquiries = filteredInquiries.filter((i: any) => (i.unread_count || 0) > 0);
-              } else if (inquiryFilter === 'replied') {
-                filteredInquiries = filteredInquiries.filter((i: any) => i.daycare_replied);
+              if (inquiryFilter === 'archived') {
+                filteredInquiries = filteredInquiries.filter((i: any) => i.archived === true);
+              } else {
+                filteredInquiries = filteredInquiries.filter((i: any) => !i.archived);
+                if (inquiryFilter === 'unread') {
+                  filteredInquiries = filteredInquiries.filter((i: any) => (i.unread_count || 0) > 0);
+                } else if (inquiryFilter === 'replied') {
+                  filteredInquiries = filteredInquiries.filter((i: any) => i.daycare_replied);
+                }
               }
 
               return (
@@ -446,6 +469,12 @@ export default function DaycareDashboard() {
                           className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           Replied
+                        </button>
+                        <button
+                          onClick={() => setInquiryFilter('archived')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Archived
                         </button>
                       </div>
 
@@ -506,12 +535,25 @@ export default function DaycareDashboard() {
                               </span>
                             )}
                           </div>
-                          <button
-                            onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer shrink-0"
-                          >
-                            Open Chat Thread
-                          </button>
+                          <div className="shrink-0 flex items-center gap-2">
+                            <button
+                              onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer"
+                            >
+                              Open Chat Thread
+                            </button>
+                            <button
+                              onClick={() => handleToggleArchiveInquiry(inq.id, !!inq.archived)}
+                              title={inq.archived ? 'Restore Inquiry' : 'Archive Inquiry'}
+                              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                                inq.archived
+                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                                  : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200'
+                              }`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>

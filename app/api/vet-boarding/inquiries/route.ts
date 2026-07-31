@@ -134,3 +134,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+// ─── PATCH /api/vet-boarding/inquiries — Archive or restore inquiry ───────────
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, archived } = body;
+
+    if (!id || typeof archived !== 'boolean') {
+      return NextResponse.json({ error: 'Missing id or archived status' }, { status: 400 });
+    }
+
+    const { data: inquiry, error } = await supabaseAdmin
+      .from('vet_inquiries')
+      .update({ archived })
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ inquiry });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

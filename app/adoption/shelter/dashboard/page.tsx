@@ -45,7 +45,25 @@ function ShelterDashboardContent() {
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [activeChatInquiry, setActiveChatInquiry] = useState<any>(null);
-  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied'>('all');
+  const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
+
+  const handleToggleArchiveThread = async (petId: string, adopterEmail: string, currentArchived: boolean) => {
+    if (!currentArchived) {
+      if (!confirm('Archive this adopter conversation? It will be moved to the Archived tab.')) return;
+    }
+    try {
+      const res = await fetch('/api/adoption/messages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pet_id: petId, adopter_email: adopterEmail, archived: !currentArchived })
+      });
+      if (res.ok) {
+        setInquiries(prev => prev.map(m => (m.pet_id === petId && (m.sender_email?.toLowerCase() === adopterEmail.toLowerCase() || m.receiver_email?.toLowerCase() === adopterEmail.toLowerCase())) ? { ...m, archived: !currentArchived } : m));
+      }
+    } catch (err) {
+      console.error('Failed to toggle thread archive status:', err);
+    }
+  };
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('all');
@@ -781,7 +799,8 @@ function ShelterDashboardContent() {
                     latestTimestamp: msg.created_at,
                     unreadCount: (!msg.read && !isShelterSender) ? 1 : 0,
                     messageCount: 1,
-                    shelterReplied: isShelterSender
+                    shelterReplied: isShelterSender,
+                    archived: !!msg.archived
                   });
                 } else {
                   const existing = threadMap.get(threadKey)!;
@@ -792,14 +811,22 @@ function ShelterDashboardContent() {
                   if (isShelterSender) {
                     existing.shelterReplied = true;
                   }
+                  if (msg.archived) {
+                    existing.archived = true;
+                  }
                 }
               }
 
               let threads = Array.from(threadMap.values());
-              if (inquiryFilter === 'unread') {
-                threads = threads.filter(t => t.unreadCount > 0);
-              } else if (inquiryFilter === 'replied') {
-                threads = threads.filter(t => t.shelterReplied);
+              if (inquiryFilter === 'archived') {
+                threads = threads.filter(t => t.archived === true);
+              } else {
+                threads = threads.filter(t => !t.archived);
+                if (inquiryFilter === 'unread') {
+                  threads = threads.filter(t => t.unreadCount > 0);
+                } else if (inquiryFilter === 'replied') {
+                  threads = threads.filter(t => t.shelterReplied);
+                }
               }
               
               threads.sort((a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime());
@@ -818,6 +845,7 @@ function ShelterDashboardContent() {
                         <button onClick={() => setInquiryFilter('all')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
                         <button onClick={() => setInquiryFilter('unread')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Unread</button>
                         <button onClick={() => setInquiryFilter('replied')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Replied</button>
+                        <button onClick={() => setInquiryFilter('archived')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Archived</button>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
@@ -888,12 +916,25 @@ function ShelterDashboardContent() {
                               </div>
                             </div>
 
-                            <Link
-                              href={`/adoption/messages/${thread.petId}?adopter=${encodeURIComponent(thread.adopterEmail)}`}
-                              className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
-                            >
-                              <MessageSquare className="w-3.5 h-3.5" /> View Thread &rarr;
-                            </Link>
+                            <div className="shrink-0 flex items-center gap-2">
+                              <Link
+                                href={`/adoption/messages/${thread.petId}?adopter=${encodeURIComponent(thread.adopterEmail)}`}
+                                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 no-underline shrink-0 transition-all shadow-2xs"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" /> View Thread &rarr;
+                              </Link>
+                              <button
+                                onClick={() => handleToggleArchiveThread(thread.petId, thread.adopterEmail, !!thread.archived)}
+                                title={thread.archived ? 'Restore Conversation' : 'Archive Conversation'}
+                                className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
+                                  thread.archived
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                                    : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200'
+                                }`}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                         );
                       })}
