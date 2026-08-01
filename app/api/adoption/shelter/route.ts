@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, org_name, tax_id, phone, org_photo_url, website, address, city, state, zip } = body;
+    const { id, email, org_name, tax_id, phone, org_photo_url, website, address, city, state, zip, is_paused } = body;
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing shelter id or email' }, { status: 400 });
@@ -231,6 +231,7 @@ export async function PATCH(request: NextRequest) {
     if (phone !== undefined) updateFields.phone = phone;
     if (website !== undefined) updateFields.website = website;
     if (updatedPhoto !== undefined) updateFields.org_photo_url = updatedPhoto;
+    if (is_paused !== undefined) updateFields.is_paused = is_paused;
 
     if (city !== undefined || address !== undefined) {
       const locString = ((address || '') + ' ' + (city || '')).trim();
