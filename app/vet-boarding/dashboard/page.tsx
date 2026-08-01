@@ -248,11 +248,8 @@ export default function VetBoardingDashboardPage() {
   };
 
   const handleTogglePause = async () => {
-    const isExpired = clinic.subscription_status === 'canceled' || (clinic.trial_end && new Date(clinic.trial_end) < new Date());
-    if (clinic.status === 'paused' && isExpired) {
-      alert('Your 1-month free trial has ended. Please subscribe to reactivate your public search listing visibility.');
-      return;
-    }
+    const isExpired = clinic.subscription_status !== 'active' && (clinic.subscription_status === 'canceled' || (clinic.trial_end && new Date(clinic.trial_end) < new Date()));
+    if (clinic.status === 'paused' && isExpired) return;
     const newStatus = clinic.status === 'approved' ? 'paused' : 'approved';
     try {
       const res = await fetch('/api/vet-boarding', {
