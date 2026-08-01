@@ -14,7 +14,7 @@ interface PartnerBillingBannerProps {
   cancelAtPeriodEnd?: boolean;
   monthlyPriceUsd?: number;
   isPaused?: boolean;
-  onRefresh?: () => void;
+  onRefresh?: () => void | Promise<void>;
 }
 
 export default function PartnerBillingBanner({
@@ -86,7 +86,7 @@ export default function PartnerBillingBanner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to cancel subscription.');
-      if (onRefresh) onRefresh();
+      if (onRefresh) await onRefresh();
       alert('Your subscription cancellation has been scheduled. Your public listing will remain active until the end of your current billing period.');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to cancel subscription.');
@@ -110,7 +110,7 @@ export default function PartnerBillingBanner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to reactivate subscription.');
-      if (onRefresh) onRefresh();
+      if (onRefresh) await onRefresh();
       alert('Your subscription has been successfully reactivated! Automatic monthly renewals will continue seamlessly.');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to reactivate subscription.');
@@ -140,7 +140,7 @@ export default function PartnerBillingBanner({
         body: JSON.stringify(payloadMap[partnerType]),
       });
       if (res.ok && onRefresh) {
-        onRefresh();
+        await onRefresh();
       }
     } catch (err) {
       console.error('Failed to resume listing:', err);
