@@ -224,9 +224,9 @@ export async function PATCH(request: NextRequest) {
 
     // Update all messages in this thread with archived state
     const { data: updated, error } = await supabaseAdmin
-      .from('messages')
+      .from('adoption_messages')
       .update({ archived })
-      .eq('booking_id', pet_id)
+      .eq('pet_id', pet_id)
       .or(`sender_email.eq.${cleanAdopter},receiver_email.eq.${cleanAdopter}`)
       .select('*');
 
