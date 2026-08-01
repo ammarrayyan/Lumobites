@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CreditCard, Clock, AlertTriangle, CheckCircle2, ShieldAlert, Loader2, ArrowRight, Play } from 'lucide-react';
+import { CreditCard, Clock, AlertTriangle, CheckCircle2, ShieldAlert, Loader2, ArrowRight, Play, RefreshCw } from 'lucide-react';
 
 interface PartnerBillingBannerProps {
   partnerId: string;
@@ -32,6 +32,7 @@ export default function PartnerBillingBanner({
 }: PartnerBillingBannerProps) {
   const [loading, setLoading] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -91,6 +92,30 @@ export default function PartnerBillingBanner({
       setErrorMsg(err.message || 'Failed to cancel subscription.');
     } finally {
       setCanceling(false);
+    }
+  };
+
+  // Handle Reactivation trigger (resumes automatic monthly renewal without new charges)
+  const handleReactivateSubscription = async () => {
+    setReactivating(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/stripe/reactivate-partner-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partner_id: partnerId,
+          partner_type: partnerType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to reactivate subscription.');
+      alert('Your subscription has been successfully reactivated! Automatic monthly renewals will continue seamlessly.');
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to reactivate subscription.');
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -174,11 +199,11 @@ export default function PartnerBillingBanner({
           </div>
         </div>
         <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className="bg-[#8B5E3C] hover:bg-[#724C2F] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shrink-0"
+          onClick={handleReactivateSubscription}
+          disabled={reactivating}
+          className="bg-[#8B5E3C] hover:bg-[#724C2F] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer border-none"
         >
-          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+          {reactivating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
           Re-activate Subscription (${monthlyPriceUsd}/mo)
         </button>
       </div>
