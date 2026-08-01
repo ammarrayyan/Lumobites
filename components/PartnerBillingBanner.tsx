@@ -240,7 +240,38 @@ export default function PartnerBillingBanner({
     );
   }
 
-  // 4A. MANUALLY PAUSED DURING VALID TRIAL / SUBSCRIPTION (OWNER PAUSED)
+  // 3B. MANUALLY PAUSED PAID SUBSCRIPTION (OWNER PAUSED PAID ACCOUNT)
+  if (subscriptionStatus === 'active' && (isPaused || status === 'paused')) {
+    const formattedEnd = currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString() : 'Next Cycle';
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#4A3E3D] text-sm">Listing Manually Paused</span>
+              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Subscription Active</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-0.5">
+              Your listing is manually paused and hidden from public search. Your paid subscription remains active (next billing date: <span className="font-semibold text-gray-800">{formattedEnd}</span>).
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleResumeListing}
+          disabled={resuming}
+          className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer border-none"
+        >
+          {resuming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+          Resume Listing
+        </button>
+      </div>
+    );
+  }
+
+  // 4A. MANUALLY PAUSED DURING VALID TRIAL (OWNER PAUSED TRIALING ACCOUNT)
   const isManuallyPaused = (isPaused || status === 'paused') && subscriptionStatus !== 'canceled' && daysRemaining > 0;
   if (isManuallyPaused) {
     return (
@@ -272,7 +303,7 @@ export default function PartnerBillingBanner({
   }
 
   // 4B. GENUINELY EXPIRED TRIAL / CANCELED SUBSCRIPTION WITH NO PAYMENT
-  if (subscriptionStatus === 'canceled' || daysRemaining === 0) {
+  if (subscriptionStatus !== 'active' && (subscriptionStatus === 'canceled' || daysRemaining === 0)) {
     return (
       <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
