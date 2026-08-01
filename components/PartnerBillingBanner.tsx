@@ -240,36 +240,7 @@ export default function PartnerBillingBanner({
     );
   }
 
-  // 4A. MANUALLY PAUSED DURING VALID TRIAL (OWNER PAUSED TRIALING ACCOUNT)
-  const isManuallyPaused = (isPaused || status === 'paused') && subscriptionStatus !== 'canceled' && daysRemaining > 0;
-  if (isManuallyPaused) {
-    return (
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-            <Clock className="w-5 h-5 text-amber-600" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[#4A3E3D] text-sm">Listing Manually Paused</span>
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Manually Paused</span>
-            </div>
-            <p className="text-xs text-gray-600 mt-0.5">
-              Your listing is manually paused and hidden from search. You still have <span className="font-bold text-gray-800">{daysRemaining} days left</span> in your free trial.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleResumeListing}
-          disabled={resuming}
-          className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer border-none"
-        >
-          {resuming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-          Resume Listing
-        </button>
-      </div>
-    );
-  }
+
 
   // 4B. GENUINELY EXPIRED TRIAL / CANCELED SUBSCRIPTION WITH NO PAYMENT
   if (subscriptionStatus !== 'active' && (subscriptionStatus === 'canceled' || daysRemaining === 0)) {
