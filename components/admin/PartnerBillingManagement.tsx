@@ -278,7 +278,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                   let daysLeft = 0;
                   if (p.trial_end) {
                     const diff = new Date(p.trial_end).getTime() - new Date().getTime();
-                    daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+                    daysLeft = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
                   }
 
                   const isTrialing = p.subscription_status === 'trialing';

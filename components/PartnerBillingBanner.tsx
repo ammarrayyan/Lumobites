@@ -39,7 +39,7 @@ export default function PartnerBillingBanner({
   let daysRemaining = 0;
   if (trialEnd) {
     const diffTime = new Date(trialEnd).getTime() - new Date().getTime();
-    daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    daysRemaining = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
   }
 
   // Handle Checkout trigger
