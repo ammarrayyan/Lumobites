@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getAllPartnerPricing, updatePartnerPricing } from '@/lib/partner-pricing';
 
-const ADMIN_SECRET = process.env.ADMIN_KEY || 'lumopet2026';
+export const dynamic = 'force-dynamic';
+const ADMIN_SECRET = process.env.ADMIN_KEY || 'Lumo2026@';
 
 function isAuthorized(request: NextRequest): boolean {
   const adminKey = request.headers.get('x-admin-key');
