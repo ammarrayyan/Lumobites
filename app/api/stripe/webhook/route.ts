@@ -3,6 +3,13 @@ import Stripe from 'stripe';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
+import {
+  sendPartnerWelcomePaidEmail,
+  sendPartnerPaymentReceiptEmail,
+  sendPartnerPaymentFailedEmail,
+  sendPartnerSubscriptionExpiredEmail,
+} from '@/lib/partner-billing-email';
+import { getPartnerPricing } from '@/lib/partner-pricing';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -43,6 +50,46 @@ export async function POST(request: NextRequest) {
         const email = session.customer_details?.email || session.metadata?.email;
         const service = session.metadata?.service;
         const referralCode = session.metadata?.referral_code;
+        const partnerId = session.metadata?.partner_id;
+        const partnerType = session.metadata?.partner_type;
+
+        if (partnerId && partnerType && email) {
+          const cleanEmail = email.toLowerCase().trim();
+          const tableMap: Record<string, string> = {
+            shelter: 'shelters',
+            pet_daycare: 'pet_daycares',
+            vet_boarding: 'vet_clinics',
+          };
+          const tableName = tableMap[partnerType];
+          if (tableName) {
+            console.log(`[Stripe Webhook] Processing partner subscription activation for ${partnerType} ID: ${partnerId}`);
+            const updateData: any = {
+              stripe_customer_id: session.customer as string,
+              stripe_subscription_id: session.subscription as string,
+              subscription_status: 'active',
+              cancel_at_period_end: false,
+            };
+            if (tableName === 'pet_daycares' || tableName === 'shelters') {
+              updateData.is_paused = false;
+            }
+            if (tableName === 'vet_clinics') {
+              updateData.status = 'approved';
+            }
+
+            const { data: updatedPartner } = await supabase
+              .from(tableName)
+              .update(updateData)
+              .eq('id', partnerId)
+              .select('*')
+              .maybeSingle();
+
+            const bName = updatedPartner?.business_name || updatedPartner?.clinic_name || updatedPartner?.name || 'Partner Account';
+            const pricingSetting = await getPartnerPricing(partnerType as any);
+            const priceVal = pricingSetting?.monthly_price_usd || (partnerType === 'shelter' ? 20 : partnerType === 'vet_boarding' ? 40 : 30);
+            await sendPartnerWelcomePaidEmail(cleanEmail, bName, partnerType, priceVal);
+          }
+          break;
+        }
         
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
@@ -154,10 +201,38 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         const email = invoice.customer_email;
+        const subId = (typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription?.id) || undefined;
+
+        if (subId) {
+          // Check if subscription belongs to a partner (vet_clinics, pet_daycares, shelters)
+          const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
+          for (const tbl of tables) {
+            const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+            if (p) {
+              const nextDate = invoice.lines?.data?.[0]?.period?.end
+                ? new Date(invoice.lines.data[0].period.end * 1000).toLocaleDateString()
+                : 'Next Month';
+              const nextIso = invoice.lines?.data?.[0]?.period?.end
+                ? new Date(invoice.lines.data[0].period.end * 1000).toISOString()
+                : null;
+              
+              const pUpdate: any = { subscription_status: 'active', current_period_end: nextIso };
+              if (tbl === 'pet_daycares' || tbl === 'shelters') pUpdate.is_paused = false;
+              if (tbl === 'vet_clinics') pUpdate.status = 'approved';
+
+              await supabase.from(tbl).update(pUpdate).eq('id', p.id);
+
+              const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+              const amt = invoice.amount_paid ? invoice.amount_paid / 100 : 30;
+              await sendPartnerPaymentReceiptEmail(p.email || email || '', bName, amt, nextDate);
+              break;
+            }
+          }
+        }
+
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
           
-          // Try to update both tables to be safe, since we don't have metadata here easily
           await supabase.from('emails').upsert(
             { email: cleanEmail, is_pro: true, source: 'stripe-webhook-invoice', created_at: new Date().toISOString() },
             { onConflict: 'email' }
@@ -166,7 +241,6 @@ export async function POST(request: NextRequest) {
           await supabase.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
 
           if (invoice.billing_reason === 'subscription_cycle') {
-            // Fetch the referred user by email and increment active_months using RPC or select/update
             const { data: referred } = await supabase
               .from('referred_users')
               .select('id, active_months')
@@ -188,6 +262,21 @@ export async function POST(request: NextRequest) {
       }
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
+        const subId = (typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription?.id) || undefined;
+
+        if (subId) {
+          const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
+          for (const tbl of tables) {
+            const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+            if (p) {
+              await supabase.from(tbl).update({ subscription_status: 'past_due' }).eq('id', p.id);
+              const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+              await sendPartnerPaymentFailedEmail(p.email, bName);
+              break;
+            }
+          }
+        }
+
         const email = invoice.customer_email;
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
@@ -195,8 +284,39 @@ export async function POST(request: NextRequest) {
         }
         break;
       }
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const subId = subscription.id;
+        const cancelAtEnd = subscription.cancel_at_period_end;
+        const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
+        for (const tbl of tables) {
+          await supabase.from(tbl).update({ cancel_at_period_end: cancelAtEnd }).eq('stripe_subscription_id', subId);
+        }
+        break;
+      }
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+        const subId = subscription.id;
+        const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
+
+        for (const tbl of tables) {
+          const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+          if (p) {
+            const updatePayload: any = { subscription_status: 'canceled' };
+            if (tbl === 'pet_daycares' || tbl === 'shelters') updatePayload.is_paused = true;
+            if (tbl === 'vet_clinics') updatePayload.status = 'paused';
+
+            await supabase.from(tbl).update(updatePayload).eq('id', p.id);
+
+            const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+            const partnerType = tbl === 'shelters' ? 'shelter' : tbl === 'vet_clinics' ? 'vet_boarding' : 'pet_daycare';
+            const pricingSetting = await getPartnerPricing(partnerType as any);
+            const priceVal = pricingSetting?.monthly_price_usd || (tbl === 'shelters' ? 20 : tbl === 'vet_clinics' ? 40 : 30);
+            await sendPartnerSubscriptionExpiredEmail(p.email, bName, priceVal);
+          }
+        }
+
+        // Also process Sitter / Owner PRO subscription deletion
         // In order to find the email, we retrieve the customer from Stripe
         const customerId = subscription.customer as string;
         if (customerId) {
