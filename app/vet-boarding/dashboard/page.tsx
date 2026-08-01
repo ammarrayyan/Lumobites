@@ -392,7 +392,7 @@ export default function VetBoardingDashboardPage() {
           cancelAtPeriodEnd={clinic.cancel_at_period_end}
           monthlyPriceUsd={monthlyPrice}
           isPaused={clinic.status === 'paused'}
-          onRefresh={loadClinic}
+          onRefresh={() => loadClinic(clinic.email)}
         />
 
         {/* Tabs */}

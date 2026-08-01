@@ -361,7 +361,7 @@ export default function DaycareDashboard() {
           cancelAtPeriodEnd={daycare.cancel_at_period_end}
           monthlyPriceUsd={monthlyPrice}
           isPaused={daycare.is_paused}
-          onRefresh={loadDaycare}
+          onRefresh={() => loadDaycare(daycare.email)}
         />
 
         {/* TAB NAVIGATION */}

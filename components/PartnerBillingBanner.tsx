@@ -85,6 +85,7 @@ export default function PartnerBillingBanner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to cancel subscription.');
+      alert('Your subscription cancellation has been scheduled. Your public listing will remain active until the end of your current billing period.');
       if (onRefresh) onRefresh();
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to cancel subscription.');
