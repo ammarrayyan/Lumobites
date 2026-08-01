@@ -35,8 +35,8 @@ export default function PartnerBillingBanner({
   const [resuming, setResuming] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Calculate trial days remaining
-  let daysRemaining = 30;
+  // Calculate trial days remaining (defaults to 0 if trialEnd is null or missing)
+  let daysRemaining = 0;
   if (trialEnd) {
     const diffTime = new Date(trialEnd).getTime() - new Date().getTime();
     daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
