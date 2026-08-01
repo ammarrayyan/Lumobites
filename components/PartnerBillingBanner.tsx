@@ -86,8 +86,8 @@ export default function PartnerBillingBanner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to cancel subscription.');
-      alert('Your subscription cancellation has been scheduled. Your public listing will remain active until the end of your current billing period.');
       if (onRefresh) onRefresh();
+      alert('Your subscription cancellation has been scheduled. Your public listing will remain active until the end of your current billing period.');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to cancel subscription.');
     } finally {
@@ -110,8 +110,8 @@ export default function PartnerBillingBanner({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to reactivate subscription.');
-      alert('Your subscription has been successfully reactivated! Automatic monthly renewals will continue seamlessly.');
       if (onRefresh) onRefresh();
+      alert('Your subscription has been successfully reactivated! Automatic monthly renewals will continue seamlessly.');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to reactivate subscription.');
     } finally {
