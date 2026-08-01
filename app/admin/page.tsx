@@ -18,12 +18,13 @@ import AdoptionPetsManagement from '@/components/admin/AdoptionPetsManagement';
 import IntegrationsManagement from '@/components/admin/IntegrationsManagement';
 import VetClinicManagement from '@/components/admin/VetClinicManagement';
 import DaycareManagement from '@/components/admin/DaycareManagement';
+import PartnerBillingManagement from '@/components/admin/PartnerBillingManagement';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'vet-clinics' | 'pet-daycares' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast' | 'integrations'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'vet-clinics' | 'pet-daycares' | 'partner-billing' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast' | 'integrations'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -305,6 +306,16 @@ export default function AdminPage() {
             Pet Daycares
           </button>
           <button
+            onClick={() => setActiveTab('partner-billing')}
+            className={`flex-1 py-2 px-4 rounded-lg font-bold text-sm transition-all whitespace-nowrap bg-amber-50 ${
+              activeTab === 'partner-billing'
+                ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-black shadow-lg'
+                : 'text-amber-900 hover:text-black hover:bg-amber-100'
+            }`}
+          >
+            💳 Partner Billing
+          </button>
+          <button
             onClick={() => setActiveTab('requests')}
             className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
               activeTab === 'requests'
@@ -459,6 +470,7 @@ export default function AdminPage() {
           {activeTab === 'reports' && <ReportsManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'broadcast' && <BroadcastManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'integrations' && <IntegrationsManagement adminKey={password} onUnauthorized={handleLogout} />}
+          {activeTab === 'partner-billing' && <PartnerBillingManagement adminKey={password} />}
           
           {activeTab === 'pet-matching' && (
             <div className="space-y-6">
