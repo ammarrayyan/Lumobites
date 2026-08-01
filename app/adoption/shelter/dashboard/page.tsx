@@ -191,7 +191,7 @@ function ShelterDashboardContent() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data.shelter) {

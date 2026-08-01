@@ -119,7 +119,7 @@ export default function VetBoardingDashboardPage() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data.clinic) {

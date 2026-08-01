@@ -115,7 +115,7 @@ export default function DaycareDashboard() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data.daycare && data.daycare.status === 'approved') {

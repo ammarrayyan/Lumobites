@@ -24,11 +24,13 @@ export async function GET(request: NextRequest) {
       .eq('email', email.toLowerCase().trim())
       .single();
 
+    const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
+
     if (error || !clinic) {
-      return NextResponse.json({ clinic: null });
+      return NextResponse.json({ clinic: null }, { headers: noCacheHeaders });
     }
 
-    return NextResponse.json({ clinic });
+    return NextResponse.json({ clinic }, { headers: noCacheHeaders });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

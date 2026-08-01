@@ -74,11 +74,13 @@ export async function GET(request: NextRequest) {
       .eq('email', email.toLowerCase().trim())
       .single();
 
+    const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
+
     if (error || !shelter) {
-      return NextResponse.json({ shelter: null });
+      return NextResponse.json({ shelter: null }, { headers: noCacheHeaders });
     }
 
-    return NextResponse.json({ shelter });
+    return NextResponse.json({ shelter }, { headers: noCacheHeaders });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

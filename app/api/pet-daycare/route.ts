@@ -21,12 +21,14 @@ export async function GET(request: NextRequest) {
       .eq('email', email.toLowerCase().trim())
       .maybeSingle();
 
+    const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
+
     if (error) {
       console.error('[PetDaycare API] GET Error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500, headers: noCacheHeaders });
     }
 
-    return NextResponse.json({ daycare });
+    return NextResponse.json({ daycare }, { headers: noCacheHeaders });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
