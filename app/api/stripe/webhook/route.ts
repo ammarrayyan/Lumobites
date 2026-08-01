@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
               .select('*')
               .maybeSingle();
 
-            const bName = updatedPartner?.business_name || updatedPartner?.clinic_name || updatedPartner?.name || 'Partner Account';
+            const bName = updatedPartner?.business_name || updatedPartner?.clinic_name || updatedPartner?.org_name || updatedPartner?.name || 'Partner Account';
             const pricingSetting = await getPartnerPricing(partnerType as any);
             const priceVal = pricingSetting?.monthly_price_usd || (partnerType === 'shelter' ? 20 : partnerType === 'vet_boarding' ? 40 : 30);
             await sendPartnerWelcomePaidEmail(cleanEmail, bName, partnerType, priceVal);
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
 
               await supabaseAdmin.from(tbl).update(pUpdate).eq('id', p.id);
 
-              const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+              const bName = p.business_name || p.clinic_name || p.org_name || p.name || 'Partner Account';
               const amt = invoice.amount_paid ? invoice.amount_paid / 100 : 30;
               await sendPartnerPaymentReceiptEmail(p.email || email || '', bName, amt, nextDate);
               break;
@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
             const { data: p } = await supabaseAdmin.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
             if (p) {
               await supabaseAdmin.from(tbl).update({ subscription_status: 'past_due' }).eq('id', p.id);
-              const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+              const bName = p.business_name || p.clinic_name || p.org_name || p.name || 'Partner Account';
               await sendPartnerPaymentFailedEmail(p.email, bName);
               break;
             }
@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
 
             await supabaseAdmin.from(tbl).update(updatePayload).eq('id', p.id);
 
-            const bName = p.business_name || p.clinic_name || p.name || 'Partner';
+            const bName = p.business_name || p.clinic_name || p.org_name || p.name || 'Partner Account';
             const partnerType = tbl === 'shelters' ? 'shelter' : tbl === 'vet_clinics' ? 'vet_boarding' : 'pet_daycare';
             const pricingSetting = await getPartnerPricing(partnerType as any);
             const priceVal = pricingSetting?.monthly_price_usd || (tbl === 'shelters' ? 20 : tbl === 'vet_clinics' ? 40 : 30);
