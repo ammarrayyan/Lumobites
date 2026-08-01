@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw, Power } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import ChatModal from '@/components/ChatModal';
@@ -589,6 +589,40 @@ function ShelterDashboardContent() {
                 <Trash2 className="w-4 h-4" /> Delete Account
               </button>
             )}
+            {shelterInfo?.status?.toLowerCase() === 'approved' && (() => {
+              const isExpired = shelterInfo.subscription_status !== 'active' && (shelterInfo.subscription_status === 'canceled' || (shelterInfo.trial_end && new Date(shelterInfo.trial_end) < new Date()));
+              return (
+                <button
+                  onClick={async () => {
+                    const newPaused = !shelterInfo.is_paused;
+                    try {
+                      const res = await fetch('/api/adoption/shelter', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: shelterInfo.email, is_paused: newPaused }),
+                      });
+                      if (res.ok) {
+                        fetchShelterDetails(shelterInfo.email);
+                      }
+                    } catch (e) {
+                      console.error('Failed to toggle shelter pause status:', e);
+                    }
+                  }}
+                  disabled={isExpired}
+                  title={isExpired ? "Subscribe to enable listing visibility" : "Toggle shelter listing visibility"}
+                  className={`px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                    isExpired
+                      ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
+                      : shelterInfo.is_paused
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer'
+                  }`}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                  {shelterInfo.is_paused ? 'Paused' : 'Active'}
+                </button>
+              );
+            })()}
             {shelterInfo?.status?.toLowerCase() === 'approved' && (
               <button
                 onClick={handleOpenAddModal}

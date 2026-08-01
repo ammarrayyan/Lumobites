@@ -362,22 +362,41 @@ export default function VetBoardingDashboardPage() {
               <p className="text-xs text-gray-500 mt-1">Your listing is hidden from search results. Resume anytime below.</p>
             )}
           </div>
-          {clinic.status === 'approved' && (
-            <button
-              onClick={handleTogglePause}
-              className="shrink-0 text-xs font-bold text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-xl px-3 py-1.5 transition-colors"
-            >
-              Pause Listing
-            </button>
-          )}
-          {clinic.status === 'paused' && (
-            <button
-              onClick={handleTogglePause}
-              className="shrink-0 text-xs font-bold text-blue-600 hover:text-blue-700 bg-white border border-blue-200 rounded-xl px-3 py-1.5 transition-colors"
-            >
-              Resume
-            </button>
-          )}
+          {(() => {
+            const isExpired = clinic.subscription_status !== 'active' && (clinic.subscription_status === 'canceled' || (clinic.trial_end && new Date(clinic.trial_end) < new Date()));
+            return (
+              <>
+                {clinic.status === 'approved' && (
+                  <button
+                    onClick={handleTogglePause}
+                    disabled={isExpired}
+                    title={isExpired ? "Subscribe to enable listing visibility" : "Pause listing visibility"}
+                    className={`shrink-0 text-xs font-bold rounded-xl px-3 py-1.5 transition-all border ${
+                      isExpired
+                        ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
+                        : 'text-gray-500 hover:text-gray-700 bg-white border-gray-200 cursor-pointer'
+                    }`}
+                  >
+                    Pause Listing
+                  </button>
+                )}
+                {clinic.status === 'paused' && (
+                  <button
+                    onClick={handleTogglePause}
+                    disabled={isExpired}
+                    title={isExpired ? "Subscribe to enable listing visibility" : "Resume listing visibility"}
+                    className={`shrink-0 text-xs font-bold rounded-xl px-3 py-1.5 transition-all border ${
+                      isExpired
+                        ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
+                        : 'text-blue-600 hover:text-blue-700 bg-white border-blue-200 cursor-pointer'
+                    }`}
+                  >
+                    Resume
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Partner Billing Banner */}

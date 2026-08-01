@@ -324,26 +324,35 @@ export default function DaycareDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleTogglePause}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer ${
-                daycare.is_paused
-                  ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
-                  : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
-              }`}
-            >
-              <Power className="w-3.5 h-3.5" />
-              {daycare.is_paused ? 'Paused' : 'Active'}
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 cursor-pointer"
-              title="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+          {(() => {
+            const isExpired = daycare.subscription_status !== 'active' && (daycare.subscription_status === 'canceled' || (daycare.trial_end && new Date(daycare.trial_end) < new Date()));
+            return (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleTogglePause}
+                  disabled={isExpired}
+                  title={isExpired ? "Subscribe to enable listing visibility" : "Toggle listing visibility"}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                    isExpired
+                      ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
+                      : daycare.is_paused
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer'
+                  }`}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                  {daycare.is_paused ? 'Paused' : 'Active'}
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            );
+          })()}
         </div>
       </header>
 
