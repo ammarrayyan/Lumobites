@@ -14,10 +14,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { data: clinics, error } = await supabaseAdmin
+    const { data: rawClinics, error } = await supabaseAdmin
       .from('vet_clinics')
       .select(
-        'id, clinic_name, email, city, state, org_photo_url, description, services, website, lat, lng'
+        'id, clinic_name, email, city, state, org_photo_url, description, services, website, lat, lng, status, is_paused, subscription_status, trial_end'
       )
       .eq('status', 'approved')
       .order('created_at', { ascending: false });
@@ -26,6 +26,16 @@ export async function GET(request: NextRequest) {
       console.error('[VetClinics Search API] Error:', error);
       return NextResponse.json({ clinics: [] });
     }
+
+    const now = new Date();
+    // Only return clinics that are NOT paused AND have an active subscription or valid trial
+    const clinics = (rawClinics || []).filter((c: any) => {
+      if (c.is_paused === true || c.status === 'paused') return false;
+      if (c.subscription_status === 'active') return true;
+      if (c.subscription_status === 'canceled') return false;
+      if (c.trial_end && new Date(c.trial_end) < now) return false;
+      return true;
+    });
 
     if (!clinics || clinics.length === 0) {
       return NextResponse.json({ clinics: [] });

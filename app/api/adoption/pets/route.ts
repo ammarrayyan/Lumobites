@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const shelter_id = searchParams.get('shelter_id');
     const status = searchParams.get('status');
 
-    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(org_name, phone, email, website, org_photo_url)');
+    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(org_name, phone, email, website, org_photo_url, is_paused, subscription_status, trial_end)');
 
     if (shelter_id) {
       query = query.eq('shelter_id', shelter_id);
@@ -93,14 +93,26 @@ export async function GET(request: NextRequest) {
 
     query = query.order('created_at', { ascending: false });
 
-    const { data: pets, error } = await query;
+    const { data: rawPets, error } = await query;
 
     if (error) {
       console.error('[Adoption Pets API] GET error:', error);
       return NextResponse.json({ pets: [] });
     }
 
-    return NextResponse.json({ pets: pets || [] });
+    const now = new Date();
+    // Exclude pets belonging to shelters that are paused or whose free trial has expired without payment
+    const pets = (rawPets || []).filter((p: any) => {
+      const s = p.shelters;
+      if (!s) return true; // If shelter object missing, keep pet
+      if (s.is_paused === true) return false;
+      if (s.subscription_status === 'active') return true;
+      if (s.subscription_status === 'canceled') return false;
+      if (s.trial_end && new Date(s.trial_end) < now) return false;
+      return true;
+    });
+
+    return NextResponse.json({ pets });
   } catch (err: any) {
     console.error('[Adoption Pets API] Server error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });

@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const { data: daycares, error } = await supabaseAdmin
+    const { data: rawDaycares, error } = await supabaseAdmin
       .from('pet_daycares')
-      .select('id, business_name, email, city, state, logo_url, description, services, website, lat, lng')
+      .select('id, business_name, email, city, state, logo_url, description, services, website, lat, lng, is_paused, subscription_status, trial_end')
       .eq('status', 'approved')
       .eq('is_paused', false)
       .order('created_at', { ascending: false });
@@ -22,6 +22,16 @@ export async function GET(request: NextRequest) {
       console.error('[Daycares Search API] Error:', error);
       return NextResponse.json({ daycares: [] });
     }
+
+    const now = new Date();
+    // Only return daycares that have an active subscription or valid trial
+    const daycares = (rawDaycares || []).filter((d: any) => {
+      if (d.is_paused === true) return false;
+      if (d.subscription_status === 'active') return true;
+      if (d.subscription_status === 'canceled') return false;
+      if (d.trial_end && new Date(d.trial_end) < now) return false;
+      return true;
+    });
 
     if (!daycares || daycares.length === 0) {
       return NextResponse.json({ daycares: [] });

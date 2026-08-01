@@ -213,6 +213,11 @@ export default function DaycareDashboard() {
 
   const handleTogglePause = async () => {
     if (!daycare) return;
+    const isExpired = daycare.subscription_status === 'canceled' || (daycare.trial_end && new Date(daycare.trial_end) < new Date());
+    if (daycare.is_paused && isExpired) {
+      alert('Your 1-month free trial has ended. Please subscribe to reactivate your public search listing visibility.');
+      return;
+    }
     const newPausedState = !daycare.is_paused;
     try {
       const res = await fetch('/api/pet-daycare', {
