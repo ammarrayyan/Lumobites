@@ -8,6 +8,7 @@ import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import ChatModal from '@/components/ChatModal';
+import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 
 interface ShelterPet {
   id: string;
@@ -32,6 +33,7 @@ function ShelterDashboardContent() {
   const router = useRouter();
   const [shelterEmail, setShelterEmail] = useState('');
   const [shelterInfo, setShelterInfo] = useState<any>(null);
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(20);
   const [pets, setPets] = useState<ShelterPet[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -183,6 +185,12 @@ function ShelterDashboardContent() {
   const fetchShelterDetails = async (email: string) => {
     setLoading(true);
     try {
+      // Fetch live pricing setting
+      fetch('/api/partner-pricing?type=shelter')
+        .then(r => r.json())
+        .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
+        .catch(() => {});
+
       const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
@@ -717,6 +725,23 @@ function ShelterDashboardContent() {
         ) : (
           /* APPROVED SHELTER DASHBOARD (FULL ACCESS) */
           <div className="space-y-6">
+            {/* Partner Billing Banner */}
+            {shelterInfo && (
+              <PartnerBillingBanner
+                partnerId={shelterInfo.id}
+                partnerType="shelter"
+                email={shelterInfo.email}
+                status={shelterInfo.status}
+                subscriptionStatus={shelterInfo.subscription_status || 'trialing'}
+                trialEnd={shelterInfo.trial_end}
+                currentPeriodEnd={shelterInfo.current_period_end}
+                cancelAtPeriodEnd={shelterInfo.cancel_at_period_end}
+                monthlyPriceUsd={monthlyPrice}
+                isPaused={shelterInfo.is_paused}
+                onRefresh={loadShelterData}
+              />
+            )}
+
             {/* STATUS TABS */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
           <div className="flex gap-2 flex-wrap">

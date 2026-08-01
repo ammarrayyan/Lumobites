@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import { formatPublicCity } from '@/lib/formatCity';
 
 const VET_SERVICES = [
@@ -36,6 +37,7 @@ export default function VetBoardingDashboardPage() {
   const [clinicEmail, setClinicEmail] = useState('');
   const [clinic, setClinic] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(40);
 
   // Inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
@@ -111,6 +113,12 @@ export default function VetBoardingDashboardPage() {
   const loadClinic = async (email: string) => {
     setLoading(true);
     try {
+      // Fetch live pricing setting
+      fetch('/api/partner-pricing?type=vet_boarding')
+        .then(r => r.json())
+        .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
+        .catch(() => {});
+
       const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
@@ -366,6 +374,21 @@ export default function VetBoardingDashboardPage() {
             </button>
           )}
         </div>
+
+        {/* Partner Billing Banner */}
+        <PartnerBillingBanner
+          partnerId={clinic.id}
+          partnerType="vet_boarding"
+          email={clinic.email}
+          status={clinic.status}
+          subscriptionStatus={clinic.subscription_status || 'trialing'}
+          trialEnd={clinic.trial_end}
+          currentPeriodEnd={clinic.current_period_end}
+          cancelAtPeriodEnd={clinic.cancel_at_period_end}
+          monthlyPriceUsd={monthlyPrice}
+          isPaused={clinic.status === 'paused'}
+          onRefresh={loadClinic}
+        />
 
         {/* Tabs */}
         <div className="bg-white rounded-3xl p-1.5 border border-blue-100 flex gap-1 shadow-sm">

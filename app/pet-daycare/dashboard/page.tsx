@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
+import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import { formatPublicCity } from '@/lib/formatCity';
 import {
   Building2,
@@ -41,6 +42,7 @@ export default function DaycareDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [daycare, setDaycare] = useState<any>(null);
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(30);
   const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'calendar' | 'profile'>('overview');
 
   // Inquiries
@@ -86,7 +88,7 @@ export default function DaycareDashboard() {
         router.push('/pet-daycare');
         return;
       }
-      fetchDaycareProfile(cachedEmail);
+      loadDaycare(cachedEmail);
 
       const params = new URLSearchParams(window.location.search);
       const targetInquiryId = params.get('inquiry');
@@ -104,9 +106,15 @@ export default function DaycareDashboard() {
     }
   }, []);
 
-  const fetchDaycareProfile = async (email: string) => {
+  const loadDaycare = async (email: string) => {
     setLoading(true);
     try {
+      // Fetch live pricing setting
+      fetch('/api/partner-pricing?type=pet_daycare')
+        .then(r => r.json())
+        .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
+        .catch(() => {});
+
       const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
@@ -336,6 +344,21 @@ export default function DaycareDashboard() {
 
       {/* DASHBOARD CONTAINER */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Partner Billing Banner */}
+        <PartnerBillingBanner
+          partnerId={daycare.id}
+          partnerType="pet_daycare"
+          email={daycare.email}
+          status={daycare.status}
+          subscriptionStatus={daycare.subscription_status || 'trialing'}
+          trialEnd={daycare.trial_end}
+          currentPeriodEnd={daycare.current_period_end}
+          cancelAtPeriodEnd={daycare.cancel_at_period_end}
+          monthlyPriceUsd={monthlyPrice}
+          isPaused={daycare.is_paused}
+          onRefresh={loadDaycare}
+        />
+
         {/* TAB NAVIGATION */}
         <div className="flex gap-2 border-b border-[#E8DDD4] mb-8 overflow-x-auto pb-1">
           <button
