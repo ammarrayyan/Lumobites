@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 import {
@@ -68,15 +68,13 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id: session.subscription as string,
               subscription_status: 'active',
               cancel_at_period_end: false,
+              is_paused: false,
             };
-            if (tableName === 'pet_daycares' || tableName === 'shelters') {
-              updateData.is_paused = false;
-            }
             if (tableName === 'vet_clinics') {
               updateData.status = 'approved';
             }
 
-            const { data: updatedPartner } = await supabase
+            const { data: updatedPartner } = await supabaseAdmin
               .from(tableName)
               .update(updateData)
               .eq('id', partnerId)
@@ -96,9 +94,9 @@ export async function POST(request: NextRequest) {
           
           if (referralCode) {
             console.log(`[Stripe Webhook] Processing referral for code: ${referralCode}`);
-            const { data: referrer } = await supabase.from('referrers').select('id').eq('code', referralCode).single();
+            const { data: referrer } = await supabaseAdmin.from('referrers').select('id').eq('code', referralCode).single();
             if (referrer) {
-              await supabase.from('referred_users').insert({
+              await supabaseAdmin.from('referred_users').insert({
                 referrer_id: referrer.id,
                 referral_code: referralCode,
                 referred_email: cleanEmail,
@@ -150,7 +148,7 @@ export async function POST(request: NextRequest) {
           } else {
             console.log(`[Stripe Webhook] Setting PRO status for email: ${cleanEmail}`);
             
-            await supabase.from('emails').upsert(
+            await supabaseAdmin.from('emails').upsert(
               {
                 email: cleanEmail,
                 is_pro: true,
@@ -207,7 +205,7 @@ export async function POST(request: NextRequest) {
           // Check if subscription belongs to a partner (vet_clinics, pet_daycares, shelters)
           const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
           for (const tbl of tables) {
-            const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+            const { data: p } = await supabaseAdmin.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
             if (p) {
               const nextDate = invoice.lines?.data?.[0]?.period?.end
                 ? new Date(invoice.lines.data[0].period.end * 1000).toLocaleDateString()
@@ -220,7 +218,7 @@ export async function POST(request: NextRequest) {
               if (tbl === 'pet_daycares' || tbl === 'shelters') pUpdate.is_paused = false;
               if (tbl === 'vet_clinics') pUpdate.status = 'approved';
 
-              await supabase.from(tbl).update(pUpdate).eq('id', p.id);
+              await supabaseAdmin.from(tbl).update(pUpdate).eq('id', p.id);
 
               const bName = p.business_name || p.clinic_name || p.name || 'Partner';
               const amt = invoice.amount_paid ? invoice.amount_paid / 100 : 30;
@@ -233,12 +231,12 @@ export async function POST(request: NextRequest) {
         if (email) {
           const cleanEmail = email.toLowerCase().trim();
           
-          await supabase.from('emails').upsert(
+          await supabaseAdmin.from('emails').upsert(
             { email: cleanEmail, is_pro: true, source: 'stripe-webhook-invoice', created_at: new Date().toISOString() },
             { onConflict: 'email' }
           );
           
-          await supabase.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
+          await supabaseAdmin.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
 
           if (invoice.billing_reason === 'subscription_cycle') {
             const { data: referred } = await supabase
@@ -267,9 +265,9 @@ export async function POST(request: NextRequest) {
         if (subId) {
           const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
           for (const tbl of tables) {
-            const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+            const { data: p } = await supabaseAdmin.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
             if (p) {
-              await supabase.from(tbl).update({ subscription_status: 'past_due' }).eq('id', p.id);
+              await supabaseAdmin.from(tbl).update({ subscription_status: 'past_due' }).eq('id', p.id);
               const bName = p.business_name || p.clinic_name || p.name || 'Partner';
               await sendPartnerPaymentFailedEmail(p.email, bName);
               break;
@@ -290,7 +288,7 @@ export async function POST(request: NextRequest) {
         const cancelAtEnd = subscription.cancel_at_period_end;
         const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
         for (const tbl of tables) {
-          await supabase.from(tbl).update({ cancel_at_period_end: cancelAtEnd }).eq('stripe_subscription_id', subId);
+          await supabaseAdmin.from(tbl).update({ cancel_at_period_end: cancelAtEnd }).eq('stripe_subscription_id', subId);
         }
         break;
       }
@@ -300,13 +298,13 @@ export async function POST(request: NextRequest) {
         const tables = ['vet_clinics', 'pet_daycares', 'shelters'];
 
         for (const tbl of tables) {
-          const { data: p } = await supabase.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
+          const { data: p } = await supabaseAdmin.from(tbl).select('*').eq('stripe_subscription_id', subId).maybeSingle();
           if (p) {
             const updatePayload: any = { subscription_status: 'canceled' };
             if (tbl === 'pet_daycares' || tbl === 'shelters') updatePayload.is_paused = true;
             if (tbl === 'vet_clinics') updatePayload.status = 'paused';
 
-            await supabase.from(tbl).update(updatePayload).eq('id', p.id);
+            await supabaseAdmin.from(tbl).update(updatePayload).eq('id', p.id);
 
             const bName = p.business_name || p.clinic_name || p.name || 'Partner';
             const partnerType = tbl === 'shelters' ? 'shelter' : tbl === 'vet_clinics' ? 'vet_boarding' : 'pet_daycare';
@@ -329,11 +327,11 @@ export async function POST(request: NextRequest) {
               console.log(`[Stripe Webhook] Subscription deleted, removing PRO status for email: ${cleanEmail}`);
               
               // Remove PRO from both owner and sitter tables
-              await supabase.from('emails').update({ is_pro: false }).eq('email', cleanEmail);
-              await supabase.from('sitters').update({ is_pro: false }).eq('email', cleanEmail);
+              await supabaseAdmin.from('emails').update({ is_pro: false }).eq('email', cleanEmail);
+              await supabaseAdmin.from('sitters').update({ is_pro: false }).eq('email', cleanEmail);
  
               // Mark referral as cancelled
-              await supabase.from('referred_users').update({
+              await supabaseAdmin.from('referred_users').update({
                 cancelled: true,
                 cancelled_date: new Date().toISOString(),
               }).eq('referred_email', cleanEmail).eq('cancelled', false);
