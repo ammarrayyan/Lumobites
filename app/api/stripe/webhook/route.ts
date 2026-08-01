@@ -63,6 +63,18 @@ export async function POST(request: NextRequest) {
           const tableName = tableMap[partnerType];
           if (tableName) {
             console.log(`[Stripe Webhook] Processing partner subscription activation for ${partnerType} ID: ${partnerId}`);
+            let currentPeriodEndIso: string | null = null;
+            if (session.subscription) {
+              try {
+                const subObj = await stripe.subscriptions.retrieve(session.subscription as string);
+                if (subObj?.current_period_end) {
+                  currentPeriodEndIso = new Date(subObj.current_period_end * 1000).toISOString();
+                }
+              } catch (subErr) {
+                console.error('[Stripe Webhook] Error fetching subscription period end:', subErr);
+              }
+            }
+
             const updateData: any = {
               stripe_customer_id: session.customer as string,
               stripe_subscription_id: session.subscription as string,
@@ -70,6 +82,11 @@ export async function POST(request: NextRequest) {
               cancel_at_period_end: false,
               is_paused: false,
             };
+
+            if (currentPeriodEndIso) {
+              updateData.current_period_end = currentPeriodEndIso;
+            }
+
             if (tableName === 'vet_clinics') {
               updateData.status = 'approved';
             }
