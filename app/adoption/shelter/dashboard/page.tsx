@@ -738,7 +738,7 @@ function ShelterDashboardContent() {
                 cancelAtPeriodEnd={shelterInfo.cancel_at_period_end}
                 monthlyPriceUsd={monthlyPrice}
                 isPaused={shelterInfo.is_paused}
-                onRefresh={loadShelterData}
+                onRefresh={() => fetchShelterDetails(shelterInfo.email)}
               />
             )}
 
