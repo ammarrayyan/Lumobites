@@ -48,6 +48,7 @@ function ShelterDashboardContent() {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeChatInquiry, setActiveChatInquiry] = useState<any>(null);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
+  const [cancelingSubscription, setCancelingSubscription] = useState(false);
 
   const handleToggleArchiveThread = async (petId: string, adopterEmail: string, currentArchived: boolean) => {
     if (!currentArchived) {
@@ -553,6 +554,29 @@ function ShelterDashboardContent() {
       }
     } catch {
       alert('Error deleting shelter account.');
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!shelterInfo) return;
+    const endDate = shelterInfo.current_period_end
+      ? new Date(shelterInfo.current_period_end).toLocaleDateString()
+      : 'the end of your current billing period';
+    if (!window.confirm(`Are you sure you want to cancel your subscription?\n\nYour listing will remain active until ${endDate}, then it will not renew.`)) return;
+    setCancelingSubscription(true);
+    try {
+      const res = await fetch('/api/stripe/cancel-partner-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partner_id: shelterInfo.id, partner_type: 'shelter' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to cancel subscription.');
+      await fetchShelterDetails(shelterInfo.email);
+    } catch (err: any) {
+      console.error('Cancel subscription error:', err);
+    } finally {
+      setCancelingSubscription(false);
     }
   };
 
@@ -1180,27 +1204,48 @@ function ShelterDashboardContent() {
             </div>
 
             {/* Account Danger Zone */}
-            <div className="bg-red-50 rounded-3xl p-5 border border-red-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account Danger Zone</h3>
-                <p className="text-xs text-red-500">Sign out or permanently delete your shelter account and all posted pets.</p>
+            <div className="bg-red-50 rounded-3xl p-5 border border-red-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account Danger Zone</h3>
+                  <p className="text-xs text-red-500">Sign out or permanently delete your shelter account and all posted pets.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSwitchAccount}
+                    className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Sign out
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteShelterAccount}
+                    className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete Account
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleSwitchAccount}
-                  className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Sign out
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteShelterAccount}
-                  className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete Account
-                </button>
-              </div>
+              {shelterInfo.subscription_status === 'active' && !shelterInfo.cancel_at_period_end && (
+                <div className="mt-4 pt-4 border-t border-red-200">
+                  <p className="text-xs text-red-500 mb-2">
+                    Cancel your subscription — your listing stays active until{' '}
+                    <span className="font-semibold">
+                      {shelterInfo.current_period_end ? new Date(shelterInfo.current_period_end).toLocaleDateString() : 'period end'}
+                    </span>
+                    , then will not renew.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleCancelSubscription}
+                    disabled={cancelingSubscription}
+                    className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-white border border-red-300 rounded-xl px-3.5 py-2 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {cancelingSubscription ? 'Canceling...' : 'Cancel Subscription'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : (

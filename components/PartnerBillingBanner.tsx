@@ -31,7 +31,6 @@ export default function PartnerBillingBanner({
   onRefresh,
 }: PartnerBillingBannerProps) {
   const [loading, setLoading] = useState(false);
-  const [canceling, setCanceling] = useState(false);
   const [reactivating, setReactivating] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -65,33 +64,6 @@ export default function PartnerBillingBanner({
     } catch (err: any) {
       setErrorMsg(err.message || 'Unable to connect to Stripe.');
       setLoading(false);
-    }
-  };
-
-  // Handle Cancellation trigger
-  const handleCancelSubscription = async () => {
-    if (!window.confirm('Are you sure you want to cancel your recurring subscription? Your public listing will remain active until the end of your current paid billing period.')) {
-      return;
-    }
-    setCanceling(true);
-    setErrorMsg('');
-    try {
-      const res = await fetch('/api/stripe/cancel-partner-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          partner_id: partnerId,
-          partner_type: partnerType,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to cancel subscription.');
-      if (onRefresh) await onRefresh();
-      alert('Your subscription cancellation has been scheduled. Your public listing will remain active until the end of your current billing period.');
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to cancel subscription.');
-    } finally {
-      setCanceling(false);
     }
   };
 
@@ -153,28 +125,19 @@ export default function PartnerBillingBanner({
   if (subscriptionStatus === 'active' && !cancelAtPeriodEnd) {
     const formattedEnd = currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString() : 'Next Cycle';
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-[#4A3E3D] text-sm">Active Subscription</span>
-              <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Paid</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-0.5">
-              ${monthlyPriceUsd}/month • Next billing date: <span className="font-semibold text-gray-700">{formattedEnd}</span>
-            </p>
-          </div>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm mb-6 flex items-center gap-3">
+        <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
         </div>
-        <button
-          onClick={handleCancelSubscription}
-          disabled={canceling}
-          className="text-xs text-red-600 hover:text-red-700 font-semibold underline shrink-0 cursor-pointer"
-        >
-          {canceling ? 'Canceling...' : 'Cancel Subscription'}
-        </button>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#4A3E3D] text-sm">Active Subscription</span>
+            <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Paid</span>
+          </div>
+          <p className="text-xs text-gray-500 mt-0.5">
+            ${monthlyPriceUsd}/month • Next billing date: <span className="font-semibold text-gray-700">{formattedEnd}</span>
+          </p>
+        </div>
       </div>
     );
   }
