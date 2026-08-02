@@ -101,10 +101,14 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date();
-    // Exclude pets belonging to shelters that are paused or whose free trial has expired without payment
+    // When a shelter_id is provided (internal dashboard), skip pause/trial filtering.
+    // Public requests (no shelter_id) should still enforce the visibility rules.
     const pets = (rawPets || []).filter((p: any) => {
       const s = p.shelters;
-      if (!s) return true; // If shelter object missing, keep pet
+      if (!s) return true; // No shelter info, keep pet
+      // If this request is for a specific shelter, do NOT filter based on pause or trial.
+      if (shelter_id) return true;
+      // Public visibility rules:
       if (s.is_paused === true) return false;
       if (s.subscription_status === 'active') return true;
       if (s.subscription_status === 'canceled') return false;
