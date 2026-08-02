@@ -7,7 +7,7 @@ import {
   Stethoscope, Building2, MessageSquare, Clock, CheckCircle2,
   XCircle, Edit3, Save, ArrowLeft, Loader2, RefreshCw,
   Phone, Globe, MapPin, ShieldCheck, LogOut, ChevronDown, ChevronUp,
-  Mail, AlertCircle, Star, Trash2,
+  Mail, AlertCircle, Star, Trash2, Power,
 } from 'lucide-react';
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
@@ -336,7 +336,6 @@ export default function VetBoardingDashboardPage() {
   if (!clinic) return null;
 
   const statusCfg = STATUS_CONFIG[clinic.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
-  const StatusIcon = statusCfg.icon;
 
   return (
     <div className="min-h-screen pb-28" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
@@ -352,66 +351,27 @@ export default function VetBoardingDashboardPage() {
               <p className="text-xs text-[#8B7E7D]">Clinic Dashboard</p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6 space-y-5">
-        {/* Status card */}
-        <div className={`rounded-3xl p-5 border ${statusCfg.bg} ${statusCfg.border} flex items-start gap-4`}>
-          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${statusCfg.bg} border ${statusCfg.border}`}>
-            <StatusIcon className={`w-5 h-5 ${statusCfg.color}`} />
-          </div>
-          <div className="flex-1">
-            <p className={`font-black text-sm ${statusCfg.color}`}>{statusCfg.label}</p>
-            {clinic.status === 'pending' && (
-              <p className="text-xs text-[#8B7E7D] mt-1">Your application is under review. We&apos;ll email you at <span className="font-medium">{clinic.email}</span> within 2–3 business days.</p>
-            )}
-            {clinic.status === 'approved' && (
-              <p className="text-xs text-green-700 mt-1">Your clinic is publicly listed on the Find a Sitter page. Pet owners can send inquiries directly.</p>
-            )}
-            {clinic.status === 'rejected' && (
-              <div>
-                <p className="text-xs text-red-600 mt-1">{clinic.rejection_reason || 'Your application was not approved.'}</p>
-                <Link href="/vet-boarding" className="mt-2 inline-block text-xs font-bold text-red-700 underline">Re-apply →</Link>
-              </div>
-            )}
-            {clinic.status === 'paused' && (
-              <p className="text-xs text-gray-500 mt-1">Your listing is hidden from search results. Resume anytime below.</p>
-            )}
-          </div>
           {(() => {
             const isExpired = clinic.subscription_status !== 'active' && (clinic.subscription_status === 'canceled' || (clinic.trial_end && new Date(clinic.trial_end) < new Date()));
             return (
-              <>
-                {clinic.status === 'approved' && (
-                  <button
-                    onClick={handleTogglePause}
-                    disabled={isExpired}
-                    title={isExpired ? "Subscribe to enable listing visibility" : "Pause listing visibility"}
-                    className={`shrink-0 text-xs font-bold rounded-xl px-3 py-1.5 transition-all border ${
-                      isExpired
-                        ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
-                        : 'text-gray-500 hover:text-gray-700 bg-white border-gray-200 cursor-pointer'
-                    }`}
-                  >
-                    Pause Listing
-                  </button>
-                )}
-                {clinic.status === 'paused' && (
-                  <button
-                    onClick={handleTogglePause}
-                    disabled={isExpired}
-                    title={isExpired ? "Subscribe to enable listing visibility" : "Resume listing visibility"}
-                    className={`shrink-0 text-xs font-bold rounded-xl px-3 py-1.5 transition-all border ${
-                      isExpired
-                        ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
-                        : 'text-blue-600 hover:text-blue-700 bg-white border-blue-200 cursor-pointer'
-                    }`}
-                  >
-                    Resume
-                  </button>
-                )}
-              </>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleTogglePause}
+                  disabled={isExpired}
+                  title={isExpired ? "Subscribe to enable listing visibility" : "Toggle listing visibility"}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                    isExpired
+                      ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
+                      : clinic.status === 'paused'
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer'
+                  }`}
+                >
+                  <Power className="w-3.5 h-3.5" />
+                  {clinic.status === 'paused' ? 'Paused' : 'Active'}
+                </button>
+              </div>
             );
           })()}
         </div>
@@ -476,9 +436,15 @@ export default function VetBoardingDashboardPage() {
               <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Today&apos;s Availability</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    AVAILABLE FOR BOARDING
-                  </span>
+                  {fullDates.includes(new Date().toISOString().split('T')[0]) ? (
+                    <span className="text-sm font-black bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      FULL / BLOCKED
+                    </span>
+                  ) : (
+                    <span className="text-sm font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      AVAILABLE
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
