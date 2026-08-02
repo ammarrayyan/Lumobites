@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw, Power } from 'lucide-react';
+import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw, Power, BarChart3 } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import ChatModal from '@/components/ChatModal';
@@ -38,7 +38,7 @@ function ShelterDashboardContent() {
   const [loading, setLoading] = useState(true);
 
   // Filters & Controls
-  const [activeTab, setActiveTab] = useState<'available' | 'pending' | 'adopted' | 'inquiries' | 'profile' | 'all'>('available');
+  const [activeTab, setActiveTab] = useState<'overview' | 'available' | 'pending' | 'adopted' | 'inquiries' | 'profile' | 'all'>('overview');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState<any>({});
   const [savingProfile, setSavingProfile] = useState(false);
@@ -788,7 +788,7 @@ function ShelterDashboardContent() {
             {/* STATUS TABS */}
         <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
           <div className="flex gap-2 flex-wrap">
-            {(['available', 'pending', 'adopted', 'inquiries', 'profile', 'all'] as const).map(tab => {
+            {(['overview', 'available', 'pending', 'adopted', 'inquiries', 'profile', 'all'] as const).map(tab => {
               const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
               const sortedInqMsgs = [...inquiries].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
               const threadKeys = new Set<string>();
@@ -801,7 +801,7 @@ function ShelterDashboardContent() {
 
               const count = tab === 'inquiries'
                 ? threadKeys.size
-                : tab === 'profile'
+                : tab === 'profile' || tab === 'overview'
                 ? null
                 : pets.filter(p => tab === 'all' || p.status === tab).length;
               return (
@@ -812,7 +812,11 @@ function ShelterDashboardContent() {
                     activeTab === tab ? 'bg-[#8B5E3C] text-white shadow-xs' : 'bg-transparent text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {tab === 'inquiries' ? (
+                  {tab === 'overview' ? (
+                    <>
+                      <BarChart3 className="w-3.5 h-3.5" /> Overview
+                    </>
+                  ) : tab === 'inquiries' ? (
                     <>
                       <MessageSquare className="w-3.5 h-3.5" /> Inquiries ({count})
                     </>
@@ -829,7 +833,7 @@ function ShelterDashboardContent() {
           </div>
 
           {/* Sort Dropdown */}
-          {activeTab !== 'inquiries' && (
+          {activeTab !== 'inquiries' && activeTab !== 'overview' && (
             <div className="flex items-center gap-2 text-xs text-gray-600">
               <span className="font-bold">Sort:</span>
               <select
@@ -845,7 +849,76 @@ function ShelterDashboardContent() {
           )}
         </div>
 
-        {activeTab === 'inquiries' ? (
+        {activeTab === 'overview' ? (
+          <div className="space-y-6">
+            {/* 3 Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Inquiries</p>
+                <p className="text-3xl font-black text-[#4A3E3D] mt-2">
+                  {(() => {
+                    const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
+                    const threadKeys = new Set<string>();
+                    inquiries.forEach(m => {
+                      const s = (m.sender_email || '').toLowerCase().trim();
+                      const r = (m.receiver_email || '').toLowerCase().trim();
+                      const adopter = s === cleanShelterEmail ? r : s;
+                      if (adopter) threadKeys.add(`${m.pet_id}_${adopter}`);
+                    });
+                    return threadKeys.size;
+                  })()}
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Search Status</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={`w-3 h-3 rounded-full ${shelterInfo?.is_paused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                  <span className="text-lg font-black text-[#4A3E3D]">
+                    {shelterInfo?.is_paused ? 'Paused' : 'Active in Search'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Pets Listed</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-lg font-black text-[#4A3E3D]">
+                    {pets.filter(p => p.status === 'available').length} <span className="text-xs font-semibold text-gray-500">Available</span> / {pets.length} <span className="text-xs font-semibold text-gray-500">Total</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <h3 className="text-sm font-black text-[#4A3E3D] mb-3">Quick Actions</h3>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleOpenAddModal}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition-colors cursor-pointer"
+                >
+                  🐾 Post a Pet for Adoption
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('profile'); setIsEditingProfile(true); }}
+                  className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  ✏️ Edit Shelter Profile
+                </button>
+                <Link
+                  href="/adoption"
+                  className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs hover:bg-blue-100 transition-colors"
+                  style={{ textDecoration: 'none' }}
+                >
+                  🔍 View Listing on Adoption Page
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'inquiries' ? (
           <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] space-y-4">
             {(() => {
               const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();

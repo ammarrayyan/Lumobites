@@ -455,19 +455,58 @@ export default function VetBoardingDashboardPage() {
 
         {/* ── Overview Tab ───────────────────────────────────────────── */}
         {activeTab === 'overview' && (
-          <div className="space-y-4">
-            {/* Quick stats */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'Inquiries', value: inquiries.length, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Pending', value: inquiries.filter(i => i.status === 'pending').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-                { label: 'Services', value: clinic.services?.length || 0, color: 'text-green-600', bg: 'bg-green-50' },
-              ].map(stat => (
-                <div key={stat.label} className={`rounded-2xl p-4 ${stat.bg} border border-white text-center`}>
-                  <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
-                  <p className="text-xs text-[#8B7E7D] font-semibold mt-0.5">{stat.label}</p>
+          <div className="space-y-6">
+            {/* 3 Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Inquiries</p>
+                <p className="text-3xl font-black text-[#4A3E3D] mt-2">{inquiries.length}</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Search Status</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className={`w-3 h-3 rounded-full ${clinic.status === 'paused' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                  <span className="text-lg font-black text-[#4A3E3D]">
+                    {clinic.status === 'paused' ? 'Paused' : 'Active in Search'}
+                  </span>
                 </div>
-              ))}
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+                <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Today&apos;s Availability</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    AVAILABLE FOR BOARDING
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <h3 className="text-sm font-black text-[#4A3E3D] mb-3">Quick Actions</h3>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setActiveTab('availability')}
+                  className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs hover:bg-blue-100 transition-colors cursor-pointer"
+                >
+                  📅 Manage Availability Calendar
+                </button>
+                <button
+                  onClick={() => { setActiveTab('profile'); setIsEditing(true); }}
+                  className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  ✏️ Edit Clinic Details
+                </button>
+                <Link
+                  href="/vet-boarding"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition-colors"
+                  style={{ textDecoration: 'none' }}
+                >
+                  🔍 View Listing on Search Page
+                </Link>
+              </div>
             </div>
 
             {/* Clinic info card */}
