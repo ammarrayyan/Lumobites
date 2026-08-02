@@ -340,13 +340,6 @@ export default function DaycareDashboard() {
                   <Power className="w-3.5 h-3.5" />
                   {daycare.is_paused ? 'Paused' : 'Active'}
                 </button>
-                <button
-                  onClick={handleSignOut}
-                  className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 cursor-pointer"
-                  title="Sign Out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
               </div>
             );
           })()}

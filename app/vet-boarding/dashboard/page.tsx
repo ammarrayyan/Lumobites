@@ -329,9 +329,6 @@ export default function VetBoardingDashboardPage() {
               <p className="text-xs text-[#8B7E7D]">Clinic Dashboard</p>
             </div>
           </div>
-          <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-red-50 transition-colors">
-            <LogOut className="w-4 h-4 text-[#8B7E7D]" />
-          </button>
         </div>
       </div>
 

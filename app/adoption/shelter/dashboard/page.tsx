@@ -580,15 +580,6 @@ function ShelterDashboardContent() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {shelterInfo && (
-              <button
-                onClick={handleDeleteShelterAccount}
-                className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3.5 py-2.5 rounded-2xl border border-red-200 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                title="Delete Shelter Account & All Listed Pets"
-              >
-                <Trash2 className="w-4 h-4" /> Delete Account
-              </button>
-            )}
             {shelterInfo?.status?.toLowerCase() === 'approved' && (() => {
               const isExpired = shelterInfo.subscription_status !== 'active' && (shelterInfo.subscription_status === 'canceled' || (shelterInfo.trial_end && new Date(shelterInfo.trial_end) < new Date()));
               return (
@@ -631,12 +622,6 @@ function ShelterDashboardContent() {
                 <Plus className="w-4 h-4" /> Post a Pet for Adoption
               </button>
             )}
-            <button
-              onClick={handleSwitchAccount}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3.5 py-2.5 rounded-2xl text-xs flex items-center gap-1.5 transition-all border-none cursor-pointer"
-            >
-              Sign Out
-            </button>
           </div>
         </div>
 
@@ -1192,6 +1177,30 @@ function ShelterDashboardContent() {
                   {[profileForm.address, profileForm.city, profileForm.state, profileForm.zip].filter(Boolean).join(', ') || '—'}
                 </p>
               )}
+            </div>
+
+            {/* Account Danger Zone */}
+            <div className="bg-red-50 rounded-3xl p-5 border border-red-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account Danger Zone</h3>
+                <p className="text-xs text-red-500">Sign out or permanently delete your shelter account and all posted pets.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSwitchAccount}
+                  className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Sign out
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteShelterAccount}
+                  className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete Account
+                </button>
+              </div>
             </div>
           </div>
         ) : (
