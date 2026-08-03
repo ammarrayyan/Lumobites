@@ -1,15 +1,45 @@
 import { NextResponse } from 'next/server';
 
-// Pet food keywords to match against product_description
+// Pet food keywords — must match in product_description, reason_for_recall, or recalling_firm.
+// IMPORTANT: keep these specific enough to avoid false positives:
+//   - 'puppy' alone matches "Hush Puppy" batter mix (confirmed FDA false positive)
+//   - 'hills' alone matches "Ample Hills Creamery", vitamins, kombucha (36 false positives)
+//   - 'rawhide' alone matches licorice candy brands
 const PET_KEYWORDS = [
+  // Generic pet food terms (all multi-word — safe)
   'dog food', 'cat food', 'pet food', 'dog treat', 'cat treat',
-  'puppy', 'kitten', 'kibble', 'dog chow', 'cat chow',
-  'pedigree', 'purina', "science diet", 'fancy feast', 'friskies',
+  'dog chow', 'cat chow', 'dog snack', 'cat snack',
+  'dog biscuit', 'dog chew', 'animal feed', 'pet treat',
+  // Puppy/kitten — multi-word only (bare 'puppy' false-positives on "Hush Puppy" mix)
+  'puppy food', 'puppy treat', 'puppy formula', 'puppy chow', 'puppy chew',
+  'kitten food', 'kitten treat', 'kitten formula',
+  // Kibble — specific enough on its own (0 false positives confirmed)
+  'kibble',
+  // Pet food brands (all sufficiently specific)
+  'pedigree', 'purina', 'science diet', 'fancy feast', 'friskies',
   'meow mix', 'alpo', 'beneful', 'iams', 'eukanuba', 'nutro',
-  'blue buffalo', 'royal canin', 'hills', 'wellness pet',
-  'nature\'s recipe', 'merrick', 'fromm', 'acana', 'orijen',
-  'canine', 'feline', 'dog biscuit', 'dog chew', 'rawhide',
-  'animal feed', 'pet treat', 'dog snack', 'cat snack',
+  'blue buffalo', 'royal canin', 'wellness pet',
+  // 'hills' alone → 36 false positives ("Ample Hills Creamery" etc.) — use specific phrases
+  "hill's pet", "hills pet", "hill's science", "hills science",
+  "nature's recipe", 'merrick', 'fromm', 'acana', 'orijen',
+  // Scientific terms (0 false positives confirmed)
+  'canine', 'feline',
+  // 'rawhide' alone → matches licorice candy — use compound form
+  'rawhide chew', 'rawhide treat', 'rawhide dog',
+  // Recalling firm terms
+  'petcare', 'pet care',
+];
+
+// Explicit phrase exclusions — catch any edge-case false positives that slip through.
+// Applied AFTER the keyword match as a final safety net.
+const FALSE_POSITIVE_PHRASES = [
+  'hush puppy',   // fried batter mix
+  'hot dog bun',  // human food
+  'hot dog roll', // human food
+  'corn dog',     // human food
+  'ample hills',  // ice cream brand
+  'pet bottle',   // plastic packaging ("PET" = polyethylene terephthalate)
+  'pet plastic',
 ];
 
 // Well-known real historical pet food recalls to show when FDA has none
@@ -129,14 +159,19 @@ export async function GET() {
       }
     }
 
-    // Secondary keyword filter to remove any false positives (e.g. "hot dog buns", "PET bottles")
+    // Secondary filter: keyword match AND no known false-positive phrase
     const petItems = allItems.filter(item => {
       const desc = (item.product_description || '').toLowerCase();
       const reason = (item.reason_for_recall || '').toLowerCase();
       const firm = (item.recalling_firm || '').toLowerCase();
       const combined = desc + ' ' + reason + ' ' + firm;
-      return PET_KEYWORDS.some(k => combined.includes(k));
+      // Must match at least one pet keyword
+      if (!PET_KEYWORDS.some(k => combined.includes(k))) return false;
+      // Must NOT match any known false-positive phrase
+      if (FALSE_POSITIVE_PHRASES.some(fp => combined.includes(fp))) return false;
+      return true;
     });
+
 
     const normalized = petItems.map(r => ({
       id: r.recall_number || Math.random().toString(36).slice(2),
