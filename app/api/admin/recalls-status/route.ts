@@ -24,9 +24,11 @@ export async function GET(req: NextRequest) {
   const lastChecked = new Date().toISOString();
 
   try {
-    // Fire a single lightweight FDA request (limit=100, most recent)
-    const searchParam = encodeURIComponent('product_type:"Animal & Veterinary"');
-    const url = `https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=0`;
+    // Fetch recent FDA food enforcement actions — no search filter, since
+    // product_type:"Animal & Veterinary" is invalid on the food/enforcement endpoint
+    // (that value lives on animalandveterinary/event, a different endpoint).
+    // The public /api/recalls route has the same issue; both rely on keyword filtering.
+    const url = `https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=0`;
 
     const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
 

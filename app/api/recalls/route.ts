@@ -84,15 +84,16 @@ const SEED_RECALLS = [
 
 export async function GET() {
   try {
-    // Fetch a large batch from FDA sorted by most recent, paginated across multiple pages
-    // Filter by product_type="Animal & Veterinary" at the FDA API level
-    const searchParam = encodeURIComponent('product_type:"Animal & Veterinary"');
+    // Fetch recent FDA food enforcement actions across multiple pages.
+    // NOTE: product_type:"Animal & Veterinary" is NOT a valid filter on the
+    // food/enforcement endpoint (it belongs to animalandveterinary/event).
+    // We fetch all food enforcement records and rely on keyword filtering below.
     const pages = await Promise.allSettled([
-      fetch(`https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=0`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=100`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=500`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=1000`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?search=${searchParam}&limit=100&sort=recall_initiation_date:desc&skip=2000`, { next: { revalidate: 3600 } }),
+      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=0`, { next: { revalidate: 3600 } }),
+      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=100`, { next: { revalidate: 3600 } }),
+      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=500`, { next: { revalidate: 3600 } }),
+      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=1000`, { next: { revalidate: 3600 } }),
+      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=2000`, { next: { revalidate: 3600 } }),
     ]);
 
     const allItems: RawFDAItem[] = [];
