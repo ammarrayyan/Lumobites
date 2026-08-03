@@ -27,13 +27,14 @@ interface LegacyResponse {
 interface ExtendedResponse {
   lastChecked: string;
   stripe: BaseStatus & { mode?: string; availableBalance?: string; currency?: string };
-  resend: BaseStatus & { domainCount?: number; primaryDomain?: string; primaryVerified?: boolean };
+  resend: BaseStatus & { domainCount?: number; primaryDomain?: string; primaryVerified?: boolean; sendOnly?: boolean };
   twilio: BaseStatus & { accountName?: string; accountStatus?: string; verifyConfigured?: boolean; verifyActive?: boolean | null; verifyName?: string | null };
   anthropic: BaseStatus & { model?: string; stopReason?: string };
   supabase: BaseStatus & { emailRowCount?: number; latencyMs?: number };
   google: BaseStatus & { keyType?: string; validAIzaKey?: boolean; apiStatus?: string };
   firebase: BaseStatus & { projectId?: string | null; initialized?: boolean; vapidKeySet?: boolean; privateKeySet?: boolean; clientEmailSet?: boolean };
 }
+
 
 interface RecallsStatus {
   status: 'Connected' | 'Error' | 'Loading' | 'Idle';
@@ -253,7 +254,7 @@ export default function IntegrationsManagement({ adminKey, onUnauthorized }: Int
           </Card>
 
           {/* ── 3. Resend ───────────────────────────────────────────────── */}
-          <Card icon={Mail} title="Resend" subtitle="Transactional email" status={extended?.resend.status} onRefresh={fetchExtended} refreshing={loadingExtended}>
+          <Card icon={Mail} title="Resend" subtitle={extended?.resend.sendOnly ? "Transactional email — Send-only key — sending works, domain status cannot be verified" : "Transactional email"} status={extended?.resend.status} onRefresh={fetchExtended} refreshing={loadingExtended}>
             <Row label="Status" value={<StatusBadge status={extended?.resend.status ?? '…'} />} />
             <Row label="Domains configured" value={extended?.resend.domainCount ?? '—'} />
             <Row label="Primary domain" value={extended?.resend.primaryDomain ?? '—'} mono />

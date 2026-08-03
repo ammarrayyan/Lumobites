@@ -52,6 +52,10 @@ async function checkResend() {
     });
     const data = await res.json();
     if (!res.ok) {
+      if (res.status === 403) {
+        // Send‑only API key cannot list domains, but sending works.
+        return { configured: true, status: 'Connected' as const, sendOnly: true, error: null as string | null };
+      }
       return { configured: true, status: 'Error' as const, error: data?.message || `HTTP ${res.status}` };
     }
     const domains: any[] = data.data || [];
