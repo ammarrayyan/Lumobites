@@ -84,31 +84,58 @@ const SEED_RECALLS = [
 
 export async function GET() {
   try {
-    // Fetch recent FDA food enforcement actions across multiple pages.
-    // NOTE: product_type:"Animal & Veterinary" is NOT a valid filter on the
-    // food/enforcement endpoint (it belongs to animalandveterinary/event).
-    // We fetch all food enforcement records and rely on keyword filtering below.
-    const pages = await Promise.allSettled([
-      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=0`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=100`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=500`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=1000`, { next: { revalidate: 3600 } }),
-      fetch(`https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=2000`, { next: { revalidate: 3600 } }),
-    ]);
+    // Use FDA's field-level search to find actual pet food enforcement records.
+    // Sorting by newest date and fetching a generic window fails because pet food recalls
+    // are interspersed among 29,000+ human food records — the newest 500 records are
+    // almost entirely human food with zero pet food items.
+    // Instead, we query specific product_description terms and merge the results.
 
+    const base = 'https://api.fda.gov/food/enforcement.json';
+    const opts = { next: { revalidate: 3600 } } as RequestInit;
+    const queries = [
+      `${base}?search=product_description:dog+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:cat+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:dog+treat&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:pet+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:puppy&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:kitten&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:kibble&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:pedigree&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:purina&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:canine&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:feline&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=recalling_firm:petcare&limit=100&sort=recall_initiation_date:desc`,
+    ];
+
+    const pages = await Promise.allSettled(
+      queries.map(url => fetch(url, opts))
+    );
+
+    const seen = new Set<string>();
     const allItems: RawFDAItem[] = [];
     for (const p of pages) {
       if (p.status === 'fulfilled' && p.value.ok) {
         const json = await p.value.json();
-        if (json.results) allItems.push(...json.results);
+        if (json.results) {
+          for (const item of json.results) {
+            // Deduplicate by recall_number
+            const key = item.recall_number || JSON.stringify(item).slice(0, 60);
+            if (!seen.has(key)) {
+              seen.add(key);
+              allItems.push(item);
+            }
+          }
+        }
       }
     }
 
-    // Filter to only pet food items
+    // Secondary keyword filter to remove any false positives (e.g. "hot dog buns", "PET bottles")
     const petItems = allItems.filter(item => {
       const desc = (item.product_description || '').toLowerCase();
       const reason = (item.reason_for_recall || '').toLowerCase();
-      return PET_KEYWORDS.some(k => desc.includes(k) || reason.includes(k));
+      const firm = (item.recalling_firm || '').toLowerCase();
+      const combined = desc + ' ' + reason + ' ' + firm;
+      return PET_KEYWORDS.some(k => combined.includes(k));
     });
 
     const normalized = petItems.map(r => ({

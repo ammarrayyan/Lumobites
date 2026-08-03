@@ -24,32 +24,49 @@ export async function GET(req: NextRequest) {
   const lastChecked = new Date().toISOString();
 
   try {
-    // Fetch recent FDA food enforcement actions — no search filter, since
-    // product_type:"Animal & Veterinary" is invalid on the food/enforcement endpoint
-    // (that value lives on animalandveterinary/event, a different endpoint).
-    // The public /api/recalls route has the same issue; both rely on keyword filtering.
-    const url = `https://api.fda.gov/food/enforcement.json?limit=100&sort=recall_initiation_date:desc&skip=0`;
+    // Use FDA field-level searches so we find pet food records across the full 29k+ dataset,
+    // not just the most recent 100 records (which are almost entirely human food).
+    const base = 'https://api.fda.gov/food/enforcement.json';
+    const queries = [
+      `${base}?search=product_description:dog+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:cat+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:dog+treat&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:pet+food&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:puppy&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:kitten&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:kibble&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:pedigree&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:purina&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:canine&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=product_description:feline&limit=100&sort=recall_initiation_date:desc`,
+      `${base}?search=recalling_firm:petcare&limit=100&sort=recall_initiation_date:desc`,
+    ];
 
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const pages = await Promise.allSettled(
+      queries.map(url => fetch(url, { signal: AbortSignal.timeout(10000) }))
+    );
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      return NextResponse.json({
-        status: 'Error',
-        liveCount: 0,
-        lastChecked,
-        error: `FDA API returned HTTP ${res.status}: ${body.slice(0, 200)}`,
-      });
+    const seen = new Set<string>();
+    const allItems: any[] = [];
+    for (const p of pages) {
+      if (p.status === 'fulfilled' && p.value.ok) {
+        const json = await p.value.json();
+        if (json.results) {
+          for (const item of json.results) {
+            const key = item.recall_number || JSON.stringify(item).slice(0, 60);
+            if (!seen.has(key)) { seen.add(key); allItems.push(item); }
+          }
+        }
+      }
     }
 
-    const json = await res.json();
-    const allItems: any[] = json.results ?? [];
-
-    // Filter to pet food items using the same keyword list as /api/recalls
+    // Secondary filter — removes false positives like "hot dog buns" or "PET bottles"
     const petItems = allItems.filter(item => {
       const desc = (item.product_description || '').toLowerCase();
       const reason = (item.reason_for_recall || '').toLowerCase();
-      return PET_KEYWORDS.some(k => desc.includes(k) || reason.includes(k));
+      const firm = (item.recalling_firm || '').toLowerCase();
+      const combined = desc + ' ' + reason + ' ' + firm;
+      return PET_KEYWORDS.some(k => combined.includes(k));
     });
 
     return NextResponse.json({
