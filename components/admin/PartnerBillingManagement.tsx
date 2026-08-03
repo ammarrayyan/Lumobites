@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   CreditCard, Clock, CheckCircle2, AlertTriangle, ShieldAlert,
   Edit3, Save, RefreshCw, Loader2, PauseCircle, PlayCircle, Zap,
-  Building2, Stethoscope, Sparkles
+  Building2, Stethoscope, Sparkles, Eye, EyeOff
 } from 'lucide-react';
 
 interface PartnerBillingManagementProps {
@@ -112,7 +112,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
     }
   };
 
-  // Filter Logic
+  // Filter Logic — filters by billing/subscription status ONLY, never by pause state
   const filteredPartners = partners.filter(p => {
     const matchesSearch =
       p.business_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -123,9 +123,9 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
 
     if (filterTab === 'all') return true;
     if (filterTab === 'trialing') return p.subscription_status === 'trialing';
-    if (filterTab === 'active') return p.subscription_status === 'active' && !p.is_paused;
+    if (filterTab === 'active') return p.subscription_status === 'active';
     if (filterTab === 'past_due') return p.subscription_status === 'past_due';
-    if (filterTab === 'canceled') return p.subscription_status === 'canceled' || p.is_paused || p.status === 'paused';
+    if (filterTab === 'canceled') return p.subscription_status === 'canceled';
     return true;
   });
 
@@ -214,14 +214,14 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
       <div className="bg-white rounded-3xl border border-[#E8DDD4] shadow-xs overflow-hidden">
         {/* TABLE CONTROLS BAR */}
         <div className="p-5 border-b border-[#E8DDD4] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gray-50/50">
-          {/* Filter Tabs */}
+          {/* Filter Tabs — filter by billing status only, never by pause/visibility state */}
           <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-gray-200 overflow-x-auto w-full md:w-auto">
             {[
               { id: 'all', label: `All (${partners.length})` },
               { id: 'trialing', label: `Trialing (${partners.filter(p => p.subscription_status === 'trialing').length})` },
-              { id: 'active', label: `Active Paid (${partners.filter(p => p.subscription_status === 'active' && !p.is_paused).length})` },
+              { id: 'active', label: `Active Paid (${partners.filter(p => p.subscription_status === 'active').length})` },
               { id: 'past_due', label: `Past Due (${partners.filter(p => p.subscription_status === 'past_due').length})` },
-              { id: 'canceled', label: `Canceled / Paused (${partners.filter(p => p.subscription_status === 'canceled' || p.is_paused).length})` },
+              { id: 'canceled', label: `Canceled (${partners.filter(p => p.subscription_status === 'canceled').length})` },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -255,6 +255,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                 <th className="py-3.5 px-4">Partner Business</th>
                 <th className="py-3.5 px-4">Service Type</th>
                 <th className="py-3.5 px-4">Subscription Status</th>
+                <th className="py-3.5 px-4">Visibility</th>
                 <th className="py-3.5 px-4">Trial / Billing Cycle</th>
                 <th className="py-3.5 px-4">Stripe Sub ID</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
@@ -263,13 +264,13 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
             <tbody className="divide-y divide-gray-100 text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 font-bold">
+                  <td colSpan={7} className="py-12 text-center text-gray-400 font-bold">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#8B5E3C]" /> Loading partner billing details...
                   </td>
                 </tr>
               ) : filteredPartners.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 font-bold">
+                  <td colSpan={7} className="py-12 text-center text-gray-400 font-bold">
                     No partner accounts found matching selected criteria.
                   </td>
                 </tr>
@@ -281,9 +282,13 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                     daysLeft = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
                   }
 
+                  // Billing status — never affected by pause state
                   const isTrialing = p.subscription_status === 'trialing';
-                  const isActivePaid = p.subscription_status === 'active' && !p.is_paused;
+                  const isActivePaid = p.subscription_status === 'active';
                   const isPastDue = p.subscription_status === 'past_due';
+                  const isCanceled = p.subscription_status === 'canceled';
+
+                  // Visibility/pause status — completely independent of billing
                   const isPaused = p.is_paused || p.status === 'paused';
 
                   return (
@@ -305,7 +310,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                         </span>
                       </td>
 
-                      {/* 3. Status Badge */}
+                      {/* 3. Subscription Status — billing state ONLY */}
                       <td className="py-4 px-4">
                         {isActivePaid ? (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
@@ -315,13 +320,26 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
                             <ShieldAlert className="w-3 h-3" /> Past Due
                           </span>
-                        ) : isPaused ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
-                            <AlertTriangle className="w-3 h-3" /> Paused / Expired
+                        ) : isCanceled ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-600 bg-gray-100 border border-gray-300 px-2.5 py-0.5 rounded-full">
+                            <AlertTriangle className="w-3 h-3" /> Canceled
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
                             <Clock className="w-3 h-3" /> Trialing
+                          </span>
+                        )}
+                      </td>
+
+                      {/* 4. Visibility — pause state ONLY, independent of billing */}
+                      <td className="py-4 px-4">
+                        {isPaused ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                            <EyeOff className="w-3 h-3" /> Paused
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                            <Eye className="w-3 h-3" /> Live
                           </span>
                         )}
                       </td>
