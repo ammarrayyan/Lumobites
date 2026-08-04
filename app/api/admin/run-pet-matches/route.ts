@@ -198,44 +198,72 @@ Return ONLY JSON object containing the match percentage score:
         console.log(`AI score for lost pet ${lostPet.id} vs found pet ${foundPet.id}: ${score}`)
 
         if (score >= 70) {
+          let emailStatus = 'skipped'
+          let emailError: string | null = null
+          let pushStatus = 'skipped'
+          let pushError: string | null = null
+          let smsStatus = 'skipped'
+          let smsError: string | null = null
+
           // 1. Send email notification safely
-          try {
-            await resend.emails.send({
-              from: 'no-reply@lumobites.net',
-              to: lostPet.contact_email,
-              subject: `🐾 Possible Match Found — ${score}% Similar`,
-              html: `
-                <h2>Possible Match Found for Your Lost Pet!</h2>
-                <p>A pet matching your description was found near your area.</p>
-                <p>Similarity score: <strong>${score}%</strong></p>
-                <p><a href="https://lumobites.net/lost-pets/${foundPet.id}">
-                  Click here to view the found pet
-                </a></p>
-                <p>If this is not your pet, no action needed.</p>
-              `
-            })
-          } catch (emailErr) {
-            console.error('[Run Pet Matches] Resend Email error:', emailErr)
+          if (lostPet.contact_email) {
+            try {
+              const resendRes = await resend.emails.send({
+                from: 'no-reply@lumobites.net',
+                to: lostPet.contact_email,
+                subject: `🐾 Possible Match Found — ${score}% Similar`,
+                html: `
+                  <h2>Possible Match Found for Your Lost Pet!</h2>
+                  <p>A pet matching your description was found near your area.</p>
+                  <p>Similarity score: <strong>${score}%</strong></p>
+                  <p><a href="https://lumobites.net/lost-pets/${foundPet.id}">
+                    Click here to view the found pet
+                  </a></p>
+                  <p>If this is not your pet, no action needed.</p>
+                `
+              })
+              if (resendRes.error) {
+                emailStatus = 'failed'
+                emailError = resendRes.error.message || String(resendRes.error)
+              } else {
+                emailStatus = 'sent'
+              }
+            } catch (emailErr: any) {
+              console.error('[Run Pet Matches] Resend Email error:', emailErr)
+              emailStatus = 'failed'
+              emailError = emailErr?.message || String(emailErr)
+            }
           }
 
           // 2. Send push notification safely
-          try {
-            await fetch(`${process.env.NEXT_PUBLIC_URL || 'https://lumobites.net'}/api/push/send`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: lostPet.contact_email,
-                title: `🐾 Possible Match Found — ${score}%`,
-                body: `A pet matching your description was found near where you lost yours. Tap to view.`,
-                data: {
-                  type: 'lost_pet_match',
-                  foundPetId: foundPet.id,
-                  score
-                }
+          if (lostPet.contact_email) {
+            try {
+              const pushRes = await fetch(`${process.env.NEXT_PUBLIC_URL || 'https://lumobites.net'}/api/push/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: lostPet.contact_email,
+                  title: `🐾 Possible Match Found — ${score}%`,
+                  body: `A pet matching your description was found near where you lost yours. Tap to view.`,
+                  data: {
+                    type: 'lost_pet_match',
+                    foundPetId: foundPet.id,
+                    score
+                  }
+                })
               })
-            })
-          } catch (pushErr) {
-            console.error('[Run Pet Matches] Push notification error:', pushErr)
+              if (pushRes.ok) {
+                pushStatus = 'sent'
+              } else {
+                const pushErrText = await pushRes.text()
+                pushStatus = 'failed'
+                pushError = `HTTP ${pushRes.status}: ${pushErrText}`
+              }
+            } catch (pushErr: any) {
+              console.error('[Run Pet Matches] Push notification error:', pushErr)
+              pushStatus = 'failed'
+              pushError = pushErr?.message || String(pushErr)
+            }
           }
 
           // 3. Insert DB notification safely
@@ -262,12 +290,42 @@ Return ONLY JSON object containing the match percentage score:
                   to: lostPet.contact_phone.trim()
                 });
                 console.log(`[Run Pet Matches] SMS notification sent to ${lostPet.contact_phone}`);
+                smsStatus = 'sent'
               } catch (smsErr: any) {
                 console.error('[Run Pet Matches] Twilio SMS error:', smsErr.message || smsErr);
+                smsStatus = 'failed'
+                smsError = smsErr?.message || String(smsErr)
               }
             } else {
               console.warn('[Run Pet Matches] Twilio is not configured. Skipping SMS.');
+              smsStatus = 'skipped'
+              smsError = 'Twilio not configured'
             }
+          } else {
+            smsStatus = 'skipped'
+            smsError = !lostPet.contact_phone ? 'No phone number provided' : 'User opted out of SMS'
+          }
+
+          // 5. Insert pet_match_logs row for match history
+          try {
+            await supabaseAdmin.from('pet_match_logs').insert({
+              lost_pet_id: lostPet.id,
+              lost_pet_name: lostPet.pet_name || 'Unnamed Pet',
+              found_pet_id: foundPet.id,
+              found_pet_name: foundPet.pet_name || 'Unnamed Pet',
+              score,
+              matched: true,
+              email_status: emailStatus,
+              email_error: emailError,
+              push_status: pushStatus,
+              push_error: pushError,
+              sms_status: smsStatus,
+              sms_error: smsError,
+              created_at: new Date().toISOString()
+            });
+            console.log('[Run Pet Matches] Logged match into pet_match_logs successfully.');
+          } catch (logErr) {
+            console.error('[Run Pet Matches] Failed to insert pet_match_log:', logErr);
           }
 
           // Update notification count and append to notified_found_pets array
