@@ -27,15 +27,11 @@ export async function GET(request: Request) {
 
     // 1. Today's usage
     const todayLogs = logs.filter(l => l.created_at >= startOfToday)
-    const todayAllowedLogs = todayLogs.filter(l => l.status !== 'blocked_daily' && l.status !== 'blocked_global')
-    const todayTotalCalls = todayAllowedLogs.length
-    const todayBlockedCount = todayLogs.filter(l => l.status === 'blocked_daily' || l.status === 'blocked_global').length
+    const todayTotalCalls = todayLogs.length
 
     // 2. Month's usage & cost
-    const monthAllowedLogs = logs.filter(l => l.status !== 'blocked_daily' && l.status !== 'blocked_global')
-    const monthTotalCalls = monthAllowedLogs.length
-    const monthBlockedCount = logs.filter(l => l.status === 'blocked_daily' || l.status === 'blocked_global').length
-    const monthTotalCost = monthAllowedLogs.reduce((sum, l) => sum + (Number(l.estimated_cost) || 0), 0)
+    const monthTotalCalls = logs.length
+    const monthTotalCost = logs.reduce((sum, l) => sum + (Number(l.estimated_cost) || 0), 0)
 
     // 3. Feature Breakdown
     const featureKeys: AiFeatureKey[] = [
@@ -58,19 +54,17 @@ export async function GET(request: Request) {
 
     const featureStats = featureKeys.map(key => {
       const config = AI_LIMIT_CONFIG[key]
-      const fMonthLogs = monthAllowedLogs.filter(l => l.feature === key)
-      const fTodayLogs = todayAllowedLogs.filter(l => l.feature === key)
-      const fTodayBlocked = todayLogs.filter(l => l.feature === key && (l.status === 'blocked_daily' || l.status === 'blocked_global')).length
-      const fMonthBlocked = logs.filter(l => l.feature === key && (l.status === 'blocked_daily' || l.status === 'blocked_global')).length
+      const fMonthLogs = logs.filter(l => l.feature === key)
+      const fTodayLogs = todayLogs.filter(l => l.feature === key)
       const fCost = fMonthLogs.reduce((sum, l) => sum + (Number(l.estimated_cost) || config.estimatedCostPerCall), 0)
 
       return {
         key,
         name: featureLabels[key] || key,
         todayCalls: fTodayLogs.length,
-        todayBlocked: fTodayBlocked,
+        todayBlocked: 0,
         monthCalls: fMonthLogs.length,
-        monthBlocked: fMonthBlocked,
+        monthBlocked: 0,
         monthCost: parseFloat(fCost.toFixed(3)),
         monthlyCap: config.monthlyGlobalCostCap,
         dailyUserLimit: config.dailyUserLimit,

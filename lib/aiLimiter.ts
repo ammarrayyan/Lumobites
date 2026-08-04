@@ -64,19 +64,9 @@ export async function checkAndTrackAiUsage({
       .select('*', { count: 'exact', head: true })
       .eq('feature', feature)
       .eq('user_identifier', userIdentifier)
-      .neq('status', 'blocked_daily')
-      .neq('status', 'blocked_global')
       .gte('created_at', twentyFourHoursAgo);
 
     if (!userErr && userDailyCount !== null && userDailyCount >= config.dailyUserLimit) {
-      await supabaseAdmin.from('ai_usage_logs').insert({
-        feature,
-        user_identifier: userIdentifier,
-        estimated_cost: 0,
-        status: 'blocked_daily',
-        created_at: now.toISOString(),
-      }).catch(e => console.error('[AI Limiter] Failed to log blocked daily:', e));
-
       return {
         allowed: false,
         reason: 'Daily limit reached (2 uses per 24 hours). Please try again tomorrow or upgrade your account.',
@@ -88,21 +78,11 @@ export async function checkAndTrackAiUsage({
       .from('ai_usage_logs')
       .select('estimated_cost')
       .eq('feature', feature)
-      .neq('status', 'blocked_daily')
-      .neq('status', 'blocked_global')
       .gte('created_at', startOfMonth);
 
     if (!globalErr && monthLogs) {
       const totalMonthCost = monthLogs.reduce((sum, log) => sum + (Number(log.estimated_cost) || config.estimatedCostPerCall), 0);
       if (totalMonthCost >= config.monthlyGlobalCostCap) {
-        await supabaseAdmin.from('ai_usage_logs').insert({
-          feature,
-          user_identifier: userIdentifier,
-          estimated_cost: 0,
-          status: 'blocked_global',
-          created_at: now.toISOString(),
-        }).catch(e => console.error('[AI Limiter] Failed to log blocked global:', e));
-
         return {
           allowed: false,
           reason: 'This feature is currently experiencing high demand. Please try again next month.',
@@ -111,16 +91,17 @@ export async function checkAndTrackAiUsage({
     }
 
     // 4. Record usage log
-    await supabaseAdmin.from('ai_usage_logs').insert({
+    const { error: insertErr } = await supabaseAdmin.from('ai_usage_logs').insert({
       feature,
       user_identifier: userIdentifier,
       estimated_cost: config.estimatedCostPerCall,
-      status: 'allowed',
       created_at: now.toISOString(),
     });
+    if (insertErr) {
+      console.error('[AI Limiter] Failed to record usage log:', insertErr);
+    }
   } catch (err) {
     console.error(`[AI Limiter] Error checking usage for ${feature}:`, err);
-    // Fail open if table does not exist yet or DB error occurs so feature doesn't break
   }
 
   return { allowed: true };
