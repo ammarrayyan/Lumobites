@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const { ingredients } = await req.json();
+    const body = await req.json();
+    const ingredients = body.ingredients;
+    const userEmail = body.email || body.userEmail;
 
     if (!ingredients || typeof ingredients !== 'string' || !ingredients.trim()) {
       return NextResponse.json({ error: 'Ingredients are required' }, { status: 400 });
+    }
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'ingredient_scanner',
+      userEmail,
+      request: req,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
