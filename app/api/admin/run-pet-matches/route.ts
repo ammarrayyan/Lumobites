@@ -7,238 +7,313 @@ import twilio from 'twilio'
 // Later will be scheduled via Vercel Cron
 
 export async function POST(request: Request) {
-  const adminSecret = request.headers.get('x-admin-secret')
-  if (adminSecret !== 'Lumo2026@') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  try {
+    const adminSecret = request.headers.get('x-admin-secret')
+    if (adminSecret !== 'Lumo2026@') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const resend = new Resend(process.env.RESEND_API_KEY || 're_123')
-  // ---- Twilio configuration (mirrors working send‑sms endpoint) ----
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = process.env.TWILIO_PHONE_NUMBER
+    const resend = new Resend(process.env.RESEND_API_KEY || 're_123')
+    // ---- Twilio configuration (mirrors working send‑sms endpoint) ----
+    const accountSid = process.env.TWILIO_ACCOUNT_SID
+    const authToken = process.env.TWILIO_AUTH_TOKEN
+    const fromNumber = process.env.TWILIO_PHONE_NUMBER
 
-  // Validate configuration – if missing, log error but continue match run.
-  if (!accountSid || !authToken || !fromNumber) {
-    console.error('[Run Pet Matches] Twilio configuration is missing – SMS will be skipped.')
-  }
+    // Validate configuration – if missing, log error but continue match run.
+    if (!accountSid || !authToken || !fromNumber) {
+      console.error('[Run Pet Matches] Twilio configuration is missing – SMS will be skipped.')
+    }
 
-  const twilioClient = (accountSid && authToken) ? twilio(accountSid, authToken) : null
-  let aiCallCount = 0
-  const MAX_AI_CALLS = 100 // Hard cap
-  const results = []
-
-  // Get found pets posted in last 7 days
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-  const { data: foundPets } = await supabaseAdmin
-    .from('lost_pets')
-    .select('*')
-    .eq('pet_type', 'found')
-    .eq('status', 'active')
-    .gte('created_at', sevenDaysAgo.toISOString())
-    .limit(50) // Max 50 found pets per run
-
-  if (!foundPets || foundPets.length === 0) {
-    return NextResponse.json({ success: true, message: 'No new found pets today' })
-  }
-
-  // Get active lost pets (last 30 days only)
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-  const { data: lostPets } = await supabaseAdmin
-    .from('lost_pets')
-    .select('*')
-    .eq('pet_type', 'lost')
-    .eq('status', 'active')
-    .eq('notify_matches', true)
-    .gte('created_at', thirtyDaysAgo.toISOString())
-    .limit(200) // Max 200 lost pets checked
-
-  if (!lostPets || lostPets.length === 0) {
-    return NextResponse.json({ success: true, message: 'No active lost pets' })
-  }
-
-  console.log('Found pets to check:', foundPets?.length)
-  console.log('Lost pets to check:', lostPets?.length)
-
-  // For each found pet → basic filter first then AI
-  for (const foundPet of foundPets) {
-    for (const lostPet of lostPets) {
-      
-      // Hard cap check
-      if (aiCallCount >= MAX_AI_CALLS) {
-        return NextResponse.json({ 
-          success: true, 
-          message: `Daily AI cap reached (${MAX_AI_CALLS} calls)`,
-          results 
-        })
+    let twilioClient = null
+    try {
+      if (accountSid && authToken) {
+        twilioClient = twilio(accountSid, authToken)
       }
+    } catch (tErr) {
+      console.error('[Run Pet Matches] Failed to initialize Twilio client:', tErr)
+    }
 
-      // Basic filter 1 — same species (REMOVED: pet_type_species column doesn't exist)
+    let aiCallCount = 0
+    const MAX_AI_CALLS = 100 // Hard cap
+    const results = []
 
-      // Basic filter 2 — within 10 miles
-      console.log(`Lost pet ${lostPet.id} - has coordinates: ${!!lostPet.latitude}`)
-      if (foundPet.latitude && lostPet.latitude) {
-        const distance = calculateDistance(
-          lostPet.latitude, lostPet.longitude,
-          foundPet.latitude, foundPet.longitude
-        )
-        console.log(`Lost pet ${lostPet.id} - distance: ${distance} miles`)
-        if (distance > 10) continue
-      }
+    // Get found pets posted in last 7 days
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      // Basic filter 3 — check daily notification limit
-      const today = new Date().toDateString()
-      const lastNotif = lostPet.last_notification_at
-        ? new Date(lostPet.last_notification_at).toDateString()
-        : null
-      
-      // If it's a new day, reset the memory count so they get their full 3 alerts today
-      if (lastNotif !== today) {
-        lostPet.notification_count = 0;
-      }
+    const { data: foundPets, error: foundErr } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*')
+      .eq('pet_type', 'found')
+      .eq('status', 'active')
+      .gte('created_at', sevenDaysAgo.toISOString())
+      .limit(50) // Max 50 found pets per run
 
-      if (lastNotif === today && (lostPet.notification_count || 0) >= 3) continue
+    if (foundErr) {
+      console.error('[Run Pet Matches] Error fetching found pets:', foundErr)
+    }
 
-      // Basic filter 4 — Duplicate prevention (already notified for this found pet)
-      const notifiedFoundPets = lostPet.notified_found_pets || []
-      if (notifiedFoundPets.includes(foundPet.id)) {
-        console.log(`Lost pet ${lostPet.id} already notified for found pet ${foundPet.id}. Skipping.`)
-        continue
-      }
+    if (!foundPets || foundPets.length === 0) {
+      return NextResponse.json({ success: true, message: 'No new found pets today' })
+    }
 
+    // Get active lost pets (last 30 days only)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      // Passed basic filters → now use AI
-      aiCallCount++
+    const { data: lostPets, error: lostErr } = await supabaseAdmin
+      .from('lost_pets')
+      .select('*')
+      .eq('pet_type', 'lost')
+      .eq('status', 'active')
+      .eq('notify_matches', true)
+      .gte('created_at', thirtyDaysAgo.toISOString())
+      .limit(200) // Max 200 lost pets checked
 
-      // Simple AI text comparison (cheaper than vision)
-      const matchResponse = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6', // Wait, claude-sonnet-4-6 is not a valid model ID in standard Anthropic API, but using what user provided. Wait, I should use `claude-3-5-sonnet-20240620` but user wrote `claude-sonnet-4-6`. I will stick to what the user wrote just in case. Wait, if it fails, I'll be blamed. Let's use what user provided exactly.
-          max_tokens: 100,
-          messages: [{
-            role: 'user',
-            content: `Compare these two pet descriptions and return ONLY a number 0-100 for similarity:\nLost pet: ${lostPet.description}\nFound pet: ${foundPet.description}\nReturn only the number, nothing else.`
-          }]
-        })
-      })
+    if (lostErr) {
+      console.error('[Run Pet Matches] Error fetching lost pets:', lostErr)
+    }
 
-      const matchData = await matchResponse.json()
-      const scoreText = matchData.content?.[0]?.text?.trim()
-      const score = parseInt(scoreText) || 0
+    if (!lostPets || lostPets.length === 0) {
+      return NextResponse.json({ success: true, message: 'No active lost pets' })
+    }
 
-      console.log(`AI score for lost pet ${lostPet.id} vs found pet ${foundPet.id}: ${score}`)
-      console.log(`Score type: ${typeof score}`)
-      console.log(`Raw AI response: ${matchData.content?.[0]?.text}`)
-      console.log(`Score >= 70: ${score >= 70}`)
+    console.log('Found pets to check:', foundPets?.length)
+    console.log('Lost pets to check:', lostPets?.length)
 
-      if (score >= 70) {
-        // Send email notification
-        await resend.emails.send({
-          from: 'no-reply@lumobites.net',
-          to: lostPet.contact_email,
-          subject: `🐾 Possible Match Found — ${score}% Similar`,
-          html: `
-            <h2>Possible Match Found for Your Lost Pet!</h2>
-            <p>A pet matching your description was found near your area.</p>
-            <p>Similarity score: <strong>${score}%</strong></p>
-            <p><a href="https://lumobites.net/lost-pets/${foundPet.id}">
-              Click here to view the found pet
-            </a></p>
-            <p>If this is not your pet, no action needed.</p>
-          `
-        })
-
-        // Send push notification
-        await fetch(`${process.env.NEXT_PUBLIC_URL}/api/push/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: lostPet.contact_email,
-            title: `🐾 Possible Match Found — ${score}%`,
-            body: `A pet matching your description was found near where you lost yours. Tap to view.`,
-            data: {
-              type: 'lost_pet_match',
-              foundPetId: foundPet.id,
-              score
-            }
+    // For each found pet → basic filter first then AI
+    for (const foundPet of foundPets) {
+      for (const lostPet of lostPets) {
+        
+        // Hard cap check
+        if (aiCallCount >= MAX_AI_CALLS) {
+          return NextResponse.json({ 
+            success: true, 
+            message: `Daily AI cap reached (${MAX_AI_CALLS} calls)`,
+            results 
           })
-        })
-
-        // Insert DB notification
-        try {
-          await supabaseAdmin.from('notifications').insert({
-            recipient_email: lostPet.contact_email,
-            type: 'lost_pet_match',
-            title: '🐾 Possible Match Found!',
-            message: `Possible match found for your lost pet! (${score}% similarity)`,
-            link: `/lost-pets/${foundPet.id}`,
-            read: false
-          });
-        } catch (err) {
-          console.error('[Run Pet Matches] Notification insert error:', err);
         }
 
-        // Send SMS notification if opted-in
-        if (lostPet.contact_phone && lostPet.notify_matches) {
-          if (twilioClient && fromNumber) {
+        // Basic filter 1 — within 10 miles
+        if (foundPet.latitude && lostPet.latitude) {
+          const distance = calculateDistance(
+            lostPet.latitude, lostPet.longitude,
+            foundPet.latitude, foundPet.longitude
+          )
+          if (distance > 10) continue
+        }
+
+        // Basic filter 2 — check daily notification limit
+        const today = new Date().toDateString()
+        const lastNotif = lostPet.last_notification_at
+          ? new Date(lostPet.last_notification_at).toDateString()
+          : null
+        
+        // If it's a new day, reset the memory count so they get their full 3 alerts today
+        if (lastNotif !== today) {
+          lostPet.notification_count = 0;
+        }
+
+        if (lastNotif === today && (lostPet.notification_count || 0) >= 3) continue
+
+        // Basic filter 3 — Duplicate prevention (already notified for this found pet)
+        const notifiedFoundPets = lostPet.notified_found_pets || []
+        if (notifiedFoundPets.includes(foundPet.id)) {
+          console.log(`Lost pet ${lostPet.id} already notified for found pet ${foundPet.id}. Skipping.`)
+          continue
+        }
+
+        // Passed basic filters → now use multi-factor AI scoring prompt matching search-by-photo
+        aiCallCount++
+
+        const promptText = `You are helping reunite lost pets with their owners.
+
+We are searching for a match for this lost pet:
+Species: ${lostPet.species || 'unknown'}
+Pet Name: ${lostPet.pet_name || 'unknown'}
+Description: ${lostPet.description || ''}
+AI Features: ${JSON.stringify(lostPet.ai_features || {})}
+
+Here is the found pet report from the database:
+ID: ${foundPet.id}
+Species: ${foundPet.species || 'unknown'}
+Pet Name: ${foundPet.pet_name || 'unknown'}
+Description: ${foundPet.description || ''}
+City: ${foundPet.city || ''}
+Date Found: ${foundPet.date_lost_found || ''}
+AI Features: ${JSON.stringify(foundPet.ai_features || {})}
+
+Calculate a similarity score (0-100) based on:
+- Species match: CRITICAL — wrong species = 0 score
+- Color/markings: HIGH importance (40% of score)
+- Breed similarity: MEDIUM importance (30% of score)  
+- Size/age: LOW importance (20% of score)
+- Description keywords: LOW importance (10% of score)
+
+Be GENEROUS with scoring when key features match:
+- Same species + similar color = minimum 50%
+- Same species + same breed = minimum 65%
+- Same species + same color + same breed = minimum 80%
+
+Return ONLY JSON object containing the match percentage score:
+{
+  "score": 87
+}`;
+
+        let score = 0;
+        try {
+          const matchResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY!,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-6',
+              max_tokens: 200,
+              messages: [{
+                role: 'user',
+                content: promptText
+              }]
+            })
+          });
+
+          if (matchResponse.ok) {
+            const matchData = await matchResponse.json();
+            const scoreText = matchData.content?.[0]?.text?.replace(/```json|```/g, '').trim() || '';
             try {
-              await twilioClient.messages.create({
-                body: `Lumo Bites: We found a possible match for your lost pet! View it here: lumobites.net/lost-pets/${foundPet.id}. Msg&Data rates may apply. Reply STOP to unsubscribe.`,
-                from: fromNumber,
-                to: lostPet.contact_phone.trim()
-              });
-              console.log(`[Run Pet Matches] SMS notification sent to ${lostPet.contact_phone}`);
-            } catch (smsErr: any) {
-              console.error('[Run Pet Matches] Twilio SMS error:', smsErr.message || smsErr);
+              const parsed = JSON.parse(scoreText);
+              score = typeof parsed.score === 'number' ? parsed.score : (parseInt(scoreText) || 0);
+            } catch {
+              score = parseInt(scoreText) || 0;
             }
           } else {
-            console.warn('[Run Pet Matches] Twilio is not configured. Skipping SMS.');
+            console.error('[Run Pet Matches] Anthropic AI scoring failed:', matchResponse.status);
           }
+        } catch (aiErr) {
+          console.error('[Run Pet Matches] AI request exception:', aiErr);
         }
 
-        // Update notification count and append to notified_found_pets array
-        const updatedNotifiedFoundPets = [...(lostPet.notified_found_pets || []), foundPet.id]
-        
-        // Mutate in memory so subsequent loop iterations this run don't notify again
-        lostPet.notified_found_pets = updatedNotifiedFoundPets
-        lostPet.notification_count = (lostPet.notification_count || 0) + 1
-        lostPet.last_notification_at = new Date().toISOString()
+        console.log(`AI score for lost pet ${lostPet.id} vs found pet ${foundPet.id}: ${score}`)
 
-        await supabaseAdmin
-          .from('lost_pets')
-          .update({
-            notification_count: lostPet.notification_count,
-            last_notification_at: lostPet.last_notification_at,
-            notified_found_pets: updatedNotifiedFoundPets
+        if (score >= 70) {
+          // 1. Send email notification safely
+          try {
+            await resend.emails.send({
+              from: 'no-reply@lumobites.net',
+              to: lostPet.contact_email,
+              subject: `🐾 Possible Match Found — ${score}% Similar`,
+              html: `
+                <h2>Possible Match Found for Your Lost Pet!</h2>
+                <p>A pet matching your description was found near your area.</p>
+                <p>Similarity score: <strong>${score}%</strong></p>
+                <p><a href="https://lumobites.net/lost-pets/${foundPet.id}">
+                  Click here to view the found pet
+                </a></p>
+                <p>If this is not your pet, no action needed.</p>
+              `
+            })
+          } catch (emailErr) {
+            console.error('[Run Pet Matches] Resend Email error:', emailErr)
+          }
+
+          // 2. Send push notification safely
+          try {
+            await fetch(`${process.env.NEXT_PUBLIC_URL || 'https://lumobites.net'}/api/push/send`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: lostPet.contact_email,
+                title: `🐾 Possible Match Found — ${score}%`,
+                body: `A pet matching your description was found near where you lost yours. Tap to view.`,
+                data: {
+                  type: 'lost_pet_match',
+                  foundPetId: foundPet.id,
+                  score
+                }
+              })
+            })
+          } catch (pushErr) {
+            console.error('[Run Pet Matches] Push notification error:', pushErr)
+          }
+
+          // 3. Insert DB notification safely
+          try {
+            await supabaseAdmin.from('notifications').insert({
+              recipient_email: lostPet.contact_email,
+              type: 'lost_pet_match',
+              title: '🐾 Possible Match Found!',
+              message: `Possible match found for your lost pet! (${score}% similarity)`,
+              link: `/lost-pets/${foundPet.id}`,
+              read: false
+            });
+          } catch (err) {
+            console.error('[Run Pet Matches] Notification insert error:', err);
+          }
+
+          // 4. Send SMS notification safely
+          if (lostPet.contact_phone && lostPet.notify_matches) {
+            if (twilioClient && fromNumber) {
+              try {
+                await twilioClient.messages.create({
+                  body: `Lumo Bites: We found a possible match for your lost pet! View it here: lumobites.net/lost-pets/${foundPet.id}. Msg&Data rates may apply. Reply STOP to unsubscribe.`,
+                  from: fromNumber,
+                  to: lostPet.contact_phone.trim()
+                });
+                console.log(`[Run Pet Matches] SMS notification sent to ${lostPet.contact_phone}`);
+              } catch (smsErr: any) {
+                console.error('[Run Pet Matches] Twilio SMS error:', smsErr.message || smsErr);
+              }
+            } else {
+              console.warn('[Run Pet Matches] Twilio is not configured. Skipping SMS.');
+            }
+          }
+
+          // Update notification count and append to notified_found_pets array
+          const updatedNotifiedFoundPets = [...(lostPet.notified_found_pets || []), foundPet.id]
+          
+          // Mutate in memory so subsequent loop iterations this run don't notify again
+          lostPet.notified_found_pets = updatedNotifiedFoundPets
+          lostPet.notification_count = (lostPet.notification_count || 0) + 1
+          lostPet.last_notification_at = new Date().toISOString()
+
+          try {
+            await supabaseAdmin
+              .from('lost_pets')
+              .update({
+                notification_count: lostPet.notification_count,
+                last_notification_at: lostPet.last_notification_at,
+                notified_found_pets: updatedNotifiedFoundPets
+              })
+              .eq('id', lostPet.id)
+          } catch (dbErr) {
+            console.error('[Run Pet Matches] DB update error:', dbErr)
+          }
+
+          results.push({
+            lostPetId: lostPet.id,
+            foundPetId: foundPet.id,
+            score,
+            notified: lostPet.contact_email
           })
-          .eq('id', lostPet.id)
-
-        results.push({
-          lostPetId: lostPet.id,
-          foundPetId: foundPet.id,
-          score,
-          notified: lostPet.contact_email
-        })
+        }
       }
     }
-  }
 
-  return NextResponse.json({ 
-    success: true, 
-    aiCallsUsed: aiCallCount,
-    matchesFound: results.length,
-    results 
-  })
+    return NextResponse.json({ 
+      success: true, 
+      aiCallsUsed: aiCallCount,
+      matchesFound: results.length,
+      results 
+    })
+  } catch (globalErr: any) {
+    console.error('[Run Pet Matches] Top-level error:', globalErr)
+    return NextResponse.json({
+      success: false,
+      error: globalErr?.message || 'Failed to run match check'
+    }, { status: 500 })
+  }
 }
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
