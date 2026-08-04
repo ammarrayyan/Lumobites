@@ -987,38 +987,54 @@ export default function AdminPage() {
                       <p className="text-[10px] text-gray-400 mt-0.5">Highest volume today</p>
                     </div>
                     <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-sm">
-                      <p className="text-xs text-gray-500 font-medium">Blocked Attempts Today</p>
-                      <p className={`text-2xl font-black mt-1 ${aiUsageStats.todayBlockedCount > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                        {aiUsageStats.todayBlockedCount || 0}
-                      </p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">Hit daily 2/day limit</p>
+                      <p className="text-xs text-gray-500 font-medium">Shared Monthly Cap</p>
+                      <p className="text-2xl font-black text-[#8B5E3C] mt-1">${aiUsageStats.monthTotalCost?.toFixed(2) || '0.00'} / ${aiUsageStats.sharedMonthlyCap || 100}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{aiUsageStats.sharedPercentUsed || 0}% of $100 budget used</p>
                     </div>
                   </div>
 
-                  {/* Feature-by-Feature Budget & Cap Progress */}
+                  {/* Shared $100 Monthly Budget Progress Bar */}
                   <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4 shadow-sm">
-                    <h3 className="font-bold text-[#4A3E3D] text-base">Feature Monthly Caps ($50 / Month Each)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {aiUsageStats.featureStats?.map((f: any) => (
-                        <div key={f.key} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-sm text-[#4A3E3D]">{f.name}</span>
-                            <span className="text-xs font-mono font-bold text-[#8B5E3C]">${f.monthCost.toFixed(2)} / ${f.monthlyCap}</span>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-bold text-[#4A3E3D] text-base">Shared Monthly Global AI Budget ($100 / Month)</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">Total spent across all 6 features combined in current calendar month</p>
+                      </div>
+                      <span className="font-mono font-bold text-sm text-[#8B5E3C]">
+                        ${aiUsageStats.monthTotalCost?.toFixed(2) || '0.00'} / ${aiUsageStats.sharedMonthlyCap || 100} ({aiUsageStats.sharedPercentUsed || 0}%)
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div
+                        className={`h-3 rounded-full transition-all ${
+                          (aiUsageStats.sharedPercentUsed || 0) >= 80
+                            ? 'bg-red-500'
+                            : (aiUsageStats.sharedPercentUsed || 0) >= 50
+                            ? 'bg-amber-500'
+                            : 'bg-emerald-500'
+                        }`}
+                        style={{ width: `${Math.min(aiUsageStats.sharedPercentUsed || 0, 100)}%` }}
+                      />
+                    </div>
+
+                    {/* Breakdown by Feature */}
+                    <div className="pt-4 border-t border-[#E8DDD4]">
+                      <h4 className="font-bold text-xs text-[#4A3E3D] uppercase tracking-wider mb-3">Feature Breakdown & Contribution</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {aiUsageStats.featureStats?.map((f: any) => (
+                          <div key={f.key} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 space-y-1.5">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-sm text-[#4A3E3D]">{f.name}</span>
+                              <span className="text-xs font-mono font-bold text-[#8B5E3C]">${f.monthCost.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px] text-gray-500">
+                              <span>Today: <strong>{f.todayCalls}</strong> calls</span>
+                              <span>Month: <strong>{f.monthCalls}</strong> calls ({f.percentOfTotalCost}% of spending)</span>
+                            </div>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                            <div
-                              className={`h-2.5 rounded-full transition-all ${
-                                f.percentUsed >= 80 ? 'bg-red-500' : f.percentUsed >= 50 ? 'bg-amber-500' : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${Math.min(f.percentUsed, 100)}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1">
-                            <span>Today: <strong>{f.todayCalls}</strong> calls ({f.todayBlocked} blocked)</span>
-                            <span>Month: <strong>{f.monthCalls}</strong> calls ({f.percentUsed}% of cap)</span>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -1031,7 +1047,6 @@ export default function AdminPage() {
                           <tr>
                             <th className="p-3">Date</th>
                             <th className="p-3">Successful Calls</th>
-                            <th className="p-3">Blocked Attempts</th>
                             <th className="p-3">Est. Cost ($)</th>
                           </tr>
                         </thead>
@@ -1040,11 +1055,6 @@ export default function AdminPage() {
                             <tr key={row.date} className="hover:bg-gray-50">
                               <td className="p-3 font-mono font-medium text-[#4A3E3D]">{row.date}</td>
                               <td className="p-3 font-bold text-[#8B5E3C]">{row.calls}</td>
-                              <td className="p-3">
-                                <span className={`px-2 py-0.5 rounded font-bold ${row.blocked > 0 ? 'bg-amber-100 text-amber-700' : 'text-gray-400'}`}>
-                                  {row.blocked}
-                                </span>
-                              </td>
                               <td className="p-3 font-mono font-medium text-gray-600">${row.cost.toFixed(3)}</td>
                             </tr>
                           ))}

@@ -52,6 +52,9 @@ export async function GET(request: Request) {
       adoption_matcher: 'Adoption Lifestyle/Visual Matcher',
     }
 
+    const SHARED_CAP = 100;
+    const sharedPercentUsed = parseFloat(((monthTotalCost / SHARED_CAP) * 100).toFixed(1))
+
     const featureStats = featureKeys.map(key => {
       const config = AI_LIMIT_CONFIG[key]
       const fMonthLogs = logs.filter(l => l.feature === key)
@@ -62,13 +65,9 @@ export async function GET(request: Request) {
         key,
         name: featureLabels[key] || key,
         todayCalls: fTodayLogs.length,
-        todayBlocked: 0,
         monthCalls: fMonthLogs.length,
-        monthBlocked: 0,
         monthCost: parseFloat(fCost.toFixed(3)),
-        monthlyCap: config.monthlyGlobalCostCap,
-        dailyUserLimit: config.dailyUserLimit,
-        percentUsed: parseFloat(((fCost / config.monthlyGlobalCostCap) * 100).toFixed(1)),
+        percentOfTotalCost: monthTotalCost > 0 ? parseFloat(((fCost / monthTotalCost) * 100).toFixed(1)) : 0,
       }
     })
 
@@ -90,12 +89,8 @@ export async function GET(request: Request) {
     logs.forEach(l => {
       const dateStr = l.created_at.split('T')[0]
       if (dailyTrendMap[dateStr]) {
-        if (l.status === 'blocked_daily' || l.status === 'blocked_global') {
-          dailyTrendMap[dateStr].blocked += 1
-        } else {
-          dailyTrendMap[dateStr].calls += 1
-          dailyTrendMap[dateStr].cost += Number(l.estimated_cost) || 0
-        }
+        dailyTrendMap[dateStr].calls += 1
+        dailyTrendMap[dateStr].cost += Number(l.estimated_cost) || 0
       }
     })
 
@@ -106,10 +101,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       todayTotalCalls,
-      todayBlockedCount,
       monthTotalCalls,
-      monthBlockedCount,
       monthTotalCost: parseFloat(monthTotalCost.toFixed(2)),
+      sharedMonthlyCap: SHARED_CAP,
+      sharedPercentUsed,
       mostUsedToday,
       mostUsedMonth,
       featureStats,

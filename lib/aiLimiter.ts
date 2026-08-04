@@ -8,17 +8,18 @@ export type AiFeatureKey =
   | 'sitter_search'
   | 'adoption_matcher';
 
+export const SHARED_MONTHLY_GLOBAL_CAP = 100; // USD total per month across all 6 features combined
+
 export const AI_LIMIT_CONFIG: Record<AiFeatureKey, {
   dailyUserLimit: number;
-  monthlyGlobalCostCap: number; // in USD
   estimatedCostPerCall: number; // in USD
 }> = {
-  ingredient_scanner: { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.003 },
-  vision_scanner:     { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.010 },
-  pet_twin:           { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.010 },
-  pet_search:         { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.005 },
-  sitter_search:      { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.003 },
-  adoption_matcher:   { dailyUserLimit: 2, monthlyGlobalCostCap: 50, estimatedCostPerCall: 0.003 },
+  ingredient_scanner: { dailyUserLimit: 2, estimatedCostPerCall: 0.003 },
+  vision_scanner:     { dailyUserLimit: 2, estimatedCostPerCall: 0.010 },
+  pet_twin:           { dailyUserLimit: 2, estimatedCostPerCall: 0.010 },
+  pet_search:         { dailyUserLimit: 2, estimatedCostPerCall: 0.005 },
+  sitter_search:      { dailyUserLimit: 2, estimatedCostPerCall: 0.003 },
+  adoption_matcher:   { dailyUserLimit: 2, estimatedCostPerCall: 0.003 },
 };
 
 const UNLIMITED_EMAILS = [
@@ -72,19 +73,18 @@ export async function checkAndTrackAiUsage({
       };
     }
 
-    // 3. Check global monthly $50 cost cap
+    // 3. Check global monthly $100 cost cap across ALL 6 features combined
     const { data: monthLogs, error: globalErr } = await supabaseAdmin
       .from('ai_usage_logs')
       .select('estimated_cost')
-      .eq('feature', feature)
       .gte('created_at', startOfMonth);
 
     if (!globalErr && monthLogs) {
-      const totalMonthCost = monthLogs.reduce((sum, log) => sum + (Number(log.estimated_cost) || config.estimatedCostPerCall), 0);
-      if (totalMonthCost >= config.monthlyGlobalCostCap) {
+      const totalMonthCost = monthLogs.reduce((sum, log) => sum + (Number(log.estimated_cost) || 0.005), 0);
+      if (totalMonthCost >= SHARED_MONTHLY_GLOBAL_CAP) {
         return {
           allowed: false,
-          reason: 'This feature is currently experiencing high demand. Please try again next month.',
+          reason: 'Lumo Bites AI services have reached their monthly global budget cap ($100/month across all features). Please try again next month.',
         };
       }
     }
