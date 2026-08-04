@@ -69,7 +69,7 @@ export async function checkAndTrackAiUsage({
     if (!userErr && userDailyCount !== null && userDailyCount >= 2) {
       return {
         allowed: false,
-        reason: 'Daily limit reached (2 AI uses per 24 hours across all features). Please try again tomorrow or upgrade your account.',
+        reason: "You've used your 2 free AI checks for today. Come back tomorrow for more!",
       };
     }
 
@@ -84,7 +84,7 @@ export async function checkAndTrackAiUsage({
       if (totalMonthCost >= SHARED_MONTHLY_GLOBAL_CAP) {
         return {
           allowed: false,
-          reason: 'Lumo Bites AI services have reached their monthly global budget cap ($100/month across all features). Please try again next month.',
+          reason: 'This feature is experiencing high demand right now. Please check back soon.',
         };
       }
     }
