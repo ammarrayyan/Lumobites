@@ -13,12 +13,17 @@ export async function POST(request: Request) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY || 're_123')
+  // ---- Twilio configuration (mirrors working send‑sms endpoint) ----
   const accountSid = process.env.TWILIO_ACCOUNT_SID
   const authToken = process.env.TWILIO_AUTH_TOKEN
   const fromNumber = process.env.TWILIO_PHONE_NUMBER
 
-  const hasTwilio = !!(accountSid && authToken && fromNumber)
-  const twilioClient = hasTwilio ? twilio(accountSid, authToken) : null
+  // Validate configuration – if missing, log error but continue match run.
+  if (!accountSid || !authToken || !fromNumber) {
+    console.error('[Run Pet Matches] Twilio configuration is missing – SMS will be skipped.')
+  }
+
+  const twilioClient = (accountSid && authToken) ? twilio(accountSid, authToken) : null
   let aiCallCount = 0
   const MAX_AI_CALLS = 100 // Hard cap
   const results = []
