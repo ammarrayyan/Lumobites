@@ -45,6 +45,11 @@ export default function PostLostPet() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [notifyMatches, setNotifyMatches] = useState(true);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setContactPhone(digitsOnly);
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
@@ -229,10 +234,17 @@ export default function PostLostPet() {
       setError('Please provide the last seen location.');
       return;
     }
-    if (type === 'lost' && notifyMatches && !contactPhone.trim()) {
-      setError('Please provide a phone number if you would like to receive match notifications.');
+    const cleanPhone = contactPhone.replace(/\D/g, '');
+    if (cleanPhone.length > 0 && cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit phone number.');
       return;
     }
+    if (type === 'lost' && notifyMatches && cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit phone number to receive match notifications.');
+      return;
+    }
+
+    const formattedPhone = cleanPhone.length === 10 ? `+1${cleanPhone}` : '';
 
     setLoading(true);
     try {
@@ -242,7 +254,7 @@ export default function PostLostPet() {
         body: JSON.stringify({
           type, species, pet_name: petName, description,
           city: finalCity, zip_code: zipCode, date_lost_found: dateLostFound,
-          contact_email: contactEmail, contact_phone: contactPhone,
+          contact_email: contactEmail, contact_phone: formattedPhone || null,
           photo_urls: photoUrls,
           latitude: finalLat, longitude: finalLng,
           notify_matches: notifyMatches
@@ -501,7 +513,20 @@ export default function PostLostPet() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number</label>
-                    <input type="tel" value={contactPhone} onChange={e => setContactPhone(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="(555) 555-5555" />
+                    <div className="relative flex items-center">
+                      <div className="absolute left-0 top-0 bottom-0 px-3.5 bg-[#E8DDD4]/50 border-r border-[#E8DDD4] rounded-l-xl flex items-center justify-center text-[#4A3E3D] font-bold text-sm select-none pointer-events-none">
+                        +1
+                      </div>
+                      <input 
+                        type="tel" 
+                        value={contactPhone} 
+                        onChange={handlePhoneChange} 
+                        maxLength={10}
+                        className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl pl-12 pr-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-mono tracking-wider" 
+                        placeholder="5555555555" 
+                      />
+                    </div>
+                    <p className="text-xs text-[#8B7E7D] mt-1 font-medium">Enter 10-digit US phone number</p>
                   </div>
                 </div>
               </div>
@@ -512,13 +537,13 @@ export default function PostLostPet() {
                     type="checkbox"
                     id="notify_matches"
                     name="notify_matches"
-                    checked={notifyMatches && contactPhone.trim() !== ''}
-                    disabled={contactPhone.trim() === ''}
+                    checked={notifyMatches && contactPhone.length === 10}
+                    disabled={contactPhone.length !== 10}
                     onChange={(e) => setNotifyMatches(e.target.checked)}
                     className="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  <label htmlFor="notify_matches" className={`text-sm ${contactPhone.trim() === '' ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600'}`}>
-                    Notify me when a possible match is found nearby (requires phone number)
+                  <label htmlFor="notify_matches" className={`text-sm ${contactPhone.length !== 10 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600'}`}>
+                    Notify me when a possible match is found nearby (requires 10-digit phone number)
                     <span className="text-xs text-gray-400 block mt-0.5">
                       We'll only notify you for strong matches (70%+ similarity) within 10 miles. Max 3 alerts per day.
                     </span>
