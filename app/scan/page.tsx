@@ -710,10 +710,11 @@ function ScanPageContent() {
     setLoading(true);
     setError(null);
     try {
+      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: text })
+        body: JSON.stringify({ ingredients: text, email: userEmail })
       });
       const data = await res.json();
       if (!res.ok) {

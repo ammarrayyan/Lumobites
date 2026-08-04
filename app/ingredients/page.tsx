@@ -37,10 +37,11 @@ export default function IngredientsPage() {
     setResults(null);
 
     try {
+      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: ingredientsText })
+        body: JSON.stringify({ ingredients: ingredientsText, email: userEmail })
       });
       const data = await res.json();
       if (!res.ok) {

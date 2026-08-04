@@ -668,9 +668,11 @@ export default function TwinPage() {
     }, 30000);
 
     try {
+      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const formData = new FormData();
       formData.append('image', uploadBlob, selectedFile.name || 'image.jpg');
       formData.append('quizAnswers', JSON.stringify(quizAnswers));
+      if (userEmail) formData.append('email', userEmail);
 
       const res = await fetch(`/api/twin?t=${Date.now()}`, {
         method: 'POST',

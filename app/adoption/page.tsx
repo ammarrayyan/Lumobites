@@ -439,12 +439,14 @@ function AdoptionContent() {
     setLifestyleMatches([]);
 
     try {
+      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const res = await fetch('/api/adoption/ai-match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: lifestylePrompt,
-          species: species !== 'all' ? species : undefined
+          species: species !== 'all' ? species : undefined,
+          email: userEmail
         })
       });
 
@@ -522,7 +524,7 @@ function AdoptionContent() {
       const res = await fetch('/api/adoption/visual-match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo: uploadedPhoto })
+        body: JSON.stringify({ photo: uploadedPhoto, email: userEmail })
       });
 
       if (res.ok) {

@@ -88,10 +88,17 @@ export async function POST(request: NextRequest) {
     if (photo) {
       let base64Data = photo;
       let mediaType = 'image/jpeg';
-      const matches = photo.match(/^data:(image\/[a-zA-Z0-9]+);base64,(.+)$/);
-      if (matches && matches.length === 3) {
-        mediaType = matches[1];
-        base64Data = matches[2];
+      if (typeof photo === 'string' && photo.includes('base64,')) {
+        const parts = photo.split('base64,');
+        base64Data = (parts[1] || '').trim();
+        const mimeMatch = parts[0]?.match(/data:([^;]+);/);
+        if (mimeMatch && mimeMatch[1]) {
+          const rawMime = mimeMatch[1].toLowerCase();
+          if (rawMime.includes('png')) mediaType = 'image/png';
+          else if (rawMime.includes('webp')) mediaType = 'image/webp';
+          else if (rawMime.includes('gif')) mediaType = 'image/gif';
+          else mediaType = 'image/jpeg';
+        }
       }
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
