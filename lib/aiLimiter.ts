@@ -58,18 +58,17 @@ export async function checkAndTrackAiUsage({
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
   try {
-    // 2. Check per-user 24-hour daily limit (2 uses/day)
+    // 2. Check per-user 24-hour daily limit (2 total AI uses per 24 hours across ALL features combined)
     const { count: userDailyCount, error: userErr } = await supabaseAdmin
       .from('ai_usage_logs')
       .select('*', { count: 'exact', head: true })
-      .eq('feature', feature)
       .eq('user_identifier', userIdentifier)
       .gte('created_at', twentyFourHoursAgo);
 
-    if (!userErr && userDailyCount !== null && userDailyCount >= config.dailyUserLimit) {
+    if (!userErr && userDailyCount !== null && userDailyCount >= 2) {
       return {
         allowed: false,
-        reason: 'Daily limit reached (2 uses per 24 hours). Please try again tomorrow or upgrade your account.',
+        reason: 'Daily limit reached (2 AI uses per 24 hours across all features). Please try again tomorrow or upgrade your account.',
       };
     }
 
