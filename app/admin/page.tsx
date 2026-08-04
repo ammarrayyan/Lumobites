@@ -24,7 +24,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'vet-clinics' | 'pet-daycares' | 'partner-billing' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast' | 'integrations'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'sitters' | 'shelters' | 'vet-clinics' | 'pet-daycares' | 'partner-billing' | 'requests' | 'accounts' | 'lost-pets' | 'adoption-pets' | 'reviews' | 'city-board' | 'twin-gallery' | 'affiliates' | 'reports' | 'pet-matching' | 'outreach' | 'broadcast' | 'integrations' | 'ai-usage'>('stats');
 
   useEffect(() => {
     // Check if we have a saved key in session storage
@@ -100,6 +100,30 @@ export default function AdminPage() {
       fetchMatchHistory(1);
     }
   }, [isAuthenticated, activeTab, password, fetchMatchHistory]);
+
+  const [aiUsageStats, setAiUsageStats] = useState<any>(null);
+  const [aiUsageLoading, setAiUsageLoading] = useState(false);
+
+  const fetchAiUsageStats = useCallback(() => {
+    setAiUsageLoading(true);
+    fetch('/api/admin/ai-usage-stats', {
+      headers: { 'x-admin-key': password }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.error) {
+        setAiUsageStats(data);
+      }
+    })
+    .catch(err => console.error('Failed to fetch AI usage stats:', err))
+    .finally(() => setAiUsageLoading(false));
+  }, [password]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'ai-usage') {
+      fetchAiUsageStats();
+    }
+  }, [isAuthenticated, activeTab, password, fetchAiUsageStats]);
 
   const handleRunMatches = async () => {
     setMatchLoading(true)
@@ -475,6 +499,16 @@ export default function AdminPage() {
             }`}
           >
             Integrations
+          </button>
+          <button
+            onClick={() => setActiveTab('ai-usage')}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+              activeTab === 'ai-usage'
+                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
+                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
+            }`}
+          >
+            🤖 AI Usage & Caps
           </button>
         </div>
 
@@ -907,6 +941,123 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+          {activeTab === 'ai-usage' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="text-xl font-bold text-[#4A3E3D]">AI Usage & Rate Limit Analytics</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Real-time tracking of AI API calls, per-user daily limits (2/day), global $50/mo feature caps, and blocked attempts.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchAiUsageStats}
+                  disabled={aiUsageLoading}
+                  className="px-4 py-2 bg-[#8B5E3C] text-white rounded-xl text-xs font-bold hover:bg-[#7A5234] transition-all disabled:opacity-50"
+                >
+                  {aiUsageLoading ? 'Refreshing...' : '🔄 Refresh Analytics'}
+                </button>
+              </div>
+
+              {aiUsageLoading && !aiUsageStats ? (
+                <div className="py-12 text-center text-sm text-gray-500 bg-white border border-[#E8DDD4] rounded-xl">
+                  Loading AI usage analytics...
+                </div>
+              ) : aiUsageStats ? (
+                <>
+                  {/* Top Metric Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-sm">
+                      <p className="text-xs text-gray-500 font-medium">Today's Total AI Calls</p>
+                      <p className="text-2xl font-black text-[#8B5E3C] mt-1">{aiUsageStats.todayTotalCalls || 0}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Across all 6 AI features</p>
+                    </div>
+                    <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-sm">
+                      <p className="text-xs text-gray-500 font-medium">This Month's Cost</p>
+                      <p className="text-2xl font-black text-[#8B5E3C] mt-1">${aiUsageStats.monthTotalCost?.toFixed(2) || '0.00'}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Total across features</p>
+                    </div>
+                    <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-sm">
+                      <p className="text-xs text-gray-500 font-medium">Most-Used Feature</p>
+                      <p className="text-sm font-bold text-[#4A3E3D] mt-2 truncate" title={aiUsageStats.mostUsedToday}>
+                        {aiUsageStats.mostUsedToday}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Highest volume today</p>
+                    </div>
+                    <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-sm">
+                      <p className="text-xs text-gray-500 font-medium">Blocked Attempts Today</p>
+                      <p className={`text-2xl font-black mt-1 ${aiUsageStats.todayBlockedCount > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                        {aiUsageStats.todayBlockedCount || 0}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Hit daily 2/day limit</p>
+                    </div>
+                  </div>
+
+                  {/* Feature-by-Feature Budget & Cap Progress */}
+                  <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4 shadow-sm">
+                    <h3 className="font-bold text-[#4A3E3D] text-base">Feature Monthly Caps ($50 / Month Each)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {aiUsageStats.featureStats?.map((f: any) => (
+                        <div key={f.key} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-sm text-[#4A3E3D]">{f.name}</span>
+                            <span className="text-xs font-mono font-bold text-[#8B5E3C]">${f.monthCost.toFixed(2)} / ${f.monthlyCap}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className={`h-2.5 rounded-full transition-all ${
+                                f.percentUsed >= 80 ? 'bg-red-500' : f.percentUsed >= 50 ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${Math.min(f.percentUsed, 100)}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1">
+                            <span>Today: <strong>{f.todayCalls}</strong> calls ({f.todayBlocked} blocked)</span>
+                            <span>Month: <strong>{f.monthCalls}</strong> calls ({f.percentUsed}% of cap)</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 7-Day Usage Trend Table */}
+                  <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4 shadow-sm">
+                    <h3 className="font-bold text-[#4A3E3D] text-base">7-Day Daily Usage Trend</h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-[#FAF6F4] text-[#4A3E3D] font-bold border-b border-[#E8DDD4]">
+                          <tr>
+                            <th className="p-3">Date</th>
+                            <th className="p-3">Successful Calls</th>
+                            <th className="p-3">Blocked Attempts</th>
+                            <th className="p-3">Est. Cost ($)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#E8DDD4]">
+                          {aiUsageStats.dailyTrend?.map((row: any) => (
+                            <tr key={row.date} className="hover:bg-gray-50">
+                              <td className="p-3 font-mono font-medium text-[#4A3E3D]">{row.date}</td>
+                              <td className="p-3 font-bold text-[#8B5E3C]">{row.calls}</td>
+                              <td className="p-3">
+                                <span className={`px-2 py-0.5 rounded font-bold ${row.blocked > 0 ? 'bg-amber-100 text-amber-700' : 'text-gray-400'}`}>
+                                  {row.blocked}
+                                </span>
+                              </td>
+                              <td className="p-3 font-mono font-medium text-gray-600">${row.cost.toFixed(3)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 text-center text-sm text-gray-500 bg-white border border-[#E8DDD4] rounded-xl">
+                  No AI usage data available yet.
+                </div>
+              )}
             </div>
           )}
         </div>
