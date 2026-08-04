@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, species } = await request.json();
+    const body = await request.json();
+    const { prompt, species, email } = body;
 
     if (!prompt) {
       return NextResponse.json({ error: 'Please describe what type of pet you are looking for.' }, { status: 400 });
+    }
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'adoption_matcher',
+      userEmail: email,
+      request,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
     }
 
     // Fetch Lumo Bites shelter listings

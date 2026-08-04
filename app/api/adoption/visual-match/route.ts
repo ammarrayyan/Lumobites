@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export async function POST(request: NextRequest) {
   try {
-    const { photo } = await request.json();
+    const body = await request.json();
+    const { photo, email } = body;
 
     if (!photo) {
       return NextResponse.json({ error: 'Photo is required for visual matching.' }, { status: 400 });
+    }
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'adoption_matcher',
+      userEmail: email,
+      request,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
     }
 
     // Fetch Lumo Bites shelter listings only (Part 5 requirement: Lumo Bites listings only)

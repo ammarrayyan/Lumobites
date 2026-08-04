@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatPublicCity } from '@/lib/formatCity';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { query: searchQuery, email: ownerEmail, sitterIds } = body;
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'sitter_search',
+      userEmail: ownerEmail,
+      request,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+    }
 
     if (!searchQuery || !searchQuery.trim()) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 });

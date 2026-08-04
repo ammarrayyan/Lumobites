@@ -1,12 +1,24 @@
 import { NextResponse } from 'next/server';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const image = formData.get('image') as File | null;
+    const userEmail = (formData.get('email') as string | null) || (formData.get('userEmail') as string | null);
 
     if (!image) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
+    }
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'vision_scanner',
+      userEmail,
+      request: req,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;

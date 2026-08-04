@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { Resend } from 'resend';
+import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -442,6 +445,17 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const image = formData.get('image') as File | null;
+    const userEmail = (formData.get('email') as string | null) || (formData.get('userEmail') as string | null);
+
+    const limitCheck = await checkAndTrackAiUsage({
+      feature: 'pet_twin',
+      userEmail,
+      request: req,
+    });
+
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+    }
     const quizAnswersStr = formData.get('quizAnswers') as string | null;
     let quizAnswersText = "";
     if (quizAnswersStr) {
