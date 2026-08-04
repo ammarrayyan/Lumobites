@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Settings } from 'lucide-react';
 import SitterManagement from '@/components/admin/SitterManagement';
 import StatisticsDashboard from '@/components/admin/StatisticsDashboard';
@@ -56,6 +56,32 @@ export default function AdminPage() {
     }
   }, [isAuthenticated, activeTab, password]);
 
+  const [matchResults, setMatchResults] = useState<any>(null)
+  const [matchLoading, setMatchLoading] = useState(false)
+  const [matchHistory, setMatchHistory] = useState<any[]>([])
+  const [historyPage, setHistoryPage] = useState(1)
+  const [historyTotalPages, setHistoryTotalPages] = useState(1)
+  const [historyTotalCount, setHistoryTotalCount] = useState(0)
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  const fetchMatchHistory = useCallback((page = 1) => {
+    setHistoryLoading(true);
+    fetch(`/api/admin/pet-match-history?page=${page}&limit=20`, {
+      headers: { 'x-admin-key': password }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.logs) {
+        setMatchHistory(data.logs);
+        setHistoryPage(data.page || page);
+        setHistoryTotalPages(data.totalPages || 1);
+        setHistoryTotalCount(data.total || 0);
+      }
+    })
+    .catch(err => console.error('Failed to fetch match history:', err))
+    .finally(() => setHistoryLoading(false));
+  }, [password]);
+
   useEffect(() => {
     if (isAuthenticated && activeTab === 'pet-matching') {
       fetch('/api/admin/pet-matches-stats', {
@@ -70,11 +96,10 @@ export default function AdminPage() {
         }
       })
       .catch(err => console.error('Failed to fetch pet match stats:', err));
-    }
-  }, [isAuthenticated, activeTab, password]);
 
-  const [matchResults, setMatchResults] = useState<any>(null)
-  const [matchLoading, setMatchLoading] = useState(false)
+      fetchMatchHistory(1);
+    }
+  }, [isAuthenticated, activeTab, password, fetchMatchHistory]);
 
   const handleRunMatches = async () => {
     setMatchLoading(true)
@@ -89,6 +114,7 @@ export default function AdminPage() {
       })
       const data = await res.json()
       setMatchResults(data)
+      fetchMatchHistory(1)
     } catch (err) {
       setMatchResults({ error: 'Failed to run match check' })
     }
@@ -533,6 +559,115 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* Match History Table */}
+              <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div>
+                    <h3 className="font-bold text-[#4A3E3D]">Match History Log</h3>
+                    <p className="text-xs text-gray-500">Permanent audit log of all matched pet reports and notification delivery statuses.</p>
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 bg-[#FAF6F4] px-3 py-1 rounded-full border border-[#E8DDD4]">
+                    {historyTotalCount} Total Matches Recorded
+                  </span>
+                </div>
+
+                {historyLoading ? (
+                  <div className="py-8 text-center text-sm text-gray-500">Loading match history...</div>
+                ) : matchHistory.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-gray-500 bg-[#FAF6F4] rounded-xl border border-dashed border-[#E8DDD4]">
+                    No match history logs recorded yet. Run a match check above to generate logs.
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-[#FAF6F4] text-[#4A3E3D] font-bold border-b border-[#E8DDD4]">
+                          <tr>
+                            <th className="p-3">Lost Pet</th>
+                            <th className="p-3">Found Pet</th>
+                            <th className="p-3">Score</th>
+                            <th className="p-3">Matched At</th>
+                            <th className="p-3">Email Status</th>
+                            <th className="p-3">SMS Status</th>
+                            <th className="p-3">Push Status</th>
+                            <th className="p-3">Error Details</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#E8DDD4]">
+                          {matchHistory.map((log: any) => (
+                            <tr key={log.id} className="hover:bg-gray-50">
+                              <td className="p-3 font-medium text-[#4A3E3D]">
+                                {log.lost_pet_name || 'Unnamed'}
+                                <span className="block text-[10px] text-gray-400 font-mono">{log.lost_pet_id ? `${log.lost_pet_id.slice(0, 8)}...` : 'N/A'}</span>
+                              </td>
+                              <td className="p-3 font-medium text-[#4A3E3D]">
+                                {log.found_pet_name || 'Unnamed'}
+                                <span className="block text-[10px] text-gray-400 font-mono">{log.found_pet_id ? `${log.found_pet_id.slice(0, 8)}...` : 'N/A'}</span>
+                              </td>
+                              <td className="p-3">
+                                <span className="font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4]">
+                                  {log.score}%
+                                </span>
+                              </td>
+                              <td className="p-3 text-gray-500 whitespace-nowrap">
+                                {new Date(log.created_at || log.run_at).toLocaleString()}
+                              </td>
+                              <td className="p-3">
+                                <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${log.email_status === 'sent' ? 'bg-green-100 text-green-700' : log.email_status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                                  {log.email_status === 'sent' ? '✓ Sent' : log.email_status === 'failed' ? '✕ Failed' : 'Skipped'}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${log.sms_status === 'sent' ? 'bg-green-100 text-green-700' : log.sms_status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                                  {log.sms_status === 'sent' ? '✓ Sent' : log.sms_status === 'failed' ? '✕ Failed' : 'Skipped'}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${log.push_status === 'sent' ? 'bg-green-100 text-green-700' : log.push_status === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                                  {log.push_status === 'sent' ? '✓ Sent' : log.push_status === 'failed' ? '✕ Failed' : 'Skipped'}
+                                </span>
+                              </td>
+                              <td className="p-3 text-gray-500 max-w-xs truncate" title={log.email_error || log.sms_error || log.push_error || 'None'}>
+                                {log.email_error || log.sms_error || log.push_error ? (
+                                  <span className="text-red-500 font-mono text-[11px]">
+                                    {log.email_error ? `Email: ${log.email_error}` : log.sms_error ? `SMS: ${log.sms_error}` : `Push: ${log.push_error}`}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Pagination controls */}
+                    {historyTotalPages > 1 && (
+                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#E8DDD4] text-xs">
+                        <button
+                          onClick={() => fetchMatchHistory(historyPage - 1)}
+                          disabled={historyPage <= 1}
+                          className="px-3 py-1.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg disabled:opacity-40 font-bold text-[#4A3E3D]"
+                        >
+                          &larr; Previous
+                        </button>
+                        <span className="text-gray-500 font-medium">
+                          Page {historyPage} of {historyTotalPages}
+                        </span>
+                        <button
+                          onClick={() => fetchMatchHistory(historyPage + 1)}
+                          disabled={historyPage >= historyTotalPages}
+                          className="px-3 py-1.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg disabled:opacity-40 font-bold text-[#4A3E3D]"
+                        >
+                          Next &rarr;
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
