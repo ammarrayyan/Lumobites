@@ -2316,6 +2316,90 @@ export default function TwinPage() {
 
 
 
+      {/* SIGN-IN / VERIFICATION MODAL OVERLAY */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-[#EEEEEE] relative animate-scale-up space-y-5">
+            <button
+              onClick={() => {
+                setShowUpgradeModal(false);
+                setPendingFile(null);
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-[#8B5E3C]/10 text-[#8B5E3C] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-[#191919]">
+                {modalStep === 'verification' ? 'Enter 6-Digit Code' : 'Sign in to see your Pet Twin'}
+              </h3>
+              <p className="text-xs text-gray-500 max-w-xs mx-auto">
+                {modalStep === 'verification'
+                  ? `We sent a 6-digit verification code to ${modalEmail}.`
+                  : 'Enter your email to calculate your AI breed match and save your results.'}
+              </p>
+            </div>
+
+            {modalMessage && (
+              <div className={`p-3 rounded-xl text-xs font-medium text-center ${modalMessage.isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                {modalMessage.text}
+              </div>
+            )}
+
+            {modalStep !== 'verification' ? (
+              <form onSubmit={handleUpgrade} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={modalEmail}
+                    onChange={(e) => setModalEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C] text-sm text-[#191919]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={modalLoading}
+                  className="w-full py-3 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold rounded-xl text-sm transition-all shadow-md disabled:opacity-50"
+                >
+                  {modalLoading ? 'Sending Code...' : 'Continue with Email'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyCode} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Verification Code</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.trim())}
+                    placeholder="123456"
+                    className="w-full px-4 py-3 text-center tracking-widest font-mono text-lg rounded-xl border border-[#E8DDD4] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C] text-[#191919]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={modalLoading}
+                  className="w-full py-3 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold rounded-xl text-sm transition-all shadow-md disabled:opacity-50"
+                >
+                  {modalLoading ? 'Verifying...' : 'Verify Code & Match Pet Twin'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Embedded CSS animations for the modal */}
       <style>{`
         @keyframes fadeIn {
