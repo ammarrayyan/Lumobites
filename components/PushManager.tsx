@@ -4,10 +4,45 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { app, getToken, onMessage, getMessaging } from '@/lib/firebase';
 
+const clearAppBadgeCount = async () => {
+  try {
+    // 1. Web PWA Standard API (iOS Safari PWA & Android Chrome PWA)
+    if (typeof navigator !== 'undefined') {
+      if ('clearAppBadge' in navigator) {
+        await (navigator as any).clearAppBadge().catch(() => {});
+      } else if ('setAppBadge' in navigator) {
+        await (navigator as any).setAppBadge(0).catch(() => {});
+      }
+    }
+
+    // 2. Capacitor Native API (iOS & Android Native)
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+      try {
+        const { PushNotifications } = await import('@capacitor/push-notifications');
+        await PushNotifications.removeAllDeliveredNotifications();
+      } catch (e) {}
+
+      try {
+        const { Badge } = await import('@capawesome/capacitor-badge');
+        await Badge.set({ count: 0 });
+      } catch (e) {}
+    }
+  } catch (err) {
+    console.warn('[PushManager] Error clearing app badge:', err);
+  }
+};
+
 export default function PushManager() {
   const router = useRouter();
   useEffect(() => {
     console.log('[PushManager] *** MOUNTING ***');
+    
+    // Clear badge count on startup and when foregrounded
+    clearAppBadgeCount();
+
+    const handleForeground = () => clearAppBadgeCount();
+    window.addEventListener('focus', handleForeground);
+    document.addEventListener('visibilitychange', handleForeground);
     console.log('[PushManager] Platform check:', 
       typeof window !== 'undefined' ? (window as any).Capacitor?.getPlatform() ?? 'Capacitor not detected' : 'no window'
     );
@@ -203,6 +238,8 @@ export default function PushManager() {
     window.addEventListener('lumo-pro-update', handleLogin);
     window.addEventListener('storage', handleLogin);
     return () => {
+      window.removeEventListener('focus', handleForeground);
+      document.removeEventListener('visibilitychange', handleForeground);
       window.removeEventListener('lumo-pro-update', handleLogin);
       window.removeEventListener('storage', handleLogin);
     };
