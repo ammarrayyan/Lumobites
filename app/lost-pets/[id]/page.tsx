@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2 } from 'lucide-react';
 
 export default function LostPetDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -17,6 +17,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [newComment, setNewComment] = useState('');
   const [commentAuthor, setCommentAuthor] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [commentPhoto, setCommentPhoto] = useState<string | null>(null);
+  const [commentPhotoPreview, setCommentPhotoPreview] = useState<string | null>(null);
 
   const [copied, setCopied] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -211,6 +213,73 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     }
   };
 
+  const handleCommentPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      try {
+        const compressedBase64 = await resizeCommentPhoto(file);
+        setCommentPhoto(compressedBase64);
+        setCommentPhotoPreview(URL.createObjectURL(file));
+      } catch (err) {
+        console.error('Failed to compress comment photo:', err);
+      }
+    }
+  };
+
+  const resizeCommentPhoto = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm("Are you sure you want to delete your update?")) return;
+
+    try {
+      const res = await fetch('/api/lost-pets/comments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment_id: commentId, email: userEmail })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete comment');
+      }
+
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err: any) {
+      alert(err.message || 'Could not delete comment.');
+    }
+  };
+
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !commentAuthor.trim()) return;
@@ -223,13 +292,17 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         body: JSON.stringify({
           lost_pet_id: id,
           author_name: commentAuthor,
-          comment_text: newComment
+          comment_text: newComment,
+          author_email: userEmail,
+          photo_url: commentPhoto
         })
       });
       const data = await res.json();
       if (res.ok) {
         setComments([...comments, data.comment]);
         setNewComment('');
+        setCommentPhoto(null);
+        setCommentPhotoPreview(null);
       }
     } catch (err) {
       console.error(err);
@@ -506,15 +579,52 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           <h3 className="text-2xl font-black text-[#4A3E3D] mb-6">Community Updates ({comments.length})</h3>
           
           <div className="space-y-6 mb-8">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DDD4]">
-                <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-bold text-[#4A3E3D]">{comment.author_name}</h4>
-                  <span className="text-xs text-[#8B7E7D]">{formatDistanceToNow(new Date(comment.created_at))} ago</span>
+            {comments.map((comment) => {
+              const isAuthor = userEmail && (
+                (comment.author_email && comment.author_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) ||
+                userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' ||
+                userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'
+              );
+
+              return (
+                <div key={comment.id} className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DDD4] space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-[#4A3E3D]">{comment.author_name}</h4>
+                      <span className="text-xs text-[#8B7E7D]">{formatDistanceToNow(new Date(comment.created_at))} ago</span>
+                    </div>
+                    {isAuthor && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                        title="Delete your update"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[#555555]">{comment.comment_text}</p>
+
+                  {/* Comment Photo Thumbnail */}
+                  {comment.photo_url && (
+                    <div className="pt-1">
+                      <img
+                        src={comment.photo_url}
+                        alt="Sighting Attachment"
+                        onClick={() => {
+                          // Insert comment photo dynamically into photosList for zoom
+                          photosList.unshift(comment.photo_url);
+                          setLightboxIndex(0);
+                          setLightboxOpen(true);
+                        }}
+                        className="w-36 h-36 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1 italic">Click image to zoom</p>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[#555555]">{comment.comment_text}</p>
-              </div>
-            ))}
+              );
+            })}
             {comments.length === 0 && (
               <p className="text-[#8B7E7D] text-center italic py-4">No updates yet. Be the first to share information!</p>
             )}
@@ -540,6 +650,31 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 <div>
                   <textarea required rows={3} value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Share a sighting or helpful info..." className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
                 </div>
+
+                {/* Photo Attachment Picker */}
+                <div>
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-4 py-2.5 rounded-xl cursor-pointer hover:bg-gray-50 transition-all shadow-xs">
+                    <Camera className="w-4 h-4 text-[#8B5E3C]" />
+                    {commentPhotoPreview ? 'Change Sighting Photo' : '📷 Attach Photo of Sighting (Optional)'}
+                    <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
+                  </label>
+                  {commentPhotoPreview && (
+                    <div className="mt-3 relative inline-block">
+                      <img src={commentPhotoPreview} alt="Preview" className="w-24 h-24 object-cover rounded-xl border border-[#E8DDD4]" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCommentPhoto(null);
+                          setCommentPhotoPreview(null);
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <button type="submit" disabled={submittingComment || !newComment.trim() || !commentAuthor.trim()} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50">
                   {submittingComment ? 'Posting...' : 'Post Update'}
                 </button>
