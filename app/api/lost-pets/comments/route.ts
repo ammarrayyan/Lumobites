@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 
 const ADMIN_EMAILS = ['ammar-rayyan@hotmail.com', 'reviewer@lumobites.net'];
 
@@ -64,6 +65,48 @@ export async function POST(request: NextRequest) {
     }
 
     if (error) throw error;
+
+    // ── Send In-App & Firebase Push Notifications to Pet Owner ───────────────
+    try {
+      const { data: pet } = await supabaseAdmin
+        .from('lost_pets')
+        .select('contact_email, pet_name, species, type')
+        .eq('id', lost_pet_id)
+        .single();
+
+      if (pet && pet.contact_email) {
+        const ownerEmail = pet.contact_email.toLowerCase().trim();
+        const commenterEmail = (author_email || '').toLowerCase().trim();
+
+        // Do not notify if owner is commenting on their own post
+        if (ownerEmail !== commenterEmail) {
+          const petLabel = pet.pet_name || pet.species || 'pet';
+          const notifTitle = `New update on ${petLabel} 🐾`;
+          const notifBody = `${author_name}: "${comment_text.slice(0, 80)}"`;
+          const notifLink = `/lost-pets/${lost_pet_id}`;
+
+          // Channel 1: In-App Bell Notification
+          await supabaseAdmin.from('notifications').insert({
+            recipient_email: ownerEmail,
+            type: 'lost_pet_update',
+            title: notifTitle,
+            message: notifBody,
+            link: notifLink,
+            read: false
+          }).catch(err => console.error('[Lost Pets Comments POST] In-App notif error:', err));
+
+          // Channel 2: Firebase Mobile Push Notification
+          await sendPushNotification(
+            ownerEmail,
+            notifTitle,
+            notifBody,
+            notifLink
+          ).catch(err => console.error('[Lost Pets Comments POST] Push notif error:', err));
+        }
+      }
+    } catch (notifErr) {
+      console.error('[Lost Pets Comments POST] Notification trigger error:', notifErr);
+    }
 
     return NextResponse.json({ comment: data });
   } catch (err: any) {
