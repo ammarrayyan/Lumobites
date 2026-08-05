@@ -120,6 +120,7 @@ export default function TwinPage() {
   // Stripe & subscription state
   const [isPro, setIsPro] = useState(false);
   const [proEmail, setProEmail] = useState('');
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [modalEmail, setModalEmail] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
@@ -426,6 +427,12 @@ export default function TwinPage() {
         setModalMessage(null);
         setVerificationCode('');
         setModalStep('paywall');
+
+        if (pendingFile) {
+          const fileToRun = pendingFile;
+          setPendingFile(null);
+          processFile(fileToRun);
+        }
         if (data.existed) {
           alert('Welcome back! ✨');
         } else {
@@ -636,6 +643,17 @@ export default function TwinPage() {
   };
 
   const processFile = async (selectedFile: File) => {
+    const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || proEmail) : null) || '';
+    
+    // Check if user is signed in BEFORE calling AI API
+    if (!userEmail || !userEmail.trim()) {
+      setPendingFile(selectedFile);
+      setModalStep('upgrade_email');
+      setModalMessage({ text: 'Please sign in or enter your email to find your Pet Twin match.', isError: false });
+      setShowUpgradeModal(true);
+      return;
+    }
+
     if (!checkTwinLimit()) {
       return;
     }
