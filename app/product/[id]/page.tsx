@@ -169,20 +169,15 @@ export default function ProductDetailPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '280px' }}>
-      {/* Header */}
-      <header style={{ backgroundColor: '#FFFFFF', position: 'sticky', top: 'calc(env(safe-area-inset-top, 0px) + 72px)', zIndex: 30, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4' }}>
-        <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B5E3C', flexShrink: 0 }}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '24px', height: '24px' }}>
+      {/* Navigation Sub-header with Back Arrow */}
+      <div style={{ backgroundColor: '#FFFFFF', position: 'sticky', top: '0', zIndex: 30, padding: '12px 24px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #E8DDD4' }}>
+        <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B5E3C', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '20px', height: '20px' }}>
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
+          Back
         </button>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-      </header>
+      </div>
  
       {/* Hero */}
       <div style={{ backgroundColor: '#FFFFFF', paddingTop: '32px', paddingBottom: '40px', paddingLeft: '24px', paddingRight: '24px', borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '24px' }}>

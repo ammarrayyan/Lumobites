@@ -162,20 +162,15 @@ export default function ResultsPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '48px' }}>
-      {/* Header */}
-      <header style={{ backgroundColor: '#FFFFFF', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '1px solid #E8DDD4', position: 'sticky', top: 'calc(env(safe-area-inset-top, 0px) + 72px)', zIndex: 30, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-        <Link href="/chat" style={{ color: '#8B5E3C', textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '24px', height: '24px' }}>
+      {/* Navigation Sub-header with Back Arrow */}
+      <div style={{ backgroundColor: '#FFFFFF', padding: '12px 24px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #E8DDD4', position: 'sticky', top: '0', zIndex: 30, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+        <Link href="/chat" style={{ color: '#8B5E3C', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '20px', height: '20px' }}>
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
+          Back to Food Finder
         </Link>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '40px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
-          </div>
-        </Link>
-      </header>
+      </div>
       
       <main style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
         {profile && (
