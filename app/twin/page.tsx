@@ -348,6 +348,7 @@ export default function TwinPage() {
     } catch (err: any) {
       console.error(err);
       setModalMessage({ text: err.message || 'Something went wrong. Please try again.', isError: true });
+    } finally {
       setModalLoading(false);
     }
   };
