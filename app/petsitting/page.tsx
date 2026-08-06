@@ -1304,10 +1304,16 @@ export function PetSittingContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: aiSitterSearch, email, sitterIds })
       });
-      if (!response.ok) throw new Error('Search failed');
       const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 429 || data.error) {
+          alert(data.error || 'You have reached your daily limit.');
+          return;
+        }
+        throw new Error(data.error || 'Search failed');
+      }
       setAiSitterResults(data.sitters || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('AI search error:', error);
       setAiSitterResults([]); // empty array to trigger fallback
       alert('Search unavailable — showing all sitters instead');

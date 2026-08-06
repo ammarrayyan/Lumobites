@@ -134,8 +134,7 @@ export default function PhotoPage() {
         setConfidence(data.confidence || '');
         setBreedDescription(data.breedDescription || '');
       } else {
-        // Surface error to user for debugging
-        alert('API Error: ' + (data.error || 'Unknown error'));
+        alert(data.error || 'Failed to analyze photo.');
         setDetectedBreed('Unknown Breed');
       }
       setStep('confirm_breed');

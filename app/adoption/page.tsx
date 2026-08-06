@@ -450,12 +450,15 @@ function AdoptionContent() {
         })
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setLifestyleMatches(data.matches || []);
+      } else {
+        alert(data.error || 'Failed to generate lifestyle matches.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI match error:', err);
+      alert(err.message || 'An error occurred while matching.');
     } finally {
       setIsLifestyleLoading(false);
     }
@@ -527,16 +530,19 @@ function AdoptionContent() {
         body: JSON.stringify({ photo: uploadedPhoto, email: userEmail })
       });
 
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         if (data.empty) {
           setVisualEmptyMessage(data.message || 'No local rescue photos yet to compare.');
         } else {
           setVisualMatches(data.matches || []);
         }
+      } else {
+        alert(data.error || 'Failed to compare visual match.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Visual match error:', err);
+      alert(err.message || 'An error occurred while running visual match.');
     } finally {
       setIsVisualLoading(false);
     }
