@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!limitCheck.allowed) {
-      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+      return NextResponse.json({ error: limitCheck.reason, isPro: limitCheck.isPro }, { status: 429 });
     }
 
     // Fetch Lumo Bites shelter listings only (Part 5 requirement: Lumo Bites listings only)

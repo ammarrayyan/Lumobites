@@ -121,6 +121,7 @@ function AdoptionContent() {
   const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
   const [lifestylePrompt, setLifestylePrompt] = useState('');
   const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
   const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
@@ -454,6 +455,7 @@ function AdoptionContent() {
       } else {
         if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
           setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
           setIsAiLimitModalOpen(true);
           return;
         }
@@ -538,6 +540,7 @@ function AdoptionContent() {
       } else {
         if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
           setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
           setIsAiLimitModalOpen(true);
           return;
         }
@@ -1375,6 +1378,7 @@ function AdoptionContent() {
         isOpen={isAiLimitModalOpen}
         onClose={() => setIsAiLimitModalOpen(false)}
         reason={aiLimitReason}
+        isPro={aiLimitIsPro}
       />
     </div>
   );

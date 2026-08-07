@@ -565,6 +565,7 @@ export function PetSittingContent() {
   const [selfDeclared, setSelfDeclared] = useState(false);
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
   const [needsReapproval, setNeedsReapproval] = useState(false);
 
   // Bookings Flow State
@@ -1313,6 +1314,7 @@ export function PetSittingContent() {
       if (!response.ok) {
         if (response.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
           setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
           setIsAiLimitModalOpen(true);
           return;
         }
@@ -7321,7 +7323,7 @@ export function PetSittingContent() {
         isOpen={isAiLimitModalOpen}
         onClose={() => setIsAiLimitModalOpen(false)}
         reason={aiLimitReason}
-        isPro={isProSitter}
+        isPro={aiLimitIsPro}
       />
 
       {/* Report Modal */}

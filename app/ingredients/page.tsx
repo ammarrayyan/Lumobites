@@ -13,6 +13,7 @@ export default function IngredientsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
   const [results, setResults] = useState<{
     grade: string;
     dangerous: { name: string; reason: string }[];
@@ -51,6 +52,7 @@ export default function IngredientsPage() {
       if (!res.ok) {
         if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
           setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
           setIsAiLimitModalOpen(true);
           return;
         }
@@ -279,6 +281,7 @@ export default function IngredientsPage() {
           isOpen={isAiLimitModalOpen}
           onClose={() => setIsAiLimitModalOpen(false)}
           reason={aiLimitReason}
+          isPro={aiLimitIsPro}
         />
       </main>
 

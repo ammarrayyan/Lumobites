@@ -93,6 +93,7 @@ function ChatPageContent() {
   const [photoAmazonLoading, setPhotoAmazonLoading] = useState(false);
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
 
   const handleAnalyzePhoto = async () => {
     if (!photoFile) return;
@@ -117,6 +118,7 @@ function ChatPageContent() {
       if (!res.ok) {
         if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
           setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
           setIsAiLimitModalOpen(true);
           return;
         }
@@ -590,6 +592,7 @@ function ChatPageContent() {
         isOpen={isAiLimitModalOpen}
         onClose={() => setIsAiLimitModalOpen(false)}
         reason={aiLimitReason}
+        isPro={aiLimitIsPro}
       />
       
       {flow === 'selection' && (

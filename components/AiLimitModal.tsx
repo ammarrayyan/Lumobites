@@ -16,9 +16,11 @@ export default function AiLimitModal({ isOpen, onClose, reason, isPro }: AiLimit
 
   const cleanReason = (reason || '').trim();
 
-  // Determine state category
+  // Determine state category: trust explicit boolean isPro first, text fallback if missing
   const isSignedOut = !cleanReason || cleanReason.toLowerCase().includes('sign in');
-  const isDailyLimitPro = isPro || cleanReason.toLowerCase().includes('pro ai checks') || cleanReason.toLowerCase().includes('come back tomorrow');
+  const isDailyLimitPro = typeof isPro === 'boolean'
+    ? isPro
+    : (cleanReason.toLowerCase().includes('pro ai checks') || cleanReason.toLowerCase().includes('come back tomorrow'));
 
   const handleSignIn = () => {
     onClose();

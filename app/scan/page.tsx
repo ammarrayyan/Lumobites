@@ -262,6 +262,7 @@ function ScanPageContent() {
   }, []);
 
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
 
   // Limit checker: returns true if allowed to scan, false if blocked (shows modal)
   const checkScanLimit = (): boolean => {
@@ -735,6 +736,12 @@ function ScanPageContent() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          if (typeof data.isPro === 'boolean') setAiLimitIsPro(data.isPro);
+          setShowUpgradeModal(true);
+          return;
+        }
         throw new Error(data.error || 'Failed to analyze ingredients');
       }
       
@@ -1359,7 +1366,7 @@ function ScanPageContent() {
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         reason={aiLimitReason}
-        isPro={isPro}
+        isPro={aiLimitIsPro ?? isPro}
       />
 
       <style jsx>{`

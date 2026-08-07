@@ -454,7 +454,7 @@ export async function POST(req: Request) {
     });
 
     if (!limitCheck.allowed) {
-      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+      return NextResponse.json({ error: limitCheck.reason, isPro: limitCheck.isPro }, { status: 429 });
     }
     const quizAnswersStr = formData.get('quizAnswers') as string | null;
     let quizAnswersText = "";

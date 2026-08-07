@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!limitCheck.allowed) {
-      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+      return NextResponse.json({ error: limitCheck.reason, isPro: limitCheck.isPro }, { status: 429 });
     }
 
     if (!searchQuery || !searchQuery.trim()) {

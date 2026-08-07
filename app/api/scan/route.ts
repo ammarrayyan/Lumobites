@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     });
 
     if (!limitCheck.allowed) {
-      return NextResponse.json({ error: limitCheck.reason }, { status: 429 });
+      return NextResponse.json({ error: limitCheck.reason, isPro: limitCheck.isPro }, { status: 429 });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
