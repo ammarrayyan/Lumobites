@@ -913,14 +913,22 @@ export default function AccountPage() {
                     <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
                   </button>
 
-                  {/* Delete My Account Button */}
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmDelete(true)}
-                    className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
-                  >
-                    <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
-                  </button>
+                  {/* Delete My Account Button (hidden for partner accounts) */}
+                  {subDetails?.isPartner ? (
+                    <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-3.5 text-center mt-2">
+                      <p className="text-xs font-semibold text-amber-900 leading-relaxed">
+                        To manage or delete your business account, please visit your <strong>{subDetails.partnerLabel || 'Partner'}</strong> dashboard.
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmDelete(true)}
+                      className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
+                    </button>
+                  )}
                 </div>
               )}
               {showConfirmCancel && (

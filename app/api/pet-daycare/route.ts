@@ -137,7 +137,22 @@ export async function POST(request: NextRequest) {
     const finalLat = geo?.lat || null;
     const finalLng = geo?.lng || null;
 
-    // Check if already registered
+    // Check for existing registration in other partner tables FIRST
+    const { data: existingVet } = await supabaseAdmin.from('vet_clinics').select('id').eq('email', cleanEmail).maybeSingle();
+    if (existingVet) {
+      return NextResponse.json({
+        error: 'This email is already registered as a Vet Boarding partner. Each business email may only have one active partner listing.'
+      }, { status: 400 });
+    }
+
+    const { data: existingShelter } = await supabaseAdmin.from('shelters').select('id').eq('email', cleanEmail).maybeSingle();
+    if (existingShelter) {
+      return NextResponse.json({
+        error: 'This email is already registered as a Shelter partner. Each business email may only have one active partner listing.'
+      }, { status: 400 });
+    }
+
+    // Check if already registered in pet_daycares table
     const { data: existing } = await supabaseAdmin
       .from('pet_daycares')
       .select('*')

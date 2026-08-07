@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accountAuth';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -14,6 +15,14 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
+
+    // Check if user is a partner — block account deletion from consumer page
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.proSource.startsWith('partner_')) {
+      return NextResponse.json({
+        error: 'Partner accounts cannot be deleted from the consumer account page. Please manage your business listing from your partner dashboard.'
+      }, { status: 403 });
+    }
 
     // 1. Stripe Subscription Cancellation for Sitter Profile (if exists)
     try {
