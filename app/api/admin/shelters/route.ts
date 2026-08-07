@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendShelterApprovalEmail, sendShelterRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 const ADMIN_SECRET = 'Lumo2026@';
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function GET(request: NextRequest) {
   try {
@@ -89,22 +91,56 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Shelter not found' }, { status: 404 });
     }
 
-    // 2. Cascade cleanup: delete pets and inquiries
+    // 2. Check & cancel active Stripe subscriptions FIRST
+    let canceledStripeSubs = 0;
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+        if (shelter.stripe_subscription_id) {
+          try {
+            await stripe.subscriptions.cancel(shelter.stripe_subscription_id);
+            canceledStripeSubs++;
+          } catch (e: any) {
+            console.error('[Shelter DELETE] Error canceling sub ID:', e.message);
+          }
+        }
+        if (shelter.email) {
+          const customers = await stripe.customers.list({ email: shelter.email.toLowerCase().trim(), limit: 5 });
+          for (const cust of customers.data) {
+            const subs = await stripe.subscriptions.list({ customer: cust.id, status: 'active' });
+            for (const sub of subs.data) {
+              if (sub.id !== shelter.stripe_subscription_id) {
+                await stripe.subscriptions.cancel(sub.id);
+                canceledStripeSubs++;
+              }
+            }
+          }
+        }
+      } catch (stripeErr: any) {
+        console.error('[Shelter DELETE] Stripe check error:', stripeErr);
+      }
+    }
+
+    // 3. Cascade cleanup: delete pets and inquiries
     await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', id);
     await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', id);
 
-    // 3. Delete shelter record
+    // 4. Delete shelter record
     const { error: deleteErr } = await supabaseAdmin.from('shelters').delete().eq('id', id);
     if (deleteErr) {
       return NextResponse.json({ error: deleteErr.message }, { status: 500 });
     }
 
-    // 4. Send confirmation email
+    // 5. Send confirmation email
     if (shelter.email) {
       sendPartnerAccountDeletionEmail(shelter.email, shelter.org_name, 'Shelter');
     }
 
-    return NextResponse.json({ success: true, message: 'Shelter account and associated listings deleted successfully.' });
+    return NextResponse.json({
+      success: true,
+      canceledStripeSubs,
+      message: 'Shelter account and associated listings deleted successfully.'
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

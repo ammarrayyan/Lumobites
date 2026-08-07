@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendDaycareApprovalEmail, sendDaycareRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 export const dynamic = 'force-dynamic';
 const ADMIN_SECRET = 'Lumo2026@';
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // ─── GET /api/admin/daycares — Fetch all daycare applications ───────────────
 export async function GET(request: NextRequest) {
@@ -77,22 +79,56 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Pet daycare not found' }, { status: 404 });
     }
 
-    // 2. Cascade cleanup: delete availability & inquiries
+    // 2. Check & cancel active Stripe subscriptions FIRST
+    let canceledStripeSubs = 0;
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+        if (daycare.stripe_subscription_id) {
+          try {
+            await stripe.subscriptions.cancel(daycare.stripe_subscription_id);
+            canceledStripeSubs++;
+          } catch (e: any) {
+            console.error('[Daycare DELETE] Error canceling sub ID:', e.message);
+          }
+        }
+        if (daycare.email) {
+          const customers = await stripe.customers.list({ email: daycare.email.toLowerCase().trim(), limit: 5 });
+          for (const cust of customers.data) {
+            const subs = await stripe.subscriptions.list({ customer: cust.id, status: 'active' });
+            for (const sub of subs.data) {
+              if (sub.id !== daycare.stripe_subscription_id) {
+                await stripe.subscriptions.cancel(sub.id);
+                canceledStripeSubs++;
+              }
+            }
+          }
+        }
+      } catch (stripeErr: any) {
+        console.error('[Daycare DELETE] Stripe check error:', stripeErr);
+      }
+    }
+
+    // 3. Cascade cleanup: delete availability & inquiries
     await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', id);
     await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', id);
 
-    // 3. Delete daycare record
+    // 4. Delete daycare record
     const { error: deleteErr } = await supabaseAdmin.from('pet_daycares').delete().eq('id', id);
     if (deleteErr) {
       return NextResponse.json({ error: deleteErr.message }, { status: 500 });
     }
 
-    // 4. Send confirmation email
+    // 5. Send confirmation email
     if (daycare.email) {
       sendPartnerAccountDeletionEmail(daycare.email, daycare.business_name, 'Pet Daycare');
     }
 
-    return NextResponse.json({ success: true, message: 'Pet daycare account and associated data deleted successfully.' });
+    return NextResponse.json({
+      success: true,
+      canceledStripeSubs,
+      message: 'Pet daycare account and associated data deleted successfully.'
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

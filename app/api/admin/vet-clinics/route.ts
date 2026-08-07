@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
   sendVetClinicApprovalEmail,
@@ -7,6 +8,7 @@ import {
 } from '@/lib/adoption-email';
 
 const ADMIN_SECRET = 'Lumo2026@';
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // ─── GET /api/admin/vet-clinics — List all clinics ────────────────────────────
 export async function GET(request: NextRequest) {
@@ -101,22 +103,56 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Vet clinic not found' }, { status: 404 });
     }
 
-    // 2. Cascade cleanup: delete availability & inquiries
+    // 2. Check & cancel active Stripe subscriptions FIRST
+    let canceledStripeSubs = 0;
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+        if (clinic.stripe_subscription_id) {
+          try {
+            await stripe.subscriptions.cancel(clinic.stripe_subscription_id);
+            canceledStripeSubs++;
+          } catch (e: any) {
+            console.error('[Vet Clinic DELETE] Error canceling sub ID:', e.message);
+          }
+        }
+        if (clinic.email) {
+          const customers = await stripe.customers.list({ email: clinic.email.toLowerCase().trim(), limit: 5 });
+          for (const cust of customers.data) {
+            const subs = await stripe.subscriptions.list({ customer: cust.id, status: 'active' });
+            for (const sub of subs.data) {
+              if (sub.id !== clinic.stripe_subscription_id) {
+                await stripe.subscriptions.cancel(sub.id);
+                canceledStripeSubs++;
+              }
+            }
+          }
+        }
+      } catch (stripeErr: any) {
+        console.error('[Vet Clinic DELETE] Stripe check error:', stripeErr);
+      }
+    }
+
+    // 3. Cascade cleanup: delete availability & inquiries
     await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', id);
     await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', id);
 
-    // 3. Delete clinic record
+    // 4. Delete clinic record
     const { error: deleteErr } = await supabaseAdmin.from('vet_clinics').delete().eq('id', id);
     if (deleteErr) {
       return NextResponse.json({ error: deleteErr.message }, { status: 500 });
     }
 
-    // 4. Send confirmation email
+    // 5. Send confirmation email
     if (clinic.email) {
       sendPartnerAccountDeletionEmail(clinic.email, clinic.clinic_name, 'Vet Boarding Clinic');
     }
 
-    return NextResponse.json({ success: true, message: 'Vet clinic account and associated data deleted successfully.' });
+    return NextResponse.json({
+      success: true,
+      canceledStripeSubs,
+      message: 'Vet clinic account and associated data deleted successfully.'
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

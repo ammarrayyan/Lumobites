@@ -29,6 +29,7 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
   const [tableError, setTableError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [deletingShelter, setDeletingShelter] = useState<Shelter | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
   const fetchShelters = async () => {
@@ -81,27 +82,8 @@ export default function ShelterManagement({ adminKey }: { adminKey: string }) {
     }
   };
 
-  const handleDeleteShelter = async (shelter: Shelter) => {
-    if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${shelter.org_name}"?\n\nThis will permanently delete their shelter account, all posted adoption pets, and all inquiry threads.`)) {
-      return;
-    }
-    setProcessingId(shelter.id);
-    try {
-      const res = await fetch(`/api/admin/shelters?id=${shelter.id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-key': adminKey }
-      });
-      if (res.ok) {
-        setShelters(prev => prev.filter(s => s.id !== shelter.id));
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(errData.error || 'Failed to delete shelter account.');
-      }
-    } catch (err) {
-      alert('Failed to delete shelter account.');
-    } finally {
-      setProcessingId(null);
-    }
+  const handleDeleteShelter = (shelter: Shelter) => {
+    setDeletingShelter(shelter);
   };
 
   const filtered = shelters.filter(s => {
@@ -306,6 +288,62 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
                 type="button"
                 onClick={() => { setRejectingId(null); setRejectionReason(''); }}
                 className="bg-gray-100 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deletingShelter && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-base font-extrabold text-gray-900">Delete Shelter Account?</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Are you sure you want to permanently delete <strong>{deletingShelter.org_name}</strong>?
+              </p>
+              <p className="text-[11px] text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100">
+                This will automatically cancel any active Stripe subscriptions FIRST, then permanently remove their shelter account and listings.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  setProcessingId(deletingShelter.id);
+                  try {
+                    const res = await fetch(`/api/admin/shelters?id=${deletingShelter.id}`, {
+                      method: 'DELETE',
+                      headers: { 'x-admin-key': adminKey }
+                    });
+                    if (res.ok) {
+                      setShelters(prev => prev.filter(s => s.id !== deletingShelter.id));
+                      setDeletingShelter(null);
+                    } else {
+                      const errData = await res.json().catch(() => ({}));
+                      alert(errData.error || 'Failed to delete shelter account.');
+                    }
+                  } catch (err) {
+                    alert('Failed to delete shelter account.');
+                  } finally {
+                    setProcessingId(null);
+                  }
+                }}
+                disabled={processingId === deletingShelter.id}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                {processingId === deletingShelter.id ? 'Deleting…' : 'Yes, Delete Shelter'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingShelter(null)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
               >
                 Cancel
               </button>

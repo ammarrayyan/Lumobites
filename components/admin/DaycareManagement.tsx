@@ -29,6 +29,7 @@ export default function DaycareManagement({ adminKey }: { adminKey: string }) {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'paused'>('pending');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [deletingDaycare, setDeletingDaycare] = useState<PetDaycare | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [tableError, setTableError] = useState<string | null>(null);
 
@@ -280,26 +281,7 @@ export default function DaycareManagement({ adminKey }: { adminKey: string }) {
                     </button>
                   )}
                   <button
-                    onClick={async () => {
-                      if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${daycare.business_name}"?\n\nThis will permanently delete their daycare account, availability schedule, and inquiries.`)) return;
-                      setProcessingId(daycare.id);
-                      try {
-                        const res = await fetch(`/api/admin/daycares?id=${daycare.id}`, {
-                          method: 'DELETE',
-                          headers: { 'x-admin-key': adminKey }
-                        });
-                        if (res.ok) {
-                          setDaycares(prev => prev.filter(d => d.id !== daycare.id));
-                        } else {
-                          const errData = await res.json().catch(() => ({}));
-                          alert(errData.error || 'Failed to delete daycare account.');
-                        }
-                      } catch (e) {
-                        alert('Failed to delete daycare account.');
-                      } finally {
-                        setProcessingId(null);
-                      }
-                    }}
+                    onClick={() => setDeletingDaycare(daycare)}
                     disabled={processingId === daycare.id}
                     className="bg-gray-100 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer border-none"
                     title="Delete Daycare Account & All Data"
@@ -324,13 +306,13 @@ export default function DaycareManagement({ adminKey }: { adminKey: string }) {
                     <button
                       onClick={() => handleUpdateStatus(daycare.id, 'rejected', rejectionReason || undefined)}
                       disabled={processingId === daycare.id}
-                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors border-none cursor-pointer"
+                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                     >
                       Confirm Rejection
                     </button>
                     <button
                       onClick={() => setRejectingId(null)}
-                      className="text-xs text-gray-500 hover:text-gray-700 px-4 py-2 border-none bg-transparent cursor-pointer"
+                      className="text-xs text-gray-500 hover:text-gray-700 px-4 py-2"
                     >
                       Cancel
                     </button>
@@ -339,6 +321,62 @@ export default function DaycareManagement({ adminKey }: { adminKey: string }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deletingDaycare && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-base font-extrabold text-gray-900">Delete Pet Daycare?</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Are you sure you want to permanently delete <strong>{deletingDaycare.business_name}</strong>?
+              </p>
+              <p className="text-[11px] text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100">
+                This will automatically cancel any active Stripe subscriptions FIRST, then permanently remove their daycare listing.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  setProcessingId(deletingDaycare.id);
+                  try {
+                    const res = await fetch(`/api/admin/daycares?id=${deletingDaycare.id}`, {
+                      method: 'DELETE',
+                      headers: { 'x-admin-key': adminKey }
+                    });
+                    if (res.ok) {
+                      setDaycares(prev => prev.filter(d => d.id !== deletingDaycare.id));
+                      setDeletingDaycare(null);
+                    } else {
+                      const errData = await res.json().catch(() => ({}));
+                      alert(errData.error || 'Failed to delete daycare account.');
+                    }
+                  } catch (e) {
+                    alert('Failed to delete daycare account.');
+                  } finally {
+                    setProcessingId(null);
+                  }
+                }}
+                disabled={processingId === deletingDaycare.id}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                {processingId === deletingDaycare.id ? 'Deleting…' : 'Yes, Delete Daycare'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingDaycare(null)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -29,6 +29,7 @@ export default function VetClinicManagement({ adminKey }: { adminKey: string }) 
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'paused'>('pending');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [deletingClinic, setDeletingClinic] = useState<VetClinic | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [tableError, setTableError] = useState<string | null>(null);
 
@@ -280,26 +281,7 @@ export default function VetClinicManagement({ adminKey }: { adminKey: string }) 
                     </button>
                   )}
                   <button
-                    onClick={async () => {
-                      if (!window.confirm(`PERMANENT DELETION WARNING:\n\nAre you sure you want to permanently delete "${clinic.clinic_name}"?\n\nThis will permanently delete their clinic account, availability schedule, and inquiries.`)) return;
-                      setProcessingId(clinic.id);
-                      try {
-                        const res = await fetch(`/api/admin/vet-clinics?id=${clinic.id}`, {
-                          method: 'DELETE',
-                          headers: { 'x-admin-key': adminKey }
-                        });
-                        if (res.ok) {
-                          setClinics(prev => prev.filter(c => c.id !== clinic.id));
-                        } else {
-                          const errData = await res.json().catch(() => ({}));
-                          alert(errData.error || 'Failed to delete clinic account.');
-                        }
-                      } catch (e) {
-                        alert('Failed to delete clinic account.');
-                      } finally {
-                        setProcessingId(null);
-                      }
-                    }}
+                    onClick={() => setDeletingClinic(clinic)}
                     disabled={processingId === clinic.id}
                     className="bg-gray-100 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     title="Delete Clinic Account & All Data"
@@ -339,6 +321,62 @@ export default function VetClinicManagement({ adminKey }: { adminKey: string }) 
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deletingClinic && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-base font-extrabold text-gray-900">Delete Vet Boarding Clinic?</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Are you sure you want to permanently delete <strong>{deletingClinic.clinic_name}</strong>?
+              </p>
+              <p className="text-[11px] text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100">
+                This will automatically cancel any active Stripe subscriptions FIRST, then permanently remove their listing.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  setProcessingId(deletingClinic.id);
+                  try {
+                    const res = await fetch(`/api/admin/vet-clinics?id=${deletingClinic.id}`, {
+                      method: 'DELETE',
+                      headers: { 'x-admin-key': adminKey }
+                    });
+                    if (res.ok) {
+                      setClinics(prev => prev.filter(c => c.id !== deletingClinic.id));
+                      setDeletingClinic(null);
+                    } else {
+                      const errData = await res.json().catch(() => ({}));
+                      alert(errData.error || 'Failed to delete clinic account.');
+                    }
+                  } catch (e) {
+                    alert('Failed to delete clinic account.');
+                  } finally {
+                    setProcessingId(null);
+                  }
+                }}
+                disabled={processingId === deletingClinic.id}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                {processingId === deletingClinic.id ? 'Deleting…' : 'Yes, Delete Clinic'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeletingClinic(null)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
