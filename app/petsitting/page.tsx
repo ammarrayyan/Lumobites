@@ -3831,24 +3831,24 @@ export function PetSittingContent() {
                                  </div>
                                ) : null}
                              </div>
-                             {isOwnerPro && (
-                               <div className="text-sm mb-1">
-                                 {sitter.review_count ? (
-                                   <span className="text-[#D97706] font-bold flex items-center gap-1">
-                                     <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
-                                     {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
-                                   </span>
-                                 ) : (
-                                   <span className="text-[#8B7E7D]">No reviews yet</span>
-                                 )}
-                               </div>
-                             )}
+                             {reqEmail && (
+                                <div className="text-sm mb-1">
+                                  {sitter.review_count ? (
+                                    <span className="text-[#D97706] font-bold flex items-center gap-1">
+                                      <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
+                                      {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[#8B7E7D]">No reviews yet</span>
+                                  )}
+                                </div>
+                              )}
                             <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
                               <MapPin className="w-3.5 h-3.5 text-gray-400" /> {formatPublicCity(sitter.city)}
                             </p>
                             {sitter.phone_number && (
                               <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
-                                <Phone className="w-3.5 h-3.5 text-gray-400" /> <span className={sitter.phone_number.includes('***') ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
+                                <Phone className="w-3.5 h-3.5 text-gray-400" /> <span className={sitter.phone_number.includes('***') && !reqEmail ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
                               </p>
                             )}
                             {sitter.distance !== undefined && (
@@ -3859,7 +3859,7 @@ export function PetSittingContent() {
                           </div>
                         </div>
 
-                        <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
+                        <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
 
                         <div className="flex flex-col gap-2 mb-4">
                           {(sitter.available_days?.length || 0) > 0 && (
@@ -3906,7 +3906,7 @@ export function PetSittingContent() {
 
                         {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
                           <div className="mt-3 flex flex-col gap-2">
-                            {isOwnerPro ? (
+                            {reqEmail ? (
                               <div className="flex flex-col gap-2">
                                 <button
                                   onClick={(e) => {
@@ -4004,7 +4004,7 @@ export function PetSittingContent() {
                                   {formatPublicCity(clinic.city || clinic.address)}
                                 </p>
                                 {clinic.description && (
-                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
+                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
                                 )}
                                 {clinic.services && clinic.services.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
@@ -4016,7 +4016,7 @@ export function PetSittingContent() {
                               </div>
                             </div>
                             <div className="mt-4">
-                              {isOwnerPro ? (
+                              {reqEmail ? (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
                                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
@@ -4089,7 +4089,7 @@ export function PetSittingContent() {
                                   {formatPublicCity(daycare.city || daycare.address)}
                                 </p>
                                 {daycare.description && (
-                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!isOwnerPro ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
+                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                 )}
                                 {daycare.services && daycare.services.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
@@ -7035,7 +7035,7 @@ export function PetSittingContent() {
           >
             {/* Cover Banner */}
             <div className="h-32 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
-              {isOwnerPro && selectedSitterForReviews.cover_photo_url ? (
+              {reqEmail && selectedSitterForReviews.cover_photo_url ? (
                 <img
                   src={selectedSitterForReviews.cover_photo_url}
                   alt="Cover banner"
@@ -7087,7 +7087,7 @@ export function PetSittingContent() {
                   )}
  
                   <div className="text-sm">
-                    {!isOwnerPro ? (
+                    {!reqEmail ? (
                       <span className="text-[#8B7E7D] text-xs font-semibold select-none">
                         🔒 Reviews locked
                       </span>
@@ -7191,10 +7191,10 @@ export function PetSittingContent() {
                   Reviews ({selectedSitterForReviews.review_count || 0})
                 </h4>
                 
-                {!isOwnerPro ? (
+                {!reqEmail ? (
                   <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 text-center shadow-xs">
                     <Lock className="w-8 h-8 text-[#8B5E3C] mx-auto mb-3" />
-                    <h5 className="font-extrabold text-[#4A3E3D] mb-1">Create Free Account to see reviews</h5>
+                    <h5 className="font-extrabold text-[#4A3E3D] mb-1">Sign in to see reviews</h5>
                     <p className="text-xs text-[#8B7E7D] max-w-sm mx-auto">
                       Reviews may contain sitter names or identifying details.
                     </p>
@@ -7244,8 +7244,8 @@ export function PetSittingContent() {
                     disabled={isSelf}
                     onClick={() => {
                       setReviewsModalOpen(false);
-                      if (!isOwnerPro) {
-                        setUnlockModalOpen(true);
+                      if (!reqEmail) {
+                        window.dispatchEvent(new Event('lumo-open-signin'));
                       } else {
                         setSelectedSitter(selectedSitterForReviews);
                         setRequestModalOpen(true);
@@ -7253,7 +7253,7 @@ export function PetSittingContent() {
                     }}
                     className={`w-full sm:flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 text-center ${isSelf ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    <span>{isOwnerPro ? 'Request Sitter' : 'Create Free Account'}</span>
+                    <span>{reqEmail ? 'Request Sitter' : 'Sign in to Request'}</span>
                   </button>
                 );
               })()}
