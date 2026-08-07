@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+import { setAccountSessionCookie, createAccountSessionToken } from '@/lib/accountAuth';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -121,9 +123,10 @@ export async function POST(request: NextRequest) {
       .delete()
       .eq('id', codeData.id);
 
-    console.log(`[Verify Code API] Successfully verified email and granted Pro access: ${cleanEmail}`);
-
-    return NextResponse.json({ success: true, isPro: true, existed, isSitter, sitterId });
+    const sessionToken = createAccountSessionToken(cleanEmail);
+    const response = NextResponse.json({ success: true, isPro: true, existed, isSitter, sitterId, sessionToken, email: cleanEmail });
+    setAccountSessionCookie(response, cleanEmail);
+    return response;
   } catch (err: any) {
     console.error('[Verify Code API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

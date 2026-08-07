@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    let bodyEmail = '';
+    try {
+      const body = await request.json();
+      bodyEmail = body.email;
+    } catch {}
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    const cleanEmail = (verifiedEmail || bodyEmail || '').toLowerCase().trim();
+
+    if (!cleanEmail) {
+      return NextResponse.json({ error: 'Session expired or email required' }, { status: 401 });
     }
-
-    const cleanEmail = email.toLowerCase().trim();
 
     const proDetails = await getUserProStatusDetails(cleanEmail);
 
@@ -22,6 +27,8 @@ export async function POST(request: NextRequest) {
         success: true,
         active: true,
         adminBypass: true,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
         nextBillingDate: 'N/A - Unlimited Admin Access 🐾',
         subscriptionId: 'admin_bypass'
       });
@@ -97,6 +104,8 @@ export async function POST(request: NextRequest) {
       success: true,
       active: true,
       adminBypass: false,
+      email: cleanEmail,
+      verified: !!verifiedEmail,
       nextBillingDate,
       periodEndMs,
       daysRemaining,

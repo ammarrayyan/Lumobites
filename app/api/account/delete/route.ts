@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
+import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accountAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    let bodyEmail = '';
+    try {
+      const body = await request.json();
+      bodyEmail = body.email;
+    } catch {}
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    const cleanEmail = (verifiedEmail || bodyEmail || '').toLowerCase().trim();
+
+    if (!cleanEmail) {
+      return NextResponse.json({ error: 'Session expired or email required' }, { status: 401 });
     }
-
-    const cleanEmail = email.toLowerCase().trim();
 
     // 1. Stripe Subscription Cancellation for Sitter Profile (if exists)
     try {
@@ -90,7 +95,9 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin.from('emails').delete().eq('email', cleanEmail);
     await supabaseAdmin.from('sitters').delete().eq('email', cleanEmail);
 
-    return NextResponse.json({ success: true, message: 'Account deleted successfully.' });
+    const response = NextResponse.json({ success: true, message: 'Account deleted successfully.' });
+    clearAccountSessionCookie(response);
+    return response;
   } catch (err: any) {
     console.error('[Account Delete] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

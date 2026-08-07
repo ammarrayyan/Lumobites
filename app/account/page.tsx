@@ -12,13 +12,44 @@ export default function AccountPage() {
   const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const cachedEmail = localStorage.getItem('lumo_pro_email');
-      if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
-        setEmail(cachedEmail);
-        setIsLocked(true);
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/stripe/subscription-details', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.email && data.verified) {
+            setEmail(data.email);
+            setIsLocked(true);
+            setSubDetails({
+              active: data.active,
+              adminBypass: data.adminBypass,
+              nextBillingDate: data.nextBillingDate,
+              subscriptionId: data.subscriptionId,
+              cancelAtPeriodEnd: data.cancelAtPeriodEnd,
+              daysRemaining: data.daysRemaining,
+            });
+            setStep('dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('[Account Session Check] No active session cookie');
       }
-    }
+
+      if (typeof window !== 'undefined') {
+        const cachedEmail = localStorage.getItem('lumo_pro_email');
+        if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+          setEmail(cachedEmail);
+          setIsLocked(true);
+        }
+      }
+    };
+
+    checkSession();
   }, []);
   const [verificationCode, setVerificationCode] = useState('');
   
@@ -172,7 +203,10 @@ export default function AccountPage() {
         throw new Error(data.error || 'Code verification failed');
       }
 
-      localStorage.setItem('lumo_pro_email', email.trim());
+      const activeEmail = data.email || email.trim();
+      setEmail(activeEmail);
+      setIsLocked(true);
+      localStorage.setItem('lumo_pro_email', activeEmail);
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       window.dispatchEvent(new Event('lumo-pro-update'));
 
@@ -183,7 +217,7 @@ export default function AccountPage() {
       }
 
       // If code verified successfully, fetch subscription details
-      await fetchSubscriptionDetails();
+      await fetchSubscriptionDetails(activeEmail);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Invalid or expired verification code. Please try again.');
@@ -192,18 +226,21 @@ export default function AccountPage() {
     }
   };
 
-  const fetchSubscriptionDetails = async () => {
+  const fetchSubscriptionDetails = async (targetEmail?: string) => {
     try {
+      const emailToUse = targetEmail || email.trim();
       const res = await fetch('/api/stripe/subscription-details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
+        body: JSON.stringify({ email: emailToUse })
       });
 
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to fetch subscription details');
       }
+
+      if (data.email) setEmail(data.email);
 
       setSubDetails({
         active: data.active,
@@ -331,7 +368,7 @@ export default function AccountPage() {
               {error === 'not_pro' ? (
                 <div className="flex flex-col gap-4 text-center items-center w-full">
                   <p className="text-red-500 font-bold text-sm leading-relaxed">
-                    No PRO subscription found for this email. Please upgrade to PRO first.
+                    No active Lumo Bites Membership found for this email. Please upgrade to Membership.
                   </p>
                   <button
                     type="button"
@@ -358,7 +395,7 @@ export default function AccountPage() {
                     disabled={loading}
                     className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    Upgrade to PRO →
+                    Upgrade to Membership ($4.99/mo) →
                   </button>
                   <button
                     type="button"
@@ -433,7 +470,7 @@ export default function AccountPage() {
                           ) : (
                             <>
                               <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
-                              Become PRO — $2.99/mo <Sparkles className="w-4 h-4 text-white shrink-0 inline ml-1.5" />
+                              Upgrade to Membership ($4.99/mo) <Sparkles className="w-4 h-4 text-white shrink-0 inline ml-1.5" />
                             </>
                           )}
                         </button>
@@ -685,7 +722,7 @@ export default function AccountPage() {
                       ) : subDetails.cancelAtPeriodEnd ? (
                         <div className="flex flex-col gap-3">
                           <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
-                            Subscription cancelled — Pro access continues until <strong>{subDetails.nextBillingDate}</strong>.
+                            Subscription cancelled — Membership access continues until <strong>{subDetails.nextBillingDate}</strong> (5 daily AI checks).
                             {subDetails.daysRemaining !== undefined && (
                               <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
                             )}
@@ -716,7 +753,7 @@ export default function AccountPage() {
                               {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
                                 <>
                                   <RefreshCw className="w-4 h-4" />
-                                  Reactivate Subscription
+                                  Reactivate Membership
                                 </>
                               )}
                             </button>
@@ -748,13 +785,21 @@ export default function AccountPage() {
                               {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
                                 <>
                                   <Sparkles className="w-4 h-4 text-white" />
-                                  Upgrade to PRO — $2.99/mo
+                                  Upgrade to Membership ($4.99/mo)
                                 </>
                               )}
                             </button>
                           )}
                         </div>
-                      ) : null}
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmCancel(true)}
+                          className="w-full bg-white hover:bg-red-50 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 mt-2"
+                        >
+                          Cancel Membership
+                        </button>
+                      )}
                     </>
                   )}
                    {/* Blocked Pet Sitters & Owners (Pet Sitting) */}
@@ -858,7 +903,7 @@ export default function AccountPage() {
                         Are you sure you want to cancel?
                       </h3>
                       <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                        Your Pro benefits and unlimited scans will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your subscription will end.
+                        Your Membership benefits (5 daily AI checks) will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your account will return to the free plan.
                       </p>
                     </div>
 
@@ -870,14 +915,14 @@ export default function AccountPage() {
                       >
                         {loading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : "Yes, cancel subscription"}
+                        ) : "Yes, cancel membership"}
                       </button>
                       <button
                         onClick={() => setShowConfirmCancel(false)}
                         disabled={loading}
                         className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center gap-1.5"
                       >
-                        Keep Pro Features <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
+                        Keep Membership <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
                       </button>
                     </div>
                   </div>

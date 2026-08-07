@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accountAuth';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    let bodyEmail = '';
+    try {
+      const body = await request.json();
+      bodyEmail = body.email;
+    } catch {}
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    const cleanEmail = (verifiedEmail || bodyEmail || '').toLowerCase().trim();
+
+    if (!cleanEmail) {
+      return NextResponse.json({ error: 'Session expired or email required' }, { status: 401 });
     }
-
-    const cleanEmail = email.toLowerCase().trim();
 
     const { error } = await supabase
       .from('emails')
@@ -22,7 +27,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to invalidate owner session in database' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'All owner devices signed out successfully.' });
+    const response = NextResponse.json({ success: true, message: 'All owner devices signed out successfully.' });
+    clearAccountSessionCookie(response);
+    return response;
   } catch (err: any) {
     console.error('[SignOut All Devices API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

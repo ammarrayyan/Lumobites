@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
                 referred_email: cleanEmail,
                 subscribed: true,
                 subscription_type: service === 'sitter-pro' ? 'pro_sitter' : 'pro_owner',
-                monthly_value: session.amount_total ? session.amount_total / 100 : (service === 'sitter-pro' ? 9.99 : 2.99),
+                monthly_value: session.amount_total ? session.amount_total / 100 : (service === 'sitter-pro' ? 9.99 : 4.99),
                 subscription_date: new Date().toISOString(),
                 active_months: 1,
               });
@@ -178,23 +178,23 @@ export async function POST(request: NextRequest) {
             // Send transactional welcome email via Resend
             try {
               const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
-              console.log(`[Stripe Webhook] Sending Pro Welcome Email to: ${cleanEmail}`);
+              console.log(`[Stripe Webhook] Sending Welcome Email to: ${cleanEmail}`);
               const emailResponse = await resend.emails.send({
                 from: fromEmail,
                 to: cleanEmail,
-                subject: '✨ Welcome to Lumo Bites Pro!',
+                subject: '✨ Welcome to Lumo Bites Membership!',
                 html: brandedEmail({
-                  subject: '✨ Welcome to Lumo Bites Pro!',
-                  preheader: 'Your Pro subscription is active — enjoy unlimited scans and recall alerts.',
+                  subject: '✨ Welcome to Lumo Bites Membership!',
+                  preheader: 'Your Membership is active — enjoy 5 daily AI checks across all tools.',
                   body: `
-    <h1 style="${emailStyles.h1}">Welcome to Lumo Bites Pro! ✨</h1>
-    <p style="${emailStyles.p}">Thank you for upgrading! Your account now has full Pro access with unlimited ingredient scanning and priority recall alerts.</p>
+    <h1 style="${emailStyles.h1}">Welcome to Lumo Bites Membership! ✨</h1>
+    <p style="${emailStyles.p}">Thank you for upgrading! Your account now has full Membership access with 5 daily AI checks across all tools.</p>
     ${emailStyles.infoBox(`
       <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;">✅ <strong style="color:#3B2410;">Status:</strong> Active</p>
-      <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;">💳 <strong style="color:#3B2410;">Plan:</strong> Lumo Bites Pro ($2.99/mo)</p>
-      <p style="margin:0;font-size:13px;color:#6B5040;">🛡️ <strong style="color:#3B2410;">Benefits:</strong> Unlimited scanning, recall alerts, sitter contact</p>
+      <p style="margin:0 0 8px 0;font-size:13px;color:#6B5040;">💳 <strong style="color:#3B2410;">Plan:</strong> Lumo Bites Membership ($4.99/mo)</p>
+      <p style="margin:0;font-size:13px;color:#6B5040;">🛡️ <strong style="color:#3B2410;">Benefits:</strong> 5 daily AI checks across all tools, priority features</p>
     `)}
-    ${emailStyles.button('https://lumobites.net/account', 'Manage Subscription')}
+    ${emailStyles.button('https://lumobites.net/account', 'Manage Account')}
     ${emailStyles.divider}
     ${emailStyles.signoff}
   `
