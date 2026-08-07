@@ -44,6 +44,8 @@ export default function DaycareDashboard() {
   const [daycare, setDaycare] = useState<any>(null);
   const [monthlyPrice, setMonthlyPrice] = useState<number>(30);
   const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'calendar' | 'profile'>('overview');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
@@ -267,11 +269,7 @@ export default function DaycareDashboard() {
 
   const handleDeleteDaycareAccount = async () => {
     if (!daycare || !daycare.email) return;
-    const confirmName = prompt(`PERMANENT ACCOUNT DELETION WARNING:\n\nTo delete your pet daycare account and all availability schedules, please type your business name "${daycare.business_name}" below to confirm:`);
-    if (confirmName !== daycare.business_name) {
-      if (confirmName !== null) alert('Business name mismatch. Deletion cancelled.');
-      return;
-    }
+    setDeletingAccount(true);
     try {
       const res = await fetch(`/api/pet-daycare?id=${daycare.id}`, {
         method: 'DELETE'
@@ -289,6 +287,9 @@ export default function DaycareDashboard() {
       }
     } catch {
       alert('Error deleting daycare account.');
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -981,7 +982,7 @@ export default function DaycareDashboard() {
                       </button>
                       <button
                         type="button"
-                        onClick={handleDeleteDaycareAccount}
+                        onClick={() => setShowDeleteModal(true)}
                         className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" /> Delete Account
@@ -1013,6 +1014,44 @@ export default function DaycareDashboard() {
           </div>
         )}
       </main>
+
+      {/* DELETE ACCOUNT CONFIRMATION MODAL */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-base font-extrabold text-gray-900">Delete Daycare Account?</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Are you sure you want to permanently delete <strong>{daycare?.business_name}</strong>?
+              </p>
+              <p className="text-[11px] text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100">
+                This will automatically cancel any active Stripe subscriptions FIRST, then permanently remove your daycare listing and availability schedule.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleDeleteDaycareAccount}
+                disabled={deletingAccount}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                {deletingAccount ? 'Deleting…' : 'Yes, Delete Account'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deletingAccount}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CHAT MODAL FOR INQUIRY THREADS */}
       {chatOpen && activeInquiry && (

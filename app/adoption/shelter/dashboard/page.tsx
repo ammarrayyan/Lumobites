@@ -96,6 +96,8 @@ function ShelterDashboardContent() {
   });
 
   // Re-application Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [isReapplyOpen, setIsReapplyOpen] = useState(false);
   const [reapplyFormData, setReapplyFormData] = useState({
     org_name: '',
@@ -531,11 +533,7 @@ function ShelterDashboardContent() {
 
   const handleDeleteShelterAccount = async () => {
     if (!shelterInfo || !shelterEmail) return;
-    const confirmName = prompt(`PERMANENT ACCOUNT DELETION WARNING:\n\nTo delete your shelter account and all posted pets, please type your organization name "${shelterInfo.org_name}" below to confirm:`);
-    if (confirmName !== shelterInfo.org_name) {
-      if (confirmName !== null) alert('Organization name mismatch. Deletion cancelled.');
-      return;
-    }
+    setDeletingAccount(true);
     try {
       const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(shelterEmail)}`, {
         method: 'DELETE'
@@ -554,6 +552,9 @@ function ShelterDashboardContent() {
       }
     } catch {
       alert('Error deleting shelter account.');
+    } finally {
+      setDeletingAccount(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -1293,13 +1294,51 @@ function ShelterDashboardContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleDeleteShelterAccount}
+                    onClick={() => setShowDeleteModal(true)}
                     className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Delete Account
                   </button>
                 </div>
               </div>
+
+              {/* DELETE ACCOUNT CONFIRMATION MODAL */}
+              {showDeleteModal && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto text-red-600">
+                      <Trash2 className="w-6 h-6" />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <h3 className="text-base font-extrabold text-gray-900">Delete Shelter Account?</h3>
+                      <p className="text-xs text-gray-600 leading-relaxed">
+                        Are you sure you want to permanently delete <strong>{shelterInfo?.org_name}</strong>?
+                      </p>
+                      <p className="text-[11px] text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100">
+                        This will automatically cancel any active Stripe subscriptions FIRST, then permanently remove your shelter account and all posted pets.
+                      </p>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleDeleteShelterAccount}
+                        disabled={deletingAccount}
+                        className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+                      >
+                        {deletingAccount ? 'Deleting…' : 'Yes, Delete Account'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={deletingAccount}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl border-none cursor-pointer text-xs transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {shelterInfo.subscription_status === 'active' && !shelterInfo.cancel_at_period_end && (
                 <div className="mt-4 pt-4 border-t border-red-200">
                   <p className="text-xs text-red-500 mb-2">
