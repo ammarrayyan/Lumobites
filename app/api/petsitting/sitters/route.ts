@@ -58,10 +58,13 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    // Mask data if the owner is not PRO & sanitize location to City, State
+    const cleanOwnerEmail = ownerEmail ? ownerEmail.toLowerCase().trim() : '';
+    const isSignedIn = !!cleanOwnerEmail;
+
+    // Mask data for signed-out visitors & sanitize location to City, State
     const sitters = data?.map(sitter => {
       const cleanCity = formatPublicCity(sitter.city);
-      if (isOwnerPro) {
+      if (isSignedIn) {
         return {
           ...sitter,
           city: cleanCity,
@@ -74,12 +77,12 @@ export async function GET(request: NextRequest) {
         city: cleanCity,
         name: 'Local Sitter',
         photo_url: '',
-        bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
+        bio: "Sign in to view full profile, photos, and contact information.",
         phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
       };
     });
 
-    return NextResponse.json({ sitters, isOwnerPro });
+    return NextResponse.json({ sitters, isOwnerPro, isSignedIn });
   } catch (error: any) {
     console.error('[PetSitting Sitters API] Error fetching:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

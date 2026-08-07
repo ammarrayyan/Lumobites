@@ -130,7 +130,14 @@ export async function checkAndTrackAiUsage({
   request?: Request;
 }): Promise<{ allowed: boolean; reason?: string; isUnlimited?: boolean; isPro?: boolean }> {
   const normalizedEmail = (userEmail || '').trim().toLowerCase();
-  
+  if (!normalizedEmail) {
+    return {
+      allowed: false,
+      reason: 'Please sign in to use AI features.',
+      isPro: false,
+    };
+  }
+
   const proDetails = await getUserProStatusDetails(normalizedEmail);
   if (proDetails.proSource === 'unlimited') {
     return { allowed: true, isUnlimited: true, isPro: true };
@@ -139,14 +146,7 @@ export async function checkAndTrackAiUsage({
   const config = AI_LIMIT_CONFIG[feature];
   if (!config) return { allowed: true };
 
-  let userIdentifier = normalizedEmail;
-  if (!userIdentifier && request) {
-    userIdentifier =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      request.headers.get('x-real-ip') ||
-      'anonymous';
-  }
-  if (!userIdentifier) userIdentifier = 'anonymous';
+  const userIdentifier = normalizedEmail;
 
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();

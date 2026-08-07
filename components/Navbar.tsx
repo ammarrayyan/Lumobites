@@ -120,6 +120,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
   const syncStatus = () => {
     if (typeof window === 'undefined') return;
+    const activeEmail = getSignedInUserEmail();
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     const cachedSitter = localStorage.getItem('lumo_sitter_email');
     const cachedShelter = localStorage.getItem('lumo_shelter_email');
@@ -127,22 +128,15 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     setShelterEmail(cachedShelter || '');
     
     const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
+    const isOwnerEmail = activeEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || activeEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
     
     if (isAdminBypass || isOwnerEmail) {
       setIsPro(true);
       setIsSignedIn(true);
-      setProEmail(cachedEmail || 'admin@lumobites.com');
-    } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
+      setProEmail(activeEmail || cachedEmail || 'admin@lumobites.com');
+    } else if (activeEmail) {
       setIsSignedIn(true);
-      setProEmail(cachedEmail);
-      // isPro state will be handled by the API call in useEffect
-    } else if (cachedSitter && cachedSitter !== 'undefined' && cachedSitter !== 'null' && cachedSitter.trim() !== '') {
-      setIsSignedIn(true);
-      setProEmail('');
-    } else if (cachedShelter && cachedShelter !== 'undefined' && cachedShelter !== 'null' && cachedShelter.trim() !== '') {
-      setIsSignedIn(true);
-      setProEmail('');
+      setProEmail(activeEmail);
     } else {
       setIsPro(false);
       setIsSignedIn(false);
@@ -633,9 +627,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                 <button
                   onClick={() => setShowProMenu(!showProMenu)}
                   className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
-                  title={proEmail || sitterEmail || 'Account'}
+                  title={proEmail || sitterEmail || shelterEmail || 'Account'}
                 >
-                  {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
+                  {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
                 </button>
 
                 {showProMenu && (
@@ -647,7 +641,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                     
                     <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
                       <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                        {proEmail || "User Account"}
+                        {proEmail || sitterEmail || shelterEmail || "User Account"}
                       </div>
                       <Link 
                         href="/account"
@@ -696,9 +690,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               <button
                 onClick={() => setShowProMenu(!showProMenu)}
                 className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
-                title={proEmail || sitterEmail || 'Account'}
+                title={proEmail || sitterEmail || shelterEmail || 'Account'}
               >
-                {proEmail || sitterEmail ? (proEmail || sitterEmail).charAt(0).toUpperCase() : 'U'}
+                {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
               </button>
 
               {showProMenu && (
@@ -710,7 +704,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
                   
                   <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
                     <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                      {proEmail || sitterEmail || "User Account"}
+                      {proEmail || sitterEmail || shelterEmail || "User Account"}
                     </div>
                     <Link 
                       href="/account"
