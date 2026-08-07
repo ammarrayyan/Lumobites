@@ -32,10 +32,13 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
     }
   };
 
-  const handleDelete = async (id: string, email: string) => {
-    if (!confirm(`Are you sure you want to permanently delete the account for ${email}? This action cannot be undone.`)) {
-      return;
+  const handleDelete = async (id: string, email: string, isPro?: boolean, subStatus?: string) => {
+    let warningMsg = `Are you sure you want to delete account ${email}?`;
+    if (isPro) {
+      warningMsg = `⚠️ WARNING: Account ${email} has an active paid subscription (${subStatus || 'Active'}). Deleting this account will IMMEDIATELY cancel their active Stripe subscription and permanently delete all database rows.\n\nAre you sure you want to proceed?`;
     }
+
+    if (!confirm(warningMsg)) return;
 
     setDeletingId(id);
     try {
@@ -47,9 +50,13 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
         onUnauthorized();
         return;
       }
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || 'Failed to delete user');
+      }
+
+      if (data.canceledStripeSubs && data.canceledStripeSubs > 0) {
+        alert(`Account ${email} deleted successfully. ${data.canceledStripeSubs} active Stripe subscription(s) were canceled.`);
       }
 
       setUsers(users.filter(u => u.id !== id));
@@ -192,7 +199,7 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
                         {signingOutEmail === user.email ? 'Signing Out...' : 'Force Sign Out'}
                       </button>
                       <button
-                        onClick={() => handleDelete(user.id, user.email)}
+                        onClick={() => handleDelete(user.id, user.email, user.is_pro, user.subStatus)}
                         disabled={deletingId === user.id}
                         className="text-red-600 hover:text-red-700 font-medium text-xs disabled:opacity-50 transition-colors"
                       >
