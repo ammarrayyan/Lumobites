@@ -57,9 +57,10 @@ export async function getUserProStatusDetails(email?: string | null): Promise<{
     return { isPro: true, proSource: 'partner_shelter' };
   }
 
-  // 3. Direct AI Membership (emails.is_pro === true)
-  const { data: emailData } = await supabaseAdmin.from('emails').select('is_pro').eq('email', cleanEmail).maybeSingle();
-  if (emailData?.is_pro) {
+  // 3. Direct AI Membership (emails.is_pro === true AND source in verified Stripe list)
+  const PAID_STRIPE_SOURCES = ['stripe_membership', 'stripe', 'stripe-webhook-invoice'];
+  const { data: emailData } = await supabaseAdmin.from('emails').select('is_pro, source').eq('email', cleanEmail).maybeSingle();
+  if (emailData && emailData.is_pro && PAID_STRIPE_SOURCES.includes(emailData.source)) {
     return { isPro: true, proSource: 'ai_member' };
   }
 
