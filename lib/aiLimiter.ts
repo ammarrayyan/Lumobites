@@ -24,6 +24,7 @@ export const AI_LIMIT_CONFIG: Record<AiFeatureKey, {
 const UNLIMITED_EMAILS = [
   'ammar-rayyan@hotmail.com',
   'reviewer@lumobites.net',
+  'premierpetnutritionllc@gmail.com',
 ];
 
 export async function getUserProStatusDetails(email?: string | null): Promise<{

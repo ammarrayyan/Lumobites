@@ -117,7 +117,8 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
           <thead className="text-xs uppercase bg-gray-50 text-gray-500">
             <tr>
               <th className="px-4 py-3 rounded-tl-lg">Email</th>
-              <th className="px-4 py-3">PRO Status</th>
+              <th className="px-4 py-3">Pro Source</th>
+              <th className="px-4 py-3">Subscription Status</th>
               <th className="px-4 py-3">Joined</th>
               <th className="px-4 py-3 rounded-tr-lg text-right">Actions</th>
             </tr>
@@ -125,38 +126,64 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
           <tbody>
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">No accounts found matching "{search}"</td>
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">No accounts found matching "{search}"</td>
               </tr>
             ) : (
-              filteredUsers.map(user => (
-                <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-[#191919]">{user.email}</td>
-                  <td className="px-4 py-3">
-                    {user.is_pro ? (
-                      <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-600 text-xs font-bold">PRO</span>
-                    ) : (
-                      <span className="px-2 py-1 rounded bg-gray-100 text-gray-500 text-xs font-medium">Free</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">{new Date(user.created_at).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleForceSignOut(user.email)}
-                      disabled={signingOutEmail === user.email}
-                      className="text-amber-600 hover:text-amber-300 font-medium disabled:opacity-50 transition-colors mr-4"
-                    >
-                      {signingOutEmail === user.email ? 'Signing Out...' : 'Force Sign Out'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id, user.email)}
-                      disabled={deletingId === user.id}
-                      className="text-red-600 hover:text-red-300 font-medium disabled:opacity-50 transition-colors"
-                    >
-                      {deletingId === user.id ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </td>
-                </tr>
-              ))
+              filteredUsers.map(user => {
+                const proSource = user.proSource || (user.is_pro ? 'ai_member' : 'none');
+                let badgeLabel = 'Free (2 Lifetime Max)';
+                let badgeClass = 'bg-gray-100 text-gray-600';
+
+                if (proSource === 'unlimited') {
+                  badgeLabel = '⚡ Unlimited (Admin)';
+                  badgeClass = 'bg-purple-100 text-purple-700 font-bold';
+                } else if (proSource === 'partner_vet') {
+                  badgeLabel = '🏥 Vet Boarding Partner';
+                  badgeClass = 'bg-blue-100 text-blue-700 font-bold';
+                } else if (proSource === 'partner_daycare') {
+                  badgeLabel = '🎾 Daycare Partner';
+                  badgeClass = 'bg-amber-100 text-amber-700 font-bold';
+                } else if (proSource === 'partner_shelter') {
+                  badgeLabel = '🐾 Shelter Partner';
+                  badgeClass = 'bg-emerald-100 text-emerald-700 font-bold';
+                } else if (proSource === 'ai_member') {
+                  badgeLabel = '⭐ Member ($4.99/mo)';
+                  badgeClass = 'bg-purple-100 text-purple-700 font-bold';
+                }
+
+                return (
+                  <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-[#191919]">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2.5 py-1 rounded-full text-xs ${badgeClass}`}>
+                        {badgeLabel}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs font-semibold text-[#555555]">
+                        {user.subStatus || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs">{new Date(user.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleForceSignOut(user.email)}
+                        disabled={signingOutEmail === user.email}
+                        className="text-amber-600 hover:text-amber-700 font-medium text-xs disabled:opacity-50 transition-colors mr-4"
+                      >
+                        {signingOutEmail === user.email ? 'Signing Out...' : 'Force Sign Out'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id, user.email)}
+                        disabled={deletingId === user.id}
+                        className="text-red-600 hover:text-red-700 font-medium text-xs disabled:opacity-50 transition-colors"
+                      >
+                        {deletingId === user.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

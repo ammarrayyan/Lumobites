@@ -137,6 +137,9 @@ export default function PartnerBillingBanner({
           <p className="text-xs text-gray-500 mt-0.5">
             ${monthlyPriceUsd}/month • Next billing date: <span className="font-semibold text-gray-700">{formattedEnd}</span>
           </p>
+          <p className="text-xs text-emerald-800 font-semibold mt-1">
+            🎉 As an active Lumo Bites partner, your subscription includes full Membership benefits at no extra cost — enjoy 5 AI checks every day!
+          </p>
         </div>
       </div>
     );

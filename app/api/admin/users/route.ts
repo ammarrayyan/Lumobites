@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 function checkAuth(req: NextRequest) {
   const key = req.headers.get('x-admin-key');
@@ -12,13 +13,35 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabaseAdmin
+    const { data: rawUsers, error } = await supabaseAdmin
       .from('emails')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return NextResponse.json({ users: data });
+
+    // Attach accurate Pro status & source details to each user
+    const usersWithPro = await Promise.all(
+      (rawUsers || []).map(async (u) => {
+        const proDetails = await getUserProStatusDetails(u.email);
+        
+        let subStatus = 'N/A';
+        if (proDetails.proSource === 'partner_vet') subStatus = 'Active Vet Partner';
+        else if (proDetails.proSource === 'partner_daycare') subStatus = 'Active Daycare Partner';
+        else if (proDetails.proSource === 'partner_shelter') subStatus = 'Active Shelter Partner';
+        else if (proDetails.proSource === 'ai_member') subStatus = 'Active Member ($4.99/mo)';
+        else if (proDetails.proSource === 'unlimited') subStatus = 'Unlimited Admin';
+
+        return {
+          ...u,
+          is_pro: proDetails.isPro,
+          proSource: proDetails.proSource,
+          subStatus: subStatus,
+        };
+      })
+    );
+
+    return NextResponse.json({ users: usersWithPro });
   } catch (err: any) {
     console.error('[Admin Users GET]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -39,7 +62,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing id or email' }, { status: 400 });
     }
 
-    // Delete from emails table
     const { error: emailsErr } = await supabaseAdmin
       .from('emails')
       .delete()
@@ -47,7 +69,6 @@ export async function DELETE(req: NextRequest) {
 
     if (emailsErr) throw emailsErr;
 
-    // Optional cleanup: also delete their sitter profile if they had one
     await supabaseAdmin
       .from('sitters')
       .delete()
@@ -67,7 +88,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { email, status } = body; // status can be 'active', 'suspended', 'banned'
+    const { email, status } = body;
 
     if (!email || !status) {
       return NextResponse.json({ error: 'Email and status are required' }, { status: 400 });
@@ -75,7 +96,6 @@ export async function PUT(req: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Update emails table
     const { error: emailsErr } = await supabaseAdmin
       .from('emails')
       .update({ account_status: status })
@@ -83,7 +103,6 @@ export async function PUT(req: NextRequest) {
 
     if (emailsErr) throw emailsErr;
 
-    // 2. Also update sitters table if sitter profile exists
     await supabaseAdmin
       .from('sitters')
       .update({ account_status: status })
