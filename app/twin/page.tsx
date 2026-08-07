@@ -5,7 +5,8 @@ import Link from 'next/link';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
-import { AlertTriangle, Star, Camera, Footprints, Dog, Cat, CheckCircle2, XCircle, UploadCloud, Sparkles, Check, ArrowRight, Mail, RefreshCw, X } from 'lucide-react';
+import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 const LOADING_MESSAGES = [
   "Analyzing your features...",
@@ -122,6 +123,8 @@ export default function TwinPage() {
   const [proEmail, setProEmail] = useState('');
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [modalEmail, setModalEmail] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState<{ text: string; isError: boolean } | null>(null);
@@ -648,10 +651,8 @@ export default function TwinPage() {
     
     // Check if user is signed in BEFORE calling AI API
     if (!userEmail || !userEmail.trim()) {
-      setPendingFile(selectedFile);
-      setModalStep('upgrade_email');
-      setModalMessage({ text: 'Please sign in or enter your email to find your Pet Twin match.', isError: false });
-      setShowUpgradeModal(true);
+      setAiLimitReason('Please sign in to use AI features.');
+      setIsAiLimitModalOpen(true);
       return;
     }
 
@@ -687,7 +688,7 @@ export default function TwinPage() {
     }, 30000);
 
     try {
-      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
+      const userEmail = getSignedInUserEmail();
       const formData = new FormData();
       formData.append('image', uploadBlob, selectedFile.name || 'image.jpg');
       formData.append('quizAnswers', JSON.stringify(quizAnswers));
@@ -707,6 +708,12 @@ export default function TwinPage() {
         setResult(data);
         setStep('result');
       } else {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          setStep('upload');
+          return;
+        }
         setError(data.error || 'Failed to detect matching breed.');
         setStep('upload');
       }
@@ -2316,6 +2323,13 @@ export default function TwinPage() {
       )}
 
 
+
+      <AiLimitModal
+        isOpen={isAiLimitModalOpen}
+        onClose={() => setIsAiLimitModalOpen(false)}
+        reason={aiLimitReason}
+        isPro={isPro}
+      />
 
       {/* SIGN-IN / VERIFICATION MODAL OVERLAY */}
       {showUpgradeModal && (

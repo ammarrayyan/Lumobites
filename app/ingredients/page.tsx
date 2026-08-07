@@ -4,12 +4,15 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { PawPrint, Search, AlertTriangle, Leaf, Sparkles, Share2, ShieldCheck } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 export default function IngredientsPage() {
   const [ingredientsText, setIngredientsText] = useState('');
   const [petType, setPetType] = useState<'dog' | 'cat'>('dog');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [results, setResults] = useState<{
     grade: string;
     dangerous: { name: string; reason: string }[];
@@ -46,6 +49,11 @@ export default function IngredientsPage() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          return;
+        }
         throw new Error(data.error || 'Failed to analyze ingredients');
       }
 
@@ -266,6 +274,12 @@ export default function IngredientsPage() {
             </div>
           </div>
         )}
+
+        <AiLimitModal
+          isOpen={isAiLimitModalOpen}
+          onClose={() => setIsAiLimitModalOpen(false)}
+          reason={aiLimitReason}
+        />
       </main>
 
       {/* FOOTER */}

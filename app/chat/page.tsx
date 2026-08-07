@@ -9,6 +9,7 @@ import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, Ch
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
@@ -90,6 +91,8 @@ function ChatPageContent() {
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoAmazonProducts, setPhotoAmazonProducts] = useState<AmazonProduct[]>([]);
   const [photoAmazonLoading, setPhotoAmazonLoading] = useState(false);
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
 
   const handleAnalyzePhoto = async () => {
     if (!photoFile) return;
@@ -112,6 +115,11 @@ function ChatPageContent() {
 
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          return;
+        }
         throw new Error(data.error || 'Failed to analyze pet photo.');
       }
 
@@ -577,6 +585,12 @@ function ChatPageContent() {
       }}
     >
       <MobileFoodNav />
+
+      <AiLimitModal
+        isOpen={isAiLimitModalOpen}
+        onClose={() => setIsAiLimitModalOpen(false)}
+        reason={aiLimitReason}
+      />
       
       {flow === 'selection' && (
         <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px', padding: '32px 24px' }} className="text-center animate-fade-in">

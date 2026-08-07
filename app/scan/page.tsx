@@ -9,6 +9,7 @@ import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 export default function ScanPage() {
   const [proEmail, setProEmail] = useState<string | null>(null);
@@ -260,19 +261,23 @@ function ScanPageContent() {
     };
   }, []);
 
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+
   // Limit checker: returns true if allowed to scan, false if blocked (shows modal)
   const checkScanLimit = (): boolean => {
-    console.log('[Lumo Scan Limit] Evaluating checkScanLimit. Current isPro state:', isPro);
-    if (isPro) {
-      console.log('[Lumo Scan Limit] User is PRO. Bypassing scan checks.');
-      return true;
+    const userEmail = getSignedInUserEmail();
+    if (!userEmail) {
+      setAiLimitReason('Please sign in to use AI features.');
+      setShowUpgradeModal(true);
+      return false;
     }
+
+    if (isPro) return true;
 
     try {
       const countStr = localStorage.getItem('lumo_scan_count');
       const dateStr = localStorage.getItem('lumo_scan_date');
       
-      // Robust local timezone date string formatter (YYYY-MM-DD)
       const d = new Date();
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -280,24 +285,16 @@ function ScanPageContent() {
       const today = `${year}-${month}-${day}`;
 
       let count = countStr ? parseInt(countStr, 10) : 0;
-      console.log(`[Lumo Scan Limit] Read from localStorage - count: ${count}, date: ${dateStr}, today: ${today}`);
+      if (dateStr !== today) count = 0;
 
-      if (dateStr !== today) {
-        console.log('[Lumo Scan Limit] Midnight reset triggered (date mismatch). Resetting scan count to 0.');
-        count = 0;
-      }
-
-      if (count >= 1) {
-        console.log('[Lumo Scan Limit] Limit exceeded! Displaying the Pro Upgrade Modal.');
+      if (count >= 2) {
+        setAiLimitReason("You've used both of your free AI checks. Upgrade to Membership for 5 checks a day!");
         setShowUpgradeModal(true);
         return false;
       }
 
-      console.log('[Lumo Scan Limit] Under limit. Access granted.');
       return true;
     } catch (err) {
-      console.error('[Lumo Scan Limit] Error reading scan limit from localStorage:', err);
-      // Fallback: allow scan in case localStorage is disabled
       return true;
     }
   };
@@ -1358,399 +1355,12 @@ function ScanPageContent() {
         </div>
       )}
 
-      {/* ── UPGRADE TO PRO MODAL ── */}
-      {showUpgradeModal && (
-        <div className="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 pb-32 md:p-8 max-w-md w-full shadow-2xl border border-gray-100 flex flex-col gap-6 relative animate-scale-up text-center">
-            
-            {!modalLoading && (
-              <button 
-                onClick={() => {
-                  setShowUpgradeModal(false);
-                  setModalStep('paywall');
-                  setModalMessage(null);
-                  setVerificationCode('');
-                }}
-                className="absolute right-5 top-5 text-gray-400 hover:text-gray-600 font-extrabold text-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
-
-            {isPro ? (
-              <div className="flex flex-col gap-5 py-4">
-                <div>
-                  <Sparkles className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                    You are a Member!
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-                    Thank you for supporting Lumo Bites. You have unlimited scans and full safety analysis active.
-                  </p>
-                </div>
-                <Link
-                  href="/account"
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer text-center"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Manage Account
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div>
-                  <Search className="w-10 h-10 text-[#8B5E3C] mx-auto mb-3" />
-                  <h3 className="text-2xl font-black text-[#191919] leading-tight text-center">
-                    You&apos;ve used your free scan today
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-                    Create a free account for unlimited scans
-                  </p>
-                </div>
-
-                <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl py-3 px-4 inline-block mx-auto text-center">
-                  <span className="text-[#8B5E3C] font-extrabold text-base md:text-lg">Free Early Access Account 🐾</span>
-                </div>
-
-                <div className="bg-gray-50/60 rounded-2xl p-4 text-left border border-gray-100">
-                  <ul className="space-y-2.5 text-xs text-gray-700 font-bold">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited ingredient scans
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Instant FDA email recall alerts
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" /> Detailed AI safety reports
-                    </li>
-                  </ul>
-                </div>
-
-                {modalStep === 'paywall' && (
-                  <div className="flex flex-col gap-4 mt-2">
-                      <button
-                        onClick={() => {
-                          setModalStep('upgrade_email');
-                          setModalMessage(null);
-                        }}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        Create Free Account
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowUpgradeModal(false);
-                          window.dispatchEvent(new Event('lumo-open-signin'));
-                        }}
-                        className="w-full bg-white border-2 border-[#E8DDD4] hover:border-[#8B5E3C] text-[#8B5E3C] py-3.5 rounded-xl font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
-                      >
-                        Already have an account? Sign in to access your account →
-                      </button>
-
-                      <div className="flex flex-col gap-2.5 mt-1">
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            setModalStep('restore_email');
-                            setModalMessage(null);
-                          }}
-                          className="text-xs text-[#8B5E3C]/80 hover:text-[#8B5E3C] font-semibold hover:underline bg-transparent border-none cursor-pointer"
-                        >
-                          Already have an account? Sign in
-                        </button>
-                      <span className="text-[11px] text-gray-400 text-center">
-                        Come back tomorrow for your free scan
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {modalStep === 'upgrade_email' && (
-                  <>
-                    <div className="text-left mt-2">
-                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Create Free Account</h4>
-                      <p className="text-xs text-gray-500 font-medium">Enter your email to get a verification code.</p>
-
-                    </div>
-
-                    <form onSubmit={handleUpgrade} className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          Enter Your Email
-                        </label>
-                        <input
-                          type="email"
-                          value={modalEmail}
-                          onChange={(e) => setModalEmail(e.target.value)}
-                          placeholder="your@email.com"
-                          required
-                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                          autoFocus
-                        />
-                      </div>
-
-                      {modalMessage && (
-                        <p className={`text-xs font-semibold ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                          {modalMessage.text}
-                        </p>
-                      )}
-
-                      <button
-                        type="submit"
-                        disabled={modalLoading}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        {modalLoading ? (
-                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : (
-                          <>
-                            Send Verification Code
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                      
-                      <p className="text-[11px] text-gray-400 text-center mt-2">
-                        Already have an account?{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowUpgradeModal(false);
-                            window.dispatchEvent(new Event('lumo-open-signin'));
-                          }}
-                          className="text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
-                        >
-                          Sign in to access your account
-                        </button>
-                      </p>
-                    </form>
-
-                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalStep('paywall');
-                          setModalMessage(null);
-                        }}
-                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        ← Back
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setModalStep('restore_email');
-                          setModalMessage(null);
-                        }}
-                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        Restore subscription
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {modalStep === 'already_pro' && (
-                  <>
-                    <div className="text-left mt-2 flex flex-col items-center text-center">
-                      <div className="w-16 h-16 bg-[#8B5E3C]/10 rounded-full flex items-center justify-center text-[#8B5E3C] mb-3">
-                        <Footprints className="w-6 h-6" />
-                      </div>
-                      <h4 className="text-base font-extrabold text-[#191919] uppercase tracking-wider mb-2">Active Membership Found</h4>
-                      <p className="text-sm text-gray-600 font-medium max-w-sm mb-4">
-                        We found an active account for <strong>{modalEmail}</strong>. You don't need to purchase another subscription!
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowUpgradeModal(false);
-                          window.dispatchEvent(new Event('lumo-open-signin'));
-                        }}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        Sign in to Your Account
-                        <Footprints className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="flex justify-center items-center mt-4 border-t border-gray-150/40 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalStep('upgrade_email');
-                          setModalMessage(null);
-                        }}
-                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        ← Back
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {modalStep === 'restore_email' && (
-                  <>
-                    <div className="text-left mt-2">
-                      <h4 className="text-sm font-extrabold text-[#191919] uppercase tracking-wider mb-1">Sign In to Account</h4>
-                      <p className="text-xs text-gray-500 font-medium">Enter your email to receive a 2-step verification code.</p>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          Enter Your Email
-                        </label>
-                        <input
-                          type="email"
-                          value={modalEmail}
-                          onChange={(e) => setModalEmail(e.target.value)}
-                          placeholder="your@email.com"
-                          required
-                          className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
-                          autoFocus
-                        />
-                      </div>
-
-                      {modalMessage && (
-                        <p className={`text-xs font-semibold text-center ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                          {modalMessage.text}
-                        </p>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={handleRestore}
-                        disabled={modalLoading}
-                        className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        {modalLoading ? (
-                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : (
-                          <>
-                            Send Verification Code
-                            <Mail className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-2 border-t border-gray-150/40 pt-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModalStep('paywall');
-                          setModalMessage(null);
-                        }}
-                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        ← Back
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setModalStep('upgrade_email');
-                          setModalMessage(null);
-                        }}
-                        className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        Create Free Account
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {modalStep === 'verification' && (
-                  <form onSubmit={handleVerifyCode} className="flex flex-col gap-3 mt-2">
-                    <div className="flex flex-col gap-1.5 text-left">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        Enter 6-Digit Verification Code
-                      </label>
-                      <p className="text-xs text-gray-500 font-medium">
-                        We sent a code to <strong className="text-gray-700">{modalEmail}</strong>. Valid for 15 minutes.
-                      </p>
-                      <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-1 mb-2 animate-fade-in">
-                        📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
-                      </div>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                        placeholder="••••••"
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-lg tracking-widest text-[#191919] bg-white transition-all"
-                        autoFocus
-                      />
-                    </div>
-
-                    {modalMessage && (
-                      <div className={`text-xs font-semibold text-center flex flex-col items-center gap-1 ${modalMessage.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                        <span>{modalMessage.text}</span>
-                        {modalMessage.isError && modalMessage.text.includes('Code expired') && (
-                          <button
-                            type="button"
-                            onClick={handleRestore}
-                            className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
-                          >
-                            Still nothing? Resend Code
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={modalLoading}
-                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      {modalLoading ? (
-                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      ) : 'Verify Code'}
-                    </button>
-
-                    <div className="mt-4 flex flex-col gap-2 pt-3 border-t border-gray-150/40">
-                      <div className="text-center text-xs text-[#8B7E7D]">
-                        Didn't receive the code? Check your spam or junk folder.
-                      </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setModalStep('restore_email');
-                            setModalMessage(null);
-                            setVerificationCode('');
-                          }}
-                          className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                        >
-                          ← Back to Email
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleRestore}
-                          disabled={modalLoading}
-                          className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
-                        >
-                          Still nothing? Resend Code
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                )}
-              </>
-            )}
-
-          </div>
-        </div>
-      )}
+      <AiLimitModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason={aiLimitReason}
+        isPro={isPro}
+      />
 
       <style jsx>{`
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }

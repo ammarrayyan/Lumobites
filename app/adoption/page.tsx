@@ -10,6 +10,8 @@ import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
+import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 interface PetListing {
   id: string;
@@ -117,6 +119,8 @@ function AdoptionContent() {
 
   // AI Matcher Modals
   const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [lifestylePrompt, setLifestylePrompt] = useState('');
   const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
   const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
@@ -422,16 +426,11 @@ function AdoptionContent() {
   // Run AI Text Matcher
   const handleRunLifestyleMatch = async () => {
     if (!lifestylePrompt.trim()) return;
-    const userEmail = (
-      localStorage.getItem('lumo_pro_email') ||
-      localStorage.getItem('lumo_sitter_email') ||
-      localStorage.getItem('lumo_shelter_email') ||
-      ''
-    ).trim();
 
+    const userEmail = getSignedInUserEmail();
     if (!userEmail) {
-      localStorage.setItem('lumo_redirect_after_login', '/adoption');
-      window.location.href = '/?signin=true';
+      setAiLimitReason('Please sign in to use AI features.');
+      setIsAiLimitModalOpen(true);
       return;
     }
 
@@ -439,7 +438,6 @@ function AdoptionContent() {
     setLifestyleMatches([]);
 
     try {
-      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const res = await fetch('/api/adoption/ai-match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -454,6 +452,11 @@ function AdoptionContent() {
       if (res.ok) {
         setLifestyleMatches(data.matches || []);
       } else {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          return;
+        }
         alert(data.error || 'Failed to generate lifestyle matches.');
       }
     } catch (err: any) {
@@ -506,16 +509,11 @@ function AdoptionContent() {
 
   const handleRunVisualMatch = async () => {
     if (!uploadedPhoto) return;
-    const userEmail = (
-      localStorage.getItem('lumo_pro_email') ||
-      localStorage.getItem('lumo_sitter_email') ||
-      localStorage.getItem('lumo_shelter_email') ||
-      ''
-    ).trim();
+    const userEmail = getSignedInUserEmail();
 
     if (!userEmail) {
-      localStorage.setItem('lumo_redirect_after_login', '/adoption');
-      window.location.href = '/?signin=true';
+      setAiLimitReason('Please sign in to use AI features.');
+      setIsAiLimitModalOpen(true);
       return;
     }
 
@@ -538,6 +536,11 @@ function AdoptionContent() {
           setVisualMatches(data.matches || []);
         }
       } else {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          return;
+        }
         alert(data.error || 'Failed to compare visual match.');
       }
     } catch (err: any) {
@@ -1367,6 +1370,12 @@ function AdoptionContent() {
           shelterId={activeChatPet.shelter_id}
         />
       )}
+
+      <AiLimitModal
+        isOpen={isAiLimitModalOpen}
+        onClose={() => setIsAiLimitModalOpen(false)}
+        reason={aiLimitReason}
+      />
     </div>
   );
 }

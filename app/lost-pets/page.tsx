@@ -8,6 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import LostPetsMap from '@/components/LostPetsMap';
 import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
+import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 export default function LostPetsFeed() {
   const proEmail = typeof window !== 'undefined' 
@@ -16,6 +18,8 @@ export default function LostPetsFeed() {
 
   // ── Page Tab ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
 
 
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
@@ -340,6 +344,13 @@ export default function LostPetsFeed() {
       return;
     }
 
+    const activeUserEmail = getSignedInUserEmail();
+    if (!activeUserEmail) {
+      setAiLimitReason('Please sign in to use AI features.');
+      setIsAiLimitModalOpen(true);
+      return;
+    }
+
     setAiLoading(true);
     setAiError(null);
     setAiSearchDone(false);
@@ -351,7 +362,7 @@ export default function LostPetsFeed() {
         timeframe: aiTimeframe,
         species: aiSpecies,
         minMatchScore: aiMinScore,
-        email: userEmail || proEmail || ''
+        email: activeUserEmail
       };
 
       if (aiSearchTab === 'photo') {
@@ -374,7 +385,14 @@ export default function LostPetsFeed() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to search for matches.');
+      if (!res.ok) {
+        if (res.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
+          return;
+        }
+        throw new Error(data.error || 'Failed to search for matches.');
+      }
 
       setAiMatches(data.matches || []);
       setAiSearchDone(true);
@@ -1025,6 +1043,11 @@ export default function LostPetsFeed() {
             )
           )}
 
+        <AiLimitModal
+          isOpen={isAiLimitModalOpen}
+          onClose={() => setIsAiLimitModalOpen(false)}
+          reason={aiLimitReason}
+        />
         </main>
 
       </div>

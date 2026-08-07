@@ -14,6 +14,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import AiLimitModal from '@/components/AiLimitModal';
 
 
 
@@ -562,6 +563,8 @@ export function PetSittingContent() {
   const [sitterGender, setSitterGender] = useState('');
   const [isProSitter, setIsProSitter] = useState(false);
   const [selfDeclared, setSelfDeclared] = useState(false);
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [needsReapproval, setNeedsReapproval] = useState(false);
 
   // Bookings Flow State
@@ -1308,8 +1311,9 @@ export function PetSittingContent() {
       });
       const data = await response.json();
       if (!response.ok) {
-        if (response.status === 429 || data.error) {
-          alert(data.error || 'You have reached your daily limit.');
+        if (response.status === 429 || data.error?.toLowerCase().includes('limit') || data.error?.toLowerCase().includes('sign in') || data.error?.toLowerCase().includes('checks')) {
+          setAiLimitReason(data.error || 'Limit reached');
+          setIsAiLimitModalOpen(true);
           return;
         }
         throw new Error(data.error || 'Search failed');
@@ -7312,6 +7316,13 @@ export function PetSittingContent() {
           petDetails={activeChatBooking.pet_details}
         />
       )}
+
+      <AiLimitModal
+        isOpen={isAiLimitModalOpen}
+        onClose={() => setIsAiLimitModalOpen(false)}
+        reason={aiLimitReason}
+        isPro={isProSitter}
+      />
 
       {/* Report Modal */}
       {reportModalOpen && (
