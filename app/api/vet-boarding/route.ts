@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { extractOgImage } from '@/lib/og-fetcher';
+import Stripe from 'stripe';
 import {
   sendVetClinicRegistrationEmail,
   sendAdminNewPartnerNotificationEmail,
 } from '@/lib/adoption-email';
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export const dynamic = 'force-dynamic';
 
@@ -330,6 +333,46 @@ export async function DELETE(request: NextRequest) {
     const { data: clinic } = await query.single();
     if (!clinic) {
       return NextResponse.json({ error: 'Vet clinic not found' }, { status: 404 });
+    }
+
+    // Cancel active Stripe subscriptions FIRST
+    let canceledStripeSubs = 0;
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+
+        if (clinic.stripe_subscription_id) {
+          try {
+            await stripe.subscriptions.cancel(clinic.stripe_subscription_id);
+            canceledStripeSubs++;
+          } catch (e: any) {
+            console.error('[VetBoarding DELETE] Error canceling subscription ID:', e.message);
+          }
+        }
+
+        if (clinic.email) {
+          const customers = await stripe.customers.list({
+            email: clinic.email.toLowerCase().trim(),
+            limit: 5,
+          });
+
+          for (const cust of customers.data) {
+            const subs = await stripe.subscriptions.list({
+              customer: cust.id,
+              status: 'active',
+            });
+
+            for (const sub of subs.data) {
+              if (sub.id !== clinic.stripe_subscription_id) {
+                await stripe.subscriptions.cancel(sub.id);
+                canceledStripeSubs++;
+              }
+            }
+          }
+        }
+      } catch (stripeErr: any) {
+        console.error('[VetBoarding DELETE] Stripe check error:', stripeErr);
+      }
     }
 
     // Cascade cleanup

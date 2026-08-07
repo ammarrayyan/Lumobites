@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import Stripe from 'stripe';
 import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 async function geocodeLocation(fullAddress: string) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_VISION_API_KEY;
@@ -319,6 +322,46 @@ export async function DELETE(request: NextRequest) {
     const { data: shelter } = await query.single();
     if (!shelter) {
       return NextResponse.json({ error: 'Shelter not found' }, { status: 404 });
+    }
+
+    // Cancel active Stripe subscriptions FIRST
+    let canceledStripeSubs = 0;
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+
+        if (shelter.stripe_subscription_id) {
+          try {
+            await stripe.subscriptions.cancel(shelter.stripe_subscription_id);
+            canceledStripeSubs++;
+          } catch (e: any) {
+            console.error('[Shelter DELETE] Error canceling subscription ID:', e.message);
+          }
+        }
+
+        if (shelter.email) {
+          const customers = await stripe.customers.list({
+            email: shelter.email.toLowerCase().trim(),
+            limit: 5,
+          });
+
+          for (const cust of customers.data) {
+            const subs = await stripe.subscriptions.list({
+              customer: cust.id,
+              status: 'active',
+            });
+
+            for (const sub of subs.data) {
+              if (sub.id !== shelter.stripe_subscription_id) {
+                await stripe.subscriptions.cancel(sub.id);
+                canceledStripeSubs++;
+              }
+            }
+          }
+        }
+      } catch (stripeErr: any) {
+        console.error('[Shelter DELETE] Stripe check error:', stripeErr);
+      }
     }
 
     // Cascade cleanup
