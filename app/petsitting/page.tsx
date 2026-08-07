@@ -13,6 +13,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 
 
 
@@ -692,11 +693,11 @@ export function PetSittingContent() {
 
   useEffect(() => {
     const getSession = async () => {
-      let email = localStorage.getItem('lumo_pro_email');
+      let email = getSignedInUserEmail();
       if (!email) {
-        // Wait 500ms and try again — Navbar may still be setting it
-        await new Promise(resolve => setTimeout(resolve, 500));
-        email = localStorage.getItem('lumo_pro_email');
+        // Wait 300ms and try again — Navbar or modal may still be setting it
+        await new Promise(resolve => setTimeout(resolve, 300));
+        email = getSignedInUserEmail();
       }
       return email;
     };
@@ -731,12 +732,13 @@ export function PetSittingContent() {
         })
         .catch(err => console.error('[Page Owner Check] error:', err));
 
-        // Logged in as a member. Always use their Pro email for sitter auth.
-        setSitterEmail(email);
+        // Logged in user session active.
+        const sitterKeyEmail = localStorage.getItem('lumo_sitter_email');
+        setSitterEmail(sitterKeyEmail || email);
         setSitterAuthMode('form');
 
-        // Always check their profile status
-        fetch(`/api/petsitting/profile?email=${encodeURIComponent(email)}&t=${Date.now()}`)
+        // Always check profile status
+        fetch(`/api/petsitting/profile?email=${encodeURIComponent(sitterKeyEmail || email)}&t=${Date.now()}`)
           .then(res => res.json())
           .then(profileData => {
             if (profileData && profileData.id) {

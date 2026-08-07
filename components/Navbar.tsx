@@ -7,6 +7,7 @@ import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 
 const getInitialProEmail = () => {
   try {
@@ -29,10 +30,10 @@ const getInitialSitterEmail = () => {
 const getInitialIsSignedIn = () => {
   try {
     if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('lumo_pro_email');
+      const email = getSignedInUserEmail();
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
       const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
-      return !!(isAdminBypass || isOwnerEmail || (email && email !== 'undefined' && email !== 'null' && email.trim() !== ''));
+      return !!(isAdminBypass || isOwnerEmail || email);
     }
   } catch (e) {}
   return false;
