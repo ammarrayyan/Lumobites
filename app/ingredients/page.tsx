@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { PawPrint, Search, AlertTriangle, Leaf, Sparkles, Share2, ShieldCheck } from 'lucide-react';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 
 export default function IngredientsPage() {
   const [ingredientsText, setIngredientsText] = useState('');
@@ -37,7 +38,7 @@ export default function IngredientsPage() {
     setResults(null);
 
     try {
-      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
+      const userEmail = getSignedInUserEmail();
       const res = await fetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { Calendar, MapPin, ClipboardList, Bell, CheckCircle2, AlertTriangle, Dog, Cat, Sparkles } from 'lucide-react';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 
 
 interface Recall {
@@ -194,19 +195,8 @@ export default function RecallsPage() {
   };
 
   useEffect(() => {
-    const cachedEmail = localStorage.getItem('lumo_pro_email');
-    if (cachedEmail) {
-      setIsPro(true);
-      setProEmail(cachedEmail);
-      setEmail(cachedEmail);
-      checkAndAutoSubscribe(cachedEmail);
-    } else {
-      setIsPro(false);
-      setProEmail('');
-    }
-
     const syncStatus = () => {
-      const emailVal = localStorage.getItem('lumo_pro_email');
+      const emailVal = getSignedInUserEmail();
       if (emailVal) {
         setIsPro(true);
         setProEmail(emailVal);
@@ -218,8 +208,23 @@ export default function RecallsPage() {
         setSubscribed(false);
       }
     };
+
+    syncStatus();
     window.addEventListener('lumo-pro-update', syncStatus);
-    return () => window.removeEventListener('lumo-pro-update', syncStatus);
+    window.addEventListener('lumo-signin-success', syncStatus);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'lumo_pro_email' || e.key === 'lumo_sitter_email' || e.key === 'lumo_shelter_email') {
+        syncStatus();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncStatus);
+      window.removeEventListener('lumo-signin-success', syncStatus);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   useEffect(() => {

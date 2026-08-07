@@ -8,18 +8,38 @@ import { ChatMessage, ParsedPetInfo } from '@/lib/types';
 import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight, Camera, MessageSquare, ArrowLeft, Upload, Loader2, MessageCircle, Utensils, Heart, PawPrint, Leaf, AlertTriangle, ShoppingCart } from 'lucide-react';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
 export default function ChatPage() {
-  const [proEmail, setProEmail] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
+  const [proEmail, setProEmail] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const email = localStorage.getItem('lumo_pro_email') || ''
-    setProEmail(email)
-    setMounted(true)
-  }, [])
+    const syncEmail = () => {
+      const email = getSignedInUserEmail();
+      setProEmail(email);
+      setMounted(true);
+    };
+
+    syncEmail();
+    window.addEventListener('lumo-pro-update', syncEmail);
+    window.addEventListener('lumo-signin-success', syncEmail);
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'lumo_pro_email' || e.key === 'lumo_sitter_email' || e.key === 'lumo_shelter_email') {
+        syncEmail();
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      window.removeEventListener('lumo-pro-update', syncEmail);
+      window.removeEventListener('lumo-signin-success', syncEmail);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   if (!mounted) return null
 
@@ -80,7 +100,7 @@ function ChatPageContent() {
     setPhotoAmazonLoading(false);
 
     try {
-      const userEmail = (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
+      const userEmail = getSignedInUserEmail();
       const formData = new FormData();
       formData.append('image', photoFile);
       if (userEmail) formData.append('email', userEmail);
