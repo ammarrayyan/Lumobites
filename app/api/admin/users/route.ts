@@ -25,18 +25,12 @@ export async function GET(req: NextRequest) {
       (rawUsers || []).map(async (u) => {
         const proDetails = await getUserProStatusDetails(u.email);
         
-        let subStatus = 'N/A';
-        if (proDetails.proSource === 'partner_vet') subStatus = 'Active Vet Partner';
-        else if (proDetails.proSource === 'partner_daycare') subStatus = 'Active Daycare Partner';
-        else if (proDetails.proSource === 'partner_shelter') subStatus = 'Active Shelter Partner';
-        else if (proDetails.proSource === 'ai_member') subStatus = 'Active Member ($4.99/mo)';
-        else if (proDetails.proSource === 'unlimited') subStatus = 'Unlimited Admin';
-
         return {
           ...u,
           is_pro: proDetails.isPro,
           proSource: proDetails.proSource,
-          subStatus: subStatus,
+          subStatus: proDetails.billingHealthLabel,
+          rawSubscriptionStatus: proDetails.rawSubscriptionStatus,
         };
       })
     );

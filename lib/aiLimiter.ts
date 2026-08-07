@@ -27,44 +27,97 @@ const UNLIMITED_EMAILS = [
   'premierpetnutritionllc@gmail.com',
 ];
 
-export async function getUserProStatusDetails(email?: string | null): Promise<{
+export interface ProStatusDetails {
   isPro: boolean;
   proSource: 'unlimited' | 'partner_vet' | 'partner_daycare' | 'partner_shelter' | 'ai_member' | 'none';
-}> {
-  if (!email) return { isPro: false, proSource: 'none' };
+  rawSubscriptionStatus: 'active' | 'trialing' | 'past_due' | 'canceled' | 'none';
+  billingHealthLabel: string;
+}
+
+export async function getUserProStatusDetails(email?: string | null): Promise<ProStatusDetails> {
+  if (!email) return { isPro: false, proSource: 'none', rawSubscriptionStatus: 'none', billingHealthLabel: 'N/A' };
   const cleanEmail = email.toLowerCase().trim();
 
   // 1. Unlimited Admin
   if (UNLIMITED_EMAILS.includes(cleanEmail)) {
-    return { isPro: true, proSource: 'unlimited' };
+    return { isPro: true, proSource: 'unlimited', rawSubscriptionStatus: 'active', billingHealthLabel: 'Unlimited Admin' };
   }
 
-  const nowIso = new Date().toISOString();
+  const now = new Date();
+  const nowIso = now.toISOString();
 
-  // 2. Active Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $20/mo)
+  const getTrialDays = (trialEnd?: string | null) => {
+    if (!trialEnd) return 0;
+    const diff = new Date(trialEnd).getTime() - now.getTime();
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  // 2. Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $20/mo)
   const { data: vet } = await supabaseAdmin.from('vet_clinics').select('subscription_status, trial_end').eq('email', cleanEmail);
-  if (vet && vet.some(v => v.subscription_status === 'active' || (v.subscription_status === 'trialing' && v.trial_end && v.trial_end > nowIso))) {
-    return { isPro: true, proSource: 'partner_vet' };
+  if (vet && vet.length > 0) {
+    const v = vet[0];
+    const status = v.subscription_status || 'trialing';
+    if (status === 'active') {
+      return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active ($40/mo)' };
+    }
+    if (status === 'trialing' && v.trial_end && v.trial_end > nowIso) {
+      const days = getTrialDays(v.trial_end);
+      return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing (${days}d left)` };
+    }
+    if (status === 'past_due') {
+      return { isPro: false, proSource: 'partner_vet', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due (Card Declined)' };
+    }
+    if (status === 'canceled') {
+      return { isPro: false, proSource: 'partner_vet', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled' };
+    }
   }
 
   const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('subscription_status, trial_end').eq('email', cleanEmail);
-  if (daycare && daycare.some(d => d.subscription_status === 'active' || (d.subscription_status === 'trialing' && d.trial_end && d.trial_end > nowIso))) {
-    return { isPro: true, proSource: 'partner_daycare' };
+  if (daycare && daycare.length > 0) {
+    const d = daycare[0];
+    const status = d.subscription_status || 'trialing';
+    if (status === 'active') {
+      return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active ($30/mo)' };
+    }
+    if (status === 'trialing' && d.trial_end && d.trial_end > nowIso) {
+      const days = getTrialDays(d.trial_end);
+      return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing (${days}d left)` };
+    }
+    if (status === 'past_due') {
+      return { isPro: false, proSource: 'partner_daycare', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due (Card Declined)' };
+    }
+    if (status === 'canceled') {
+      return { isPro: false, proSource: 'partner_daycare', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled' };
+    }
   }
 
   const { data: shelter } = await supabaseAdmin.from('shelters').select('subscription_status, trial_end').eq('email', cleanEmail);
-  if (shelter && shelter.some(s => s.subscription_status === 'active' || (s.subscription_status === 'trialing' && s.trial_end && s.trial_end > nowIso))) {
-    return { isPro: true, proSource: 'partner_shelter' };
+  if (shelter && shelter.length > 0) {
+    const s = shelter[0];
+    const status = s.subscription_status || 'trialing';
+    if (status === 'active') {
+      return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active ($20/mo)' };
+    }
+    if (status === 'trialing' && s.trial_end && s.trial_end > nowIso) {
+      const days = getTrialDays(s.trial_end);
+      return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing (${days}d left)` };
+    }
+    if (status === 'past_due') {
+      return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due (Card Declined)' };
+    }
+    if (status === 'canceled') {
+      return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled' };
+    }
   }
 
   // 3. Direct AI Membership (emails.is_pro === true AND source in verified Stripe list)
   const PAID_STRIPE_SOURCES = ['stripe_membership', 'stripe', 'stripe-webhook-invoice'];
   const { data: emailData } = await supabaseAdmin.from('emails').select('is_pro, source').eq('email', cleanEmail).maybeSingle();
   if (emailData && emailData.is_pro && PAID_STRIPE_SOURCES.includes(emailData.source)) {
-    return { isPro: true, proSource: 'ai_member' };
+    return { isPro: true, proSource: 'ai_member', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Member ($4.99/mo)' };
   }
 
-  return { isPro: false, proSource: 'none' };
+  return { isPro: false, proSource: 'none', rawSubscriptionStatus: 'none', billingHealthLabel: 'N/A' };
 }
 
 export async function checkAndTrackAiUsage({
@@ -78,7 +131,6 @@ export async function checkAndTrackAiUsage({
 }): Promise<{ allowed: boolean; reason?: string; isUnlimited?: boolean; isPro?: boolean }> {
   const normalizedEmail = (userEmail || '').trim().toLowerCase();
   
-  // Resolve Pro status
   const proDetails = await getUserProStatusDetails(normalizedEmail);
   if (proDetails.proSource === 'unlimited') {
     return { allowed: true, isUnlimited: true, isPro: true };
@@ -87,7 +139,6 @@ export async function checkAndTrackAiUsage({
   const config = AI_LIMIT_CONFIG[feature];
   if (!config) return { allowed: true };
 
-  // Determine user identifier (email if logged in, or client IP from headers)
   let userIdentifier = normalizedEmail;
   if (!userIdentifier && request) {
     userIdentifier =
@@ -103,7 +154,6 @@ export async function checkAndTrackAiUsage({
 
   try {
     if (proDetails.isPro) {
-      // PRO / MEMBER TIER: 5 uses per 24-hour rolling window across ALL 6 features combined
       const { count: userDailyCount, error: userErr } = await supabaseAdmin
         .from('ai_usage_logs')
         .select('*', { count: 'exact', head: true })
@@ -118,7 +168,6 @@ export async function checkAndTrackAiUsage({
         };
       }
     } else {
-      // FREE TIER: 2 LIFETIME total uses across ALL 6 features combined (no 24h reset)
       const { count: lifetimeCount, error: lifeErr } = await supabaseAdmin
         .from('ai_usage_logs')
         .select('*', { count: 'exact', head: true })
@@ -133,7 +182,6 @@ export async function checkAndTrackAiUsage({
       }
     }
 
-    // Check global monthly $100 cost cap across ALL 6 features combined
     const { data: monthLogs, error: globalErr } = await supabaseAdmin
       .from('ai_usage_logs')
       .select('estimated_cost')
@@ -149,7 +197,6 @@ export async function checkAndTrackAiUsage({
       }
     }
 
-    // Record usage log
     const { error: insertErr } = await supabaseAdmin.from('ai_usage_logs').insert({
       feature,
       user_identifier: userIdentifier,

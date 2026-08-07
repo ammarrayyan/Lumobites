@@ -160,9 +160,27 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs font-semibold text-[#555555]">
-                        {user.subStatus || 'N/A'}
-                      </span>
+                      {user.rawSubscriptionStatus === 'past_due' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs bg-red-100 text-red-700 font-bold border border-red-300 animate-pulse inline-flex items-center gap-1">
+                          {user.subStatus}
+                        </span>
+                      ) : user.rawSubscriptionStatus === 'active' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-100 text-emerald-800 font-semibold">
+                          {user.subStatus}
+                        </span>
+                      ) : user.rawSubscriptionStatus === 'trialing' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs bg-blue-100 text-blue-800 font-semibold">
+                          {user.subStatus}
+                        </span>
+                      ) : user.rawSubscriptionStatus === 'canceled' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-500 font-medium">
+                          {user.subStatus}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400 font-normal">
+                          {user.subStatus || 'N/A'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-xs">{new Date(user.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
