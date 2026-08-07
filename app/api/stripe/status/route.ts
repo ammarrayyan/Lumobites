@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 async function checkStatus(email: string) {
   const cleanEmail = email.toLowerCase().trim();
 
-  if (cleanEmail === 'premierpetnutritionllc@gmail.com' || cleanEmail === 'reviewer@lumobites.net') {
-    return { isPro: true, phone_verified: true, session_invalidated_at: null };
-  }
+  const proDetails = await getUserProStatusDetails(cleanEmail);
 
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('emails')
-    .select('is_pro, session_invalidated_at, phone_verified')
+    .select('session_invalidated_at, phone_verified')
     .eq('email', cleanEmail)
     .maybeSingle();
 
-  if (error) {
-    throw error;
-  }
-
   return {
-    isPro: !!data?.is_pro,
+    isPro: proDetails.isPro,
+    proSource: proDetails.proSource,
     session_invalidated_at: data?.session_invalidated_at || null,
     phone_verified: !!data?.phone_verified
   };

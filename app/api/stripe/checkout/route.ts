@@ -49,27 +49,27 @@ export async function POST(request: NextRequest) {
     // 1. Get or create product
     let product;
     const products = await stripe.products.list({ limit: 100 });
-    product = products.data.find(p => p.name === 'Lumo Bites Pro');
+    product = products.data.find(p => p.name === 'Lumo Bites Membership' || p.name === 'Lumo Bites Pro');
 
     if (!product) {
       product = await stripe.products.create({
-        name: 'Lumo Bites Pro',
-        description: 'Unlimited ingredient safety scans and detailed AI reports.',
+        name: 'Lumo Bites Membership',
+        description: '5 daily AI checks across all features (ingredient scanner, photo food scanner, pet twin, lost pet matcher, sitter search, and adoption matcher).',
         metadata: {
-          service: 'safety-scanner',
+          service: 'ai-membership',
         },
       });
     }
 
-    // 2. Get or create price (2.99 USD / month recurring)
+    // 2. Get or create price (4.99 USD / month recurring)
     let price;
     const prices = await stripe.prices.list({ product: product.id, limit: 100 });
-    price = prices.data.find(p => p.unit_amount === 299 && p.recurring?.interval === 'month');
+    price = prices.data.find(p => p.unit_amount === 499 && p.recurring?.interval === 'month');
 
     if (!price) {
       price = await stripe.prices.create({
         product: product.id,
-        unit_amount: 299,
+        unit_amount: 499,
         currency: 'usd',
         recurring: {
           interval: 'month',
