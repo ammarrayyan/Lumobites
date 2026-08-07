@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 function checkAuth(req: NextRequest) {
   const key = req.headers.get('x-admin-key');
@@ -35,19 +36,48 @@ export async function GET(req: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('approval_status', 'rejected');
 
-    // PRO owner subscribers
-    const { count: proOwners } = await supabaseAdmin
-      .from('emails')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_pro', true);
+    // Fetch all email rows to calculate true Pro & Member breakdowns
+    const { data: emails } = await supabaseAdmin.from('emails').select('email');
+    
+    let proMembersCount = 0;
+    let partnerVetCount = 0;
+    let partnerDaycareCount = 0;
+    let partnerShelterCount = 0;
+    let unlimitedAdminCount = 0;
 
-    // PRO sitter subscribers
-    const { count: proSitters } = await supabaseAdmin
-      .from('sitters')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_pro', true);
+    if (emails) {
+      await Promise.all(
+        emails.map(async (u) => {
+          const details = await getUserProStatusDetails(u.email);
+          if (details.proSource === 'ai_member') proMembersCount++;
+          else if (details.proSource === 'partner_vet') partnerVetCount++;
+          else if (details.proSource === 'partner_daycare') partnerDaycareCount++;
+          else if (details.proSource === 'partner_shelter') partnerShelterCount++;
+          else if (details.proSource === 'unlimited') unlimitedAdminCount++;
+        })
+      );
+    }
 
-    // New signups this week (from emails table)
+    const proOwners = proMembersCount + partnerVetCount + partnerDaycareCount + partnerShelterCount;
+
+    // Check sitters pro status
+    const { data: sitters } = await supabaseAdmin.from('sitters').select('email');
+    let proSitters = 0;
+    if (sitters) {
+      await Promise.all(
+        sitters.map(async (s) => {
+          const details = await getUserProStatusDetails(s.email);
+          if (details.isPro) proSitters++;
+        })
+      );
+    }
+
+    // Revenue calculations
+    const monthlyAiMemberRevenue = proMembersCount * 4.99;
+    const monthlyPartnerRevenue = (partnerVetCount * 40) + (partnerDaycareCount * 30) + (partnerShelterCount * 20);
+    const totalMonthlyRevenue = monthlyAiMemberRevenue + monthlyPartnerRevenue;
+
+    // New signups this week
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const { count: newSignups } = await supabaseAdmin
@@ -80,8 +110,17 @@ export async function GET(req: NextRequest) {
       pendingSitters: pendingSitters || 0,
       approvedSitters: approvedSitters || 0,
       rejectedSitters: rejectedSitters || 0,
-      proOwners: proOwners || 0,
-      proSitters: proSitters || 0,
+      proOwners,
+      proSitters,
+      proMembersCount,
+      partnerVetCount,
+      partnerDaycareCount,
+      partnerShelterCount,
+      totalPartnersCount: partnerVetCount + partnerDaycareCount + partnerShelterCount,
+      unlimitedAdminCount,
+      monthlyAiMemberRevenue,
+      monthlyPartnerRevenue,
+      totalMonthlyRevenue,
       newSignups: newSignups || 0,
       totalLostPets: totalLostPets || 0,
       activeLostPets: activeLostPets || 0,
