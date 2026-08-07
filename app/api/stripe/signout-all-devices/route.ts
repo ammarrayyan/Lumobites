@@ -5,17 +5,12 @@ import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accoun
 export async function POST(request: NextRequest) {
   try {
     const verifiedEmail = await getVerifiedSessionEmail(request);
-    let bodyEmail = '';
-    try {
-      const body = await request.json();
-      bodyEmail = body.email;
-    } catch {}
 
-    const cleanEmail = (verifiedEmail || bodyEmail || '').toLowerCase().trim();
-
-    if (!cleanEmail) {
-      return NextResponse.json({ error: 'Session expired or email required' }, { status: 401 });
+    if (!verifiedEmail) {
+      return NextResponse.json({ error: 'Unauthorized — valid session cookie required' }, { status: 401 });
     }
+
+    const cleanEmail = verifiedEmail.toLowerCase().trim();
 
     const { error } = await supabase
       .from('emails')

@@ -11,19 +11,21 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 export async function POST(request: NextRequest) {
   try {
     const verifiedEmail = await getVerifiedSessionEmail(request);
-    let bodyEmail = '';
+    if (!verifiedEmail) {
+      return NextResponse.json({ error: 'Unauthorized — valid session cookie required' }, { status: 401 });
+    }
+
     let subscriptionId = '';
     try {
       const body = await request.json();
-      bodyEmail = body.email;
       subscriptionId = body.subscriptionId;
     } catch {}
 
-    const cleanEmail = (verifiedEmail || bodyEmail || '').toLowerCase().trim();
-
-    if (!cleanEmail || !subscriptionId) {
-      return NextResponse.json({ error: 'Email and subscriptionId are required' }, { status: 400 });
+    if (!subscriptionId) {
+      return NextResponse.json({ error: 'subscriptionId is required' }, { status: 400 });
     }
+
+    const cleanEmail = verifiedEmail.toLowerCase().trim();
 
     // Check for owner/admin bypass
     const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
@@ -48,6 +50,17 @@ export async function POST(request: NextRequest) {
     }
 
     const stripe = new Stripe(stripeSecretKey);
+
+    // Verify subscription belongs to authenticated user
+    const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });
+    if (!customers.data || customers.data.length === 0) {
+      return NextResponse.json({ error: 'No Stripe customer found for authenticated user' }, { status: 403 });
+    }
+    const customerId = customers.data[0].id;
+    const subObj = await stripe.subscriptions.retrieve(subscriptionId);
+    if (!subObj || subObj.customer !== customerId) {
+      return NextResponse.json({ error: 'Unauthorized — subscription does not belong to authenticated user' }, { status: 403 });
+    }
 
     // Update Stripe subscription to cancel at period end instead of immediate deletion
     console.log(`[Cancel Subscription API] Setting cancel_at_period_end = true for subscription: ${subscriptionId} for email: ${cleanEmail}`);

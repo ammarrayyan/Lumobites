@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       cancel_url: cancelUrl || `${origin}/scan`,
       metadata: {
         email: email.toLowerCase().trim(),
-        service: 'safety-scanner-pro',
+        service: 'ai-membership',
         ...(referralCode && { referral_code: referralCode }),
       },
     });
