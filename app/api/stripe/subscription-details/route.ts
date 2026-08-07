@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -15,51 +15,24 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // Check for owner/admin bypass
-    const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
-    const isReviewer = cleanEmail === 'reviewer@lumobites.net';
+    const proDetails = await getUserProStatusDetails(cleanEmail);
 
-    if (isOwner || isReviewer) {
+    if (proDetails.proSource === 'unlimited') {
       return NextResponse.json({
         success: true,
         active: true,
         adminBypass: true,
-        nextBillingDate: 'N/A - Lifetime Owner Access 🐾',
+        nextBillingDate: 'N/A - Unlimited Admin Access 🐾',
         subscriptionId: 'admin_bypass'
       });
     }
 
-    // Verify Pro status first in Supabase to prevent unauthenticated access (check both owner and sitter tables)
-    const { data: emailData } = await supabase
-      .from('emails')
-      .select('is_pro, source')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-
-    const { data: sitterData } = await supabase
-      .from('sitters')
-      .select('is_pro')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-
-    const isPro = (emailData && emailData.is_pro) || (sitterData && sitterData.is_pro);
-
-    if (!isPro) {
+    if (!proDetails.isPro) {
       return NextResponse.json({
         success: true,
         active: false,
-        error: 'No active Pro subscription found for this email address.'
-      }, { status: 404 });
-    }
-
-    // Check if the user is a free early access account (or has no Stripe setup but is PRO)
-    if (emailData?.source === 'early_access_free' || (emailData && !emailData.source && emailData.is_pro)) {
-      return NextResponse.json({
-        success: true,
-        active: true,
-        earlyAccessFree: true,
-        nextBillingDate: 'N/A - Free Early Access Account 🐾',
-        subscriptionId: 'early_access_free'
+        proSource: proDetails.proSource,
+        error: 'Free Account — No active paid subscription.'
       });
     }
 
@@ -69,19 +42,16 @@ export async function POST(request: NextRequest) {
 
     const stripe = new Stripe(stripeSecretKey);
 
-    // Find Stripe customer by email
     const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });
     if (!customers.data || customers.data.length === 0) {
       return NextResponse.json({
         success: true,
         active: false,
         error: 'Stripe customer record not found for this email address.'
-      }, { status: 404 });
+      });
     }
 
     const customerId = customers.data[0].id;
-
-    // Retrieve active or trialing subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       limit: 10
@@ -96,23 +66,12 @@ export async function POST(request: NextRequest) {
         success: true,
         active: false,
         error: 'No active subscription found in Stripe.'
-      }, { status: 404 });
+      });
     }
 
-    // Log raw subscription data to diagnose the Invalid Date issue
-    console.log('[Subscription Details API] Raw subscription:', JSON.stringify({
-      id: activeSubscription.id,
-      status: activeSubscription.status,
-      current_period_end: activeSubscription.current_period_end,
-      cancel_at_period_end: activeSubscription.cancel_at_period_end,
-      items_count: activeSubscription.items?.data?.length,
-    }));
-
-    // Defensively extract current_period_end — fall back to items[0] if top-level is missing
     let rawPeriodEnd: number | null | undefined = activeSubscription.current_period_end;
     if (!rawPeriodEnd && activeSubscription.items?.data?.[0]) {
       rawPeriodEnd = (activeSubscription.items.data[0] as any).current_period_end;
-      console.log('[Subscription Details API] Used items[0].current_period_end fallback:', rawPeriodEnd);
     }
 
     let nextBillingDate = 'N/A';
@@ -132,11 +91,7 @@ export async function POST(request: NextRequest) {
         nextBillingDate = new Date(periodEndMs).toDateString();
       }
       daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
-    } else {
-      console.error('[Subscription Details API] current_period_end is missing or zero for subscription:', activeSubscription.id);
     }
-
-    console.log('[Subscription Details API] Resolved nextBillingDate:', nextBillingDate, 'daysRemaining:', daysRemaining);
 
     return NextResponse.json({
       success: true,
@@ -148,7 +103,6 @@ export async function POST(request: NextRequest) {
       cancelAtPeriodEnd: activeSubscription.cancel_at_period_end,
       subscriptionId: activeSubscription.id
     });
-
   } catch (err: any) {
     console.error('[Subscription Details API] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

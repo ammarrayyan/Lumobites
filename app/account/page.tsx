@@ -591,24 +591,60 @@ export default function AccountPage() {
                 // Active Subscription Status Dashboard
                 <div className="flex flex-col gap-5">
                   <div className="text-center flex flex-col items-center">
-                    <Sparkles className="w-10 h-10 text-amber-500 mb-3" />
+                    <Sparkles className="w-10 h-10 text-[#8B5E3C] mb-3" />
                     <h2 className="text-2xl font-[900] text-[#191919] tracking-tight">
-                      {subDetails.earlyAccessFree ? "Your Account Dashboard" : "Your Pro Dashboard"}
+                      {subDetails.active ? "Your Membership Dashboard" : "Your Account Dashboard"}
                     </h2>
-                    <p className="text-xs text-gray-400 mt-1 font-bold">
+                    <p className="text-xs text-gray-500 mt-1 font-bold">
                       Account: {email}
                     </p>
                   </div>
 
-                  {subDetails.earlyAccessFree ? (
+                  {!subDetails.active ? (
                     <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-4">
                       <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Account Status</span>
-                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                          Active (Free Access) <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200">
+                          Free Account
                         </span>
                       </div>
+                      
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <span className="text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">AI Usage Allowance</span>
+                        <p className="text-xs text-gray-600 leading-relaxed">
+                          Standard free accounts get <strong>2 lifetime AI checks</strong> across all tools.
+                        </p>
+                      </div>
 
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setLoading(true);
+                          setError(null);
+                          try {
+                            const res = await fetch('/api/stripe/checkout', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ email: email.trim() })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              window.location.href = data.url;
+                            } else {
+                              throw new Error(data.error || 'Failed to start checkout');
+                            }
+                          } catch (err: any) {
+                            setError(err.message || 'Failed to start checkout.');
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={loading}
+                        className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Upgrade to Membership ($4.99/mo) →
+                      </button>
                     </div>
                   ) : (
                     <>
@@ -621,7 +657,7 @@ export default function AccountPage() {
                             </span>
                           ) : (
                             <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                              Active <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              Active Membership <Check className="w-3.5 h-3.5 text-emerald-600" />
                             </span>
                           )}
                         </div>

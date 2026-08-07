@@ -79,21 +79,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
       }
 
-      if (!userData || !userData.is_pro) {
-        // Automatically register as free early access account
+      if (!userData) {
+        // Register free account if not present
         const { error: upsertErr } = await supabase
           .from('emails')
           .upsert({
             email: cleanEmail,
-            is_pro: true,
-            source: 'early_access_free',
+            is_pro: false,
+            source: 'free_signup',
             created_at: new Date().toISOString()
           }, { onConflict: 'email' });
 
         if (upsertErr) {
-          console.error('[Verify Code API] Failed to register free account:', upsertErr);
-          return NextResponse.json({ error: 'Failed to create your free account.' }, { status: 500 });
+          console.error('[Verify Code API] Failed to register account:', upsertErr);
+          return NextResponse.json({ error: 'Failed to create your account.' }, { status: 500 });
         }
+      } else {
+        isProUser = userData.is_pro || false;
       }
     }
 
