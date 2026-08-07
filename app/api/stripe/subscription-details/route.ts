@@ -29,6 +29,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (proDetails.proSource.startsWith('partner_')) {
+      const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string }> = {
+        partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard' },
+        partner_daycare: { partnerType: 'daycare', partnerLabel: 'Pet Daycare', dashboardUrl: '/pet-daycare/dashboard' },
+        partner_shelter: { partnerType: 'shelter', partnerLabel: 'Shelter', dashboardUrl: '/adoption/shelter/dashboard' },
+      };
+
+      const info = partnerMap[proDetails.proSource] || { partnerType: 'vet', partnerLabel: 'Partner', dashboardUrl: '/' };
+
+      return NextResponse.json({
+        success: true,
+        active: true,
+        isPartner: true,
+        partnerType: info.partnerType,
+        partnerLabel: info.partnerLabel,
+        dashboardUrl: info.dashboardUrl,
+        adminBypass: false,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
+        nextBillingDate: `Included with ${info.partnerLabel} Subscription 🐾`,
+        subscriptionId: 'partner_bypass'
+      });
+    }
+
     if (!proDetails.isPro) {
       return NextResponse.json({
         success: true,

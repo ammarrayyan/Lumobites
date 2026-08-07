@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -21,12 +22,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'subscriptionId is required' }, { status: 400 });
     }
 
-    if (!stripeSecretKey) {
-      return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
-    }
-
-    const stripe = new Stripe(stripeSecretKey);
     const cleanEmail = verifiedEmail.toLowerCase().trim();
+
+    // Check if account is a partner subscription — block reactivation from consumer account page
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.proSource.startsWith('partner_') || subscriptionId === 'partner_bypass') {
+      return NextResponse.json({
+        error: 'Partner subscriptions cannot be managed from the consumer account page. Please manage your business subscription in your partner dashboard.'
+      }, { status: 403 });
+    }
 
     // Verify subscription belongs to authenticated user
     const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });

@@ -27,6 +27,14 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
 
+    // Check if account is a partner subscription — block cancellation from consumer account page
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.proSource.startsWith('partner_') || subscriptionId === 'partner_bypass') {
+      return NextResponse.json({
+        error: 'Partner subscriptions cannot be cancelled from the consumer account page. Please manage your business subscription in your partner dashboard.'
+      }, { status: 403 });
+    }
+
     // Check for owner/admin bypass
     const isOwner = cleanEmail === 'premierpetnutritionllc@gmail.com';
 

@@ -27,6 +27,9 @@ export default function AccountPage() {
             setSubDetails({
               active: data.active,
               adminBypass: data.adminBypass,
+              isPartner: data.isPartner,
+              partnerLabel: data.partnerLabel,
+              dashboardUrl: data.dashboardUrl,
               nextBillingDate: data.nextBillingDate,
               subscriptionId: data.subscriptionId,
               cancelAtPeriodEnd: data.cancelAtPeriodEnd,
@@ -62,6 +65,9 @@ export default function AccountPage() {
   const [subDetails, setSubDetails] = useState<{
     active: boolean;
     adminBypass: boolean;
+    isPartner?: boolean;
+    partnerLabel?: string;
+    dashboardUrl?: string;
     nextBillingDate: string;
     subscriptionId: string;
     cancelAtPeriodEnd?: boolean;
@@ -245,6 +251,9 @@ export default function AccountPage() {
       setSubDetails({
         active: data.active,
         adminBypass: data.adminBypass,
+        isPartner: data.isPartner,
+        partnerLabel: data.partnerLabel,
+        dashboardUrl: data.dashboardUrl,
         nextBillingDate: data.nextBillingDate,
         subscriptionId: data.subscriptionId,
         cancelAtPeriodEnd: data.cancelAtPeriodEnd,
@@ -718,6 +727,26 @@ export default function AccountPage() {
                       {subDetails.adminBypass ? (
                         <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
                           <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
+                        </div>
+                      ) : subDetails.isPartner ? (
+                        <div className="flex flex-col gap-3">
+                          <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-xs font-medium leading-relaxed">
+                            <p className="font-bold text-sm text-[#191919] mb-1">
+                              🐾 {subDetails.partnerLabel || 'Partner'} Account
+                            </p>
+                            <p className="text-amber-800 leading-relaxed">
+                              Full Membership AI access (5 daily checks across all tools) is automatically included with your active <strong>{subDetails.partnerLabel || 'Partner'}</strong> business subscription.
+                            </p>
+                            <p className="text-amber-700 mt-2 text-[11px]">
+                              To manage your business listing or subscription, please visit your partner dashboard.
+                            </p>
+                          </div>
+                          <Link
+                            href={subDetails.dashboardUrl || '/'}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                          >
+                            Go to {subDetails.partnerLabel || 'Partner'} Dashboard →
+                          </Link>
                         </div>
                       ) : subDetails.cancelAtPeriodEnd ? (
                         <div className="flex flex-col gap-3">
