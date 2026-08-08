@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban } from 'lucide-react';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard } from 'lucide-react';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
