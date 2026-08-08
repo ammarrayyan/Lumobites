@@ -50,16 +50,17 @@ export async function POST(request: NextRequest) {
       const cancelAtPeriodEnd = !!partnerRecord?.cancel_at_period_end;
       const currentPeriodEnd = partnerRecord?.current_period_end;
 
-      let nextBillingDate = 'Active Member 🐾';
-      if (currentPeriodEnd) {
+      let nextBillingDate = '30-Day Free Trial';
+      const dateToFormat = currentPeriodEnd || partnerRecord?.trial_end;
+      if (dateToFormat) {
         try {
-          nextBillingDate = new Date(currentPeriodEnd).toLocaleDateString('en-US', {
+          nextBillingDate = new Date(dateToFormat).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
           });
         } catch {
-          nextBillingDate = new Date(currentPeriodEnd).toDateString();
+          nextBillingDate = new Date(dateToFormat).toDateString();
         }
       }
 

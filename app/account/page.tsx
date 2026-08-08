@@ -741,30 +741,6 @@ export default function AccountPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
-                        <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
-                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
-                          {subDetails.cancelAtPeriodEnd ? (
-                            <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                              Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                            </span>
-                          ) : (
-                            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                              Active Membership <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
-                          </span>
-                          <p className="text-[#191919] font-extrabold text-sm mt-0.5">
-                            {subDetails.nextBillingDate}
-                          </p>
-                        </div>
-                      </div>
-
                       {error && (
                         <p className="text-xs text-red-500 font-semibold text-center leading-normal">
                           <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
@@ -776,144 +752,171 @@ export default function AccountPage() {
                           <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
                         </div>
                       ) : subDetails.isPartner ? (
-                        <div className="flex flex-col gap-3">
-                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-4 flex flex-col gap-2.5">
-                            <div className="flex items-center justify-between border-b border-gray-200/50 pb-2">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Plan</span>
-                              <span className="text-xs font-extrabold text-[#8B5E3C]">
-                                {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 30}/mo)
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 pt-0.5">
-                              <p className="text-xs font-bold text-gray-800 truncate" title={subDetails.businessName}>
-                                {subDetails.businessName}
-                              </p>
+                        <div className="flex flex-col gap-4">
+                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/15 rounded-2xl p-5 flex flex-col gap-3.5 shadow-xs">
+                            <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Subscription Status</span>
                               {subDetails.rawSubscriptionStatus === 'trialing' ? (
-                                <span className="bg-amber-100 text-amber-900 border border-amber-300/60 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shrink-0">
-                                  {subDetails.billingHealthLabel || 'Free Trial Active'}
+                                <span className="bg-amber-100 text-amber-900 border border-amber-300/70 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-3xs flex items-center gap-1.5">
+                                  <Sparkles className="w-3.5 h-3.5 text-amber-700" /> {subDetails.billingHealthLabel || 'Free Trial Active'}
+                                </span>
+                              ) : subDetails.cancelAtPeriodEnd ? (
+                                <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                  Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                                 </span>
                               ) : (
-                                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                  Active Subscription <Check className="w-3 h-3 text-emerald-600" />
+                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                  Active Partner Listing <Check className="w-3.5 h-3.5 text-emerald-600" />
                                 </span>
                               )}
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Business Name</span>
+                              <p className="text-[#191919] font-extrabold text-base">
+                                {subDetails.businessName}
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200/50">
+                              <div>
+                                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Business Plan</span>
+                                <p className="text-xs font-extrabold text-[#8B5E3C] mt-0.5">
+                                  {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 40}/mo)
+                                </p>
+                              </div>
+                              <div>
+                                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                                  {subDetails.rawSubscriptionStatus === 'trialing' ? 'Trial Ends On' : subDetails.cancelAtPeriodEnd ? 'Access Ends On' : 'Next Billing Date'}
+                                </span>
+                                <p className="text-xs font-extrabold text-gray-800 mt-0.5">
+                                  {subDetails.nextBillingDate}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {subDetails.cancelAtPeriodEnd && (
+                            <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-semibold leading-relaxed">
+                              Subscription scheduled to cancel — listing stays active until <strong>{subDetails.nextBillingDate}</strong>.
+                            </div>
+                          )}
+
+                          <Link
+                            href={subDetails.dashboardUrl || '/'}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
+                          >
+                            Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-4">
+                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
+                            <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
+                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
+                              {subDetails.cancelAtPeriodEnd ? (
+                                <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                  Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                                </span>
+                              ) : (
+                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                  Active Membership <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
+                              </span>
+                              <p className="text-[#191919] font-extrabold text-sm mt-0.5">
+                                {subDetails.nextBillingDate}
+                              </p>
                             </div>
                           </div>
 
                           {subDetails.cancelAtPeriodEnd ? (
-                            <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-semibold leading-relaxed">
-                              Subscription scheduled to cancel — listing stays active until <strong>{subDetails.nextBillingDate}</strong>.
-                            </div>
-                          ) : null}
-
-                          <div className="flex gap-2">
-                            {subDetails.cancelAtPeriodEnd ? (
-                              <button
-                                type="button"
-                                onClick={handleReactivateSubscription}
-                                disabled={loading}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                              >
-                                {loading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><RefreshCw className="w-3.5 h-3.5" /> Reactivate</>}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setShowConfirmCancel(true)}
-                                disabled={loading}
-                                className="flex-1 bg-white hover:bg-red-50 text-red-600 border border-red-200 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                              >
-                                Cancel Subscription
-                              </button>
-                            )}
-                            <Link
-                              href={subDetails.dashboardUrl || '/'}
-                              className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1 shrink-0"
-                            >
-                              Business Dashboard →
-                            </Link>
-                          </div>
-                        </div>
-                      ) : subDetails.cancelAtPeriodEnd ? (
-                        <div className="flex flex-col gap-3">
-                          <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
-                            Subscription cancelled — Membership access continues until <strong>{subDetails.nextBillingDate}</strong> (5 daily AI checks).
-                            {subDetails.daysRemaining !== undefined && (
-                              <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
-                            )}
-                          </div>
-                          {(subDetails.daysRemaining ?? 0) > 0 ? (
-                            <button
-                              onClick={async () => {
-                                setLoading(true);
-                                setError(null);
-                                try {
-                                  const res = await fetch('/api/stripe/reactivate-subscription', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
-                                  });
-                                  const data = await res.json();
-                                  if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
-                                  setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
-                                } catch (err: any) {
-                                  setError(err.message);
-                                } finally {
-                                  setLoading(false);
-                                }
-                              }}
-                              disabled={loading}
-                              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
-                            >
-                              {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                                <>
-                                  <RefreshCw className="w-4 h-4" />
-                                  Reactivate Membership
-                                </>
+                            <div className="flex flex-col gap-3">
+                              <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
+                                Subscription cancelled — Membership access continues until <strong>{subDetails.nextBillingDate}</strong> (5 daily AI checks).
+                                {subDetails.daysRemaining !== undefined && (
+                                  <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
+                                )}
+                              </div>
+                              {(subDetails.daysRemaining ?? 0) > 0 ? (
+                                <button
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    setError(null);
+                                    try {
+                                      const res = await fetch('/api/stripe/reactivate-subscription', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
+                                      });
+                                      const data = await res.json();
+                                      if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
+                                      setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+                                    } catch (err: any) {
+                                      setError(err.message);
+                                    } finally {
+                                      setLoading(false);
+                                    }
+                                  }}
+                                  disabled={loading}
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                >
+                                  {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                    <>
+                                      <RefreshCw className="w-4 h-4" />
+                                      Reactivate Membership
+                                    </>
+                                  )}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    setError(null);
+                                    try {
+                                      const res = await fetch('/api/stripe/checkout', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ email: email.trim() })
+                                      });
+                                      const data = await res.json();
+                                      if (data.url) {
+                                        window.location.href = data.url;
+                                      } else {
+                                        throw new Error(data.error || 'Failed to start checkout');
+                                      }
+                                    } catch (err: any) {
+                                      setError(err.message);
+                                      setLoading(false);
+                                    }
+                                  }}
+                                  disabled={loading}
+                                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                >
+                                  {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                    <>
+                                      <Sparkles className="w-4 h-4 text-white" />
+                                      Upgrade to Membership ($4.99/mo)
+                                    </>
+                                  )}
+                                </button>
                               )}
-                            </button>
+                            </div>
                           ) : (
                             <button
-                              onClick={async () => {
-                                setLoading(true);
-                                setError(null);
-                                try {
-                                  const res = await fetch('/api/stripe/checkout', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ email: email.trim() })
-                                  });
-                                  const data = await res.json();
-                                  if (data.url) {
-                                    window.location.href = data.url;
-                                  } else {
-                                    throw new Error(data.error || 'Failed to start checkout');
-                                  }
-                                } catch (err: any) {
-                                  setError(err.message);
-                                  setLoading(false);
-                                }
-                              }}
-                              disabled={loading}
-                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                              type="button"
+                              onClick={() => setShowConfirmCancel(true)}
+                              className="w-full bg-white hover:bg-red-50 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
                             >
-                              {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                                <>
-                                  <Sparkles className="w-4 h-4 text-white" />
-                                  Upgrade to Membership ($4.99/mo)
-                                </>
-                              )}
+                              Cancel Membership
                             </button>
                           )}
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmCancel(true)}
-                          className="w-full bg-white hover:bg-red-50 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 mt-2"
-                        >
-                          Cancel Membership
-                        </button>
                       )}
                     </>
                   )}
