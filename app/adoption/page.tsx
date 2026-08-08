@@ -252,6 +252,9 @@ function AdoptionContent() {
       if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
 
       // Successfully authenticated!
+      if (data.sessionToken) {
+        localStorage.setItem('lumo_account_session_token', data.sessionToken);
+      }
       localStorage.setItem('lumo_pro_email', trimmedEmail);
       localStorage.setItem('lumo_shelter_email', trimmedEmail);
       document.cookie = `lumo_pro_email=${encodeURIComponent(trimmedEmail)}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;

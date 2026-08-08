@@ -105,6 +105,10 @@ export default function AffiliateDashboard() {
         throw new Error(data.error || 'Verification failed. Please try again.');
       }
 
+      if (data.sessionToken) {
+        localStorage.setItem('lumo_account_session_token', data.sessionToken);
+      }
+      localStorage.setItem('lumo_pro_email', email.trim());
       localStorage.setItem('lumo_affiliate_email', email.trim());
       await fetchStats(email.trim());
     } catch (err: any) {

@@ -14,9 +14,13 @@ export default function AccountPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('lumo_account_session_token') : null;
         const res = await fetch('/api/stripe/subscription-details', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(tokenFromStorage ? { 'x-account-session': tokenFromStorage } : {})
+          },
           body: JSON.stringify({})
         });
         if (res.ok) {
@@ -212,6 +216,9 @@ export default function AccountPage() {
       const activeEmail = data.email || email.trim();
       setEmail(activeEmail);
       setIsLocked(true);
+      if (data.sessionToken) {
+        localStorage.setItem('lumo_account_session_token', data.sessionToken);
+      }
       localStorage.setItem('lumo_pro_email', activeEmail);
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       window.dispatchEvent(new Event('lumo-pro-update'));

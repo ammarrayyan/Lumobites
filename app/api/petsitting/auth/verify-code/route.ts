@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { setAccountSessionCookie, createAccountSessionToken } from '@/lib/accountAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,7 +108,10 @@ export async function POST(request: NextRequest) {
       await supabaseAdmin.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);
     }
 
-    return NextResponse.json({ success: true, message: 'Logged in successfully', existed });
+    const sessionToken = createAccountSessionToken(cleanEmail);
+    const response = NextResponse.json({ success: true, message: 'Logged in successfully', existed, sessionToken, email: cleanEmail });
+    setAccountSessionCookie(response, cleanEmail);
+    return response;
 
   } catch (err: any) {
     console.error('[Sitter Auth Verify Code] Server error:', err);

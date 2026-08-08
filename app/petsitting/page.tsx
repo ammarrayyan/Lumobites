@@ -2298,6 +2298,10 @@ export function PetSittingContent() {
 
       if (res.ok) {
         // Code verified! Save persistent sitter session
+        if (data.sessionToken) {
+          localStorage.setItem('lumo_account_session_token', data.sessionToken);
+        }
+        localStorage.setItem('lumo_pro_email', sitterEmail);
         const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
         localStorage.setItem('lumo_sitter_email', sitterEmail);
         localStorage.setItem('lumo_sitter_email_expiry', expiry.toString());
@@ -2718,6 +2722,9 @@ export function PetSittingContent() {
           setUnlockModalOpen(false);
           setOwnerAuthMode('email');
           setOwnerAuthCode('');
+          if (data.sessionToken) {
+            localStorage.setItem('lumo_account_session_token', data.sessionToken);
+          }
           localStorage.setItem('lumo_pro_email', unlockEmail);
           setReqEmail(unlockEmail);
           loadOwnerProfile(unlockEmail);

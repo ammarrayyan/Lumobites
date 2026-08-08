@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         active: false,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
         proSource: proDetails.proSource,
         error: 'Free Account — No active paid subscription.'
       });
@@ -102,6 +104,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         active: false,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
         error: 'Stripe customer record not found for this email address.'
       });
     }
@@ -120,6 +124,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         active: false,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
         error: 'No active subscription found in Stripe.'
       });
     }
