@@ -426,17 +426,24 @@ function AdoptionContent() {
       if (email) {
         setShelterOtpEmail(email);
         setShelterFormData(prev => ({ ...prev, email }));
-        setShelterOtpStep('form');
-        fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
-          .then(r => (r.ok ? r.json() : null))
-          .then(data => {
-            if (data && data.shelter) {
-              setUserShelter(data.shelter);
-            } else {
-              setUserShelter(null);
-            }
-          })
-          .catch(() => setUserShelter(null));
+        
+        checkShelterEmailConflict(email).then(isClean => {
+          if (isClean) {
+            setShelterOtpStep('form');
+            fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
+              .then(r => (r.ok ? r.json() : null))
+              .then(data => {
+                if (data && data.shelter) {
+                  setUserShelter(data.shelter);
+                } else {
+                  setUserShelter(null);
+                }
+              })
+              .catch(() => setUserShelter(null));
+          } else {
+            setShelterOtpStep('email');
+          }
+        });
       } else {
         setShelterOtpStep('email');
         setUserShelter(null);
