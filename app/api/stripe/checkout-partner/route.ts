@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
 
     const stripe = new Stripe(stripeSecretKey);
     const body = await request.json();
-    const { partner_id, partner_type, email } = body;
+    let { partner_id, partner_type, email } = body;
 
-    if (!partner_id || !partner_type || !email) {
-      return NextResponse.json({ error: 'Missing partner_id, partner_type, or email.' }, { status: 400 });
+    if (!partner_type || !email) {
+      return NextResponse.json({ error: 'Missing partner_type or email.' }, { status: 400 });
     }
 
     const validTypes = ['vet_boarding', 'pet_daycare', 'shelter'];
@@ -26,6 +26,23 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+
+    if (!partner_id) {
+      const tableMap: Record<string, string> = {
+        vet_boarding: 'vet_clinics',
+        pet_daycare: 'pet_daycares',
+        shelter: 'shelters',
+      };
+      const tableName = tableMap[partner_type];
+      if (tableName) {
+        const { data: found } = await supabaseAdmin.from(tableName).select('id').eq('email', cleanEmail).maybeSingle();
+        if (found?.id) partner_id = found.id;
+      }
+    }
+
+    if (!partner_id) {
+      return NextResponse.json({ error: 'Partner record not found for this email.' }, { status: 404 });
+    }
 
     // 1. Get current pricing config from database (defaults to $20 shelter, $30 daycare, $40 vet boarding)
     const pricing = await getPartnerPricing(partner_type as any);

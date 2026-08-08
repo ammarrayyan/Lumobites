@@ -33,6 +33,8 @@ export default function AccountPage() {
               active: data.active,
               adminBypass: data.adminBypass,
               isPartner: data.isPartner,
+              partnerId: data.partnerId,
+              dbPartnerType: data.dbPartnerType,
               partnerLabel: data.partnerLabel,
               dashboardUrl: data.dashboardUrl,
               businessName: data.businessName,
@@ -77,6 +79,8 @@ export default function AccountPage() {
     active: boolean;
     adminBypass: boolean;
     isPartner?: boolean;
+    partnerId?: string;
+    dbPartnerType?: string;
     partnerLabel?: string;
     dashboardUrl?: string;
     businessName?: string;
@@ -270,6 +274,8 @@ export default function AccountPage() {
         active: data.active,
         adminBypass: data.adminBypass,
         isPartner: data.isPartner,
+        partnerId: data.partnerId,
+        dbPartnerType: data.dbPartnerType,
         partnerLabel: data.partnerLabel,
         dashboardUrl: data.dashboardUrl,
         businessName: data.businessName,
@@ -814,12 +820,59 @@ export default function AccountPage() {
                             </div>
                           )}
 
-                          <Link
-                            href={subDetails.dashboardUrl || '/'}
-                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
-                          >
-                            Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
-                          </Link>
+                          {subDetails.rawSubscriptionStatus === 'trialing' ? (
+                            <div className="flex gap-2.5">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (!subDetails.dbPartnerType) return;
+                                  setLoading(true);
+                                  setError(null);
+                                  try {
+                                    const res = await fetch('/api/stripe/checkout-partner', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        partner_id: subDetails.partnerId,
+                                        partner_type: subDetails.dbPartnerType,
+                                        email: email.trim(),
+                                      }),
+                                    });
+                                    const data = await res.json();
+                                    if (!res.ok) throw new Error(data.error || 'Failed to start checkout.');
+                                    if (data.url) window.location.href = data.url;
+                                  } catch (err: any) {
+                                    setError(err.message || 'Unable to connect to Stripe.');
+                                    setLoading(false);
+                                  }
+                                }}
+                                disabled={loading}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                              >
+                                {loading ? (
+                                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <>
+                                    <CreditCard className="w-3.5 h-3.5" />
+                                    Start Billing Now (${subDetails.priceUsd || 40}/mo)
+                                  </>
+                                )}
+                              </button>
+                              <Link
+                                href={subDetails.dashboardUrl || '/'}
+                                className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                              >
+                                Business Dashboard →
+                              </Link>
+                            </div>
+                          ) : (
+                            <Link
+                              href={subDetails.dashboardUrl || '/'}
+                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
+                            >
+                              Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
+                            </Link>
+                          )}
                         </div>
                       ) : (
                         <div className="flex flex-col gap-4">

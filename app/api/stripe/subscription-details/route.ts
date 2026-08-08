@@ -64,10 +64,14 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      const dbPartnerType = info.table === 'vet_clinics' ? 'vet_boarding' : info.table === 'pet_daycares' ? 'pet_daycare' : 'shelter';
+
       return NextResponse.json({
         success: true,
         active: true,
         isPartner: true,
+        partnerId: partnerRecord?.id,
+        dbPartnerType,
         partnerType: info.partnerType,
         partnerLabel: info.partnerLabel,
         dashboardUrl: info.dashboardUrl,
