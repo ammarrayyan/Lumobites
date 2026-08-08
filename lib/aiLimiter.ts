@@ -93,87 +93,96 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
   };
 
   // 2. Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $20/mo)
-  const { data: vet } = await supabaseAdmin.from('vet_clinics').select('subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  const { data: vet } = await supabaseAdmin.from('vet_clinics').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
   if (vet && vet.length > 0) {
     const v = vet[0];
-    const status = v.subscription_status || 'trialing';
-    if (status === 'active') {
-      const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, v.stripe_subscription_id);
-      if (cancelAtPeriodEnd) {
-        return {
-          isPro: true,
-          proSource: 'partner_vet',
-          rawSubscriptionStatus: 'active',
-          billingHealthLabel: endDateStr ? `Canceling Vet Partner (access until ${endDateStr})` : 'Canceling Vet Partner ($40/mo)'
-        };
-      }
-      return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Vet Partner ($40/mo)' };
-    }
-    if (status === 'trialing' && v.trial_end && v.trial_end > nowIso) {
-      const days = getTrialDays(v.trial_end);
-      return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Vet Partner (${days}d left)` };
-    }
-    if (status === 'past_due') {
+    const appStatus = v.status || 'pending';
+    const subStatus = v.subscription_status || 'trialing';
+
+    if (subStatus === 'past_due') {
       return { isPro: false, proSource: 'partner_vet', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due Vet Partner (Card Declined)' };
     }
-    if (status === 'canceled') {
+    if (subStatus === 'canceled') {
       return { isPro: false, proSource: 'partner_vet', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled Vet Partner ($40/mo)' };
     }
+
+    if (appStatus === 'approved' || subStatus === 'active' || subStatus === 'trialing') {
+      if (subStatus === 'active') {
+        const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, v.stripe_subscription_id);
+        if (cancelAtPeriodEnd) {
+          return {
+            isPro: true,
+            proSource: 'partner_vet',
+            rawSubscriptionStatus: 'active',
+            billingHealthLabel: endDateStr ? `Canceling Vet Partner (access until ${endDateStr})` : 'Canceling Vet Partner ($40/mo)'
+          };
+        }
+        return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Vet Partner ($40/mo)' };
+      }
+      const days = v.trial_end && v.trial_end > nowIso ? getTrialDays(v.trial_end) : 30;
+      return { isPro: true, proSource: 'partner_vet', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Vet Partner (${days}d left)` };
+    }
   }
 
-  const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
   if (daycare && daycare.length > 0) {
     const d = daycare[0];
-    const status = d.subscription_status || 'trialing';
-    if (status === 'active') {
-      const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, d.stripe_subscription_id);
-      if (cancelAtPeriodEnd) {
-        return {
-          isPro: true,
-          proSource: 'partner_daycare',
-          rawSubscriptionStatus: 'active',
-          billingHealthLabel: endDateStr ? `Canceling Daycare Partner (access until ${endDateStr})` : 'Canceling Daycare Partner ($30/mo)'
-        };
-      }
-      return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Daycare Partner ($30/mo)' };
-    }
-    if (status === 'trialing' && d.trial_end && d.trial_end > nowIso) {
-      const days = getTrialDays(d.trial_end);
-      return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Daycare Partner (${days}d left)` };
-    }
-    if (status === 'past_due') {
+    const appStatus = d.status || 'pending';
+    const subStatus = d.subscription_status || 'trialing';
+
+    if (subStatus === 'past_due') {
       return { isPro: false, proSource: 'partner_daycare', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due Daycare Partner (Card Declined)' };
     }
-    if (status === 'canceled') {
+    if (subStatus === 'canceled') {
       return { isPro: false, proSource: 'partner_daycare', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled Daycare Partner ($30/mo)' };
+    }
+
+    if (appStatus === 'approved' || subStatus === 'active' || subStatus === 'trialing') {
+      if (subStatus === 'active') {
+        const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, d.stripe_subscription_id);
+        if (cancelAtPeriodEnd) {
+          return {
+            isPro: true,
+            proSource: 'partner_daycare',
+            rawSubscriptionStatus: 'active',
+            billingHealthLabel: endDateStr ? `Canceling Daycare Partner (access until ${endDateStr})` : 'Canceling Daycare Partner ($30/mo)'
+          };
+        }
+        return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Daycare Partner ($30/mo)' };
+      }
+      const days = d.trial_end && d.trial_end > nowIso ? getTrialDays(d.trial_end) : 30;
+      return { isPro: true, proSource: 'partner_daycare', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Daycare Partner (${days}d left)` };
     }
   }
 
-  const { data: shelter } = await supabaseAdmin.from('shelters').select('subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  const { data: shelter } = await supabaseAdmin.from('shelters').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
   if (shelter && shelter.length > 0) {
     const s = shelter[0];
-    const status = s.subscription_status || 'trialing';
-    if (status === 'active') {
-      const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, s.stripe_subscription_id);
-      if (cancelAtPeriodEnd) {
-        return {
-          isPro: true,
-          proSource: 'partner_shelter',
-          rawSubscriptionStatus: 'active',
-          billingHealthLabel: endDateStr ? `Canceling Shelter Partner (access until ${endDateStr})` : 'Canceling Shelter Partner ($20/mo)'
-        };
-      }
-      return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Shelter Partner ($20/mo)' };
-    }
-    if (status === 'trialing' && s.trial_end && s.trial_end > nowIso) {
-      const days = getTrialDays(s.trial_end);
-      return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Shelter Partner (${days}d left)` };
-    }
-    if (status === 'past_due') {
+    const appStatus = s.status || 'pending';
+    const subStatus = s.subscription_status || 'trialing';
+
+    if (subStatus === 'past_due') {
       return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due Shelter Partner (Card Declined)' };
     }
-    if (status === 'canceled') {
+    if (subStatus === 'canceled') {
       return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled Shelter Partner ($20/mo)' };
+    }
+
+    if (appStatus === 'approved' || subStatus === 'active' || subStatus === 'trialing') {
+      if (subStatus === 'active') {
+        const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail, s.stripe_subscription_id);
+        if (cancelAtPeriodEnd) {
+          return {
+            isPro: true,
+            proSource: 'partner_shelter',
+            rawSubscriptionStatus: 'active',
+            billingHealthLabel: endDateStr ? `Canceling Shelter Partner (access until ${endDateStr})` : 'Canceling Shelter Partner ($20/mo)'
+          };
+        }
+        return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Shelter Partner ($20/mo)' };
+      }
+      const days = s.trial_end && s.trial_end > nowIso ? getTrialDays(s.trial_end) : 30;
+      return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Shelter Partner (${days}d left)` };
     }
   }
 

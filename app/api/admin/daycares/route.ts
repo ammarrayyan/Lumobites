@@ -35,9 +35,20 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
     }
 
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const updatePayload: any = { status };
+
+    if (status === 'approved') {
+      updatePayload.approved_at = now.toISOString();
+      updatePayload.subscription_status = 'trialing';
+      updatePayload.trial_start = now.toISOString();
+      updatePayload.trial_end = trialEnd.toISOString();
+    }
+
     const { data: daycare, error } = await supabaseAdmin
       .from('pet_daycares')
-      .update({ status })
+      .update(updatePayload)
       .eq('id', id)
       .select('*')
       .single();

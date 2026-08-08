@@ -40,11 +40,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
     }
 
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     const updatePayload: any = { status };
+
     if (status === 'rejected') {
       updatePayload.rejection_reason = rejection_reason || 'Application did not meet verification criteria.';
     } else if (status === 'approved') {
       updatePayload.rejection_reason = null;
+      updatePayload.approved_at = now.toISOString();
+      updatePayload.subscription_status = 'trialing';
+      updatePayload.trial_start = now.toISOString();
+      updatePayload.trial_end = trialEnd.toISOString();
     }
 
     const { data: shelter, error } = await supabaseAdmin
