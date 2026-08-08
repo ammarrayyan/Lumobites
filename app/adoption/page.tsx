@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
@@ -188,8 +188,28 @@ function AdoptionContent() {
   const [shelterOtpSending, setShelterOtpSending] = useState(false);
   const [shelterOtpVerifying, setShelterOtpVerifying] = useState(false);
   const [shelterOtpError, setShelterOtpError] = useState('');
+  const [shelterConflictMsg, setShelterConflictMsg] = useState('');
 
-  const handleOpenShelterModal = () => {
+  const checkShelterEmailConflict = async (emailVal: string) => {
+    const trimmed = emailVal.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@')) return true;
+    try {
+      const res = await fetch(`/api/partnerships/check-email?email=${encodeURIComponent(trimmed)}&target_type=shelter`);
+      const data = await res.json();
+      if (data.valid === false) {
+        setShelterConflictMsg(data.error);
+        return false;
+      }
+      setShelterConflictMsg('');
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
+  const handleOpenShelterModal = async () => {
+    setShelterConflictMsg('');
+    setShelterOtpError('');
     if (typeof window !== 'undefined') {
       const email = (
         localStorage.getItem('lumo_pro_email') ||
@@ -201,6 +221,13 @@ function AdoptionContent() {
       if (email) {
         setShelterOtpEmail(email);
         setShelterFormData(prev => ({ ...prev, email }));
+        
+        const isClean = await checkShelterEmailConflict(email);
+        if (!isClean) {
+          setIsShelterRegOpen(true);
+          return;
+        }
+
         setShelterOtpStep('form');
       } else {
         setShelterOtpStep('email');
@@ -218,6 +245,12 @@ function AdoptionContent() {
     setShelterOtpError('');
     setShelterOtpSending(true);
     try {
+      const isClean = await checkShelterEmailConflict(trimmed);
+      if (!isClean) {
+        setShelterOtpSending(false);
+        return;
+      }
+
       const res = await fetch('/api/petsitting/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -261,6 +294,12 @@ function AdoptionContent() {
       window.dispatchEvent(new Event('lumo-pro-update'));
 
       setShelterFormData(prev => ({ ...prev, email: trimmedEmail }));
+
+      const isClean = await checkShelterEmailConflict(trimmedEmail);
+      if (!isClean) {
+        setShelterOtpVerifying(false);
+        return;
+      }
 
       // Immediately check if this email is an existing approved shelter
       try {
@@ -1165,7 +1204,29 @@ function AdoptionContent() {
 
             {/* Scrollable Content Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 text-left">
-              {shelterRegSuccess ? (
+              {shelterConflictMsg ? (
+                <div className="bg-rose-50 border border-rose-200 p-5 rounded-2xl text-center space-y-3 text-xs text-rose-900 font-medium">
+                  <ShieldAlert className="w-8 h-8 text-rose-600 mx-auto" />
+                  <p className="font-black text-sm text-rose-950">Account Conflict</p>
+                  <p className="leading-relaxed text-rose-800">{shelterConflictMsg}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('lumo_pro_email');
+                      localStorage.removeItem('lumo_sitter_email');
+                      localStorage.removeItem('lumo_shelter_email');
+                      localStorage.removeItem('lumo_account_session_token');
+                      document.cookie = 'lumo_pro_email=; path=/; max-age=0';
+                      setShelterConflictMsg('');
+                      setShelterOtpStep('email');
+                      setShelterOtpEmail('');
+                    }}
+                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-all shadow-sm text-xs border-none cursor-pointer"
+                  >
+                    Sign Out / Switch Account
+                  </button>
+                </div>
+              ) : shelterRegSuccess ? (
                 <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2 text-xs text-emerald-900 font-medium">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
                   <p className="font-bold text-sm">Application Submitted!</p>
