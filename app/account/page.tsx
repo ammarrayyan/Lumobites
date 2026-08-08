@@ -1041,7 +1041,13 @@ export default function AccountPage() {
                         Delete Your Account?
                       </h3>
                       <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                        Are you sure you want to delete your account? This will permanently delete all your data including bookings, pets, and posts. This cannot be undone.
+                        Are you sure you want to delete your account? This will permanently delete all your data including bookings, pets, and posts.
+                        {subDetails?.active && (
+                          <span className="block mt-2 font-semibold text-red-600">
+                            ⚠️ This will also immediately cancel your active {subDetails.isPartner ? (subDetails.partnerLabel || 'Partner') : 'Membership'} subscription.
+                          </span>
+                        )}
+                        <span className="block mt-1 font-medium text-gray-600">This cannot be undone.</span>
                       </p>
                     </div>
 
