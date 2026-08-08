@@ -777,16 +777,27 @@ export default function AccountPage() {
                         </div>
                       ) : subDetails.isPartner ? (
                         <div className="flex flex-col gap-3">
-                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-4 flex flex-col gap-2">
+                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-4 flex flex-col gap-2.5">
                             <div className="flex items-center justify-between border-b border-gray-200/50 pb-2">
                               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Plan</span>
                               <span className="text-xs font-extrabold text-[#8B5E3C]">
                                 {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 30}/mo)
                               </span>
                             </div>
-                            <p className="text-xs font-bold text-gray-800">
-                              {subDetails.businessName}
-                            </p>
+                            <div className="flex items-center justify-between gap-2 pt-0.5">
+                              <p className="text-xs font-bold text-gray-800 truncate" title={subDetails.businessName}>
+                                {subDetails.businessName}
+                              </p>
+                              {subDetails.rawSubscriptionStatus === 'trialing' ? (
+                                <span className="bg-amber-100 text-amber-900 border border-amber-300/60 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shrink-0">
+                                  {subDetails.billingHealthLabel || 'Free Trial Active'}
+                                </span>
+                              ) : (
+                                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                  Active Subscription <Check className="w-3 h-3 text-emerald-600" />
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {subDetails.cancelAtPeriodEnd ? (

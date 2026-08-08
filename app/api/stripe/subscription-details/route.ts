@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
         priceUsd: info.defaultPrice,
         cancelAtPeriodEnd,
         status: partnerRecord?.status || 'approved',
+        rawSubscriptionStatus: proDetails.rawSubscriptionStatus,
+        billingHealthLabel: proDetails.billingHealthLabel,
         adminBypass: false,
         email: cleanEmail,
         verified: !!verifiedEmail,
