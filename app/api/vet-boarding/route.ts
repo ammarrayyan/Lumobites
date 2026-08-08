@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { extractOgImage } from '@/lib/og-fetcher';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 import Stripe from 'stripe';
 import {
   sendVetClinicRegistrationEmail,
@@ -134,6 +135,14 @@ export async function POST(request: NextRequest) {
     const finalAddress = geo?.formatted_address || address || locationQuery;
     const finalLat = geo?.lat || null;
     const finalLng = geo?.lng || null;
+
+    // Check for active consumer AI Membership FIRST
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.isPro && proDetails.proSource === 'ai_member') {
+      return NextResponse.json({
+        error: "This email already has an active AI Membership. Please cancel it on your Account page first if you'd like to register as a Vet Boarding partner instead."
+      }, { status: 400 });
+    }
 
     // Check for existing registration in other partner tables FIRST
     const { data: existingDaycare } = await supabaseAdmin.from('pet_daycares').select('id').eq('email', cleanEmail).maybeSingle();

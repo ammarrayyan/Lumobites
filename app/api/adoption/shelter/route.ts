@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -121,6 +122,14 @@ export async function POST(request: NextRequest) {
     const finalAddress = geo?.formatted_address || address || locationQuery;
     const finalLat = geo?.lat || null;
     const finalLng = geo?.lng || null;
+
+    // Check for active consumer AI Membership FIRST
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.isPro && proDetails.proSource === 'ai_member') {
+      return NextResponse.json({
+        error: "This email already has an active AI Membership. Please cancel it on your Account page first if you'd like to register as a Shelter partner instead."
+      }, { status: 400 });
+    }
 
     // Check for existing registration in other partner tables FIRST
     const { data: existingVet } = await supabaseAdmin.from('vet_clinics').select('id').eq('email', cleanEmail).maybeSingle();

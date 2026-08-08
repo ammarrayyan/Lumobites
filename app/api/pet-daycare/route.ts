@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { extractOgImage } from '@/lib/og-fetcher';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 import { sendDaycareRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -139,6 +140,14 @@ export async function POST(request: NextRequest) {
     const finalAddress = geo?.formatted_address || address || locationQuery;
     const finalLat = geo?.lat || null;
     const finalLng = geo?.lng || null;
+
+    // Check for active consumer AI Membership FIRST
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.isPro && proDetails.proSource === 'ai_member') {
+      return NextResponse.json({
+        error: "This email already has an active AI Membership. Please cancel it on your Account page first if you'd like to register as a Pet Daycare partner instead."
+      }, { status: 400 });
+    }
 
     // Check for existing registration in other partner tables FIRST
     const { data: existingVet } = await supabaseAdmin.from('vet_clinics').select('id').eq('email', cleanEmail).maybeSingle();
