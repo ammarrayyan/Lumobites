@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (proDetails.proSource.startsWith('partner_')) {
+    if (proDetails.isPro && proDetails.proSource.startsWith('partner_')) {
       const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string; table: string; defaultPrice: number }> = {
         partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard', table: 'vet_clinics', defaultPrice: 40 },
         partner_daycare: { partnerType: 'daycare', partnerLabel: 'Pet Daycare', dashboardUrl: '/pet-daycare/dashboard', table: 'pet_daycares', defaultPrice: 30 },

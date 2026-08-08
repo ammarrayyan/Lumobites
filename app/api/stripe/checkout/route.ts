@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
     }
 
-    // Check if user is an active partner account — block AI membership checkout to avoid double paying
+    // Check if user is an ACTIVE partner account — block AI membership checkout to avoid double paying
     const proDetails = await getUserProStatusDetails(cleanEmail);
-    if (proDetails.proSource.startsWith('partner_')) {
+    if (proDetails.isPro && proDetails.proSource.startsWith('partner_')) {
       const partnerName = proDetails.proSource === 'partner_vet'
         ? 'Vet Boarding'
         : proDetails.proSource === 'partner_daycare'
