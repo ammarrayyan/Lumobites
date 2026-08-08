@@ -274,20 +274,22 @@ export default function AccountPage() {
   };
 
   const handleCancelSubscription = async () => {
-    if (!subDetails || !subDetails.subscriptionId) return;
+    if (!subDetails) return;
 
     setLoading(true);
     setError(null);
     setMessage(null);
 
     try {
-      const res = await fetch('/api/stripe/cancel-subscription', {
+      const endpoint = subDetails.isPartner ? '/api/stripe/cancel-partner-subscription' : '/api/stripe/cancel-subscription';
+      const body = subDetails.isPartner
+        ? { email: email.trim(), type: subDetails.partnerType === 'shelter' ? 'shelter' : subDetails.partnerType === 'vet' ? 'vet_boarding' : 'pet_daycare' }
+        : { email: email.trim(), subscriptionId: subDetails.subscriptionId };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          subscriptionId: subDetails.subscriptionId
-        })
+        body: JSON.stringify(body)
       });
 
       const data = await res.json();
@@ -297,15 +299,43 @@ export default function AccountPage() {
 
       setIsCancelled(true);
       setShowConfirmCancel(false);
-      // Store the end date and days remaining from the API response
       setCancelEndDate(data.endDate || subDetails.nextBillingDate);
       setCancelDaysRemaining(data.daysRemaining ?? subDetails.daysRemaining ?? 0);
-      // Optimistically update dashboard state to cancellation scheduled
       setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: true } : null);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Could not cancel subscription. Please contact support.');
       setShowConfirmCancel(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    if (!subDetails || !subDetails.isPartner) return;
+
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const partnerTypeKey = subDetails.partnerType === 'shelter' ? 'shelter' : subDetails.partnerType === 'vet' ? 'vet_boarding' : 'pet_daycare';
+      const res = await fetch('/api/stripe/reactivate-partner-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), type: partnerTypeKey })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to reactivate subscription');
+      }
+
+      setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+      setMessage('Subscription reactivated successfully!');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Could not reactivate subscription. Please contact support.');
     } finally {
       setLoading(false);
     }
@@ -730,23 +760,51 @@ export default function AccountPage() {
                         </div>
                       ) : subDetails.isPartner ? (
                         <div className="flex flex-col gap-3">
-                          <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-xs font-medium leading-relaxed">
-                            <p className="font-bold text-sm text-[#191919] mb-1">
-                              🐾 {subDetails.partnerLabel || 'Partner'} Account
-                            </p>
-                            <p className="text-amber-800 leading-relaxed">
-                              Full Membership AI access (5 daily checks across all tools) is automatically included with your active <strong>{subDetails.partnerLabel || 'Partner'}</strong> business subscription.
-                            </p>
-                            <p className="text-amber-700 mt-2 text-[11px]">
-                              To manage your business listing or subscription, please visit your partner dashboard.
+                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-4 flex flex-col gap-2">
+                            <div className="flex items-center justify-between border-b border-gray-200/50 pb-2">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Business Plan</span>
+                              <span className="text-xs font-extrabold text-[#8B5E3C]">
+                                {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 30}/mo)
+                              </span>
+                            </div>
+                            <p className="text-xs font-bold text-gray-800">
+                              {subDetails.businessName}
                             </p>
                           </div>
-                          <Link
-                            href={subDetails.dashboardUrl || '/'}
-                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
-                          >
-                            Go to {subDetails.partnerLabel || 'Partner'} Dashboard →
-                          </Link>
+
+                          {subDetails.cancelAtPeriodEnd ? (
+                            <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-semibold leading-relaxed">
+                              Subscription scheduled to cancel — listing stays active until <strong>{subDetails.nextBillingDate}</strong>.
+                            </div>
+                          ) : null}
+
+                          <div className="flex gap-2">
+                            {subDetails.cancelAtPeriodEnd ? (
+                              <button
+                                type="button"
+                                onClick={handleReactivateSubscription}
+                                disabled={loading}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                              >
+                                {loading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><RefreshCw className="w-3.5 h-3.5" /> Reactivate</>}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirmCancel(true)}
+                                disabled={loading}
+                                className="flex-1 bg-white hover:bg-red-50 text-red-600 border border-red-200 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                              >
+                                Cancel Subscription
+                              </button>
+                            )}
+                            <Link
+                              href={subDetails.dashboardUrl || '/'}
+                              className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3 rounded-xl font-bold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1 shrink-0"
+                            >
+                              Business Dashboard →
+                            </Link>
+                          </div>
                         </div>
                       ) : subDetails.cancelAtPeriodEnd ? (
                         <div className="flex flex-col gap-3">
@@ -913,22 +971,14 @@ export default function AccountPage() {
                     <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
                   </button>
 
-                  {/* Delete My Account Button (hidden for partner accounts) */}
-                  {subDetails?.isPartner ? (
-                    <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-3.5 text-center mt-2">
-                      <p className="text-xs font-semibold text-amber-900 leading-relaxed">
-                        To manage or delete your business account, please visit your <strong>{subDetails.partnerLabel || 'Partner'}</strong> dashboard.
-                      </p>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmDelete(true)}
-                      className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
-                    >
-                      <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
-                    </button>
-                  )}
+                  {/* Delete My Account Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmDelete(true)}
+                    className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
+                  </button>
                 </div>
               )}
               {showConfirmCancel && (
