@@ -16,15 +16,49 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
 
-    // Check if user is a partner — block account deletion from consumer page
-    const proDetails = await getUserProStatusDetails(cleanEmail);
-    if (proDetails.proSource.startsWith('partner_')) {
-      return NextResponse.json({
-        error: 'Partner accounts cannot be deleted from the consumer account page. Please manage your business listing from your partner dashboard.'
-      }, { status: 403 });
+    // 1. Partner Account Cleanup (Vet Boarding, Pet Daycare, Shelter)
+    if (stripeSecretKey) {
+      try {
+        const stripe = new Stripe(stripeSecretKey);
+
+        // Cancel partner subscriptions for vet_clinics
+        const { data: vet } = await supabaseAdmin.from('vet_clinics').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
+        if (vet) {
+          if (vet.stripe_subscription_id) {
+            try { await stripe.subscriptions.cancel(vet.stripe_subscription_id); } catch (e) {}
+          }
+          await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', vet.id);
+          await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', vet.id);
+          await supabaseAdmin.from('vet_clinics').delete().eq('id', vet.id);
+        }
+
+        // Cancel partner subscriptions for pet_daycares
+        const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
+        if (daycare) {
+          if (daycare.stripe_subscription_id) {
+            try { await stripe.subscriptions.cancel(daycare.stripe_subscription_id); } catch (e) {}
+          }
+          await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', daycare.id);
+          await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', daycare.id);
+          await supabaseAdmin.from('pet_daycares').delete().eq('id', daycare.id);
+        }
+
+        // Cancel partner subscriptions for shelters
+        const { data: shelter } = await supabaseAdmin.from('shelters').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
+        if (shelter) {
+          if (shelter.stripe_subscription_id) {
+            try { await stripe.subscriptions.cancel(shelter.stripe_subscription_id); } catch (e) {}
+          }
+          await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', shelter.id);
+          await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', shelter.id);
+          await supabaseAdmin.from('shelters').delete().eq('id', shelter.id);
+        }
+      } catch (partnerErr) {
+        console.error('[Account Delete] Partner cleanup error:', partnerErr);
+      }
     }
 
-    // 1. Stripe Subscription Cancellation for Sitter Profile (if exists)
+    // 2. Stripe Subscription Cancellation for Sitter Profile (if exists)
     try {
       const { data: sitter } = await supabaseAdmin
         .from('sitters')

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -40,6 +41,19 @@ export async function POST(request: NextRequest) {
 
     if (existingUser?.account_status === 'suspended' || existingUser?.account_status === 'banned') {
       return NextResponse.json({ error: 'Your account has been suspended. Contact info@lumobitespet.com for assistance.' }, { status: 403 });
+    }
+
+    // Check if user is an active partner account — block AI membership checkout to avoid double paying
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    if (proDetails.proSource.startsWith('partner_')) {
+      const partnerName = proDetails.proSource === 'partner_vet'
+        ? 'Vet Boarding'
+        : proDetails.proSource === 'partner_daycare'
+        ? 'Pet Daycare'
+        : 'Shelter';
+      return NextResponse.json({
+        error: `You already have Pro AI access included with your ${partnerName} subscription — no need to purchase Membership separately.`
+      }, { status: 400 });
     }
 
     if (existingUser?.is_pro) {

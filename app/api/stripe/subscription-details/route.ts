@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
 import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
@@ -30,13 +31,37 @@ export async function POST(request: NextRequest) {
     }
 
     if (proDetails.proSource.startsWith('partner_')) {
-      const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string }> = {
-        partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard' },
-        partner_daycare: { partnerType: 'daycare', partnerLabel: 'Pet Daycare', dashboardUrl: '/pet-daycare/dashboard' },
-        partner_shelter: { partnerType: 'shelter', partnerLabel: 'Shelter', dashboardUrl: '/adoption/shelter/dashboard' },
+      const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string; table: string; defaultPrice: number }> = {
+        partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard', table: 'vet_clinics', defaultPrice: 40 },
+        partner_daycare: { partnerType: 'daycare', partnerLabel: 'Pet Daycare', dashboardUrl: '/pet-daycare/dashboard', table: 'pet_daycares', defaultPrice: 30 },
+        partner_shelter: { partnerType: 'shelter', partnerLabel: 'Shelter', dashboardUrl: '/adoption/shelter/dashboard', table: 'shelters', defaultPrice: 20 },
       };
 
-      const info = partnerMap[proDetails.proSource] || { partnerType: 'vet', partnerLabel: 'Partner', dashboardUrl: '/' };
+      const info = partnerMap[proDetails.proSource] || { partnerType: 'vet', partnerLabel: 'Partner', dashboardUrl: '/', table: 'vet_clinics', defaultPrice: 40 };
+
+      // Fetch live partner record from Supabase
+      const { data: partnerRecord } = await supabaseAdmin
+        .from(info.table)
+        .select('*')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      const businessName = partnerRecord?.clinic_name || partnerRecord?.business_name || partnerRecord?.org_name || info.partnerLabel;
+      const cancelAtPeriodEnd = !!partnerRecord?.cancel_at_period_end;
+      const currentPeriodEnd = partnerRecord?.current_period_end;
+
+      let nextBillingDate = 'Active Member 🐾';
+      if (currentPeriodEnd) {
+        try {
+          nextBillingDate = new Date(currentPeriodEnd).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+        } catch {
+          nextBillingDate = new Date(currentPeriodEnd).toDateString();
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -45,11 +70,15 @@ export async function POST(request: NextRequest) {
         partnerType: info.partnerType,
         partnerLabel: info.partnerLabel,
         dashboardUrl: info.dashboardUrl,
+        businessName,
+        priceUsd: info.defaultPrice,
+        cancelAtPeriodEnd,
+        status: partnerRecord?.status || 'approved',
         adminBypass: false,
         email: cleanEmail,
         verified: !!verifiedEmail,
-        nextBillingDate: `Included with ${info.partnerLabel} Subscription 🐾`,
-        subscriptionId: 'partner_bypass'
+        nextBillingDate,
+        subscriptionId: partnerRecord?.stripe_subscription_id || 'partner_bypass'
       });
     }
 
