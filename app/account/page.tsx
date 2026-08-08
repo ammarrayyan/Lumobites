@@ -35,6 +35,10 @@ export default function AccountPage() {
               isPartner: data.isPartner,
               partnerLabel: data.partnerLabel,
               dashboardUrl: data.dashboardUrl,
+              businessName: data.businessName,
+              priceUsd: data.priceUsd,
+              rawSubscriptionStatus: data.rawSubscriptionStatus,
+              billingHealthLabel: data.billingHealthLabel,
               nextBillingDate: data.nextBillingDate,
               subscriptionId: data.subscriptionId,
               cancelAtPeriodEnd: data.cancelAtPeriodEnd,
@@ -75,6 +79,10 @@ export default function AccountPage() {
     isPartner?: boolean;
     partnerLabel?: string;
     dashboardUrl?: string;
+    businessName?: string;
+    priceUsd?: number;
+    rawSubscriptionStatus?: string;
+    billingHealthLabel?: string;
     nextBillingDate: string;
     subscriptionId: string;
     cancelAtPeriodEnd?: boolean;
@@ -264,6 +272,10 @@ export default function AccountPage() {
         isPartner: data.isPartner,
         partnerLabel: data.partnerLabel,
         dashboardUrl: data.dashboardUrl,
+        businessName: data.businessName,
+        priceUsd: data.priceUsd,
+        rawSubscriptionStatus: data.rawSubscriptionStatus,
+        billingHealthLabel: data.billingHealthLabel,
         nextBillingDate: data.nextBillingDate,
         subscriptionId: data.subscriptionId,
         cancelAtPeriodEnd: data.cancelAtPeriodEnd,
