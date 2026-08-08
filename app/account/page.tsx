@@ -660,7 +660,7 @@ export default function AccountPage() {
                   </h2>
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left flex flex-col gap-2 w-full">
                     <p className="text-sm text-amber-900 leading-relaxed">
-                      Your Pro subscription has been cancelled. You will continue to have <strong>full access</strong> until{' '}
+                      Your Membership has been cancelled. You will continue to have <strong>full access</strong> until{' '}
                       <strong>{cancelEndDate}</strong>{' '}({cancelDaysRemaining} days remaining). After that your account will return to the free plan.
                     </p>
                     <div className="flex items-center gap-2 mt-1">

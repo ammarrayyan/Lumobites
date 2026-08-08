@@ -2612,7 +2612,7 @@ export function PetSittingContent() {
       alert("No active Stripe subscription was found for this account (Lifetime / Promo status). No cancellation is needed!");
       return;
     }
-    if (!confirm("Are you sure you want to cancel your Lumo Bites Pro subscription? Your profile will remain active until the end of your billing cycle.")) {
+    if (!confirm("Are you sure you want to cancel your Lumo Bites subscription? Your profile will remain active until the end of your billing cycle.")) {
       return;
     }
     setSitterSubActionLoading(true);
