@@ -378,21 +378,6 @@ export default function VetBoardingDashboardPage() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Partner Billing Banner */}
-        <PartnerBillingBanner
-          partnerId={clinic.id}
-          partnerType="vet_boarding"
-          email={clinic.email}
-          status={clinic.status}
-          subscriptionStatus={clinic.subscription_status || 'trialing'}
-          trialEnd={clinic.trial_end}
-          currentPeriodEnd={clinic.current_period_end}
-          cancelAtPeriodEnd={clinic.cancel_at_period_end}
-          monthlyPriceUsd={monthlyPrice}
-          isPaused={clinic.status === 'paused'}
-          onRefresh={() => loadClinic(clinic.email)}
-        />
-
         {/* Tabs */}
         <div className="bg-white rounded-3xl p-1.5 border border-blue-100 flex gap-1 shadow-sm">
           {[
@@ -1009,46 +994,28 @@ export default function VetBoardingDashboardPage() {
               )}
             </div>
 
-            {/* Danger zone */}
-            <div className="bg-red-50 rounded-3xl p-5 border border-red-100">
-              <div className="flex items-center justify-between">
+            {/* Account & Billing Card */}
+            <div className="bg-amber-50/70 rounded-3xl p-5 border border-amber-200/70">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xs font-black text-red-700 uppercase tracking-wider mb-1">Account</h3>
-                  <p className="text-xs text-red-500">Sign out or permanently delete your clinic account.</p>
+                  <h3 className="text-xs font-black text-amber-900 uppercase tracking-wider mb-1">Account & Billing Settings</h3>
+                  <p className="text-xs text-amber-800">Manage your business subscription, billing details, and account deletion on your unified Account page.</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={handleSignOut}
                     className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" /> Sign out
                   </button>
-                  <button
-                    onClick={() => setShowDeleteModal(true)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-red-100/80 hover:bg-red-200 border border-red-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2 transition-colors shadow-sm cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" /> Delete Account
-                  </button>
+                    Manage Account on /account →
+                  </Link>
                 </div>
               </div>
-              {clinic.subscription_status === 'active' && !clinic.cancel_at_period_end && (
-                <div className="mt-4 pt-4 border-t border-red-200">
-                  <p className="text-xs text-red-500 mb-2">
-                    Cancel your subscription — your listing stays active until{' '}
-                    <span className="font-semibold">
-                      {clinic.current_period_end ? new Date(clinic.current_period_end).toLocaleDateString() : 'period end'}
-                    </span>
-                    , then will not renew.
-                  </p>
-                  <button
-                    onClick={handleCancelSubscription}
-                    disabled={cancelingSubscription}
-                    className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 bg-white border border-red-300 rounded-xl px-3 py-2 transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    {cancelingSubscription ? 'Canceling...' : 'Cancel Subscription'}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         )}
