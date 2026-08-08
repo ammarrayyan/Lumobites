@@ -93,11 +93,11 @@ export async function DELETE(request: NextRequest) {
           }
         }
         if (daycare.email) {
-          const customers = await stripe.customers.list({ email: daycare.email.toLowerCase().trim(), limit: 5 });
+          const customers = await stripe.customers.list({ email: daycare.email.toLowerCase().trim(), limit: 100 });
           for (const cust of customers.data) {
-            const subs = await stripe.subscriptions.list({ customer: cust.id, status: 'active' });
+            const subs = await stripe.subscriptions.list({ customer: cust.id, status: 'all' });
             for (const sub of subs.data) {
-              if (sub.id !== daycare.stripe_subscription_id) {
+              if ((sub.status === 'active' || sub.status === 'trialing') && sub.id !== daycare.stripe_subscription_id) {
                 await stripe.subscriptions.cancel(sub.id);
                 canceledStripeSubs++;
               }

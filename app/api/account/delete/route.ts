@@ -88,20 +88,21 @@ export async function POST(request: NextRequest) {
       console.error('[Account Delete] Sitter details/Stripe error:', sitterErr);
     }
 
-    // 2. Stripe Subscription Cancellation for Owner (if exists via Stripe customer matching)
+    // 2. Stripe Subscription Cancellation for Owner & Partner (query ALL Stripe customers for this email)
     if (stripeSecretKey) {
       try {
         const stripe = new Stripe(stripeSecretKey);
-        const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });
-        if (customers.data.length > 0) {
-          const customerId = customers.data[0].id;
+        const customers = await stripe.customers.list({ email: cleanEmail, limit: 100 });
+        for (const customer of customers.data) {
           const subscriptions = await stripe.subscriptions.list({
-            customer: customerId,
-            status: 'active',
+            customer: customer.id,
+            status: 'all',
           });
           for (const sub of subscriptions.data) {
-            await stripe.subscriptions.cancel(sub.id);
-            console.log(`[Account Delete] Cancelled Stripe subscription ${sub.id} for ${cleanEmail}`);
+            if (sub.status === 'active' || sub.status === 'trialing') {
+              await stripe.subscriptions.cancel(sub.id);
+              console.log(`[Account Delete] Cancelled Stripe subscription ${sub.id} (customer ${customer.id}) for ${cleanEmail}`);
+            }
           }
         }
       } catch (stripeErr) {
