@@ -104,6 +104,23 @@ export default function VetBoardingRegisterPage() {
     setLoading(false);
   };
 
+  const checkEmailEarly = async (emailVal: string) => {
+    const trimmed = emailVal.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@')) return true;
+    try {
+      const res = await fetch(`/api/partnerships/check-email?email=${encodeURIComponent(trimmed)}&target_type=vet_boarding`);
+      const data = await res.json();
+      if (data.valid === false) {
+        setOtpError(data.error);
+        return false;
+      }
+      setOtpError('');
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
   const handleSendOtp = async () => {
     const trimmed = clinicEmail.trim().toLowerCase();
     if (!trimmed || !trimmed.includes('@')) {
@@ -113,6 +130,9 @@ export default function VetBoardingRegisterPage() {
     setOtpError('');
     setOtpSending(true);
     try {
+      const isClean = await checkEmailEarly(trimmed);
+      if (!isClean) return;
+
       const res = await fetch('/api/petsitting/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -372,7 +392,8 @@ export default function VetBoardingRegisterPage() {
                   <input
                     type="email"
                     value={clinicEmail}
-                    onChange={e => setClinicEmail(e.target.value)}
+                    onChange={e => { setClinicEmail(e.target.value); setOtpError(''); }}
+                    onBlur={e => checkEmailEarly(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
                     placeholder="clinic@example.com"
                     className="mt-1 w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"

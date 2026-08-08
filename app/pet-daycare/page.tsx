@@ -101,6 +101,23 @@ export default function DaycareRegistrationPage() {
     setLoading(false);
   };
 
+  const checkEmailEarly = async (emailVal: string) => {
+    const trimmed = emailVal.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@')) return true;
+    try {
+      const res = await fetch(`/api/partnerships/check-email?email=${encodeURIComponent(trimmed)}&target_type=pet_daycare`);
+      const data = await res.json();
+      if (data.valid === false) {
+        setOtpError(data.error);
+        return false;
+      }
+      setOtpError('');
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
   const handleSendOtp = async () => {
     const trimmed = daycareEmail.trim().toLowerCase();
     if (!trimmed || !trimmed.includes('@')) {
@@ -110,6 +127,9 @@ export default function DaycareRegistrationPage() {
     setOtpError('');
     setOtpSending(true);
     try {
+      const isClean = await checkEmailEarly(trimmed);
+      if (!isClean) return;
+
       const res = await fetch('/api/petsitting/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -258,7 +278,8 @@ export default function DaycareRegistrationPage() {
                 <input
                   type="email"
                   value={daycareEmail}
-                  onChange={e => setDaycareEmail(e.target.value)}
+                  onChange={e => { setDaycareEmail(e.target.value); setOtpError(''); }}
+                  onBlur={e => checkEmailEarly(e.target.value)}
                   placeholder="daycare@example.com"
                   className="w-full px-4 py-3 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm text-[#4A3E3D] focus:outline-none focus:border-emerald-500 transition-colors"
                 />
