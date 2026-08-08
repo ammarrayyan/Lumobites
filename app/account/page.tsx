@@ -8,6 +8,7 @@ type Step = 'email' | 'verification' | 'dashboard';
 
 export default function AccountPage() {
   const [step, setStep] = useState<Step>('email');
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [email, setEmail] = useState('');
   const [isLocked, setIsLocked] = useState(false);
 
@@ -40,6 +41,7 @@ export default function AccountPage() {
               daysRemaining: data.daysRemaining,
             });
             setStep('dashboard');
+            setIsCheckingSession(false);
             return;
           }
         }
@@ -54,6 +56,7 @@ export default function AccountPage() {
           setIsLocked(true);
         }
       }
+      setIsCheckingSession(false);
     };
 
     checkSession();
@@ -398,8 +401,15 @@ export default function AccountPage() {
       <main className="flex-1 flex flex-col items-center py-16 px-6 md:px-8 lg:px-12">
         <div className="w-full max-w-[500px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 relative">
           
-          {/* STEP 1: ENTER PRO EMAIL */}
-          {step === 'email' && (
+          {/* INITIAL SESSION CHECK LOADING STATE */}
+          {isCheckingSession ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+              <div className="w-10 h-10 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-sm font-semibold text-[#8B5E3C] tracking-wide animate-pulse">
+                Verifying account session...
+              </p>
+            </div>
+          ) : step === 'email' ? (
             <div className="flex flex-col gap-6">
               <div className="text-center flex flex-col items-center">
                 <Settings className="w-10 h-10 text-[#8B5E3C] mb-3" />
@@ -537,7 +547,7 @@ export default function AccountPage() {
               )}
 
             </div>
-          )}
+          ) : null}
 
           {/* STEP 2: ENTER CODE */}
           {step === 'verification' && (
