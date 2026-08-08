@@ -26,22 +26,28 @@ export async function POST(request: NextRequest) {
 
     // Check if account is a partner subscription — block reactivation from consumer account page
     const proDetails = await getUserProStatusDetails(cleanEmail);
-    if (proDetails.proSource.startsWith('partner_') || subscriptionId === 'partner_bypass') {
+    if ((proDetails.isPro && proDetails.proSource.startsWith('partner_')) || subscriptionId === 'partner_bypass') {
       return NextResponse.json({
         error: 'Partner subscriptions cannot be managed from the consumer account page. Please manage your business subscription in your partner dashboard.'
       }, { status: 403 });
     }
 
-    // Verify subscription belongs to authenticated user
-    const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });
+    if (!stripeSecretKey) {
+      return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey);
+
+    // Verify subscription belongs to authenticated user across all customer IDs
+    const customers = await stripe.customers.list({ email: cleanEmail, limit: 100 });
     if (!customers.data || customers.data.length === 0) {
       return NextResponse.json({ error: 'No Stripe customer record found for authenticated user' }, { status: 403 });
     }
 
-    const customerId = customers.data[0].id;
+    const userCustomerIds = customers.data.map(c => c.id);
     const subObj = await stripe.subscriptions.retrieve(subscriptionId);
 
-    if (!subObj || subObj.customer !== customerId) {
+    if (!subObj || !userCustomerIds.includes(subObj.customer as string)) {
       return NextResponse.json({ error: 'Unauthorized — subscription does not belong to authenticated user' }, { status: 403 });
     }
 

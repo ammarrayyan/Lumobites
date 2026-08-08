@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Check if account is a partner subscription — block cancellation from consumer account page
     const proDetails = await getUserProStatusDetails(cleanEmail);
-    if (proDetails.proSource.startsWith('partner_') || subscriptionId === 'partner_bypass') {
+    if ((proDetails.isPro && proDetails.proSource.startsWith('partner_')) || subscriptionId === 'partner_bypass') {
       return NextResponse.json({
         error: 'Partner subscriptions cannot be cancelled from the consumer account page. Please manage your business subscription in your partner dashboard.'
       }, { status: 403 });
