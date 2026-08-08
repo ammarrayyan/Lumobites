@@ -66,9 +66,32 @@ export default function DaycareRegistrationPage() {
     }
   }, []);
 
+  const [existingConflictMsg, setExistingConflictMsg] = useState('');
+
+  const handleSignOutAndReset = () => {
+    localStorage.removeItem('lumo_pro_email');
+    localStorage.removeItem('lumo_sitter_email');
+    localStorage.removeItem('lumo_shelter_email');
+    localStorage.removeItem('lumo_account_session_token');
+    document.cookie = 'lumo_pro_email=; path=/; max-age=0';
+    setExistingConflictMsg('');
+    setIsAuthenticated(false);
+    setOtpStep('email');
+    setDaycareEmail('');
+    setLoading(false);
+  };
+
   const fetchExistingDaycare = async (email: string) => {
     setLoading(true);
     try {
+      const checkRes = await fetch(`/api/partnerships/check-email?email=${encodeURIComponent(email)}&target_type=pet_daycare`);
+      const checkData = await checkRes.json();
+      if (checkRes.ok && checkData.valid === false) {
+        setExistingConflictMsg(checkData.error);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
@@ -242,6 +265,28 @@ export default function DaycareRegistrationPage() {
     return (
       <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center p-6">
         <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (existingConflictMsg) {
+    return (
+      <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-100 text-center">
+          <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-100">
+            <ShieldAlert className="w-7 h-7 text-rose-600" />
+          </div>
+          <h1 className="text-xl font-black text-[#4A3E3D] mb-2">Account Conflict</h1>
+          <p className="text-xs text-[#8B7E7D] leading-relaxed mb-6">
+            {existingConflictMsg}
+          </p>
+          <button
+            onClick={handleSignOutAndReset}
+            className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md cursor-pointer text-sm flex items-center justify-center gap-2 border-none"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out / Switch Account
+          </button>
+        </div>
       </div>
     );
   }
