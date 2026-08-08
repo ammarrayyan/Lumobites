@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accountAuth';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { Resend } from 'resend';
+import { brandedEmail, emailStyles } from '@/lib/email-template';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -15,6 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
+    let canceledSubscriptionsCount = 0;
 
     // 1. Partner Account Cleanup (Vet Boarding, Pet Daycare, Shelter)
     if (stripeSecretKey) {
@@ -25,7 +28,10 @@ export async function POST(request: NextRequest) {
         const { data: vet } = await supabaseAdmin.from('vet_clinics').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
         if (vet) {
           if (vet.stripe_subscription_id) {
-            try { await stripe.subscriptions.cancel(vet.stripe_subscription_id); } catch (e) {}
+            try {
+              await stripe.subscriptions.cancel(vet.stripe_subscription_id);
+              canceledSubscriptionsCount++;
+            } catch (e) {}
           }
           await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', vet.id);
           await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', vet.id);
@@ -36,7 +42,10 @@ export async function POST(request: NextRequest) {
         const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
         if (daycare) {
           if (daycare.stripe_subscription_id) {
-            try { await stripe.subscriptions.cancel(daycare.stripe_subscription_id); } catch (e) {}
+            try {
+              await stripe.subscriptions.cancel(daycare.stripe_subscription_id);
+              canceledSubscriptionsCount++;
+            } catch (e) {}
           }
           await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', daycare.id);
           await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', daycare.id);
@@ -47,7 +56,10 @@ export async function POST(request: NextRequest) {
         const { data: shelter } = await supabaseAdmin.from('shelters').select('id, stripe_subscription_id').eq('email', cleanEmail).maybeSingle();
         if (shelter) {
           if (shelter.stripe_subscription_id) {
-            try { await stripe.subscriptions.cancel(shelter.stripe_subscription_id); } catch (e) {}
+            try {
+              await stripe.subscriptions.cancel(shelter.stripe_subscription_id);
+              canceledSubscriptionsCount++;
+            } catch (e) {}
           }
           await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', shelter.id);
           await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', shelter.id);
@@ -74,6 +86,7 @@ export async function POST(request: NextRequest) {
         });
         for (const sub of subscriptions.data) {
           await stripe.subscriptions.cancel(sub.id);
+          canceledSubscriptionsCount++;
           console.log(`[Account Delete] Cancelled Stripe subscription ${sub.id} for ${cleanEmail}`);
         }
       }
@@ -101,6 +114,7 @@ export async function POST(request: NextRequest) {
           for (const sub of subscriptions.data) {
             if (sub.status === 'active' || sub.status === 'trialing') {
               await stripe.subscriptions.cancel(sub.id);
+              canceledSubscriptionsCount++;
               console.log(`[Account Delete] Cancelled Stripe subscription ${sub.id} (customer ${customer.id}) for ${cleanEmail}`);
             }
           }
@@ -133,6 +147,42 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin.from('lost_pets').delete().eq('contact_email', cleanEmail);
     await supabaseAdmin.from('emails').delete().eq('email', cleanEmail);
     await supabaseAdmin.from('sitters').delete().eq('email', cleanEmail);
+
+    // 5. Send Account Deletion & Subscription Cancellation Confirmation Email via Resend
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+      const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
+      
+      const subInfoText = canceledSubscriptionsCount > 0
+        ? `<p style="${emailStyles.p}">Your active subscription has been <strong>immediately canceled in Stripe</strong>. You will not receive any further billing charges.</p>`
+        : `<p style="${emailStyles.p}">Your Lumo Bites account and associated profile data have been permanently deleted.</p>`;
+
+      await resend.emails.send({
+        from: fromEmail,
+        to: cleanEmail,
+        subject: '🗑️ Your Lumo Bites account has been deleted',
+        html: brandedEmail({
+          subject: '🗑️ Your Lumo Bites account has been deleted',
+          preheader: 'Confirmation that your Lumo Bites account and data have been deleted.',
+          body: `
+    <h1 style="${emailStyles.h1}">Account Deleted</h1>
+    <p style="${emailStyles.p}">This email confirms that your Lumo Bites account (<strong>${cleanEmail}</strong>) and all associated data (pets, bookings, community posts) have been permanently deleted.</p>
+    ${subInfoText}
+    ${emailStyles.highlightBox(`
+      <p style="margin:0 0 4px 0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Account Status</p>
+      <p style="margin:0;font-size:22px;font-weight:800;color:#3B2410;">Permanently Closed</p>
+      <p style="margin:6px 0 0 0;font-size:13px;color:#8B6A50;">No further action is required.</p>
+    `)}
+    <p style="${emailStyles.pSmall}">If you did not request this deletion or have any questions, please contact support immediately.</p>
+    ${emailStyles.divider}
+    ${emailStyles.signoff}
+  `
+        })
+      });
+      console.log(`[Account Delete] Confirmation email sent to: ${cleanEmail}`);
+    } catch (emailErr) {
+      console.error('[Account Delete] Failed to send deletion email:', emailErr);
+    }
 
     const response = NextResponse.json({ success: true, message: 'Account deleted successfully.' });
     clearAccountSessionCookie(response);
