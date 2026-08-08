@@ -46,6 +46,43 @@ export async function POST(request: NextRequest) {
         .eq('email', cleanEmail)
         .maybeSingle();
 
+      // Auto-sync with Stripe if partner is showing trialing or missing subscription ID
+      if (stripeSecretKey && partnerRecord && (partnerRecord.subscription_status === 'trialing' || !partnerRecord.stripe_subscription_id)) {
+        try {
+          const stripe = new Stripe(stripeSecretKey);
+          const customers = await stripe.customers.list({ email: cleanEmail, limit: 5 });
+          for (const customer of customers.data) {
+            const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 5 });
+            if (subs.data.length > 0) {
+              const activeSub = subs.data[0];
+              const updatePayload: any = {
+                stripe_customer_id: customer.id,
+                stripe_subscription_id: activeSub.id,
+                subscription_status: 'active',
+                cancel_at_period_end: !!activeSub.cancel_at_period_end,
+              };
+              if (info.table !== 'vet_clinics') {
+                updatePayload.is_paused = false;
+              } else {
+                updatePayload.status = 'approved';
+              }
+
+              await supabaseAdmin.from(info.table).update(updatePayload).eq('email', cleanEmail);
+              partnerRecord.subscription_status = 'active';
+              partnerRecord.stripe_subscription_id = activeSub.id;
+              partnerRecord.stripe_customer_id = customer.id;
+              partnerRecord.cancel_at_period_end = !!activeSub.cancel_at_period_end;
+              break;
+            }
+          }
+        } catch (e) {
+          console.error('[Subscription Details] Error auto-syncing partner Stripe status:', e);
+        }
+      }
+
+      // Re-evaluate proDetails after auto-sync
+      const updatedProDetails = await getUserProStatusDetails(cleanEmail);
+
       const businessName = partnerRecord?.clinic_name || partnerRecord?.business_name || partnerRecord?.org_name || info.partnerLabel;
       const cancelAtPeriodEnd = !!partnerRecord?.cancel_at_period_end;
       const currentPeriodEnd = partnerRecord?.current_period_end;

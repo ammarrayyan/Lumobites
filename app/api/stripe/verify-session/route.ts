@@ -33,8 +33,41 @@ export async function GET(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // Update is_pro in Supabase
-    // If the email doesn't exist, we upsert it.
+    const partnerId = session.metadata?.partner_id;
+    const partnerType = session.metadata?.partner_type;
+
+    if (partnerType) {
+      const tableMap: Record<string, string> = {
+        shelter: 'shelters',
+        pet_daycare: 'pet_daycares',
+        vet_boarding: 'vet_clinics',
+      };
+      const tableName = tableMap[partnerType];
+      if (tableName) {
+        const updateData: any = {
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          subscription_status: 'active',
+          cancel_at_period_end: false,
+        };
+
+        if (tableName !== 'vet_clinics') {
+          updateData.is_paused = false;
+        } else {
+          updateData.status = 'approved';
+        }
+
+        if (partnerId) {
+          await supabase.from(tableName).update(updateData).eq('id', partnerId);
+        } else {
+          await supabase.from(tableName).update(updateData).eq('email', cleanEmail);
+        }
+
+        return NextResponse.json({ success: true, isPartner: true, partnerType, email: cleanEmail });
+      }
+    }
+
+    // Update is_pro in Supabase for consumer subscriptions
     const { error: dbError } = await supabase
       .from('emails')
       .upsert(

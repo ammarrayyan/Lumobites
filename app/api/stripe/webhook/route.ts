@@ -80,14 +80,11 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id: session.subscription as string,
               subscription_status: 'active',
               cancel_at_period_end: false,
-              is_paused: false,
             };
 
-            if (currentPeriodEndIso) {
-              updateData.current_period_end = currentPeriodEndIso;
-            }
-
-            if (tableName === 'vet_clinics') {
+            if (tableName !== 'vet_clinics') {
+              updateData.is_paused = false;
+            } else {
               updateData.status = 'approved';
             }
 
