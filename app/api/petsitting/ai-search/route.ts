@@ -128,19 +128,12 @@ Do not include any intro, outro, markdown block, or conversational text. Return 
       })
       .filter(Boolean);
 
-    // 4. Apply PRO account paywall masking logic
-    let isOwnerPro = false;
-    if (ownerEmail) {
-      const { data: emailData } = await supabaseAdmin
-        .from('emails')
-        .select('is_pro')
-        .eq('email', ownerEmail.toLowerCase().trim())
-        .single();
-      isOwnerPro = emailData?.is_pro || false;
-    }
+    // 4. Return full sitter profile for signed-in users, prompt sign-in for visitors
+    const cleanOwnerEmail = ownerEmail ? ownerEmail.toLowerCase().trim() : '';
+    const isSignedIn = !!cleanOwnerEmail;
 
     const maskedSitters = rankedSitters.map((sitter: any) => {
-      if (isOwnerPro) {
+      if (isSignedIn) {
         return {
           ...sitter,
           phone_number: sitter.phone_visible ? sitter.phone_number : null
@@ -151,12 +144,12 @@ Do not include any intro, outro, markdown block, or conversational text. Return 
         ...sitter,
         name: 'Local Sitter',
         photo_url: '',
-        bio: "Subscribe to Lumo Bites PRO to read this sitter's full bio, see their experience, and contact them directly.",
+        bio: "Sign in to view full profile, photos, and contact information.",
         phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
       };
     });
 
-    return NextResponse.json({ sitters: maskedSitters, isOwnerPro });
+    return NextResponse.json({ sitters: maskedSitters, isSignedIn });
   } catch (error: any) {
     console.error('[AI Sitter Search API] Error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
