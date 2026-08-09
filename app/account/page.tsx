@@ -780,7 +780,7 @@ export default function AccountPage() {
                       <div className="pt-2.5 mt-1 border-t border-gray-200/60 text-center">
                         <p className="text-[11px] text-gray-500 font-medium">
                           Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
-                          <Link href="/partnerships" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
+                          <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
                             Register as a Partner →
                           </Link>
                         </p>

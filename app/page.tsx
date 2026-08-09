@@ -26,6 +26,13 @@ export default function Home() {
       setIsSignedIn(true);
     }
 
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('partnerModal') === 'true' || params.get('partner') === 'true') {
+        setPartnerModalOpen(true);
+      }
+    }
+
     const syncStatus = () => {
       const cachedEmail = localStorage.getItem('lumo_pro_email');
       const cachedSitter = localStorage.getItem('lumo_sitter_email');
