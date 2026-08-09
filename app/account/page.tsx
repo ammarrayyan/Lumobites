@@ -775,6 +775,16 @@ export default function AccountPage() {
                         <Sparkles className="w-4 h-4" />
                         Upgrade to Membership ($4.99/mo) →
                       </button>
+
+                      {/* Subtle Partner Registration Note */}
+                      <div className="pt-2.5 mt-1 border-t border-gray-200/60 text-center">
+                        <p className="text-[11px] text-gray-500 font-medium">
+                          Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
+                          <Link href="/partnerships" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
+                            Register as a Partner →
+                          </Link>
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <>
