@@ -335,9 +335,15 @@ export default function DaycareDashboard() {
       <header className="bg-white border-b border-[#E8DDD4] sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center border border-emerald-200 shrink-0">
-              <span className="text-xl">🐕</span>
-            </div>
+            {daycare.logo_url ? (
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-emerald-200 shrink-0 flex items-center justify-center bg-white">
+                <img src={daycare.logo_url} alt={daycare.business_name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center border border-emerald-200 shrink-0">
+                <span className="text-xl">🐕</span>
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h1>
@@ -345,7 +351,11 @@ export default function DaycareDashboard() {
                   Partner Portal
                 </span>
               </div>
-              <p className="text-xs text-[#8B7E7D]">{daycare.city}, {daycare.state}</p>
+              <p className="text-xs text-[#8B7E7D]">
+                {daycare.city && daycare.state ? (
+                  daycare.city.toLowerCase().includes(daycare.state.toLowerCase()) ? daycare.city : `${daycare.city}, ${daycare.state}`
+                ) : daycare.city || daycare.state || ''}
+              </p>
             </div>
           </div>
 
@@ -802,7 +812,9 @@ export default function DaycareDashboard() {
               <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm space-y-4">
                 <div className="flex items-start gap-4">
                   {daycare.logo_url ? (
-                    <img src={daycare.logo_url} alt={daycare.business_name} className="w-20 h-20 rounded-2xl object-cover border border-[#E8DDD4]" />
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#E8DDD4] shrink-0 flex items-center justify-center bg-white">
+                      <img src={daycare.logo_url} alt={daycare.business_name} className="w-full h-full object-cover" />
+                    </div>
                   ) : (
                     <div className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
                       <span className="text-3xl">🐕</span>

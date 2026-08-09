@@ -470,7 +470,9 @@ export default function VetBoardingDashboardPage() {
             <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
               <div className="flex items-start gap-4">
                 {clinic.org_photo_url ? (
-                  <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-16 h-16 rounded-2xl object-cover border border-blue-100" />
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-blue-100 shrink-0 flex items-center justify-center bg-white">
+                    <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-full h-full object-cover" />
+                  </div>
                 ) : (
                   <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
                     <Building2 className="w-7 h-7 text-blue-400" />

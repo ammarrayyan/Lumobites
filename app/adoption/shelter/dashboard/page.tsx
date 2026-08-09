@@ -592,7 +592,9 @@ function ShelterDashboardContent() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-xs">
           <div className="flex items-center gap-4">
             {shelterInfo?.org_photo_url ? (
-              <img src={shelterInfo.org_photo_url} alt={shelterInfo.org_name} className="w-14 h-14 rounded-2xl object-cover border border-amber-200 shrink-0" />
+              <div className="w-14 h-14 rounded-2xl overflow-hidden border border-amber-200 shrink-0 flex items-center justify-center bg-white">
+                <img src={shelterInfo.org_photo_url} alt={shelterInfo.org_name} className="w-full h-full object-cover" />
+              </div>
             ) : (
               <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-bold">
                 <Building2 className="w-7 h-7" />
@@ -710,7 +712,7 @@ function ShelterDashboardContent() {
             </p>
             <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-1">
               <p><strong>Registered Email:</strong> {shelterInfo.email}</p>
-              <p><strong>Location:</strong> {shelterInfo.city}{shelterInfo.state ? `, ${shelterInfo.state}` : ''}</p>
+              <p><strong>Location:</strong> {shelterInfo.city && shelterInfo.state ? (shelterInfo.city.toLowerCase().includes(shelterInfo.state.toLowerCase()) ? shelterInfo.city : `${shelterInfo.city}, ${shelterInfo.state}`) : shelterInfo.city || shelterInfo.state || ''}</p>
               <p><strong>Status:</strong> <span className="bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">PENDING APPROVAL</span></p>
             </div>
             <p className="text-xs text-gray-400">
