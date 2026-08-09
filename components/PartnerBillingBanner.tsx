@@ -121,9 +121,20 @@ export default function PartnerBillingBanner({
     }
   };
 
+  function safeFormatBannerDate(dVal: any, fallback: string): string {
+    if (!dVal) return fallback;
+    try {
+      const t = typeof dVal === 'number' ? (dVal > 1e11 ? dVal : dVal * 1000) : new Date(dVal).getTime();
+      if (isNaN(t) || t <= 0) return fallback;
+      return new Date(t).toLocaleDateString();
+    } catch {
+      return fallback;
+    }
+  }
+
   // 1. ACTIVE PAID SUBSCRIPTION (Always visible regardless of pause state)
   if (subscriptionStatus === 'active' && !cancelAtPeriodEnd) {
-    const formattedEnd = currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString() : 'Next Cycle';
+    const formattedEnd = safeFormatBannerDate(currentPeriodEnd, 'Next Cycle');
     return (
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm mb-6 flex items-center gap-3">
         <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
@@ -147,7 +158,7 @@ export default function PartnerBillingBanner({
 
   // 2. CANCELLATION SCHEDULED
   if (subscriptionStatus === 'active' && cancelAtPeriodEnd) {
-    const formattedEnd = currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString() : 'Period End';
+    const formattedEnd = safeFormatBannerDate(currentPeriodEnd, 'Period End');
     return (
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">

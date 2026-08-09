@@ -294,9 +294,13 @@ export default function DaycareDashboard() {
   };
 
   const handleCancelSubscription = async () => {
-    const endDate = daycare.current_period_end
-      ? new Date(daycare.current_period_end).toLocaleDateString()
-      : 'the end of your current billing period';
+    let endDate = 'the end of your current billing period';
+    if (daycare.current_period_end) {
+      try {
+        const t = new Date(daycare.current_period_end).getTime();
+        if (!isNaN(t) && t > 0) endDate = new Date(t).toLocaleDateString();
+      } catch {}
+    }
     if (!window.confirm(`Are you sure you want to cancel your subscription?\n\nYour listing will remain active until ${endDate}, then it will not renew.`)) return;
     setCancelingSubscription(true);
     try {
