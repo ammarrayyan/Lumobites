@@ -45,16 +45,20 @@ export async function POST(request: NextRequest) {
       cancel_at_period_end: true,
     });
 
+    const currentPeriodEndIso = updatedSub.current_period_end
+      ? new Date(updatedSub.current_period_end * 1000).toISOString()
+      : null;
+
     // Update database record
     await supabaseAdmin
       .from(tableName)
-      .update({ cancel_at_period_end: true })
+      .update({ cancel_at_period_end: true, current_period_end: currentPeriodEndIso })
       .eq('id', partner_id);
 
     return NextResponse.json({
       success: true,
       cancel_at_period_end: true,
-      current_period_end: new Date(updatedSub.current_period_end * 1000).toISOString(),
+      current_period_end: currentPeriodEndIso,
     });
   } catch (err: any) {
     console.error('[Cancel Partner Subscription API] Error:', err);

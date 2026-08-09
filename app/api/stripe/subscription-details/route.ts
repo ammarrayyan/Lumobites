@@ -6,6 +6,22 @@ import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
+function safeFormatDate(dateVal: any): string {
+  if (!dateVal) return '30-Day Free Trial';
+  try {
+    const timeMs = typeof dateVal === 'number' ? (dateVal > 1e11 ? dateVal : dateVal * 1000) : new Date(dateVal).getTime();
+    if (isNaN(timeMs) || timeMs <= 0) return '30-Day Free Trial';
+    return new Date(timeMs).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    });
+  } catch {
+    return '30-Day Free Trial';
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const verifiedEmail = await getVerifiedSessionEmail(request);
@@ -61,6 +77,10 @@ export async function POST(request: NextRequest) {
                 subscription_status: 'active',
                 cancel_at_period_end: !!activeSub.cancel_at_period_end,
               };
+              if (activeSub.current_period_end) {
+                updatePayload.current_period_end = new Date(activeSub.current_period_end * 1000).toISOString();
+                partnerRecord.current_period_end = updatePayload.current_period_end;
+              }
               if (info.table !== 'vet_clinics') {
                 updatePayload.is_paused = false;
               } else {
@@ -87,19 +107,8 @@ export async function POST(request: NextRequest) {
       const cancelAtPeriodEnd = !!partnerRecord?.cancel_at_period_end;
       const currentPeriodEnd = partnerRecord?.current_period_end;
 
-      let nextBillingDate = '30-Day Free Trial';
       const dateToFormat = currentPeriodEnd || partnerRecord?.trial_end;
-      if (dateToFormat) {
-        try {
-          nextBillingDate = new Date(dateToFormat).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-        } catch {
-          nextBillingDate = new Date(dateToFormat).toDateString();
-        }
-      }
+      const nextBillingDate = safeFormatDate(dateToFormat);
 
       const dbPartnerType = info.table === 'vet_clinics' ? 'vet_boarding' : info.table === 'pet_daycares' ? 'pet_daycare' : 'shelter';
 
