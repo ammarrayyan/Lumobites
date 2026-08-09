@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut } from 'lucide-react';
+import { Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut, X } from 'lucide-react';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import { formatPublicCity } from '@/lib/formatCity';
 
@@ -272,7 +272,14 @@ export default function DaycareRegistrationPage() {
   if (existingConflictMsg) {
     return (
       <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-100 text-center">
+        <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-100 text-center relative">
+          <button
+            onClick={() => router.push('/')}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all cursor-pointer border-none bg-transparent"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
           <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-100">
             <ShieldAlert className="w-7 h-7 text-rose-600" />
           </div>
