@@ -44,14 +44,31 @@ export async function PATCH(request: NextRequest) {
       updatePayload.subscription_status = 'trialing';
       updatePayload.trial_start = now.toISOString();
       updatePayload.trial_end = trialEnd.toISOString();
+    } else if (status === 'rejected') {
+      if (rejection_reason !== undefined) {
+        updatePayload.rejection_reason = rejection_reason;
+      }
     }
 
-    const { data: daycare, error } = await supabaseAdmin
+    let { data: daycare, error } = await supabaseAdmin
       .from('pet_daycares')
       .update(updatePayload)
       .eq('id', id)
       .select('*')
       .single();
+
+    // Fallback if rejection_reason column does not exist on DB table yet
+    if (error && error.code === 'PGRST204' && updatePayload.rejection_reason !== undefined) {
+      delete updatePayload.rejection_reason;
+      const fallback = await supabaseAdmin
+        .from('pet_daycares')
+        .update(updatePayload)
+        .eq('id', id)
+        .select('*')
+        .single();
+      daycare = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

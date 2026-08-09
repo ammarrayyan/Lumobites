@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.pet_daycares (
   services TEXT[] DEFAULT '{}',
   logo_url TEXT DEFAULT '',
   status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+  rejection_reason TEXT DEFAULT '',
   is_paused BOOLEAN DEFAULT false,
   stripe_customer_id TEXT DEFAULT '',
   stripe_subscription_id TEXT DEFAULT '',
