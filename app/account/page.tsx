@@ -311,7 +311,7 @@ export default function AccountPage() {
     try {
       const endpoint = subDetails.isPartner ? '/api/stripe/cancel-partner-subscription' : '/api/stripe/cancel-subscription';
       const body = subDetails.isPartner
-        ? { email: email.trim(), type: subDetails.partnerType === 'shelter' ? 'shelter' : subDetails.partnerType === 'vet' ? 'vet_boarding' : 'pet_daycare' }
+        ? { partner_id: subDetails.partnerId, partner_type: subDetails.dbPartnerType }
         : { email: email.trim(), subscriptionId: subDetails.subscriptionId };
 
       const res = await fetch(endpoint, {
@@ -327,13 +327,34 @@ export default function AccountPage() {
 
       setIsCancelled(true);
       setShowConfirmCancel(false);
-      setCancelEndDate(data.endDate || subDetails.nextBillingDate);
-      setCancelDaysRemaining(data.daysRemaining ?? subDetails.daysRemaining ?? 0);
-      setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: true } : null);
+      await fetchSubscriptionDetails(email);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Could not cancel subscription. Please contact support.');
       setShowConfirmCancel(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivatePartnerSubscription = async () => {
+    if (!subDetails?.partnerId || !subDetails?.dbPartnerType) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/stripe/reactivate-partner-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          partner_id: subDetails.partnerId,
+          partner_type: subDetails.dbPartnerType,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to reactivate subscription');
+      await fetchSubscriptionDetails(email);
+    } catch (err: any) {
+      setError(err.message || 'Failed to reactivate subscription.');
     } finally {
       setLoading(false);
     }
@@ -866,12 +887,40 @@ export default function AccountPage() {
                               </Link>
                             </div>
                           ) : (
-                            <Link
-                              href={subDetails.dashboardUrl || '/'}
-                              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
-                            >
-                              Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
-                            </Link>
+                            <div className="flex flex-col gap-2.5">
+                              {subDetails.cancelAtPeriodEnd && (
+                                <button
+                                  type="button"
+                                  onClick={handleReactivatePartnerSubscription}
+                                  disabled={loading}
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                >
+                                  {loading ? (
+                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Sparkles className="w-3.5 h-3.5" />
+                                      Resume Automatic Renewal (${subDetails.priceUsd || 40}/mo)
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                              <Link
+                                href={subDetails.dashboardUrl || '/'}
+                                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
+                              >
+                                Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
+                              </Link>
+                              {!subDetails.cancelAtPeriodEnd && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowConfirmCancel(true)}
+                                  className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center mt-1 flex items-center justify-center gap-1.5"
+                                >
+                                  <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> Cancel Subscription
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       ) : (
@@ -1083,10 +1132,18 @@ export default function AccountPage() {
                     <div className="flex flex-col items-center">
                       <AlertTriangle className="w-10 h-10 text-red-500 mb-3" />
                       <h3 className="text-xl font-black text-[#191919] leading-tight">
-                        Are you sure you want to cancel?
+                        Cancel {subDetails?.isPartner ? (subDetails.partnerLabel || 'Partner') : 'Membership'} Subscription?
                       </h3>
                       <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                        Your Membership benefits (5 daily AI checks) will continue until the end of your billing cycle on <strong>{subDetails.nextBillingDate}</strong>, after which your account will return to the free plan.
+                        {subDetails?.isPartner ? (
+                          <>
+                            Your <strong>{subDetails.partnerLabel || 'Partner'}</strong> listing will remain active until the end of your current billing period on <strong>{subDetails.nextBillingDate}</strong>, after which automatic renewal will stop.
+                          </>
+                        ) : (
+                          <>
+                            Your Membership benefits (5 daily AI checks) will continue until the end of your billing cycle on <strong>{subDetails?.nextBillingDate}</strong>, after which your account will return to the free plan.
+                          </>
+                        )}
                       </p>
                     </div>
 
@@ -1098,14 +1155,14 @@ export default function AccountPage() {
                       >
                         {loading ? (
                           <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        ) : "Yes, cancel membership"}
+                        ) : `Yes, cancel ${subDetails?.isPartner ? 'subscription' : 'membership'}`}
                       </button>
                       <button
                         onClick={() => setShowConfirmCancel(false)}
                         disabled={loading}
                         className="w-full bg-gray-50 hover:bg-gray-100 text-gray-600 py-3.5 rounded-xl font-bold text-sm transition-colors border border-gray-200 cursor-pointer flex items-center justify-center gap-1.5"
                       >
-                        Keep Membership <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
+                        Keep {subDetails?.isPartner ? 'Subscription' : 'Membership'} <Sparkles className="w-4 h-4 text-[#8B5E3C]" />
                       </button>
                     </div>
                   </div>
