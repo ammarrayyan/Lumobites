@@ -434,9 +434,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col">
-      {/* NAVBAR */}
-      
+    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col font-inter">
       <main className="flex-1 flex flex-col items-center py-16 px-6 md:px-8 lg:px-12">
         <div className="w-full max-w-[500px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 relative">
           

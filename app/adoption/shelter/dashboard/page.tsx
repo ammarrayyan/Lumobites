@@ -582,7 +582,7 @@ function ShelterDashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-4 md:p-8">
+    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-4 md:p-8 font-inter">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-xs">

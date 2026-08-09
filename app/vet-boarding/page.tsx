@@ -366,7 +366,7 @@ export default function VetBoardingRegisterPage() {
   const isAuthenticated = !!form.email;
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
+    <div className="min-h-screen pb-28 font-inter" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">

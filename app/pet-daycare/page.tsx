@@ -301,7 +301,7 @@ export default function DaycareRegistrationPage() {
   // Not authenticated -> Show OTP Sign-In Portal
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#FDFAF7] py-12 px-4 sm:px-6 lg:px-8 font-inter">
         <div className="max-w-md mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#E8DDD4]">
           <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
             <span className="text-3xl">🐕</span>
@@ -422,7 +422,7 @@ export default function DaycareRegistrationPage() {
 
   // Registration Form
   return (
-    <div className="min-h-screen bg-[#FDFAF7] py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDFAF7] py-10 px-4 sm:px-6 lg:px-8 font-inter">
       <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-[#E8DDD4]">
         <div className="flex items-center justify-end mb-6">
           <button

@@ -326,7 +326,7 @@ export default function DaycareDashboard() {
   if (!daycare) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#555555]">
+    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-inter">
       {/* HEADER */}
       <header className="bg-white border-b border-[#E8DDD4] sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

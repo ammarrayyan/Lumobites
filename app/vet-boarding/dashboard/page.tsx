@@ -339,7 +339,7 @@ export default function VetBoardingDashboardPage() {
   const statusCfg = STATUS_CONFIG[clinic.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
+    <div className="min-h-screen pb-28 font-inter" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
