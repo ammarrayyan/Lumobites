@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isAuthorizedAdmin } from '@/lib/adminAuth'
 
 export async function GET(request: Request) {
-  const adminKey = request.headers.get('x-admin-key')
-  
-  if (adminKey !== process.env.ADMIN_SECRET && adminKey !== 'Lumo2026@') {
+  if (!isAuthorizedAdmin(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

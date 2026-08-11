@@ -6,9 +6,10 @@ import { brandedEmail, emailStyles } from '@/lib/email-template';
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
 
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
+
 function checkAuth(req: NextRequest) {
-  const key = req.headers.get('x-admin-key');
-  return key === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+  return isAuthorizedAdmin(req);
 }
 
 export async function GET(req: NextRequest) {

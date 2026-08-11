@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('x-admin-key');
-    if (authHeader !== process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
+    if (!isAuthorizedAdmin(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

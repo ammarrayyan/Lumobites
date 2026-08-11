@@ -1,11 +1,11 @@
 import { Resend } from 'resend'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isAuthorizedAdmin } from '@/lib/adminAuth'
 
 export async function POST(request: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY)
 
-  const adminSecret = request.headers.get('x-admin-secret')
-  if (adminSecret !== 'Lumo2026@') {
+  if (!isAuthorizedAdmin(request)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

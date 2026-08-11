@@ -7,7 +7,7 @@ import {
   sendPartnerAccountDeletionEmail,
 } from '@/lib/adoption-email';
 
-const ADMIN_SECRET = 'Lumo2026@';
+const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // ─── GET /api/admin/vet-clinics — List all clinics ────────────────────────────

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const secret = searchParams.get('secret');
-    if (secret !== 'lumobackfill') {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

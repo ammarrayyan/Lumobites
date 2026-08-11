@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function middleware(request: NextRequest) {
   try {
@@ -22,32 +22,25 @@ export async function middleware(request: NextRequest) {
           secure: process.env.NODE_ENV === 'production',
         });
 
-        // Track the click asynchronously using Supabase Edge Client
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-        
-        if (supabaseUrl && supabaseKey) {
-          try {
-            const supabase = createClient(supabaseUrl, supabaseKey);
-            
-            // Find the referrer to get their ID
-            const { data: referrer } = await supabase
-              .from('referrers')
-              .select('id')
-              .eq('code', ref)
-              .maybeSingle();
-              
-            if (referrer) {
-              // Record the click
-              await supabase.from('referred_users').insert({
-                referrer_id: referrer.id,
-                referral_code: ref,
-                subscribed: false,
-              });
-            }
-          } catch (dbErr) {
-            console.error('[Middleware Supabase Error]', dbErr);
+        // Track the click asynchronously. Uses the service-role client since
+        // referrers/referred_users have RLS enabled with no anon-access policies.
+        try {
+          const { data: referrer } = await supabaseAdmin
+            .from('referrers')
+            .select('id')
+            .eq('code', ref)
+            .maybeSingle();
+
+          if (referrer) {
+            // Record the click
+            await supabaseAdmin.from('referred_users').insert({
+              referrer_id: referrer.id,
+              referral_code: ref,
+              subscribed: false,
+            });
           }
+        } catch (dbErr) {
+          console.error('[Middleware Supabase Error]', dbErr);
         }
       }
     }

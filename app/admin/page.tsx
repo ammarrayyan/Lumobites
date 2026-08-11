@@ -131,9 +131,9 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/admin/run-pet-matches', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret': 'Lumo2026@' 
+          'x-admin-key': password
         }
       })
       const data = await res.json()
@@ -172,9 +172,9 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/admin/send-sms', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret': 'Lumo2026@'
+          'x-admin-key': password
         },
         body: JSON.stringify({
           numbers,
@@ -195,7 +195,7 @@ export default function AdminPage() {
   const fetchOutreachHistory = async () => {
     try {
       const { data } = await fetch('/api/admin/outreach-history', {
-        headers: { 'x-admin-secret': 'Lumo2026@' }
+        headers: { 'x-admin-key': password }
       }).then(r => r.json())
       setOutreachHistory(data || [])
     } catch (err) {
@@ -222,9 +222,9 @@ export default function AdminPage() {
     
     const res = await fetch('/api/admin/send-outreach', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'x-admin-secret': 'Lumo2026@'
+        'x-admin-key': password
       },
       body: JSON.stringify({
         emails,

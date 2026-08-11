@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const ingredients = body.ingredients;
     const userEmail = body.email || body.userEmail;
+    const verifiedEmail = await getVerifiedSessionEmail(req);
 
     if (!ingredients || typeof ingredients !== 'string' || !ingredients.trim()) {
       return NextResponse.json({ error: 'Ingredients are required' }, { status: 400 });
@@ -16,6 +18,7 @@ export async function POST(req: Request) {
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'ingredient_scanner',
       userEmail,
+      verifiedEmail,
       request: req,
     });
 

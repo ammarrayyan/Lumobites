@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export async function POST(request: NextRequest) {
-  const adminKey = request.headers.get('x-admin-key');
-  if (adminKey !== process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
+  if (!isAuthorizedAdmin(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

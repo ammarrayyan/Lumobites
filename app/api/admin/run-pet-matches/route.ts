@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { Resend } from 'resend'
 import twilio from 'twilio'
+import { isAuthorizedAdmin } from '@/lib/adminAuth'
 
 // Admin triggers this manually first for testing
 // Later will be scheduled via Vercel Cron
 
 export async function POST(request: Request) {
   try {
-    const adminSecret = request.headers.get('x-admin-secret')
-    if (adminSecret !== 'Lumo2026@') {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

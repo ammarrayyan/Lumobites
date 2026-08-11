@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,9 +12,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Photo is required for visual matching.' }, { status: 400 });
     }
 
+    const verifiedEmail = await getVerifiedSessionEmail(request);
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'adoption_matcher',
       userEmail: email,
+      verifiedEmail,
       request,
     });
 

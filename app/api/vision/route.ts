@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const image = formData.get('image') as File | null;
     const userEmail = (formData.get('email') as string | null) || (formData.get('userEmail') as string | null);
+    const verifiedEmail = await getVerifiedSessionEmail(req);
 
     if (!image) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
@@ -14,6 +16,7 @@ export async function POST(req: Request) {
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'vision_scanner',
       userEmail,
+      verifiedEmail,
       request: req,
     });
 

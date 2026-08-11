@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendShelterApprovalEmail, sendShelterRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
-const ADMIN_SECRET = 'Lumo2026@';
+const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function GET(request: NextRequest) {

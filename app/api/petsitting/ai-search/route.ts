@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatPublicCity } from '@/lib/formatCity';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +16,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { query: searchQuery, email: ownerEmail, sitterIds } = body;
 
+    const verifiedEmail = await getVerifiedSessionEmail(request);
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'sitter_search',
       userEmail: ownerEmail,
+      verifiedEmail,
       request,
     });
 

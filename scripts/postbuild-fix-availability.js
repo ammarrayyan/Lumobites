@@ -1,4 +1,4 @@
-const bypassKey = process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY || 'Lumo2026@';
+const bypassKey = process.env.ADMIN_API_KEY;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ltruotyzraxrrrtyakmc.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 

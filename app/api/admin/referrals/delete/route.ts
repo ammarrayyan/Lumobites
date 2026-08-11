@@ -1,7 +1,15 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
-export async function POST(request: Request) {
+function checkAuth(req: NextRequest) {
+  return isAuthorizedAdmin(req);
+}
+
+export async function POST(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id } = await request.json();
 
@@ -9,10 +17,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Referrer ID is required' }, { status: 400 });
     }
 
-    // Since referred_users has a foreign key to referrers(id), 
+    // Since referred_users has a foreign key to referrers(id),
     // we should delete from referred_users first to avoid constraint errors
     // unless ON DELETE CASCADE is enabled in Supabase, but it's safer to delete explicitly.
-    const { error: usersError } = await supabase
+    const { error: usersError } = await supabaseAdmin
       .from('referred_users')
       .delete()
       .eq('referrer_id', id);
@@ -22,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to delete referred users' }, { status: 500 });
     }
 
-    const { error: referrerError } = await supabase
+    const { error: referrerError } = await supabaseAdmin
       .from('referrers')
       .delete()
       .eq('id', id);

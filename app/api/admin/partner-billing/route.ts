@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { getAllPartnerPricing, updatePartnerPricing } from '@/lib/partner-pricing';
 
 export const dynamic = 'force-dynamic';
-const ADMIN_SECRET = process.env.ADMIN_KEY || 'Lumo2026@';
+const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 
 function isAuthorized(request: NextRequest): boolean {
   const adminKey = request.headers.get('x-admin-key');

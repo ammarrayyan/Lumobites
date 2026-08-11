@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,8 +13,7 @@ export async function GET(req: NextRequest) {
     const keyword = searchParams.get('keyword');
     const sort = searchParams.get('sort') || 'helpful';
 
-    const adminKey = req.headers.get('x-admin-key');
-    const isAdmin = adminKey === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+    const isAdmin = isAuthorizedAdmin(req);
 
     let query = supabaseAdmin
       .from('city_board_posts')
@@ -198,8 +198,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
     }
 
-    const authHeader = req.headers.get('x-admin-key');
-    const isAdmin = authHeader === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+    const isAdmin = isAuthorizedAdmin(req);
 
     if (!isAdmin) {
       if (!device_cookie) {

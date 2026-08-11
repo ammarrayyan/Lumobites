@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
-const ADMIN_SECRET = 'Lumo2026@';
+const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 
 const SQL = `
 -- 1. Shelters table
@@ -60,6 +61,10 @@ CREATE TABLE IF NOT EXISTS adoption_messages (
 
 export async function GET(request: NextRequest) {
   try {
+    if (!isAuthorizedAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { error: err1 } = await supabaseAdmin.from('shelters').select('id').limit(1);
     const { error: err2 } = await supabaseAdmin.from('adoption_pets').select('id').limit(1);
     const { error: err3 } = await supabaseAdmin.from('adoption_messages').select('id').limit(1);

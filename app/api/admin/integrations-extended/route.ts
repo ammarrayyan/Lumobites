@@ -3,9 +3,10 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import admin from '@/lib/firebase-admin';
 
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
+
 function checkAuth(req: NextRequest) {
-  const key = req.headers.get('x-admin-key');
-  return key === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+  return isAuthorizedAdmin(req);
 }
 
 const TIMEOUT = 8000;

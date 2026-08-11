@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
+
 function checkAuth(req: NextRequest) {
-  const key = req.headers.get('x-admin-key');
-  return key === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY;
+  return isAuthorizedAdmin(req);
 }
 
 export async function GET(req: NextRequest) {

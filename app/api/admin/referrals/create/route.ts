@@ -1,7 +1,15 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
-export async function POST(request: Request) {
+function checkAuth(req: NextRequest) {
+  return isAuthorizedAdmin(req);
+}
+
+export async function POST(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { name } = await request.json();
 
@@ -23,7 +31,7 @@ export async function POST(request: Request) {
     // Assuming `supabase` client is set up correctly (maybe falling back to anon which has select permissions based on RLS).
     // The previous insert worked because we disabled RLS for referrers table.
     while (!isUnique) {
-      const { data: existing, error: checkError } = await supabase
+      const { data: existing, error: checkError } = await supabaseAdmin
         .from('referrers')
         .select('id')
         .eq('code', code)
@@ -39,7 +47,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('referrers')
       .insert({ name, code })
       .select()

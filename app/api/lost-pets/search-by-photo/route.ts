@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 // Helper function for Haversine distance
 const getDistanceInMiles = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -63,9 +64,11 @@ export async function POST(request: NextRequest) {
     console.log('Filters:', { species, radius, timeframe, minMatchScore });
 
     const userEmail = body.email || body.userEmail;
+    const verifiedEmail = await getVerifiedSessionEmail(request);
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'pet_search',
       userEmail,
+      verifiedEmail,
       request,
     });
 

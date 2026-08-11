@@ -159,28 +159,10 @@ function ScanPageContent() {
     const searchParams = new URLSearchParams(window.location.search);
     const sessionId = searchParams.get('session_id');
     const emailParam = searchParams.get('email');
-    const adminParam = searchParams.get('admin');
 
     console.log('[Lumo Subscription] Page mounted. Checking subscription status...');
 
-    if (adminParam === process.env.NEXT_PUBLIC_ADMIN_BYPASS_KEY) {
-      console.log('[Lumo Subscription] Admin bypass activated via URL parameter.');
-      setIsPro(true);
-      setProEmail('admin@lumobites.com');
-      localStorage.setItem('lumo_pro_email', 'admin@lumobites.com');
-      localStorage.setItem('lumo_admin_bypass', 'true');
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      
-      try {
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {}
-      
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (sessionId) {
+    if (sessionId) {
       console.log('[Lumo Subscription] Found Stripe session_id in URL:', sessionId);
       setVerifyingSession(true);
       fetch(`/api/stripe/verify-session?session_id=${sessionId}`)

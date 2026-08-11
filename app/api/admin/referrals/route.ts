@@ -1,12 +1,20 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+function checkAuth(req: NextRequest) {
+  return isAuthorizedAdmin(req);
+}
+
+export async function GET(req: NextRequest) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     // 1. Fetch referrers
-    const { data: referrers, error: referrersError } = await supabase
+    const { data: referrers, error: referrersError } = await supabaseAdmin
       .from('referrers')
       .select('*')
       .order('created_at', { ascending: false });
@@ -14,7 +22,7 @@ export async function GET() {
     if (referrersError) throw referrersError;
 
     // 2. Fetch referred users
-    const { data: referredUsers, error: referredUsersError } = await supabase
+    const { data: referredUsers, error: referredUsersError } = await supabaseAdmin
       .from('referred_users')
       .select('*');
 

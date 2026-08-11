@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { checkAndTrackAiUsage } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -441,15 +442,17 @@ const DOG_BREEDS = Object.keys(BREED_DATA).slice(0, 45).map(b => b.split(' ').ma
 const CAT_BREEDS = Object.keys(BREED_DATA).slice(45).map(b => b.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
 const ALL_BREEDS = [...DOG_BREEDS, ...CAT_BREEDS];
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const image = formData.get('image') as File | null;
     const userEmail = (formData.get('email') as string | null) || (formData.get('userEmail') as string | null);
+    const verifiedEmail = await getVerifiedSessionEmail(req);
 
     const limitCheck = await checkAndTrackAiUsage({
       feature: 'pet_twin',
       userEmail,
+      verifiedEmail,
       request: req,
     });
 

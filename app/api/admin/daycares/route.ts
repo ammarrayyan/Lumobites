@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendDaycareApprovalEmail, sendDaycareRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
-const ADMIN_SECRET = 'Lumo2026@';
+const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // ─── GET /api/admin/daycares — Fetch all daycare applications ───────────────
 export async function GET(request: NextRequest) {
   try {
+    if (!isAuthorizedAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { data: daycares, error } = await supabaseAdmin
       .from('pet_daycares')
       .select('*')
@@ -28,6 +33,10 @@ export async function GET(request: NextRequest) {
 // ─── PATCH /api/admin/daycares — Update daycare application status ──────────
 export async function PATCH(request: NextRequest) {
   try {
+    if (!isAuthorizedAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, status, rejection_reason } = body;
 
