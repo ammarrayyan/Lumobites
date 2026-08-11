@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const { data: profile, error } = await supabase
+    const { data: profile, error } = await supabaseAdmin
       .from('owner_profiles')
       .select('*')
       .eq('email', cleanEmail)
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('owner_profiles')
       .upsert({
         email: cleanEmail,
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('owner_profiles')
       .delete()
       .eq('email', cleanEmail);

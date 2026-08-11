@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 1. Fetch sitting request
-    const { data: reqRow, error: reqError } = await supabase
+    const { data: reqRow, error: reqError } = await supabaseAdmin
       .from('sitting_requests')
       .select('*')
       .eq('id', id)
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Update request status to declined
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('sitting_requests')
       .update({ status: 'declined' })
       .eq('id', id);
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Fetch sitter info
-    const { data: sitter } = await supabase
+    const { data: sitter } = await supabaseAdmin
       .from('sitters')
       .select('name')
       .eq('id', reqRow.sitter_id)

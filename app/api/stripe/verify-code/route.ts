@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 import { setAccountSessionCookie, createAccountSessionToken } from '@/lib/accountAuth';
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Check if the code exists
-    const { data: codeData, error: codeError } = await supabase
+    const { data: codeData, error: codeError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('email', cleanEmail)
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const expiryTime = new Date(codeData.expires_at).getTime();
     if (Date.now() > expiryTime) {
       // Clean up the expired code
-      await supabase
+      await supabaseAdmin
         .from('verification_codes')
         .delete()
         .eq('id', codeData.id);
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     let existed = isOwner;
 
     if (!isOwner) {
-      const { data: userData, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabaseAdmin
         .from('emails')
         .select('is_pro, account_status')
         .eq('email', cleanEmail)
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
       if (!userData) {
         // Register free account if not present
-        const { error: upsertErr } = await supabase
+        const { error: upsertErr } = await supabaseAdmin
           .from('emails')
           .upsert({
             email: cleanEmail,
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Check if the user is also an approved sitter
-    const { data: sitterData, error: sitterError } = await supabase
+    const { data: sitterData, error: sitterError } = await supabaseAdmin
       .from('sitters')
       .select('id')
       .eq('email', cleanEmail)
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Consume/delete the code immediately only AFTER successful verification
-    await supabase
+    await supabaseAdmin
       .from('verification_codes')
       .delete()
       .eq('id', codeData.id);

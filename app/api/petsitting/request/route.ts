@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const cleanEmail = owner_email.toLowerCase().trim();
 
     // 1. Check if owner is PRO (Code intact for future)
-    const { data: emailData } = await supabase
+    const { data: emailData } = await supabaseAdmin
       .from('emails')
       .select('is_pro')
       .eq('email', cleanEmail)
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const isOwnerPro = emailData?.is_pro || false;
 
     // 2. Get Sitter details
-    const { data: sitter, error: sitterError } = await supabase
+    const { data: sitter, error: sitterError } = await supabaseAdmin
       .from('sitters')
       .select('email, name, phone_number, available_times')
       .eq('id', sitter_id)
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       const requestedDatesInRange = parsedRequested ? getDatesInRange(parsedRequested.start, parsedRequested.end) : [];
 
       if (requestedDatesInRange.length > 0) {
-        const { data: existingBookings, error: existingBookingsError } = await supabase
+        const { data: existingBookings, error: existingBookingsError } = await supabaseAdmin
           .from('sitting_requests')
           .select('dates, time_slot')
           .eq('sitter_id', sitter_id)
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Generate sequential booking number
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await supabaseAdmin
       .from('sitting_requests')
       .select('id', { count: 'exact', head: true });
 
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
     const booking_number = `Booking #${countVal + 1}`;
 
     // 4. Insert Request Record
-    const { data: insertedReq, error: insertError } = await supabase
+    const { data: insertedReq, error: insertError } = await supabaseAdmin
       .from('sitting_requests')
       .insert({
         owner_email: cleanEmail,

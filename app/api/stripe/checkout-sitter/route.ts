@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     // Check if banned/suspended Sitter
-    const { data: sitterData } = await supabase
+    const { data: sitterData } = await supabaseAdmin
       .from('sitters')
       .select('account_status')
       .eq('email', cleanEmail)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import admin from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user email record exists in Supabase emails table
-    const { data: existingRecord, error: fetchError } = await supabase
+    const { data: existingRecord, error: fetchError } = await supabaseAdmin
       .from('emails')
       .select('email, is_pro')
       .eq('email', cleanEmail)
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     let dbError;
     if (existingRecord) {
       // Update existing record
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('emails')
         .update({
           verified_phone: verifiedPhone,
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       dbError = error;
     } else {
       // Insert new record (first-time visitor booking request)
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('emails')
         .insert({
           email: cleanEmail,

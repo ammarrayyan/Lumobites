@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     let isProUser = isOwner;
 
     if (!isOwner) {
-      const { data: userData, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabaseAdmin
         .from('emails')
         .select('is_pro, account_status')
         .eq('email', cleanEmail)
@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes from now
 
     // 3. Clear any existing verification codes for this email to keep table clean
-    await supabase
+    await supabaseAdmin
       .from('verification_codes')
       .delete()
       .eq('email', cleanEmail);
 
     // 4. Store the pending verification code
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('verification_codes')
       .insert({
         email: cleanEmail,

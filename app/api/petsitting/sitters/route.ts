@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { formatPublicCity } from '@/lib/formatCity';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     let isOwnerPro = false;
 
     if (ownerEmail) {
-      const { data: emailData } = await supabase
+      const { data: emailData } = await supabaseAdmin
         .from('emails')
         .select('is_pro')
         .eq('email', ownerEmail.toLowerCase().trim())
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       blockedEmails = blocked?.map(b => b.blocked_email.toLowerCase().trim()) || [];
     }
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('sitters')
       .select('id, email, name, photo_url, cover_photo_url, cover_photo_position, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
       .eq('approval_status', 'approved')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getVerifiedSessionEmail, clearAccountSessionCookie } from '@/lib/accountAuth';
 
 export async function POST(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('emails')
       .update({ session_invalidated_at: new Date().toISOString() })
       .eq('email', cleanEmail);

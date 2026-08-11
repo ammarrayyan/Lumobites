@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const SESSION_COOKIE_NAME = 'lumo_account_session';
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
@@ -94,7 +94,7 @@ export async function getVerifiedSessionEmail(request: NextRequest): Promise<str
   // 3. Database check: verify session was not revoked via "Sign Out All Devices"
   // FAIL CLOSED: If DB check errors or throws exception, return null
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('emails')
       .select('session_invalidated_at')
       .eq('email', verifiedEmail)

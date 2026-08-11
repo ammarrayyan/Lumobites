@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Update is_pro in Supabase for consumer subscriptions
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('emails')
       .upsert(
         {

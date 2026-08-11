@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 async function checkStatus(email: string) {
@@ -7,7 +7,7 @@ async function checkStatus(email: string) {
 
   const proDetails = await getUserProStatusDetails(cleanEmail);
 
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('emails')
     .select('session_invalidated_at, phone_verified')
     .eq('email', cleanEmail)

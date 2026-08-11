@@ -447,10 +447,10 @@ export default function Home() {
               </div>
               <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
               Find trusted, ID-verified pet sitters, licensed vet boarding, and daycare facilities near you. AI finds the perfect match instantly. Sitters keep 100%.
             </p>
-            <div className="mt-auto flex flex-col gap-2 relative z-10">
+            <div className="flex flex-col gap-2 relative z-10">
               <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Sitters &rarr;
               </Link>
@@ -468,10 +468,10 @@ export default function Home() {
               </div>
               <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
             </div>
-            <p className="text-[#627985] leading-relaxed relative flex-1 z-10 text-sm">
+            <p className="text-[#627985] leading-relaxed relative z-10 text-sm">
               Post a lost or found pet instantly. AI searches found pet reports using photo recognition to reunite you faster.
             </p>
-            <div className="mt-auto relative z-10">
+            <div className="relative z-10">
               <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#517685] to-[#426270] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Post Lost Pet &rarr;
               </Link>
@@ -486,10 +486,10 @@ export default function Home() {
               </div>
               <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food</h3>
             </div>
-            <p className="text-[#61755E] leading-relaxed relative flex-1 z-10 text-sm">
+            <p className="text-[#61755E] leading-relaxed relative z-10 text-sm">
               Scan pet food labels to flag hidden toxins. Get AI recommendations and live FDA recall alerts.
             </p>
-            <div className="mt-auto flex flex-col gap-2 relative z-10">
+            <div className="flex flex-col gap-2 relative z-10">
               <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#63825D] to-[#516E4C] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Food &rarr;
               </Link>
@@ -504,10 +504,10 @@ export default function Home() {
               </div>
               <h3 className="text-[#664333] font-extrabold text-xl">Pet Adoption</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
               Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
             </p>
-            <div className="mt-auto relative z-10">
+            <div className="relative z-10">
               <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5E3C] to-[#734A2E] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find to Adopt &rarr;
               </Link>
@@ -522,10 +522,10 @@ export default function Home() {
               </div>
               <h3 className="text-[#5C4533] font-extrabold text-xl">Partner Portal</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative flex-1 z-10 text-sm">
+            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
               Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings & inquiries.
             </p>
-            <div className="mt-auto relative z-10">
+            <div className="relative z-10">
               <button
                 type="button"
                 onClick={handleOpenPartnerPortal}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const cleanPaypal = paypal_email ? paypal_email.toLowerCase().trim() : null;
 
     // Check if email already exists
-    const { data: existing, error: checkError } = await supabase
+    const { data: existing, error: checkError } = await supabaseAdmin
       .from('affiliates')
       .select('id, status')
       .eq('email', cleanEmail)
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert into affiliates table as pending
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseAdmin
       .from('affiliates')
       .insert({
         full_name,

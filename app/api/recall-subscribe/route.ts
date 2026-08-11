@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Verify PRO Status
     if (cleanEmail !== 'premierpetnutritionllc@gmail.com' && cleanEmail !== 'reviewer@lumobites.net') {
-      const { data: proData, error: proError } = await supabase
+      const { data: proData, error: proError } = await supabaseAdmin
         .from('emails')
         .select('is_pro')
         .eq('email', cleanEmail)
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Check if subscription already exists
-    const { data: existingSub, error: checkError } = await supabase
+    const { data: existingSub, error: checkError } = await supabaseAdmin
       .from('recall_subscriptions')
       .select('email')
       .eq('email', cleanEmail)
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (existingSub) {
       // Update preferences on existing subscription without sending another welcome email
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('recall_subscriptions')
         .update({
           pet_type: pet_type || 'both',
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert new subscription
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('recall_subscriptions')
       .insert({
         email: cleanEmail,
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const { data: existingSub, error } = await supabase
+    const { data: existingSub, error } = await supabaseAdmin
       .from('recall_subscriptions')
       .select('email')
       .eq('email', cleanEmail)
@@ -163,7 +163,7 @@ export async function DELETE(request: NextRequest) {
     
     // Verify PRO status
     if (cleanEmail !== 'premierpetnutritionllc@gmail.com' && cleanEmail !== 'reviewer@lumobites.net') {
-      const { data: proData, error: proError } = await supabase
+      const { data: proData, error: proError } = await supabaseAdmin
         .from('emails')
         .select('is_pro')
         .eq('email', cleanEmail)
@@ -174,7 +174,7 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('recall_subscriptions')
       .delete()
       .eq('email', cleanEmail);

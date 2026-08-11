@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
     // 2. Fetch completed requests older than 10 minutes that haven't received a review email
-    const { data: requests, error: fetchError } = await supabase
+    const { data: requests, error: fetchError } = await supabaseAdmin
       .from('sitting_requests')
       .select('id, owner_email, sitter_id, pet_name, dates, completed_at')
       .eq('status', 'completed')
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     for (const reqRow of requests) {
       try {
         // Fetch sitter details
-        const { data: sitter } = await supabase
+        const { data: sitter } = await supabaseAdmin
           .from('sitters')
           .select('name')
           .eq('id', reqRow.sitter_id)
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Mark as sent
-        await supabase
+        await supabaseAdmin
           .from('sitting_requests')
           .update({ review_sent: true })
           .eq('id', reqRow.id);

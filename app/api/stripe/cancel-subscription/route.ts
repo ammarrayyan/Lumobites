@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 import { getVerifiedSessionEmail } from '@/lib/accountAuth';
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     if (isOwner || subscriptionId === 'admin_bypass') {
       // For admin/owner, just update Supabase Pro status to false
-      const { error: dbError } = await supabase
+      const { error: dbError } = await supabaseAdmin
         .from('emails')
         .update({ is_pro: false })
         .eq('email', cleanEmail);

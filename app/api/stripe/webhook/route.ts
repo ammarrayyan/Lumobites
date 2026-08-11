@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           if (service === 'sitter-pro') {
             console.log(`[Stripe Webhook] Setting Sitter PRO status for email: ${cleanEmail}`);
             
-            await supabase
+            await supabaseAdmin
               .from('sitters')
               .update({ is_pro: true, stripe_customer_id: session.customer as string })
               .eq('email', cleanEmail);
@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
           await supabaseAdmin.from('sitters').update({ is_pro: true }).eq('email', cleanEmail);
 
           if (invoice.billing_reason === 'subscription_cycle') {
-            const { data: referred } = await supabase
+            const { data: referred } = await supabaseAdmin
               .from('referred_users')
               .select('id, active_months')
               .eq('referred_email', cleanEmail)
@@ -261,9 +261,9 @@ export async function POST(request: NextRequest) {
               .order('created_at', { ascending: false })
               .limit(1)
               .single();
-              
+
             if (referred) {
-              await supabase
+              await supabaseAdmin
                 .from('referred_users')
                 .update({ active_months: (referred.active_months || 1) + 1 })
                 .eq('id', referred.id);
