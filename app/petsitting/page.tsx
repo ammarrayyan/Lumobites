@@ -670,6 +670,7 @@ export function PetSittingContent() {
   const coverCameraInputRef = useRef<HTMLInputElement | null>(null);
   const petPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const petCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const idPhotoInputRef = useRef<HTMLInputElement | null>(null);
 
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
@@ -5480,21 +5481,42 @@ export function PetSittingContent() {
                       </button>
                     </div>
                   ) : (
-                    // New sitter — needs to upload
-                    <div className="flex items-center gap-4 p-2 rounded-xl bg-white border border-[#E8DDD4]">
-                      <div className="w-16 h-12 rounded bg-[#E8DDD4] flex items-center justify-center text-gray-400">
+                    // New sitter — needs to upload. Two explicit options so the file
+                    // picker (Choose File) and the camera (Take Photo) never collide.
+                    <div className="p-3 rounded-xl bg-white border border-[#E8DDD4] flex flex-col sm:flex-row items-center gap-4">
+                      <div className="w-16 h-12 rounded bg-[#E8DDD4] flex items-center justify-center text-gray-400 text-2xl shrink-0">
                         🪪
                       </div>
-                      <div className="flex-1 flex flex-col gap-2">
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          capture="environment"
+                      <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => idPhotoInputRef.current?.click()}
+                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                        >
+                          <Upload className="w-4 h-4 shrink-0" />
+                          <span>Choose File</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startCamera('id')}
+                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                        >
+                          <Camera className="w-4 h-4 shrink-0" />
+                          <span>Take Photo</span>
+                        </button>
+                        {/* Hidden file input (no `capture`) so this always opens the
+                            device file picker, never the camera. */}
+                        <input
+                          type="file"
+                          ref={idPhotoInputRef}
+                          accept="image/*"
+                          className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
                               if (file.size > 4 * 1024 * 1024) {
                                 alert('Your ID photo is too large. Please use a photo under 4MB');
+                                e.target.value = '';
                                 return;
                               }
                               const reader = new FileReader();
@@ -5521,16 +5543,9 @@ export function PetSittingContent() {
                               };
                               reader.readAsDataURL(file);
                             }
-                          }} 
-                          className="block w-full text-sm text-[#666666] file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-[#FAF6F4] file:text-[#8B5E3C] hover:file:bg-[#F0E6DD] transition-colors cursor-pointer focus:outline-none" 
+                            e.target.value = '';
+                          }}
                         />
-                        <button 
-                          type="button" 
-                          onClick={() => startCamera('id')}
-                          className="w-fit text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#F0E6DD] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
-                        >
-                          📷 Take Photo with Webcam
-                        </button>
                       </div>
                     </div>
                   )}
