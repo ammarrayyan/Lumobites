@@ -5369,68 +5369,63 @@ export function PetSittingContent() {
                     </div>
                   ) : (
                     // New sitter — needs to upload
-                    <div className="flex flex-col sm:flex-row items-center gap-4 p-2 rounded-xl">
-                      <div className="w-16 h-16 rounded-full bg-[#E8DDD4] flex items-center justify-center text-gray-400 shrink-0">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      </div>
-                      <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input 
-                          type="file" 
-                          ref={profilePhotoInputRef}
-                          className="hidden"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.size > 4 * 1024 * 1024) {
-                                setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
-                                return;
-                              } else {
-                                setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
-                              }
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const img = new window.Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  let width = img.width;
-                                  let height = img.height;
-                                  const MAX_WIDTH = 800;
-                                  const MAX_HEIGHT = 800;
-                                  if (width > height) {
-                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                  } else {
-                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                                  }
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  ctx?.drawImage(img, 0, 0, width, height);
-                                  setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
-                                };
-                                img.src = reader.result as string;
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }} 
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => startCamera('selfie')}
-                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
-                        >
-                          <Camera className="w-4 h-4 shrink-0" />
-                          <span>Take Selfie</span>
-                        </button>
+                    <div className="p-4 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4] flex flex-col gap-3">
+                      <div className="flex flex-wrap gap-3">
                         <button 
                           type="button" 
                           onClick={() => profilePhotoInputRef.current?.click()}
-                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                          className="flex-1 min-w-[140px] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                         >
-                          <Upload className="w-4 h-4 shrink-0" />
-                          <span>Upload Photo</span>
+                          📁 Choose File
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => startCamera('selfie')}
+                          className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
+                        >
+                          📷 Take Photo
                         </button>
                       </div>
+                      <input 
+                        type="file" 
+                        ref={profilePhotoInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
+                              return;
+                            } else {
+                              setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 800;
+                                const MAX_HEIGHT = 800;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                              };
+                              img.src = reader.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                      />
                     </div>
                   )}
                 </div>
@@ -5481,72 +5476,66 @@ export function PetSittingContent() {
                       </button>
                     </div>
                   ) : (
-                    // New sitter — needs to upload. Two explicit options so the file
-                    // picker (Choose File) and the camera (Take Photo) never collide.
-                    <div className="p-3 rounded-xl bg-white border border-[#E8DDD4] flex flex-col sm:flex-row items-center gap-4">
-                      <div className="w-16 h-12 rounded bg-[#E8DDD4] flex items-center justify-center text-gray-400 text-2xl shrink-0">
-                        🪪
-                      </div>
-                      <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    // New sitter — needs to upload. Two explicit options matching Lost Pet photo uploader.
+                    <div className="p-4 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4] flex flex-col gap-3">
+                      <div className="flex flex-wrap gap-3">
                         <button
                           type="button"
                           onClick={() => idPhotoInputRef.current?.click()}
-                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                          className="flex-1 min-w-[140px] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                         >
-                          <Upload className="w-4 h-4 shrink-0" />
-                          <span>Choose File</span>
+                          📁 Choose File
                         </button>
                         <button
                           type="button"
                           onClick={() => startCamera('id')}
-                          className="flex items-center justify-center gap-2 bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-3 px-4 rounded-xl transition-all shadow-sm text-sm cursor-pointer"
+                          className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                         >
-                          <Camera className="w-4 h-4 shrink-0" />
-                          <span>Take Photo</span>
+                          📷 Take Photo
                         </button>
-                        {/* Hidden file input (no `capture`) so this always opens the
-                            device file picker, never the camera. */}
-                        <input
-                          type="file"
-                          ref={idPhotoInputRef}
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.size > 4 * 1024 * 1024) {
-                                alert('Your ID photo is too large. Please use a photo under 4MB');
-                                e.target.value = '';
-                                return;
-                              }
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                const img = new window.Image();
-                                img.onload = () => {
-                                  const canvas = document.createElement('canvas');
-                                  let width = img.width;
-                                  let height = img.height;
-                                  const MAX_WIDTH = 1200;
-                                  const MAX_HEIGHT = 1200;
-                                  if (width > height) {
-                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                                  } else {
-                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                                  }
-                                  canvas.width = width;
-                                  canvas.height = height;
-                                  const ctx = canvas.getContext('2d');
-                                  ctx?.drawImage(img, 0, 0, width, height);
-                                  setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
-                                };
-                                img.src = reader.result as string;
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                            e.target.value = '';
-                          }}
-                        />
                       </div>
+                      {/* Hidden file input (no `capture`) so this always opens the
+                          device file picker (gallery/files), never directly forcing camera. */}
+                      <input
+                        type="file"
+                        ref={idPhotoInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              alert('Your ID photo is too large. Please use a photo under 4MB');
+                              e.target.value = '';
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 1200;
+                                const MAX_HEIGHT = 1200;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                              };
+                              img.src = reader.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                          e.target.value = '';
+                        }}
+                      />
                     </div>
                   )}
                 </div>
