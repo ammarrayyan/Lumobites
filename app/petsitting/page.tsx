@@ -6936,85 +6936,79 @@ export function PetSittingContent() {
             className="bg-white rounded-3xl w-full max-w-xl max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden" 
             onClick={e => e.stopPropagation()}
           >
-            {/* Cover Banner */}
-            <div className="h-32 sm:h-64 w-full relative bg-[#E8DDD4] overflow-hidden shrink-0">
-              {reqEmail && selectedSitterForReviews.cover_photo_url ? (
-                <img
-                  src={selectedSitterForReviews.cover_photo_url}
-                  alt="Cover banner"
-                  className="w-full h-full pointer-events-none"
-                  style={{
-                    objectFit: 'cover',
-                    objectPosition: (selectedSitterForReviews as any).cover_photo_position || 'center'
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-r from-[#FAF6F4] to-[#E8DDD4] opacity-75" />
-              )}
-            </div>
-
-            <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-b border-[#E8DDD4] relative bg-white z-10 pt-0">
-              <div className="relative z-10 flex items-start gap-3 sm:gap-4 pr-10 sm:pr-12">
-                <div className="-mt-12 sm:-mt-18 flex-shrink-0">
-                  {selectedSitterForReviews.photo_url ? (
-                    <img src={selectedSitterForReviews.photo_url} alt={formatSitterName(selectedSitterForReviews.name)} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl object-cover border-4 border-white shadow-md pointer-events-none" />
-                  ) : (
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-3xl sm:text-5xl shadow-md border-4 border-white">
-                      {formatSitterName(selectedSitterForReviews.name).charAt(0)}
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1 pt-2 sm:pt-4 pb-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] break-words">{formatSitterName(selectedSitterForReviews.name)}</h3>
-                    {selectedSitterForReviews.gender && (
-                      <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-[#FAF6F4] rounded-full border border-[#E8DDD4] whitespace-nowrap">
-                        {selectedSitterForReviews.gender}
-                      </span>
-                    )}
-                    {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === selectedSitterForReviews.id || (selectedSitterForReviews.email && req.sitter_email?.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim()))) && (
-                      <button
-                        onClick={() => handleOpenReportModal(selectedSitterForReviews.email || '', 'sitter', undefined, selectedSitterForReviews.id)}
-                        className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-sm"
-                        title="Report this sitter"
-                      >
-                        ⚠️
-                      </button>
-                    )}
-                  </div>
-                  
-                  {selectedSitterForReviews.approval_status === 'approved' && (
-                    <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#A7F3D0] mb-2 whitespace-nowrap">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID Verified
-                    </div>
-                  )}
- 
-                  <div className="text-sm">
-                    {!reqEmail ? (
-                      <span className="text-[#8B7E7D] text-xs font-semibold select-none">
-                        🔒 Reviews locked
-                      </span>
-                    ) : selectedSitterForReviews.review_count ? (
-                      <span className="text-[#D97706] font-bold whitespace-nowrap">
-                        ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
-                      </span>
-                    ) : (
-                      <span className="text-[#8B7E7D] whitespace-nowrap">No reviews yet</span>
-                    )}
-                  </div>
- 
-                  <p className="text-[#8B7E7D] text-xs sm:text-sm flex flex-wrap items-center gap-1 mt-1">
-                    📍 {formatPublicCity(selectedSitterForReviews.city)}
-                  </p>
-
-                </div>
-              </div>
+            {/* Warm Beige Header Container */}
+            <div className="px-4 sm:px-6 pt-8 pb-6 border-b border-[#E8DDD4] relative bg-[#FAF6F4] flex flex-col items-center text-center">
+              {/* Close Button */}
               <button 
                 onClick={() => setReviewsModalOpen(false)} 
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-[#FAF6F4] hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer text-lg font-bold z-20"
+                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white hover:bg-[#E8DDD4] text-[#4A3E3D] transition-colors cursor-pointer text-base font-bold shadow-xs z-20 border border-[#E8DDD4]"
               >
                 ✕
               </button>
+
+              {/* Centered Circular Profile Photo (130px) */}
+              <div className="relative mb-3">
+                {selectedSitterForReviews.photo_url ? (
+                  <img 
+                    src={selectedSitterForReviews.photo_url} 
+                    alt={formatSitterName(selectedSitterForReviews.name)} 
+                    className="w-[130px] h-[130px] rounded-full object-cover border-4 border-white shadow-md pointer-events-none" 
+                  />
+                ) : (
+                  <div className="w-[130px] h-[130px] rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-black text-5xl shadow-md border-4 border-white">
+                    {formatSitterName(selectedSitterForReviews.name).charAt(0)}
+                  </div>
+                )}
+              </div>
+
+              {/* Centered Sitter Name & Metadata */}
+              <div className="flex flex-col items-center text-center max-w-md w-full">
+                <div className="flex items-center justify-center gap-2 flex-wrap mb-1">
+                  <h3 className="text-2xl font-black text-[#4A3E3D] break-words">
+                    {formatSitterName(selectedSitterForReviews.name)}
+                  </h3>
+                  {selectedSitterForReviews.gender && (
+                    <span className="text-[#8B7E7D] text-xs font-semibold px-2.5 py-0.5 bg-white rounded-full border border-[#E8DDD4] whitespace-nowrap">
+                      {selectedSitterForReviews.gender}
+                    </span>
+                  )}
+                  {ownerRequests.some(req => ['accepted', 'completed', 'no_show'].includes(req.status) && (req.sitter_id === selectedSitterForReviews.id || (selectedSitterForReviews.email && req.sitter_email?.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim()))) && (
+                    <button
+                      onClick={() => handleOpenReportModal(selectedSitterForReviews.email || '', 'sitter', undefined, selectedSitterForReviews.id)}
+                      className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-sm"
+                      title="Report this sitter"
+                    >
+                      ⚠️
+                    </button>
+                  )}
+                </div>
+
+                {selectedSitterForReviews.approval_status === 'approved' && (
+                  <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-3 py-1 rounded-full border border-[#A7F3D0] mb-2 whitespace-nowrap">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID Verified
+                  </div>
+                )}
+
+                <div className="flex items-center justify-center gap-3 text-sm flex-wrap text-[#8B7E7D]">
+                  {!reqEmail ? (
+                    <span className="text-xs font-semibold select-none">
+                      🔒 Reviews locked
+                    </span>
+                  ) : selectedSitterForReviews.review_count ? (
+                    <span className="text-[#D97706] font-bold whitespace-nowrap">
+                      ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
+                    </span>
+                  ) : (
+                    <span className="text-[#8B7E7D] whitespace-nowrap">No reviews yet</span>
+                  )}
+
+                  <span className="text-[#E8DDD4]">•</span>
+
+                  <span className="flex items-center gap-1 text-xs sm:text-sm font-semibold">
+                    📍 {formatPublicCity(selectedSitterForReviews.city)}
+                  </span>
+                </div>
+              </div>
             </div>
             
             <div className="p-4 pb-32 sm:p-6 overflow-y-auto flex-1 bg-[#FDFAF7] space-y-6">
