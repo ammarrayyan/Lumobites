@@ -666,11 +666,13 @@ export function PetSittingContent() {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const profileCameraInputRef = useRef<HTMLInputElement | null>(null);
   const coverPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const coverCameraInputRef = useRef<HTMLInputElement | null>(null);
   const petPhotoInputRef = useRef<HTMLInputElement | null>(null);
   const petCameraInputRef = useRef<HTMLInputElement | null>(null);
   const idPhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const idCameraInputRef = useRef<HTMLInputElement | null>(null);
 
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
@@ -5380,12 +5382,13 @@ export function PetSittingContent() {
                         </button>
                         <button 
                           type="button" 
-                          onClick={() => startCamera('selfie')}
+                          onClick={() => profileCameraInputRef.current?.click()}
                           className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                         >
                           📷 Take Photo
                         </button>
                       </div>
+                      {/* Choose File input (no capture) so it always opens gallery/files */}
                       <input 
                         type="file" 
                         ref={profilePhotoInputRef}
@@ -5424,6 +5427,50 @@ export function PetSittingContent() {
                             };
                             reader.readAsDataURL(file);
                           }
+                          e.target.value = '';
+                        }} 
+                      />
+                      {/* Take Photo input (with native camera capture) */}
+                      <input 
+                        type="file" 
+                        ref={profileCameraInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        capture="user"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              setFormErrors(prev => ({ ...prev, photo: 'Your photo is too large. Please use a photo under 4MB' }));
+                              return;
+                            } else {
+                              setFormErrors(prev => { const newErr = {...prev}; delete newErr.photo; return newErr; });
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 800;
+                                const MAX_HEIGHT = 800;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterPhoto(canvas.toDataURL('image/jpeg', 0.7));
+                              };
+                              img.src = reader.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                          e.target.value = '';
                         }} 
                       />
                     </div>
@@ -5488,18 +5535,60 @@ export function PetSittingContent() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => startCamera('id')}
+                          onClick={() => idCameraInputRef.current?.click()}
                           className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                         >
                           📷 Take Photo
                         </button>
                       </div>
-                      {/* Hidden file input (no `capture`) so this always opens the
+                      {/* Choose File input (no `capture`) so this always opens the
                           device file picker (gallery/files), never directly forcing camera. */}
                       <input
                         type="file"
                         ref={idPhotoInputRef}
                         accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 4 * 1024 * 1024) {
+                              alert('Your ID photo is too large. Please use a photo under 4MB');
+                              e.target.value = '';
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new window.Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_WIDTH = 1200;
+                                const MAX_HEIGHT = 1200;
+                                if (width > height) {
+                                  if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                  if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                setSitterIdPhoto(canvas.toDataURL('image/jpeg', 0.8));
+                              };
+                              img.src = reader.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                      {/* Take Photo input (with native camera capture matching Lost Pet uploader) */}
+                      <input
+                        type="file"
+                        ref={idCameraInputRef}
+                        accept="image/*"
+                        capture="environment"
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
