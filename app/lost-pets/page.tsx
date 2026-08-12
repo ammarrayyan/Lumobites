@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
@@ -12,9 +13,25 @@ import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 
 export default function LostPetsFeed() {
-  const proEmail = typeof window !== 'undefined' 
-    ? localStorage.getItem('lumo_pro_email') || '' 
-    : '';
+  const router = useRouter();
+  const handleCardClick = (e: React.MouseEvent, petId: string) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, input, select, textarea, [data-interactive="true"]')) {
+      return;
+    }
+    router.push(`/lost-pets/${petId}`);
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, petId: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, input, select, textarea, [data-interactive="true"]')) {
+        return;
+      }
+      e.preventDefault();
+      router.push(`/lost-pets/${petId}`);
+    }
+  };
 
   // ── Page Tab ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
@@ -641,7 +658,15 @@ export default function LostPetsFeed() {
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
-                          <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
+                          <div 
+                            key={pet.id} 
+                            tabIndex={0}
+                            role="link"
+                            aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
+                            onClick={(e) => handleCardClick(e, pet.id)}
+                            onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
+                            className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                          >
                             <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                               {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
@@ -949,7 +974,15 @@ export default function LostPetsFeed() {
                         {aiMatches
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
-                          <div key={pet.id} className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
+                          <div 
+                            key={pet.id} 
+                            tabIndex={0}
+                            role="link"
+                            aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
+                            onClick={(e) => handleCardClick(e, pet.id)}
+                            onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
+                            className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                          >
                             <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                               {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
