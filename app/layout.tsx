@@ -103,10 +103,10 @@ export default async function RootLayout({
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
         <div 
-          className="pb-24 lg:pb-0 min-h-[calc(100dvh-72px)] flex flex-col justify-between"
+          className="pb-28 lg:pb-0 min-h-[calc(100dvh-72px)] flex flex-col justify-between"
           style={{
             paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 104px)'
           }}
         >
           <div className="flex-grow">

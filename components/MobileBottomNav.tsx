@@ -25,8 +25,12 @@ export default function MobileBottomNav() {
       style={{
         position: 'fixed',
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: 0,
+        right: 0,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
         zIndex: 9999,
         backgroundColor: 'rgba(255, 255, 255, 0.65)',
         backdropFilter: 'blur(20px) saturate(180%)',
@@ -34,6 +38,7 @@ export default function MobileBottomNav() {
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
         borderRadius: '40px',
         border: '1px solid rgba(255, 255, 255, 0.1)',
+        pointerEvents: 'auto',
       }}
     >
       {tabs.map((tab) => {
