@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine, Ban, Trash2 } from 'lucide-react';
+import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine, Ban, Trash2, PawPrint, ChevronDown, ArrowUpDown } from 'lucide-react';
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -19,6 +19,30 @@ const getCategoryColor = (category: string) => {
   };
   return colors[category] || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
 };
+
+// Deterministic per-anonymous-poster avatar color, drawn from the same palette
+// used for category pills so it stays visually consistent with the rest of the page.
+const AVATAR_COLORS = [
+  { bg: '#F2D5D5', text: '#7A2222' },
+  { bg: '#E1E8D5', text: '#2C3B1E' },
+  { bg: '#E6E2F0', text: '#3A2C5C' },
+  { bg: '#FFF3CD', text: '#664D03' },
+  { bg: '#E2EBEB', text: '#234A4A' },
+  { bg: '#F5E6DA', text: '#6E4225' },
+  { bg: '#D9E2E8', text: '#2B3D45' },
+  { bg: '#EADBCE', text: '#5C4533' },
+];
+
+const getAvatarColor = (cookie: string) => {
+  if (!cookie) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < cookie.length; i++) {
+    hash = (hash * 31 + cookie.charCodeAt(i)) >>> 0;
+  }
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+};
+
+const REPLIES_PAGE_SIZE = 10;
 
 export default function CityBoardPostPage() {
   const params = useParams();
@@ -85,6 +109,8 @@ export default function CityBoardPostPage() {
   const [newReply, setNewReply] = useState('');
   const [isReplying, setIsReplying] = useState(false);
   const [replyError, setReplyError] = useState('');
+  const [replySort, setReplySort] = useState<'newest' | 'oldest'>('oldest');
+  const [visibleRepliesCount, setVisibleRepliesCount] = useState(REPLIES_PAGE_SIZE);
 
   useEffect(() => {
     let cookie = localStorage.getItem('lumo_city_board_cookie');
@@ -249,16 +275,12 @@ export default function CityBoardPostPage() {
       
       <main className="max-w-3xl mx-auto px-4 py-8">
         
-        {/* Back Button & Thread ID Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        {/* Back Button */}
+        <div className="mb-6">
           <Link href="/city-board" className="inline-flex items-center gap-2 text-[#8B5E3C] font-bold hover:bg-[#8B5E3C] hover:text-white transition-all bg-white px-5 py-2.5 rounded-full shadow-sm border border-[#3B2410]/10 text-sm w-fit">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Back to City Board
           </Link>
-          <div className="bg-[#FFFBF5] px-4 py-2 rounded-xl border border-[#3B2410]/10 shadow-sm inline-flex items-center gap-2 w-fit">
-            <span className="text-[#3B2410]/60 text-xs font-bold uppercase tracking-wider">Thread ID</span>
-            <span className="font-black text-[#3B2410]">{postId}</span>
-          </div>
         </div>
         
         {/* OP Post */}
@@ -329,54 +351,106 @@ export default function CityBoardPostPage() {
           </div>
         </div>
 
-        <h3 className="text-xl font-black text-[#3B2410] mb-5 pl-2 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-[#3B2410]" /> Replies ({replies.length})
-        </h3>
-
-        {/* Replies List */}
-        <div className="space-y-4 mb-8">
-          {replies
-            .filter(reply => !blockedCookies.includes(reply.device_cookie))
-            .map(reply => (
-            <div key={reply.id} className="bg-[#FFFBF5] rounded-2xl p-5 border border-[#3B2410]/10 shadow-sm relative ml-4 md:ml-8">
-              <div className="absolute -left-4 md:-left-8 top-6 w-4 md:w-8 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
-              <div className="absolute -left-4 md:-left-8 -top-4 bottom-6 w-0 border-l-2 border-[#3B2410]/10"></div>
-
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold text-[#3B2410]/70 flex items-center gap-2">
-                  {reply.device_cookie === post.device_cookie ? (
-                    <span className="bg-[#8B5E3C] text-white px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">OP</span>
-                  ) : (
-                    <span>Anonymous</span>
-                  )}
-                  {reply.device_cookie === deviceCookie ? (
-                    <span className="bg-[#F5F0E8] text-[#8B5E3C] px-2 py-0.5 rounded border border-[#3B2410]/10 text-[10px] uppercase tracking-wider">You</span>
-                  ) : (
-                    <button 
-                      onClick={() => handleBlockUser(reply.device_cookie)}
-                      className="text-[#3B2410]/40 hover:text-red-600 text-[10px] uppercase font-bold tracking-wider hover:underline cursor-pointer"
-                    >
-                      Block User
-                    </button>
-                  )}
-                </span>
-                <span className="text-xs text-[#3B2410]/50 font-medium">{formatDistanceToNow(new Date(reply.created_at))} ago</span>
-              </div>
-              <p className="text-[#3B2410] whitespace-pre-wrap font-medium">{reply.content}</p>
-            </div>
-          ))}
-          {replies.length === 0 && (
-            <div className="bg-[#FFFBF5] rounded-2xl p-8 border border-[#3B2410]/10 shadow-sm text-center ml-4 md:ml-8 flex flex-col items-center justify-center">
-              <PenLine className="w-8 h-8 text-[#3B2410]/40 mb-3" />
-              <p className="text-[#3B2410]/60 font-bold">No replies yet. Be the first to jump in!</p>
-            </div>
+        <div className="flex items-center justify-between mb-5 pl-2 pr-1 flex-wrap gap-2">
+          <h3 className="text-xl font-black text-[#3B2410] flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-[#3B2410]" /> Replies ({replies.length})
+          </h3>
+          {replies.length > 1 && (
+            <button
+              onClick={() => setReplySort(prev => prev === 'oldest' ? 'newest' : 'oldest')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3B2410]/60 hover:text-[#3B2410] bg-white border border-[#3B2410]/10 px-3 py-1.5 rounded-full shadow-sm hover:border-[#3B2410]/25 transition-all cursor-pointer"
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              {replySort === 'oldest' ? 'Oldest first' : 'Newest first'}
+            </button>
           )}
         </div>
 
+        {/* Replies List */}
+        {(() => {
+          const visibleReplies = replies
+            .filter(reply => !blockedCookies.includes(reply.device_cookie))
+            .sort((a, b) => {
+              const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+              return replySort === 'oldest' ? diff : -diff;
+            });
+          const shown = visibleReplies.slice(0, visibleRepliesCount);
+          const remaining = visibleReplies.length - shown.length;
+
+          return (
+            <div className="mb-8">
+              {shown.length > 0 && (
+                <div className="relative ml-5 md:ml-9">
+                  {/* Continuous thread rail connecting all replies back to the post */}
+                  <div className="absolute -left-5 md:-left-9 top-0 bottom-6 w-0 border-l-2 border-[#3B2410]/10"></div>
+
+                  <div className="space-y-3">
+                    {shown.map(reply => {
+                      const avatarColor = getAvatarColor(reply.device_cookie);
+                      const isOP = reply.device_cookie === post.device_cookie;
+                      const isYou = reply.device_cookie === deviceCookie;
+                      return (
+                        <div key={reply.id} className="relative flex gap-3">
+                          <div className="absolute -left-5 md:-left-9 top-6 w-5 md:w-9 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"
+                            style={{ backgroundColor: avatarColor.bg }}
+                          >
+                            <PawPrint className="w-4 h-4" style={{ color: avatarColor.text }} />
+                          </div>
+                          <div className="flex-1 bg-[#FFFBF5] rounded-2xl p-5 border border-[#3B2410]/10 shadow-sm min-w-0">
+                            <div className="flex justify-between items-start mb-2 gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-[#3B2410]/70 flex items-center gap-2">
+                                {isOP ? (
+                                  <span className="bg-[#8B5E3C] text-white px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">OP</span>
+                                ) : (
+                                  <span>Anonymous</span>
+                                )}
+                                {isYou ? (
+                                  <span className="bg-[#F5F0E8] text-[#8B5E3C] px-2 py-0.5 rounded border border-[#3B2410]/10 text-[10px] uppercase tracking-wider">You</span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleBlockUser(reply.device_cookie)}
+                                    className="text-[#3B2410]/40 hover:text-red-600 text-[10px] uppercase font-bold tracking-wider hover:underline cursor-pointer"
+                                  >
+                                    Block User
+                                  </button>
+                                )}
+                              </span>
+                              <span className="text-xs text-[#3B2410]/50 font-medium whitespace-nowrap">{formatDistanceToNow(new Date(reply.created_at))} ago</span>
+                            </div>
+                            <p className="text-[#3B2410] whitespace-pre-wrap font-medium">{reply.content}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {remaining > 0 && (
+                    <button
+                      onClick={() => setVisibleRepliesCount(c => c + REPLIES_PAGE_SIZE)}
+                      className="mt-4 w-full flex items-center justify-center gap-2 text-sm font-bold text-[#3B2410]/70 hover:text-[#3B2410] bg-white border border-[#3B2410]/10 hover:border-[#3B2410]/25 py-3 rounded-xl shadow-sm transition-all cursor-pointer"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                      Show {Math.min(remaining, REPLIES_PAGE_SIZE)} more {remaining === 1 ? 'reply' : 'replies'}
+                    </button>
+                  )}
+                </div>
+              )}
+              {shown.length === 0 && (
+                <div className="bg-[#FFFBF5] rounded-2xl p-8 border border-[#3B2410]/10 shadow-sm text-center ml-5 md:ml-9 flex flex-col items-center justify-center">
+                  <PenLine className="w-8 h-8 text-[#3B2410]/40 mb-3" />
+                  <p className="text-[#3B2410]/60 font-bold">No replies yet. Be the first to jump in!</p>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Reply Form */}
-        <div className="bg-[#FFFBF5] rounded-3xl p-6 border border-[#3B2410]/10 shadow-sm ml-4 md:ml-8 relative">
-          <div className="absolute -left-4 md:-left-8 top-10 w-4 md:w-8 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
-          <div className="absolute -left-4 md:-left-8 -top-4 bottom-10 w-0 border-l-2 border-[#3B2410]/10"></div>
+        <div className="bg-[#FFFBF5] rounded-3xl p-6 border border-[#3B2410]/10 shadow-sm ml-5 md:ml-9 relative">
+          <div className="absolute -left-5 md:-left-9 top-10 w-5 md:w-9 border-t-2 border-[#3B2410]/10 rounded-bl-lg"></div>
+          <div className="absolute -left-5 md:-left-9 -top-4 bottom-10 w-0 border-l-2 border-[#3B2410]/10"></div>
           
           {!userEmail ? (
             <div className="text-center py-6">

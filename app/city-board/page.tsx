@@ -576,7 +576,7 @@ export default function CityBoardPage() {
                     <MapPin className="w-3.5 h-3.5 text-[#3B2410]/70" /> {post.city}
                   </span>
                   <span className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
-                  <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block font-medium">ID: {post.post_id} • {formatDistanceToNow(new Date(post.created_at))} ago</span>
+                  <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
                 </div>
                 <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed font-medium">{post.content}</p>
                 
