@@ -3,7 +3,45 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2 } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send } from 'lucide-react';
+
+// Avatar palette, reused from the same treatment applied to City Board for visual consistency.
+const AVATAR_COLORS = [
+  { bg: '#F2D5D5', text: '#7A2222' },
+  { bg: '#E1E8D5', text: '#2C3B1E' },
+  { bg: '#E6E2F0', text: '#3A2C5C' },
+  { bg: '#FFF3CD', text: '#664D03' },
+  { bg: '#E2EBEB', text: '#234A4A' },
+  { bg: '#F5E6DA', text: '#6E4225' },
+  { bg: '#D9E2E8', text: '#2B3D45' },
+  { bg: '#EADBCE', text: '#5C4533' },
+];
+
+const getAvatarColor = (key: string) => {
+  if (!key) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+};
+
+// Derives a no-PII display name from a signed-in email, e.g. "jane@x.com" -> "User J".
+const getDisplayNameFromEmail = (email: string) => {
+  const letter = (email || '').trim().charAt(0).toUpperCase();
+  return letter ? `User ${letter}` : 'User';
+};
+
+// Extracts the meaningful letter for an avatar: the "J" from "User J", or the
+// first letter of a legacy freeform name (e.g. "Sarah" -> "S").
+const getAvatarLetter = (name: string) => {
+  if (!name) return '?';
+  const match = name.trim().match(/^User\s+([A-Za-z])$/i);
+  if (match) return match[1].toUpperCase();
+  return name.trim().charAt(0).toUpperCase();
+};
+
+const COMMENTS_PAGE_SIZE = 10;
 
 export default function LostPetDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -27,6 +65,13 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [actionLoading, setActionLoading] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_PAGE_SIZE);
+
+  // Auto-derive the comment display name from the signed-in email — no manual typing,
+  // no PII shown (see getDisplayNameFromEmail).
+  useEffect(() => {
+    setCommentAuthor(getDisplayNameFromEmail(userEmail));
+  }, [userEmail]);
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -578,53 +623,77 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         <div className="max-w-3xl mx-auto">
           <h3 className="text-2xl font-black text-[#4A3E3D] mb-6">Community Updates ({comments.length})</h3>
           
-          <div className="space-y-6 mb-8">
-            {comments.map((comment) => {
-              const isAuthor = userEmail && (
-                (comment.author_email && comment.author_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) ||
-                userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' ||
-                userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'
-              );
+          <div className="mb-8">
+            {comments.length > 0 && (
+              <div className="space-y-3">
+                {comments.slice(0, visibleCommentsCount).map((comment) => {
+                  const isAuthor = userEmail && (
+                    (comment.author_email && comment.author_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) ||
+                    userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' ||
+                    userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'
+                  );
+                  const avatarColor = getAvatarColor(comment.author_email || comment.author_name || comment.id);
+                  const avatarLetter = getAvatarLetter(comment.author_name);
 
-              return (
-                <div key={comment.id} className="bg-white p-6 rounded-2xl shadow-sm border border-[#E8DDD4] space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-bold text-[#4A3E3D]">{comment.author_name}</h4>
-                      <span className="text-xs text-[#8B7E7D]">{formatDistanceToNow(new Date(comment.created_at))} ago</span>
-                    </div>
-                    {isAuthor && (
-                      <button
-                        onClick={() => handleDeleteComment(comment.id)}
-                        className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
-                        title="Delete your update"
+                  return (
+                    <div key={comment.id} className="flex gap-3">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm font-black text-sm"
+                        style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-[#555555]">{comment.comment_text}</p>
+                        {avatarLetter}
+                      </div>
+                      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-[#E8DDD4] min-w-0">
+                        <div className="flex justify-between items-start gap-2 flex-wrap">
+                          <div>
+                            <h4 className="font-bold text-[#4A3E3D] text-sm">{comment.author_name}</h4>
+                            <span className="text-xs text-[#8B7E7D]">{formatDistanceToNow(new Date(comment.created_at))} ago</span>
+                          </div>
+                          {isAuthor && (
+                            <button
+                              onClick={() => handleDeleteComment(comment.id)}
+                              className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                              title="Delete your update"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[#555555] mt-2">{comment.comment_text}</p>
 
-                  {/* Comment Photo Thumbnail */}
-                  {comment.photo_url && (
-                    <div className="pt-1">
-                      <img
-                        src={comment.photo_url}
-                        alt="Sighting Attachment"
-                        onClick={() => {
-                          // Insert comment photo dynamically into photosList for zoom
-                          photosList.unshift(comment.photo_url);
-                          setLightboxIndex(0);
-                          setLightboxOpen(true);
-                        }}
-                        className="w-36 h-36 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
-                      />
-                      <p className="text-[10px] text-gray-400 mt-1 italic">Click image to zoom</p>
+                        {/* Comment Photo Thumbnail */}
+                        {comment.photo_url && (
+                          <div className="pt-3">
+                            <img
+                              src={comment.photo_url}
+                              alt="Sighting Attachment"
+                              onClick={() => {
+                                // Insert comment photo dynamically into photosList for zoom
+                                photosList.unshift(comment.photo_url);
+                                setLightboxIndex(0);
+                                setLightboxOpen(true);
+                              }}
+                              className="w-36 h-36 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1 italic">Click image to zoom</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+
+                {comments.length > visibleCommentsCount && (
+                  <button
+                    onClick={() => setVisibleCommentsCount(c => c + COMMENTS_PAGE_SIZE)}
+                    className="w-full flex items-center justify-center gap-2 text-sm font-bold text-[#4A3E3D]/70 hover:text-[#4A3E3D] bg-white border border-[#E8DDD4] hover:border-[#8B5E3C]/40 py-3 rounded-xl shadow-sm transition-all cursor-pointer"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                    Show {Math.min(comments.length - visibleCommentsCount, COMMENTS_PAGE_SIZE)} more {comments.length - visibleCommentsCount === 1 ? 'update' : 'updates'}
+                  </button>
+                )}
+              </div>
+            )}
             {comments.length === 0 && (
               <p className="text-[#8B7E7D] text-center italic py-4">No updates yet. Be the first to share information!</p>
             )}
@@ -643,24 +712,35 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleCommentSubmit} className="space-y-4">
-                <div>
-                  <input required type="text" value={commentAuthor} onChange={e => setCommentAuthor(e.target.value)} placeholder="Your Name" className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                </div>
-                <div>
-                  <textarea required rows={3} value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Share a sighting or helpful info..." className="w-full bg-white border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-                </div>
-
-                {/* Photo Attachment Picker */}
-                <div>
-                  <label className="inline-flex items-center gap-2 text-xs font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] px-4 py-2.5 rounded-xl cursor-pointer hover:bg-gray-50 transition-all shadow-xs">
-                    <Camera className="w-4 h-4 text-[#8B5E3C]" />
-                    {commentPhotoPreview ? 'Change Sighting Photo' : '📷 Attach Photo of Sighting (Optional)'}
-                    <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
-                  </label>
+              <form onSubmit={handleCommentSubmit}>
+                <div className="bg-white border border-[#E8DDD4] rounded-2xl p-3 focus-within:border-[#8B5E3C] transition-all">
+                  <textarea
+                    required
+                    rows={2}
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    placeholder="Share a sighting or helpful info..."
+                    className="w-full text-[#4A3E3D] focus:outline-none resize-none placeholder:text-[#8B7E7D]/70"
+                  />
+                  <div className="flex items-center justify-between pt-2 border-t border-[#E8DDD4] mt-2">
+                    <label
+                      className="inline-flex items-center justify-center w-9 h-9 rounded-full text-[#8B5E3C] hover:bg-[#FAF6F4] cursor-pointer transition-all"
+                      title={commentPhotoPreview ? 'Change photo' : 'Attach a photo'}
+                    >
+                      <Camera className="w-5 h-5" />
+                      <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={submittingComment || !newComment.trim()}
+                      className="inline-flex items-center gap-1.5 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-5 rounded-full transition-all disabled:opacity-50 text-sm"
+                    >
+                      {submittingComment ? 'Posting...' : 'Post'} <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                   {commentPhotoPreview && (
                     <div className="mt-3 relative inline-block">
-                      <img src={commentPhotoPreview} alt="Preview" className="w-24 h-24 object-cover rounded-xl border border-[#E8DDD4]" />
+                      <img src={commentPhotoPreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-[#E8DDD4]" />
                       <button
                         type="button"
                         onClick={() => {
@@ -674,10 +754,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                     </div>
                   )}
                 </div>
-
-                <button type="submit" disabled={submittingComment || !newComment.trim() || !commentAuthor.trim()} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50">
-                  {submittingComment ? 'Posting...' : 'Post Update'}
-                </button>
               </form>
             )}
           </div>
