@@ -5,30 +5,35 @@ import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
-import { MapPin, MessageSquare, ThumbsUp, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2 } from 'lucide-react';
+import {
+  MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
+  ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar
+} from 'lucide-react';
 
-const getCategoryColor = (category: string) => {
-  const colors: Record<string, string> = {
-    'General': 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20',
-    'Vet Recommendations': 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20',
-    'Groomers': 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20',
-    'Pet Sitters': 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20',
-    'Lost & Found': 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20',
-    'Diet & Nutrition': 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20',
-    'Parks & Activities': 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20',
-  };
-  return colors[category] || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+// Single source of truth for category color + icon, used for both the post badges
+// and the browsable sidebar/pill strip.
+const CATEGORY_META: Record<string, { color: string; icon: any }> = {
+  'General': { color: 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20', icon: MessageCircle },
+  'Vet Recommendations': { color: 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20', icon: Stethoscope },
+  'Groomers': { color: 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20', icon: Scissors },
+  'Pet Sitters': { color: 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20', icon: PawPrint },
+  'Lost & Found': { color: 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20', icon: Search },
+  'Diet & Nutrition': { color: 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20', icon: Utensils },
+  'Parks & Activities': { color: 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20', icon: TreePine },
+  'Training & Behavior': { color: 'bg-[#D9E2E8] text-[#2B3D45] border-[#2B3D45]/20', icon: GraduationCap },
+  'Pet Health & Wellness': { color: 'bg-[#EADBCE] text-[#5C4533] border-[#5C4533]/20', icon: HeartPulse },
+  'Adoption & Rescue': { color: 'bg-[#F5D5E0] text-[#7A2255] border-[#7A2255]/20', icon: Heart },
+  'Product Recommendations': { color: 'bg-[#DCEAF7] text-[#1E4E70] border-[#1E4E70]/20', icon: ShoppingBag },
+  'Show & Tell': { color: 'bg-[#FDE8CE] text-[#8A5A1E] border-[#8A5A1E]/20', icon: Camera },
+  'New Pet Owners': { color: 'bg-[#E3F0E1] text-[#2D5A3D] border-[#2D5A3D]/20', icon: Star },
+  'Events & Meetups': { color: 'bg-[#EDE0F5] text-[#4A2E6B] border-[#4A2E6B]/20', icon: Calendar },
 };
 
-const CATEGORIES = [
-  'General',
-  'Vet Recommendations',
-  'Groomers',
-  'Pet Sitters',
-  'Lost & Found',
-  'Diet & Nutrition',
-  'Parks & Activities'
-];
+const getCategoryColor = (category: string) => CATEGORY_META[category]?.color || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+const getCategoryIcon = (category: string) => CATEGORY_META[category]?.icon || MessageCircle;
+
+const CATEGORIES = Object.keys(CATEGORY_META);
 
 export default function CityBoardPage() {
   const [deviceCookie, setDeviceCookie] = useState<string>('');
@@ -395,8 +400,44 @@ export default function CityBoardPage() {
           </div>
         )}
 
-      <main className="max-w-4xl mx-auto px-4 py-8 w-full">
-        
+      <main className="max-w-6xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6 items-start">
+
+        {/* CATEGORY BROWSER — sidebar on desktop, horizontal pill strip on mobile */}
+        <aside className="lg:sticky lg:top-24">
+          <h3 className="hidden lg:block text-xs font-black text-[#3B2410]/50 uppercase tracking-wider mb-3 px-2">Browse Topics</h3>
+          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar bg-[#FFFBF5] lg:bg-transparent p-3 lg:p-0 rounded-2xl lg:rounded-none border border-[#3B2410]/10 lg:border-0 shadow-sm lg:shadow-none">
+            <button
+              onClick={() => setSearchCategory('All')}
+              className={`shrink-0 flex items-center gap-2 text-sm font-bold px-3.5 py-2 rounded-xl border transition-all whitespace-nowrap ${
+                searchCategory === 'All'
+                  ? 'bg-[#3B2410] text-white border-[#3B2410] shadow-sm'
+                  : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4]'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4" /> All Topics
+            </button>
+            {CATEGORIES.map(cat => {
+              const Icon = getCategoryIcon(cat);
+              const isActive = searchCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSearchCategory(cat)}
+                  className={`shrink-0 flex items-center gap-2 text-sm font-bold px-3.5 py-2 rounded-xl border transition-all whitespace-nowrap ${
+                    isActive
+                      ? `${getCategoryColor(cat)} shadow-sm ring-2 ring-[#3B2410]/20`
+                      : 'bg-white text-[#3B2410]/80 border-[#3B2410]/15 hover:bg-[#FAF6F4]'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" /> {cat}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        <div className="min-w-0">
+
         <div className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 shadow-sm border border-[#3B2410]/10 mb-8">
           <div className="mb-6">
             <h2 className="text-2xl md:text-3xl font-black text-[#3B2410] flex items-center gap-2">
@@ -528,15 +569,7 @@ export default function CityBoardPage() {
                 </div>
               )}
             </div>
-            <select 
-              value={searchCategory}
-              onChange={e => setSearchCategory(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
-            >
-              <option value="All">All Categories</option>
-              {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            <input 
+            <input
               type="text" 
               placeholder="#️⃣ ID (LB-...)" 
               value={searchPostId}
@@ -565,7 +598,28 @@ export default function CityBoardPage() {
             {posts
               .filter(post => !blockedCookies.includes(post.device_cookie))
               .map(post => (
-              <div key={post.id} className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl p-6 md:p-8 border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] hover:shadow-[0_8px_30px_rgba(59,36,16,0.08)] hover:-translate-y-0.5 transition-all duration-300 relative group">
+              <div key={post.id} className="flex gap-0 bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] hover:shadow-[0_8px_30px_rgba(59,36,16,0.08)] hover:-translate-y-0.5 transition-all duration-300 relative group overflow-hidden">
+                {/* Vote column — Reddit-style single upvote (this app has no downvote) */}
+                <div className="flex flex-col items-center justify-start gap-1 py-6 px-3 sm:px-4 bg-[#3B2410]/[0.03] shrink-0">
+                  <button
+                    onClick={() => handleMarkHelpful(post.post_id)}
+                    disabled={post.voted_helpful}
+                    title="Mark as helpful"
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                      post.voted_helpful
+                        ? 'bg-[#8B5E3C] text-white shadow-inner cursor-not-allowed'
+                        : 'bg-white text-[#3B2410]/60 border border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:text-[#8B5E3C] hover:border-[#8B5E3C]/40 cursor-pointer'
+                    }`}
+                  >
+                    <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
+                  </button>
+                  <span className={`text-sm font-black ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#3B2410]'}`}>
+                    {post.helpful_count || 0}
+                  </span>
+                  <span className="text-[9px] text-[#3B2410]/40 font-bold uppercase tracking-wide hidden sm:block">Helpful</span>
+                </div>
+
+                <div className="flex-1 min-w-0 p-6 md:p-8">
                 {post.device_cookie === deviceCookie && (
                   <div className="absolute top-6 right-6 bg-[#3B2410] text-[#FFFDF9] text-[10px] uppercase tracking-[0.15em] font-black px-3.5 py-1 rounded-full shadow-sm">
                     You
@@ -575,31 +629,22 @@ export default function CityBoardPage() {
                   <span className="text-xs font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-[#3B2410]/70" /> {post.city}
                   </span>
-                  <span className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
+                  <span className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 ${getCategoryColor(post.category)}`}>
+                    {(() => { const Icon = getCategoryIcon(post.category); return <Icon className="w-3.5 h-3.5" />; })()}
+                    {post.category}
+                  </span>
                   <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
                 </div>
                 <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed font-medium">{post.content}</p>
-                
+
                 <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-4 mt-2 flex-wrap gap-4">
                   <div className="flex items-center gap-3">
-                    <Link 
-                      href={`/city-board/${post.post_id}`} 
+                    <Link
+                      href={`/city-board/${post.post_id}`}
                       className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                       <MessageSquare className="w-4 h-4 text-[#3B2410]" /> {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
                     </Link>
-                    
-                    <button
-                      onClick={() => handleMarkHelpful(post.post_id)}
-                      disabled={post.voted_helpful}
-                      className={`inline-flex items-center gap-1.5 text-sm px-5 py-2.5 rounded-full border shadow-sm transition-all ${
-                        post.voted_helpful 
-                          ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-inner font-extrabold cursor-not-allowed'
-                          : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-bold'
-                      }`}
-                    >
-                      <ThumbsUp className={`w-4 h-4 ${post.voted_helpful ? 'text-white' : 'text-[#3B2410]'}`} /> Helpful ({post.helpful_count || 0})
-                    </button>
                   </div>
                   <div className="flex items-center gap-4 flex-wrap">
                     {post.device_cookie === deviceCookie ? (
@@ -638,11 +683,13 @@ export default function CityBoardPage() {
                     </button>
                   </div>
                 </div>
+                </div>
               </div>
             ))}
           </div>
         )}
 
+        </div>
       </main>
 
 

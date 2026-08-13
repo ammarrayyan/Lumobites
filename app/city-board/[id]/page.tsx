@@ -5,20 +5,33 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, ThumbsUp, MessageSquare, AlertTriangle, Share2, PenLine, Ban, Trash2, PawPrint, ChevronDown, ArrowUpDown } from 'lucide-react';
+import {
+  MapPin, MessageSquare, AlertTriangle, Share2, PenLine, Ban, Trash2, PawPrint, ChevronDown, ArrowUpDown,
+  ArrowBigUp, MessageCircle, Stethoscope, Scissors, Search, Utensils, TreePine,
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar
+} from 'lucide-react';
 
-const getCategoryColor = (category: string) => {
-  const colors: Record<string, string> = {
-    'General': 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20',
-    'Vet Recommendations': 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20',
-    'Groomers': 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20',
-    'Pet Sitters': 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20',
-    'Lost & Found': 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20',
-    'Diet & Nutrition': 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20',
-    'Parks & Activities': 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20',
-  };
-  return colors[category] || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+// Same category metadata as the feed page (app/city-board/page.tsx) — kept in sync manually,
+// matching this codebase's existing per-page convention for category/avatar helpers.
+const CATEGORY_META: Record<string, { color: string; icon: any }> = {
+  'General': { color: 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20', icon: MessageCircle },
+  'Vet Recommendations': { color: 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20', icon: Stethoscope },
+  'Groomers': { color: 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20', icon: Scissors },
+  'Pet Sitters': { color: 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20', icon: PawPrint },
+  'Lost & Found': { color: 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20', icon: Search },
+  'Diet & Nutrition': { color: 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20', icon: Utensils },
+  'Parks & Activities': { color: 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20', icon: TreePine },
+  'Training & Behavior': { color: 'bg-[#D9E2E8] text-[#2B3D45] border-[#2B3D45]/20', icon: GraduationCap },
+  'Pet Health & Wellness': { color: 'bg-[#EADBCE] text-[#5C4533] border-[#5C4533]/20', icon: HeartPulse },
+  'Adoption & Rescue': { color: 'bg-[#F5D5E0] text-[#7A2255] border-[#7A2255]/20', icon: Heart },
+  'Product Recommendations': { color: 'bg-[#DCEAF7] text-[#1E4E70] border-[#1E4E70]/20', icon: ShoppingBag },
+  'Show & Tell': { color: 'bg-[#FDE8CE] text-[#8A5A1E] border-[#8A5A1E]/20', icon: Camera },
+  'New Pet Owners': { color: 'bg-[#E3F0E1] text-[#2D5A3D] border-[#2D5A3D]/20', icon: Star },
+  'Events & Meetups': { color: 'bg-[#EDE0F5] text-[#4A2E6B] border-[#4A2E6B]/20', icon: Calendar },
 };
+
+const getCategoryColor = (category: string) => CATEGORY_META[category]?.color || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+const getCategoryIcon = (category: string) => CATEGORY_META[category]?.icon || MessageCircle;
 
 // Deterministic per-anonymous-poster avatar color, drawn from the same palette
 // used for category pills so it stays visually consistent with the rest of the page.
@@ -284,7 +297,28 @@ export default function CityBoardPostPage() {
         </div>
         
         {/* OP Post */}
-        <div className="bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl p-6 md:p-8 border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] mb-8 relative">
+        <div className="flex gap-0 bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] mb-8 relative overflow-hidden">
+          {/* Vote column — Reddit-style single upvote (this app has no downvote) */}
+          <div className="flex flex-col items-center justify-start gap-1 py-6 px-3 sm:px-4 bg-[#3B2410]/[0.03] shrink-0">
+            <button
+              onClick={() => handleMarkHelpful(post.post_id)}
+              disabled={post.voted_helpful}
+              title="Mark as helpful"
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                post.voted_helpful
+                  ? 'bg-[#8B5E3C] text-white shadow-inner cursor-not-allowed'
+                  : 'bg-white text-[#3B2410]/60 border border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:text-[#8B5E3C] hover:border-[#8B5E3C]/40 cursor-pointer'
+              }`}
+            >
+              <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
+            </button>
+            <span className={`text-sm font-black ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#3B2410]'}`}>
+              {post.helpful_count || 0}
+            </span>
+            <span className="text-[9px] text-[#3B2410]/40 font-bold uppercase tracking-wide hidden sm:block">Helpful</span>
+          </div>
+
+          <div className="flex-1 min-w-0 p-6 md:p-8">
           {post.device_cookie === deviceCookie && (
             <div className="absolute top-4 right-4 bg-[#3B2410] text-[#FFFDF9] text-[10px] font-black uppercase tracking-[0.15em] px-3.5 py-1 rounded-full shadow-sm">
               You
@@ -294,26 +328,15 @@ export default function CityBoardPostPage() {
             <span className="text-sm font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-[#3B2410]/70" /> {post.city}
             </span>
-            <span className={`text-sm font-black px-3 py-1.5 rounded-xl border shadow-sm ${getCategoryColor(post.category)}`}>{post.category}</span>
+            <span className={`text-sm font-black px-3 py-1.5 rounded-xl border shadow-sm flex items-center gap-1.5 ${getCategoryColor(post.category)}`}>
+              {(() => { const Icon = getCategoryIcon(post.category); return <Icon className="w-4 h-4" />; })()}
+              {post.category}
+            </span>
             <span className="text-sm text-[#3B2410]/50 ml-auto font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
           </div>
           <p className="text-[#3B2410] whitespace-pre-wrap text-lg md:text-xl font-medium leading-relaxed">{post.content}</p>
-          
-          <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-5 mt-6 flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleMarkHelpful(post.post_id)}
-                disabled={post.voted_helpful}
-                className={`inline-flex items-center gap-1.5 text-sm px-5 py-2.5 rounded-full border shadow-sm transition-all ${
-                  post.voted_helpful 
-                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-inner font-extrabold cursor-not-allowed'
-                    : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-bold'
-                }`}
-              >
-                <ThumbsUp className={`w-4 h-4 ${post.voted_helpful ? 'text-white' : 'text-[#3B2410]'}`} /> Helpful ({post.helpful_count || 0})
-              </button>
-            </div>
-            
+
+          <div className="flex items-center justify-end border-t border-[#3B2410]/10 pt-5 mt-6 flex-wrap gap-4">
             <div className="flex items-center gap-4 flex-wrap">
               {post.device_cookie === deviceCookie ? (
                 <button
@@ -338,7 +361,7 @@ export default function CityBoardPostPage() {
                   </button>
                 </>
               )}
-              <button 
+              <button
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
                   alert('Link copied to clipboard!');
@@ -348,6 +371,7 @@ export default function CityBoardPostPage() {
                 <Share2 className="w-4 h-4 text-[#3B2410]" /> Copy Share Link
               </button>
             </div>
+          </div>
           </div>
         </div>
 
