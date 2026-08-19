@@ -11,6 +11,7 @@ import FloatingQRCode from "@/components/FloatingQRCode";
 import PushManager from "@/components/PushManager";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import TermsModal from "@/components/TermsModal";
+import SectionSwipeProvider from "@/components/SectionSwipeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -110,7 +111,9 @@ export default async function RootLayout({
           }}
         >
           <div className="flex-grow">
-            {children}
+            <SectionSwipeProvider>
+              {children}
+            </SectionSwipeProvider>
           </div>
           <footer className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] py-6 px-4 text-center text-xs text-[#8B7E7D] mt-12">
             <p>© {new Date().getFullYear()} Lumo Bites. All rights reserved.</p>
