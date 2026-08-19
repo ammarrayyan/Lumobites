@@ -8,54 +8,111 @@ import MobileCommunityNav from '@/components/MobileCommunityNav';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
-  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark
 } from 'lucide-react';
 
-// Single source of truth for category color + icon, used for both the post badges
-// and the browsable sidebar/pill strip.
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
-  'General': { color: 'bg-[#E8DDD4] text-[#3B2410] border-[#3B2410]/20', icon: MessageCircle },
-  'Vet Recommendations': { color: 'bg-[#E1E8D5] text-[#2C3B1E] border-[#2C3B1E]/20', icon: Stethoscope },
-  'Groomers': { color: 'bg-[#F5E6DA] text-[#6E4225] border-[#6E4225]/20', icon: Scissors },
-  'Pet Sitters': { color: 'bg-[#E6E2F0] text-[#3A2C5C] border-[#3A2C5C]/20', icon: PawPrint },
-  'Lost & Found': { color: 'bg-[#F2D5D5] text-[#7A2222] border-[#7A2222]/20', icon: Search },
-  'Diet & Nutrition': { color: 'bg-[#FFF3CD] text-[#664D03] border-[#664D03]/20', icon: Utensils },
-  'Parks & Activities': { color: 'bg-[#E2EBEB] text-[#234A4A] border-[#234A4A]/20', icon: TreePine },
-  'Training & Behavior': { color: 'bg-[#D9E2E8] text-[#2B3D45] border-[#2B3D45]/20', icon: GraduationCap },
-  'Pet Health & Wellness': { color: 'bg-[#EADBCE] text-[#5C4533] border-[#5C4533]/20', icon: HeartPulse },
-  'Adoption & Rescue': { color: 'bg-[#F5D5E0] text-[#7A2255] border-[#7A2255]/20', icon: Heart },
-  'Product Recommendations': { color: 'bg-[#DCEAF7] text-[#1E4E70] border-[#1E4E70]/20', icon: ShoppingBag },
-  'Show & Tell': { color: 'bg-[#FDE8CE] text-[#8A5A1E] border-[#8A5A1E]/20', icon: Camera },
-  'New Pet Owners': { color: 'bg-[#E3F0E1] text-[#2D5A3D] border-[#2D5A3D]/20', icon: Star },
-  'Events & Meetups': { color: 'bg-[#EDE0F5] text-[#4A2E6B] border-[#4A2E6B]/20', icon: Calendar },
+  'General': { color: 'bg-stone-100 text-stone-800 border-stone-200', icon: MessageCircle },
+  'Vet Recommendations': { color: 'bg-emerald-50 text-emerald-900 border-emerald-200', icon: Stethoscope },
+  'Groomers': { color: 'bg-amber-50 text-amber-900 border-amber-200', icon: Scissors },
+  'Pet Sitters': { color: 'bg-indigo-50 text-indigo-900 border-indigo-200', icon: PawPrint },
+  'Lost & Found': { color: 'bg-rose-50 text-rose-900 border-rose-200', icon: Search },
+  'Diet & Nutrition': { color: 'bg-yellow-50 text-yellow-900 border-yellow-200', icon: Utensils },
+  'Parks & Activities': { color: 'bg-teal-50 text-teal-900 border-teal-200', icon: TreePine },
+  'Training & Behavior': { color: 'bg-sky-50 text-sky-900 border-sky-200', icon: GraduationCap },
+  'Pet Health & Wellness': { color: 'bg-[#FDF8F3] text-[#5C4533] border-[#EADBCE]', icon: HeartPulse },
+  'Adoption & Rescue': { color: 'bg-pink-50 text-pink-900 border-pink-200', icon: Heart },
+  'Product Recommendations': { color: 'bg-blue-50 text-blue-900 border-blue-200', icon: ShoppingBag },
+  'Show & Tell': { color: 'bg-orange-50 text-orange-900 border-orange-200', icon: Camera },
+  'New Pet Owners': { color: 'bg-lime-50 text-lime-900 border-lime-200', icon: Star },
+  'Events & Meetups': { color: 'bg-purple-50 text-purple-900 border-purple-200', icon: Calendar },
 };
 
-const getCategoryColor = (category: string) => CATEGORY_META[category]?.color || 'bg-[#FAF6F4] text-[#3B2410] border-[#3B2410]/20';
+const getCategoryColor = (category: string) => CATEGORY_META[category]?.color || 'bg-stone-100 text-stone-800 border-stone-200';
 const getCategoryIcon = (category: string) => CATEGORY_META[category]?.icon || MessageCircle;
 
 const CATEGORIES = Object.keys(CATEGORY_META);
 
 export default function CityBoardPage() {
   const [deviceCookie, setDeviceCookie] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
+  const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Auto-dismiss toast notification
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const email = (
+        localStorage.getItem('lumo_pro_email') ||
+        localStorage.getItem('lumo_sitter_email') ||
+        ''
+      ).trim();
+      setUserEmail(email);
+
       const blocked = localStorage.getItem('lumo_blocked_device_cookies');
       if (blocked) {
-        try {
-          setBlockedCookies(JSON.parse(blocked));
-        } catch (e) {}
+        try { setBlockedCookies(JSON.parse(blocked)); } catch (e) {}
+      }
+
+      if (email) {
+        const savedKey = `lumo_saved_city_board_posts_${email}`;
+        const saved = localStorage.getItem(savedKey) || localStorage.getItem('lumo_saved_city_board_posts');
+        if (saved) {
+          try { setSavedPostIds(JSON.parse(saved)); } catch (e) {}
+        }
       }
     }
   }, []);
 
+  const toggleSavePost = (postId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // STRICT CHECK: Gated exclusively to signed-in users
+    if (!userEmail) {
+      showToast('Sign in to save discussions to your bookmarks 🔖');
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      return;
+    }
+
+    let updated: string[];
+    if (savedPostIds.includes(postId)) {
+      updated = savedPostIds.filter(id => id !== postId);
+      showToast('Removed from your saved bookmarks');
+    } else {
+      updated = [...savedPostIds, postId];
+      showToast('Discussion saved to bookmarks 🔖');
+    }
+    setSavedPostIds(updated);
+    if (typeof window !== 'undefined') {
+      const savedKey = `lumo_saved_city_board_posts_${userEmail}`;
+      localStorage.setItem(savedKey, JSON.stringify(updated));
+    }
+  };
+
+  const handleSelectCategory = (cat: string) => {
+    if (cat === 'Saved' && !userEmail) {
+      showToast('Sign in to view your saved discussions 🔖');
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      return;
+    }
+    setSearchCategory(cat);
+  };
+
   const handleBlockUser = (cookieToBlock: string) => {
     if (!cookieToBlock) return;
     if (cookieToBlock === deviceCookie) {
-      alert("You cannot block yourself.");
+      showToast("You cannot block yourself.");
       return;
     }
     if (!window.confirm("Are you sure you want to block this user? You will no longer see their posts.")) return;
@@ -65,7 +122,7 @@ export default function CityBoardPage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('lumo_blocked_device_cookies', JSON.stringify(nextBlocked));
     }
-    alert("User blocked successfully.");
+    showToast("User blocked successfully.");
   };
 
   const handleDeletePost = async (postId: string) => {
@@ -80,10 +137,10 @@ export default function CityBoardPage() {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete post');
       }
-      alert("Post deleted successfully.");
+      showToast("Post deleted successfully.");
       setPosts(prev => prev.filter(p => p.post_id !== postId));
     } catch (err: any) {
-      alert(err.message || "Failed to delete post. Please try again.");
+      showToast(err.message || "Failed to delete post.");
     }
   };
 
@@ -191,7 +248,7 @@ export default function CityBoardPage() {
       const params = new URLSearchParams();
       if (ctx.searchKeyword) params.append('keyword', ctx.searchKeyword);
       if (ctx.searchCity) params.append('city', ctx.searchCity);
-      if (ctx.searchCategory !== 'All') params.append('category', ctx.searchCategory);
+      if (ctx.searchCategory !== 'All' && ctx.searchCategory !== 'Saved') params.append('category', ctx.searchCategory);
       if (ctx.searchPostId) params.append('post_id', ctx.searchPostId);
       if (ctx.deviceCookie) params.append('device_cookie', ctx.deviceCookie);
       if (ctx.showMyPosts) params.append('my_posts_only', 'true');
@@ -215,7 +272,6 @@ export default function CityBoardPage() {
     }
   }, [searchKeyword, searchCity, searchCategory, searchPostId, showMyPosts, deviceCookie, fetchPosts]);
 
-  // Refresh on returning to browser tab
   useEffect(() => {
     if (!deviceCookie) return;
     const handleVisibilityChange = () => {
@@ -286,7 +342,7 @@ export default function CityBoardPage() {
       if (res.ok) {
         setNewContent('');
         setNewCategory('General');
-        // keep city for convenience
+        showToast('Discussion posted successfully! ✨');
         fetchPosts();
       } else {
         const err = await res.json();
@@ -298,8 +354,6 @@ export default function CityBoardPage() {
       setIsPosting(false);
     }
   };
-
-  // Modals & States for Helpful and Report features
 
   const [reportPostId, setReportPostId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('Spam');
@@ -321,16 +375,15 @@ export default function CityBoardPage() {
               : p
           )
         );
+        showToast('Voted helpful! 👍');
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to vote helpful');
+        showToast(err.error || 'Failed to vote helpful');
       }
     } catch (e) {
       console.error(e);
     }
   };
-
-
 
   const openReportModal = (postId: string) => {
     setReportPostId(postId);
@@ -342,13 +395,13 @@ export default function CityBoardPage() {
     if (!reportPostId || !deviceCookie) return;
     setSubmittingReport(true);
     try {
-      const userEmail = (typeof window !== 'undefined' && localStorage.getItem('lumo_pro_email')) || 'anonymous@lumobites.net';
+      const email = userEmail || 'anonymous@lumobites.net';
       const res = await fetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          reported_by_email: userEmail,
-          reporter_email: userEmail,
+          reported_by_email: email,
+          reporter_email: email,
           reported_email: 'anonymous@lumobites.net',
           reported_type: 'city_board',
           post_id: reportPostId,
@@ -358,25 +411,37 @@ export default function CityBoardPage() {
         })
       });
       if (res.ok) {
-        alert('Thank you. This post has been reported and will be reviewed by our admin team.');
+        showToast('Report submitted for review');
         setReportPostId(null);
       } else {
         const err = await res.json();
-        alert(err.error || 'Failed to report post');
+        showToast(err.error || 'Failed to report post');
       }
     } catch (e) {
       console.error(e);
-      alert('An error occurred.');
+      showToast('An error occurred.');
     } finally {
       setSubmittingReport(false);
     }
   };
 
+  // Filter posts by saved if searchCategory === 'Saved'
+  const filteredPosts = posts
+    .filter(post => !blockedCookies.includes(post.device_cookie))
+    .filter(post => searchCategory === 'Saved' ? savedPostIds.includes(post.post_id) : true);
+
   return (
     <div 
-      className="min-h-screen bg-[#F5F0E8] font-sans flex flex-col relative pt-[52px] md:pt-0"
+      className="min-h-screen bg-[#FAF7F2] font-sans flex flex-col relative pt-[52px] md:pt-0"
     >
-            <MobileCommunityNav />
+      <MobileCommunityNav />
+
+      {/* FLOATING TOAST NOTIFICATION */}
+      {toastMessage && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[10000] bg-gray-900/95 text-white text-xs font-extrabold px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md transition-all animate-bounce flex items-center gap-2">
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
       <div 
         className="flex-1 flex flex-col w-full relative"
@@ -387,11 +452,11 @@ export default function CityBoardPage() {
       >
         {(pullDownY > 0 || isRefreshing) && (
           <div className="absolute top-0 left-0 w-full flex justify-center pt-8 z-50 animate-fade-in" style={{ transform: isRefreshing ? 'none' : `translateY(${pullDownY}px)` }}>
-            <div className="bg-white rounded-full shadow-md py-2.5 px-4 flex items-center justify-center gap-2 border border-[#E8DDD4] text-[#8B5E3C] font-bold text-xs">
+            <div className="bg-white rounded-full shadow-md py-2.5 px-4 flex items-center justify-center gap-2 border border-[#EDE5DA] text-[#8B5E3C] font-bold text-xs">
               {isRefreshing ? (
                 <>
                   <Loader2 className="w-4 h-4 text-[#8B5E3C] animate-spin" />
-                  <span>Refreshing...</span>
+                  <span>Refreshing feed...</span>
                 </>
               ) : (
                 <RefreshCw className="w-4 h-4 text-[#8B5E3C]" style={{ transform: `rotate(${pullDownY * 3}deg)` }} />
@@ -400,33 +465,47 @@ export default function CityBoardPage() {
           </div>
         )}
 
-      <main className="max-w-6xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6 items-start">
+      <main className="max-w-6xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
 
-        {/* CATEGORY BROWSER — sidebar on desktop, horizontal pill strip on mobile */}
+        {/* TOPIC NAVIGATION (SOFT FLOATING PILL SYSTEM WITH SAVED TAB) */}
         <aside className="lg:sticky lg:top-24">
-          <h3 className="hidden lg:block text-xs font-black text-[#3B2410]/50 uppercase tracking-wider mb-3 px-2">Browse Topics</h3>
-          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar bg-[#FFFBF5] lg:bg-transparent p-3 lg:p-0 rounded-2xl lg:rounded-none border border-[#3B2410]/10 lg:border-0 shadow-sm lg:shadow-none">
+          <h3 className="hidden lg:block text-[11px] font-extrabold text-[#8C827A] uppercase tracking-widest mb-3 px-2">Topics</h3>
+          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar bg-white/60 lg:bg-transparent p-2.5 lg:p-0 rounded-2xl lg:rounded-none border border-[#EDE5DA] lg:border-0 shadow-xs lg:shadow-none backdrop-blur-xs">
             <button
-              onClick={() => setSearchCategory('All')}
-              className={`shrink-0 flex items-center gap-2 text-sm font-bold px-3.5 py-2 rounded-xl border transition-all whitespace-nowrap ${
+              onClick={() => handleSelectCategory('All')}
+              className={`shrink-0 flex items-center gap-2 text-xs font-extrabold px-4 py-2.5 rounded-full border transition-all whitespace-nowrap cursor-pointer ${
                 searchCategory === 'All'
-                  ? 'bg-[#3B2410] text-white border-[#3B2410] shadow-sm'
-                  : 'bg-white text-[#3B2410] border-[#3B2410]/15 hover:bg-[#FAF6F4]'
+                  ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-xs'
+                  : 'bg-white text-gray-700 border-[#EDE5DA] hover:bg-[#FDFAF7] hover:border-[#8B5E3C]/30'
               }`}
             >
               <MessageSquare className="w-4 h-4" /> All Topics
             </button>
+
+            {/* Saved Bookmarks Tab */}
+            <button
+              onClick={() => handleSelectCategory('Saved')}
+              className={`shrink-0 flex items-center gap-2 text-xs font-extrabold px-4 py-2.5 rounded-full border transition-all whitespace-nowrap cursor-pointer ${
+                searchCategory === 'Saved'
+                  ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-xs'
+                  : 'bg-white text-gray-700 border-[#EDE5DA] hover:bg-[#FDFAF7] hover:border-[#8B5E3C]/30'
+              }`}
+            >
+              <Bookmark className={`w-4 h-4 ${searchCategory === 'Saved' ? 'fill-white' : 'text-[#8B5E3C]'}`} />
+              <span>Saved {userEmail ? `(${savedPostIds.length})` : ''}</span>
+            </button>
+
             {CATEGORIES.map(cat => {
               const Icon = getCategoryIcon(cat);
               const isActive = searchCategory === cat;
               return (
                 <button
                   key={cat}
-                  onClick={() => setSearchCategory(cat)}
-                  className={`shrink-0 flex items-center gap-2 text-sm font-bold px-3.5 py-2 rounded-xl border transition-all whitespace-nowrap ${
+                  onClick={() => handleSelectCategory(cat)}
+                  className={`shrink-0 flex items-center gap-2 text-xs font-extrabold px-4 py-2.5 rounded-full border transition-all whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? `${getCategoryColor(cat)} shadow-sm ring-2 ring-[#3B2410]/20`
-                      : 'bg-white text-[#3B2410]/80 border-[#3B2410]/15 hover:bg-[#FAF6F4]'
+                      ? `${getCategoryColor(cat)} shadow-xs ring-2 ring-[#8B5E3C]/20`
+                      : 'bg-white text-gray-700 border-[#EDE5DA] hover:bg-[#FDFAF7] hover:border-[#8B5E3C]/30'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" /> {cat}
@@ -436,20 +515,25 @@ export default function CityBoardPage() {
           </div>
         </aside>
 
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-6">
 
-        <div className="bg-[#FFFBF5] rounded-3xl p-6 md:p-8 shadow-sm border border-[#3B2410]/10 mb-8">
-          <div className="mb-6">
-            <h2 className="text-2xl md:text-3xl font-black text-[#3B2410] flex items-center gap-2">
-              <img src="/Logo.png" alt="Lumo Bites" className="h-6 md:h-8 w-auto object-contain drop-shadow-sm" />
+        {/* COMPOSER CARD (23ANDME CLEAN CARD SYSTEM) */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-[#EDE5DA]">
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-1">
+              <img src="/Logo.png" alt="Lumo Bites" className="h-6 w-auto object-contain" />
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8B5E3C]">City Board</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#1F1712] tracking-tight">
               Share with your pet community
             </h2>
-            <p className="text-[#3B2410]/70 mt-2 font-medium">Ask questions, share tips, get recommendations — anonymously</p>
+            <p className="text-[#5C534C] text-xs sm:text-sm mt-1 font-normal">Ask questions, share recommendations, or discuss local pet care — completely free.</p>
           </div>
+
           <form onSubmit={handleCreatePost} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <label className="block text-sm font-bold text-[#3B2410] mb-1">City</label>
+                <label className="block text-xs font-extrabold text-[#1F1712] uppercase tracking-wider mb-1.5">City Location</label>
                 <div className="relative">
                   <input 
                     type="text" 
@@ -459,21 +543,23 @@ export default function CityBoardPage() {
                       setNewCityVerified(false);
                     }} 
                     placeholder="e.g. Louisville, KY" 
-                    className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
+                    className="w-full bg-[#FAF7F2] border border-[#EDE5DA] rounded-2xl px-4 py-3 text-sm text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium"
                     required
                   />
                   {isLocatingNewCity && (
-                    <div className="absolute right-3 top-3">
-                      <svg className="animate-spin h-5 w-5 text-[#3B2410]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <div className="absolute right-3.5 top-3.5">
+                      <Loader2 className="animate-spin h-4 w-4 text-[#8B5E3C]" />
                     </div>
                   )}
                   {newCityVerified && !isLocatingNewCity && (
-                    <div className="absolute right-3 top-3 text-green-600 font-bold">✓</div>
+                    <div className="absolute right-3.5 top-3.5 text-emerald-600 font-bold">
+                      <Check className="w-4 h-4 text-emerald-600" />
+                    </div>
                   )}
                 </div>
                 {newCityOptions.length > 0 && !newCityVerified && (
-                  <div className="mt-2 p-2 bg-white border border-[#3B2410]/10 rounded-xl shadow-lg absolute z-10 w-full">
-                    <p className="text-xs font-bold text-[#3B2410]/70 mb-1 px-2 uppercase tracking-wide">Did you mean:</p>
+                  <div className="mt-2 p-2 bg-white border border-[#EDE5DA] rounded-2xl shadow-xl absolute z-20 w-full">
+                    <p className="text-[10px] font-extrabold text-[#8C827A] mb-1 px-2 uppercase tracking-widest">Select City:</p>
                     {newCityOptions.map((opt, i) => (
                       <button
                         key={i}
@@ -483,76 +569,79 @@ export default function CityBoardPage() {
                           setNewCityVerified(true);
                           setNewCityOptions([]);
                         }}
-                        className="block w-full text-left px-3 py-2 hover:bg-[#F5F0E8] rounded-lg text-sm text-[#3B2410] font-medium transition-colors flex items-center gap-1.5"
+                        className="block w-full text-left px-3 py-2 hover:bg-[#FAF7F2] rounded-xl text-xs text-[#1F1712] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer border-none"
                       >
-                        <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" /> {opt.formatted_address}
+                        <MapPin className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" /> {opt.formatted_address}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+
               <div>
-                <label className="block text-sm font-bold text-[#3B2410] mb-1">Category</label>
+                <label className="block text-xs font-extrabold text-[#1F1712] uppercase tracking-wider mb-1.5">Topic Category</label>
                 <select 
                   value={newCategory} 
                   onChange={e => setNewCategory(e.target.value)}
-                  className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
+                  className="w-full bg-[#FAF7F2] border border-[#EDE5DA] rounded-2xl px-4 py-3 text-sm text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium cursor-pointer"
                 >
                   {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
               </div>
             </div>
+
             <div>
-              <label className="block text-sm font-bold text-[#3B2410] mb-1">Message</label>
+              <label className="block text-xs font-extrabold text-[#1F1712] uppercase tracking-wider mb-1.5">Discussion Content</label>
               <textarea 
                 value={newContent} 
                 onChange={e => setNewContent(e.target.value)} 
                 rows={3} 
-                placeholder="Ask a question, share a tip..." 
-                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all resize-y"
+                placeholder="What's on your mind? Ask a question or share local pet tips..." 
+                className="w-full bg-[#FAF7F2] border border-[#EDE5DA] rounded-2xl px-4 py-3 text-sm text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all resize-y font-medium placeholder:text-[#8C827A]"
                 required
               />
             </div>
-            {postError && <div className="text-red-500 text-sm font-bold">{postError}</div>}
-            <div className="flex justify-end pt-2">
+
+            {postError && <div className="text-rose-600 text-xs font-bold px-1">{postError}</div>}
+            
+            <div className="flex justify-end pt-1">
               <button 
                 type="submit" 
                 disabled={isPosting} 
-                className="bg-[#3B2410] hover:bg-[#3B2410]/80 text-white font-bold py-3 px-8 rounded-xl transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-3 px-8 rounded-full text-xs transition-all disabled:opacity-50 shadow-xs hover:shadow-md cursor-pointer border-none active:scale-[0.98]"
               >
-                {isPosting ? 'Posting...' : 'Post Anonymously'}
+                {isPosting ? 'Posting...' : 'Post Discussion'}
               </button>
             </div>
           </form>
         </div>
 
-        <div className="flex flex-col gap-4 mb-8 bg-[#FFFBF5] p-4 rounded-2xl border border-[#3B2410]/10 shadow-sm">
-          <div className="flex gap-3 w-full overflow-x-auto pb-2 hide-scrollbar">
+        {/* SEARCH & FILTERS (PILL BAR SYSTEM) */}
+        <div className="bg-white rounded-2xl p-3.5 border border-[#EDE5DA] shadow-xs flex flex-col gap-3">
+          <div className="flex gap-2.5 w-full overflow-x-auto pb-1 hide-scrollbar">
             <input 
               type="text" 
-              placeholder="🔍 Keyword (e.g. vet)..." 
+              placeholder="🔍 Search keyword..." 
               value={searchKeyword}
               onChange={e => setSearchKeyword(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-4 py-2.5 text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[160px] transition-all"
+              className="bg-[#FAF7F2] border border-[#EDE5DA] rounded-xl px-3.5 py-2 text-xs text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white min-w-[150px] transition-all font-medium"
             />
-            <div className="relative min-w-[160px]">
+            <div className="relative min-w-[150px]">
               <input 
                 type="text" 
-                placeholder="📍 City..." 
+                placeholder="📍 Filter city..." 
                 value={searchCity}
-                onChange={e => {
-                  setSearchCity(e.target.value);
-                }}
-                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 transition-all"
+                onChange={e => setSearchCity(e.target.value)}
+                className="w-full bg-[#FAF7F2] border border-[#EDE5DA] rounded-xl px-3.5 py-2 text-xs text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium"
               />
               {isLocatingSearchCity && (
-                <div className="absolute right-3 top-2.5">
-                  <svg className="animate-spin h-5 w-5 text-[#3B2410]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <div className="absolute right-2.5 top-2.5">
+                  <Loader2 className="animate-spin h-3.5 w-3.5 text-[#8B5E3C]" />
                 </div>
               )}
               {searchCityOptions.length > 0 && (
-                <div className="mt-1 p-2 bg-white border border-[#3B2410]/10 rounded-xl shadow-lg absolute z-20 w-[250px]">
-                  <p className="text-[10px] font-bold text-[#3B2410]/70 mb-1 px-2 uppercase tracking-wide">Did you mean:</p>
+                <div className="mt-1 p-2 bg-white border border-[#EDE5DA] rounded-xl shadow-xl absolute z-20 w-[240px]">
+                  <p className="text-[10px] font-extrabold text-[#8C827A] mb-1 px-2 uppercase tracking-widest">Matching City:</p>
                   {searchCityOptions.map((opt, i) => (
                     <button
                       key={i}
@@ -561,9 +650,9 @@ export default function CityBoardPage() {
                         setSearchCity(opt.clean_city);
                         setSearchCityOptions([]);
                       }}
-                      className="block w-full text-left px-3 py-2 hover:bg-[#F5F0E8] rounded-lg text-sm text-[#3B2410] font-medium transition-colors flex items-center gap-1.5"
+                      className="block w-full text-left px-3 py-1.5 hover:bg-[#FAF7F2] rounded-lg text-xs text-[#1F1712] font-semibold transition-colors flex items-center gap-1.5 cursor-pointer border-none"
                     >
-                      <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" /> {opt.formatted_address}
+                      <MapPin className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" /> {opt.formatted_address}
                     </button>
                   ))}
                 </div>
@@ -571,143 +660,217 @@ export default function CityBoardPage() {
             </div>
             <input
               type="text" 
-              placeholder="#️⃣ ID (LB-...)" 
+              placeholder="#️⃣ Post ID (LB-...)" 
               value={searchPostId}
               onChange={e => setSearchPostId(e.target.value)}
-              className="bg-white border border-[#3B2410]/20 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-[16px] md:text-sm text-[#3B2410] focus:outline-none focus:border-[#3B2410] focus:ring-1 focus:ring-[#3B2410]/20 min-w-[140px] transition-all"
+              className="bg-[#FAF7F2] border border-[#EDE5DA] rounded-xl px-3.5 py-2 text-xs text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] focus:bg-white min-w-[130px] transition-all font-medium"
             />
           </div>
-          <div className="flex items-center gap-2 px-2 border-t border-[#3B2410]/10 pt-3">
+
+          <div className="flex items-center gap-2 px-1 border-t border-[#EDE5DA] pt-2">
             <input 
               type="checkbox" 
               id="my_posts" 
               checked={showMyPosts} 
               onChange={e => setShowMyPosts(e.target.checked)}
-              className="w-4 h-4 accent-[#3B2410] rounded border-[#3B2410]/20"
+              className="w-4 h-4 accent-[#8B5E3C] rounded border-[#EDE5DA]"
             />
-            <label htmlFor="my_posts" className="text-sm font-bold text-[#3B2410] cursor-pointer whitespace-nowrap">Show only my posts</label>
+            <label htmlFor="my_posts" className="text-xs font-extrabold text-[#1F1712] cursor-pointer whitespace-nowrap">Show only my discussions</label>
           </div>
         </div>
 
+        {/* FEED POST LIST (SKELETON LOADERS & 23ANDME CARDS) */}
         {loading ? (
-          <div className="text-center py-16 text-[#3B2410]/50 font-bold">Loading community posts...</div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-16 text-[#3B2410]/50 font-bold bg-[#FFFBF5] rounded-3xl border border-[#3B2410]/10 shadow-sm">No posts found. Be the first to start a conversation!</div>
-        ) : (
           <div className="space-y-4">
-            {posts
-              .filter(post => !blockedCookies.includes(post.device_cookie))
-              .map(post => (
-              <div key={post.id} className="flex gap-0 bg-gradient-to-br from-[#FFFDF9] to-[#FAF6F4] rounded-3xl border border-[#3B2410]/12 shadow-[0_4px_20px_rgba(59,36,16,0.03)] hover:shadow-[0_8px_30px_rgba(59,36,16,0.08)] hover:-translate-y-0.5 transition-all duration-300 relative group overflow-hidden">
-                {/* Vote column — Reddit-style single upvote (this app has no downvote) */}
-                <div className="flex flex-col items-center justify-start gap-1 py-6 px-3 sm:px-4 bg-[#3B2410]/[0.03] shrink-0">
-                  <button
-                    onClick={() => handleMarkHelpful(post.post_id)}
-                    disabled={post.voted_helpful}
-                    title="Mark as helpful"
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      post.voted_helpful
-                        ? 'bg-[#8B5E3C] text-white shadow-inner cursor-not-allowed'
-                        : 'bg-white text-[#3B2410]/60 border border-[#3B2410]/15 hover:bg-[#FAF6F4] hover:text-[#8B5E3C] hover:border-[#8B5E3C]/40 cursor-pointer'
-                    }`}
-                  >
-                    <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
-                  </button>
-                  <span className={`text-sm font-black ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#3B2410]'}`}>
-                    {post.helpful_count || 0}
-                  </span>
-                  <span className="text-[9px] text-[#3B2410]/40 font-bold uppercase tracking-wide hidden sm:block">Helpful</span>
+            {[1, 2, 3].map(n => (
+              <div key={n} className="bg-white rounded-3xl border border-[#EDE5DA] p-6 shadow-xs animate-pulse space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+                  <div className="w-24 h-6 bg-gray-100 rounded-full"></div>
+                  <div className="w-20 h-4 bg-gray-100 rounded-full ml-auto"></div>
                 </div>
-
-                <div className="flex-1 min-w-0 p-6 md:p-8">
-                {post.device_cookie === deviceCookie && (
-                  <div className="absolute top-6 right-6 bg-[#3B2410] text-[#FFFDF9] text-[10px] uppercase tracking-[0.15em] font-black px-3.5 py-1 rounded-full shadow-sm">
-                    You
-                  </div>
-                )}
-                <div className="flex items-center gap-2 mb-4 flex-wrap pr-12">
-                  <span className="text-xs font-black text-[#3B2410] bg-[#FAF6F4] border border-[#3B2410]/15 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#3B2410]/70" /> {post.city}
-                  </span>
-                  <span className={`text-xs font-black px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-1.5 ${getCategoryColor(post.category)}`}>
-                    {(() => { const Icon = getCategoryIcon(post.category); return <Icon className="w-3.5 h-3.5" />; })()}
-                    {post.category}
-                  </span>
-                  <span className="text-xs text-[#3B2410]/50 ml-auto hidden sm:inline-block font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
-                </div>
-                <p className="text-[#3B2410] whitespace-pre-wrap mb-6 text-lg leading-relaxed font-medium">{post.content}</p>
-
-                <div className="flex items-center justify-between border-t border-[#3B2410]/10 pt-4 mt-2 flex-wrap gap-4">
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href={`/city-board/${post.post_id}`}
-                      className="inline-flex items-center gap-2 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                      <MessageSquare className="w-4 h-4 text-[#3B2410]" /> {post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}
-                    </Link>
-                  </div>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    {post.device_cookie === deviceCookie ? (
-                      <button
-                        onClick={() => handleDeletePost(post.post_id)}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-red-600 hover:underline transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete Post
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => openReportModal(post.post_id)}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
-                        >
-                          <AlertTriangle className="w-3.5 h-3.5" /> Flag Post
-                        </button>
-                        <button
-                          onClick={() => handleBlockUser(post.device_cookie)}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3B2410]/50 hover:text-red-600 hover:underline transition-colors cursor-pointer"
-                        >
-                          <Ban className="w-3.5 h-3.5" /> Block Poster
-                        </button>
-                      </>
-                    )}
-                    <span className="text-xs text-[#3B2410]/50 sm:hidden font-medium">{formatDistanceToNow(new Date(post.created_at))} ago</span>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
-                        alert('Link copied to clipboard!');
-                      }}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#3B2410] bg-white border border-[#3B2410]/15 px-5 py-2.5 rounded-full shadow-sm hover:bg-[#FAF6F4] hover:border-[#3B2410]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                      title="Copy link to post"
-                    >
-                      <Share2 className="w-4 h-4 text-[#3B2410]" /> Copy Link
-                    </button>
-                  </div>
-                </div>
+                <div className="w-3/4 h-6 bg-gray-200 rounded-xl"></div>
+                <div className="w-full h-4 bg-gray-100 rounded-lg"></div>
+                <div className="flex justify-between items-center pt-2">
+                  <div className="w-24 h-8 bg-gray-100 rounded-full"></div>
+                  <div className="w-16 h-6 bg-gray-100 rounded-full"></div>
                 </div>
               </div>
             ))}
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="text-center py-16 text-[#8C827A] font-extrabold text-sm bg-white rounded-3xl border border-[#EDE5DA] shadow-xs">
+            {searchCategory === 'Saved' 
+              ? 'You have no saved discussions yet. Click the bookmark icon on any discussion to save it here!' 
+              : 'No discussions found. Be the first to start a topic!'}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredPosts.map(post => {
+              const isTrending = (post.helpful_count || 0) >= 3 || (post.reply_count || 0) >= 3;
+              const isMine = post.device_cookie === deviceCookie;
+              const isBookmarked = savedPostIds.includes(post.post_id);
+
+              return (
+                <div 
+                  key={post.id} 
+                  className={`rounded-3xl border transition-all duration-300 relative overflow-hidden flex gap-0 ${
+                    isTrending 
+                      ? 'bg-gradient-to-br from-[#FFFDF9] via-[#FAF3EA] to-[#F5EAD9] border-[#E8D4C0] shadow-md ring-1 ring-[#8B5E3C]/15 hover:shadow-lg'
+                      : 'bg-white border-[#EDE5DA] shadow-xs hover:shadow-md hover:-translate-y-0.5'
+                  }`}
+                >
+                  {/* Helpful Vote Sidebar */}
+                  <div className="flex flex-col items-center justify-start gap-1 py-6 px-3.5 bg-black/[0.02] shrink-0 border-r border-[#EDE5DA]/60">
+                    <button
+                      onClick={() => handleMarkHelpful(post.post_id)}
+                      disabled={post.voted_helpful}
+                      title="Mark as helpful"
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                        post.voted_helpful
+                          ? 'bg-[#8B5E3C] text-white shadow-xs cursor-not-allowed'
+                          : 'bg-white text-gray-600 border border-[#EDE5DA] hover:bg-[#FAF7F2] hover:text-[#8B5E3C] hover:border-[#8B5E3C]/40 cursor-pointer'
+                      }`}
+                    >
+                      <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
+                    </button>
+                    <span className={`text-xs font-extrabold ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#1F1712]'}`}>
+                      {post.helpful_count || 0}
+                    </span>
+                    <span className="text-[9px] text-[#8C827A] font-extrabold uppercase tracking-widest hidden sm:block">Helpful</span>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="flex-1 min-w-0 p-5 sm:p-7">
+                    
+                    {/* Top Meta Bar */}
+                    <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {/* Category Badge (Capitalized Pill) */}
+                        <span className={`text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border ${getCategoryColor(post.category)}`}>
+                          {post.category}
+                        </span>
+
+                        {/* City Location */}
+                        <span className="text-xs font-extrabold text-[#1F1712] bg-[#FAF7F2] border border-[#EDE5DA] px-3 py-1 rounded-full flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" /> {post.city}
+                        </span>
+
+                        {/* Trending Badge */}
+                        {isTrending && (
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                            <Flame className="w-3 h-3 text-amber-600 fill-amber-500 animate-pulse" />
+                            <span>Trending</span>
+                          </span>
+                        )}
+
+                        {isMine && (
+                          <span className="text-[10px] font-black uppercase tracking-wider text-white bg-[#8B5E3C] px-2.5 py-1 rounded-full shadow-2xs">
+                            Your Post
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-auto">
+                        {/* Bookmark Button - Signed-in Gated */}
+                        <button
+                          type="button"
+                          onClick={(e) => toggleSavePost(post.post_id, e)}
+                          title={!userEmail ? 'Sign in to save posts' : isBookmarked ? 'Remove bookmark' : 'Bookmark post'}
+                          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                            isBookmarked && userEmail
+                              ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' 
+                              : 'bg-white text-gray-500 border-[#EDE5DA] hover:text-[#8B5E3C]'
+                          }`}
+                        >
+                          <Bookmark className={`w-3.5 h-3.5 ${isBookmarked && userEmail ? 'fill-white' : ''}`} />
+                        </button>
+
+                        {/* Timestamp */}
+                        <span className="text-xs text-[#8C827A] font-medium">
+                          {formatDistanceToNow(new Date(post.created_at))} ago
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Main Title / Question Treatment */}
+                    <Link href={`/city-board/${post.post_id}`} className="block group/link" style={{ textDecoration: 'none' }}>
+                      <h3 className="text-lg sm:text-xl font-extrabold text-[#1F1712] leading-snug tracking-tight mb-2 group-hover/link:text-[#8B5E3C] transition-colors">
+                        {post.content}
+                      </h3>
+                    </Link>
+
+                    {/* Action Bar (List / Row Scannability) */}
+                    <div className="flex items-center justify-between border-t border-[#EDE5DA]/70 pt-4 mt-4 flex-wrap gap-3">
+                      <Link
+                        href={`/city-board/${post.post_id}`}
+                        className="inline-flex items-center gap-2 text-xs font-extrabold text-[#8B5E3C] bg-[#FAF7F2] hover:bg-[#8B5E3C] hover:text-white border border-[#EDE5DA] px-4 py-2 rounded-full transition-all"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}</span>
+                      </Link>
+
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {isMine ? (
+                          <button
+                            onClick={() => handleDeletePost(post.post_id)}
+                            className="inline-flex items-center gap-1 text-xs font-extrabold text-rose-600 hover:underline transition-colors cursor-pointer border-none bg-transparent"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => openReportModal(post.post_id)}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-[#8C827A] hover:text-rose-600 transition-colors cursor-pointer border-none bg-transparent"
+                            >
+                              <AlertTriangle className="w-3.5 h-3.5" /> Flag
+                            </button>
+                            <button
+                              onClick={() => handleBlockUser(post.device_cookie)}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-[#8C827A] hover:text-rose-600 transition-colors cursor-pointer border-none bg-transparent"
+                            >
+                              <Ban className="w-3.5 h-3.5" /> Block
+                            </button>
+                          </>
+                        )}
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
+                            showToast('Link copied to clipboard ✓');
+                          }}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-[#8B5E3C] bg-white border border-[#EDE5DA] px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+                          title="Copy link to post"
+                        >
+                          <Share2 className="w-3.5 h-3.5" /> Share
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
         </div>
       </main>
 
-
-
       {/* REPORT MODAL */}
       {reportPostId && (
-        <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={() => setReportPostId(null)}>
-          <div className="bg-[#FFFBF5] rounded-3xl p-8 pb-32 sm:pb-8 max-w-md w-full border border-[#3B2410]/15 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#3B2410] font-bold">✕</button>
-            <h3 className="text-xl font-black text-red-700 mb-2 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-700" /> Report post
+        <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-xs z-[60] flex items-center justify-center p-4" onClick={() => setReportPostId(null)}>
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full border border-[#EDE5DA] shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 font-bold border-none cursor-pointer">✕</button>
+            <h3 className="text-xl font-black text-rose-700 mb-2 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-700" /> Report Post
             </h3>
-            <p className="text-[#3B2410]/70 text-sm mb-6 font-medium">Help us keep Lumo Bites clean and safe. Please select a reason for reporting this post:</p>
+            <p className="text-gray-600 text-xs mb-6 font-medium leading-relaxed">Help us keep Lumo Bites clean and safe. Please select a reason for reporting this post:</p>
             <form onSubmit={handleReportSubmit} className="space-y-4">
               <select
                 value={reportReason}
                 onChange={e => setReportReason(e.target.value)}
-                className="w-full bg-white border border-[#3B2410]/20 rounded-xl px-4 py-3 text-[#3B2410] focus:outline-none focus:border-[#3B2410] font-medium"
+                className="w-full bg-[#FAF7F2] border border-[#EDE5DA] rounded-2xl px-4 py-3 text-sm text-[#1F1712] focus:outline-none focus:border-[#8B5E3C] font-medium"
               >
                 <option value="Spam">Spam</option>
                 <option value="Inappropriate">Inappropriate content</option>
@@ -717,7 +880,7 @@ export default function CityBoardPage() {
               <button
                 type="submit"
                 disabled={submittingReport}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-md cursor-pointer"
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold py-3 rounded-2xl transition-all disabled:opacity-50 shadow-sm cursor-pointer border-none text-xs"
               >
                 {submittingReport ? 'Submitting...' : 'Submit Report'}
               </button>
