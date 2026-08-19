@@ -467,13 +467,13 @@ export default function CityBoardPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
 
-        {/* TOPIC NAVIGATION (SITE-WIDE CONSISTENT PILL SYSTEM WITH SAVED TAB) */}
+        {/* TOPIC NAVIGATION (WRAP-GRID CHIP SYSTEM ON MOBILE, STICKY SIDEBAR ON DESKTOP) */}
         <aside className="lg:sticky lg:top-24">
-          <h3 className="hidden lg:block text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-3 px-2">Topics</h3>
-          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar bg-white/60 lg:bg-transparent p-2.5 lg:p-0 rounded-2xl lg:rounded-none border border-[#E8DDD4] lg:border-0 shadow-xs lg:shadow-none backdrop-blur-xs">
+          <h3 className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-2.5 px-1">Topics</h3>
+          <div className="flex flex-wrap lg:flex-col gap-2 bg-white/80 lg:bg-transparent p-3 lg:p-0 rounded-2xl lg:rounded-none border border-[#E8DDD4] lg:border-0 shadow-xs lg:shadow-none backdrop-blur-xs">
             <button
               onClick={() => handleSelectCategory('All')}
-              className={`shrink-0 flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                 searchCategory === 'All'
                   ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
                   : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
@@ -485,7 +485,7 @@ export default function CityBoardPage() {
             {/* Saved Bookmarks Tab */}
             <button
               onClick={() => handleSelectCategory('Saved')}
-              className={`shrink-0 flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                 searchCategory === 'Saved'
                   ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
                   : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
@@ -502,7 +502,7 @@ export default function CityBoardPage() {
                 <button
                   key={cat}
                   onClick={() => handleSelectCategory(cat)}
-                  className={`shrink-0 flex items-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+                  className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                     isActive
                       ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
                       : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
@@ -658,13 +658,6 @@ export default function CityBoardPage() {
                 </div>
               )}
             </div>
-            <input
-              type="text" 
-              placeholder="#️⃣ Post ID (LB-...)" 
-              value={searchPostId}
-              onChange={e => setSearchPostId(e.target.value)}
-              className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white min-w-[130px] transition-all font-medium"
-            />
           </div>
 
           <div className="flex items-center gap-2 px-1 border-t border-[#E8DDD4] pt-2">
