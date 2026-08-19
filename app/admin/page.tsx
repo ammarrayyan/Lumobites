@@ -303,217 +303,91 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-2 bg-white p-1 rounded-xl mb-8 border border-gray-200 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'stats'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Statistics
-          </button>
-          <button
-            onClick={() => setActiveTab('sitters')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'sitters'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Sitter Management
-          </button>
-          <button
-            onClick={() => setActiveTab('shelters')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'shelters'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Shelters & Rescues
-          </button>
-          <button
-            onClick={() => setActiveTab('vet-clinics')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'vet-clinics'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Vet Clinics
-          </button>
-          <button
-            onClick={() => setActiveTab('pet-daycares')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'pet-daycares'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Pet Daycares
-          </button>
-          <button
-            onClick={() => setActiveTab('partner-billing')}
-            className={`flex-1 py-2 px-4 rounded-lg font-bold text-sm transition-all whitespace-nowrap bg-amber-50 ${
-              activeTab === 'partner-billing'
-                ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-black shadow-lg'
-                : 'text-amber-900 hover:text-black hover:bg-amber-100'
-            }`}
-          >
-            💳 Partner Billing
-          </button>
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'requests'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Sitting Requests
-          </button>
-          <button
-            onClick={() => setActiveTab('accounts')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'accounts'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            All Accounts
-          </button>
-          <button
-            onClick={() => setActiveTab('lost-pets')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'lost-pets'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Lost Pets
-          </button>
-          <button
-            onClick={() => setActiveTab('adoption-pets')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'adoption-pets'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Adoption Pets
-          </button>
-          <button
-            onClick={() => setActiveTab('reviews')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'reviews'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Reviews
-          </button>
-          <button
-            onClick={() => setActiveTab('city-board')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'city-board'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            City Board
-          </button>
-          <button
-            onClick={() => setActiveTab('twin-gallery')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'twin-gallery'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Pet Twin Gallery
-          </button>
-          <button
-            onClick={() => setActiveTab('affiliates')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'affiliates'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Affiliates
-          </button>
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`flex-grow-0 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap flex items-center justify-center gap-1.5 ${
-              activeTab === 'reports'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Reports
-            {pendingReportsCount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {pendingReportsCount}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('pet-matching')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'pet-matching'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Pet Matching
-          </button>
-          <button
-            onClick={() => setActiveTab('outreach')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'outreach'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Outreach
-          </button>
-          <button
-            onClick={() => setActiveTab('broadcast')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'broadcast'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Broadcast
-          </button>
-          <button
-            onClick={() => setActiveTab('integrations')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'integrations'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            Integrations
-          </button>
-          <button
-            onClick={() => setActiveTab('ai-usage')}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-              activeTab === 'ai-usage'
-                ? 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-lg'
-                : 'text-[#555555] hover:text-[#191919] hover:bg-gray-50'
-            }`}
-          >
-            🤖 AI Usage & Caps
-          </button>
-        </div>
+        {/* MAIN DASHBOARD LAYOUT (OPTION 3: LEFT VERTICAL SIDEBAR + CONTENT VIEW) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 lg:gap-8 items-start">
+          
+          {/* PERSISTENT LEFT SIDEBAR NAVIGATION */}
+          <aside className="bg-white rounded-2xl border border-gray-200 p-4 shadow-xs lg:sticky lg:top-24 space-y-4">
+            {[
+              {
+                title: 'Overview',
+                items: [
+                  { id: 'stats', label: 'Statistics', icon: '📊' },
+                  { id: 'partner-billing', label: 'Partner Billing', icon: '💳', highlight: true },
+                  { id: 'ai-usage', label: 'AI Usage & Caps', icon: '🤖' },
+                ]
+              },
+              {
+                title: 'Services & Partners',
+                items: [
+                  { id: 'sitters', label: 'Sitter Management', icon: '🐶' },
+                  { id: 'shelters', label: 'Shelters & Rescues', icon: '🏠' },
+                  { id: 'vet-clinics', label: 'Vet Clinics', icon: '🏥' },
+                  { id: 'pet-daycares', label: 'Pet Daycares', icon: '🐾' },
+                  { id: 'requests', label: 'Sitting Requests', icon: '📋' },
+                ]
+              },
+              {
+                title: 'Community & Content',
+                items: [
+                  { id: 'accounts', label: 'All Accounts', icon: '👥' },
+                  { id: 'lost-pets', label: 'Lost Pets', icon: '🚨' },
+                  { id: 'adoption-pets', label: 'Adoption Pets', icon: '🐾' },
+                  { id: 'reviews', label: 'Reviews', icon: '⭐' },
+                  { id: 'city-board', label: 'City Board', icon: '💬' },
+                  { id: 'twin-gallery', label: 'Pet Twin Gallery', icon: '👯' },
+                  { id: 'reports', label: 'Reports', icon: '🚩', badge: pendingReportsCount },
+                ]
+              },
+              {
+                title: 'Growth & Automation',
+                items: [
+                  { id: 'affiliates', label: 'Affiliates', icon: '🤝' },
+                  { id: 'pet-matching', label: 'Pet Matching', icon: '🔍' },
+                  { id: 'outreach', label: 'Outreach', icon: '✉️' },
+                  { id: 'broadcast', label: 'Broadcast', icon: '📢' },
+                  { id: 'integrations', label: 'Integrations', icon: '🔌' },
+                ]
+              }
+            ].map((group, gIdx) => (
+              <div key={gIdx} className="space-y-1">
+                <h3 className="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider px-2 mb-1">{group.title}</h3>
+                <div className="flex flex-wrap lg:flex-col gap-1">
+                  {group.items.map(item => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full text-left py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                          isActive
+                            ? item.highlight
+                              ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-black shadow-md font-bold'
+                              : 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-md font-bold'
+                            : item.highlight
+                              ? 'bg-amber-50 text-amber-900 hover:bg-amber-100'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 truncate">
+                          <span className="text-sm shrink-0">{item.icon}</span>
+                          <span className="truncate">{item.label}</span>
+                        </span>
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className="bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full shrink-0">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </aside>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
+          {/* Tab Content */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 min-h-[500px]">
           {activeTab === 'stats' && <StatisticsDashboard adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'sitters' && <SitterManagement adminKey={password} onUnauthorized={handleLogout} />}
           {activeTab === 'shelters' && <ShelterManagement adminKey={password} />}
@@ -1073,5 +947,6 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
