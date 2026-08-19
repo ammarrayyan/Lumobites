@@ -15,9 +15,12 @@ export default function MobileCommunityNav() {
 
   return (
     <div 
-      className="md:hidden fixed left-0 right-0 h-[52px] z-40 flex items-center justify-between gap-2 p-2 bg-[#FAF6F0] border-b border-[#E8DDD4] shadow-sm"
+      className="md:hidden fixed left-0 right-0 h-[52px] z-40 flex items-center justify-between gap-2 p-2 shadow-xs border-b border-stone-200/60"
       style={{
-        top: 'calc(env(safe-area-inset-top, 0px) + 72px)'
+        top: 'calc(env(safe-area-inset-top, 0px) + 72px)',
+        backgroundColor: 'rgba(250, 246, 240, 0.75)',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
       }}
     >
       {items.map((item) => {
@@ -27,14 +30,14 @@ export default function MobileCommunityNav() {
           <Link
             key={item.label}
             href={item.href}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl cursor-pointer transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl cursor-pointer active:scale-95 transition-all duration-200 ${
               isActive 
-                ? 'bg-[#8B5E3C] text-white shadow-sm' 
-                : 'bg-white text-[#666666] border border-[#E8DDD4]'
+                ? 'bg-[#8B5E3C] text-white shadow-xs' 
+                : 'bg-white/80 text-[#666666] border border-[#E8DDD4]/80 hover:bg-white'
             }`}
             style={{ textDecoration: 'none' }}
           >
-            <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#8B5E3C]'}`} />
+            <Icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? 'text-white scale-110' : 'text-[#8B5E3C]'}`} />
             <span className="text-xs font-extrabold tracking-tight select-none">
               {item.label}
             </span>
