@@ -970,7 +970,7 @@ export default function LostPetsFeed() {
                         </h2>
                         <span className="text-xs text-[#8B7E7D] font-semibold">Sorted by match confidence</span>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[500px]">
                         {aiMatches
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (

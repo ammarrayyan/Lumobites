@@ -680,6 +680,7 @@ export default function CityBoardPage() {
         </div>
 
         {/* FEED POST LIST (SKELETON LOADERS & SITE-WIDE CARDS) */}
+        <div className="min-h-[500px]">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(n => (
@@ -849,6 +850,7 @@ export default function CityBoardPage() {
             })}
           </div>
         )}
+        </div>
 
         </div>
       </main>

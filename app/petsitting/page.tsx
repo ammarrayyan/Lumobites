@@ -3796,7 +3796,7 @@ export function PetSittingContent() {
                 )}
                 <div className="flex flex-col md:flex-row gap-8">
                 {/* Sitters List (Left on desktop, Below on mobile) */}
-                <div className="flex-1 order-2 md:order-1">
+                <div className="flex-1 order-2 md:order-1 min-h-[600px]">
                   {showSittersSection && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredSitters.map(sitter => (

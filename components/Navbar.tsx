@@ -836,14 +836,14 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       )}
     </nav>
     {showPushBanner && (
-      <div className="bg-gradient-to-r from-[#FFFBF5] to-[#FAF6F4] border-b border-[#E8D5C0] px-4 py-2 text-center flex items-center justify-center gap-3 animate-fade-in relative z-40">
-        <span className="text-xs text-[#8B5E3C] font-bold flex items-center gap-1.5">
-          <Bell className="w-4 h-4 text-[#8B5E3C] shrink-0" /> Enable notifications to get instant updates
+      <div className="fixed top-[78px] left-1/2 -translate-x-1/2 z-[45] bg-gradient-to-r from-[#FFFBF5] to-[#FAF6F4] border border-[#E8D5C0] shadow-md rounded-full px-4 py-1.5 text-center flex items-center justify-center gap-3 animate-fade-in max-w-[90vw] md:max-w-md">
+        <span className="text-xs text-[#8B5E3C] font-bold flex items-center gap-1.5 truncate">
+          <Bell className="w-4 h-4 text-[#8B5E3C] shrink-0" /> Enable notifications for updates
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleEnableNotifications}
-            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold px-3 py-1 rounded-lg transition-colors cursor-pointer"
+            className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-[11px] font-bold px-3 py-1 rounded-full transition-colors cursor-pointer"
           >
             Enable
           </button>

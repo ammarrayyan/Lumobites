@@ -38,6 +38,10 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html, body {
   background-color: #FDFAF7;
   color: var(--foreground);
@@ -47,6 +51,7 @@ html, body {
   font-size: var(--text-body);
   line-height: 1.6 !important;
   overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 .font-inter {
