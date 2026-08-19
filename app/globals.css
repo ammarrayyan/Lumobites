@@ -50,7 +50,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
   font-size: var(--text-body);
   line-height: 1.6 !important;
-  overscroll-behavior-y: none;
   overflow-x: hidden;
 }
 
