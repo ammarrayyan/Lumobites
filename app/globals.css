@@ -131,6 +131,29 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* App-wide unified placeholder typography */
+input::placeholder,
+textarea::placeholder,
+select::placeholder,
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  opacity: 0.75 !important;
+}
+
+@media (min-width: 768px) {
+  input::placeholder,
+  textarea::placeholder,
+  select::placeholder,
+  ::-webkit-input-placeholder,
+  ::-moz-placeholder,
+  :-ms-input-placeholder {
+    font-size: 13px !important;
+  }
+}
+
 /* 2. Scroll margin & dynamic bottom padding to keep focused inputs visible above keyboard */
 @media (max-width: 767px) {
   input, textarea, select {
