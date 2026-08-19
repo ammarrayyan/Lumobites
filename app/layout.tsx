@@ -15,6 +15,13 @@ import SectionSwipeProvider from "@/components/SectionSwipeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
   description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",

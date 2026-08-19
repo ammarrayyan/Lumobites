@@ -124,14 +124,26 @@ h1, h2, h3, h4, h5, h6 {
    MOBILE VIEWPORT & KEYBOARD FOCUS FIXES
    ========================================== */
 
-/* 1. Prevent iOS auto-zoom on input focus */
-@media (max-width: 767px) {
-  input, textarea, select, [contenteditable="true"] {
-    font-size: 16px !important;
+/* 1. Universal input, textarea, select, and dropdown option typography */
+input,
+textarea,
+select,
+option {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #2B231D !important;
+}
+
+@media (min-width: 768px) {
+  input,
+  textarea,
+  select,
+  option {
+    font-size: 13px !important;
   }
 }
 
-/* App-wide unified placeholder typography */
+/* 2. Universal placeholder typography: crisp 12px, medium font weight (500), consistent subtle color */
 input::placeholder,
 textarea::placeholder,
 select::placeholder,
@@ -140,18 +152,8 @@ select::placeholder,
 :-ms-input-placeholder {
   font-size: 12px !important;
   font-weight: 500 !important;
-  opacity: 0.75 !important;
-}
-
-@media (min-width: 768px) {
-  input::placeholder,
-  textarea::placeholder,
-  select::placeholder,
-  ::-webkit-input-placeholder,
-  ::-moz-placeholder,
-  :-ms-input-placeholder {
-    font-size: 13px !important;
-  }
+  color: #7A6E67 !important;
+  opacity: 0.8 !important;
 }
 
 /* 2. Scroll margin & dynamic bottom padding to keep focused inputs visible above keyboard */
