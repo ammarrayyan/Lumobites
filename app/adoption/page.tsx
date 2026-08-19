@@ -811,7 +811,7 @@ function AdoptionContent() {
 
         {/* INLINE EXPANDABLE MAP SECTION */}
         {showMap && !loading && (
-          <section className="space-y-3 bg-white p-4 rounded-3xl border border-[#E8DDD4] shadow-2xs">
+          <section className="space-y-3 bg-white p-4 rounded-3xl border border-[#E8DDD4] shadow-2xs mb-6">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-[#8B5E3C]" /> Pet Locations Map
@@ -825,7 +825,7 @@ function AdoptionContent() {
                 </div>
               </div>
             </div>
-            <div className="h-[400px] w-full">
+            <div className="h-[440px] w-full">
               <AdoptionPetsMap 
                 key={`${species}-${age}-${size}-${debouncedCitySearch}`}
                 pets={[...localPets, ...rescueGroupsPets]}

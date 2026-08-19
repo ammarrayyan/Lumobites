@@ -171,7 +171,7 @@ export default function AdoptionPetsMap({ pets, citySearch }: AdoptionPetsMapPro
   }
 
   return (
-    <div className="w-full h-[540px] relative rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-xs">
+    <div className="w-full h-full min-h-[400px] relative rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-xs">
       <APIProvider apiKey={apiKey}>
         <Map
           defaultCenter={{ lat: 39.8283, lng: -98.5795 }}
