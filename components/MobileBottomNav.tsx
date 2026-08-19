@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, PawPrint, MapPin, Utensils, Users, Globe } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies' || pathname === '/recalls';
   const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
@@ -63,6 +64,9 @@ export default function MobileBottomNav() {
           <Link
             key={tab.label}
             href={tab.href}
+            prefetch={true}
+            onTouchStart={() => router.prefetch(tab.href)}
+            onMouseEnter={() => router.prefetch(tab.href)}
             className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-0.5 group active:scale-90 transition-transform duration-150"
             style={{ textDecoration: 'none' }}
           >

@@ -2,21 +2,29 @@
 
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { createPortal } from 'react-dom';
+import dynamic from 'next/dynamic';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
-import ChatModal from '@/components/ChatModal';
-import SitterMap from '@/components/SitterMap';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
-import { loadStripe } from '@stripe/stripe-js';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
-import AiLimitModal from '@/components/AiLimitModal';
 
+const SitterMap = dynamic(() => import('@/components/SitterMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[400px] bg-[#FAF6F4] rounded-3xl border border-[#E8DDD4] flex items-center justify-center text-xs font-bold text-[#8B7E7D] gap-2 animate-pulse">
+      <Loader2 className="w-4 h-4 animate-spin text-[#8B5E3C]" />
+      <span>Loading Interactive Map...</span>
+    </div>
+  ),
+});
 
+const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false });
+const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
 
 export function formatSitterName(fullName) {
   if (!fullName) return 'Sitter';
@@ -60,7 +68,6 @@ export const getCroppedImg = (
     image.onerror = (err) => reject(err);
   });
 };
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface Sitter {
   id: string;
