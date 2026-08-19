@@ -633,7 +633,7 @@ function AdoptionContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] font-sans pt-[52px] md:pt-0 font-inter">
+    <div className="min-h-screen bg-[#FCFAF8] text-[#2B231D] font-sans pt-[52px] md:pt-0 font-inter">
       <MobileCommunityNav />
       {/* HERO SECTION */}
       <section className="bg-gradient-to-b from-[#FAF5EE] to-[#FDFAF7] border-b border-[#E8DDD4] px-6 py-12">

@@ -432,7 +432,7 @@ export default function CityBoardPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col relative pt-[52px] md:pt-0"
+      className="min-h-screen bg-[#FCFAF8] font-sans flex flex-col relative pt-[52px] md:pt-0"
     >
       <MobileCommunityNav />
 

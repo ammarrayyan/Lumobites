@@ -506,7 +506,7 @@ export default function LostPetsFeed() {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col relative">
+    <div className="min-h-screen bg-[#FCFAF8] font-sans flex flex-col relative">
       
       <div
         className="flex-1 flex flex-col w-full relative pt-2 md:pt-20"

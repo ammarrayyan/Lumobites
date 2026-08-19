@@ -135,7 +135,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-[#555555] bg-[#FDFAF7]">
+    <div className="min-h-screen flex flex-col font-sans text-[#2B231D] bg-[#FCFAF8]">
 
       {/* PET SITTING COMING SOON MODAL */}
       {petSittingModalOpen && (
@@ -320,7 +320,7 @@ export default function Home() {
       )}
 
       {/* HERO SECTION */}
-      <section className="w-full bg-[#FDFAF7] pt-[32px] pb-12 px-6 md:px-8 lg:px-12">
+      <section className="w-full bg-[#FCFAF8] pt-[32px] pb-12 px-6 md:px-8 lg:px-12">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 

@@ -336,7 +336,7 @@ export default function CityBoardPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] font-sans flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#FCFAF8] font-sans flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl p-8 max-w-sm w-full border border-[#E8DDD4] shadow-sm animate-pulse text-center space-y-3">
           <div className="w-10 h-10 bg-gray-200 rounded-full mx-auto"></div>
           <div className="h-4 bg-gray-200 rounded-full w-3/4 mx-auto"></div>
@@ -368,7 +368,7 @@ export default function CityBoardPostPage() {
 
   return (
     <div 
-      className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col pt-4 pb-16 relative"
+      className="min-h-screen bg-[#FCFAF8] font-sans flex flex-col pt-4 pb-16 relative"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

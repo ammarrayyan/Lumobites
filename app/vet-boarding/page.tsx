@@ -262,7 +262,7 @@ export default function VetBoardingRegisterPage() {
 
   if (existingConflictMsg) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#FCFAF8] flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-100 text-center relative">
           <button
             onClick={() => router.push('/')}
