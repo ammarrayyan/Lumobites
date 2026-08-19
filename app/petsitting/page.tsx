@@ -3491,8 +3491,8 @@ export function PetSittingContent() {
 
       <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
         <div className="text-center mb-10">
-          <h1 className="text-2xl md:text-5xl font-black text-[#4A3E3D] mb-4">Lumo Bites Pet Sitting</h1>
-          <p className="text-[#8B5E3C] font-medium text-sm md:text-lg">Connect with trusted, local pet sitters in your community.</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-3">Lumo Bites Pet Sitting</h1>
+          <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Connect with trusted, local pet sitters in your community.</p>
         </div>
 
         {/* FIND A SITTER TAB */}

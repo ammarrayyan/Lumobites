@@ -532,8 +532,8 @@ export default function LostPetsFeed() {
           {/* ── Page Header ── */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 md:gap-6">
             <div className="text-center md:text-left">
-              <h1 className="text-2xl md:text-5xl font-black text-[#4A3E3D] mb-1 md:mb-3">Community Pet Board</h1>
-              <p className="text-[#8B5E3C] font-medium text-sm md:text-lg">Help reunite lost pets with their families in your neighborhood.</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-2">Community Pet Board</h1>
+              <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Help reunite lost pets with their families in your neighborhood.</p>
             </div>
             <Link 
               href="/lost-pets/post" 

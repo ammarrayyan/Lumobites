@@ -541,13 +541,13 @@ export default function Home() {
 
 
       {/* EXPLORE TEASER BANNER */}
-      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
+      <section className="hidden md:block w-full bg-[#FCFAF8] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
         <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
           <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
             <Globe className="w-6 h-6 text-[#8B5E3C]" />
           </div>
-          <h2 className="text-xl md:text-2xl font-black text-[#191919] mb-2">Meet Your Pet Community</h2>
-          <p className="text-[#666666] text-sm md:text-base leading-relaxed mb-6">
+          <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] mb-2">Meet Your Pet Community</h2>
+          <p className="text-sm sm:text-base text-[#2B231D] leading-relaxed mb-6 font-normal">
             Connect with local pet owners, follow lost pet alerts, and stay in the loop with everything happening in your neighborhood.
           </p>
           <Link 

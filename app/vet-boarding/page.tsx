@@ -393,10 +393,10 @@ export default function VetBoardingRegisterPage() {
             <ShieldCheck className="w-3.5 h-3.5" />
             Verified Partner Program
           </div>
-          <h1 className="text-2xl font-black text-[#4A3E3D] mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#2B231D] tracking-tight mb-2">
             {isRejected ? 'Re-Apply as a Partner Clinic' : 'List Your Veterinary Clinic'}
           </h1>
-          <p className="text-[#8B7E7D] text-sm">
+          <p className="text-sm font-normal text-[#2B231D] leading-relaxed">
             {isRejected
               ? `Your previous application was not approved: "${existingClinic.rejection_reason || 'No reason provided'}". Please update your details and resubmit.`
               : 'Reach pet owners actively searching for boarding. Verified clinics appear alongside trusted sitters with a 🏥 partner badge.'}

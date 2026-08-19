@@ -641,10 +641,10 @@ function AdoptionContent() {
           <div className="inline-flex items-center gap-2 bg-[#F5EDE4] text-[#8B5E3C] px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-2xs">
             <Heart className="w-4 h-4 fill-[#8B5E3C]" /> Pet Adoption Portal
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight">
             Find Your New Best Friend
           </h1>
-          <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base font-normal text-[#2B231D] max-w-2xl mx-auto leading-relaxed">
             Search adoptable pets from verified local shelters and RescueGroups partners. Use AI lifestyle matching or visual photo recognition to find your match.
           </p>
 

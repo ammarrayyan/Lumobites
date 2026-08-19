@@ -440,7 +440,7 @@ export default function CityBoardPostPage() {
             </div>
 
             {/* Title / Post Content */}
-            <h1 className="text-xl sm:text-2xl font-bold text-[#4A3E3D] leading-snug tracking-tight mb-6 whitespace-pre-wrap">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#2B231D] leading-snug tracking-tight mb-6 whitespace-pre-wrap">
               {post.content}
             </h1>
 
@@ -574,7 +574,7 @@ export default function CityBoardPostPage() {
                       </div>
 
                       {/* Reply Text */}
-                      <p className="text-[#4A3E3D] text-sm leading-relaxed whitespace-pre-wrap font-normal">
+                      <p className="text-[#2B231D] text-sm leading-relaxed whitespace-pre-wrap font-normal">
                         {reply.content}
                       </p>
                     </div>

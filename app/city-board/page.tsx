@@ -524,10 +524,10 @@ export default function CityBoardPage() {
               <img src="/Logo.png" alt="Lumo Bites" className="h-6 w-auto object-contain" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C]">City Board</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#4A3E3D] tracking-tight">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] tracking-tight">
               Share with your pet community
             </h2>
-            <p className="text-[#8B7E7D] text-xs sm:text-sm mt-1 font-medium">Ask questions, share recommendations, or discuss local pet care — completely free.</p>
+            <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed mt-1">Ask questions, share recommendations, or discuss local pet care — completely free.</p>
           </div>
 
           <form onSubmit={handleCreatePost} className="space-y-4">
@@ -791,7 +791,7 @@ export default function CityBoardPage() {
 
                     {/* Main Title / Question Treatment */}
                     <Link href={`/city-board/${post.post_id}`} className="block group/link" style={{ textDecoration: 'none' }}>
-                      <h3 className="text-base sm:text-lg font-bold text-[#4A3E3D] leading-snug tracking-tight mb-2 group-hover/link:text-[#8B5E3C] transition-colors">
+                      <h3 className="text-lg sm:text-xl font-extrabold text-[#2B231D] leading-snug tracking-tight mb-2 group-hover/link:text-[#8B5E3C] transition-colors">
                         {post.content}
                       </h3>
                     </Link>
