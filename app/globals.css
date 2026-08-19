@@ -61,7 +61,7 @@ html, body {
 
 @media (max-width: 1023px) {
   .floating-qr-btn {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 96px) !important;
+    bottom: 96px !important;
   }
 }
 

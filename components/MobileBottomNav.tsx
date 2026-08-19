@@ -27,13 +27,14 @@ export default function MobileBottomNav() {
       className="lg:hidden px-1.5 flex items-center justify-between w-[calc(100%-24px)] max-w-[430px] h-[66px] relative"
       style={{
         position: 'fixed',
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+        bottom: '14px',
         left: 0,
         right: 0,
         marginLeft: 'auto',
         marginRight: 'auto',
-        transform: 'translateZ(0)',
-        WebkitTransform: 'translateZ(0)',
+        transform: 'translate3d(0, 0, 0)',
+        WebkitTransform: 'translate3d(0, 0, 0)',
+        willChange: 'transform',
         zIndex: 9999,
         backgroundColor: 'rgba(255, 255, 255, 0.52)',
         backdropFilter: 'blur(24px) saturate(200%)',
