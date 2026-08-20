@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 // POST /api/pets/qr-checkin
-// Validates partner scanning, registers an active pet_profile_access grant, and returns tiered pet profile data.
+// Validates partner scanning, verifies partner DB status, registers access grant, and returns tiered pet profile data.
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Fetch pet details to verify existence & get owner email
+    // 1. Fetch pet details first
     const { data: pet, error: petErr } = await supabaseAdmin
       .from('owner_pets')
       .select('*')
@@ -39,8 +39,85 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Pet profile not found or removed.' }, { status: 404 });
     }
 
-    // 2. Insert or update pet_profile_access grant
-    const { data: accessGrant, error: grantErr } = await supabaseAdmin
+    // 2. STRICT PARTNER VERIFICATION AGAINST DATABASE
+    // Verify that cleanPartnerEmail exists in vet_clinics, pet_daycares, sitters, shelters, or matches pet.owner_email
+    let isVerifiedPartner = false;
+    let actualAccessTier: 'full_vet' | 'care_level' = 'care_level';
+
+    // Is Pet Owner?
+    if (pet.owner_email && pet.owner_email.toLowerCase().trim() === cleanPartnerEmail) {
+      isVerifiedPartner = true;
+      actualAccessTier = 'full_vet';
+    }
+
+    // Is Registered Vet Clinic?
+    if (!isVerifiedPartner) {
+      const { data: vet } = await supabaseAdmin
+        .from('vet_clinics')
+        .select('id, email, status')
+        .eq('email', cleanPartnerEmail)
+        .maybeSingle();
+
+      if (vet) {
+        isVerifiedPartner = true;
+        actualAccessTier = 'full_vet';
+      }
+    }
+
+    // Is Registered Daycare Facility?
+    if (!isVerifiedPartner) {
+      const { data: daycare } = await supabaseAdmin
+        .from('pet_daycares')
+        .select('id, email, status')
+        .eq('email', cleanPartnerEmail)
+        .maybeSingle();
+
+      if (daycare) {
+        isVerifiedPartner = true;
+        actualAccessTier = 'care_level';
+      }
+    }
+
+    // Is Registered Pet Sitter?
+    if (!isVerifiedPartner) {
+      const { data: sitter } = await supabaseAdmin
+        .from('sitters')
+        .select('id, email, status')
+        .eq('email', cleanPartnerEmail)
+        .maybeSingle();
+
+      if (sitter) {
+        isVerifiedPartner = true;
+        actualAccessTier = 'care_level';
+      }
+    }
+
+    // Is Registered Shelter?
+    if (!isVerifiedPartner) {
+      const { data: shelter } = await supabaseAdmin
+        .from('shelters')
+        .select('id, email, status')
+        .eq('email', cleanPartnerEmail)
+        .maybeSingle();
+
+      if (shelter) {
+        isVerifiedPartner = true;
+        actualAccessTier = 'care_level';
+      }
+    }
+
+    if (!isVerifiedPartner) {
+      return NextResponse.json(
+        {
+          error: 'Partner verification failed. This email is not registered as an authorized Vet Clinic, Daycare, Pet Sitter, or Shelter account. Zero pet data is returned to unverified scanners.',
+          verified: false,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Insert or update pet_profile_access grant
+    const { data: accessGrant } = await supabaseAdmin
       .from('pet_profile_access')
       .upsert(
         {
@@ -59,12 +136,8 @@ export async function POST(request: NextRequest) {
       .select('*')
       .single();
 
-    if (grantErr) {
-      console.warn('[QR Checkin POST] Upsert grant warning (proceeding):', grantErr.message);
-    }
-
-    // 3. Return Tiered Field Visibility
-    if (cleanPartnerType === 'vet') {
+    // 4. Return Tiered Field Visibility for verified partner
+    if (actualAccessTier === 'full_vet') {
       return NextResponse.json({
         success: true,
         access_tier: 'full_vet',
@@ -72,7 +145,6 @@ export async function POST(request: NextRequest) {
         pet,
       });
     } else {
-      // Care-Level Access: Exclude sensitive medical/insurance credentials
       const careLevelPet = {
         id: pet.id,
         owner_email: pet.owner_email,
@@ -107,3 +179,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
+
