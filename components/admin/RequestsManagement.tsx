@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trash2, Footprints } from 'lucide-react';
+import { Trash2, Footprints, X, PawPrint } from 'lucide-react';
+import PetProfileCard, { PetProfileData } from '@/components/PetProfileCard';
 
 interface SittingRequest {
   id: string;
@@ -22,6 +23,10 @@ interface SittingRequest {
   cancelled_by?: string;
   updated_at?: string;
   no_show_at?: string;
+  pet_details?: any;
+  phone_number?: string;
+  booking_number?: string;
+  time_slot?: string;
 }
 
 interface RequestsManagementProps {
@@ -40,6 +45,7 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
   
   // Expanded rows to show special notes
   const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
+  const [selectedAdminPet, setSelectedAdminPet] = useState<PetProfileData | null>(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -410,10 +416,32 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
 
                         {/* Pet Name & Type */}
                         <td className="p-4 text-sm">
-                          <span className="font-semibold text-[#191919]">{request.pet_name}</span>
-                          <span className="ml-1.5 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200 uppercase font-bold tracking-wider">
-                            {request.pet_type === 'both' ? '🐱 & 🐶' : request.pet_type === 'dog' ? '🐶 Dog' : '🐱 Cat'}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-extrabold text-[#191919]">{request.pet_name}</span>
+                            <span className="text-[10px] font-bold bg-amber-100/80 text-amber-900 border border-amber-200/60 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              {request.pet_type === 'both' ? '🐱 & 🐶 Both' : request.pet_type === 'dog' ? '🐶 Dog' : '🐱 Cat'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const petInfo = request.pet_details?.pets?.[0] || request.pet_details || {
+                                  pet_name: request.pet_name,
+                                  pet_type: request.pet_type,
+                                  owner_email: request.owner_email,
+                                };
+                                setSelectedAdminPet({
+                                  pet_name: request.pet_name,
+                                  pet_type: request.pet_type,
+                                  owner_email: request.owner_email,
+                                  ...petInfo,
+                                });
+                              }}
+                              className="text-[10px] font-bold text-[#8B5E3C] hover:underline bg-[#FAF6F4] px-1.5 py-0.5 rounded border border-[#E8DDD4] cursor-pointer"
+                            >
+                              View Profile
+                            </button>
+                          </div>
                         </td>
 
                         {/* Requested Dates */}
@@ -520,6 +548,30 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                                   <strong className="text-gray-500">Sitter ID:</strong> {request.sitter_id}
                                 </div>
                               </div>
+                              {/* Pet Profile Details in Expanded Row */}
+                              {request.pet_details && (
+                                <div className="mt-4 pt-3 border-t border-gray-200">
+                                  <h4 className="text-xs font-bold text-[#8B5E3C] uppercase tracking-wider mb-2">
+                                    🐾 Registered Pet Details:
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {(request.pet_details.pets || [request.pet_details]).map((p: any, pIdx: number) => (
+                                      <PetProfileCard
+                                        key={p.id || pIdx}
+                                        pet={{
+                                          pet_name: p.pet_name || request.pet_name,
+                                          pet_type: p.pet_type || request.pet_type,
+                                          owner_email: request.owner_email,
+                                          ...p,
+                                        }}
+                                        tier="admin"
+                                        headerTitle="Admin Pet Inspection"
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
                               {status.toLowerCase() === 'no_show' && (
                                 <div className="pt-2">
                                   <button
@@ -542,6 +594,45 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Admin Pet Profile Inspection Modal */}
+        {selectedAdminPet && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl border border-gray-200 shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-5 space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <PawPrint className="w-5 h-5 text-[#8B5E3C]" />
+                  <h3 className="font-extrabold text-base text-gray-900">
+                    Admin Pet Inspection: {selectedAdminPet.pet_name}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedAdminPet(null)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <PetProfileCard
+                pet={selectedAdminPet}
+                tier="admin"
+                headerTitle="Full Pet Record"
+              />
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedAdminPet(null)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  Close Inspection
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

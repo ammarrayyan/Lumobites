@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
+import PetProfileCard from '@/components/PetProfileCard';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
@@ -4237,62 +4238,29 @@ export function PetSittingContent() {
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {ownerPets.map((pet) => (
-                          <div key={pet.id} className="bg-white border border-[#E8DDD4] rounded-2xl p-4 flex gap-4 shadow-sm relative group hover:border-[#8B5E3C] transition-all">
-                            {/* Pet Photo / Icon */}
-                            <PetPhotoCarousel photoUrls={pet.photo_urls} petType={pet.pet_type} className="w-20 h-20 rounded-xl" />
-
-                            {/* Pet Details */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h5 className="font-bold text-sm text-[#4A3E3D] truncate">{pet.pet_name}</h5>
-                                <span className="text-[10px] bg-[#FAF6F4] text-[#8B5E3C] px-2 py-0.5 rounded-full font-bold border border-[#E8DDD4] uppercase tracking-wide">
-                                  {pet.pet_type}
-                                </span>
-                              </div>
-                              <p className="text-xs text-[#8B7E7D] truncate mb-2">
-                                {pet.breed && `${pet.breed}`}
-                                {pet.gender && ` • ${pet.gender}`}
-                                {pet.age && ` • ${pet.age}`}
-                                {pet.weight && ` • ${pet.weight}`}
-                              </p>
-
-                              {/* Badges/Highlights */}
-                              <div className="flex flex-wrap gap-1.5 mb-2">
-                                {pet.spayed_neutered && (
-                                  <span className="text-[9px] bg-green-50 text-green-700 px-1.5 py-0.5 rounded font-semibold border border-green-200">Spayed/Neutered</span>
-                                )}
-                                {pet.feeding_schedule && (
-                                  <span className="text-[9px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-semibold border border-amber-200 truncate max-w-[120px]" title={`Feeding: ${pet.feeding_schedule}`}>🥣 Feed Schedule</span>
-                                )}
-                                {pet.medication && (
-                                  <span className="text-[9px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded font-semibold border border-red-200 truncate max-w-[120px]" title={`Medications: ${pet.medication}`}>💊 Meds</span>
-                                )}
-                              </div>
-
-                              {/* Vet details */}
-                              {(pet.vet_name || pet.vet_phone) && (
-                                <div className="text-[10px] text-[#8B7E7D] bg-[#FAF6F4] px-2.5 py-1 rounded-lg border border-[#E8DDD4] mb-1">
-                                  🏥 Vet: {pet.vet_name || 'N/A'} {pet.vet_phone && `(${pet.vet_phone})`}
-                                </div>
-                              )}
-
-                              {/* Action buttons */}
-                              <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-[#FAF6F4]">
+                          <PetProfileCard
+                            key={pet.id}
+                            pet={pet}
+                            tier="owner"
+                            actions={
+                              <>
                                 <button
+                                  type="button"
                                   onClick={() => openPetModal(pet)}
-                                  className="text-[11px] font-bold text-[#8B5E3C] hover:underline cursor-pointer border-none bg-none"
+                                  className="text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer border-none bg-none px-1 py-0.5"
                                 >
                                   Edit
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => handleDeletePet(pet.id)}
-                                  className="text-[11px] font-bold text-red-600 hover:underline cursor-pointer border-none bg-none"
+                                  className="text-xs font-bold text-red-600 hover:underline cursor-pointer border-none bg-none px-1 py-0.5"
                                 >
                                   Delete
                                 </button>
-                              </div>
-                            </div>
-                          </div>
+                              </>
+                            }
+                          />
                         ))}
                       </div>
                     )}
@@ -5073,49 +5041,17 @@ export function PetSittingContent() {
                                      )}
 
                                      {req.pet_details && (
-                                       <div className="col-span-1 sm:col-span-2 mt-2 space-y-2.5">
-                                         {(req.pet_details.pets || [req.pet_details]).map((pet: any, idx: number) => (
-                                           <div key={pet.id || idx} className="bg-white rounded-xl border border-[#E8DDD4] p-3 text-xs text-[#4A3E3D]">
-                                             <div className="font-bold text-[#8B5E3C] mb-2 flex items-center gap-1.5 border-b border-[#FAF6F4] pb-1.5">
-                                               <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Care Profile: {pet.pet_name}
-                                             </div>
-                                             <div className="flex gap-3 flex-col sm:flex-row text-left">
-                                               {(pet.photo_url || (Array.isArray(pet.photo_urls) && pet.photo_urls.filter(Boolean).length > 0)) && (
-                                                 <PetPhotoCarousel
-                                                   photoUrls={pet.photo_urls || [pet.photo_url]}
-                                                   petType={pet.pet_type}
-                                                   className="w-20 h-20 rounded-xl"
-                                                 />
-                                               )}
-                                               <div className="flex-1 space-y-1.5 text-[11px]">
-                                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                                                   {pet.breed && <div><strong>Breed:</strong> {pet.breed}</div>}
-                                                   {pet.gender && <div><strong>Gender:</strong> {pet.gender}</div>}
-                                                   {pet.weight && <div><strong>Weight:</strong> {pet.weight}</div>}
-                                                   {pet.spayed_neutered !== undefined && (
-                                                     <div><strong>Spayed/Neutered:</strong> {pet.spayed_neutered ? 'Yes' : 'No'}</div>
-                                                   )}
-                                                 </div>
-                                                 {pet.feeding_schedule && (
-                                                   <div><strong>Feeding:</strong> {pet.feeding_schedule}</div>
-                                                 )}
-                                                 {pet.medication && (
-                                                   <div><strong>Medications:</strong> {pet.medication}</div>
-                                                 )}
-                                                 {pet.behavior_notes && (
-                                                   <div><strong>Behavior Notes:</strong> {pet.behavior_notes}</div>
-                                                 )}
-                                                 {(pet.vet_name || pet.vet_phone) && (
-                                                   <div className="text-[10px] text-[#8B7E7D] bg-[#FAF6F4] p-1.5 rounded-lg border border-[#E8DDD4] mt-1 inline-block">
-                                                     Vet: {pet.vet_name || 'N/A'} {pet.vet_phone && `(${pet.vet_phone})`}
-                                                   </div>
-                                                 )}
-                                               </div>
-                                             </div>
-                                           </div>
-                                         ))}
-                                       </div>
-                                     )}
+                                        <div className="col-span-1 sm:col-span-2 mt-2 space-y-2.5">
+                                          {(req.pet_details.pets || [req.pet_details]).map((pet: any, idx: number) => (
+                                            <PetProfileCard
+                                              key={pet.id || idx}
+                                              pet={pet}
+                                              tier="care"
+                                              headerTitle="Care Profile"
+                                            />
+                                          ))}
+                                        </div>
+                                      )}
                                       {req.care_plan && (() => {
                                         const showCarePlan = !!expandedCarePlans[req.id];
                                         return (

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock } from 'lucide-react';
+import PetProfileCard from '@/components/PetProfileCard';
 
 interface VaccineRecord {
   id?: string;
@@ -267,59 +268,38 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
               <p className="text-xs text-gray-500 max-w-xs">Add your pet once to use seamlessly across Pet Sitting, Vet Boarding, and Daycare.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               {pets.map(pet => (
-                <div key={pet.id} className="bg-white border border-[#EEEEEE] rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {pet.photo_url ? (
-                      <img src={pet.photo_url} alt={pet.pet_name} className="w-12 h-12 rounded-full object-cover border border-amber-200 shrink-0" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-amber-100/70 text-amber-800 font-black text-lg flex items-center justify-center shrink-0">
-                        {pet.pet_name?.[0]?.toUpperCase() || '🐾'}
-                      </div>
-                    )}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-gray-900 text-base">{pet.pet_name}</span>
-                        <span className="bg-amber-100 text-amber-900 font-bold text-[10px] uppercase px-2 py-0.5 rounded-full">
-                          {pet.pet_type}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {pet.breed || 'Mixed'} • {pet.age || 'Age N/A'} • {pet.gender || 'N/A'}
-                      </p>
-                      {pet.allergies && (
-                        <span className="inline-block mt-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
-                          ⚠️ Allergies: {pet.allergies}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-end sm:self-center">
-                    <button
-                      type="button"
-                      onClick={() => { setQrPet(pet); setCopiedLink(false); }}
-                      className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs"
-                    >
-                      <QrCode className="w-3.5 h-3.5 text-emerald-600" /> Partner QR
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setEditingPet(pet); setShowModal(true); }}
-                      className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs flex items-center gap-1 transition-all"
-                    >
-                      <Edit2 className="w-3 h-3 text-gray-500" /> Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => pet.id && handleDeletePet(pet.id)}
-                      className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs flex items-center gap-1 transition-all"
-                    >
-                      <Trash2 className="w-3 h-3 text-rose-500" />
-                    </button>
-                  </div>
-                </div>
+                <PetProfileCard
+                  key={pet.id}
+                  pet={pet}
+                  tier="owner"
+                  actions={
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => { setQrPet(pet); setCopiedLink(false); }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-emerald-600" /> Partner QR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingPet(pet); setShowModal(true); }}
+                        className="px-3 py-1.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                      >
+                        <Edit2 className="w-3 h-3 text-gray-500" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => pet.id && handleDeletePet(pet.id)}
+                        className="px-2.5 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3 text-rose-500" />
+                      </button>
+                    </>
+                  }
+                />
               ))}
             </div>
           )}
