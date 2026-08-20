@@ -87,8 +87,28 @@ export default function LostPetsFeed() {
           setBlockedEmails(JSON.parse(blocked));
         } catch (e) {}
       }
+
+      // Check URL query parameters for tab selection
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'ai' || tabParam === 'ai-search' || tabParam === 'search') {
+        setActiveTab('ai');
+      }
     }
   }, []);
+
+  const handleTabSwitch = (tab: 'board' | 'ai') => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (tab === 'ai') {
+        url.searchParams.set('tab', 'ai');
+      } else {
+        url.searchParams.delete('tab');
+      }
+      window.history.replaceState(null, '', url.pathname + url.search);
+    }
+  };
 
   const handleBlockUser = (emailToBlock: string) => {
     if (!emailToBlock) return;
@@ -548,7 +568,7 @@ export default function LostPetsFeed() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setActiveTab('board')}
+                onClick={() => handleTabSwitch('board')}
                 className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'board'
                     ? 'bg-[#8B5E3C] text-white shadow-sm'
@@ -560,7 +580,7 @@ export default function LostPetsFeed() {
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('ai')}
+                onClick={() => handleTabSwitch('ai')}
                 className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === 'ai'
                     ? 'bg-[#8B5E3C] text-white shadow-sm'
