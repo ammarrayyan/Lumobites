@@ -778,7 +778,7 @@ export default function LostPetsFeed() {
               TAB 2 — AI Pet Search
           ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'ai' && (
-            !proEmail ? (
+            !userEmail ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 mb-4">Sign in to use AI Pet Matching</p>
                 <button
