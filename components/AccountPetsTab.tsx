@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock } from 'lucide-react';
 
 interface VaccineRecord {
   id?: string;
@@ -66,6 +66,8 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
   // Edit modal state
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [qrPet, setQrPet] = useState<Pet | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const fetchPetsAndGrants = async () => {
     if (!ownerEmail) return;
@@ -295,6 +297,13 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                   </div>
 
                   <div className="flex items-center gap-2 self-end sm:self-center">
+                    <button
+                      type="button"
+                      onClick={() => { setQrPet(pet); setCopiedLink(false); }}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs"
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-emerald-600" /> Partner QR
+                    </button>
                     <button
                       type="button"
                       onClick={() => { setEditingPet(pet); setShowModal(true); }}
@@ -604,6 +613,88 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── PARTNER CHECK-IN QR CODE MODAL ── */}
+      {qrPet && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-gray-900 text-base leading-tight">Partner Check-In QR Code</h3>
+                  <p className="text-xs text-gray-500 font-semibold">{qrPet.pet_name} ({qrPet.pet_type})</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQrPet(null)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center text-center space-y-4 py-2">
+              <div className="p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex flex-col items-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`https://lumobites.net/pet-access?id=${qrPet.id}`)}`}
+                  alt={`QR Code for ${qrPet.pet_name}`}
+                  className="w-48 h-48 rounded-xl shadow-md border border-white"
+                />
+                <span className="mt-3 text-[11px] font-bold text-emerald-900 bg-emerald-100/90 px-3 py-1 rounded-full uppercase tracking-wider">
+                  ID: {qrPet.id ? qrPet.id.substring(0, 8) : 'PET'}
+                </span>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200/70 rounded-xl p-3 text-left w-full space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-900 font-extrabold text-xs">
+                  <Lock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <span>Restricted Access & Privacy Guard</span>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-snug">
+                  Show this QR code at check-in with any verified Vet Clinic, Daycare, or Sitter. Unauthenticated or public scans reveal <strong>zero private owner details</strong>. Authorized partners gain temporary read-only access.
+                </p>
+              </div>
+
+              <div className="w-full flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const link = `https://lumobites.net/pet-access?id=${qrPet.id}`;
+                    navigator.clipboard.writeText(link);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 3000);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-800 hover:bg-gray-50 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                >
+                  {copiedLink ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" /> Copied Link!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-gray-500" /> Copy Access Link
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href={`https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(`https://lumobites.net/pet-access?id=${qrPet.id}`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  download={`${qrPet.pet_name}-partner-qr.png`}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                >
+                  <Download className="w-4 h-4" /> Save High-Res QR
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
