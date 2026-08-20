@@ -497,39 +497,39 @@ export default function Home() {
           </div>
 
           {/* 4. Pet Adoption */}
-          <div className="bg-gradient-to-b from-[#FAF5EE] to-[#FDF8F3] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#FDF5F6] to-[#FAF0F2] border border-[#F4DCDD] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#E8BFC2] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center shadow-inner">
-                <Heart className="w-6 h-6 text-[#8B5E3C]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#FCE8EA] flex items-center justify-center shadow-inner">
+                <Heart className="w-6 h-6 text-[#D94668]" />
               </div>
-              <h3 className="text-[#664333] font-extrabold text-xl">Pet Adoption</h3>
+              <h3 className="text-[#7A2A38] font-extrabold text-xl">Pet Adoption</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
+            <p className="text-[#8F5561] leading-relaxed relative z-10 text-sm">
               Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
             </p>
             <div className="relative z-10">
-              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5E3C] to-[#734A2E] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#D94668] to-[#B83250] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find to Adopt &rarr;
               </Link>
             </div>
           </div>
 
           {/* 5. Partner Portal */}
-          <div className="bg-gradient-to-b from-[#FAF5EE] to-[#F5EDE4] border border-[#E8DDD4] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#F7F6FA] to-[#EFF0F7] border border-[#E0DDF2] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#C8C3E8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#EADBCE]/50 flex items-center justify-center shadow-inner">
-                <Building2 className="w-6 h-6 text-[#5C4533]" />
+              <div className="w-12 h-12 rounded-2xl bg-[#ECEAF7] flex items-center justify-center shadow-inner">
+                <Building2 className="w-6 h-6 text-[#635BFF]" />
               </div>
-              <h3 className="text-[#5C4533] font-extrabold text-xl">Partner Portal</h3>
+              <h3 className="text-[#3B347A] font-extrabold text-xl">Partner Portal</h3>
             </div>
-            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
-              Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings & inquiries.
+            <p className="text-[#645F94] leading-relaxed relative z-10 text-sm">
+              Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings &amp; inquiries.
             </p>
             <div className="relative z-10">
               <button
                 type="button"
                 onClick={handleOpenPartnerPortal}
-                className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#5C4533] to-[#4A3728] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#635BFF] to-[#4E44E6] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
               >
                 Partner Portal &rarr;
               </button>
