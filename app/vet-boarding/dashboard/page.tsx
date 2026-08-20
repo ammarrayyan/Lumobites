@@ -12,6 +12,7 @@ import {
 import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
+import LivePetProfileCard from '@/components/LivePetProfileCard';
 import { formatPublicCity } from '@/lib/formatCity';
 
 const VET_SERVICES = [
@@ -680,6 +681,11 @@ export default function VetBoardingDashboardPage() {
                                 ✓ Replied
                               </span>
                             )}
+                          </div>
+
+                          {/* 🐾 LIVE PET PROFILE CARD */}
+                          <div className="mt-3">
+                            <LivePetProfileCard petId={inq.pet_id} partnerId={clinic.id} partnerType="vet" />
                           </div>
                         </div>
                         <div className="shrink-0 flex items-center gap-2">

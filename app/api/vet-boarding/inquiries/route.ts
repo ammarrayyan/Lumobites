@@ -86,13 +86,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { clinic_id, owner_email } = body;
+    const { clinic_id, owner_email, pet_id } = body;
 
     if (!clinic_id || !owner_email) {
       return NextResponse.json({ error: 'Missing clinic_id or owner_email' }, { status: 400 });
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
+
+    // Fetch clinic details
+    const { data: clinic } = await supabaseAdmin
+      .from('vet_clinics')
+      .select('email, clinic_name')
+      .eq('id', clinic_id)
+      .maybeSingle();
 
     // Check if an inquiry thread already exists for this owner+clinic pair
     const { data: existing } = await supabaseAdmin
@@ -102,44 +109,55 @@ export async function POST(request: NextRequest) {
       .eq('owner_email', cleanEmail)
       .maybeSingle();
 
-    if (existing) {
-      return NextResponse.json({ inquiry: existing, existed: true });
+    let targetInquiry = existing;
+
+    if (!existing) {
+      // Create new inquiry thread
+      const { data: inquiry, error } = await supabaseAdmin
+        .from('vet_inquiries')
+        .insert({ clinic_id, owner_email: cleanEmail, pet_id: pet_id || null, status: 'pending' })
+        .select('*')
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      targetInquiry = inquiry;
+    } else if (pet_id) {
+      // Update pet_id if passed
+      await supabaseAdmin.from('vet_inquiries').update({ pet_id }).eq('id', existing.id);
     }
 
-    // Create new inquiry thread
-    const { data: inquiry, error } = await supabaseAdmin
-      .from('vet_inquiries')
-      .insert({ clinic_id, owner_email: cleanEmail, status: 'pending' })
-      .select('*')
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // Grant or renew profile access if pet_id is provided
+    if (pet_id && clinic) {
+      const { grantOrRenewPetAccess } = await import('@/lib/petAccessHelper');
+      await grantOrRenewPetAccess({
+        petId: pet_id,
+        ownerEmail: cleanEmail,
+        partnerType: 'vet',
+        partnerId: clinic_id,
+        partnerName: clinic.clinic_name || 'Vet Clinic',
+        partnerEmail: clinic.email || '',
+      });
     }
 
     // Notify clinic via in-app notification
-    const { data: clinic } = await supabaseAdmin
-      .from('vet_clinics')
-      .select('email, clinic_name')
-      .eq('id', clinic_id)
-      .single();
-
-    if (clinic?.email) {
+    if (clinic?.email && !existing) {
       await supabaseAdmin.from('notifications').insert({
         recipient_email: clinic.email,
         type: 'new_message',
         title: 'New Boarding Inquiry 🏥',
         message: `${cleanEmail} sent a boarding inquiry for their pet — tap to view`,
-        link: `/vet-boarding/dashboard?inquiry=${inquiry.id}`,
+        link: `/vet-boarding/dashboard?inquiry=${targetInquiry.id}`,
         read: false,
       });
     }
 
-    if (inquiry?.id) {
-      await supabaseAdmin.from('vet_inquiries').update({ archived: false }).eq('id', inquiry.id);
+    if (targetInquiry?.id) {
+      await supabaseAdmin.from('vet_inquiries').update({ archived: false }).eq('id', targetInquiry.id);
     }
 
-    return NextResponse.json({ inquiry, existed: false });
+    return NextResponse.json({ inquiry: targetInquiry, existed: !!existing });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

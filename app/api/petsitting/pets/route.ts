@@ -62,7 +62,14 @@ export async function POST(request: NextRequest) {
       vet_name,
       vet_phone,
       photo_url,
-      photo_urls
+      photo_urls,
+      vaccination_records,
+      microchip_number,
+      allergies,
+      emergency_contact_name,
+      emergency_contact_phone,
+      insurance_provider,
+      insurance_policy_number
     } = body;
 
     if (!owner_email || !pet_name || !pet_type) {
@@ -134,7 +141,14 @@ export async function POST(request: NextRequest) {
       vet_name: vet_name || null,
       vet_phone: vet_phone || null,
       photo_url: processedPhotoUrls[0] || '',
-      photo_urls: processedPhotoUrls
+      photo_urls: processedPhotoUrls,
+      vaccination_records: Array.isArray(vaccination_records) ? vaccination_records : [],
+      microchip_number: microchip_number || null,
+      allergies: allergies || null,
+      emergency_contact_name: emergency_contact_name || null,
+      emergency_contact_phone: emergency_contact_phone || null,
+      insurance_provider: insurance_provider || null,
+      insurance_policy_number: insurance_policy_number || null
     };
 
     let resultData = null;

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard } from 'lucide-react';
+import AccountPetsTab from '@/components/AccountPetsTab';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -729,6 +730,9 @@ export default function AccountPage() {
                       Account: {email}
                     </p>
                   </div>
+
+                  {/* 🐾 UNIFIED PET PROFILES & LIVE ACCESS CONTROL */}
+                  <AccountPetsTab ownerEmail={email} />
 
                   {!subDetails.active ? (
                     <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-4">

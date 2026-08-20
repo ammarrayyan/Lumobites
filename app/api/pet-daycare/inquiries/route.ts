@@ -82,13 +82,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { daycare_id, owner_email } = body;
+    const { daycare_id, owner_email, pet_id } = body;
 
     if (!daycare_id || !owner_email) {
       return NextResponse.json({ error: 'Missing daycare_id or owner_email' }, { status: 400 });
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
+
+    // Fetch daycare details
+    const { data: daycare } = await supabaseAdmin
+      .from('pet_daycares')
+      .select('email, business_name')
+      .eq('id', daycare_id)
+      .maybeSingle();
 
     // Check if an inquiry thread already exists for this owner+daycare pair
     const { data: existing } = await supabaseAdmin
@@ -98,44 +105,54 @@ export async function POST(request: NextRequest) {
       .eq('owner_email', cleanEmail)
       .maybeSingle();
 
-    if (existing) {
-      return NextResponse.json({ inquiry: existing, existed: true });
+    let targetInquiry = existing;
+
+    if (!existing) {
+      // Create new inquiry thread
+      const { data: inquiry, error } = await supabaseAdmin
+        .from('daycare_inquiries')
+        .insert({ daycare_id, owner_email: cleanEmail, pet_id: pet_id || null, status: 'pending' })
+        .select('*')
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      targetInquiry = inquiry;
+    } else if (pet_id) {
+      await supabaseAdmin.from('daycare_inquiries').update({ pet_id }).eq('id', existing.id);
     }
 
-    // Create new inquiry thread
-    const { data: inquiry, error } = await supabaseAdmin
-      .from('daycare_inquiries')
-      .insert({ daycare_id, owner_email: cleanEmail, status: 'pending' })
-      .select('*')
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // Grant or renew profile access if pet_id is provided
+    if (pet_id && daycare) {
+      const { grantOrRenewPetAccess } = await import('@/lib/petAccessHelper');
+      await grantOrRenewPetAccess({
+        petId: pet_id,
+        ownerEmail: cleanEmail,
+        partnerType: 'daycare',
+        partnerId: daycare_id,
+        partnerName: daycare.business_name || 'Pet Daycare',
+        partnerEmail: daycare.email || '',
+      });
     }
 
     // Notify daycare via in-app notification
-    const { data: daycare } = await supabaseAdmin
-      .from('pet_daycares')
-      .select('email, business_name')
-      .eq('id', daycare_id)
-      .maybeSingle();
-
-    if (daycare?.email) {
+    if (daycare?.email && !existing) {
       await supabaseAdmin.from('notifications').insert({
         recipient_email: daycare.email,
         type: 'new_message',
         title: 'New Daycare Inquiry 🐕',
         message: `${cleanEmail} sent a daycare inquiry for their pet — tap to view`,
-        link: `/pet-daycare/dashboard?inquiry=${inquiry.id}`,
+        link: `/pet-daycare/dashboard?inquiry=${targetInquiry.id}`,
         read: false,
       });
     }
 
-    if (inquiry?.id) {
-      await supabaseAdmin.from('daycare_inquiries').update({ archived: false }).eq('id', inquiry.id);
+    if (targetInquiry?.id) {
+      await supabaseAdmin.from('daycare_inquiries').update({ archived: false }).eq('id', targetInquiry.id);
     }
 
-    return NextResponse.json({ inquiry, existed: false });
+    return NextResponse.json({ inquiry: targetInquiry, existed: !!existing });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

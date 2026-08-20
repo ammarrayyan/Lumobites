@@ -216,9 +216,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError?.message || 'Database error' }, { status: 500 });
     }
 
+    // Grant or renew pet access for sitter
+    const selectedPetIds = pet_details?.pets?.map((p: any) => p.id).filter(Boolean) || (pet_id ? [pet_id] : []);
+    if (selectedPetIds.length > 0 && sitter_id) {
+      (async () => {
+        try {
+          const { grantOrRenewPetAccess } = await import('@/lib/petAccessHelper');
+          const { data: sitter } = await supabaseAdmin
+            .from('sitters')
+            .select('name, email')
+            .eq('id', sitter_id)
+            .maybeSingle();
+
+          for (const pid of selectedPetIds) {
+            await grantOrRenewPetAccess({
+              petId: pid,
+              ownerEmail: cleanEmail,
+              partnerType: 'sitter',
+              partnerId: sitter_id,
+              partnerName: sitter?.name || 'Pet Sitter',
+              partnerEmail: sitter?.email || '',
+            });
+          }
+        } catch (ex) {
+          console.error('[PetSitting Request API] Error granting pet access:', ex);
+        }
+      })();
+    }
+
     // Generate care plan silently in the background
     if (process.env.ANTHROPIC_API_KEY) {
-      const selectedPetIds = pet_details?.pets?.map((p: any) => p.id).filter(Boolean) || (pet_id ? [pet_id] : []);
       if (selectedPetIds.length > 0) {
         (async () => {
           try {
