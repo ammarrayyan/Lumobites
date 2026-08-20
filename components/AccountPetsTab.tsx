@@ -541,7 +541,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                 {/* Vaccination Records */}
                 <div className="space-y-2 pt-1 border-t border-amber-200/60">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-amber-950 text-xs">Vaccination Records (Vets Only)</span>
+                    <span className="font-bold text-amber-950 text-xs">Vaccination Records</span>
                     <button
                       type="button"
                       onClick={addVaccineRow}
@@ -551,30 +551,37 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                     </button>
                   </div>
 
-                  {(editingPet.vaccination_records || []).map((vax, vi) => (
-                    <div key={vi} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-200">
-                      <input
-                        type="text"
-                        placeholder="Vaccine Name (e.g. Rabies)"
-                        value={vax.name}
-                        onChange={e => {
-                          const updated = [...(editingPet.vaccination_records || [])];
-                          updated[vi].name = e.target.value;
-                          setEditingPet({ ...editingPet, vaccination_records: updated });
-                        }}
-                        className="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs"
-                      />
-                      <input
-                        type="date"
-                        value={vax.date_administered}
-                        onChange={e => {
-                          const updated = [...(editingPet.vaccination_records || [])];
-                          updated[vi].date_administered = e.target.value;
-                          setEditingPet({ ...editingPet, vaccination_records: updated });
-                        }}
-                        className="w-28 px-1.5 py-1 border border-gray-200 rounded-lg text-xs"
-                      />
-                      <button type="button" onClick={() => removeVaccineRow(vi)} className="text-rose-500 hover:text-rose-700 font-bold px-1">✕</button>
+                  {(editingPet.vaccination_records || []).map((vax: any, vi) => (
+                    <div key={vi} className="flex flex-col gap-1 bg-white p-2 rounded-xl border border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          placeholder="Vaccine Name (e.g. Rabies)"
+                          value={vax.name || vax.vaccine || ''}
+                          onChange={e => {
+                            const updated = [...(editingPet.vaccination_records || [])];
+                            updated[vi].name = e.target.value;
+                            setEditingPet({ ...editingPet, vaccination_records: updated });
+                          }}
+                          className="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs"
+                        />
+                        <input
+                          type="date"
+                          value={vax.date_administered || ''}
+                          onChange={e => {
+                            const updated = [...(editingPet.vaccination_records || [])];
+                            updated[vi].date_administered = e.target.value;
+                            setEditingPet({ ...editingPet, vaccination_records: updated });
+                          }}
+                          className="w-28 px-1.5 py-1 border border-gray-200 rounded-lg text-xs"
+                        />
+                        <button type="button" onClick={() => removeVaccineRow(vi)} className="text-rose-500 hover:text-rose-700 font-bold px-1">✕</button>
+                      </div>
+                      {vax.added_by && (
+                        <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md self-start">
+                          🏷️ {vax.added_by}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -603,3 +610,4 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
     </div>
   );
 }
+
