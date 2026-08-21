@@ -4,6 +4,17 @@
  * rich medical, insurance, and emergency contact structures.
  */
 
+export interface VetVisitRecord {
+  id: string;
+  visit_date: string;
+  reason: string;
+  summary: string;
+  follow_up_notes?: string;
+  clinic_name: string;
+  added_by: string;
+  date_added: string;
+}
+
 export interface UnpackedPetProfile {
   id?: string;
   owner_email: string;
@@ -30,6 +41,7 @@ export interface UnpackedPetProfile {
   insurance_policy_number?: string | null;
   vaccination_records?: any[];
   chronic_conditions?: any[];
+  vet_visits?: VetVisitRecord[];
   created_at?: string;
 }
 
@@ -91,6 +103,9 @@ export function unpackPetProfile(pet: any): UnpackedPetProfile | null {
     chronic_conditions: Array.isArray(parsedNotes.chronic_conditions) 
       ? parsedNotes.chronic_conditions 
       : (Array.isArray(pet.chronic_conditions) ? pet.chronic_conditions : []),
+    vet_visits: Array.isArray(parsedNotes.vet_visits)
+      ? parsedNotes.vet_visits
+      : (Array.isArray(pet.vet_visits) ? pet.vet_visits : []),
     created_at: pet.created_at,
   };
 }
@@ -133,6 +148,10 @@ export function packPetProfile(input: any) {
 
   if (Array.isArray(input.chronic_conditions)) {
     structuredNotes.chronic_conditions = input.chronic_conditions;
+  }
+
+  if (Array.isArray(input.vet_visits)) {
+    structuredNotes.vet_visits = input.vet_visits;
   }
 
   const rawPhotoUrls = Array.isArray(input.photo_urls) ? input.photo_urls : (input.photo_url ? [input.photo_url] : []);

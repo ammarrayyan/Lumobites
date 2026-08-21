@@ -17,7 +17,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [accessTier, setAccessTier] = useState<string>('');
 
   // Vet Add Entry Modal States
-  const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'chronic_condition' | null>(null);
+  const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -29,6 +29,10 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [chipNumber, setChipNumber] = useState('');
   const [conditionName, setConditionName] = useState('');
   const [conditionDate, setConditionDate] = useState('');
+  const [visitDate, setVisitDate] = useState('');
+  const [visitReason, setVisitReason] = useState('');
+  const [visitSummary, setVisitSummary] = useState('');
+  const [visitFollowUp, setVisitFollowUp] = useState('');
 
   const fetchLiveProfile = async () => {
     if (!petId || !partnerId || !partnerType) return;
@@ -54,7 +58,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
     fetchLiveProfile();
   }, [petId, partnerId, partnerType]);
 
-  const handleAddMedicalEntry = async (entryType: 'vaccination' | 'microchip' | 'chronic_condition') => {
+  const handleAddMedicalEntry = async (entryType: 'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit') => {
     setSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(null);
@@ -81,6 +85,18 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         return;
       }
       payloadData = { condition: conditionName, date_diagnosed: conditionDate };
+    } else if (entryType === 'vet_visit') {
+      if (!visitDate || !visitReason || !visitSummary) {
+        setSubmitError('Visit date, reason for visit, and clinical summary are required');
+        setSubmitting(false);
+        return;
+      }
+      payloadData = {
+        visit_date: visitDate,
+        reason: visitReason,
+        summary: visitSummary,
+        follow_up_notes: visitFollowUp || undefined
+      };
     }
 
     try {
@@ -103,6 +119,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         setVaxName(''); setVaxDateAdmin(''); setVaxDateExp('');
         setChipNumber('');
         setConditionName(''); setConditionDate('');
+        setVisitDate(''); setVisitReason(''); setVisitSummary(''); setVisitFollowUp('');
 
         setTimeout(() => {
           setActiveModal(null);
@@ -268,6 +285,53 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
                       type="date"
                       value={conditionDate}
                       onChange={(e) => setConditionDate(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* VET VISIT LOG FORM */}
+              {activeModal === 'vet_visit' && (
+                <div className="space-y-2.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Visit Date *</label>
+                      <input
+                        type="date"
+                        value={visitDate}
+                        onChange={(e) => setVisitDate(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Reason for Visit *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Annual Exam, Limping Check"
+                        value={visitReason}
+                        onChange={(e) => setVisitReason(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Clinical Summary & Diagnosis *</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Brief clinical observations and findings..."
+                      value={visitSummary}
+                      onChange={(e) => setVisitSummary(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Optional Follow-Up Notes</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Monitor for limping, recheck in 2 weeks"
+                      value={visitFollowUp}
+                      onChange={(e) => setVisitFollowUp(e.target.value)}
                       className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
                   </div>

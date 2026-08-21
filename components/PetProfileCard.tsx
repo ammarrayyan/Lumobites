@@ -35,6 +35,17 @@ export interface ChronicCondition {
   added_by?: string;
 }
 
+export interface VetVisitRecord {
+  id?: string;
+  visit_date: string;
+  reason: string;
+  summary: string;
+  follow_up_notes?: string;
+  clinic_name?: string;
+  added_by?: string;
+  date_added?: string;
+}
+
 export interface PetProfileData {
   id?: string;
   owner_email?: string;
@@ -61,6 +72,7 @@ export interface PetProfileData {
   insurance_policy_number?: string;
   vaccination_records?: VaccineRecord[];
   chronic_conditions?: ChronicCondition[];
+  vet_visits?: VetVisitRecord[];
 }
 
 export interface PetProfileCardProps {
@@ -69,7 +81,7 @@ export interface PetProfileCardProps {
   layout?: 'card' | 'compact' | 'full';
   headerTitle?: string;
   actions?: React.ReactNode;
-  onAddMedicalEntry?: (entryType: 'vaccination' | 'microchip' | 'chronic_condition') => void;
+  onAddMedicalEntry?: (entryType: 'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit') => void;
   className?: string;
   collapsible?: boolean;
   defaultExpanded?: boolean;
@@ -105,6 +117,7 @@ export default function PetProfileCard({
   let parsedMicrochip: string | undefined = pet.microchip_number;
   let parsedMicrochipAddedBy: string | undefined = pet.microchip_added_by;
   let parsedChronicConditions: ChronicCondition[] = Array.isArray(pet.chronic_conditions) ? pet.chronic_conditions : [];
+  let parsedVetVisits: VetVisitRecord[] = Array.isArray(pet.vet_visits) ? pet.vet_visits : [];
 
   if (pet.behavior_notes && pet.behavior_notes.trim().startsWith('{')) {
     try {
@@ -119,6 +132,9 @@ export default function PetProfileCard({
         }
         if (Array.isArray(parsed.chronic_conditions) && parsedChronicConditions.length === 0) {
           parsedChronicConditions = parsed.chronic_conditions;
+        }
+        if (Array.isArray(parsed.vet_visits) && parsedVetVisits.length === 0) {
+          parsedVetVisits = parsed.vet_visits;
         }
         cleanBehaviorNotes = parsed.notes || parsed.text || '';
       }
@@ -446,6 +462,61 @@ export default function PetProfileCard({
                       </div>
                     ) : (
                       <p className="text-[11px] text-gray-400 italic mt-1">No chronic conditions recorded.</p>
+                    )}
+                  </div>
+                )}
+
+                {/* 🏥 Vet Visit History & Follow-Up Notes */}
+                {(isVet || parsedVetVisits.length > 0) && (
+                  <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-extrabold text-gray-900 text-xs flex items-center gap-1.5">
+                        <Stethoscope className="w-3.5 h-3.5 text-emerald-600" /> Vet Visit History & Follow-Up Notes
+                      </span>
+                      {isVet && onAddMedicalEntry && (
+                        <button
+                          type="button"
+                          onClick={() => onAddMedicalEntry('vet_visit')}
+                          className="bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" /> Add Visit Log
+                        </button>
+                      )}
+                    </div>
+
+                    {parsedVetVisits.length > 0 ? (
+                      <div className="space-y-2 mt-2">
+                        {parsedVetVisits.map((visit, i) => (
+                          <div key={visit.id || i} className="bg-stone-50 p-2.5 rounded-lg border border-stone-200/70 text-[11px] space-y-1.5">
+                            <div className="flex items-center justify-between flex-wrap gap-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-gray-900 text-xs">{visit.reason}</span>
+                                {visit.added_by && (
+                                  <span className="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 text-[10px] px-1.5 py-0.2 rounded-md">
+                                    {visit.added_by}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-gray-500 font-medium">
+                                Visit: <strong>{visit.visit_date}</strong>
+                              </span>
+                            </div>
+
+                            <p className="text-gray-700 leading-relaxed text-xs">
+                              {visit.summary}
+                            </p>
+
+                            {visit.follow_up_notes && (
+                              <div className="mt-1 bg-amber-50/90 border border-amber-200/80 p-2 rounded-md text-amber-950 text-[11px] flex items-start gap-1.5">
+                                <span className="font-bold text-amber-900 shrink-0">⚠️ Follow-Up:</span>
+                                <span className="leading-tight">{visit.follow_up_notes}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-gray-400 italic mt-1">No vet visits recorded yet.</p>
                     )}
                   </div>
                 )}

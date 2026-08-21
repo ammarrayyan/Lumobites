@@ -380,14 +380,14 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
 
       {/* ── EDIT / ADD PET FULL-SCREEN MODAL ── */}
       {showModal && editingPet && (
-        <div className="fixed inset-0 z-50 bg-[#FDFAF7] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 bg-[#F7F3EE] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
           {/* Sticky Full-Screen Top Header */}
-          <div className="bg-white border-b border-[#E8DDD4] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
+          <div className="bg-white/95 backdrop-blur-xs border-b border-[#DFD3C7] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
             <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
                 title="Go back without saving"
               >
                 <ArrowLeft className="w-4 h-4 text-[#8B5E3C]" />
@@ -420,304 +420,356 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
           <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10">
             <form id="account-pet-edit-form" onSubmit={handleSavePet} className="max-w-4xl mx-auto space-y-6 text-xs">
               {/* Section 1: Basic Identity & Core Information */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Basic Details & Identity
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Pet Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editingPet.pet_name}
-                      onChange={e => setEditingPet({ ...editingPet, pet_name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Milo"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Pet Type *</label>
-                    <select
-                      value={editingPet.pet_type}
-                      onChange={e => setEditingPet({ ...editingPet, pet_type: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                    >
-                      <option value="Dog">Dog 🐶</option>
-                      <option value="Cat">Cat 🐱</option>
-                      <option value="Bird">Bird 🦜</option>
-                      <option value="Rabbit">Rabbit 🐰</option>
-                      <option value="Other">Other 🐾</option>
-                    </select>
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
+                      🐾
+                    </span>
+                    Basic Details & Identity
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 1 of 4
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="font-bold text-gray-700 block mb-1">Breed</label>
-                    <input
-                      type="text"
-                      value={editingPet.breed || ''}
-                      onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Golden Retriever"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Age</label>
-                    <input
-                      type="text"
-                      value={editingPet.age || ''}
-                      onChange={e => setEditingPet({ ...editingPet, age: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. 3 years"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Weight</label>
-                    <input
-                      type="text"
-                      value={editingPet.weight || ''}
-                      onChange={e => setEditingPet({ ...editingPet, weight: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. 50 lbs"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Gender</label>
-                    <select
-                      value={editingPet.gender || ''}
-                      onChange={e => setEditingPet({ ...editingPet, gender: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center pt-2 sm:pt-6">
-                    <label className="flex items-center gap-2.5 text-xs font-bold text-gray-800 cursor-pointer select-none">
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Pet Name *</label>
                       <input
-                        type="checkbox"
-                        checked={!!editingPet.spayed_neutered}
-                        onChange={e => setEditingPet({ ...editingPet, spayed_neutered: e.target.checked })}
-                        className="rounded text-[#8B5E3C] focus:ring-[#8B5E3C] w-4 h-4 border-[#E8DDD4]"
+                        type="text"
+                        required
+                        value={editingPet.pet_name}
+                        onChange={e => setEditingPet({ ...editingPet, pet_name: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Milo"
                       />
-                      <span>Spayed / Neutered (Fixed)</span>
-                    </label>
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Pet Type *</label>
+                      <select
+                        value={editingPet.pet_type}
+                        onChange={e => setEditingPet({ ...editingPet, pet_type: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                      >
+                        <option value="Dog">Dog 🐶</option>
+                        <option value="Cat">Cat 🐱</option>
+                        <option value="Bird">Bird 🦜</option>
+                        <option value="Rabbit">Rabbit 🐰</option>
+                        <option value="Other">Other 🐾</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="font-bold text-gray-700 block mb-1">Breed</label>
+                      <input
+                        type="text"
+                        value={editingPet.breed || ''}
+                        onChange={e => setEditingPet({ ...editingPet, breed: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Golden Retriever"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Age</label>
+                      <input
+                        type="text"
+                        value={editingPet.age || ''}
+                        onChange={e => setEditingPet({ ...editingPet, age: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. 3 years"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Weight</label>
+                      <input
+                        type="text"
+                        value={editingPet.weight || ''}
+                        onChange={e => setEditingPet({ ...editingPet, weight: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. 50 lbs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Gender</label>
+                      <select
+                        value={editingPet.gender || ''}
+                        onChange={e => setEditingPet({ ...editingPet, gender: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center pt-2 sm:pt-6">
+                      <label className="flex items-center gap-2.5 text-xs font-bold text-gray-800 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={!!editingPet.spayed_neutered}
+                          onChange={e => setEditingPet({ ...editingPet, spayed_neutered: e.target.checked })}
+                          className="rounded text-[#8B5E3C] focus:ring-[#8B5E3C] w-4 h-4 border-[#E2D5C8]"
+                        />
+                        <span>Spayed / Neutered (Fixed)</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Section 2: Daily Care & Routine */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  🥣 Daily Care, Feeding & Routine
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">🥣 Feeding Schedule</label>
-                    <textarea
-                      rows={3}
-                      value={editingPet.feeding_schedule || ''}
-                      onChange={e => setEditingPet({ ...editingPet, feeding_schedule: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. 1 cup dry kibble at 8 AM and 6 PM"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">💊 Medications & Dosing</label>
-                    <textarea
-                      rows={3}
-                      value={editingPet.medication || ''}
-                      onChange={e => setEditingPet({ ...editingPet, medication: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Heartgard on 1st of month, 10mg Apoquel with breakfast"
-                    />
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                      🥣
+                    </span>
+                    Daily Care, Feeding & Routine
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 2 of 4
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">⚠️ Allergies & Medical Warnings</label>
-                    <input
-                      type="text"
-                      value={editingPet.allergies || ''}
-                      onChange={e => setEditingPet({ ...editingPet, allergies: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Chicken allergy, sensitive skin"
-                    />
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">🥣 Feeding Schedule</label>
+                      <textarea
+                        rows={3}
+                        value={editingPet.feeding_schedule || ''}
+                        onChange={e => setEditingPet({ ...editingPet, feeding_schedule: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. 1 cup dry kibble at 8 AM and 6 PM"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">💊 Medications & Dosing</label>
+                      <textarea
+                        rows={3}
+                        value={editingPet.medication || ''}
+                        onChange={e => setEditingPet({ ...editingPet, medication: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Heartgard on 1st of month, 10mg Apoquel with breakfast"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">🧠 Behavior & Temperament Notes</label>
-                    <input
-                      type="text"
-                      value={editingPet.behavior_notes || ''}
-                      onChange={e => setEditingPet({ ...editingPet, behavior_notes: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Friendly with kids, anxious around storms"
-                    />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">⚠️ Allergies & Medical Warnings</label>
+                      <input
+                        type="text"
+                        value={editingPet.allergies || ''}
+                        onChange={e => setEditingPet({ ...editingPet, allergies: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Chicken allergy, sensitive skin"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">🧠 Behavior & Temperament Notes</label>
+                      <input
+                        type="text"
+                        value={editingPet.behavior_notes || ''}
+                        onChange={e => setEditingPet({ ...editingPet, behavior_notes: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Friendly with kids, anxious around storms"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Section 3: Emergency & Veterinary Contacts */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  📞 Emergency Contacts & Primary Vet
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Emergency Contact Name</label>
-                    <input
-                      type="text"
-                      value={editingPet.emergency_contact_name || ''}
-                      onChange={e => setEditingPet({ ...editingPet, emergency_contact_name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Jane Doe (Neighbor)"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Emergency Contact Phone</label>
-                    <input
-                      type="text"
-                      value={editingPet.emergency_contact_phone || ''}
-                      onChange={e => setEditingPet({ ...editingPet, emergency_contact_phone: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. (555) 019-2834"
-                    />
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs font-bold">
+                      📞
+                    </span>
+                    Emergency Contacts & Primary Vet
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 3 of 4
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Primary Vet Clinic Name</label>
-                    <input
-                      type="text"
-                      value={editingPet.vet_name || ''}
-                      onChange={e => setEditingPet({ ...editingPet, vet_name: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Metro Animal Hospital"
-                    />
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Emergency Contact Name</label>
+                      <input
+                        type="text"
+                        value={editingPet.emergency_contact_name || ''}
+                        onChange={e => setEditingPet({ ...editingPet, emergency_contact_name: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Jane Doe (Neighbor)"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Emergency Contact Phone</label>
+                      <input
+                        type="text"
+                        value={editingPet.emergency_contact_phone || ''}
+                        onChange={e => setEditingPet({ ...editingPet, emergency_contact_phone: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. (555) 019-2834"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Primary Vet Clinic Phone</label>
-                    <input
-                      type="text"
-                      value={editingPet.vet_phone || ''}
-                      onChange={e => setEditingPet({ ...editingPet, vet_phone: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. (555) 321-7654"
-                    />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Primary Vet Clinic Name</label>
+                      <input
+                        type="text"
+                        value={editingPet.vet_name || ''}
+                        onChange={e => setEditingPet({ ...editingPet, vet_name: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Metro Animal Hospital"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Primary Vet Clinic Phone</label>
+                      <input
+                        type="text"
+                        value={editingPet.vet_phone || ''}
+                        onChange={e => setEditingPet({ ...editingPet, vet_phone: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. (555) 321-7654"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Section 4: Clinical Credentials & Medical Records */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  <ShieldCheck className="w-4 h-4 text-[#8B5E3C]" /> Clinical Credentials & Insurance
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Microchip Number</label>
-                    <input
-                      type="text"
-                      value={editingPet.microchip_number || ''}
-                      onChange={e => setEditingPet({ ...editingPet, microchip_number: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D] font-mono"
-                      placeholder="e.g. 985141000123456"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Insurance Provider</label>
-                    <input
-                      type="text"
-                      value={editingPet.insurance_provider || ''}
-                      onChange={e => setEditingPet({ ...editingPet, insurance_provider: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. Trupanion"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Insurance Policy #</label>
-                    <input
-                      type="text"
-                      value={editingPet.insurance_policy_number || ''}
-                      onChange={e => setEditingPet({ ...editingPet, insurance_policy_number: e.target.value })}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl focus:outline-none focus:border-[#8B5E3C] text-sm text-[#4A3E3D]"
-                      placeholder="e.g. POL-987213"
-                    />
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                      🛡️
+                    </span>
+                    Clinical Credentials & Insurance
+                  </h4>
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Step 4 of 4
+                  </span>
                 </div>
 
-                {/* Vaccination Records Dynamic List */}
-                <div className="space-y-3 pt-2 border-t border-[#FAF6F4]">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-gray-900 text-xs">Vaccination Records Log</span>
-                    <button
-                      type="button"
-                      onClick={addVaccineRow}
-                      className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      + Add Vaccine Record
-                    </button>
-                  </div>
-
-                  {(editingPet.vaccination_records || []).map((vax: any, vi) => (
-                    <div key={vi} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Microchip Number</label>
                       <input
                         type="text"
-                        placeholder="Vaccine Name (e.g. Rabies 3-Yr, DHPP)"
-                        value={vax.name || vax.vaccine || ''}
-                        onChange={e => {
-                          const updated = [...(editingPet.vaccination_records || [])];
-                          updated[vi].name = e.target.value;
-                          setEditingPet({ ...editingPet, vaccination_records: updated });
-                        }}
-                        className="flex-1 px-3 py-2 bg-white border border-[#E8DDD4] rounded-lg text-xs"
+                        value={editingPet.microchip_number || ''}
+                        onChange={e => setEditingPet({ ...editingPet, microchip_number: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419] font-mono"
+                        placeholder="e.g. 985141000123456"
                       />
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="date"
-                          title="Date Administered"
-                          value={vax.date_administered || ''}
-                          onChange={e => {
-                            const updated = [...(editingPet.vaccination_records || [])];
-                            updated[vi].date_administered = e.target.value;
-                            setEditingPet({ ...editingPet, vaccination_records: updated });
-                          }}
-                          className="px-2 py-2 bg-white border border-[#E8DDD4] rounded-lg text-xs"
-                        />
-                        <input
-                          type="date"
-                          title="Expiration Date"
-                          value={vax.expiration_date || ''}
-                          onChange={e => {
-                            const updated = [...(editingPet.vaccination_records || [])];
-                            updated[vi].expiration_date = e.target.value;
-                            setEditingPet({ ...editingPet, vaccination_records: updated });
-                          }}
-                          className="px-2 py-2 bg-white border border-[#E8DDD4] rounded-lg text-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeVaccineRow(vi)}
-                          className="text-rose-500 hover:text-rose-700 font-bold px-2 py-1 bg-white border border-rose-200 rounded-lg cursor-pointer"
-                          title="Remove Record"
-                        >
-                          ✕
-                        </button>
-                      </div>
                     </div>
-                  ))}
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Insurance Provider</label>
+                      <input
+                        type="text"
+                        value={editingPet.insurance_provider || ''}
+                        onChange={e => setEditingPet({ ...editingPet, insurance_provider: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. Trupanion"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Insurance Policy #</label>
+                      <input
+                        type="text"
+                        value={editingPet.insurance_policy_number || ''}
+                        onChange={e => setEditingPet({ ...editingPet, insurance_policy_number: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419]"
+                        placeholder="e.g. POL-987213"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Vaccination Records Dynamic List */}
+                  <div className="space-y-3 pt-3 border-t border-[#EADBCE]">
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-[#2E2419] text-xs">Vaccination Records Log</span>
+                      <button
+                        type="button"
+                        onClick={addVaccineRow}
+                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        + Add Vaccine Record
+                      </button>
+                    </div>
+
+                    {(editingPet.vaccination_records || []).map((vax: any, vi) => (
+                      <div key={vi} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
+                        <input
+                          type="text"
+                          placeholder="Vaccine Name (e.g. Rabies 3-Yr, DHPP)"
+                          value={vax.name || vax.vaccine || ''}
+                          onChange={e => {
+                            const updated = [...(editingPet.vaccination_records || [])];
+                            updated[vi].name = e.target.value;
+                            setEditingPet({ ...editingPet, vaccination_records: updated });
+                          }}
+                          className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="date"
+                            title="Date Administered"
+                            value={vax.date_administered || ''}
+                            onChange={e => {
+                              const updated = [...(editingPet.vaccination_records || [])];
+                              updated[vi].date_administered = e.target.value;
+                              setEditingPet({ ...editingPet, vaccination_records: updated });
+                            }}
+                            className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                          />
+                          <input
+                            type="date"
+                            title="Expiration Date"
+                            value={vax.expiration_date || ''}
+                            onChange={e => {
+                              const updated = [...(editingPet.vaccination_records || [])];
+                              updated[vi].expiration_date = e.target.value;
+                              setEditingPet({ ...editingPet, vaccination_records: updated });
+                            }}
+                            className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeVaccineRow(vi)}
+                            className="text-rose-500 hover:text-rose-700 font-bold px-2 py-1 bg-white border border-rose-200 rounded-lg cursor-pointer"
+                            title="Remove Record"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -726,7 +778,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 rounded-xl border border-[#E8DDD4] text-gray-700 font-bold text-xs hover:bg-white transition-colors cursor-pointer"
+                  className="px-6 py-3 rounded-xl border border-[#DFD3C7] text-gray-700 font-bold text-xs hover:bg-white transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

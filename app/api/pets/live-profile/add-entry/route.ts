@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ALLOWED_ENTRIES = ['vaccination', 'microchip', 'chronic_condition'];
+    const ALLOWED_ENTRIES = ['vaccination', 'microchip', 'chronic_condition', 'vet_visit'];
     if (!ALLOWED_ENTRIES.includes(entry_type)) {
       return NextResponse.json(
-        { error: 'Forbidden: Vets may only add vaccination records, microchip numbers, or chronic conditions/diagnoses' },
+        { error: 'Forbidden: Vets may only add vaccination records, microchip numbers, chronic conditions, or vet visit logs' },
         { status: 400 }
       );
     }
@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
       owner_behavior_notes: '',
       vaccinations: [],
       microchip: null,
-      chronic_conditions: []
+      chronic_conditions: [],
+      vet_visits: []
     };
 
     if (pet.behavior_notes) {
@@ -85,7 +86,8 @@ export async function POST(request: NextRequest) {
             owner_behavior_notes: parsed.owner_behavior_notes || '',
             vaccinations: Array.isArray(parsed.vaccinations) ? parsed.vaccinations : [],
             microchip: parsed.microchip || null,
-            chronic_conditions: Array.isArray(parsed.chronic_conditions) ? parsed.chronic_conditions : []
+            chronic_conditions: Array.isArray(parsed.chronic_conditions) ? parsed.chronic_conditions : [],
+            vet_visits: Array.isArray(parsed.vet_visits) ? parsed.vet_visits : []
           };
         } else {
           // Legacy plain text
@@ -145,6 +147,21 @@ export async function POST(request: NextRequest) {
         date_added: timestamp
       };
       parsedNotes.chronic_conditions.push(newCondition);
+    } else if (entry_type === 'vet_visit') {
+      if (!data.visit_date || !data.reason || !data.summary) {
+        return NextResponse.json({ error: 'Vet visit requires visit_date, reason, and summary' }, { status: 400 });
+      }
+      const newVisit = {
+        id: `visit_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        visit_date: String(data.visit_date).trim(),
+        reason: String(data.reason).trim(),
+        summary: String(data.summary).trim(),
+        follow_up_notes: data.follow_up_notes ? String(data.follow_up_notes).trim() : undefined,
+        clinic_name: clinicName,
+        added_by: addedByLabel,
+        date_added: timestamp
+      };
+      parsedNotes.vet_visits = [newVisit, ...(parsedNotes.vet_visits || [])];
     }
 
     // 7. Save to DB

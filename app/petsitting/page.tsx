@@ -7331,16 +7331,16 @@ export function PetSittingContent() {
         </div>
       )}
 
-      {/* ── Pet Profile Full-Screen Modal ── */}
+      {/* ── FULL-SCREEN EDIT / ADD PET MODAL ── */}
       {petModalOpen && (
-        <div className="fixed inset-0 z-[1050] bg-[#FDFAF7] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 bg-[#F7F3EE] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
           {/* Sticky Full-Screen Top Header */}
-          <div className="bg-white border-b border-[#E8DDD4] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
+          <div className="bg-white/95 backdrop-blur-xs border-b border-[#DFD3C7] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
             <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setPetModalOpen(false)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
                 title="Go back without saving"
               >
                 <ArrowLeft className="w-4 h-4 text-[#8B5E3C]" />
@@ -7373,218 +7373,269 @@ export function PetSittingContent() {
           <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10">
             <form id="petsitting-pet-form" onSubmit={handleSavePet} className="max-w-4xl mx-auto space-y-6 text-xs">
               {/* Section 1: Basic Identity */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Basic Details & Identity
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name *</label>
-                    <input
-                      required
-                      type="text"
-                      value={petFormName}
-                      onChange={(e) => setPetFormName(e.target.value)}
-                      placeholder="e.g. Buddy"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type *</label>
-                    <select
-                      value={petFormType}
-                      onChange={(e) => setPetFormType(e.target.value)}
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    >
-                      <option value="dog">Dog</option>
-                      <option value="cat">Cat</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
+                      🐾
+                    </span>
+                    Basic Details & Identity
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 1 of 4
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Breed</label>
-                    <input
-                      type="text"
-                      value={petFormBreed}
-                      onChange={(e) => setPetFormBreed(e.target.value)}
-                      placeholder="e.g. Golden Retriever"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Age</label>
-                    <input
-                      type="text"
-                      value={petFormAge}
-                      onChange={(e) => setPetFormAge(e.target.value)}
-                      placeholder="e.g. 3 yrs"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Weight</label>
-                    <input
-                      type="text"
-                      value={petFormWeight}
-                      onChange={(e) => setPetFormWeight(e.target.value)}
-                      placeholder="e.g. 50 lbs"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Gender</label>
-                    <select
-                      value={petFormGender}
-                      onChange={(e) => setPetFormGender(e.target.value)}
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center pt-2 sm:pt-6">
-                    <label className="flex items-center gap-2.5 text-xs font-bold text-[#4A3E3D] cursor-pointer select-none">
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Name *</label>
                       <input
-                        type="checkbox"
-                        checked={petFormSpayed}
-                        onChange={(e) => setPetFormSpayed(e.target.checked)}
-                        className="rounded text-[#8B5E3C] focus:ring-[#8B5E3C] w-4 h-4 border-[#E8DDD4]"
+                        required
+                        type="text"
+                        value={petFormName}
+                        onChange={(e) => setPetFormName(e.target.value)}
+                        placeholder="e.g. Buddy"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                       />
-                      <span>Spayed / Neutered (Fixed)</span>
-                    </label>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Pet Type *</label>
+                      <select
+                        value={petFormType}
+                        onChange={(e) => setPetFormType(e.target.value)}
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      >
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Breed</label>
+                      <input
+                        type="text"
+                        value={petFormBreed}
+                        onChange={(e) => setPetFormBreed(e.target.value)}
+                        placeholder="e.g. Golden Retriever"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Age</label>
+                      <input
+                        type="text"
+                        value={petFormAge}
+                        onChange={(e) => setPetFormAge(e.target.value)}
+                        placeholder="e.g. 3 yrs"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Weight</label>
+                      <input
+                        type="text"
+                        value={petFormWeight}
+                        onChange={(e) => setPetFormWeight(e.target.value)}
+                        placeholder="e.g. 50 lbs"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Gender</label>
+                      <select
+                        value={petFormGender}
+                        onChange={(e) => setPetFormGender(e.target.value)}
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center pt-2 sm:pt-6">
+                      <label className="flex items-center gap-2.5 text-xs font-bold text-[#4A3E3D] cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={petFormSpayed}
+                          onChange={(e) => setPetFormSpayed(e.target.checked)}
+                          className="rounded text-[#8B5E3C] focus:ring-[#8B5E3C] w-4 h-4 border-[#E2D5C8]"
+                        />
+                        <span>Spayed / Neutered (Fixed)</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Section 2: Care, Feeding & Behavior */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  🥣 Care Routine, Feeding & Behavior
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Feeding Schedule</label>
-                    <textarea
-                      rows={3}
-                      value={petFormFeeding}
-                      onChange={(e) => setPetFormFeeding(e.target.value)}
-                      placeholder="e.g. 2 cups at 8 AM and 6 PM"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Medications (Optional)</label>
-                    <textarea
-                      rows={3}
-                      value={petFormMedication}
-                      onChange={(e) => setPetFormMedication(e.target.value)}
-                      placeholder="e.g. None, or specific medicines and doses"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                      🥣
+                    </span>
+                    Care Routine, Feeding & Behavior
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 2 of 4
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Behavior & Temperament Notes</label>
-                  <textarea
-                    rows={3}
-                    value={petFormNotes}
-                    onChange={(e) => setPetFormNotes(e.target.value)}
-                    placeholder="e.g. Friendly with kids, anxious around vacuums, loves belly rubs"
-                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-sm focus:outline-none focus:border-[#8B5E3C] text-gray-800"
-                  />
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Feeding Schedule</label>
+                      <textarea
+                        rows={3}
+                        value={petFormFeeding}
+                        onChange={(e) => setPetFormFeeding(e.target.value)}
+                        placeholder="e.g. 2 cups at 8 AM and 6 PM"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Medications (Optional)</label>
+                      <textarea
+                        rows={3}
+                        value={petFormMedication}
+                        onChange={(e) => setPetFormMedication(e.target.value)}
+                        placeholder="e.g. None, or specific medicines and doses"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Behavior & Temperament Notes</label>
+                    <textarea
+                      rows={3}
+                      value={petFormNotes}
+                      onChange={(e) => setPetFormNotes(e.target.value)}
+                      placeholder="e.g. Friendly with kids, anxious around vacuums, loves belly rubs"
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-3 text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-gray-800"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Section 3: Veterinary Contact */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  🏥 Primary Veterinary Clinic
-                </h4>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                      🏥
+                    </span>
+                    Primary Veterinary Clinic
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 3 of 4
+                  </span>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Primary Vet Clinic Name</label>
-                    <input
-                      type="text"
-                      value={petFormVetName}
-                      onChange={(e) => setPetFormVetName(e.target.value)}
-                      placeholder="e.g. Dr. Walker / Metro Animal Hospital"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Primary Vet Clinic Phone</label>
-                    <input
-                      type="text"
-                      value={petFormVetPhone}
-                      onChange={(e) => setPetFormVetPhone(e.target.value)}
-                      placeholder="e.g. (555) 123-4567"
-                      className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2.5 text-[#4A3E3D] text-sm focus:outline-none focus:border-[#8B5E3C]"
-                    />
+                <div className="p-5 sm:p-6 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Primary Vet Clinic Name</label>
+                      <input
+                        type="text"
+                        value={petFormVetName}
+                        onChange={(e) => setPetFormVetName(e.target.value)}
+                        placeholder="e.g. Dr. Walker / Metro Animal Hospital"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Primary Vet Clinic Phone</label>
+                      <input
+                        type="text"
+                        value={petFormVetPhone}
+                        onChange={(e) => setPetFormVetPhone(e.target.value)}
+                        placeholder="e.g. (555) 123-4567"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Section 4: Photos */}
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E8DDD4] shadow-xs space-y-4">
-                <h4 className="font-black text-sm text-[#4A3E3D] flex items-center gap-2 border-b border-[#FAF6F4] pb-2.5">
-                  📷 Pet Photos (Up to 3)
-                </h4>
-
-                {/* Photo Previews Grid */}
-                <div className="flex flex-wrap gap-3 mb-3">
-                  {petFormPhotos.map((url, index) => (
-                    <div key={index} className="w-24 h-24 rounded-2xl overflow-hidden bg-[#FAF6F4] border border-[#E8DDD4] relative group">
-                      <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPetFormPhotos(prev => prev.filter((_, idx) => idx !== index));
-                        }}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600/90 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer border-none shadow-sm transition-all"
-                        title="Remove Photo"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {petFormPhotos.length === 0 && (
-                    <div className="w-24 h-24 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center">
-                      <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
-                    </div>
-                  )}
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h4 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                      📷
+                    </span>
+                    Pet Photos (Up to 3)
+                  </h4>
+                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                    Step 4 of 4
+                  </span>
                 </div>
 
-                {petFormPhotos.length < 3 ? (
-                  <div className="flex gap-2 items-center">
-                    <button
-                      type="button"
-                      onClick={() => petPhotoInputRef.current?.click()}
-                      className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2.5 px-4 rounded-xl transition-all shadow-xs text-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                      📁 Choose from Gallery
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => petCameraInputRef.current?.click()}
-                      className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#E8DDD4] font-bold py-2.5 px-4 rounded-xl transition-all shadow-xs text-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                      📷 Take Photo
-                    </button>
+                <div className="p-5 sm:p-6 space-y-4">
+                  {/* Photo Previews Grid */}
+                  <div className="flex flex-wrap gap-3 mb-3">
+                    {petFormPhotos.map((url, index) => (
+                      <div key={index} className="w-24 h-24 rounded-2xl overflow-hidden bg-[#FAF6F4] border border-[#DFD3C7] relative group">
+                        <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPetFormPhotos(prev => prev.filter((_, idx) => idx !== index));
+                          }}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600/90 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold cursor-pointer border-none shadow-sm transition-all"
+                          title="Remove Photo"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {petFormPhotos.length === 0 && (
+                      <div className="w-24 h-24 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-center">
+                        <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-xs text-[#8B7E7D] font-medium italic">Maximum of 3 photos added.</p>
-                )}
+
+                  {petFormPhotos.length < 3 ? (
+                    <div className="flex gap-2 items-center">
+                      <button
+                        type="button"
+                        onClick={() => petPhotoInputRef.current?.click()}
+                        className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#DFD3C7] font-bold py-2.5 px-4 rounded-xl transition-all shadow-xs text-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        📁 Choose from Gallery
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => petCameraInputRef.current?.click()}
+                        className="bg-[#FAF6F4] hover:bg-[#F0E6DD] text-[#8B5E3C] border border-[#DFD3C7] font-bold py-2.5 px-4 rounded-xl transition-all shadow-xs text-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        📷 Take Photo
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#8B7E7D] font-medium italic">Maximum of 3 photos added.</p>
+                  )}
 
                 {/* Hidden File Inputs */}
                 <input
@@ -7600,20 +7651,21 @@ export function PetSittingContent() {
                     }
                   }}
                 />
-                <input
-                  type="file"
-                  ref={petCameraInputRef}
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handlePhotoUpload(file);
-                      e.target.value = '';
-                    }
-                  }}
-                />
+                  <input
+                    type="file"
+                    ref={petCameraInputRef}
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handlePhotoUpload(file);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Bottom Action Buttons */}
@@ -7621,7 +7673,7 @@ export function PetSittingContent() {
                 <button
                   type="button"
                   onClick={() => setPetModalOpen(false)}
-                  className="px-6 py-3 rounded-xl border border-[#E8DDD4] text-gray-700 font-bold text-xs hover:bg-white transition-colors cursor-pointer"
+                  className="px-6 py-3 rounded-xl border border-[#DFD3C7] text-gray-700 font-bold text-xs hover:bg-white transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

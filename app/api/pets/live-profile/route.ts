@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
         insurance_provider: undefined,
         insurance_policy_number: undefined,
         chronic_conditions: undefined,
+        vet_visits: undefined,
       };
 
       return NextResponse.json({
