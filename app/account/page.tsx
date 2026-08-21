@@ -439,7 +439,7 @@ export default function AccountPage() {
       <main className="flex-1 flex flex-col items-center py-16 px-6 md:px-8 lg:px-12">
         <div 
           style={{ boxShadow: '0 4px 20px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)' }}
-          className="w-full max-w-[500px] bg-white rounded-3xl border border-[#DFD3C7] p-8 md:p-10 flex flex-col gap-6 relative"
+          className={`w-full ${step === 'dashboard' ? 'max-w-3xl' : 'max-w-[500px]'} bg-white rounded-3xl border border-[#DFD3C7] p-6 sm:p-8 md:p-10 flex flex-col gap-6 relative transition-all duration-200`}
         >
           
           {/* INITIAL SESSION CHECK LOADING STATE */}

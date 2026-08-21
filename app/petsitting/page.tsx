@@ -7332,8 +7332,8 @@ export function PetSittingContent() {
       )}
 
       {/* ── FULL-SCREEN EDIT / ADD PET MODAL ── */}
-      {petModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#F7F3EE] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
+      {petModalOpen && typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-[#F7F3EE] flex flex-col w-screen h-screen overflow-hidden text-left animate-in fade-in duration-150">
           {/* Sticky Full-Screen Top Header */}
           <div className="bg-white/95 backdrop-blur-xs border-b border-[#DFD3C7] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
             <div className="flex items-center gap-2.5 sm:gap-3">
@@ -7687,7 +7687,8 @@ export function PetSittingContent() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ─── Vet Clinic Inquiry Modal ─────────────────────────────────────── */}
