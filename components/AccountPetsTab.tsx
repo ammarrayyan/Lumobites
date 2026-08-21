@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock } from 'lucide-react';
+import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock, ArrowLeft } from 'lucide-react';
 import PetProfileCard from '@/components/PetProfileCard';
 
 interface VaccineRecord {
@@ -69,6 +69,17 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
   const [showModal, setShowModal] = useState(false);
   const [qrPet, setQrPet] = useState<Pet | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Prevent background page scrolling when modal is open
+  useEffect(() => {
+    if (showModal && editingPet) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [showModal, editingPet]);
 
   const fetchPetsAndGrants = async () => {
     if (!ownerEmail) return;
@@ -370,31 +381,33 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
         <div className="fixed inset-0 z-50 bg-[#FDFAF7] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
           {/* Sticky Full-Screen Top Header */}
           <div className="bg-white border-b border-[#E8DDD4] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-900 flex items-center justify-center font-bold shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
+                title="Go back without saving"
+              >
+                <ArrowLeft className="w-4 h-4 text-[#8B5E3C]" />
+                <span>Back</span>
+              </button>
+              <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-900 flex items-center justify-center font-bold shrink-0 hidden md:flex">
                 <PawPrint className="w-5 h-5 text-[#8B5E3C]" />
               </div>
               <div>
                 <h3 className="font-black text-gray-900 text-base sm:text-lg leading-tight">
                   {editingPet.id ? (editingPet.pet_name ? `Edit Profile: ${editingPet.pet_name}` : 'Edit Pet Profile') : 'Add New Pet Profile'}
                 </h3>
-                <p className="text-xs text-gray-500 font-medium">Update care instructions, routine, and medical credentials</p>
+                <p className="text-xs text-gray-500 font-medium hidden sm:block">Update care instructions, routine, and medical credentials</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-bold text-xs transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
                 type="submit"
                 form="account-pet-edit-form"
                 disabled={saving}
-                className="px-5 py-2 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Profile 🐾'}
               </button>

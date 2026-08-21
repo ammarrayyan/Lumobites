@@ -8,7 +8,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import PetProfileCard from '@/components/PetProfileCard';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
@@ -486,6 +486,18 @@ export function PetSittingContent() {
   const [ownerPets, setOwnerPets] = useState<any[]>([]);
   const [loadingOwnerPets, setLoadingOwnerPets] = useState(false);
   const [petModalOpen, setPetModalOpen] = useState(false);
+
+  // Prevent background page scrolling when pet modal is open
+  useEffect(() => {
+    if (petModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [petModalOpen]);
+
   const [editingPet, setEditingPet] = useState<any | null>(null);
   const [petFormName, setPetFormName] = useState('');
   const [petFormType, setPetFormType] = useState('dog');
@@ -7324,31 +7336,33 @@ export function PetSittingContent() {
         <div className="fixed inset-0 z-[1050] bg-[#FDFAF7] flex flex-col w-full h-full overflow-hidden text-left animate-in fade-in duration-150">
           {/* Sticky Full-Screen Top Header */}
           <div className="bg-white border-b border-[#E8DDD4] px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between sticky top-0 z-30 shrink-0 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-900 flex items-center justify-center font-bold shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setPetModalOpen(false)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
+                title="Go back without saving"
+              >
+                <ArrowLeft className="w-4 h-4 text-[#8B5E3C]" />
+                <span>Back</span>
+              </button>
+              <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-900 flex items-center justify-center font-bold shrink-0 hidden md:flex">
                 <PawPrint className="w-5 h-5 text-[#8B5E3C]" />
               </div>
               <div>
                 <h3 className="font-black text-gray-900 text-base sm:text-lg leading-tight">
                   {editingPet ? (petFormName ? `Edit Profile: ${petFormName}` : 'Edit Pet Profile') : 'Add a Pet'}
                 </h3>
-                <p className="text-xs text-gray-500 font-medium">Update care details, routine, photos, and emergency vet info</p>
+                <p className="text-xs text-gray-500 font-medium hidden sm:block">Update care details, routine, photos, and emergency vet info</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                type="button"
-                onClick={() => setPetModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-gray-600 hover:bg-gray-100 font-bold text-xs transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
                 type="submit"
                 form="petsitting-pet-form"
                 disabled={submittingPet}
-                className="px-5 py-2 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {submittingPet ? 'Saving...' : 'Save Profile 🐾'}
               </button>
