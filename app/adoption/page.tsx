@@ -633,7 +633,7 @@ function AdoptionContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF8] text-[#2B231D] font-sans pt-[52px] md:pt-0 font-inter">
+    <div className="min-h-screen bg-[#F7F3EE] text-[#2B231D] font-sans pt-[52px] md:pt-0 font-inter">
       <MobileCommunityNav />
       {/* HERO SECTION */}
       <section className="bg-gradient-to-b from-[#FAF5EE] to-[#FDFAF7] border-b border-[#E8DDD4] px-6 py-12">
@@ -932,7 +932,8 @@ function AdoptionContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {rescueGroupsPets.map(pet => (
-                  <div key={pet.id} className="bg-white rounded-3xl border border-amber-200/80 hover:border-amber-500 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+                  <div key={pet.id} style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                  className="bg-white rounded-3xl border border-[#DFD3C7] hover:border-[#8B5E3C] overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col justify-between">
                     <div className="p-4 space-y-3">
                       <div className="relative">
                         <img src={pet.photo || '/placeholder-pet.png'} alt={pet.name} className="w-full h-48 rounded-2xl object-cover" />

@@ -358,7 +358,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] font-sans">
+      <div className="min-h-screen bg-[#F7F3EE] font-sans">
                 <div className="flex items-center justify-center py-32 text-[#8B5E3C] font-bold text-xl animate-pulse">
           Loading details...
         </div>
@@ -368,7 +368,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
   if (error || !pet) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] font-sans">
+      <div className="min-h-screen bg-[#F7F3EE] font-sans">
                 <div className="max-w-xl mx-auto px-4 py-20 text-center">
           <h2 className="text-3xl font-black text-[#4A3E3D] mb-4">Post Not Found</h2>
           <p className="text-[#8B7E7D] mb-8">This post may have been removed or does not exist.</p>
@@ -381,7 +381,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans">
       
       <main className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <Link href="/lost-pets" className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-block">&larr; Back to Board</Link>
@@ -396,10 +396,11 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           </div>
         )}
 
-        <div className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm mb-12">
+        <div style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+        className="bg-white rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs mb-12">
           <div className="flex flex-col md:flex-row">
             {/* Photo Gallery Column */}
-            <div className="md:w-[58%] relative bg-[#FAF6F4] flex flex-col justify-between border-r border-[#E8DDD4] min-h-[400px] md:min-h-[550px]">
+            <div className="md:w-[58%] relative bg-[#FAF5EE] flex flex-col justify-between border-r border-[#EADBCE] min-h-[400px] md:min-h-[550px]">
               
               {/* Main Image Slideshow Container */}
               <div 

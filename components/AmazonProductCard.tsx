@@ -82,7 +82,8 @@ export default function AmazonProductCard({ product, compact = false }: Props) {
         href={product.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex gap-3 bg-white border border-[#E8DDD4] rounded-2xl p-3 hover:shadow-md transition-all group"
+        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+        className="flex gap-3 bg-white border border-[#DFD3C7] rounded-2xl p-3 hover:shadow-md transition-all group"
       >
         {/* Image */}
         <div className="w-16 h-16 flex-shrink-0 bg-[#FDFAF7] rounded-xl flex items-center justify-center overflow-hidden border border-[#F0E8E0]">
@@ -120,7 +121,8 @@ export default function AmazonProductCard({ product, compact = false }: Props) {
   }
 
   return (
-    <div className="bg-white border border-[#E8DDD4] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+    <div style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+    className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col">
       {/* Product image */}
       <div className="relative h-48 bg-[#FDFAF7] flex items-center justify-center border-b border-[#F0E8E0]">
         {product.image && !imgError ? (

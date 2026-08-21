@@ -48,7 +48,7 @@ export default function ProductCard({ product, profile }: { product: ScoredProdu
   const chewyLink = `https://www.chewy.com/s?query=${chewySearchTerm}`;
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #E8DDD4' }}>
+    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', border: '1px solid #DFD3C7', boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}>
       {product.match_pct >= 90 && (
         <div style={{ position: 'absolute', top: 0, right: 0, backgroundColor: '#F59E0B', color: '#FFFFFF', fontSize: 'var(--text-small)', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '8px', zIndex: 10 }}>
           Top Match

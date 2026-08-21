@@ -526,7 +526,7 @@ export default function LostPetsFeed() {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#FCFAF8] font-sans flex flex-col relative">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col relative">
       
       <div
         className="flex-1 flex flex-col w-full relative pt-2 md:pt-20"
@@ -685,9 +685,10 @@ export default function LostPetsFeed() {
                             aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
                             onClick={(e) => handleCardClick(e, pet.id)}
                             onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
-                            className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                            className="bg-white rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                           >
-                            <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
+                            <div className="relative h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
                               {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
                               ) : (
@@ -791,7 +792,8 @@ export default function LostPetsFeed() {
             ) : (
             <div className="space-y-6">
               {/* AI Panel Card */}
-              <div className="bg-white border border-[#E8DDD4] rounded-3xl p-6 shadow-sm animate-fade-in text-left">
+              <div style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white border border-[#DFD3C7] rounded-3xl p-6 shadow-xs animate-fade-in text-left">
                 <div className="flex items-center gap-2.5 mb-5">
                   <Search className="w-6 h-6 text-[#8B5E3C]" />
                   <div>

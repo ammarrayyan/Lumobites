@@ -74,9 +74,10 @@ export default function ManageLostPet() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col">
             <main className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white p-10 rounded-3xl shadow-lg border border-[#E8DDD4] text-center max-w-md w-full animate-fade-in">
+        <div style={{ boxShadow: '0 4px 20px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)' }}
+        className="bg-white p-10 rounded-3xl shadow-md border border-[#DFD3C7] text-center max-w-md w-full animate-fade-in">
           {error && !success ? (
             <>
               <AlertTriangle className="w-16 h-16 text-amber-500 mx-auto mb-4" />

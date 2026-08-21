@@ -3451,7 +3451,7 @@ export function PetSittingContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FCFAF8] font-sans selection:bg-[#8B5E3C] selection:text-white flex flex-col relative">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans selection:bg-[#8B5E3C] selection:text-white flex flex-col relative">
       
       <div 
         className="flex-1 flex flex-col pt-2 md:pt-24 pb-12 w-full relative"
@@ -3547,7 +3547,7 @@ export function PetSittingContent() {
 
             <div className={ownerSubTab === 'search' ? 'block animate-fade-in' : 'hidden'}>
               {/* Search Bar */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#E8DDD4] mb-1 flex flex-col gap-4 relative">
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#DFD3C7] mb-1 flex flex-col gap-4 relative">
               {/* Row 1: Location & Search Radius */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 flex flex-col gap-1">
@@ -3824,10 +3824,11 @@ export function PetSittingContent() {
                         key={sitter.id}
                         id={`sitter-card-${sitter.id}`}
                         onClick={() => handleViewReviews(sitter)}
+                        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                         className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
                           highlightedSitterId === sitter.id 
                             ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
-                            : 'border-[#E8DDD4] shadow-sm hover:shadow-md'
+                            : 'border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-[#8B5E3C]/40 hover:-translate-y-0.5'
                         }`}
                       >
                         {sitter.matchScore !== undefined && (
@@ -4004,7 +4005,7 @@ export function PetSittingContent() {
                         {filteredVetClinics.map((clinic: any) => (
                           <div
                             key={clinic.id}
-                            className="bg-white rounded-3xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                            className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
                             onClick={() => {
                               if (!reqEmail) {
                                 window.dispatchEvent(new Event('lumo-open-signin'));
@@ -4089,7 +4090,7 @@ export function PetSittingContent() {
                         {filteredPetDaycares.map((daycare: any) => (
                           <div
                             key={daycare.id}
-                            className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                            className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
                             onClick={() => {
                               if (!reqEmail) {
                                 window.dispatchEvent(new Event('lumo-open-signin'));
@@ -4185,7 +4186,7 @@ export function PetSittingContent() {
 
             {/* Owner Booking History Section */}
             {ownerSubTab === 'dashboard' && reqEmail && (
-              <div id="owner-history" className="bg-white rounded-3xl p-8 border border-[#E8DDD4] shadow-sm max-w-4xl mx-auto text-left">
+              <div id="owner-history" style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }} className="bg-white rounded-3xl p-8 border border-[#DFD3C7] shadow-xs max-w-4xl mx-auto text-left">
               <div id="messages" />
               <div className="mb-6">
                 <h3 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
