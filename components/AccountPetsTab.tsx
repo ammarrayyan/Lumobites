@@ -37,6 +37,7 @@ interface Pet {
   emergency_contact_phone?: string;
   insurance_provider?: string;
   insurance_policy_number?: string;
+  chronic_conditions?: { id?: string; condition: string; notes?: string }[];
 }
 
 interface AccessGrant {
@@ -225,6 +226,64 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
     const current = [...(editingPet.vaccination_records || [])];
     current.splice(index, 1);
     setEditingPet({ ...editingPet, vaccination_records: current });
+  };
+
+  const addConditionRow = () => {
+    if (!editingPet) return;
+    const current = (editingPet as any).chronic_conditions || [];
+    setEditingPet({
+      ...editingPet,
+      chronic_conditions: [
+        ...current,
+        { condition: '' },
+      ],
+    } as any);
+  };
+
+  const removeConditionRow = (index: number) => {
+    if (!editingPet) return;
+    const current = [...((editingPet as any).chronic_conditions || [])];
+    current.splice(index, 1);
+    setEditingPet({ ...editingPet, chronic_conditions: current } as any);
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingPet) return;
+    const currentPhotos = editingPet.photo_urls || (editingPet.photo_url ? [editingPet.photo_url] : []);
+    if (currentPhotos.length >= 3) {
+      alert("Maximum of 3 photos reached");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        const updated = [...currentPhotos, compressed].slice(0, 3);
+        setEditingPet({
+          ...editingPet,
+          photo_urls: updated,
+          photo_url: updated[0] || '',
+        });
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -807,7 +866,10 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                           <button
                             type="button"
                             onClick={() => {
-                              const updated = (editingPet.photo_urls || [editingPet.photo_url]).filter((_: any, i: number) => i !== index);
+                              const basePhotos: string[] = (editingPet.photo_urls && editingPet.photo_urls.length > 0)
+                                ? editingPet.photo_urls
+                                : (editingPet.photo_url ? [editingPet.photo_url] : []);
+                              const updated = basePhotos.filter((_, i) => i !== index);
                               setEditingPet({ ...editingPet, photo_urls: updated, photo_url: updated[0] || '' });
                             }}
                             className="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-xs opacity-90 hover:opacity-100 transition-opacity cursor-pointer border-none shadow-sm"
