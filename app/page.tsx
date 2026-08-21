@@ -135,7 +135,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-[#2B231D] bg-[#FCFAF8]">
+    <div className="min-h-screen flex flex-col font-sans text-[#2B231D] bg-[#F7F3EE]">
 
       {/* PET SITTING COMING SOON MODAL */}
       {petSittingModalOpen && (
@@ -320,18 +320,18 @@ export default function Home() {
       )}
 
       {/* HERO SECTION */}
-      <section className="w-full bg-[#FCFAF8] pt-[32px] pb-12 px-6 md:px-8 lg:px-12">
+      <section className="w-full bg-[#F7F3EE] pt-2 sm:pt-8 pb-3 sm:pb-6 px-4 sm:px-8 lg:px-12">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 
-          <h1 className="font-[800] leading-[1.1] mb-4 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(30px, 4vw, 48px)' }}>
+          <h1 className="font-[800] leading-[1.15] mb-2 sm:mb-3 tracking-[-0.02em] relative z-10" style={{ fontSize: 'clamp(24px, 3.5vw, 44px)' }}>
             <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
           </h1>
 
           {!isNativeApp && (
-            <div className="flex flex-wrap gap-3 justify-center items-center mt-2">
+            <div className="flex flex-wrap gap-2.5 justify-center items-center mt-1 sm:mt-2">
               {/* Google Play Badge */}
               <a 
                 href="https://play.google.com/store/apps/details?id=net.lumobites.app"
@@ -341,8 +341,8 @@ export default function Home() {
                 <img 
                   src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
                   alt="Get it on Google Play"
-                  height="50"
-                  style={{ height: '50px' }}
+                  height="44"
+                  style={{ height: '44px' }}
                 />
               </a>
 
@@ -355,8 +355,8 @@ export default function Home() {
                 <img 
                   src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
                   alt="Download on the App Store"
-                  height="50"
-                  style={{ height: '50px' }}
+                  height="44"
+                  style={{ height: '44px' }}
                 />
               </a>
             </div>
@@ -365,9 +365,9 @@ export default function Home() {
       </section>
 
       {/* MOBILE QUICK ACCESS BUTTONS (My Pets Quick Banner + 3+3 Square Grid) */}
-      <section className="md:hidden w-full px-4 pb-8">
+      <section className="md:hidden w-full px-4 pt-1 pb-6">
         {/* 🐾 My Pets Quick Banner (Compact, Light & Refined) */}
-        <Link href="/account?tab=pets" className="block max-w-sm mx-auto mb-3" style={{ textDecoration: 'none' }}>
+        <Link href="/account?tab=pets" className="block max-w-sm mx-auto mb-2.5" style={{ textDecoration: 'none' }}>
           <div 
             style={{ boxShadow: '0 1px 4px rgba(139, 94, 60, 0.05)' }}
             className="bg-[#FAF5EE] border border-[#EADBCE] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F4ECE2] active:scale-[0.99] transition-all"

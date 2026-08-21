@@ -7,7 +7,7 @@ import { Sparkles } from 'lucide-react';
 
 export default function AnimatedPets() {
   return (
-    <div className="flex flex-col items-center w-full mb-10 mt-2 select-none">
+    <div className="flex flex-col items-center w-full mb-3 sm:mb-6 mt-1 sm:mt-2 select-none">
       <style>{`
         @keyframes subtle-float {
           0%, 100% { transform: translateY(0); }
@@ -24,13 +24,13 @@ export default function AnimatedPets() {
           display: flex;
           justify-content: center;
           align-items: flex-end;
-          margin-bottom: 30px;
+          margin-bottom: 8px;
         }
         @media (min-width: 1024px) {
           .image-container {
             max-width: 1100px;
             max-height: 464px;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
           }
         }
         .image-glow {
