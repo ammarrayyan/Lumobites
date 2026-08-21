@@ -7669,24 +7669,26 @@ export function PetSittingContent() {
                 </div>
               </div>
 
-              {/* Bottom Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4 pb-12">
-                <button
-                  type="button"
-                  onClick={() => setPetModalOpen(false)}
-                  className="px-6 py-3 rounded-xl border border-[#DFD3C7] text-gray-700 font-bold text-xs hover:bg-white transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingPet}
-                  className="px-8 py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {submittingPet ? 'Saving...' : 'Save Profile 🐾'}
-                </button>
-              </div>
             </form>
+          </div>
+
+          {/* Sticky Bottom Action Bar */}
+          <div className="bg-white/95 backdrop-blur-md border-t border-[#DFD3C7] px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-end gap-3 sticky bottom-0 z-30 shrink-0 shadow-lg">
+            <button
+              type="button"
+              onClick={() => setPetModalOpen(false)}
+              className="flex-1 sm:flex-initial px-6 py-3 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold text-sm transition-colors cursor-pointer text-center"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="petsitting-pet-form"
+              disabled={submittingPet}
+              className="flex-1 sm:flex-initial px-8 py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 text-center"
+            >
+              {submittingPet ? 'Saving...' : 'Save Profile 🐾'}
+            </button>
           </div>
         </div>,
         document.body

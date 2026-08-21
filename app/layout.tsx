@@ -111,30 +111,29 @@ export default async function RootLayout({
         <PwaInstallBanner />
         <Navbar initialEmail={proEmail} />
         <div 
-          className="pb-28 lg:pb-0 min-h-[calc(100vh-72px)] flex flex-col justify-between"
+          className="min-h-[calc(100vh-72px)] flex flex-col justify-between"
           style={{
-            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)',
-            paddingBottom: '104px'
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 72px)'
           }}
         >
-          <div className="flex-grow">
+          <div className="flex-grow pb-12 lg:pb-6">
             <SectionSwipeProvider>
               {children}
             </SectionSwipeProvider>
           </div>
-          <footer className="w-full bg-[#FAF6F4] border-t border-[#E8DDD4] py-6 px-4 text-center text-xs text-[#8B7E7D] mt-12">
+          <footer className="w-full bg-[#FAF5EE] border-t border-[#DFD3C7] pt-6 pb-24 lg:pb-6 px-4 text-center text-xs text-[#8B7E7D] mt-12">
             <p>© {new Date().getFullYear()} Lumo Bites. All rights reserved.</p>
             <p className="mt-1 font-semibold text-[#8B5E3C]">
               Report inappropriate content: <a href="mailto:info@lumobitespet.com" className="underline hover:text-[#734A2E]">info@lumobitespet.com</a>
             </p>
             <div className="flex gap-4 items-center justify-center flex-wrap mt-3">
-              <a href="/privacy" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
+              <a href="/privacy" className="text-xs text-gray-500 hover:text-[#8B5E3C]">
                 Privacy Policy
               </a>
-              <a href="/terms" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
+              <a href="/terms" className="text-xs text-gray-500 hover:text-[#8B5E3C]">
                 Terms of Service
               </a>
-              <a href="/partnerships" className="text-xs text-gray-400 hover:text-[#8B5E3C]">
+              <a href="/partnerships" className="text-xs text-gray-500 hover:text-[#8B5E3C]">
                 Partnerships & Press
               </a>
             </div>
