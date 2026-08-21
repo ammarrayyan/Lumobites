@@ -344,17 +344,17 @@ export default function VetBoardingDashboardPage() {
   const statusCfg = STATUS_CONFIG[clinic.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
 
   return (
-    <div className="min-h-screen pb-28 font-inter" style={{ background: 'linear-gradient(135deg, #EEF4FF 0%, #F0FDF4 100%)' }}>
+    <div className="min-h-screen pb-28 font-inter bg-[#F7F3EE]">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-blue-100">
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-[#DFD3C7] shadow-2xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#8B5E3C] rounded-xl flex items-center justify-center shadow-xs">
               <Stethoscope className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="font-black text-[#4A3E3D] text-sm leading-tight">{clinic.clinic_name}</p>
-              <p className="text-xs text-[#8B7E7D]">Clinic Dashboard</p>
+              <p className="font-black text-[#2E2419] text-sm leading-tight">{clinic.clinic_name}</p>
+              <p className="text-xs text-[#8B7E7D]">Veterinary Partner Dashboard</p>
             </div>
           </div>
 
@@ -382,9 +382,12 @@ export default function VetBoardingDashboardPage() {
           })()}
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         {/* Tabs */}
-        <div className="bg-white rounded-3xl p-1.5 border border-blue-100 flex gap-1 shadow-sm">
+        <div 
+          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+          className="bg-white rounded-2xl p-1.5 border border-[#DFD3C7] flex gap-1 shadow-xs mb-6"
+        >
           {[
             { id: 'overview', label: 'Overview', emoji: '📊' },
             { id: 'inquiries', label: `Inquiries${inquiries.length ? ` (${inquiries.length})` : ''}`, emoji: '💬' },
@@ -394,10 +397,10 @@ export default function VetBoardingDashboardPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition-all duration-200 ${
+              className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                  : 'text-[#8B7E7D] hover:text-[#4A3E3D]'
+                  ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                  : 'text-[#8B7E7D] hover:text-[#2E2419] hover:bg-[#FAF6F2]'
               }`}
             >
               {tab.emoji} {tab.label}
@@ -410,30 +413,39 @@ export default function VetBoardingDashboardPage() {
           <div className="space-y-6">
             {/* 3 Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Inquiries</p>
-                <p className="text-3xl font-black text-[#4A3E3D] mt-2">{inquiries.length}</p>
+                <p className="text-3xl font-black text-[#2E2419] mt-2">{inquiries.length}</p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Search Status</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className={`w-3 h-3 rounded-full ${clinic.status === 'paused' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                  <span className="text-lg font-black text-[#4A3E3D]">
+                  <span className="text-lg font-black text-[#2E2419]">
                     {clinic.status === 'paused' ? 'Paused' : 'Active in Search'}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Today&apos;s Availability</p>
                 <div className="flex items-center gap-2 mt-2">
                   {fullDates.includes(new Date().toISOString().split('T')[0]) ? (
-                    <span className="text-sm font-black bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-xs font-black bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       FULL / BLOCKED
                     </span>
                   ) : (
-                    <span className="text-sm font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-xs font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       AVAILABLE
                     </span>
                   )}
@@ -442,18 +454,21 @@ export default function VetBoardingDashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
-              <h3 className="text-sm font-black text-[#4A3E3D] mb-3">Quick Actions</h3>
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+            >
+              <h3 className="text-sm font-extrabold text-[#2E2419] mb-3">Quick Actions</h3>
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => setActiveTab('availability')}
-                  className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs hover:bg-blue-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#8B5E3C] font-bold text-xs hover:bg-[#F0E6DD] transition-colors cursor-pointer"
                 >
                   📅 Manage Availability Calendar
                 </button>
                 <button
                   onClick={() => { setActiveTab('profile'); setIsEditing(true); }}
-                  className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] font-bold text-xs hover:bg-[#F0E6DD] transition-colors cursor-pointer"
                 >
                   ✏️ Edit Clinic Details
                 </button>
@@ -468,84 +483,105 @@ export default function VetBoardingDashboardPage() {
             </div>
 
             {/* Clinic info card */}
-            <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
-              <div className="flex items-start gap-4">
-                {clinic.org_photo_url ? (
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-blue-100 shrink-0 flex items-center justify-center bg-white">
-                    <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-full h-full object-cover" />
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                    🏥
+                  </span>
+                  Clinic Overview
+                </h3>
+                {clinic.status === 'approved' && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> Verified Partner
+                  </span>
+                )}
+              </div>
+
+              <div className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-start gap-4">
+                  {clinic.org_photo_url ? (
+                    <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#DFD3C7] shrink-0 flex items-center justify-center bg-white shadow-2xs">
+                      <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl flex items-center justify-center">
+                      <Building2 className="w-7 h-7 text-[#8B5E3C]" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-extrabold text-[#2E2419] text-lg">{clinic.clinic_name}</h2>
+                    <div className="mt-1 space-y-1">
+                      {(clinic.address || clinic.city) && (
+                        <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                          {clinic.address || clinic.city}
+                        </p>
+                      )}
+                      {clinic.phone && (
+                        <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5 text-[#8B5E3C]" />{clinic.phone}
+                        </p>
+                      )}
+                      {clinic.website && (
+                        <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#8B5E3C] flex items-center gap-1 hover:underline font-medium">
+                          <Globe className="w-3.5 h-3.5" />{clinic.website.replace(/^https?:\/\//, '')}
+                        </a>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
-                    <Building2 className="w-7 h-7 text-blue-400" />
+                </div>
+
+                {clinic.description && (
+                  <p className="text-xs text-[#4A3E3D] leading-relaxed border-t border-[#FAF6F2] pt-3">{clinic.description}</p>
+                )}
+                {clinic.services?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {clinic.services.map((svc: string) => (
+                      <span key={svc} className="text-xs font-semibold bg-[#FAF6F2] text-[#8B5E3C] px-2.5 py-1 rounded-full border border-[#E2D5C8]">{svc}</span>
+                    ))}
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-black text-[#4A3E3D]">{clinic.clinic_name}</h2>
-                    {clinic.status === 'approved' && (
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
-                        <ShieldCheck className="w-3 h-3" /> Verified
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 space-y-1">
-                    {(clinic.address || clinic.city) && (
-                      <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {clinic.address || clinic.city}
-                      </p>
-                    )}
-                    {clinic.phone && (
-                      <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
-                        <Phone className="w-3 h-3" />{clinic.phone}
-                      </p>
-                    )}
-                    {clinic.website && (
-                      <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 flex items-center gap-1 hover:underline">
-                        <Globe className="w-3 h-3" />{clinic.website.replace(/^https?:\/\//, '')}
-                      </a>
-                    )}
-                  </div>
-                </div>
+                <button
+                  onClick={() => { setActiveTab('profile'); setIsEditing(true); }}
+                  className="w-full flex items-center justify-center gap-2 border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-[#8B5E3C] rounded-xl py-2.5 text-xs font-extrabold transition-colors cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Edit Clinic Profile
+                </button>
               </div>
-              {clinic.description && (
-                <p className="mt-3 text-sm text-[#4A3E3D] leading-relaxed border-t border-gray-100 pt-3">{clinic.description}</p>
-              )}
-              {clinic.services?.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {clinic.services.map((svc: string) => (
-                    <span key={svc} className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">{svc}</span>
-                  ))}
-                </div>
-              )}
-              <button
-                onClick={() => { setActiveTab('profile'); setIsEditing(true); }}
-                className="mt-4 w-full flex items-center justify-center gap-2 border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-2xl py-2 text-sm font-bold transition-colors"
-              >
-                <Edit3 className="w-4 h-4" /> Edit Profile
-              </button>
             </div>
 
             {/* Recent inquiries */}
             {clinic.status === 'approved' && inquiries.length > 0 && (
-              <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-black text-[#4A3E3D] text-sm">Recent Inquiries</h3>
-                  <button onClick={() => setActiveTab('inquiries')} className="text-xs text-blue-600 font-bold hover:underline">View all</button>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                      💬
+                    </span>
+                    Recent Inquiries
+                  </h3>
+                  <button onClick={() => setActiveTab('inquiries')} className="text-xs text-[#8B5E3C] font-extrabold hover:underline">View all</button>
                 </div>
-                <div className="space-y-3">
+                <div className="p-5 space-y-3">
                   {inquiries.slice(0, 3).map(inq => (
-                    <div key={inq.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-2xl">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                        <Mail className="w-4 h-4 text-blue-500" />
+                    <div key={inq.id} className="flex items-center gap-3 p-3.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl">
+                      <div className="w-8 h-8 bg-[#F0E6DA] text-[#8B5E3C] rounded-full flex items-center justify-center shrink-0">
+                        <Mail className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[#4A3E3D] truncate">{inq.owner_email}</p>
-                        <p className="text-xs text-[#8B7E7D]">{new Date(inq.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs font-extrabold text-[#2E2419] truncate">{inq.owner_email}</p>
+                        <p className="text-[11px] text-[#8B7E7D]">{new Date(inq.created_at).toLocaleDateString()}</p>
                       </div>
                       <button
                         onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                        className="text-xs font-bold text-blue-600 hover:text-blue-700 shrink-0"
+                        className="text-xs font-extrabold text-[#8B5E3C] hover:text-[#734A2E] shrink-0"
                       >
                         Reply →
                       </button>
@@ -557,11 +593,14 @@ export default function VetBoardingDashboardPage() {
 
             {/* No inquiries empty state */}
             {clinic.status === 'approved' && inquiries.length === 0 && !inquiriesLoading && (
-              <div className="bg-white rounded-3xl p-8 border border-blue-100 shadow-sm text-center">
-                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <MessageSquare className="w-7 h-7 text-blue-300" />
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl p-8 border border-[#DFD3C7] shadow-xs text-center"
+              >
+                <div className="w-14 h-14 bg-[#FAF6F2] border border-[#E2D5C8] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="w-7 h-7 text-[#8B5E3C]" />
                 </div>
-                <p className="font-bold text-[#4A3E3D] text-sm">No inquiries yet</p>
+                <p className="font-extrabold text-[#2E2419] text-sm">No inquiries yet</p>
                 <p className="text-xs text-[#8B7E7D] mt-1">Pet owners who find your clinic in search will be able to message you here.</p>
               </div>
             )}
@@ -863,31 +902,31 @@ export default function VetBoardingDashboardPage() {
 
         {/* ── Profile Tab ────────────────────────────────────────────── */}
         {activeTab === 'profile' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-black text-[#4A3E3D]">Clinic Profile</p>
+              <p className="text-sm font-black text-[#2E2419]">Clinic Profile Settings</p>
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-blue-600 border border-blue-200 bg-white hover:bg-blue-50 px-3 py-2 rounded-xl transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                 >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                  <Edit3 className="w-3.5 h-3.5" /> Edit Profile
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setIsEditing(false); setEditForm({ ...clinic }); setSaveError(''); }}
-                    className="text-xs font-bold text-[#8B7E7D] border border-gray-200 bg-white hover:bg-gray-50 px-3 py-2 rounded-xl transition-colors"
+                    className="text-xs font-bold text-[#8B7E7D] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 px-3 py-2 rounded-xl transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] disabled:opacity-60 px-4 py-2 rounded-xl transition-colors shadow-sm cursor-pointer"
                   >
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    Save
+                    Save Changes
                   </button>
                 </div>
               )}
@@ -900,114 +939,170 @@ export default function VetBoardingDashboardPage() {
             )}
 
             {/* Basic info */}
-            <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm space-y-3">
-              <h3 className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider">Basic Info</h3>
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                    🏢
+                  </span>
+                  Basic Identity & Credentials
+                </h3>
+              </div>
 
-              <ProfileField
-                label="Clinic Name"
-                value={editForm.clinic_name || ''}
-                editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
-                onChange={v => setEditForm((p: any) => ({ ...p, clinic_name: v }))}
-                readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
-              />
-              <ProfileField
-                label="License Number"
-                value={editForm.license_number || ''}
-                editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
-                onChange={v => setEditForm((p: any) => ({ ...p, license_number: v }))}
-                readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
-              />
-              <ProfileField
-                label="Phone"
-                value={editForm.phone || ''}
-                editing={isEditing}
-                onChange={v => setEditForm((p: any) => ({ ...p, phone: v }))}
-              />
-              <ProfileField
-                label="Website"
-                value={editForm.website || ''}
-                editing={isEditing}
-                onChange={v => setEditForm((p: any) => ({ ...p, website: v }))}
-                href={isEditing ? undefined : editForm.website}
-              />
-              <ProfileField
-                label="Photo URL"
-                value={editForm.org_photo_url || ''}
-                editing={isEditing}
-                onChange={v => setEditForm((p: any) => ({ ...p, org_photo_url: v }))}
-                placeholder="https://... or leave blank to auto-fetch from website"
-              />
+              <div className="p-5 sm:p-6 space-y-4">
+                <ProfileField
+                  label="Clinic Name"
+                  value={editForm.clinic_name || ''}
+                  editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
+                  onChange={v => setEditForm((p: any) => ({ ...p, clinic_name: v }))}
+                  readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
+                />
+                <ProfileField
+                  label="License Number"
+                  value={editForm.license_number || ''}
+                  editing={isEditing && clinic.status !== 'approved' && clinic.status !== 'paused'}
+                  onChange={v => setEditForm((p: any) => ({ ...p, license_number: v }))}
+                  readOnlyNote={(clinic.status === 'approved' || clinic.status === 'paused') ? "Contact support to update your business name or license number" : undefined}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ProfileField
+                    label="Phone"
+                    value={editForm.phone || ''}
+                    editing={isEditing}
+                    onChange={v => setEditForm((p: any) => ({ ...p, phone: v }))}
+                  />
+                  <ProfileField
+                    label="Website"
+                    value={editForm.website || ''}
+                    editing={isEditing}
+                    onChange={v => setEditForm((p: any) => ({ ...p, website: v }))}
+                    href={isEditing ? undefined : editForm.website}
+                  />
+                </div>
+                <ProfileField
+                  label="Photo URL"
+                  value={editForm.org_photo_url || ''}
+                  editing={isEditing}
+                  onChange={v => setEditForm((p: any) => ({ ...p, org_photo_url: v }))}
+                  placeholder="https://... or leave blank to auto-fetch from website"
+                />
+              </div>
             </div>
 
             {/* Location */}
-            <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm space-y-3">
-              <h3 className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider">Location</h3>
-              {isEditing ? (
-                <CityAutocompleteInput
-                  label="Location / Address *"
-                  required
-                  value={editForm.address || editForm.city || ''}
-                  onChange={val => setEditForm((p: any) => ({ ...p, address: val, city: formatPublicCity(val) }))}
-                  placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
-                  inputClassName="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              ) : (
-                <p className="text-sm text-[#4A3E3D]">
-                  {editForm.address || editForm.city || '—'}
-                </p>
-              )}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                    📍
+                  </span>
+                  Clinic Location
+                </h3>
+              </div>
+
+              <div className="p-5 sm:p-6 space-y-3">
+                {isEditing ? (
+                  <CityAutocompleteInput
+                    label="Location / Address *"
+                    required
+                    value={editForm.address || editForm.city || ''}
+                    onChange={val => setEditForm((p: any) => ({ ...p, address: val, city: formatPublicCity(val) }))}
+                    placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
+                    inputClassName="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                  />
+                ) : (
+                  <p className="text-sm font-bold text-[#2E2419]">
+                    {editForm.address || editForm.city || '—'}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Services */}
-            <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
-              <h3 className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider mb-3">Services Offered</h3>
-              {isEditing ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {VET_SERVICES.map(svc => {
-                    const checked = editForm.services?.includes(svc);
-                    return (
-                      <button
-                        key={svc}
-                        type="button"
-                        onClick={() => toggleService(svc)}
-                        className={`text-left px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-200 ${
-                          checked ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-[#4A3E3D] border-gray-200 hover:border-blue-300'
-                        }`}
-                      >
-                        {checked ? '✓ ' : ''}{svc}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {(clinic.services || []).length > 0
-                    ? clinic.services.map((svc: string) => (
-                        <span key={svc} className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">{svc}</span>
-                      ))
-                    : <span className="text-sm text-[#8B7E7D]">No services listed.</span>
-                  }
-                </div>
-              )}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                    🩺
+                  </span>
+                  Services Offered
+                </h3>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                {isEditing ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {VET_SERVICES.map(svc => {
+                      const checked = editForm.services?.includes(svc);
+                      return (
+                        <button
+                          key={svc}
+                          type="button"
+                          onClick={() => toggleService(svc)}
+                          className={`text-left px-3 py-2.5 rounded-xl border text-xs font-extrabold transition-all duration-200 cursor-pointer ${
+                            checked ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' : 'bg-[#FAF6F2] text-[#4A3E3D] border-[#E2D5C8] hover:border-[#8B5E3C]'
+                          }`}
+                        >
+                          {checked ? '✓ ' : ''}{svc}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {(clinic.services || []).length > 0
+                      ? clinic.services.map((svc: string) => (
+                          <span key={svc} className="text-xs font-semibold bg-[#FAF6F2] text-[#8B5E3C] px-3 py-1 rounded-full border border-[#E2D5C8]">{svc}</span>
+                        ))
+                      : <span className="text-sm text-[#8B7E7D]">No services listed.</span>
+                    }
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Description */}
-            <div className="bg-white rounded-3xl p-5 border border-blue-100 shadow-sm">
-              <h3 className="text-xs font-black text-[#8B7E7D] uppercase tracking-wider mb-3">About Your Clinic</h3>
-              {isEditing ? (
-                <textarea
-                  value={editForm.description || ''}
-                  onChange={e => setEditForm((p: any) => ({ ...p, description: e.target.value }))}
-                  rows={4}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
-                />
-              ) : (
-                <p className="text-sm text-[#4A3E3D] leading-relaxed">{clinic.description || <span className="text-[#8B7E7D]">No description yet.</span>}</p>
-              )}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-purple-100 text-purple-900 flex items-center justify-center text-xs">
+                    📝
+                  </span>
+                  About Your Clinic
+                </h3>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                {isEditing ? (
+                  <textarea
+                    value={editForm.description || ''}
+                    onChange={e => setEditForm((p: any) => ({ ...p, description: e.target.value }))}
+                    rows={4}
+                    className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 resize-none"
+                  />
+                ) : (
+                  <p className="text-xs text-[#4A3E3D] leading-relaxed">{clinic.description || <span className="text-[#8B7E7D]">No description yet.</span>}</p>
+                )}
+              </div>
             </div>
 
             {/* Account & Billing Card */}
-            <div className="bg-amber-50/70 rounded-3xl p-5 border border-amber-200/70">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-amber-50/70 rounded-2xl p-5 border border-amber-200/70"
+            >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xs font-black text-amber-900 uppercase tracking-wider mb-1">Account & Billing Settings</h3>
@@ -1109,22 +1204,22 @@ function ProfileField({
 }) {
   return (
     <div>
-      <label className="text-xs text-[#8B7E7D] font-semibold">{label}</label>
+      <label className="text-xs text-[#4A3E3D] font-bold block mb-1">{label}</label>
       {editing ? (
         <input
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="mt-1 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
         />
       ) : (
         href && value ? (
-          <a href={href} target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:underline mt-0.5">
+          <a href={href} target="_blank" rel="noopener noreferrer" className="block text-sm text-[#8B5E3C] font-semibold hover:underline mt-0.5">
             {value}
           </a>
         ) : (
           <div>
-            <p className="text-sm font-bold text-[#4A3E3D] mt-0.5">{value || '—'}</p>
+            <p className="text-sm font-bold text-[#2E2419] mt-0.5">{value || '—'}</p>
             {readOnlyNote && (
               <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">
                 {readOnlyNote}

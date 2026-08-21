@@ -435,9 +435,12 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-sans flex flex-col font-inter">
+    <div className="min-h-screen bg-[#F7F3EE] text-[#555555] font-sans flex flex-col font-inter">
       <main className="flex-1 flex flex-col items-center py-16 px-6 md:px-8 lg:px-12">
-        <div className="w-full max-w-[500px] bg-white rounded-3xl border border-[#EEEEEE] shadow-[0_12px_40px_rgba(0,0,0,0.03)] p-8 md:p-10 flex flex-col gap-6 relative">
+        <div 
+          style={{ boxShadow: '0 4px 20px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)' }}
+          className="w-full max-w-[500px] bg-white rounded-3xl border border-[#DFD3C7] p-8 md:p-10 flex flex-col gap-6 relative"
+        >
           
           {/* INITIAL SESSION CHECK LOADING STATE */}
           {isCheckingSession ? (
@@ -506,7 +509,7 @@ export default function AccountPage() {
                       Email Address {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
                     </label>
                     {isLocked ? (
-                      <div className="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500 font-medium">
+                      <div className="w-full px-4 py-3.5 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] text-sm text-gray-500 font-medium">
                         {email}
                       </div>
                     ) : (
@@ -517,7 +520,7 @@ export default function AccountPage() {
                         placeholder="your@email.com"
                         required
                         disabled={loading}
-                        className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all disabled:opacity-50"
+                        className="w-full px-4 py-3.5 rounded-xl border border-[#E2D5C8] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#2E2419] bg-[#FAF6F2] transition-all disabled:opacity-50"
                       />
                     )}
                     {isLocked && (
@@ -617,7 +620,7 @@ export default function AccountPage() {
                     placeholder="••••••"
                     required
                     disabled={loading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest text-[#191919] bg-white transition-all disabled:opacity-50"
+                    className="w-full px-4 py-3.5 rounded-xl border border-[#E2D5C8] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest text-[#2E2419] bg-[#FAF6F2] transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -735,59 +738,69 @@ export default function AccountPage() {
                   <AccountPetsTab ownerEmail={email} />
 
                   {!subDetails.active ? (
-                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-4">
-                      <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Account Status</span>
+                    <div 
+                      style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                      className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
+                    >
+                      <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
+                            👤
+                          </span>
+                          Account Status
+                        </span>
                         <span className="bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200">
                           Free Account
                         </span>
                       </div>
                       
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <span className="text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">AI Usage Allowance</span>
-                        <p className="text-xs text-gray-600 leading-relaxed">
-                          Standard free accounts get <strong>2 lifetime AI checks</strong> across all tools.
-                        </p>
-                      </div>
+                      <div className="p-5 flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5 text-left">
+                          <span className="text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">AI Usage Allowance</span>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            Standard free accounts get <strong>2 lifetime AI checks</strong> across all tools.
+                          </p>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          setLoading(true);
-                          setError(null);
-                          try {
-                            const res = await fetch('/api/stripe/checkout', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ email: email.trim() })
-                            });
-                            const data = await res.json();
-                            if (data.url) {
-                              window.location.href = data.url;
-                            } else {
-                              throw new Error(data.error || 'Failed to start checkout');
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setLoading(true);
+                            setError(null);
+                            try {
+                              const res = await fetch('/api/stripe/checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: email.trim() })
+                              });
+                              const data = await res.json();
+                              if (data.url) {
+                                window.location.href = data.url;
+                              } else {
+                                throw new Error(data.error || 'Failed to start checkout');
+                              }
+                            } catch (err: any) {
+                              setError(err.message || 'Failed to start checkout.');
+                            } finally {
+                              setLoading(false);
                             }
-                          } catch (err: any) {
-                            setError(err.message || 'Failed to start checkout.');
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                        disabled={loading}
-                        className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        Upgrade to Membership ($4.99/mo) →
-                      </button>
+                          }}
+                          disabled={loading}
+                          className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Upgrade to Membership ($4.99/mo) →
+                        </button>
 
-                      {/* Subtle Partner Registration Note */}
-                      <div className="pt-2.5 mt-1 border-t border-gray-200/60 text-center">
-                        <p className="text-[11px] text-gray-500 font-medium">
-                          Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
-                          <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
-                            Register as a Partner →
-                          </Link>
-                        </p>
+                        {/* Subtle Partner Registration Note */}
+                        <div className="pt-2.5 mt-1 border-t border-gray-100 text-center">
+                          <p className="text-[11px] text-gray-500 font-medium">
+                            Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
+                            <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
+                              Register as a Partner →
+                            </Link>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -804,9 +817,17 @@ export default function AccountPage() {
                         </div>
                       ) : subDetails.isPartner ? (
                         <div className="flex flex-col gap-4">
-                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/15 rounded-2xl p-5 flex flex-col gap-3.5 shadow-xs">
-                            <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Subscription Status</span>
+                          <div 
+                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                            className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
+                          >
+                            <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                              <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                                  🏢
+                                </span>
+                                Subscription Status
+                              </span>
                               {subDetails.rawSubscriptionStatus === 'trialing' ? (
                                 <span className="bg-amber-100 text-amber-900 border border-amber-300/70 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-3xs flex items-center gap-1.5">
                                   <Sparkles className="w-3.5 h-3.5 text-amber-700" /> {subDetails.billingHealthLabel || 'Free Trial Active'}
@@ -822,27 +843,29 @@ export default function AccountPage() {
                               )}
                             </div>
 
-                            <div className="flex flex-col gap-1">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Business Name</span>
-                              <p className="text-[#191919] font-extrabold text-base">
-                                {subDetails.businessName}
-                              </p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200/50">
-                              <div>
-                                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Business Plan</span>
-                                <p className="text-xs font-extrabold text-[#8B5E3C] mt-0.5">
-                                  {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 40}/mo)
+                            <div className="p-5 flex flex-col gap-3.5">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Business Name</span>
+                                <p className="text-[#191919] font-extrabold text-base">
+                                  {subDetails.businessName}
                                 </p>
                               </div>
-                              <div>
-                                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
-                                  {subDetails.rawSubscriptionStatus === 'trialing' ? 'Trial Ends On' : subDetails.cancelAtPeriodEnd ? 'Access Ends On' : 'Next Billing Date'}
-                                </span>
-                                <p className="text-xs font-extrabold text-gray-800 mt-0.5">
-                                  {subDetails.nextBillingDate}
-                                </p>
+
+                              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#FAF6F2]">
+                                <div>
+                                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Business Plan</span>
+                                  <p className="text-xs font-extrabold text-[#8B5E3C] mt-0.5">
+                                    {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 40}/mo)
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                                    {subDetails.rawSubscriptionStatus === 'trialing' ? 'Trial Ends On' : subDetails.cancelAtPeriodEnd ? 'Access Ends On' : 'Next Billing Date'}
+                                  </span>
+                                  <p className="text-xs font-extrabold text-gray-800 mt-0.5">
+                                    {subDetails.nextBillingDate}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -937,9 +960,17 @@ export default function AccountPage() {
                         </div>
                       ) : (
                         <div className="flex flex-col gap-4">
-                          <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
-                            <div className="flex items-center justify-between border-b border-gray-200/50 pb-3">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subscription Status</span>
+                          <div 
+                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                            className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
+                          >
+                            <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                              <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                                  ✨
+                                </span>
+                                Membership Status
+                              </span>
                               {subDetails.cancelAtPeriodEnd ? (
                                 <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
                                   Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
@@ -951,13 +982,15 @@ export default function AccountPage() {
                               )}
                             </div>
 
-                            <div className="flex flex-col gap-1">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
-                              </span>
-                              <p className="text-[#191919] font-extrabold text-sm mt-0.5">
-                                {subDetails.nextBillingDate}
-                              </p>
+                            <div className="p-5 flex flex-col gap-3">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                  {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
+                                </span>
+                                <p className="text-[#191919] font-extrabold text-sm mt-0.5">
+                                  {subDetails.nextBillingDate}
+                                </p>
+                              </div>
                             </div>
                           </div>
 
@@ -1046,40 +1079,62 @@ export default function AccountPage() {
                       )}
                     </>
                   )}
+
                    {/* Blocked Pet Sitters & Owners (Pet Sitting) */}
-                   <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
-                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                       <Ban className="w-3.5 h-3.5" /> Blocked Sitters & Owners (Pet Sitting)
-                     </span>
-                     {blockedUsers.length === 0 ? (
-                       <p className="text-xs text-gray-400 font-medium">No blocked users</p>
-                     ) : (
-                       <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                         {blockedUsers.map((user: any) => (
-                           <div key={user.id} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                             <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={user.blocked_email}>
-                               {user.blocked_email}
-                             </span>
-                             <button
-                               type="button"
-                               onClick={() => handleUnblockUser(user.blocked_email)}
-                               className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
-                             >
-                               Unblock
-                             </button>
-                           </div>
-                         ))}
-                       </div>
-                     )}
+                   <div 
+                     style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                     className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden mt-4"
+                   >
+                     <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                       <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                         <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
+                           🚫
+                         </span>
+                         Blocked Sitters & Owners
+                       </span>
+                     </div>
+
+                     <div className="p-5 flex flex-col gap-3">
+                       {blockedUsers.length === 0 ? (
+                         <p className="text-xs text-gray-400 font-medium italic">No blocked users</p>
+                       ) : (
+                         <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                           {blockedUsers.map((user: any) => (
+                             <div key={user.id} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
+                               <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={user.blocked_email}>
+                                 {user.blocked_email}
+                               </span>
+                               <button
+                                 type="button"
+                                 onClick={() => handleUnblockUser(user.blocked_email)}
+                                 className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                               >
+                                 Unblock
+                               </button>
+                             </div>
+                           ))}
+                         </div>
+                       )}
+                     </div>
                    </div>
 
                    {/* Blocked Users Section */}
                   {blockedEmails.length > 0 && (
-                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Users</span>
-                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                    <div 
+                      style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                      className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden mt-4"
+                    >
+                      <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
+                            🚫
+                          </span>
+                          Blocked Users
+                        </span>
+                      </div>
+                      <div className="p-5 flex flex-col gap-2 max-h-40 overflow-y-auto">
                         {blockedEmails.map((blockedEmail) => (
-                          <div key={blockedEmail} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                          <div key={blockedEmail} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
                             <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedEmail}>
                               {blockedEmail}
                             </span>

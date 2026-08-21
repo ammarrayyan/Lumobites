@@ -322,8 +322,8 @@ export default function DaycareDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center p-6">
-        <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-[#F7F3EE] flex items-center justify-center p-6">
+        <div className="animate-spin w-8 h-8 border-4 border-[#8B5E3C] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -331,24 +331,24 @@ export default function DaycareDashboard() {
   if (!daycare) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#555555] font-inter">
+    <div className="min-h-screen bg-[#F7F3EE] text-[#555555] font-inter">
       {/* HEADER */}
-      <header className="bg-white border-b border-[#E8DDD4] sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className="bg-white/90 backdrop-blur-xl border-b border-[#DFD3C7] sticky top-0 z-40 shadow-2xs">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {daycare.logo_url ? (
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-emerald-200 shrink-0 flex items-center justify-center bg-white">
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#DFD3C7] shrink-0 flex items-center justify-center bg-white shadow-2xs">
                 <img src={daycare.logo_url} alt={daycare.business_name} className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center border border-emerald-200 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FAF6F2] flex items-center justify-center border border-[#E2D5C8] shrink-0">
                 <span className="text-xl">🐕</span>
               </div>
             )}
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h1>
-                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <h1 className="text-base font-black text-[#2E2419]">{daycare.business_name}</h1>
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                   Partner Portal
                 </span>
               </div>
@@ -368,12 +368,12 @@ export default function DaycareDashboard() {
                   onClick={handleTogglePause}
                   disabled={isExpired}
                   title={isExpired ? "Subscribe to enable listing visibility" : "Toggle listing visibility"}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer ${
                     isExpired
                       ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
                       : daycare.is_paused
-                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer'
-                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer'
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
                   }`}
                 >
                   <Power className="w-3.5 h-3.5" />
@@ -388,43 +388,46 @@ export default function DaycareDashboard() {
       {/* DASHBOARD CONTAINER */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* TAB NAVIGATION */}
-        <div className="flex gap-2 border-b border-[#E8DDD4] mb-8 overflow-x-auto pb-1">
+        <div 
+          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+          className="bg-white rounded-2xl p-1.5 border border-[#DFD3C7] flex gap-1 shadow-xs mb-8 overflow-x-auto"
+        >
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border-none cursor-pointer ${
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 border-none cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-[#8B7E7D] hover:bg-white hover:text-[#4A3E3D]'
+                ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                : 'text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
             }`}
           >
             <Building2 className="w-4 h-4" /> Overview
           </button>
           <button
             onClick={() => setActiveTab('inquiries')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border-none cursor-pointer ${
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 border-none cursor-pointer ${
               activeTab === 'inquiries'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-[#8B7E7D] hover:bg-white hover:text-[#4A3E3D]'
+                ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                : 'text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
             }`}
           >
             <MessageSquare className="w-4 h-4" /> Inquiries ({inquiries.length})
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border-none cursor-pointer ${
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 border-none cursor-pointer ${
               activeTab === 'calendar'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-[#8B7E7D] hover:bg-white hover:text-[#4A3E3D]'
+                ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                : 'text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
             }`}
           >
             <Calendar className="w-4 h-4" /> Availability Calendar
           </button>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border-none cursor-pointer ${
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 border-none cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-[#8B7E7D] hover:bg-white hover:text-[#4A3E3D]'
+                ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                : 'text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
             }`}
           >
             <User className="w-4 h-4" /> Profile
@@ -435,30 +438,39 @@ export default function DaycareDashboard() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Inquiries</p>
-                <p className="text-3xl font-black text-[#4A3E3D] mt-2">{inquiries.length}</p>
+                <p className="text-3xl font-black text-[#2E2419] mt-2">{inquiries.length}</p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Search Status</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className={`w-3 h-3 rounded-full ${daycare.is_paused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                  <span className="text-lg font-black text-[#4A3E3D]">
+                  <span className="text-lg font-black text-[#2E2419]">
                     {daycare.is_paused ? 'Paused' : 'Active in Search'}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Today&apos;s Availability</p>
                 <div className="flex items-center gap-2 mt-2">
                   {fullDates.includes(new Date().toISOString().split('T')[0]) ? (
-                    <span className="text-sm font-black bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-xs font-black bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       FULL / BLOCKED
                     </span>
                   ) : (
-                    <span className="text-sm font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    <span className="text-xs font-black bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       AVAILABLE
                     </span>
                   )}
@@ -467,24 +479,27 @@ export default function DaycareDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
-              <h3 className="text-sm font-black text-[#4A3E3D] mb-3">Quick Actions</h3>
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+            >
+              <h3 className="text-sm font-extrabold text-[#2E2419] mb-3">Quick Actions</h3>
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => setActiveTab('calendar')}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold text-xs hover:bg-emerald-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#8B5E3C] font-bold text-xs hover:bg-[#F0E6DD] transition-colors cursor-pointer"
                 >
                   📅 Manage Availability Calendar
                 </button>
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] font-bold text-xs hover:bg-[#F0E6DD] transition-colors cursor-pointer"
                 >
                   ✏️ Edit Daycare Details
                 </button>
                 <Link
                   href="/petsitting"
-                  className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold text-xs hover:bg-blue-100 transition-colors"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] font-bold text-xs hover:bg-[#F0E6DD] transition-colors"
                   style={{ textDecoration: 'none' }}
                 >
                   🔍 View Listing on Search Page
@@ -496,7 +511,10 @@ export default function DaycareDashboard() {
 
         {/* ── Inquiries Tab ─────────────────────────────────────────────── */}
         {activeTab === 'inquiries' && (
-          <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] p-6 shadow-xs"
+          >
             {(() => {
               let filteredInquiries = [...inquiries];
               if (inquiryFilter === 'archived') {
@@ -513,47 +531,47 @@ export default function DaycareDashboard() {
               return (
                 <>
                   <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                    <h2 className="text-base font-black text-[#4A3E3D]">Owner Inquiries</h2>
+                    <h2 className="text-base font-black text-[#2E2419]">Owner Inquiries</h2>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex bg-gray-100 p-1 rounded-xl">
+                      <div className="flex bg-[#FAF6F2] p-1 rounded-xl border border-[#E2D5C8]">
                         <button
                           onClick={() => setInquiryFilter('all')}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'all' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           All
                         </button>
                         <button
                           onClick={() => setInquiryFilter('unread')}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'unread' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           Unread
                         </button>
                         <button
                           onClick={() => setInquiryFilter('replied')}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'replied' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           Replied
                         </button>
                         <button
                           onClick={() => setInquiryFilter('archived')}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'archived' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           Archived
                         </button>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                        <span className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-xl">
                           {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
                         </span>
                         <button
                           onClick={() => daycare?.id && fetchInquiries(daycare.id)}
-                          className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer border-none"
+                          className="p-2 rounded-xl hover:bg-[#FAF6F2] transition-colors cursor-pointer border-none"
                           title="Refresh inquiries"
                           disabled={inquiriesLoading}
                         >
-                          <RefreshCw className={`w-4 h-4 text-gray-500 ${inquiriesLoading ? 'animate-spin' : ''}`} />
+                          <RefreshCw className={`w-4 h-4 text-[#8B7E7D] ${inquiriesLoading ? 'animate-spin' : ''}`} />
                         </button>
                       </div>
                     </div>
@@ -572,7 +590,7 @@ export default function DaycareDashboard() {
                       {filteredInquiries.map((inq: any) => (
                         <div
                           key={inq.id}
-                          className="p-4 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4] flex items-center justify-between hover:border-emerald-400 transition-all"
+                          className="p-4 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-between hover:border-[#8B5E3C] transition-all"
                         >
                           <div className="flex-1 min-w-0 pr-3">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -581,7 +599,7 @@ export default function DaycareDashboard() {
                               ) : (
                                 <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
                               )}
-                              <p className="text-sm font-bold text-[#4A3E3D] truncate">{inq.owner_email}</p>
+                              <p className="text-sm font-bold text-[#2E2419] truncate">{inq.owner_email}</p>
                               {inq.unread_count > 0 && (
                                 <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                                   {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
@@ -605,23 +623,18 @@ export default function DaycareDashboard() {
                               <LivePetProfileCard petId={inq.pet_id} partnerId={center.id} partnerType="daycare" />
                             </div>
                           </div>
-                          <div className="shrink-0 flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
                             <button
-                              onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors border-none cursor-pointer"
+                              onClick={() => handleToggleArchiveInquiry(inq.id, inq.archived)}
+                              className="px-2.5 py-1.5 text-xs text-[#8B7E7D] hover:text-gray-900 border border-[#E2D5C8] rounded-xl hover:bg-white transition-colors cursor-pointer"
                             >
-                              Open Chat Thread
+                              {inq.archived ? 'Unarchive' : 'Archive'}
                             </button>
                             <button
-                              onClick={() => handleToggleArchiveInquiry(inq.id, !!inq.archived)}
-                              title={inq.archived ? 'Restore Inquiry' : 'Archive Inquiry'}
-                              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                                inq.archived
-                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
-                                  : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200'
-                              }`}
+                              onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                              className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl transition-colors cursor-pointer border-none shadow-xs"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              View & Reply →
                             </button>
                           </div>
                         </div>
@@ -636,24 +649,25 @@ export default function DaycareDashboard() {
 
         {/* ── Availability Calendar Tab ──────────────────────────────────── */}
         {activeTab === 'calendar' && (
-          <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] p-6 shadow-xs"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
               <div>
-                <h2 className="text-base font-black text-[#4A3E3D]">Availability Calendar</h2>
-                <p className="text-xs text-[#8B7E7D]">
-                  Click on today or future dates to toggle between <strong>Available</strong> and <strong>FULL</strong>. Past dates are automatically disabled.
-                </p>
+                <h2 className="text-base font-black text-[#2E2419]">Daycare Availability Calendar</h2>
+                <p className="text-xs text-[#8B7E7D] mt-0.5">Click any date to toggle between Available and Full/Blocked.</p>
               </div>
 
-              {/* Month Selector Controls */}
-              <div className="flex items-center gap-2 bg-[#FDFAF7] border border-[#E8DDD4] rounded-2xl p-1 shrink-0">
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setCalMonthOffset(prev => prev - 1)}
-                  className="p-1.5 rounded-xl hover:bg-white text-[#4A3E3D] transition-colors border-none cursor-pointer"
+                  onClick={() => setCalMonthOffset(p => p - 1)}
+                  disabled={calMonthOffset <= 0}
+                  className="p-2 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 text-[#2E2419]" />
                 </button>
-                <span className="text-xs font-bold text-[#4A3E3D] px-3">
+                <span className="text-xs font-black text-[#2E2419] px-2 min-w-[120px] text-center">
                   {(() => {
                     const d = new Date();
                     d.setDate(1);
@@ -662,16 +676,17 @@ export default function DaycareDashboard() {
                   })()}
                 </span>
                 <button
-                  onClick={() => setCalMonthOffset(prev => prev + 1)}
-                  className="p-1.5 rounded-xl hover:bg-white text-[#4A3E3D] transition-colors border-none cursor-pointer"
+                  onClick={() => setCalMonthOffset(p => p + 1)}
+                  disabled={calMonthOffset >= 3}
+                  className="p-2 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-[#2E2419]" />
                 </button>
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex flex-wrap items-center gap-5 mb-4 text-xs font-medium border-t border-b border-gray-100 py-3">
+            {/* Calendar Legend */}
+            <div className="flex items-center gap-4 text-xs font-bold mb-4 pb-4 border-b border-[#FAF6F2]">
               <div className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block"></span>
                 <span className="text-[#4A3E3D]">Available (Default)</span>
@@ -740,14 +755,14 @@ export default function DaycareDashboard() {
                               : isFull
                               ? 'bg-rose-50 border-rose-200 hover:bg-rose-100 text-rose-800 cursor-pointer'
                               : 'bg-emerald-50/60 border-emerald-100 hover:bg-emerald-100/80 text-emerald-900 cursor-pointer'
-                          } ${isToday ? 'ring-2 ring-emerald-500 shadow-sm' : ''}`}
+                          } ${isToday ? 'ring-2 ring-[#8B5E3C] shadow-sm' : ''}`}
                         >
                           <div className="w-full flex items-center justify-between">
-                            <span className={`text-xs font-black ${isPast ? 'text-gray-400 font-normal' : isToday ? 'text-emerald-700' : 'text-[#4A3E3D]'}`}>
+                            <span className={`text-xs font-black ${isPast ? 'text-gray-400 font-normal' : isToday ? 'text-[#8B5E3C]' : 'text-[#4A3E3D]'}`}>
                               {dayNum}
                             </span>
                             {isToday && (
-                              <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1 rounded font-black">Today</span>
+                              <span className="text-[9px] bg-[#F0E6DA] text-[#8B5E3C] px-1 rounded font-black">Today</span>
                             )}
                           </div>
                           <div className="w-full mt-1">
@@ -779,28 +794,28 @@ export default function DaycareDashboard() {
 
         {/* ── Profile Tab ───────────────────────────────────────────────── */}
         {activeTab === 'profile' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-black text-[#4A3E3D]">Daycare Profile</p>
+              <h2 className="text-base font-black text-[#2E2419]">Daycare Profile Settings</h2>
               {!isEditing ? (
                 <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 border border-emerald-200 bg-white hover:bg-emerald-50 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+                  onClick={() => { setIsEditing(true); setEditForm({ ...daycare }); }}
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                 >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                  <Edit3 className="w-3.5 h-3.5" /> Edit Profile
                 </button>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => { setIsEditing(false); setEditForm({ ...daycare }); setSaveError(''); }}
-                    className="text-xs font-bold text-[#8B7E7D] border border-gray-200 bg-white hover:bg-gray-50 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+                    onClick={() => { setIsEditing(false); setSaveError(''); }}
+                    className="text-xs font-bold text-[#8B7E7D] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveProfile}
                     disabled={saveLoading}
-                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl transition-colors border-none cursor-pointer"
+                    className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] px-4 py-2 rounded-xl transition-colors border-none cursor-pointer shadow-sm"
                   >
                     <Check className="w-3.5 h-3.5" /> {saveLoading ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -815,36 +830,39 @@ export default function DaycareDashboard() {
             )}
 
             {!isEditing ? (
-              <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm space-y-4">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] p-6 shadow-xs space-y-4"
+              >
                 <div className="flex items-start gap-4">
                   {daycare.logo_url ? (
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#E8DDD4] shrink-0 flex items-center justify-center bg-white">
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#DFD3C7] shrink-0 flex items-center justify-center bg-white shadow-2xs">
                       <img src={daycare.logo_url} alt={daycare.business_name} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                    <div className="w-20 h-20 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-center shrink-0">
                       <span className="text-3xl">🐕</span>
                     </div>
                   )}
                   <div>
-                    <h3 className="text-lg font-black text-[#4A3E3D]">{daycare.business_name}</h3>
+                    <h3 className="text-lg font-black text-[#2E2419]">{daycare.business_name}</h3>
                     {daycare.license_number && <p className="text-xs text-[#8B7E7D]">License: {daycare.license_number}</p>}
                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> {daycare.address || daycare.city || '—'}
+                      <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" /> {daycare.address || daycare.city || '—'}
                     </p>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-4 space-y-2">
+                <div className="border-t border-[#FAF6F2] pt-4 space-y-2">
                   <p className="text-xs font-bold text-[#4A3E3D]">Facility Overview</p>
                   <p className="text-xs text-[#8B7E7D] leading-relaxed">{daycare.description || 'No description provided.'}</p>
                 </div>
 
-                <div className="border-t border-gray-100 pt-4 space-y-2">
+                <div className="border-t border-[#FAF6F2] pt-4 space-y-2">
                   <p className="text-xs font-bold text-[#4A3E3D]">Services Offered</p>
                   <div className="flex flex-wrap gap-1.5">
                     {(daycare.services || []).map((s: string) => (
-                      <span key={s} className="text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                      <span key={s} className="text-[11px] font-bold bg-[#FAF6F2] text-[#8B5E3C] border border-[#E2D5C8] px-2.5 py-0.5 rounded-full">
                         {s}
                       </span>
                     ))}
@@ -852,13 +870,16 @@ export default function DaycareDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 shadow-sm space-y-4">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] p-6 shadow-xs space-y-4"
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">Business Name</label>
                     {(daycare.status === 'approved' || daycare.status === 'paused') ? (
                       <div>
-                        <p className="text-sm font-bold text-[#4A3E3D] py-1">{editForm.business_name || daycare.business_name || '—'}</p>
+                        <p className="text-sm font-bold text-[#2E2419] py-1">{editForm.business_name || daycare.business_name || '—'}</p>
                         <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">Contact support to update your business name or license number</p>
                       </div>
                     ) : (
@@ -866,7 +887,7 @@ export default function DaycareDashboard() {
                         type="text"
                         value={editForm.business_name || ''}
                         onChange={e => setEditForm({ ...editForm, business_name: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                       />
                     )}
                   </div>
@@ -874,7 +895,7 @@ export default function DaycareDashboard() {
                     <label className="block text-xs font-bold text-[#4A3E3D] mb-1">License Number</label>
                     {(daycare.status === 'approved' || daycare.status === 'paused') ? (
                       <div>
-                        <p className="text-sm font-bold text-[#4A3E3D] py-1">{editForm.license_number || daycare.license_number || '—'}</p>
+                        <p className="text-sm font-bold text-[#2E2419] py-1">{editForm.license_number || daycare.license_number || '—'}</p>
                         <p className="text-[11px] text-[#8B7E7D] mt-0.5 font-medium italic">Contact support to update your business name or license number</p>
                       </div>
                     ) : (
@@ -882,7 +903,7 @@ export default function DaycareDashboard() {
                         type="text"
                         value={editForm.license_number || ''}
                         onChange={e => setEditForm({ ...editForm, license_number: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                       />
                     )}
                   </div>
@@ -896,7 +917,7 @@ export default function DaycareDashboard() {
                       value={editForm.logo_url || ''}
                       onChange={e => setEditForm({ ...editForm, logo_url: e.target.value })}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                     />
                   </div>
                   <div>
@@ -906,7 +927,7 @@ export default function DaycareDashboard() {
                       value={editForm.phone || ''}
                       onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
                       placeholder="(555) 555-5555"
-                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                     />
                   </div>
                 </div>
@@ -919,7 +940,7 @@ export default function DaycareDashboard() {
                       value={editForm.website || ''}
                       onChange={e => setEditForm({ ...editForm, website: e.target.value })}
                       placeholder="https://..."
-                      className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                     />
                   </div>
                   <div>
@@ -929,7 +950,7 @@ export default function DaycareDashboard() {
                       value={editForm.address || editForm.city || ''}
                       onChange={val => setEditForm({ ...editForm, address: val, city: formatPublicCity(val) })}
                       placeholder="Search location (e.g. 1239 Lexington Rd, Louisville, KY)…"
-                      inputClassName="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500"
+                      inputClassName="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                     />
                   </div>
                 </div>
@@ -940,7 +961,7 @@ export default function DaycareDashboard() {
                     rows={3}
                     value={editForm.description || ''}
                     onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-xs focus:outline-none focus:border-emerald-500 resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 resize-none"
                   />
                 </div>
 

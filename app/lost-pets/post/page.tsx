@@ -299,48 +299,119 @@ export default function PostLostPet() {
 
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] font-sans">
-            <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans">
+      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
         <Link href="/lost-pets" className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-block">&larr; Back to Board</Link>
         
-        <div className="bg-white rounded-3xl p-6 md:p-10 border border-[#E8DDD4] shadow-sm">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-black text-[#4A3E3D] mb-2">Report a Pet</h1>
-            <p className="text-[#8B7E7D]">Provide as much detail as possible to help the community.</p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-black text-[#2E2419] mb-2">Report a Pet</h1>
+          <p className="text-gray-500 font-medium">Provide as much detail as possible to help reunite pets across the community.</p>
+        </div>
+
+        {error && <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 font-bold text-center border border-red-200">{error}</div>}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section 1: Pet Identity & Basic Info */}
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+          >
+            <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
+                  🐾
+                </span>
+                Pet Identity & Type
+              </h3>
+              <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                Step 1 of 4
+              </span>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">I am reporting a...</label>
+                  <select 
+                    value={type} 
+                    onChange={e => setType(e.target.value as any)} 
+                    className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 font-bold"
+                  >
+                    <option value="lost">Lost Pet (I lost my pet)</option>
+                    <option value="found">Found Pet (I found someone's pet)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Pet Species</label>
+                  <select 
+                    value={species} 
+                    onChange={e => setSpecies(e.target.value as any)} 
+                    className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 font-bold"
+                  >
+                    <option value="dog">Dog 🐶</option>
+                    <option value="cat">Cat 🐱</option>
+                    <option value="other">Other 🐾</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Pet's Name {type === 'found' && '(if known)'}</label>
+                  <input 
+                    required={type === 'lost'} 
+                    type="text" 
+                    value={petName} 
+                    onChange={e => setPetName(e.target.value)} 
+                    className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20" 
+                    placeholder="e.g. Bella" 
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Date {type === 'lost' ? 'Lost' : 'Found'}</label>
+                  <input 
+                    required 
+                    type="date" 
+                    value={dateLostFound} 
+                    onChange={e => setDateLostFound(e.target.value)} 
+                    className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20" 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Description & Distinguishing Features</label>
+                <textarea 
+                  required 
+                  rows={3} 
+                  value={description} 
+                  onChange={e => setDescription(e.target.value)} 
+                  className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20" 
+                  placeholder="Breed, color, collar/tag details, microchip info, behavior traits..." 
+                />
+              </div>
+            </div>
           </div>
 
-          {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 font-bold text-center border border-red-200">{error}</div>}
+          {/* Section 2: Last Seen Date & Location */}
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+          >
+            <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                  📍
+                </span>
+                Last Seen Location
+              </h3>
+              <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                Step 2 of 4
+              </span>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 sm:p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">I am reporting a...</label>
-                <select value={type} onChange={e => setType(e.target.value as any)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-bold">
-                  <option value="lost">Lost Pet (I lost my pet)</option>
-                  <option value="found">Found Pet (I found someone's pet)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pet Species</label>
-                <select value={species} onChange={e => setSpecies(e.target.value as any)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-bold">
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pet's Name {type === 'found' && '(if known)'}</label>
-                <input required={type === 'lost'} type="text" value={petName} onChange={e => setPetName(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="e.g. Bella" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Date {type === 'lost' ? 'Lost' : 'Found'}</label>
-                <input required type="date" value={dateLostFound} onChange={e => setDateLostFound(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Seen Location (City or Zip Code)</label>
+                <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">City, Neighborhood, or 5-Digit Zip Code</label>
                 <div className="flex gap-2">
                   <div className="relative flex-grow">
                     <input 
@@ -354,15 +425,15 @@ export default function PostLostPet() {
                         setLocationOptions([]);
                       }} 
                       onBlur={handleLocationBlur}
-                      className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
+                      className={`w-full bg-[#FAF6F2] border ${locationVerified ? 'border-emerald-500' : 'border-[#E2D5C8]'} rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 pr-12`} 
                       placeholder="Enter city name OR 5-digit zip code..." 
                     />
                     {isLocating && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
                     )}
                     {locationVerified && !isLocating && selectedLocation && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-600">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                       </div>
                     )}
                   </div>
@@ -370,15 +441,15 @@ export default function PostLostPet() {
                     type="button"
                     onClick={handleUseMyLocation}
                     disabled={isDetectingLocation}
-                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-sm ${
+                    className={`bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#DFD3C7] rounded-xl px-4 py-2.5 text-[#8B5E3C] font-bold text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                       isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''
                     }`}
                     title="Use my current location"
                   >
                     {isDetectingLocation ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" />
-                        <span className="hidden sm:inline">📍 Detecting location...</span>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#8B5E3C]" />
+                        <span className="hidden sm:inline">Detecting...</span>
                       </>
                     ) : (
                       <>
@@ -390,15 +461,15 @@ export default function PostLostPet() {
                 </div>
                 
                 {selectedLocation && (
-                  <p className="mt-2 text-sm font-bold text-green-600 flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-green-600" /> {selectedLocation.formatted_address}
+                  <p className="mt-2 text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> {selectedLocation.formatted_address}
                   </p>
                 )}
                 
                 {locationOptions.length > 1 && !selectedLocation && (
-                  <div className="mt-3 p-4 bg-white border border-[#E8DDD4] rounded-xl shadow-sm">
-                    <p className="text-sm font-bold text-[#4A3E3D] mb-2">Multiple locations found. Please select one:</p>
-                    <div className="flex flex-col gap-2">
+                  <div className="mt-3 p-3 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl">
+                    <p className="text-xs font-bold text-[#4A3E3D] mb-1.5">Multiple locations found. Please select one:</p>
+                    <div className="flex flex-col gap-1.5">
                       {locationOptions.map((opt, i) => (
                         <button
                           key={i}
@@ -409,130 +480,158 @@ export default function PostLostPet() {
                             setLocationVerified(true);
                             setLocationInput(opt.formatted_address);
                           }}
-                          className="text-left px-4 py-2 hover:bg-[#FAF6F4] rounded-lg border border-transparent hover:border-[#E8DDD4] transition-colors text-[#4A3E3D] flex items-center gap-1.5"
+                          className="text-left px-3 py-2 hover:bg-white rounded-lg border border-transparent hover:border-[#E2D5C8] transition-colors text-xs text-[#2E2419] font-medium flex items-center gap-1.5"
                         >
-                          <MapPin className="w-4 h-4 text-gray-500 shrink-0" /> {opt.formatted_address}
+                          <MapPin className="w-3.5 h-3.5 text-gray-500 shrink-0" /> {opt.formatted_address}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
+            </div>
+          </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Description</label>
-                <textarea required rows={4} value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]" placeholder="Breed, color, collar details, microchip info, behavioral traits..." />
-              </div>
+          {/* Section 3: Pet Photos */}
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+          >
+            <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                  📷
+                </span>
+                Pet Photos (up to 5)
+              </h3>
+              <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                *At least 1 required
+              </span>
+            </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Pet Photos (up to 5) <span className="text-red-500">*At least 1 required</span></label>
-                <div className="flex flex-col gap-4 p-4 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4]">
-                  {photoUrls.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                      {photoUrls.map((url, index) => (
-                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-[#E8DDD4] bg-white shadow-sm group">
-                          <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setPhotoUrls(prev => prev.filter((_, i) => i !== index))}
-                            className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-black text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all shadow-md cursor-pointer hover:scale-105"
-                            title="Remove photo"
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      multiple 
-                      ref={fileInputRef}
-                      onChange={handlePhotoUpload} 
-                      disabled={photoUrls.length >= 5}
-                      className="hidden" 
-                    />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      ref={cameraInputRef}
-                      onChange={handlePhotoCapture}
-                      disabled={photoUrls.length >= 5}
-                      className="hidden"
-                    />
-                    <div className="flex flex-wrap gap-3">
+            <div className="p-5 sm:p-6 space-y-4">
+              {photoUrls.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {photoUrls.map((url, index) => (
+                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-[#DFD3C7] bg-white shadow-2xs group">
+                      <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={photoUrls.length >= 5}
-                        className="flex-1 min-w-[150px] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        onClick={() => setPhotoUrls(prev => prev.filter((_, i) => i !== index))}
+                        className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-black text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all shadow-md cursor-pointer hover:scale-105"
+                        title="Remove photo"
                       >
-                        📁 Choose from Gallery
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => cameraInputRef.current?.click()}
-                        disabled={photoUrls.length >= 5}
-                        className="flex-1 min-w-[150px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        📷 Take Photo
+                        &times;
                       </button>
                     </div>
-                    <p className="text-[11px] text-[#8B7E7D] mt-3 font-medium">
-                      Select up to 5 photos. You have added {photoUrls.length}/5 photos.
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
 
-              <div className="md:col-span-2 mt-4 pt-6 border-t border-[#E8DDD4]">
-                <h3 className="text-lg font-black text-[#4A3E3D] mb-4">Contact Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Email Address <span className="text-red-500">*Required</span></label>
-                    <div className="relative">
-                      {isSignedIn && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                          <Lock className="w-4 h-4" />
-                        </div>
-                      )}
-                      <input 
-                        required 
-                        type="email" 
-                        value={contactEmail} 
-                        onChange={e => !isSignedIn && setContactEmail(e.target.value)}
-                        readOnly={isSignedIn} 
-                        className={`w-full border border-[#E8DDD4] rounded-xl py-3 focus:outline-none ${isSignedIn ? 'bg-gray-100 text-gray-500 cursor-not-allowed pl-10 pr-4' : 'bg-[#FAF6F4] text-[#4A3E3D] focus:border-[#8B5E3C] px-4'}`} 
-                        placeholder="you@email.com" 
-                      />
-                    </div>
-                    <p className="text-xs text-[#8B7E7D] mt-2 font-medium">Required — we'll send you a secure link to manage or delete your post anytime.</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Phone Number</label>
-                    <div className="relative flex items-center">
-                      <div className="absolute left-0 top-0 bottom-0 px-3.5 bg-[#E8DDD4]/50 border-r border-[#E8DDD4] rounded-l-xl flex items-center justify-center text-[#4A3E3D] font-bold text-sm select-none pointer-events-none">
-                        +1
+              <div>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  multiple 
+                  ref={fileInputRef}
+                  onChange={handlePhotoUpload} 
+                  disabled={photoUrls.length >= 5}
+                  className="hidden" 
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  ref={cameraInputRef}
+                  onChange={handlePhotoCapture}
+                  disabled={photoUrls.length >= 5}
+                  className="hidden"
+                />
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={photoUrls.length >= 5}
+                    className="flex-1 min-w-[140px] bg-[#FAF6F4] border border-[#DFD3C7] hover:bg-[#F0E6DD] text-[#8B5E3C] font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    📁 Choose from Gallery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    disabled={photoUrls.length >= 5}
+                    className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    📷 Take Photo
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#8B7E7D] mt-2 font-medium">
+                  Select up to 5 photos. You have added {photoUrls.length}/5 photos.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Contact Info & Match Alerts */}
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+          >
+            <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                  📞
+                </span>
+                Contact Information & Alerts
+              </h3>
+              <span className="text-[10px] font-bold text-[#8B5E3C] bg-white px-2 py-0.5 rounded-full border border-[#EADBCE]">
+                Step 4 of 4
+              </span>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Email Address <span className="text-red-500">*Required</span></label>
+                  <div className="relative">
+                    {isSignedIn && (
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                        <Lock className="w-3.5 h-3.5" />
                       </div>
-                      <input 
-                        type="tel" 
-                        value={contactPhone} 
-                        onChange={handlePhoneChange} 
-                        maxLength={10}
-                        className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl pl-12 pr-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] font-mono tracking-wider" 
-                        placeholder="5555555555" 
-                      />
-                    </div>
-                    <p className="text-xs text-[#8B7E7D] mt-1 font-medium">Enter 10-digit US phone number</p>
+                    )}
+                    <input 
+                      required 
+                      type="email" 
+                      value={contactEmail} 
+                      onChange={e => !isSignedIn && setContactEmail(e.target.value)}
+                      readOnly={isSignedIn} 
+                      className={`w-full border rounded-xl py-2.5 text-sm focus:outline-none ${isSignedIn ? 'bg-gray-100 text-gray-500 cursor-not-allowed pl-9 pr-3.5 border-gray-200' : 'bg-[#FAF6F2] text-[#2E2419] border-[#E2D5C8] focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 px-3.5'}`} 
+                      placeholder="you@email.com" 
+                    />
                   </div>
+                  <p className="text-[11px] text-[#8B7E7D] mt-1 font-medium">We'll send you a secure link to manage or delete your post anytime.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Phone Number</label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-0 top-0 bottom-0 px-3 bg-[#EADBCE]/50 border-r border-[#E2D5C8] rounded-l-xl flex items-center justify-center text-[#4A3E3D] font-bold text-xs select-none pointer-events-none">
+                      +1
+                    </div>
+                    <input 
+                      type="tel" 
+                      value={contactPhone} 
+                      onChange={handlePhoneChange} 
+                      maxLength={10}
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl pl-11 pr-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 font-mono tracking-wider" 
+                      placeholder="5555555555" 
+                    />
+                  </div>
+                  <p className="text-[11px] text-[#8B7E7D] mt-1 font-medium">Enter 10-digit US phone number for instant alerts</p>
                 </div>
               </div>
 
               {type === 'lost' && (
-                <div className="flex items-start gap-2 mt-4">
+                <div className="flex items-start gap-2 pt-2 border-t border-[#FAF6F2]">
                   <input
                     type="checkbox"
                     id="notify_matches"
@@ -540,23 +639,27 @@ export default function PostLostPet() {
                     checked={notifyMatches && contactPhone.length === 10}
                     disabled={contactPhone.length !== 10}
                     onChange={(e) => setNotifyMatches(e.target.checked)}
-                    className="mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="mt-0.5 rounded text-[#8B5E3C] focus:ring-[#8B5E3C] disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  <label htmlFor="notify_matches" className={`text-sm ${contactPhone.length !== 10 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600'}`}>
-                    Notify me when a possible match is found nearby (requires 10-digit phone number)
-                    <span className="text-xs text-gray-400 block mt-0.5">
-                      We'll only notify you for strong matches (70%+ similarity) within 10 miles. Max 3 alerts per day.
+                  <label htmlFor="notify_matches" className={`text-xs ${contactPhone.length !== 10 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 font-medium'}`}>
+                    Notify me via SMS when a possible match is found nearby (requires 10-digit phone number)
+                    <span className="text-[10px] text-gray-400 block mt-0.5">
+                      We'll only notify you for strong AI matches (70%+ similarity) within 10 miles. Max 3 alerts per day.
                     </span>
                   </label>
                 </div>
               )}
             </div>
+          </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-4 rounded-xl transition-transform transform hover:scale-[1.02] shadow-lg text-lg mt-8 disabled:opacity-70 disabled:hover:scale-100">
-              {loading ? 'Posting...' : 'Post to Community Board'}
-            </button>
-          </form>
-        </div>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-3.5 rounded-xl transition-all shadow-md text-base mt-8 disabled:opacity-70 cursor-pointer"
+          >
+            {loading ? 'Posting...' : 'Post to Community Board 🐾'}
+          </button>
+        </form>
       </main>
     </div>
   );
