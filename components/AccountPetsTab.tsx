@@ -285,6 +285,8 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                   key={pet.id}
                   pet={pet}
                   tier="owner"
+                  collapsible={true}
+                  defaultExpanded={false}
                   actions={
                     <>
                       <button

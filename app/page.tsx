@@ -366,19 +366,25 @@ export default function Home() {
 
       {/* MOBILE QUICK ACCESS BUTTONS (My Pets Quick Banner + 3+3 Square Grid) */}
       <section className="md:hidden w-full px-4 pb-8">
-        {/* 🐾 My Pets Quick Banner */}
+        {/* 🐾 My Pets Quick Banner (Compact, Light & Refined) */}
         <Link href="/account?tab=pets" className="block max-w-sm mx-auto mb-3" style={{ textDecoration: 'none' }}>
-          <div className="bg-gradient-to-r from-[#8B5E3C] to-[#734A2E] text-white p-3.5 rounded-2xl shadow-xs flex items-center justify-between hover:brightness-105 active:scale-[0.99] transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">
+          <div 
+            style={{ boxShadow: '0 1px 4px rgba(139, 94, 60, 0.05)' }}
+            className="bg-[#FAF5EE] border border-[#EADBCE] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F4ECE2] active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-xl bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-sm font-bold shrink-0">
                 🐾
               </div>
               <div className="text-left">
-                <p className="font-extrabold text-sm leading-tight">My Pet Profiles</p>
-                <p className="text-[11px] text-amber-100 font-medium">Manage pet records & partner access</p>
+                <p className="font-bold text-xs text-[#2E2419] leading-tight">My Pet Profiles</p>
+                <p className="text-[10px] text-[#7A6B5E] font-medium leading-tight">Manage records & partner access</p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-amber-200" />
+            <div className="flex items-center gap-1 text-[#8B5E3C] font-bold text-[11px]">
+              <span>View</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
           </div>
         </Link>
 
@@ -453,29 +459,32 @@ export default function Home() {
 
       {/* SERVICES GRID SECTION */}
       <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
-        {/* Desktop My Pets Quick Card */}
-        <div className="max-w-[1360px] mx-auto mb-6">
+        {/* Desktop My Pets Quick Card (Light & Sleek) */}
+        <div className="max-w-[1360px] mx-auto mb-5">
           <Link href="/account?tab=pets" className="block w-full" style={{ textDecoration: 'none' }}>
-            <div className="bg-gradient-to-r from-[#FAF5EE] via-[#F5EDE4] to-[#FAF5EE] border border-[#EADFD5] hover:border-[#8B5E3C]/40 p-4 sm:p-5 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs hover:shadow-md transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#8B5E3C] text-white flex items-center justify-center text-xl font-black shadow-inner shrink-0">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04)' }}
+              className="bg-[#FAF5EE] border border-[#EADBCE] hover:border-[#8B5E3C]/40 py-3 px-4.5 rounded-2xl flex items-center justify-between gap-4 transition-all hover:shadow-xs group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-base font-bold shrink-0">
                   🐾
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-[#191919] text-base sm:text-lg flex items-center gap-2">
-                    My Pet Profiles & Live Access
-                    <span className="bg-amber-100 text-[#8B5E3C] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase border border-amber-200">
-                      Quick Access
+                  <h3 className="font-bold text-[#2E2419] text-sm flex items-center gap-2">
+                    My Pet Profiles
+                    <span className="text-[10px] font-semibold text-[#8B5E3C] bg-[#F3EBE1] px-2 py-0.5 rounded-full border border-[#E6D7C8]">
+                      Records & Access
                     </span>
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#777777] mt-0.5">
-                    View & manage feeding schedules, medical records, vaccination dates, and authorized Vets & Sitters.
+                  <p className="text-xs text-[#7A6B5E] mt-0.5">
+                    Manage care routines, clinical credentials, and authorized partner permissions.
                   </p>
                 </div>
               </div>
-              <button type="button" className="px-5 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-                View My Pets <ArrowRight className="w-4 h-4" />
-              </button>
+              <span className="px-3.5 py-1.5 rounded-xl bg-white border border-[#E0D2C4] text-[#5C4533] group-hover:bg-[#8B5E3C] group-hover:text-white group-hover:border-transparent font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 shrink-0">
+                View Pets <ArrowRight className="w-3.5 h-3.5" />
+              </span>
             </div>
           </Link>
         </div>

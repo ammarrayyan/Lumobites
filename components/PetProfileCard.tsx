@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   PawPrint,
   ShieldCheck,
@@ -13,6 +13,8 @@ import {
   Tag,
   Plus,
   HeartPulse,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 
@@ -69,6 +71,8 @@ export interface PetProfileCardProps {
   actions?: React.ReactNode;
   onAddMedicalEntry?: (entryType: 'vaccination' | 'microchip' | 'chronic_condition') => void;
   className?: string;
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
 }
 
 export default function PetProfileCard({
@@ -79,7 +83,10 @@ export default function PetProfileCard({
   actions,
   onAddMedicalEntry,
   className = '',
+  collapsible = false,
+  defaultExpanded = false,
 }: PetProfileCardProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const isVet = tier === 'vet';
   const isOwner = tier === 'owner';
   const isAdmin = tier === 'admin';
@@ -206,260 +213,276 @@ export default function PetProfileCard({
           )}
         </div>
 
-        {/* 2. Critical Care Alerts (Allergies) */}
-        {pet.allergies && (
-          <div className="bg-rose-50 border border-rose-200/80 p-3 rounded-xl text-rose-950 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-            <div>
-              <strong className="font-extrabold text-[11px] block uppercase tracking-wider text-rose-900">
-                Allergies & Medical Alerts
-              </strong>
-              <p className="text-xs font-semibold leading-relaxed mt-0.5">{pet.allergies}</p>
-            </div>
-          </div>
-        )}
-
-        {/* 3. Feeding & Medication (2-Column Grid) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
-          <div>
-            <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
-              🥣 Feeding Schedule
-            </span>
-            <p className="text-gray-700 text-xs leading-relaxed">
-              {pet.feeding_schedule || <span className="text-gray-400 italic">None specified</span>}
-            </p>
-          </div>
-          <div>
-            <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
-              💊 Medications & Dosing
-            </span>
-            <p className="text-gray-700 text-xs leading-relaxed">
-              {pet.medication || <span className="text-gray-400 italic">None</span>}
-            </p>
-          </div>
-        </div>
-
-        {/* 4. Behavior Notes (if present) */}
-        {cleanBehaviorNotes && (
-          <div className="bg-stone-50 border border-stone-200/80 p-3 rounded-xl">
-            <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
-              🧠 Behavior & Temperament Notes
-            </span>
-            <p className="text-gray-700 text-xs leading-relaxed">{cleanBehaviorNotes}</p>
-          </div>
-        )}
-
-        {/* 5. Emergency Contact & Primary Vet (2-Column Grid) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* Emergency Contact */}
-          {(pet.emergency_contact_name || pet.emergency_contact_phone) ? (
-            <div className="bg-emerald-50/70 border border-emerald-200/80 p-2.5 rounded-xl text-emerald-950">
-              <span className="font-extrabold block text-[11px] text-emerald-900">
-                📞 Emergency Contact
-              </span>
-              <p className="text-xs font-semibold mt-0.5">
-                {pet.emergency_contact_name || 'Owner / Emergency Contact'}
-              </p>
-              {pet.emergency_contact_phone && (
-                <a
-                  href={`tel:${pet.emergency_contact_phone}`}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline mt-0.5"
-                >
-                  <Phone className="w-3 h-3" /> {pet.emergency_contact_phone}
-                </a>
-              )}
-            </div>
-          ) : (
-            <div className="bg-stone-50 border border-stone-200/60 p-2.5 rounded-xl text-gray-400 text-[11px] italic">
-              No emergency contact on file
-            </div>
-          )}
-
-          {/* Primary Vet Contact */}
-          {(pet.vet_name || pet.vet_phone) ? (
-            <div className="bg-blue-50/60 border border-blue-200/70 p-2.5 rounded-xl text-blue-950">
-              <span className="font-extrabold block text-[11px] text-blue-900">
-                🏥 Primary Vet Clinic
-              </span>
-              <p className="text-xs font-semibold mt-0.5">{pet.vet_name || 'Clinic on file'}</p>
-              {pet.vet_phone && (
-                <a
-                  href={`tel:${pet.vet_phone}`}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:underline mt-0.5"
-                >
-                  <Phone className="w-3 h-3" /> {pet.vet_phone}
-                </a>
-              )}
-            </div>
-          ) : (
-            <div className="bg-stone-50 border border-stone-200/60 p-2.5 rounded-xl text-gray-400 text-[11px] italic">
-              No primary vet info on file
-            </div>
-          )}
-        </div>
-
-        {/* 6. Medical Credentials & Veterinary Records (Vet / Owner / Admin Tier Only) */}
-        {(isVet || isOwner || isAdmin) ? (
-          <div className="bg-blue-50/40 border border-blue-200/80 p-3.5 rounded-xl space-y-3 text-blue-950">
-            <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
-              <span className="font-extrabold text-xs flex items-center gap-1.5 text-blue-900">
-                <Stethoscope className="w-4 h-4 text-blue-700" />
-                Medical & Clinical Credentials
-              </span>
-              {isVet && (
-                <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full">
-                  Direct Edit Enabled
-                </span>
-              )}
-            </div>
-
-            {/* Microchip & Insurance Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {/* Microchip */}
-              <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-[11px] text-gray-800 flex items-center gap-1">
-                    <Tag className="w-3.5 h-3.5 text-blue-600" /> Microchip Number:
-                  </span>
-                  {isVet && onAddMedicalEntry && (
-                    <button
-                      type="button"
-                      onClick={() => onAddMedicalEntry('microchip')}
-                      className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-[10px] px-2 py-0.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
-                    >
-                      <Plus className="w-3 h-3" /> Edit
-                    </button>
-                  )}
+        {(!collapsible || isExpanded) && (
+          <>
+            {/* 2. Critical Care Alerts (Allergies) */}
+            {pet.allergies && (
+              <div className="bg-rose-50 border border-rose-200/80 p-3 rounded-xl text-rose-950 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-extrabold text-[11px] block uppercase tracking-wider text-rose-900">
+                    Allergies & Medical Alerts
+                  </strong>
+                  <p className="text-xs font-semibold leading-relaxed mt-0.5">{pet.allergies}</p>
                 </div>
-                <p className="text-xs font-black text-gray-900 mt-1 font-mono">
-                  {parsedMicrochip || <span className="text-gray-400 font-normal italic font-sans">No microchip recorded</span>}
-                </p>
-                {parsedMicrochipAddedBy && (
-                  <span className="inline-block mt-1 text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200/60 px-1.5 py-0.5 rounded-md">
-                    🏷️ {parsedMicrochipAddedBy}
-                  </span>
-                )}
-              </div>
-
-              {/* Insurance */}
-              <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                <span className="font-bold text-[11px] text-gray-800 block">
-                  🛡️ Pet Insurance:
-                </span>
-                <p className="text-xs font-black text-gray-900 mt-1">
-                  {pet.insurance_provider ? (
-                    <>
-                      {pet.insurance_provider}
-                      {pet.insurance_policy_number && (
-                        <span className="text-gray-500 font-normal text-[11px] block">
-                          Policy #{pet.insurance_policy_number}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-gray-400 font-normal italic">None specified</span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* Vaccination Records */}
-            <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="font-bold text-[11px] text-gray-800 flex items-center gap-1">
-                  <Syringe className="w-3.5 h-3.5 text-blue-600" /> Vaccination Records:
-                </span>
-                {isVet && onAddMedicalEntry && (
-                  <button
-                    type="button"
-                    onClick={() => onAddMedicalEntry('vaccination')}
-                    className="bg-blue-600 text-white hover:bg-blue-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" /> Add Vaccine
-                  </button>
-                )}
-              </div>
-
-              {parsedVaccinations.length > 0 ? (
-                <div className="space-y-1.5 mt-2">
-                  {parsedVaccinations.map((vax, i) => (
-                    <div key={i} className="bg-stone-50 p-2 rounded-lg border border-stone-200/70 text-[11px]">
-                      <div className="flex items-center justify-between font-bold text-gray-900">
-                        <span>{vax.name || vax.vaccine}</span>
-                        <span className="text-[10px] text-gray-500 font-medium">
-                          Exp: {vax.expiration_date || 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-gray-600 mt-0.5">
-                        <span>Administered: {vax.date_administered || 'N/A'}</span>
-                        {vax.added_by && (
-                          <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.2 rounded-md">
-                            {vax.added_by}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[11px] text-gray-400 italic mt-1">No vaccination records entered.</p>
-              )}
-            </div>
-
-            {/* Chronic Conditions & Diagnoses */}
-            {(isVet || parsedChronicConditions.length > 0) && (
-              <div className="bg-white p-2.5 rounded-xl border border-blue-100">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-bold text-[11px] text-gray-800 flex items-center gap-1">
-                    <HeartPulse className="w-3.5 h-3.5 text-blue-600" /> Chronic Conditions & Diagnoses:
-                  </span>
-                  {isVet && onAddMedicalEntry && (
-                    <button
-                      type="button"
-                      onClick={() => onAddMedicalEntry('chronic_condition')}
-                      className="bg-blue-600 text-white hover:bg-blue-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
-                    >
-                      <Plus className="w-3 h-3" /> Add Diagnosis
-                    </button>
-                  )}
-                </div>
-
-                {parsedChronicConditions.length > 0 ? (
-                  <div className="space-y-1.5 mt-2">
-                    {parsedChronicConditions.map((cond, i) => (
-                      <div key={i} className="bg-stone-50 p-2 rounded-lg border border-stone-200/70 text-[11px]">
-                        <div className="flex items-center justify-between font-bold text-gray-900">
-                          <span>{cond.condition}</span>
-                          <span className="text-[10px] text-gray-500 font-medium">
-                            Diagnosed: {cond.date_diagnosed || cond.date_added || 'N/A'}
-                          </span>
-                        </div>
-                        {cond.added_by && (
-                          <div className="mt-0.5">
-                            <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-100 text-[10px] px-1.5 py-0.2 rounded-md">
-                              {cond.added_by}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-gray-400 italic mt-1">No chronic conditions recorded.</p>
-                )}
               </div>
             )}
-          </div>
-        ) : (
-          /* Locked Medical Credentials for Care Tier (Daycare / Sitters) */
-          <div className="bg-stone-100/80 border border-stone-200 p-2.5 rounded-xl text-gray-500 text-[11px] flex items-center gap-2">
-            <Lock className="w-4 h-4 text-stone-400 shrink-0" />
-            <span>
-              <strong>Care-Level Tier:</strong> Clinical medical records (vaccine expiration logs, microchip ID, insurance policy details) are restricted to licensed Vet Clinics.
-            </span>
-          </div>
+
+            {/* 3. Feeding & Medication (2-Column Grid) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+              <div>
+                <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
+                  🥣 Feeding Schedule
+                </span>
+                <p className="text-gray-700 text-xs leading-relaxed">
+                  {pet.feeding_schedule || <span className="text-gray-400 italic">None specified</span>}
+                </p>
+              </div>
+              <div>
+                <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
+                  💊 Medications & Dosing
+                </span>
+                <p className="text-gray-700 text-xs leading-relaxed">
+                  {pet.medication || <span className="text-gray-400 italic">None</span>}
+                </p>
+              </div>
+            </div>
+
+            {/* 4. Behavior & Care Instructions */}
+            {cleanBehaviorNotes && (
+              <div className="bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+                <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-[#8B5E3C]" /> Behavior & Routine Notes
+                </span>
+                <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">
+                  {cleanBehaviorNotes}
+                </p>
+              </div>
+            )}
+
+            {/* 5. Emergency & Veterinary Contacts (2-Column Grid) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4]">
+              <div>
+                <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
+                  <Stethoscope className="w-3.5 h-3.5 text-[#8B5E3C]" /> Primary Vet
+                </span>
+                {pet.vet_name || pet.vet_phone ? (
+                  <div className="text-gray-700 text-xs leading-tight">
+                    <p className="font-semibold">{pet.vet_name || 'Veterinarian'}</p>
+                    {pet.vet_phone && (
+                      <p className="text-gray-500 font-mono text-[11px] mt-0.5 flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-gray-400" /> {pet.vet_phone}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic text-xs">No vet specified</p>
+                )}
+              </div>
+
+              <div>
+                <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-rose-600" /> Emergency Contact
+                </span>
+                {pet.emergency_contact_name || pet.emergency_contact_phone ? (
+                  <div className="text-gray-700 text-xs leading-tight">
+                    <p className="font-semibold">{pet.emergency_contact_name || 'Designated Contact'}</p>
+                    {pet.emergency_contact_phone && (
+                      <p className="text-gray-500 font-mono text-[11px] mt-0.5 flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-gray-400" /> {pet.emergency_contact_phone}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic text-xs">No emergency contact</p>
+                )}
+              </div>
+            </div>
+
+            {/* 6. Clinical Records & Credentials (Tier Protected: Vet, Owner, Admin) */}
+            {isVet || isOwner || isAdmin ? (
+              <div className="bg-emerald-50/50 border border-emerald-200/70 p-3.5 rounded-xl space-y-3">
+                <div className="flex items-center justify-between border-b border-emerald-200/50 pb-2">
+                  <span className="font-extrabold text-emerald-950 text-xs flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" /> Clinical Records & Credentials
+                  </span>
+                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                    {isVet ? 'Vet Clinic View' : isOwner ? 'Full Owner Access' : 'Admin Inspection'}
+                  </span>
+                </div>
+
+                {/* Microchip & Insurance Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-gray-800 text-[11px] flex items-center gap-1">
+                        <Tag className="w-3 h-3 text-emerald-600" /> Microchip ID
+                      </span>
+                      {isVet && onAddMedicalEntry && (
+                        <button
+                          type="button"
+                          onClick={() => onAddMedicalEntry('microchip')}
+                          className="text-emerald-700 hover:text-emerald-900 font-bold text-[10px] flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" /> Update
+                        </button>
+                      )}
+                    </div>
+                    <p className="font-mono text-emerald-900 font-bold mt-1 text-xs">
+                      {parsedMicrochip || <span className="text-gray-400 font-normal italic">None registered</span>}
+                    </p>
+                    {parsedMicrochipAddedBy && (
+                      <p className="text-[10px] text-emerald-700 mt-0.5 font-medium">{parsedMicrochipAddedBy}</p>
+                    )}
+                  </div>
+
+                  <div className="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+                    <span className="font-bold text-gray-800 text-[11px] flex items-center gap-1">
+                      <HeartPulse className="w-3 h-3 text-emerald-600" /> Pet Insurance
+                    </span>
+                    {pet.insurance_provider ? (
+                      <div className="mt-1">
+                        <p className="font-bold text-gray-800 text-xs">{pet.insurance_provider}</p>
+                        <p className="font-mono text-gray-500 text-[10px] mt-0.5">
+                          Policy #{pet.insurance_policy_number || 'N/A'}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 italic mt-1 text-xs">No insurance policy logged</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Vaccination Records Table */}
+                <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-extrabold text-gray-900 text-xs flex items-center gap-1.5">
+                      <Syringe className="w-3.5 h-3.5 text-emerald-600" /> Vaccination History
+                    </span>
+                    {isVet && onAddMedicalEntry && (
+                      <button
+                        type="button"
+                        onClick={() => onAddMedicalEntry('vaccination')}
+                        className="bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                      >
+                        <Plus className="w-3 h-3" /> Add Vaccine
+                      </button>
+                    )}
+                  </div>
+
+                  {parsedVaccinations.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px] text-left">
+                        <thead>
+                          <tr className="border-b border-gray-100 text-gray-400 font-semibold text-[10px] uppercase">
+                            <th className="pb-1">Vaccine</th>
+                            <th className="pb-1">Administered</th>
+                            <th className="pb-1">Expires</th>
+                            <th className="pb-1 text-right">Verified By</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                          {parsedVaccinations.map((vax, i) => (
+                            <tr key={vax.id || i} className="hover:bg-emerald-50/30">
+                              <td className="py-1.5 font-bold text-gray-900">{vax.name || vax.vaccine}</td>
+                              <td className="py-1.5 text-gray-600">{vax.date_administered || 'N/A'}</td>
+                              <td className="py-1.5 font-semibold text-emerald-800">{vax.expiration_date || 'N/A'}</td>
+                              <td className="py-1.5 text-right font-medium text-gray-500 text-[10px]">
+                                {vax.added_by ? (
+                                  <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
+                                    {vax.added_by}
+                                  </span>
+                                ) : (
+                                  'Owner Log'
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-gray-400 italic">No vaccination records on file.</p>
+                  )}
+                </div>
+
+                {/* Chronic Conditions & Diagnoses */}
+                {(isVet || parsedChronicConditions.length > 0) && (
+                  <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-gray-900 text-xs flex items-center gap-1.5">
+                        <HeartPulse className="w-3.5 h-3.5 text-blue-600" /> Chronic Conditions & Clinical Notes
+                      </span>
+                      {isVet && onAddMedicalEntry && (
+                        <button
+                          type="button"
+                          onClick={() => onAddMedicalEntry('chronic_condition')}
+                          className="bg-blue-600 text-white hover:bg-blue-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" /> Add Diagnosis
+                        </button>
+                      )}
+                    </div>
+
+                    {parsedChronicConditions.length > 0 ? (
+                      <div className="space-y-1.5 mt-2">
+                        {parsedChronicConditions.map((cond, i) => (
+                          <div key={i} className="bg-stone-50 p-2 rounded-lg border border-stone-200/70 text-[11px]">
+                            <div className="flex items-center justify-between font-bold text-gray-900">
+                              <span>{cond.condition}</span>
+                              <span className="text-[10px] text-gray-500 font-medium">
+                                Diagnosed: {cond.date_diagnosed || cond.date_added || 'N/A'}
+                              </span>
+                            </div>
+                            {cond.added_by && (
+                              <div className="mt-0.5">
+                                <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-100 text-[10px] px-1.5 py-0.2 rounded-md">
+                                  {cond.added_by}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-gray-400 italic mt-1">No chronic conditions recorded.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Locked Medical Credentials for Care Tier (Daycare / Sitters) */
+              <div className="bg-stone-100/80 border border-stone-200 p-2.5 rounded-xl text-gray-500 text-[11px] flex items-center gap-2">
+                <Lock className="w-4 h-4 text-stone-400 shrink-0" />
+                <span>
+                  <strong>Care-Level Tier:</strong> Clinical medical records (vaccine expiration logs, microchip ID, insurance policy details) are restricted to licensed Vet Clinics.
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* ── Expand / Collapse Toggle Button (When Collapsible) ── */}
+      {collapsible && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full bg-[#FAF6F4] hover:bg-[#F3ECE7] border-t border-[#E8DDD4] py-2 px-4 flex items-center justify-center gap-1.5 text-xs font-bold text-[#8B5E3C] transition-colors cursor-pointer"
+        >
+          {isExpanded ? (
+            <>
+              <span>Hide Details</span>
+              <ChevronUp className="w-3.5 h-3.5" />
+            </>
+          ) : (
+            <>
+              <span>View Full Details</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
