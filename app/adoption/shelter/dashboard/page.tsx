@@ -586,25 +586,28 @@ function ShelterDashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] text-[#191919] p-4 md:p-8 font-inter">
+    <div className="min-h-screen bg-[#F7F3EE] text-[#191919] p-4 md:p-8 font-inter">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-xs">
+        <div 
+          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+        >
           <div className="flex items-center gap-4">
             {shelterInfo?.org_photo_url ? (
-              <div className="w-14 h-14 rounded-2xl overflow-hidden border border-amber-200 shrink-0 flex items-center justify-center bg-white">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden border border-[#DFD3C7] shrink-0 flex items-center justify-center bg-white shadow-2xs">
                 <img src={shelterInfo.org_photo_url} alt={shelterInfo.org_name} className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shrink-0 font-bold">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-center text-[#8B5E3C] shrink-0 font-bold">
                 <Building2 className="w-7 h-7" />
               </div>
             )}
             <div>
-              <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+              <h1 className="text-xl font-black text-[#2E2419] flex items-center gap-2">
                 {shelterInfo?.org_name || 'Shelter Management Dashboard'}
               </h1>
-              <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+              <div className="flex items-center gap-2 text-xs text-[#8B7E7D] mt-0.5">
                 <span>{shelterInfo?.status ? `Status: ${String(shelterInfo.status).toUpperCase()}` : 'Rescue Partner Portal'}</span>
               </div>
             </div>
@@ -632,12 +635,12 @@ function ShelterDashboardContent() {
                   }}
                   disabled={isExpired}
                   title={isExpired ? "Subscribe to enable listing visibility" : "Toggle shelter listing visibility"}
-                  className={`px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer ${
                     isExpired
                       ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200 text-gray-400 select-none'
                       : shelterInfo.is_paused
-                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer'
-                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer'
+                      ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
                   }`}
                 >
                   <Power className="w-3.5 h-3.5" />
@@ -648,7 +651,7 @@ function ShelterDashboardContent() {
             {shelterInfo?.status?.toLowerCase() === 'approved' && (
               <button
                 onClick={handleOpenAddModal}
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
               >
                 <Plus className="w-4 h-4" /> Post a Pet for Adoption
               </button>
@@ -658,51 +661,63 @@ function ShelterDashboardContent() {
 
         {/* ACCESS CONTROL BRANCHING */}
         {loading ? (
-          <div className="bg-white p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-md mx-auto space-y-3">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white p-12 rounded-2xl border border-[#DFD3C7] shadow-xs text-center max-w-md mx-auto space-y-3"
+          >
             <Building2 className="w-10 h-10 text-[#8B5E3C] animate-bounce mx-auto" />
-            <p className="text-xs text-gray-500 font-bold">Verifying shelter administrator credentials...</p>
+            <p className="text-xs text-[#8B7E7D] font-bold">Verifying shelter administrator credentials...</p>
           </div>
         ) : !shelterEmail ? (
-          <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-md mx-auto space-y-4">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white p-8 md:p-12 rounded-2xl border border-[#DFD3C7] shadow-xs text-center max-w-md mx-auto space-y-4"
+          >
             <ShieldCheck className="w-12 h-12 text-[#8B5E3C] mx-auto" />
-            <h2 className="text-lg font-black text-gray-900">Sign In Required</h2>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h2 className="text-lg font-black text-[#2E2419]">Sign In Required</h2>
+            <p className="text-xs text-[#8B7E7D] leading-relaxed">
               Please sign in with your account to access your shelter or rescue organization dashboard.
             </p>
             <div className="pt-2">
               <Link
                 href="/account"
-                className="inline-block bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-2xl text-xs transition-all shadow-sm no-underline"
+                className="inline-block bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-xl text-xs transition-all shadow-sm no-underline"
               >
                 Sign In / Register Account
               </Link>
             </div>
           </div>
         ) : !shelterInfo ? (
-          <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E8DDD4] shadow-xs text-center max-w-lg mx-auto space-y-4">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white p-8 md:p-12 rounded-2xl border border-[#DFD3C7] shadow-xs text-center max-w-lg mx-auto space-y-4"
+          >
             <Building2 className="w-12 h-12 text-amber-700 mx-auto" />
-            <h2 className="text-lg font-black text-gray-900">Shelter Access Restricted</h2>
+            <h2 className="text-lg font-black text-[#2E2419]">Shelter Access Restricted</h2>
             <p className="text-xs text-gray-600 leading-relaxed">
               You are currently signed in as <strong className="text-gray-900">{shelterEmail}</strong>, but this account is not registered as an approved rescue partner.
             </p>
             <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
               <Link
                 href="/adoption"
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-2xl text-xs no-underline transition-all shadow-2xs"
+                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-xl text-xs no-underline transition-all shadow-2xs"
               >
                 Apply as a Shelter Partner
               </Link>
               <button
                 type="button"
                 onClick={handleSwitchAccount}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-5 rounded-2xl text-xs border-none cursor-pointer transition-all"
+                className="bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold py-3 px-5 rounded-xl text-xs border border-[#DFD3C7] cursor-pointer transition-all"
               >
                 Sign Out / Switch Account
               </button>
             </div>
           </div>
         ) : shelterInfo?.status?.toLowerCase() === 'pending' ? (
-          <div className="bg-white p-8 md:p-12 rounded-3xl border border-amber-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white p-8 md:p-12 rounded-2xl border border-amber-200 shadow-xs text-center max-w-lg mx-auto space-y-4"
+          >
             <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 mx-auto font-bold">
               <ShieldCheck className="w-8 h-8" />
             </div>
@@ -710,7 +725,7 @@ function ShelterDashboardContent() {
             <p className="text-xs text-gray-600 leading-relaxed">
               Your application for <strong>{shelterInfo.org_name}</strong> has been received and is currently under review by our team.
             </p>
-            <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-1">
+            <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 text-left space-y-1">
               <p><strong>Registered Email:</strong> {shelterInfo.email}</p>
               <p><strong>Location:</strong> {shelterInfo.city && shelterInfo.state ? (shelterInfo.city.toLowerCase().includes(shelterInfo.state.toLowerCase()) ? shelterInfo.city : `${shelterInfo.city}, ${shelterInfo.state}`) : shelterInfo.city || shelterInfo.state || ''}</p>
               <p><strong>Status:</strong> <span className="bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">PENDING APPROVAL</span></p>
@@ -720,7 +735,10 @@ function ShelterDashboardContent() {
             </p>
           </div>
         ) : shelterInfo?.status?.toLowerCase() === 'rejected' ? (
-          <div className="bg-white p-8 md:p-12 rounded-3xl border border-red-200 shadow-xs text-center max-w-lg mx-auto space-y-4">
+          <div 
+            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+            className="bg-white p-8 md:p-12 rounded-2xl border border-red-200 shadow-xs text-center max-w-lg mx-auto space-y-4"
+          >
             <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 mx-auto font-bold">
               <Trash2 className="w-8 h-8" />
             </div>
@@ -730,13 +748,13 @@ function ShelterDashboardContent() {
             </p>
             
             {shelterInfo.rejection_reason && (
-              <div className="bg-red-50 p-4 rounded-2xl border border-red-200 text-xs text-red-900 text-left space-y-1">
+              <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-xs text-red-900 text-left space-y-1">
                 <p className="font-bold text-red-800">Reason Provided by Reviewer:</p>
                 <p className="italic">"{shelterInfo.rejection_reason}"</p>
               </div>
             )}
 
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs text-gray-700 text-left space-y-1">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs text-gray-700 text-left space-y-1">
               <p><strong>Organization:</strong> {shelterInfo.org_name}</p>
               <p><strong>Email:</strong> {shelterInfo.email}</p>
               <p><strong>Status:</strong> <span className="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">NOT APPROVED</span></p>
@@ -777,7 +795,10 @@ function ShelterDashboardContent() {
           <div className="space-y-6">
 
             {/* STATUS TABS */}
-        <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#E8DDD4]">
+        <div 
+          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+          className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#DFD3C7] shadow-xs"
+        >
           <div className="flex gap-2 flex-wrap">
             {(['overview', 'available', 'pending', 'adopted', 'inquiries', 'profile', 'all'] as const).map(tab => {
               const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
@@ -799,8 +820,10 @@ function ShelterDashboardContent() {
                 <button
                   key={tab}
                   onClick={() => { setActiveTab(tab); setSelectedIds([]); }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer border-none flex items-center gap-1.5 ${
-                    activeTab === tab ? 'bg-[#8B5E3C] text-white shadow-xs' : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold capitalize transition-all cursor-pointer border-none flex items-center gap-1.5 ${
+                    activeTab === tab 
+                      ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20' 
+                      : 'bg-transparent text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
                   }`}
                 >
                   {tab === 'overview' ? (
@@ -830,7 +853,7 @@ function ShelterDashboardContent() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as any)}
-                className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-semibold"
+                className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3 py-1.5 text-xs font-semibold text-[#2E2419]"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -844,9 +867,12 @@ function ShelterDashboardContent() {
           <div className="space-y-6">
             {/* 3 Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Inquiries</p>
-                <p className="text-3xl font-black text-[#4A3E3D] mt-2">
+                <p className="text-3xl font-black text-[#2E2419] mt-2">
                   {(() => {
                     const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
                     const threadKeys = new Set<string>();
@@ -861,29 +887,38 @@ function ShelterDashboardContent() {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Search Status</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className={`w-3 h-3 rounded-full ${shelterInfo?.is_paused ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                  <span className="text-lg font-black text-[#4A3E3D]">
+                  <span className="text-lg font-black text-[#2E2419]">
                     {shelterInfo?.is_paused ? 'Paused' : 'Active in Search'}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+              >
                 <p className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">Total Pets Listed</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-lg font-black text-[#4A3E3D]">
-                    {pets.filter(p => p.status === 'available').length} <span className="text-xs font-semibold text-gray-500">Available</span> / {pets.length} <span className="text-xs font-semibold text-gray-500">Total</span>
+                  <span className="text-lg font-black text-[#2E2419]">
+                    {pets.filter(p => p.status === 'available').length} <span className="text-xs font-semibold text-[#8B7E7D]">Available</span> / {pets.length} <span className="text-xs font-semibold text-[#8B7E7D]">Total</span>
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-3xl border border-[#E8DDD4] shadow-sm">
-              <h3 className="text-sm font-black text-[#4A3E3D] mb-3">Quick Actions</h3>
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white p-6 rounded-2xl border border-[#DFD3C7] shadow-xs"
+            >
+              <h3 className="text-sm font-extrabold text-[#2E2419] mb-3">Quick Actions</h3>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -895,7 +930,7 @@ function ShelterDashboardContent() {
                 <button
                   type="button"
                   onClick={() => { setActiveTab('profile'); setIsEditingProfile(true); }}
-                  className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] font-bold text-xs hover:bg-[#F0E6DD] transition-colors cursor-pointer"
                 >
                   ✏️ Edit Shelter Profile
                 </button>
@@ -981,32 +1016,35 @@ function ShelterDashboardContent() {
               threads.sort((a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime());
 
               return (
-                <>
-                  <div className="flex items-center justify-between">
+                <div 
+                  style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                  className="bg-white rounded-2xl border border-[#DFD3C7] p-6 shadow-xs"
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
                     <div>
-                      <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                      <h3 className="text-base font-black text-[#2E2419] flex items-center gap-2">
                         <MessageSquare className="w-5 h-5 text-[#8B5E3C]" /> Adopter Inquiries & Messages
                       </h3>
-                      <p className="text-xs text-gray-500">Incoming conversation threads from prospective adopters</p>
+                      <p className="text-xs text-[#8B7E7D] mt-0.5">Incoming conversation threads from prospective adopters</p>
                     </div>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                      <div className="flex bg-gray-100 p-1 rounded-xl">
-                        <button onClick={() => setInquiryFilter('all')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
-                        <button onClick={() => setInquiryFilter('unread')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Unread</button>
-                        <button onClick={() => setInquiryFilter('replied')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Replied</button>
-                        <button onClick={() => setInquiryFilter('archived')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'archived' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Archived</button>
+                      <div className="flex bg-[#FAF6F2] p-1 rounded-xl border border-[#E2D5C8]">
+                        <button onClick={() => setInquiryFilter('all')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'all' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>All</button>
+                        <button onClick={() => setInquiryFilter('unread')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'unread' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Unread</button>
+                        <button onClick={() => setInquiryFilter('replied')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'replied' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Replied</button>
+                        <button onClick={() => setInquiryFilter('archived')} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'archived' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>Archived</button>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
+                        <span className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-xl hidden sm:inline-block">
                           {threads.length} {threads.length === 1 ? 'conversation' : 'conversations'}
                         </span>
                         <button
                           onClick={() => shelterInfo?.id && fetchShelterInquiries(shelterInfo.id, shelterInfo.email)}
-                          className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer border-none"
+                          className="p-2 rounded-xl hover:bg-[#FAF6F2] transition-colors cursor-pointer border-none"
                           title="Refresh inquiries"
                           disabled={inquiriesLoading}
                         >
-                          <RefreshCw className={`w-4 h-4 text-gray-500 ${inquiriesLoading ? 'animate-spin' : ''}`} />
+                          <RefreshCw className={`w-4 h-4 text-[#8B7E7D] ${inquiriesLoading ? 'animate-spin' : ''}`} />
                         </button>
                       </div>
                     </div>
@@ -1015,13 +1053,13 @@ function ShelterDashboardContent() {
                   {inquiriesLoading ? (
                     <div className="text-center py-10 text-xs text-gray-400 font-bold">Loading conversation threads…</div>
                   ) : threads.length === 0 ? (
-                    <div className="text-center py-12 bg-amber-50/50 rounded-2xl border border-amber-200/60 space-y-2">
-                      <MessageSquare className="w-8 h-8 text-amber-700/40 mx-auto" />
-                      <p className="font-bold text-xs text-gray-700">No adopter inquiries found</p>
-                      <p className="text-[11px] text-gray-400">Try changing your filters or check back later.</p>
+                    <div className="text-center py-12 bg-[#FAF6F2] rounded-2xl border border-[#E2D5C8] space-y-2">
+                      <MessageSquare className="w-8 h-8 text-[#8B5E3C]/40 mx-auto" />
+                      <p className="font-bold text-xs text-[#2E2419]">No adopter inquiries found</p>
+                      <p className="text-[11px] text-[#8B7E7D]">Try changing your filters or check back later.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto pr-2">
+                    <div className="divide-y divide-[#FAF6F2] max-h-[600px] overflow-y-auto pr-2">
                       {threads.map(thread => {
                         const isStale = thread.petStatus === 'adopted' && !thread.shelterReplied;
                         
@@ -1034,14 +1072,14 @@ function ShelterDashboardContent() {
                                 ) : (
                                   <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
                                 )}
-                                <span className="font-bold text-gray-900 text-sm">{thread.adopterEmail}</span>
-                                <span className="text-[10px] text-gray-400">&bull; {getDaysAgo(thread.latestTimestamp)}</span>
+                                <span className="font-bold text-[#2E2419] text-sm">{thread.adopterEmail}</span>
+                                <span className="text-[10px] text-[#8B7E7D]">&bull; {getDaysAgo(thread.latestTimestamp)}</span>
                                 {thread.unreadCount > 0 && (
                                   <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                                     {thread.unreadCount > 1 ? `${thread.unreadCount} New` : 'New'}
                                   </span>
                                 )}
-                                <span className="bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                                <span className="bg-[#FAF6F2] text-[#8B5E3C] border border-[#E2D5C8] text-[10px] font-semibold px-2 py-0.5 rounded-full">
                                   {thread.messageCount} {thread.messageCount === 1 ? 'msg' : 'msgs'}
                                 </span>
                                 {isStale && (
@@ -1089,19 +1127,22 @@ function ShelterDashboardContent() {
                       })}
                     </div>
                   )}
-                </>
+                </div>
               );
             })()}
           </div>
         ) : activeTab === 'profile' ? (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Header controls */}
-            <div className="bg-white rounded-3xl p-5 border border-[#E8DDD4] shadow-xs flex items-center justify-between flex-wrap gap-3">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl p-5 border border-[#DFD3C7] shadow-xs flex items-center justify-between flex-wrap gap-3"
+            >
               <div>
-                <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
+                <h2 className="text-base font-black text-[#2E2419] flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Shelter & Organization Profile
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-[#8B7E7D] mt-0.5">
                   Update your contact details, website, logo photo, and organization location.
                 </p>
               </div>
@@ -1109,15 +1150,15 @@ function ShelterDashboardContent() {
               {!isEditingProfile ? (
                 <button
                   onClick={() => { setIsEditingProfile(true); setProfileForm({ ...shelterInfo }); setProfileSaveError(''); }}
-                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] px-4 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer border-none"
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-4 py-2 rounded-xl transition-all cursor-pointer"
                 >
-                  <Edit3 className="w-4 h-4" /> Edit Profile
+                  <Edit3 className="w-3.5 h-3.5" /> Edit Profile
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setIsEditingProfile(false); setProfileForm({ ...shelterInfo }); setProfileSaveError(''); }}
-                    className="text-xs font-bold text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
+                    className="text-xs font-bold text-[#8B7E7D] border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1139,136 +1180,165 @@ function ShelterDashboardContent() {
             )}
 
             {/* Basic Info Card */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-xs space-y-4">
-              <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Organization Information</h3>
-
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Organization / Rescue Name</label>
-                {isEditingProfile && shelterInfo?.status !== 'approved' ? (
-                  <input
-                    type="text"
-                    value={profileForm.org_name || ''}
-                    onChange={e => setProfileForm({ ...profileForm, org_name: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                  />
-                ) : (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{profileForm.org_name || '—'}</p>
-                    {shelterInfo?.status === 'approved' && (
-                      <p className="text-[11px] text-gray-400 mt-0.5">Contact support to update your verified organization name or EIN/Tax ID.</p>
-                    )}
-                  </div>
-                )}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                    🏢
+                  </span>
+                  Organization Information
+                </h3>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">EIN / Tax ID</label>
-                {isEditingProfile && shelterInfo?.status !== 'approved' ? (
-                  <input
-                    type="text"
-                    value={profileForm.tax_id || ''}
-                    onChange={e => setProfileForm({ ...profileForm, tax_id: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="12-3456789"
-                  />
-                ) : (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{profileForm.tax_id || '—'}</p>
-                  </div>
-                )}
-              </div>
+              <div className="p-5 sm:p-6 space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">Organization / Rescue Name</label>
+                  {isEditingProfile && shelterInfo?.status !== 'approved' ? (
+                    <input
+                      type="text"
+                      value={profileForm.org_name || ''}
+                      onChange={e => setProfileForm({ ...profileForm, org_name: e.target.value })}
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                    />
+                  ) : (
+                    <div>
+                      <p className="text-sm font-bold text-[#2E2419]">{profileForm.org_name || '—'}</p>
+                      {shelterInfo?.status === 'approved' && (
+                        <p className="text-[11px] text-[#8B7E7D] mt-0.5 italic">Contact support to update your verified organization name or EIN/Tax ID.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Contact Email</label>
-                <p className="text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-xl p-2.5 inline-block">
-                  {profileForm.email || '—'}
-                </p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Verified email associated with account login credentials.</p>
-              </div>
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">EIN / Tax ID</label>
+                  {isEditingProfile && shelterInfo?.status !== 'approved' ? (
+                    <input
+                      type="text"
+                      value={profileForm.tax_id || ''}
+                      onChange={e => setProfileForm({ ...profileForm, tax_id: e.target.value })}
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      placeholder="12-3456789"
+                    />
+                  ) : (
+                    <div>
+                      <p className="text-sm font-bold text-[#2E2419]">{profileForm.tax_id || '—'}</p>
+                    </div>
+                  )}
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Phone Number</label>
-                {isEditingProfile ? (
-                  <input
-                    type="tel"
-                    value={profileForm.phone || ''}
-                    onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="(555) 000-0000"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-gray-900">{profileForm.phone || '—'}</p>
-                )}
-              </div>
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">Contact Email</label>
+                  <p className="text-sm font-bold text-[#2E2419] bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 inline-block">
+                    {profileForm.email || '—'}
+                  </p>
+                  <p className="text-[11px] text-[#8B7E7D] mt-0.5">Verified email associated with account login credentials.</p>
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Website URL</label>
-                {isEditingProfile ? (
-                  <input
-                    type="url"
-                    value={profileForm.website || ''}
-                    onChange={e => setProfileForm({ ...profileForm, website: e.target.value })}
-                    className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                    placeholder="https://..."
-                  />
-                ) : profileForm.website ? (
-                  <a href={profileForm.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#8B5E3C] hover:underline">
-                    {profileForm.website}
-                  </a>
-                ) : (
-                  <p className="text-sm text-gray-400">—</p>
-                )}
-              </div>
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">Phone Number</label>
+                  {isEditingProfile ? (
+                    <input
+                      type="tel"
+                      value={profileForm.phone || ''}
+                      onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      placeholder="(555) 000-0000"
+                    />
+                  ) : (
+                    <p className="text-sm font-bold text-[#2E2419]">{profileForm.phone || '—'}</p>
+                  )}
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 block mb-1">Organization Logo / Photo URL</label>
-                {isEditingProfile ? (
-                  <div className="space-y-2">
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">Website URL</label>
+                  {isEditingProfile ? (
                     <input
                       type="url"
-                      value={profileForm.org_photo_url || ''}
-                      onChange={e => setProfileForm({ ...profileForm, org_photo_url: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2.5 text-xs text-gray-900 focus:outline-none focus:border-[#8B5E3C]"
-                      placeholder="https://... or leave blank to auto-fetch from website"
+                      value={profileForm.website || ''}
+                      onChange={e => setProfileForm({ ...profileForm, website: e.target.value })}
+                      className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                      placeholder="https://..."
                     />
-                    {profileForm.org_photo_url && (
-                      <div className="flex items-center gap-2">
-                        <img src={profileForm.org_photo_url} alt="Logo preview" className="w-10 h-10 rounded-xl object-cover border border-gray-200" />
-                        <span className="text-[11px] text-gray-500 font-medium">Logo Preview</span>
-                      </div>
-                    )}
-                  </div>
-                ) : profileForm.org_photo_url ? (
-                  <div className="flex items-center gap-3">
-                    <img src={profileForm.org_photo_url} alt="Shelter logo" className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-2xs" />
-                    <span className="text-xs text-gray-600 font-medium">{profileForm.org_photo_url}</span>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400">—</p>
-                )}
+                  ) : profileForm.website ? (
+                    <a href={profileForm.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-[#8B5E3C] hover:underline">
+                      {profileForm.website}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-400">—</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#4A3E3D] block mb-1">Organization Logo / Photo URL</label>
+                  {isEditingProfile ? (
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={profileForm.org_photo_url || ''}
+                        onChange={e => setProfileForm({ ...profileForm, org_photo_url: e.target.value })}
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                        placeholder="https://... or leave blank to auto-fetch from website"
+                      />
+                      {profileForm.org_photo_url && (
+                        <div className="flex items-center gap-2">
+                          <img src={profileForm.org_photo_url} alt="Logo preview" className="w-10 h-10 rounded-xl object-cover border border-[#DFD3C7]" />
+                          <span className="text-[11px] text-[#8B7E7D] font-medium">Logo Preview</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : profileForm.org_photo_url ? (
+                    <div className="flex items-center gap-3">
+                      <img src={profileForm.org_photo_url} alt="Shelter logo" className="w-12 h-12 rounded-xl object-cover border border-[#DFD3C7] shadow-2xs" />
+                      <span className="text-xs text-[#8B7E7D] font-medium">{profileForm.org_photo_url}</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">—</p>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Location Card */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-xs space-y-4">
-              <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Organization Location</h3>
-              {isEditingProfile ? (
-                <CityAutocompleteInput
-                  label="Address / Location *"
-                  value={profileForm.city || profileForm.address || ''}
-                  onChange={val => setProfileForm({ ...profileForm, city: val, address: val })}
-                  placeholder="Enter city or full street address (e.g. 1239 Lexington Rd, Louisville, KY)"
-                  required
-                />
-              ) : (
-                <p className="text-sm font-semibold text-gray-900">
-                  {[profileForm.address, profileForm.city, profileForm.state, profileForm.zip].filter(Boolean).join(', ') || '—'}
-                </p>
-              )}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                    📍
+                  </span>
+                  Organization Location
+                </h3>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                {isEditingProfile ? (
+                  <CityAutocompleteInput
+                    label="Address / Location *"
+                    value={profileForm.city || profileForm.address || ''}
+                    onChange={val => setProfileForm({ ...profileForm, city: val, address: val })}
+                    placeholder="Enter city or full street address (e.g. 1239 Lexington Rd, Louisville, KY)"
+                    inputClassName="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
+                    required
+                  />
+                ) : (
+                  <p className="text-sm font-bold text-[#2E2419]">
+                    {[profileForm.address, profileForm.city, profileForm.state, profileForm.zip].filter(Boolean).join(', ') || '—'}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Account & Billing Card */}
-            <div className="bg-amber-50/70 rounded-3xl p-5 border border-amber-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-amber-50/70 rounded-2xl p-5 border border-amber-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
               <div>
                 <h3 className="text-xs font-black text-amber-900 uppercase tracking-wider mb-1">Account & Billing Settings</h3>
                 <p className="text-xs text-amber-800">Manage your business subscription, billing details, and account deletion on your unified Account page.</p>
@@ -1293,7 +1363,10 @@ function ShelterDashboardContent() {
         ) : (
           <div className="space-y-4">
             {/* FILTERS & SEARCH BAR */}
-            <div className="bg-white p-4 rounded-2xl border border-[#E8DDD4] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white p-4 rounded-2xl border border-[#DFD3C7] shadow-xs grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs"
+            >
               <div className="relative">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
                 <input
@@ -1301,14 +1374,14 @@ function ShelterDashboardContent() {
                   placeholder="Search by pet name/breed…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-[#8B5E3C]"
+                  className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl pl-9 pr-3 py-2 text-xs text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                 />
               </div>
 
               <select
                 value={speciesFilter}
                 onChange={e => setSpeciesFilter(e.target.value)}
-                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+                className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] rounded-xl px-3 py-2 text-xs font-medium"
               >
                 <option value="all">All Species</option>
                 <option value="dog">Dog</option>
@@ -1319,7 +1392,7 @@ function ShelterDashboardContent() {
               <select
                 value={ageFilter}
                 onChange={e => setAgeFilter(e.target.value)}
-                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+                className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] rounded-xl px-3 py-2 text-xs font-medium"
               >
                 <option value="all">All Ages</option>
                 <option value="puppy">Puppy/Kitten</option>
@@ -1331,7 +1404,7 @@ function ShelterDashboardContent() {
               <select
                 value={sizeFilter}
                 onChange={e => setSizeFilter(e.target.value)}
-                className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-2 text-xs font-medium"
+                className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] rounded-xl px-3 py-2 text-xs font-medium"
               >
                 <option value="all">All Sizes</option>
                 <option value="small">Small</option>
@@ -1375,32 +1448,38 @@ function ShelterDashboardContent() {
 
             {/* LIST VIEW */}
             {loading ? (
-              <div className="text-center py-20 text-xs text-gray-400 font-medium">Loading shelter listings…</div>
+              <div className="text-center py-20 text-xs text-[#8B7E7D] font-medium">Loading shelter listings…</div>
             ) : filteredPets.length === 0 ? (
-              <div className="bg-white p-12 rounded-3xl border border-[#E8DDD4] text-center space-y-3">
-                <PawPrint className="w-10 h-10 text-gray-300 mx-auto" />
-                <p className="font-bold text-gray-800 text-sm">No pet listings match this view</p>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white p-12 rounded-2xl border border-[#DFD3C7] text-center space-y-3 shadow-xs"
+              >
+                <PawPrint className="w-10 h-10 text-[#8B5E3C]/30 mx-auto" />
+                <p className="font-extrabold text-[#2E2419] text-sm">No pet listings match this view</p>
                 <button
                   onClick={handleOpenAddModal}
-                  className="bg-[#8B5E3C] text-white text-xs font-bold py-2 px-4 rounded-xl cursor-pointer border-none"
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold py-2.5 px-4 rounded-xl cursor-pointer border-none shadow-xs"
                 >
                   Add First Pet
                 </button>
               </div>
             ) : (
-          <div className="bg-white rounded-3xl border border-[#E8DDD4] overflow-hidden shadow-xs">
-            <div className="p-3 bg-[#FAF6F0] border-b border-[#E8DDD4] flex items-center gap-3 text-xs font-bold text-gray-600">
-              <input
-                type="checkbox"
-                checked={selectedIds.length === filteredPets.length && filteredPets.length > 0}
-                onChange={toggleSelectAll}
-                className="rounded text-[#8B5E3C]"
-              />
-              <span className="flex-1">Pet Listing</span>
-              <span className="w-24 text-center hidden sm:inline">Status</span>
-              <span className="w-28 text-center hidden md:inline">Posted</span>
-              <span className="w-56 text-right">Quick Actions</span>
-            </div>
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] overflow-hidden shadow-xs"
+              >
+                <div className="p-3.5 bg-[#FAF5EE] border-b border-[#EADBCE] flex items-center gap-3 text-xs font-extrabold text-[#2E2419]">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === filteredPets.length && filteredPets.length > 0}
+                    onChange={toggleSelectAll}
+                    className="rounded text-[#8B5E3C]"
+                  />
+                  <span className="flex-1">Pet Listing</span>
+                  <span className="w-24 text-center hidden sm:inline">Status</span>
+                  <span className="w-28 text-center hidden md:inline">Posted</span>
+                  <span className="w-56 text-right">Quick Actions</span>
+                </div>
 
             <div className="divide-y divide-gray-100">
               {filteredPets.map(pet => (
