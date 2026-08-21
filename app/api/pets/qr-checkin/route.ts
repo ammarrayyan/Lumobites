@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { unpackPetProfile } from '@/lib/petProfileSchema';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,25 +117,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Insert or update pet_profile_access grant
-    const { data: accessGrant } = await supabaseAdmin
-      .from('pet_profile_access')
-      .upsert(
-        {
-          pet_id: pet.id,
-          owner_email: pet.owner_email,
-          partner_type: cleanPartnerType,
-          partner_id: cleanPartnerEmail,
-          partner_name: partner_name || `${cleanPartnerType.toUpperCase()} Partner (${cleanPartnerEmail})`,
-          partner_email: cleanPartnerEmail,
-          status: 'active',
-          granted_at: new Date().toISOString(),
-          last_activity_at: new Date().toISOString(),
-        },
-        { onConflict: 'pet_id,partner_email,partner_type' }
-      )
-      .select('*')
-      .single();
+    // 3. Register or renew access grant
+    const { grantOrRenewPetAccess } = await import('@/lib/petAccessHelper');
+    await grantOrRenewPetAccess({
+      petId: pet.id,
+      ownerEmail: pet.owner_email,
+      partnerType: cleanPartnerType,
+      partnerId: cleanPartnerEmail,
+      partnerName: partner_name || `${cleanPartnerType.toUpperCase()} Partner (${cleanPartnerEmail})`,
+      partnerEmail: cleanPartnerEmail,
+    });
+
+    const unpackedPet = unpackPetProfile(pet);
+    if (!unpackedPet) {
+      return NextResponse.json({ error: 'Pet profile not found' }, { status: 404 });
+    }
 
     // 4. Return Tiered Field Visibility for verified partner
     if (actualAccessTier === 'full_vet') {
@@ -142,29 +139,29 @@ export async function POST(request: NextRequest) {
         success: true,
         access_tier: 'full_vet',
         granted_at: accessGrant?.granted_at || new Date().toISOString(),
-        pet,
+        pet: unpackedPet,
       });
     } else {
       const careLevelPet = {
-        id: pet.id,
-        owner_email: pet.owner_email,
-        pet_name: pet.pet_name,
-        pet_type: pet.pet_type,
-        breed: pet.breed,
-        age: pet.age,
-        weight: pet.weight,
-        gender: pet.gender,
-        spayed_neutered: pet.spayed_neutered,
-        feeding_schedule: pet.feeding_schedule,
-        medication: pet.medication,
-        behavior_notes: pet.behavior_notes,
-        allergies: pet.allergies,
-        emergency_contact_name: pet.emergency_contact_name,
-        emergency_contact_phone: pet.emergency_contact_phone,
-        vet_name: pet.vet_name,
-        vet_phone: pet.vet_phone,
-        photo_url: pet.photo_url,
-        photo_urls: pet.photo_urls,
+        id: unpackedPet.id,
+        owner_email: unpackedPet.owner_email,
+        pet_name: unpackedPet.pet_name,
+        pet_type: unpackedPet.pet_type,
+        breed: unpackedPet.breed,
+        age: unpackedPet.age,
+        weight: unpackedPet.weight,
+        gender: unpackedPet.gender,
+        spayed_neutered: unpackedPet.spayed_neutered,
+        feeding_schedule: unpackedPet.feeding_schedule,
+        medication: unpackedPet.medication,
+        behavior_notes: unpackedPet.behavior_notes,
+        allergies: unpackedPet.allergies,
+        emergency_contact_name: unpackedPet.emergency_contact_name,
+        emergency_contact_phone: unpackedPet.emergency_contact_phone,
+        vet_name: unpackedPet.vet_name,
+        vet_phone: unpackedPet.vet_phone,
+        photo_url: unpackedPet.photo_url,
+        photo_urls: unpackedPet.photo_urls,
       };
 
       return NextResponse.json({

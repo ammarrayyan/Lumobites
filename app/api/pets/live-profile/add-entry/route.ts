@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { unpackPetProfile } from '@/lib/petProfileSchema';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,18 +33,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Access Grant Verification
-    const { data: accessGrant, error: accessErr } = await supabaseAdmin
-      .from('pet_profile_access')
-      .select('*')
-      .eq('pet_id', pet_id)
-      .eq('partner_id', partner_id)
-      .eq('partner_type', 'vet')
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (accessErr || !accessGrant) {
+    const { verifyPetAccess } = await import('@/lib/petAccessHelper');
+    const accessCheck = await verifyPetAccess(pet_id, partner_id, 'vet');
+    if (!accessCheck.allowed) {
       return NextResponse.json(
-        { error: 'Access denied: No active booking access grant found for this vet clinic' },
+        { error: `Access denied: ${accessCheck.reason}` },
         { status: 403 }
       );
     }
@@ -174,7 +168,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Successfully added entry: ${addedByLabel}`,
       added_by: addedByLabel,
-      pet: updatedPet
+      pet: unpackPetProfile(updatedPet)
     });
   } catch (err: any) {
     console.error('[Add Medical Entry] Server error:', err);

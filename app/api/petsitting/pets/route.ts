@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { unpackPetProfile, packPetProfile } from '@/lib/petProfileSchema';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,16 +26,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const normalizedPets = (pets || []).map(p => {
-      let urls = p.photo_urls;
-      if (!Array.isArray(urls) || urls.length === 0) {
-        urls = p.photo_url ? [p.photo_url] : [];
-      }
-      return {
-        ...p,
-        photo_urls: urls
-      };
-    });
+    const normalizedPets = (pets || []).map(p => unpackPetProfile(p));
 
     return NextResponse.json({ success: true, pets: normalizedPets });
   } catch (error: any) {
@@ -126,30 +118,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const petPayload = {
+    const petPayload = packPetProfile({
       owner_email: cleanEmail,
       pet_name,
       pet_type,
-      breed: breed || null,
-      age: age || null,
-      weight: weight || null,
-      gender: gender || null,
-      spayed_neutered: spayed_neutered !== undefined ? spayed_neutered : false,
-      feeding_schedule: feeding_schedule || null,
-      medication: medication || null,
-      behavior_notes: behavior_notes || null,
-      vet_name: vet_name || null,
-      vet_phone: vet_phone || null,
+      breed,
+      age,
+      weight,
+      gender,
+      spayed_neutered,
+      feeding_schedule,
+      medication,
+      behavior_notes,
+      vet_name,
+      vet_phone,
       photo_url: processedPhotoUrls[0] || '',
       photo_urls: processedPhotoUrls,
-      vaccination_records: Array.isArray(vaccination_records) ? vaccination_records : [],
-      microchip_number: microchip_number || null,
-      allergies: allergies || null,
-      emergency_contact_name: emergency_contact_name || null,
-      emergency_contact_phone: emergency_contact_phone || null,
-      insurance_provider: insurance_provider || null,
-      insurance_policy_number: insurance_policy_number || null
-    };
+      vaccination_records,
+      microchip_number,
+      allergies,
+      emergency_contact_name,
+      emergency_contact_phone,
+      insurance_provider,
+      insurance_policy_number
+    });
 
     let resultData = null;
     let dbError = null;
@@ -181,7 +173,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, pet: resultData });
+    return NextResponse.json({ success: true, pet: unpackPetProfile(resultData) });
   } catch (error: any) {
     console.error('[Pets POST] Server error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

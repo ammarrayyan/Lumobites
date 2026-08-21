@@ -15,35 +15,96 @@ export async function GET(request: NextRequest) {
 
     const cleanEmail = ownerEmail.toLowerCase().trim();
 
-    // Fetch access grants joined with owner_pets for pet_name
-    const { data: grants, error } = await supabaseAdmin
-      .from('pet_profile_access')
-      .select('*, owner_pets(id, pet_name, pet_type, photo_url)')
+    // 1. Fetch vet inquiries
+    const { data: vetInquiries } = await supabaseAdmin
+      .from('vet_inquiries')
+      .select('id, clinic_id, owner_email, pet_id, status, created_at, vet_clinics(clinic_name, email, org_photo_url)')
       .eq('owner_email', cleanEmail)
-      .order('granted_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('[Pet Access GET] Database error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    // 2. Fetch daycare inquiries
+    const { data: daycareInquiries } = await supabaseAdmin
+      .from('daycare_inquiries')
+      .select('id, daycare_id, owner_email, pet_id, status, created_at, pet_daycares(business_name, email, logo_url)')
+      .eq('owner_email', cleanEmail)
+      .order('created_at', { ascending: false });
 
-    // Process 6-month dormancy check dynamically
-    const SIX_MONTHS_MS = 180 * 24 * 60 * 60 * 1000; // ~6 months
-    const now = Date.now();
+    // 3. Fetch sitting requests
+    const { data: sittingRequests } = await supabaseAdmin
+      .from('sitting_requests')
+      .select('id, sitter_id, owner_email, pet_id, status, created_at, sitters(first_name, last_name, email, profile_photo_url)')
+      .eq('owner_email', cleanEmail)
+      .order('created_at', { ascending: false });
 
-    const processedGrants = (grants || []).map((g: any) => {
-      const lastAct = g.last_activity_at ? new Date(g.last_activity_at).getTime() : new Date(g.granted_at).getTime();
-      let calculatedStatus = g.status;
-      if (g.status === 'active' && now - lastAct > SIX_MONTHS_MS) {
-        calculatedStatus = 'dormant';
-      }
-      return {
-        ...g,
-        effective_status: calculatedStatus,
-      };
+    // 4. Fetch pets for metadata
+    const { data: pets } = await supabaseAdmin
+      .from('owner_pets')
+      .select('id, pet_name, pet_type, photo_url')
+      .eq('owner_email', cleanEmail);
+
+    const petMap = new Map((pets || []).map(p => [p.id, p]));
+
+    const unifiedGrants: any[] = [];
+
+    (vetInquiries || []).forEach(inq => {
+      const clinic = (inq as any).vet_clinics;
+      const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
+      unifiedGrants.push({
+        id: inq.id,
+        partner_id: inq.clinic_id,
+        partner_type: 'vet',
+        partner_name: clinic?.clinic_name || 'Vet Clinic',
+        partner_email: clinic?.email || '',
+        owner_email: inq.owner_email,
+        pet_id: inq.pet_id || pet?.id,
+        owner_pets: pet,
+        status: inq.status || 'active',
+        effective_status: inq.status === 'revoked' ? 'revoked' : 'active',
+        granted_at: inq.created_at,
+        last_activity_at: inq.created_at
+      });
     });
 
-    return NextResponse.json({ success: true, grants: processedGrants });
+    (daycareInquiries || []).forEach(inq => {
+      const daycare = (inq as any).pet_daycares;
+      const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
+      unifiedGrants.push({
+        id: inq.id,
+        partner_id: inq.daycare_id,
+        partner_type: 'daycare',
+        partner_name: daycare?.business_name || 'Pet Daycare',
+        partner_email: daycare?.email || '',
+        owner_email: inq.owner_email,
+        pet_id: inq.pet_id || pet?.id,
+        owner_pets: pet,
+        status: inq.status || 'active',
+        effective_status: inq.status === 'revoked' ? 'revoked' : 'active',
+        granted_at: inq.created_at,
+        last_activity_at: inq.created_at
+      });
+    });
+
+    (sittingRequests || []).forEach(req => {
+      const sitter = (req as any).sitters;
+      const pet = petMap.get(req.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
+      const sitterName = sitter ? `${sitter.first_name} ${sitter.last_name || ''}`.trim() : 'Pet Sitter';
+      unifiedGrants.push({
+        id: req.id,
+        partner_id: req.sitter_id,
+        partner_type: 'sitter',
+        partner_name: sitterName || 'Pet Sitter',
+        partner_email: sitter?.email || '',
+        owner_email: req.owner_email,
+        pet_id: req.pet_id || pet?.id,
+        owner_pets: pet,
+        status: req.status || 'active',
+        effective_status: req.status === 'revoked' ? 'revoked' : 'active',
+        granted_at: req.created_at,
+        last_activity_at: req.created_at
+      });
+    });
+
+    return NextResponse.json({ success: true, grants: unifiedGrants });
   } catch (err: any) {
     console.error('[Pet Access GET] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
@@ -54,32 +115,45 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { access_id, owner_email, action } = body; // action: 'revoke' | 'restore'
+    const { access_id, partner_id, partner_type, owner_email, action } = body; // action: 'revoke' | 'restore'
 
-    if (!access_id || !owner_email || !action) {
-      return NextResponse.json({ error: 'Access ID, owner email, and action are required' }, { status: 400 });
+    if ((!access_id && !partner_id) || !owner_email || !action) {
+      return NextResponse.json({ error: 'Access ID or Partner ID, owner email, and action are required' }, { status: 400 });
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
     const newStatus = action === 'revoke' ? 'revoked' : 'active';
 
-    const { data: updated, error } = await supabaseAdmin
-      .from('pet_profile_access')
-      .update({
-        status: newStatus,
-        last_activity_at: new Date().toISOString(),
-      })
-      .eq('id', access_id)
-      .eq('owner_email', cleanEmail)
-      .select('*')
-      .single();
-
-    if (error) {
-      console.error('[Pet Access POST] Update error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (partner_type === 'vet') {
+      if (access_id) {
+        await supabaseAdmin.from('vet_inquiries').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail);
+      } else if (partner_id) {
+        await supabaseAdmin.from('vet_inquiries').update({ status: newStatus }).eq('clinic_id', String(partner_id)).eq('owner_email', cleanEmail);
+      }
+    } else if (partner_type === 'daycare') {
+      if (access_id) {
+        await supabaseAdmin.from('daycare_inquiries').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail);
+      } else if (partner_id) {
+        await supabaseAdmin.from('daycare_inquiries').update({ status: newStatus }).eq('daycare_id', String(partner_id)).eq('owner_email', cleanEmail);
+      }
+    } else if (partner_type === 'sitter') {
+      if (access_id) {
+        await supabaseAdmin.from('sitting_requests').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail);
+      } else if (partner_id) {
+        await supabaseAdmin.from('sitting_requests').update({ status: newStatus }).eq('sitter_id', String(partner_id)).eq('owner_email', cleanEmail);
+      }
+    } else {
+      // Try updating by ID across tables
+      if (access_id) {
+        await Promise.all([
+          supabaseAdmin.from('vet_inquiries').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail),
+          supabaseAdmin.from('daycare_inquiries').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail),
+          supabaseAdmin.from('sitting_requests').update({ status: newStatus }).eq('id', access_id).eq('owner_email', cleanEmail),
+        ]);
+      }
     }
 
-    return NextResponse.json({ success: true, grant: updated });
+    return NextResponse.json({ success: true, status: newStatus });
   } catch (err: any) {
     console.error('[Pet Access POST] Server error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

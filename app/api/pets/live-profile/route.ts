@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { unpackPetProfile } from '@/lib/petProfileSchema';
+import { verifyPetAccess } from '@/lib/petAccessHelper';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,44 +18,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required query parameters: pet_id, partner_id, partner_type' }, { status: 400 });
     }
 
-    // 1. Verify active access grant
-    const { data: accessGrant, error: accessErr } = await supabaseAdmin
-      .from('pet_profile_access')
-      .select('*')
-      .eq('pet_id', petId)
-      .eq('partner_id', partnerId)
-      .eq('partner_type', partnerType)
-      .maybeSingle();
-
-    if (accessErr || !accessGrant) {
-      return NextResponse.json({ error: 'Access denied: No active profile access grant found for this partner' }, { status: 403 });
-    }
-
-    if (accessGrant.status === 'revoked') {
-      return NextResponse.json({ error: 'Access revoked: The pet owner has revoked access for this business' }, { status: 403 });
-    }
-
-    // Check 6-month dormancy threshold
-    const SIX_MONTHS_MS = 180 * 24 * 60 * 60 * 1000;
-    const lastAct = accessGrant.last_activity_at ? new Date(accessGrant.last_activity_at).getTime() : new Date(accessGrant.granted_at).getTime();
-    if (Date.now() - lastAct > SIX_MONTHS_MS) {
-      // Mark dormant
-      await supabaseAdmin
-        .from('pet_profile_access')
-        .update({ status: 'dormant' })
-        .eq('id', accessGrant.id);
-
-      return NextResponse.json({ error: 'Access dormant: No booking activity in 6 months. Access will reactivate automatically upon your next booking.' }, { status: 403 });
-    }
-
-    // 2. Fetch live pet profile
-    const { data: pet, error: petErr } = await supabaseAdmin
+    // 1. Fetch live pet profile
+    const { data: petRow, error: petErr } = await supabaseAdmin
       .from('owner_pets')
       .select('*')
       .eq('id', petId)
       .maybeSingle();
 
-    if (petErr || !pet) {
+    if (petErr || !petRow) {
+      return NextResponse.json({ error: 'Pet profile not found' }, { status: 404 });
+    }
+
+    // 2. Verify active access grant
+    const accessCheck = await verifyPetAccess(petId, partnerId, partnerType, petRow.owner_email);
+    if (!accessCheck.allowed) {
+      return NextResponse.json({ error: `Access denied: ${accessCheck.reason}` }, { status: 403 });
+    }
+
+    const unpackedPet = unpackPetProfile(petRow);
+    if (!unpackedPet) {
       return NextResponse.json({ error: 'Pet profile not found' }, { status: 404 });
     }
 
@@ -63,35 +46,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         access_tier: 'full_vet',
-        pet,
+        pet: unpackedPet,
       });
     } else {
-      // Care-Level Access Only: Strip medical credentials (vaccination_records, microchip, insurance)
+      // Care-Level Access Only: Strip medical credentials (vaccination_records, microchip, insurance, chronic_conditions)
       const careLevelPet = {
-        id: pet.id,
-        owner_email: pet.owner_email,
-        pet_name: pet.pet_name,
-        pet_type: pet.pet_type,
-        breed: pet.breed,
-        age: pet.age,
-        weight: pet.weight,
-        gender: pet.gender,
-        spayed_neutered: pet.spayed_neutered,
-        feeding_schedule: pet.feeding_schedule,
-        medication: pet.medication,
-        behavior_notes: pet.behavior_notes,
-        allergies: pet.allergies,
-        emergency_contact_name: pet.emergency_contact_name,
-        emergency_contact_phone: pet.emergency_contact_phone,
-        vet_name: pet.vet_name,
-        vet_phone: pet.vet_phone,
-        photo_url: pet.photo_url,
-        photo_urls: pet.photo_urls,
+        id: unpackedPet.id,
+        owner_email: unpackedPet.owner_email,
+        pet_name: unpackedPet.pet_name,
+        pet_type: unpackedPet.pet_type,
+        breed: unpackedPet.breed,
+        age: unpackedPet.age,
+        weight: unpackedPet.weight,
+        gender: unpackedPet.gender,
+        spayed_neutered: unpackedPet.spayed_neutered,
+        feeding_schedule: unpackedPet.feeding_schedule,
+        medication: unpackedPet.medication,
+        behavior_notes: unpackedPet.behavior_notes,
+        allergies: unpackedPet.allergies,
+        emergency_contact_name: unpackedPet.emergency_contact_name,
+        emergency_contact_phone: unpackedPet.emergency_contact_phone,
+        vet_name: unpackedPet.vet_name,
+        vet_phone: unpackedPet.vet_phone,
+        photo_url: unpackedPet.photo_url,
+        photo_urls: unpackedPet.photo_urls,
         // Explicitly excluded for Care Tier:
         vaccination_records: undefined,
         microchip_number: undefined,
+        microchip_added_by: undefined,
         insurance_provider: undefined,
         insurance_policy_number: undefined,
+        chronic_conditions: undefined,
       };
 
       return NextResponse.json({
