@@ -15,6 +15,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [error, setError] = useState<string | null>(null);
   const [pet, setPet] = useState<any>(null);
   const [accessTier, setAccessTier] = useState<string>('');
+  const [accessStatus, setAccessStatus] = useState<'active' | 'pending' | 'denied' | 'revoked' | 'none' | null>(null);
 
   // Vet Add Entry Modal States
   const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit' | null>(null);
@@ -44,7 +45,9 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
       if (res.ok && data.success) {
         setPet(data.pet);
         setAccessTier(data.access_tier);
+        setAccessStatus('active');
       } else {
+        setAccessStatus(data.status || 'denied');
         setError(data.error || 'Unable to fetch live pet profile');
       }
     } catch (err: any) {
@@ -146,7 +149,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
     );
   }
 
-  if (loading && !pet) {
+  if (loading && !pet && !accessStatus) {
     return (
       <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 flex items-center justify-center gap-2 text-xs text-amber-900 font-bold">
         <RefreshCw className="w-4 h-4 animate-spin text-[#8B5E3C]" />
@@ -155,7 +158,70 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
     );
   }
 
-  if (error) {
+  if (accessStatus === 'pending') {
+    return (
+      <div 
+        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+        className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900"
+      >
+        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-base">
+          ⏳
+        </div>
+        <div className="flex-1 min-w-0">
+          <strong className="font-extrabold text-amber-950 block text-xs mb-0.5">
+            Pet Profile Access Request Pending Owner Approval
+          </strong>
+          <span className="text-amber-800 leading-relaxed block text-[11px]">
+            A notification has been sent to the pet owner. Live profile records will unlock automatically once the owner approves access. You can still message and manage this booking normally in the meantime.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (accessStatus === 'denied') {
+    return (
+      <div 
+        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+        className="bg-[#FAF6F2] border border-[#DFD3C7] rounded-2xl p-4 flex items-start gap-3 text-xs text-[#5C4533]"
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#F0E6DA] flex items-center justify-center shrink-0 text-base">
+          🔒
+        </div>
+        <div className="flex-1 min-w-0">
+          <strong className="font-extrabold text-[#2E2419] block text-xs mb-0.5">
+            Profile Access Declined by Owner
+          </strong>
+          <span className="text-[#7A6B5E] leading-relaxed block text-[11px]">
+            The pet owner chose not to share full profile records. You can still message, confirm, and complete this booking normally.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (accessStatus === 'revoked') {
+    return (
+      <div 
+        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+        className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-rose-900"
+      >
+        <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 text-base">
+          ✕
+        </div>
+        <div className="flex-1 min-w-0">
+          <strong className="font-extrabold text-rose-950 block text-xs mb-0.5">
+            Profile Access Revoked by Owner
+          </strong>
+          <span className="text-rose-800 leading-relaxed block text-[11px]">
+            Access to live pet profile records was revoked by the pet owner.
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !pet) {
     return (
       <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-rose-800">
         <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />

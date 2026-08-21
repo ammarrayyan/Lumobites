@@ -7,21 +7,29 @@ export interface GrantPetAccessParams {
   partnerId: string;
   partnerName: string;
   partnerEmail: string;
+  petName?: string;
 }
 
 /**
- * Grants or renews live pet profile access for a partner upon a booking, inquiry, or verified QR check-in.
+ * Establishes or checks pet profile access for a partner.
+ * Under Explicit Owner Approval flow:
+ * - If status is already active, preserve active.
+ * - If status is revoked or denied, preserve that decision.
+ * - Otherwise, create/update the grant in 'pending' status and notify the owner to approve/deny.
  */
 export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promise<{ success: boolean; status?: string }> {
   try {
-    const { petId, ownerEmail, partnerType, partnerId, partnerName, partnerEmail } = params;
+    const { petId, ownerEmail, partnerType, partnerId, partnerName, partnerEmail, petName } = params;
 
-    if (!petId || !ownerEmail || !partnerId) {
+    if (!ownerEmail || !partnerId) {
       return { success: false };
     }
 
     const cleanOwnerEmail = ownerEmail.toLowerCase().trim();
     const cleanPartnerEmail = (partnerEmail || '').toLowerCase().trim();
+    const resolvedPetName = petName || 'your pet';
+
+    let currentStatus = 'pending';
 
     if (partnerType === 'vet') {
       const { data: existing } = await supabaseAdmin
@@ -32,22 +40,24 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'revoked') {
-          return { success: true, status: 'revoked' };
+        if (existing.status === 'active') {
+          return { success: true, status: 'active' };
         }
-        await supabaseAdmin
-          .from('vet_inquiries')
-          .update({ status: 'active', archived: false })
-          .eq('id', existing.id);
-        return { success: true, status: 'active' };
+        if (existing.status === 'revoked' || existing.status === 'denied') {
+          return { success: true, status: existing.status };
+        }
+        currentStatus = existing.status || 'pending';
+      } else {
+        const { error: insErr } = await supabaseAdmin.from('vet_inquiries').insert({
+          clinic_id: String(partnerId),
+          owner_email: cleanOwnerEmail,
+          status: 'pending',
+          archived: false
+        });
+        if (insErr) {
+          console.warn('[PetAccess] Error inserting vet inquiry:', insErr);
+        }
       }
-
-      await supabaseAdmin.from('vet_inquiries').insert({
-        clinic_id: String(partnerId),
-        owner_email: cleanOwnerEmail,
-        status: 'active',
-        archived: false
-      });
     } else if (partnerType === 'daycare') {
       const { data: existing } = await supabaseAdmin
         .from('daycare_inquiries')
@@ -57,22 +67,24 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'revoked') {
-          return { success: true, status: 'revoked' };
+        if (existing.status === 'active') {
+          return { success: true, status: 'active' };
         }
-        await supabaseAdmin
-          .from('daycare_inquiries')
-          .update({ status: 'active', archived: false })
-          .eq('id', existing.id);
-        return { success: true, status: 'active' };
+        if (existing.status === 'revoked' || existing.status === 'denied') {
+          return { success: true, status: existing.status };
+        }
+        currentStatus = existing.status || 'pending';
+      } else {
+        const { error: insErr } = await supabaseAdmin.from('daycare_inquiries').insert({
+          daycare_id: String(partnerId),
+          owner_email: cleanOwnerEmail,
+          status: 'pending',
+          archived: false
+        });
+        if (insErr) {
+          console.warn('[PetAccess] Error inserting daycare inquiry:', insErr);
+        }
       }
-
-      await supabaseAdmin.from('daycare_inquiries').insert({
-        daycare_id: String(partnerId),
-        owner_email: cleanOwnerEmail,
-        status: 'active',
-        archived: false
-      });
     } else if (partnerType === 'sitter') {
       const { data: existing } = await supabaseAdmin
         .from('sitting_requests')
@@ -82,39 +94,42 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'revoked') {
-          return { success: true, status: 'revoked' };
+        if (existing.status === 'active') {
+          return { success: true, status: 'active' };
         }
-        await supabaseAdmin
-          .from('sitting_requests')
-          .update({ status: 'accepted' })
-          .eq('id', existing.id);
-        return { success: true, status: 'active' };
+        if (existing.status === 'revoked' || existing.status === 'denied') {
+          return { success: true, status: existing.status };
+        }
+        currentStatus = existing.status || 'pending';
+      } else {
+        await supabaseAdmin.from('sitting_requests').insert({
+          sitter_id: String(partnerId),
+          owner_email: cleanOwnerEmail,
+          pet_id: petId || null,
+          status: 'pending',
+          dates: 'Ongoing Care'
+        });
       }
-
-      await supabaseAdmin.from('sitting_requests').insert({
-        sitter_id: String(partnerId),
-        owner_email: cleanOwnerEmail,
-        status: 'accepted',
-        dates: 'Ongoing Care'
-      });
     }
 
-    // In-app transparent notification to owner (non-blocking)
-    try {
-      await supabaseAdmin.from('notifications').insert({
-        recipient_email: cleanOwnerEmail,
-        type: 'new_message',
-        title: 'Pet Profile Access Granted 🐾',
-        message: `${partnerName} (${partnerType === 'vet' ? 'Vet Clinic' : partnerType === 'daycare' ? 'Daycare' : 'Pet Sitter'}) now has active access to your pet's profile. Manage access anytime in Account settings.`,
-        link: '/account?tab=pets',
-        read: false,
-      });
-    } catch (notifErr) {
-      console.warn('[PetAccess] Notification insert warning:', notifErr);
+    // In-app access request notification to owner (non-blocking)
+    if (currentStatus === 'pending') {
+      try {
+        const partnerTypeLabel = partnerType === 'vet' ? 'Vet Clinic (Full Medical Access)' : partnerType === 'daycare' ? 'Daycare (Care Access)' : 'Pet Sitter (Care Access)';
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: cleanOwnerEmail,
+          type: 'new_message',
+          title: 'Pet Profile Access Request 🐾',
+          message: `${partnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Approve or deny in Account settings.`,
+          link: '/account?tab=pets',
+          read: false,
+        });
+      } catch (notifErr) {
+        console.warn('[PetAccess] Notification insert warning:', notifErr);
+      }
     }
 
-    return { success: true, status: 'active' };
+    return { success: true, status: currentStatus };
   } catch (err: any) {
     console.error('[PetAccess] Exception in grantOrRenewPetAccess:', err);
     return { success: false };
@@ -122,12 +137,17 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
 }
 
 /**
- * Checks whether a partner has an active profile access grant for a pet.
+ * Checks whether a partner has an approved active profile access grant for a pet.
  */
-export async function verifyPetAccess(petId: string, partnerId: string, partnerType: 'vet' | 'daycare' | 'sitter', ownerEmail?: string): Promise<{ allowed: boolean; reason?: string; status?: string }> {
+export async function verifyPetAccess(
+  petId: string,
+  partnerId: string,
+  partnerType: 'vet' | 'daycare' | 'sitter',
+  ownerEmail?: string
+): Promise<{ allowed: boolean; reason?: string; status?: string }> {
   try {
     let resolvedOwnerEmail = ownerEmail;
-    if (!resolvedOwnerEmail) {
+    if (!resolvedOwnerEmail && petId) {
       const { data: pet } = await supabaseAdmin
         .from('owner_pets')
         .select('owner_email')
@@ -137,11 +157,13 @@ export async function verifyPetAccess(petId: string, partnerId: string, partnerT
     }
 
     if (!resolvedOwnerEmail) {
-      return { allowed: false, reason: 'Pet not found' };
+      return { allowed: false, reason: 'Pet not found', status: 'none' };
     }
 
     const cleanEmail = resolvedOwnerEmail.toLowerCase().trim();
     const cleanPartnerId = String(partnerId).trim();
+
+    let status = 'none';
 
     if (partnerType === 'vet') {
       const { data: inq } = await supabaseAdmin
@@ -152,15 +174,10 @@ export async function verifyPetAccess(petId: string, partnerId: string, partnerT
         .maybeSingle();
 
       if (!inq) {
-        return { allowed: false, reason: 'No active booking or inquiry found for this partner' };
+        return { allowed: false, reason: 'No inquiry thread found for this clinic', status: 'none' };
       }
-      if (inq.status === 'revoked') {
-        return { allowed: false, reason: 'The pet owner has revoked access for this business' };
-      }
-      return { allowed: true, status: inq.status };
-    }
-
-    if (partnerType === 'daycare') {
+      status = inq.status || 'pending';
+    } else if (partnerType === 'daycare') {
       const { data: inq } = await supabaseAdmin
         .from('daycare_inquiries')
         .select('id, status, created_at')
@@ -169,15 +186,10 @@ export async function verifyPetAccess(petId: string, partnerId: string, partnerT
         .maybeSingle();
 
       if (!inq) {
-        return { allowed: false, reason: 'No active booking or inquiry found for this partner' };
+        return { allowed: false, reason: 'No inquiry thread found for this daycare', status: 'none' };
       }
-      if (inq.status === 'revoked') {
-        return { allowed: false, reason: 'The pet owner has revoked access for this business' };
-      }
-      return { allowed: true, status: inq.status };
-    }
-
-    if (partnerType === 'sitter') {
+      status = inq.status || 'pending';
+    } else if (partnerType === 'sitter') {
       const { data: req } = await supabaseAdmin
         .from('sitting_requests')
         .select('id, status, created_at')
@@ -186,17 +198,27 @@ export async function verifyPetAccess(petId: string, partnerId: string, partnerT
         .maybeSingle();
 
       if (!req) {
-        return { allowed: false, reason: 'No active booking or inquiry found for this partner' };
+        return { allowed: false, reason: 'No booking request found for this sitter', status: 'none' };
       }
-      if (req.status === 'revoked') {
-        return { allowed: false, reason: 'The pet owner has revoked access for this business' };
-      }
-      return { allowed: true, status: req.status };
+      status = req.status || 'pending';
     }
 
-    return { allowed: false, reason: 'Unknown partner type' };
+    if (status === 'active') {
+      return { allowed: true, status: 'active' };
+    }
+    if (status === 'pending') {
+      return { allowed: false, reason: 'Waiting for pet owner approval', status: 'pending' };
+    }
+    if (status === 'denied') {
+      return { allowed: false, reason: 'Access request was declined by pet owner', status: 'denied' };
+    }
+    if (status === 'revoked') {
+      return { allowed: false, reason: 'The pet owner has revoked access for this business', status: 'revoked' };
+    }
+
+    return { allowed: false, reason: 'Profile access is not active', status };
   } catch (err: any) {
     console.error('[PetAccess] Error verifying access:', err);
-    return { allowed: false, reason: err.message };
+    return { allowed: false, reason: err.message, status: 'error' };
   }
 }

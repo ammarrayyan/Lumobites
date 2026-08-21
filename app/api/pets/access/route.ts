@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
     (vetInquiries || []).forEach(inq => {
       const clinic = (inq as any).vet_clinics;
       const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
+      const st = inq.status || 'pending';
       unifiedGrants.push({
         id: inq.id,
         partner_id: inq.clinic_id,
@@ -58,8 +59,8 @@ export async function GET(request: NextRequest) {
         owner_email: inq.owner_email,
         pet_id: inq.pet_id || pet?.id,
         owner_pets: pet,
-        status: inq.status || 'active',
-        effective_status: inq.status === 'revoked' ? 'revoked' : 'active',
+        status: st,
+        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : st === 'active' ? 'active' : 'pending',
         granted_at: inq.created_at,
         last_activity_at: inq.created_at
       });
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
     (daycareInquiries || []).forEach(inq => {
       const daycare = (inq as any).pet_daycares;
       const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
+      const st = inq.status || 'pending';
       unifiedGrants.push({
         id: inq.id,
         partner_id: inq.daycare_id,
@@ -77,8 +79,8 @@ export async function GET(request: NextRequest) {
         owner_email: inq.owner_email,
         pet_id: inq.pet_id || pet?.id,
         owner_pets: pet,
-        status: inq.status || 'active',
-        effective_status: inq.status === 'revoked' ? 'revoked' : 'active',
+        status: st,
+        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : st === 'active' ? 'active' : 'pending',
         granted_at: inq.created_at,
         last_activity_at: inq.created_at
       });
@@ -88,6 +90,7 @@ export async function GET(request: NextRequest) {
       const sitter = (req as any).sitters;
       const pet = petMap.get(req.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
       const sitterName = sitter ? `${sitter.first_name} ${sitter.last_name || ''}`.trim() : 'Pet Sitter';
+      const st = req.status || 'pending';
       unifiedGrants.push({
         id: req.id,
         partner_id: req.sitter_id,
@@ -97,8 +100,8 @@ export async function GET(request: NextRequest) {
         owner_email: req.owner_email,
         pet_id: req.pet_id || pet?.id,
         owner_pets: pet,
-        status: req.status || 'active',
-        effective_status: req.status === 'revoked' ? 'revoked' : 'active',
+        status: st,
+        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : st === 'active' || st === 'accepted' ? 'active' : 'pending',
         granted_at: req.created_at,
         last_activity_at: req.created_at
       });
@@ -111,18 +114,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/pets/access — Owner revokes or modifies access for a specific business
+// POST /api/pets/access — Owner approves, denies, revokes, or restores access for a specific business
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { access_id, partner_id, partner_type, owner_email, action } = body; // action: 'revoke' | 'restore'
+    const { access_id, partner_id, partner_type, owner_email, action } = body; // action: 'approve' | 'deny' | 'revoke' | 'restore'
 
     if ((!access_id && !partner_id) || !owner_email || !action) {
       return NextResponse.json({ error: 'Access ID or Partner ID, owner email, and action are required' }, { status: 400 });
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
-    const newStatus = action === 'revoke' ? 'revoked' : 'active';
+    const newStatus = action === 'approve' || action === 'restore' ? 'active' : action === 'deny' ? 'denied' : 'revoked';
 
     if (partner_type === 'vet') {
       if (access_id) {

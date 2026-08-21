@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
     // 2. Verify active access grant
     const accessCheck = await verifyPetAccess(petId, partnerId, partnerType, petRow.owner_email);
     if (!accessCheck.allowed) {
-      return NextResponse.json({ error: `Access denied: ${accessCheck.reason}` }, { status: 403 });
+      return NextResponse.json({
+        success: false,
+        status: accessCheck.status || 'denied',
+        error: `Access ${accessCheck.status === 'pending' ? 'pending owner approval' : 'restricted'}: ${accessCheck.reason}`,
+        reason: accessCheck.reason
+      }, { status: 200 });
     }
 
     const unpackedPet = unpackPetProfile(petRow);
