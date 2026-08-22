@@ -121,13 +121,20 @@ export async function POST(request: NextRequest) {
       .eq('id', clinic_id)
       .maybeSingle();
 
-    // Check if an inquiry thread already exists for this owner+clinic pair
-    const { data: existing } = await supabaseAdmin
+    // Check if an OPEN / ACTIVE inquiry thread already exists for this owner+clinic pair
+    // Active states: 'pending', 'accepted', 'confirmed', 'active' (and unarchived)
+    // Terminal states ('completed', 'declined', 'no_show', etc.) start a fresh inquiry
+    const { data: openInquiries } = await supabaseAdmin
       .from('vet_inquiries')
-      .select('id')
+      .select('*')
       .eq('clinic_id', clinic_id)
       .eq('owner_email', cleanEmail)
-      .maybeSingle();
+      .in('status', ['pending', 'accepted', 'confirmed', 'active'])
+      .eq('archived', false)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const existing = openInquiries && openInquiries.length > 0 ? openInquiries[0] : null;
 
     let targetInquiry = existing;
 
