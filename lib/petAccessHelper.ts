@@ -27,7 +27,12 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
 
     const cleanOwnerEmail = ownerEmail.toLowerCase().trim();
     const cleanPartnerEmail = (partnerEmail || '').toLowerCase().trim();
-    const resolvedPetName = petName || 'your pet';
+    let resolvedPetName = petName;
+    if (!resolvedPetName && petId) {
+      const { data: p } = await supabaseAdmin.from('owner_pets').select('pet_name').eq('id', petId).maybeSingle();
+      if (p?.pet_name) resolvedPetName = p.pet_name;
+    }
+    if (!resolvedPetName) resolvedPetName = 'your pet';
 
     let currentStatus = 'pending';
 
@@ -115,12 +120,12 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
     // In-app access request notification to owner (non-blocking)
     if (currentStatus === 'pending') {
       try {
-        const partnerTypeLabel = partnerType === 'vet' ? 'Vet Clinic (Full Medical Access)' : partnerType === 'daycare' ? 'Daycare (Care Access)' : 'Pet Sitter (Care Access)';
+        const partnerTypeLabel = partnerType === 'vet' ? 'Vet Clinic' : partnerType === 'daycare' ? 'Daycare' : 'Pet Sitter';
         await supabaseAdmin.from('notifications').insert({
           recipient_email: cleanOwnerEmail,
-          type: 'new_message',
+          type: 'pet_access_request',
           title: 'Pet Profile Access Request 🐾',
-          message: `${partnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Approve or deny in Account settings.`,
+          message: `${partnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Tap to review and approve.`,
           link: '/account?tab=pets',
           read: false,
         });

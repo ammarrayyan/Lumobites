@@ -156,6 +156,83 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Notify the business partner about the owner's decision
+    try {
+      let partnerEmail = '';
+      let partnerDashboardLink = '/petsitting';
+
+      if (partner_type === 'vet') {
+        let clinic = null;
+        if (partner_id) {
+          const { data } = await supabaseAdmin.from('vet_clinics').select('clinic_name, email').eq('id', partner_id).maybeSingle();
+          clinic = data;
+        } else if (access_id) {
+          const { data: inq } = await supabaseAdmin.from('vet_inquiries').select('clinic_id, vet_clinics(clinic_name, email)').eq('id', access_id).maybeSingle();
+          clinic = inq?.vet_clinics as any;
+        }
+        if (clinic?.email) {
+          partnerEmail = clinic.email.toLowerCase().trim();
+          partnerDashboardLink = access_id ? `/vet-boarding/dashboard?inquiry=${access_id}` : '/vet-boarding/dashboard';
+        }
+      } else if (partner_type === 'daycare') {
+        let daycare = null;
+        if (partner_id) {
+          const { data } = await supabaseAdmin.from('pet_daycares').select('business_name, email').eq('id', partner_id).maybeSingle();
+          daycare = data;
+        } else if (access_id) {
+          const { data: inq } = await supabaseAdmin.from('daycare_inquiries').select('daycare_id, pet_daycares(business_name, email)').eq('id', access_id).maybeSingle();
+          daycare = inq?.pet_daycares as any;
+        }
+        if (daycare?.email) {
+          partnerEmail = daycare.email.toLowerCase().trim();
+          partnerDashboardLink = access_id ? `/pet-daycare/dashboard?inquiry=${access_id}` : '/pet-daycare/dashboard';
+        }
+      } else if (partner_type === 'sitter') {
+        let sitter = null;
+        if (partner_id) {
+          const { data } = await supabaseAdmin.from('sitters').select('name, email').eq('id', partner_id).maybeSingle();
+          sitter = data;
+        } else if (access_id) {
+          const { data: req } = await supabaseAdmin.from('sitting_requests').select('sitter_id, sitters(name, email)').eq('id', access_id).maybeSingle();
+          sitter = req?.sitters as any;
+        }
+        if (sitter?.email) {
+          partnerEmail = sitter.email.toLowerCase().trim();
+          partnerDashboardLink = access_id ? `/petsitting/messages/${access_id}` : '/petsitting';
+        }
+      }
+
+      if (partnerEmail) {
+        const { data: pet } = await supabaseAdmin.from('owner_pets').select('pet_name').eq('owner_email', cleanEmail).limit(1).maybeSingle();
+        const petLabel = pet?.pet_name ? `${pet.pet_name}'s` : "their pet's";
+
+        let notifTitle = 'Pet Profile Access Updated 🐾';
+        let notifMessage = `${cleanEmail} updated access to ${petLabel} profile.`;
+
+        if (action === 'approve' || action === 'restore') {
+          notifTitle = 'Pet Profile Access Approved 🐾';
+          notifMessage = `${cleanEmail} approved access to ${petLabel} live profile. Full care and medical records are now unlocked.`;
+        } else if (action === 'deny') {
+          notifTitle = 'Pet Profile Access Declined ❌';
+          notifMessage = `${cleanEmail} declined access to ${petLabel} profile.`;
+        } else if (action === 'revoke') {
+          notifTitle = 'Pet Profile Access Revoked ⚠️';
+          notifMessage = `${cleanEmail} revoked access to ${petLabel} profile.`;
+        }
+
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: partnerEmail,
+          type: 'pet_access_decision',
+          title: notifTitle,
+          message: notifMessage,
+          link: partnerDashboardLink,
+          read: false,
+        });
+      }
+    } catch (notifErr) {
+      console.warn('[Pet Access POST] Error creating partner notification:', notifErr);
+    }
+
     return NextResponse.json({ success: true, status: newStatus });
   } catch (err: any) {
     console.error('[Pet Access POST] Server error:', err);
