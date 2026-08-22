@@ -130,7 +130,7 @@ export async function DELETE(request: NextRequest) {
 
     // 3. Cascade cleanup: delete pets and inquiries
     await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', id);
-    await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', id);
+    await supabaseAdmin.from('adoption_messages').delete().eq('shelter_id', id);
 
     // 4. Delete shelter record
     const { error: deleteErr } = await supabaseAdmin.from('shelters').delete().eq('id', id);

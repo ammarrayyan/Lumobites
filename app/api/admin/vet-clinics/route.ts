@@ -142,7 +142,11 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // 3. Cascade cleanup: delete availability & inquiries
+    // 3. Cascade cleanup: delete messages, availability & inquiries
+    const { data: inqs } = await supabaseAdmin.from('vet_inquiries').select('id').eq('clinic_id', id);
+    if (inqs && inqs.length > 0) {
+      await supabaseAdmin.from('messages').delete().in('booking_id', inqs.map(i => i.id));
+    }
     await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', id);
     await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', id);
 

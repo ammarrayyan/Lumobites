@@ -410,7 +410,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cascade cleanup
-    await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', daycare.id);
+    const { data: inqs } = await supabaseAdmin.from('daycare_inquiries').select('id').eq('daycare_id', daycare.id);
+    if (inqs && inqs.length > 0) {
+      const inqIds = inqs.map(i => i.id);
+      await supabaseAdmin.from('messages').delete().in('booking_id', inqIds);
+    }
+    await supabaseAdmin.from('daycare_availability').delete().eq('daycare_id', daycare.id);
     await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', daycare.id);
 
     // Delete daycare record

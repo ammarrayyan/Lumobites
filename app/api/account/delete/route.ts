@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
               canceledSubscriptionsCount++;
             } catch (e) {}
           }
+          const { data: inqs } = await supabaseAdmin.from('vet_inquiries').select('id').eq('clinic_id', vet.id);
+          if (inqs && inqs.length > 0) {
+            await supabaseAdmin.from('messages').delete().in('booking_id', inqs.map(i => i.id));
+          }
           await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', vet.id);
           await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', vet.id);
           await supabaseAdmin.from('vet_clinics').delete().eq('id', vet.id);
@@ -47,7 +51,11 @@ export async function POST(request: NextRequest) {
               canceledSubscriptionsCount++;
             } catch (e) {}
           }
-          await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', daycare.id);
+          const { data: inqs } = await supabaseAdmin.from('daycare_inquiries').select('id').eq('daycare_id', daycare.id);
+          if (inqs && inqs.length > 0) {
+            await supabaseAdmin.from('messages').delete().in('booking_id', inqs.map(i => i.id));
+          }
+          await supabaseAdmin.from('daycare_availability').delete().eq('daycare_id', daycare.id);
           await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', daycare.id);
           await supabaseAdmin.from('pet_daycares').delete().eq('id', daycare.id);
         }
@@ -62,7 +70,7 @@ export async function POST(request: NextRequest) {
             } catch (e) {}
           }
           await supabaseAdmin.from('adoption_pets').delete().eq('shelter_id', shelter.id);
-          await supabaseAdmin.from('adoption_inquiries').delete().eq('shelter_id', shelter.id);
+          await supabaseAdmin.from('adoption_messages').delete().eq('shelter_id', shelter.id);
           await supabaseAdmin.from('shelters').delete().eq('id', shelter.id);
         }
       } catch (partnerErr) {
@@ -141,7 +149,6 @@ export async function POST(request: NextRequest) {
 
     // 4. Delete user data from all tables
     await supabaseAdmin.from('owner_pets').delete().eq('owner_email', cleanEmail);
-    await supabaseAdmin.from('pets').delete().eq('owner_email', cleanEmail);
     await supabaseAdmin.from('sitting_requests').delete().eq('owner_email', cleanEmail);
     await supabaseAdmin.from('notifications').delete().eq('email', cleanEmail);
     await supabaseAdmin.from('lost_pets').delete().eq('contact_email', cleanEmail);

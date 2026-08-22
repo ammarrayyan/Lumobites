@@ -146,8 +146,13 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // 3. Cascade cleanup: delete availability & inquiries
-    await supabaseAdmin.from('pet_daycare_availability').delete().eq('daycare_id', id);
+    // 3. Cascade cleanup: delete messages, inquiries & availability
+    const { data: inqs } = await supabaseAdmin.from('daycare_inquiries').select('id').eq('daycare_id', id);
+    if (inqs && inqs.length > 0) {
+      const inqIds = inqs.map(i => i.id);
+      await supabaseAdmin.from('messages').delete().in('booking_id', inqIds);
+    }
+    await supabaseAdmin.from('daycare_availability').delete().eq('daycare_id', id);
     await supabaseAdmin.from('daycare_inquiries').delete().eq('daycare_id', id);
 
     // 4. Delete daycare record

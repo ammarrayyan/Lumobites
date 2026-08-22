@@ -385,6 +385,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Cascade cleanup
+    const { data: inqs } = await supabaseAdmin.from('vet_inquiries').select('id').eq('clinic_id', clinic.id);
+    if (inqs && inqs.length > 0) {
+      await supabaseAdmin.from('messages').delete().in('booking_id', inqs.map(i => i.id));
+    }
     await supabaseAdmin.from('vet_clinic_availability').delete().eq('clinic_id', clinic.id);
     await supabaseAdmin.from('vet_inquiries').delete().eq('clinic_id', clinic.id);
 
