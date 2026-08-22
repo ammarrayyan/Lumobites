@@ -644,9 +644,9 @@ export default function VetBoardingDashboardPage() {
               } else {
                 filteredInquiries = filteredInquiries.filter(i => !i.archived);
                 if (inquiryFilter === 'pending') {
-                  filteredInquiries = filteredInquiries.filter(i => i.status === 'pending');
+                  filteredInquiries = filteredInquiries.filter(i => !i.status || i.status === 'pending');
                 } else if (inquiryFilter === 'accepted') {
-                  filteredInquiries = filteredInquiries.filter(i => i.status === 'accepted' || i.status === 'confirmed');
+                  filteredInquiries = filteredInquiries.filter(i => i.status === 'accepted' || i.status === 'confirmed' || i.status === 'active');
                 } else if (inquiryFilter === 'completed') {
                   filteredInquiries = filteredInquiries.filter(i => i.status === 'completed');
                 } else if (inquiryFilter === 'unread') {
@@ -753,12 +753,12 @@ export default function VetBoardingDashboardPage() {
                             <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
                           )}
                           <div className="mt-1 flex items-center gap-2">
-                            {inq.status === 'pending' && (
+                            {(!inq.status || inq.status === 'pending') && (
                               <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
                                 <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" /> ⏳ Pending Review
                               </span>
                             )}
-                            {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                            {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
                               <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" /> ✅ Accepted
                               </span>
@@ -768,7 +768,7 @@ export default function VetBoardingDashboardPage() {
                                 <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /> 🎉 Completed
                               </span>
                             )}
-                            {inq.status === 'declined' && (
+                            {(inq.status === 'declined' || inq.status === 'denied' || inq.status === 'revoked') && (
                               <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" /> ❌ Declined
                               </span>
@@ -796,7 +796,7 @@ export default function VetBoardingDashboardPage() {
                               Appointment Actions
                             </span>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              {inq.status === 'pending' && (
+                              {(!inq.status || inq.status === 'pending') && (
                                 <>
                                   <button
                                     onClick={() => handleInquiryAction(inq.id, 'accept')}
@@ -812,7 +812,7 @@ export default function VetBoardingDashboardPage() {
                                   </button>
                                 </>
                               )}
-                              {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                              {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
                                 <>
                                   <button
                                     onClick={() => handleInquiryAction(inq.id, 'complete')}
@@ -828,7 +828,7 @@ export default function VetBoardingDashboardPage() {
                                   </button>
                                 </>
                               )}
-                              {['completed', 'declined', 'no_show'].includes(inq.status) && (
+                              {['completed', 'declined', 'denied', 'revoked', 'no_show'].includes(inq.status) && (
                                 <span className="text-xs font-bold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-xl">
                                   Archived in History
                                 </span>
