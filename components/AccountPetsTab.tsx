@@ -354,14 +354,14 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                       <button
                         type="button"
                         onClick={() => { setQrPet(pet); setCopiedLink(false); }}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer btn-gloss"
                       >
                         <QrCode className="w-3.5 h-3.5 text-emerald-600" /> Partner QR
                       </button>
                       <button
                         type="button"
                         onClick={() => { setEditingPet(pet); setShowModal(true); }}
-                        className="px-3 py-1.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer btn-gloss"
                       >
                         <Edit2 className="w-3 h-3 text-gray-500" /> Edit
                       </button>
