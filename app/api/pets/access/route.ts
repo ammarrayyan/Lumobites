@@ -18,21 +18,21 @@ export async function GET(request: NextRequest) {
     // 1. Fetch vet inquiries
     const { data: vetInquiries } = await supabaseAdmin
       .from('vet_inquiries')
-      .select('id, clinic_id, owner_email, pet_id, status, created_at, vet_clinics(clinic_name, email, org_photo_url)')
+      .select('id, clinic_id, owner_email, status, created_at, vet_clinics(clinic_name, email, org_photo_url)')
       .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
     // 2. Fetch daycare inquiries
     const { data: daycareInquiries } = await supabaseAdmin
       .from('daycare_inquiries')
-      .select('id, daycare_id, owner_email, pet_id, status, created_at, pet_daycares(business_name, email, logo_url)')
+      .select('id, daycare_id, owner_email, status, created_at, pet_daycares(business_name, email, logo_url)')
       .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
     // 3. Fetch sitting requests
     const { data: sittingRequests } = await supabaseAdmin
       .from('sitting_requests')
-      .select('id, sitter_id, owner_email, pet_id, status, created_at, sitters(first_name, last_name, email, profile_photo_url)')
+      .select('id, sitter_id, owner_email, pet_id, status, created_at, sitters(name, email, photo_url)')
       .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     (sittingRequests || []).forEach(req => {
       const sitter = (req as any).sitters;
       const pet = petMap.get(req.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
-      const sitterName = sitter ? `${sitter.first_name} ${sitter.last_name || ''}`.trim() : 'Pet Sitter';
+      const sitterName = sitter?.name || 'Pet Sitter';
       const st = req.status || 'pending';
       unifiedGrants.push({
         id: req.id,

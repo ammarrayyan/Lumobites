@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       // Create new inquiry thread
       const { data: inquiry, error } = await supabaseAdmin
         .from('daycare_inquiries')
-        .insert({ daycare_id, owner_email: cleanEmail, pet_id: pet_id || null, status: 'pending' })
+        .insert({ daycare_id, owner_email: cleanEmail, status: 'pending' })
         .select('*')
         .single();
 
@@ -119,8 +119,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
       targetInquiry = inquiry;
-    } else if (pet_id) {
-      await supabaseAdmin.from('daycare_inquiries').update({ pet_id }).eq('id', existing.id);
     }
 
     // Grant or renew profile access if pet_id is provided

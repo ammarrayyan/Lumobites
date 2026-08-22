@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       // Create new inquiry thread
       const { data: inquiry, error } = await supabaseAdmin
         .from('vet_inquiries')
-        .insert({ clinic_id, owner_email: cleanEmail, pet_id: pet_id || null, status: 'pending' })
+        .insert({ clinic_id, owner_email: cleanEmail, status: 'pending' })
         .select('*')
         .single();
 
@@ -123,9 +123,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
       targetInquiry = inquiry;
-    } else if (pet_id) {
-      // Update pet_id if passed
-      await supabaseAdmin.from('vet_inquiries').update({ pet_id }).eq('id', existing.id);
     }
 
     // Grant or renew profile access if pet_id is provided
