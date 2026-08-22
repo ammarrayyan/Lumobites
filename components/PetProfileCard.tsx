@@ -491,6 +491,11 @@ export default function PetProfileCard({
                             <div className="flex items-center justify-between flex-wrap gap-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="font-bold text-gray-900 text-xs">{visit.reason}</span>
+                                {visit.weight_at_visit && (
+                                  <span className="text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-1.5 py-0.5 rounded-md">
+                                    ⚖️ {visit.weight_at_visit}
+                                  </span>
+                                )}
                                 {visit.added_by && (
                                   <span className="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 text-[10px] px-1.5 py-0.2 rounded-md">
                                     {visit.added_by}
@@ -505,6 +510,22 @@ export default function PetProfileCard({
                             <p className="text-gray-700 leading-relaxed text-xs">
                               {visit.summary}
                             </p>
+
+                            {visit.treatment_administered && (
+                              <div className="mt-1 bg-emerald-50/80 border border-emerald-200/80 p-2 rounded-md text-emerald-950 text-[11px] flex items-start gap-1.5">
+                                <span className="font-bold text-emerald-900 shrink-0">💉 Treatment:</span>
+                                <span className="leading-tight text-emerald-900">{visit.treatment_administered}</span>
+                              </div>
+                            )}
+
+                            {visit.next_visit_date && (
+                              <div className="mt-1 bg-blue-50/90 border border-blue-200/80 px-2.5 py-1.5 rounded-md text-blue-950 text-[11px] flex items-center justify-between">
+                                <span className="font-bold text-blue-900 flex items-center gap-1">
+                                  📅 Next Recommended Visit:
+                                </span>
+                                <strong className="font-extrabold text-blue-900">{visit.next_visit_date}</strong>
+                              </div>
+                            )}
 
                             {visit.follow_up_notes && (
                               <div className="mt-1 bg-amber-50/90 border border-amber-200/80 p-2 rounded-md text-amber-950 text-[11px] flex items-start gap-1.5">

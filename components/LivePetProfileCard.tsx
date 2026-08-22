@@ -32,7 +32,10 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [conditionDate, setConditionDate] = useState('');
   const [visitDate, setVisitDate] = useState('');
   const [visitReason, setVisitReason] = useState('');
+  const [visitWeight, setVisitWeight] = useState('');
   const [visitSummary, setVisitSummary] = useState('');
+  const [visitTreatment, setVisitTreatment] = useState('');
+  const [visitNextDate, setVisitNextDate] = useState('');
   const [visitFollowUp, setVisitFollowUp] = useState('');
 
   const fetchLiveProfile = async () => {
@@ -98,6 +101,9 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         visit_date: visitDate,
         reason: visitReason,
         summary: visitSummary,
+        weight_at_visit: visitWeight || undefined,
+        treatment_administered: visitTreatment || undefined,
+        next_visit_date: visitNextDate || undefined,
         follow_up_notes: visitFollowUp || undefined
       };
     }
@@ -122,7 +128,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         setVaxName(''); setVaxDateAdmin(''); setVaxDateExp('');
         setChipNumber('');
         setConditionName(''); setConditionDate('');
-        setVisitDate(''); setVisitReason(''); setVisitSummary(''); setVisitFollowUp('');
+        setVisitDate(''); setVisitReason(''); setVisitWeight(''); setVisitSummary(''); setVisitTreatment(''); setVisitNextDate(''); setVisitFollowUp('');
 
         setTimeout(() => {
           setActiveModal(null);
@@ -360,7 +366,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
               {/* VET VISIT LOG FORM */}
               {activeModal === 'vet_visit' && (
                 <div className="space-y-2.5">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <label className="font-bold text-gray-700 block mb-1">Visit Date *</label>
                       <input
@@ -374,15 +380,26 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
                       <label className="font-bold text-gray-700 block mb-1">Reason for Visit *</label>
                       <input
                         type="text"
-                        placeholder="e.g. Annual Exam, Limping Check"
+                        placeholder="e.g. Annual Exam, Limp"
                         value={visitReason}
                         onChange={(e) => setVisitReason(e.target.value)}
                         className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       />
                     </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Weight at Visit</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 48.5 lbs"
+                        value={visitWeight}
+                        onChange={(e) => setVisitWeight(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <label className="font-bold text-gray-700 block mb-1">Clinical Summary & Diagnosis *</label>
+                    <label className="font-bold text-gray-700 block mb-1">Clinical Summary & Observations *</label>
                     <textarea
                       rows={2}
                       placeholder="Brief clinical observations and findings..."
@@ -391,21 +408,44 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
                       className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
                     />
                   </div>
+
                   <div>
-                    <label className="font-bold text-gray-700 block mb-1">Optional Follow-Up Notes</label>
+                    <label className="font-bold text-gray-700 block mb-1">Treatment Administered</label>
                     <input
                       type="text"
-                      placeholder="e.g. Monitor for limping, recheck in 2 weeks"
-                      value={visitFollowUp}
-                      onChange={(e) => setVisitFollowUp(e.target.value)}
+                      placeholder="e.g. Administered 100ml SubQ fluids, Convenia injection"
+                      value={visitTreatment}
+                      onChange={(e) => setVisitTreatment(e.target.value)}
                       className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Next Recommended Visit Date</label>
+                      <input
+                        type="date"
+                        value={visitNextDate}
+                        onChange={(e) => setVisitNextDate(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-bold text-gray-700 block mb-1">Follow-Up Notes</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Recheck incision in 10 days"
+                        value={visitFollowUp}
+                        onChange={(e) => setVisitFollowUp(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
               <p className="text-[10px] text-gray-500 italic bg-gray-50 p-2 rounded-lg border border-gray-200">
-                ℹ️ Entry will be saved directly and tagged with <strong>"Added by [Clinic Name]"</strong>. Pet owner can view, edit, or delete if necessary.
+                ℹ️ Entry will be saved directly and tagged with <strong>"Added by [Clinic Name]"</strong>. This clinical entry is permanently verified and locked from pet owner mutation.
               </p>
 
               <div className="flex items-center justify-end gap-2 pt-2">

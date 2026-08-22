@@ -9,6 +9,9 @@ export interface VetVisitRecord {
   visit_date: string;
   reason: string;
   summary: string;
+  weight_at_visit?: string;
+  treatment_administered?: string;
+  next_visit_date?: string;
   follow_up_notes?: string;
   clinic_name: string;
   added_by: string;

@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const petPayload = packPetProfile({
+    let petPayload = packPetProfile({
       owner_email: cleanEmail,
       pet_name,
       pet_type,
@@ -135,6 +135,7 @@ export async function POST(request: NextRequest) {
       photo_url: processedPhotoUrls[0] || '',
       photo_urls: processedPhotoUrls,
       vaccination_records,
+      chronic_conditions: body.chronic_conditions,
       microchip_number,
       allergies,
       emergency_contact_name,
@@ -147,6 +148,80 @@ export async function POST(request: NextRequest) {
     let dbError = null;
 
     if (id) {
+      // 🔒 SERVER-SIDE TAMPER-PROOFING: Fetch existing pet and preserve all Vet-verified records
+      const { data: existingPet } = await supabaseAdmin
+        .from('owner_pets')
+        .select('*')
+        .eq('id', id)
+        .eq('owner_email', cleanEmail)
+        .maybeSingle();
+
+      if (existingPet) {
+        const unpackedExisting = unpackPetProfile(existingPet);
+
+        // 1. Preserve all Vet-added vaccinations
+        const existingVetVaccines = (unpackedExisting?.vaccination_records || []).filter(
+          (v: any) => v.added_by && v.added_by !== 'Owner Log' && v.added_by !== 'Added by Owner'
+        );
+        const submittedOwnerVaccines = (Array.isArray(vaccination_records) ? vaccination_records : []).filter(
+          (v: any) => !v.added_by || v.added_by === 'Owner Log' || v.added_by === 'Added by Owner'
+        );
+        const mergedVaccines = [...existingVetVaccines, ...submittedOwnerVaccines];
+
+        // 2. Preserve all Vet-added chronic conditions
+        const existingVetConditions = (unpackedExisting?.chronic_conditions || []).filter(
+          (c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner'
+        );
+        const submittedOwnerConditions = (Array.isArray(body.chronic_conditions) ? body.chronic_conditions : []).filter(
+          (c: any) => !c.added_by || c.added_by === 'Owner Log' || c.added_by === 'Added by Owner'
+        );
+        const mergedConditions = [...existingVetConditions, ...submittedOwnerConditions];
+
+        // 3. Preserve Vet-verified microchip if set by a clinic
+        let resolvedMicrochip = microchip_number;
+        let resolvedMicrochipAddedBy = 'Added by Owner';
+        if (
+          unpackedExisting?.microchip_added_by &&
+          unpackedExisting.microchip_added_by !== 'Added by Owner' &&
+          unpackedExisting.microchip_added_by !== 'Owner Log' &&
+          unpackedExisting.microchip_number
+        ) {
+          resolvedMicrochip = unpackedExisting.microchip_number;
+          resolvedMicrochipAddedBy = unpackedExisting.microchip_added_by;
+        }
+
+        // 4. Preserve all Vet Visit logs
+        const existingVetVisits = unpackedExisting?.vet_visits || [];
+
+        petPayload = packPetProfile({
+          owner_email: cleanEmail,
+          pet_name,
+          pet_type,
+          breed,
+          age,
+          weight,
+          gender,
+          spayed_neutered,
+          feeding_schedule,
+          medication,
+          behavior_notes,
+          vet_name,
+          vet_phone,
+          photo_url: processedPhotoUrls[0] || existingPet.photo_url || '',
+          photo_urls: processedPhotoUrls.length > 0 ? processedPhotoUrls : (unpackedExisting?.photo_urls || []),
+          vaccination_records: mergedVaccines,
+          chronic_conditions: mergedConditions,
+          vet_visits: existingVetVisits,
+          microchip_number: resolvedMicrochip,
+          microchip_added_by: resolvedMicrochipAddedBy,
+          allergies,
+          emergency_contact_name,
+          emergency_contact_phone,
+          insurance_provider,
+          insurance_policy_number
+        });
+      }
+
       // Update existing record
       const { data, error } = await supabaseAdmin
         .from('owner_pets')

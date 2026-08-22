@@ -866,20 +866,42 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                   </span>
                 </div>
 
-                <div className="p-5 sm:p-6 space-y-4">
+                <div className="p-5 sm:p-6 space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="font-bold text-gray-700 block mb-1">Microchip #</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="font-bold text-gray-700 block text-xs">Microchip #</label>
+                        {editingPet.microchip_added_by &&
+                         editingPet.microchip_added_by !== 'Added by Owner' &&
+                         editingPet.microchip_added_by !== 'Owner Log' && (
+                          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            🔒 {editingPet.microchip_added_by}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="text"
+                        disabled={
+                          !!(editingPet.microchip_added_by &&
+                          editingPet.microchip_added_by !== 'Added by Owner' &&
+                          editingPet.microchip_added_by !== 'Owner Log' &&
+                          editingPet.microchip_number)
+                        }
                         value={editingPet.microchip_number || ''}
                         onChange={e => setEditingPet({ ...editingPet, microchip_number: e.target.value })}
-                        className="w-full px-3.5 py-2.5 bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-sm text-[#2E2419] font-mono"
+                        className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-mono ${
+                          editingPet.microchip_added_by &&
+                          editingPet.microchip_added_by !== 'Added by Owner' &&
+                          editingPet.microchip_added_by !== 'Owner Log' &&
+                          editingPet.microchip_number
+                            ? 'bg-gray-100 border border-[#E2D5C8] text-gray-700 cursor-not-allowed opacity-90'
+                            : 'bg-[#FAF6F2] border border-[#E2D5C8] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 text-[#2E2419]'
+                        }`}
                         placeholder="e.g. 985141000123456"
                       />
                     </div>
                     <div>
-                      <label className="font-bold text-gray-700 block mb-1">Insurance Provider</label>
+                      <label className="font-bold text-gray-700 block mb-1 text-xs">Insurance Provider</label>
                       <input
                         type="text"
                         value={editingPet.insurance_provider || ''}
@@ -889,7 +911,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                       />
                     </div>
                     <div>
-                      <label className="font-bold text-gray-700 block mb-1">Insurance Policy #</label>
+                      <label className="font-bold text-gray-700 block mb-1 text-xs">Insurance Policy #</label>
                       <input
                         type="text"
                         value={editingPet.insurance_policy_number || ''}
@@ -900,104 +922,178 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                     </div>
                   </div>
 
-                  {/* Vaccination Records Dynamic List */}
+                  {/* Vaccination Records Section */}
                   <div className="space-y-3 pt-3 border-t border-[#EADBCE]">
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-[#2E2419] text-xs">Vaccination Records Log</span>
+                      <div>
+                        <span className="font-extrabold text-[#2E2419] text-xs block">Vaccination Records</span>
+                        <span className="text-[11px] text-gray-500">Vet-verified records are locked; add your own entries below.</span>
+                      </div>
                       <button
                         type="button"
                         onClick={addVaccineRow}
-                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
                       >
                         + Add Vaccine Record
                       </button>
                     </div>
 
-                    {(editingPet.vaccination_records || []).map((vax: any, vi) => (
-                      <div key={vi} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
-                        <input
-                          type="text"
-                          placeholder="Vaccine Name (e.g. Rabies 3-Yr, DHPP)"
-                          value={vax.name || vax.vaccine || ''}
-                          onChange={e => {
-                            const updated = [...(editingPet.vaccination_records || [])];
-                            updated[vi].name = e.target.value;
-                            setEditingPet({ ...editingPet, vaccination_records: updated });
-                          }}
-                          className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
-                        />
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="date"
-                            title="Date Administered"
-                            value={vax.date_administered || ''}
-                            onChange={e => {
-                              const updated = [...(editingPet.vaccination_records || [])];
-                              updated[vi].date_administered = e.target.value;
-                              setEditingPet({ ...editingPet, vaccination_records: updated });
-                            }}
-                            className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
-                          />
-                          <input
-                            type="date"
-                            title="Expiration Date"
-                            value={vax.expiration_date || ''}
-                            onChange={e => {
-                              const updated = [...(editingPet.vaccination_records || [])];
-                              updated[vi].expiration_date = e.target.value;
-                              setEditingPet({ ...editingPet, vaccination_records: updated });
-                            }}
-                            className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeVaccineRow(vi)}
-                            className="text-rose-500 hover:text-rose-700 font-bold px-2 py-1 bg-white border border-rose-200 rounded-lg cursor-pointer"
-                            title="Remove Record"
-                          >
-                            ✕
-                          </button>
-                        </div>
+                    {/* 1. Verified Clinic Vaccines (Read-Only) */}
+                    {(editingPet.vaccination_records || []).filter(
+                      (v: any) => v.added_by && v.added_by !== 'Owner Log' && v.added_by !== 'Added by Owner'
+                    ).length > 0 && (
+                      <div className="space-y-1.5 mb-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-900 block">
+                          🔒 Clinic Verified Vaccinations (Locked)
+                        </span>
+                        {(editingPet.vaccination_records || [])
+                          .filter((v: any) => v.added_by && v.added_by !== 'Owner Log' && v.added_by !== 'Added by Owner')
+                          .map((vax: any, vi: number) => (
+                            <div key={vi} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-emerald-50/70 border border-emerald-200/90 p-2.5 rounded-xl text-xs">
+                              <div>
+                                <span className="font-bold text-gray-900">{vax.name || vax.vaccine}</span>
+                                <div className="text-[11px] text-gray-600 mt-0.5">
+                                  Administered: <strong>{vax.date_administered || 'N/A'}</strong> • Expires: <strong className="text-emerald-800">{vax.expiration_date || 'N/A'}</strong>
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-semibold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
+                                {vax.added_by}
+                              </span>
+                            </div>
+                          ))}
                       </div>
-                    ))}
+                    )}
+
+                    {/* 2. Owner Logged Vaccines (Editable) */}
+                    {(editingPet.vaccination_records || []).filter(
+                      (v: any) => !v.added_by || v.added_by === 'Owner Log' || v.added_by === 'Added by Owner'
+                    ).length === 0 && (editingPet.vaccination_records || []).filter(
+                      (v: any) => v.added_by && v.added_by !== 'Owner Log' && v.added_by !== 'Added by Owner'
+                    ).length === 0 ? (
+                      <p className="text-xs text-gray-400 italic">No vaccination records logged yet.</p>
+                    ) : null}
+
+                    {(editingPet.vaccination_records || [])
+                      .map((vax: any, originalIndex: number) => ({ vax, originalIndex }))
+                      .filter(({ vax }) => !vax.added_by || vax.added_by === 'Owner Log' || vax.added_by === 'Added by Owner')
+                      .map(({ vax, originalIndex }) => (
+                        <div key={originalIndex} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
+                          <input
+                            type="text"
+                            placeholder="Vaccine Name (e.g. Rabies 3-Yr, DHPP)"
+                            value={vax.name || vax.vaccine || ''}
+                            onChange={e => {
+                              const updated = [...(editingPet.vaccination_records || [])];
+                              updated[originalIndex].name = e.target.value;
+                              setEditingPet({ ...editingPet, vaccination_records: updated });
+                            }}
+                            className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                          />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="date"
+                              title="Date Administered"
+                              value={vax.date_administered || ''}
+                              onChange={e => {
+                                const updated = [...(editingPet.vaccination_records || [])];
+                                updated[originalIndex].date_administered = e.target.value;
+                                setEditingPet({ ...editingPet, vaccination_records: updated });
+                              }}
+                              className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                            />
+                            <input
+                              type="date"
+                              title="Expiration Date"
+                              value={vax.expiration_date || ''}
+                              onChange={e => {
+                                const updated = [...(editingPet.vaccination_records || [])];
+                                updated[originalIndex].expiration_date = e.target.value;
+                                setEditingPet({ ...editingPet, vaccination_records: updated });
+                              }}
+                              className="px-2 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeVaccineRow(originalIndex)}
+                              className="text-rose-500 hover:text-rose-700 font-bold px-2.5 py-1.5 bg-white border border-rose-200 rounded-lg cursor-pointer"
+                              title="Remove Record"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                   </div>
 
-                  {/* Chronic Conditions & Diagnoses */}
+                  {/* Chronic Conditions & Diagnoses Section */}
                   <div className="space-y-3 pt-3 border-t border-[#EADBCE]">
                     <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-[#2E2419] text-xs">Chronic Conditions & Diagnoses</span>
+                      <div>
+                        <span className="font-extrabold text-[#2E2419] text-xs block">Chronic Conditions & Diagnoses</span>
+                        <span className="text-[11px] text-gray-500">Clinical diagnoses are locked; add personal health observations below.</span>
+                      </div>
                       <button
                         type="button"
                         onClick={addConditionRow}
-                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
                       >
                         + Add Diagnosis
                       </button>
                     </div>
 
-                    {((editingPet as any).chronic_conditions || []).map((cond: any, ci: number) => (
-                      <div key={ci} className="flex items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
-                        <input
-                          type="text"
-                          placeholder="Condition (e.g. Diabetes, Hip Dysplasia, Epilepsy)"
-                          value={cond.condition || ''}
-                          onChange={e => {
-                            const updated = [...((editingPet as any).chronic_conditions || [])];
-                            updated[ci].condition = e.target.value;
-                            setEditingPet({ ...editingPet, chronic_conditions: updated } as any);
-                          }}
-                          className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeConditionRow(ci)}
-                          className="text-rose-500 hover:text-rose-700 font-bold px-2 py-1 bg-white border border-rose-200 rounded-lg cursor-pointer"
-                          title="Remove Diagnosis"
-                        >
-                          ✕
-                        </button>
+                    {/* 1. Verified Clinical Diagnoses (Read-Only) */}
+                    {((editingPet as any).chronic_conditions || []).filter(
+                      (c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner'
+                    ).length > 0 && (
+                      <div className="space-y-1.5 mb-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-900 block">
+                          🔒 Clinical Diagnoses (Locked)
+                        </span>
+                        {((editingPet as any).chronic_conditions || [])
+                          .filter((c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner')
+                          .map((cond: any, ci: number) => (
+                            <div key={ci} className="flex items-center justify-between bg-blue-50/70 border border-blue-200/90 p-2.5 rounded-xl text-xs">
+                              <div>
+                                <span className="font-bold text-gray-900">{cond.condition}</span>
+                                <div className="text-[11px] text-gray-500 mt-0.5">
+                                  Diagnosed: {cond.date_diagnosed || cond.date_added || 'N/A'}
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-semibold text-blue-800 bg-white px-2 py-0.5 rounded-md border border-blue-200 shrink-0">
+                                {cond.added_by}
+                              </span>
+                            </div>
+                          ))}
                       </div>
-                    ))}
+                    )}
+
+                    {/* 2. Owner Logged Conditions (Editable) */}
+                    {((editingPet as any).chronic_conditions || [])
+                      .map((cond: any, originalIndex: number) => ({ cond, originalIndex }))
+                      .filter(({ cond }) => !cond.added_by || cond.added_by === 'Owner Log' || cond.added_by === 'Added by Owner')
+                      .map(({ cond, originalIndex }) => (
+                        <div key={originalIndex} className="flex items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
+                          <input
+                            type="text"
+                            placeholder="Condition (e.g. Diabetes, Hip Dysplasia, Epilepsy)"
+                            value={cond.condition || ''}
+                            onChange={e => {
+                              const updated = [...((editingPet as any).chronic_conditions || [])];
+                              updated[originalIndex].condition = e.target.value;
+                              setEditingPet({ ...editingPet, chronic_conditions: updated } as any);
+                            }}
+                            className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeConditionRow(originalIndex)}
+                            className="text-rose-500 hover:text-rose-700 font-bold px-2.5 py-1.5 bg-white border border-rose-200 rounded-lg cursor-pointer"
+                            title="Remove Diagnosis"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
                   </div>
 
                   {/* Photo upload section */}
