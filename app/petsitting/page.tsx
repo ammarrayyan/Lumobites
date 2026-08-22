@@ -4084,7 +4084,7 @@ export function PetSittingContent() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                  {isOwnerPro ? (
+                                  {reqEmail ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
@@ -4093,10 +4093,10 @@ export function PetSittingContent() {
                                     </button>
                                   ) : (
                                     <button
-                                      onClick={(e) => { e.stopPropagation(); setShowProPerksModal(true); }}
-                                      className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer flex items-center justify-center gap-1.5"
+                                      onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
+                                      className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer btn-gloss"
                                     >
-                                      <Crown className="w-4 h-4 text-amber-500" /> Daycare Inquiries — Pro Feature
+                                      Sign in to Inquire
                                     </button>
                                   )}
                                 </div>
@@ -4384,7 +4384,7 @@ export function PetSittingContent() {
                                 </div>
                               </div>
                               <div className="mt-4">
-                                {isOwnerPro ? (
+                                {reqEmail ? (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
