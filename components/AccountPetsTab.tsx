@@ -37,7 +37,6 @@ interface Pet {
   emergency_contact_phone?: string;
   insurance_provider?: string;
   insurance_policy_number?: string;
-  chronic_conditions?: { id?: string; condition: string; notes?: string }[];
 }
 
 interface AccessGrant {
@@ -239,25 +238,6 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
     const current = [...(editingPet.vaccination_records || [])];
     current.splice(index, 1);
     setEditingPet({ ...editingPet, vaccination_records: current });
-  };
-
-  const addConditionRow = () => {
-    if (!editingPet) return;
-    const current = (editingPet as any).chronic_conditions || [];
-    setEditingPet({
-      ...editingPet,
-      chronic_conditions: [
-        ...current,
-        { condition: '' },
-      ],
-    } as any);
-  };
-
-  const removeConditionRow = (index: number) => {
-    if (!editingPet) return;
-    const current = [...((editingPet as any).chronic_conditions || [])];
-    current.splice(index, 1);
-    setEditingPet({ ...editingPet, chronic_conditions: current } as any);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1021,77 +1001,6 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                               ✕
                             </button>
                           </div>
-                        </div>
-                      ))}
-                  </div>
-
-                  {/* Chronic Conditions & Diagnoses Section */}
-                  <div className="space-y-3 pt-3 border-t border-[#EADBCE]">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-extrabold text-[#2E2419] text-xs block">Chronic Conditions & Diagnoses</span>
-                        <span className="text-[11px] text-gray-500">Clinical diagnoses are locked; add personal health observations below.</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addConditionRow}
-                        className="text-xs font-bold text-[#8B5E3C] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
-                      >
-                        + Add Diagnosis
-                      </button>
-                    </div>
-
-                    {/* 1. Verified Clinical Diagnoses (Read-Only) */}
-                    {((editingPet as any).chronic_conditions || []).filter(
-                      (c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner'
-                    ).length > 0 && (
-                      <div className="space-y-1.5 mb-2">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-900 block">
-                          🔒 Clinical Diagnoses (Locked)
-                        </span>
-                        {((editingPet as any).chronic_conditions || [])
-                          .filter((c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner')
-                          .map((cond: any, ci: number) => (
-                            <div key={ci} className="flex items-center justify-between bg-blue-50/70 border border-blue-200/90 p-2.5 rounded-xl text-xs">
-                              <div>
-                                <span className="font-bold text-gray-900">{cond.condition}</span>
-                                <div className="text-[11px] text-gray-500 mt-0.5">
-                                  Diagnosed: {cond.date_diagnosed || cond.date_added || 'N/A'}
-                                </div>
-                              </div>
-                              <span className="text-[10px] font-semibold text-blue-800 bg-white px-2 py-0.5 rounded-md border border-blue-200 shrink-0">
-                                {cond.added_by}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-
-                    {/* 2. Owner Logged Conditions (Editable) */}
-                    {((editingPet as any).chronic_conditions || [])
-                      .map((cond: any, originalIndex: number) => ({ cond, originalIndex }))
-                      .filter(({ cond }) => !cond.added_by || cond.added_by === 'Owner Log' || cond.added_by === 'Added by Owner')
-                      .map(({ cond, originalIndex }) => (
-                        <div key={originalIndex} className="flex items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
-                          <input
-                            type="text"
-                            placeholder="Condition (e.g. Diabetes, Hip Dysplasia, Epilepsy)"
-                            value={cond.condition || ''}
-                            onChange={e => {
-                              const updated = [...((editingPet as any).chronic_conditions || [])];
-                              updated[originalIndex].condition = e.target.value;
-                              setEditingPet({ ...editingPet, chronic_conditions: updated } as any);
-                            }}
-                            className="flex-1 px-3 py-2 bg-white border border-[#DFD3C7] rounded-lg text-xs text-[#2E2419]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeConditionRow(originalIndex)}
-                            className="text-rose-500 hover:text-rose-700 font-bold px-2.5 py-1.5 bg-white border border-rose-200 rounded-lg cursor-pointer"
-                            title="Remove Diagnosis"
-                          >
-                            ✕
-                          </button>
                         </div>
                       ))}
                   </div>

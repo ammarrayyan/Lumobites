@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         pet: unpackedPet,
       });
     } else {
-      // Care-Level Access Only: Strip medical credentials (vaccination_records, microchip, insurance, chronic_conditions)
+      // Care-Level Access Only: Strip medical credentials (vaccination_records, microchip, insurance, vet visits)
       const careLevelPet = {
         id: unpackedPet.id,
         owner_email: unpackedPet.owner_email,
@@ -81,7 +81,6 @@ export async function GET(request: NextRequest) {
         microchip_added_by: undefined,
         insurance_provider: undefined,
         insurance_policy_number: undefined,
-        chronic_conditions: undefined,
         vet_visits: undefined,
       };
 

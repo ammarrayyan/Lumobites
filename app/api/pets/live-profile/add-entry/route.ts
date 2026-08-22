@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ALLOWED_ENTRIES = ['vaccination', 'microchip', 'chronic_condition', 'vet_visit'];
+    const ALLOWED_ENTRIES = ['vaccination', 'microchip', 'vet_visit'];
     if (!ALLOWED_ENTRIES.includes(entry_type)) {
       return NextResponse.json(
-        { error: 'Forbidden: Vets may only add vaccination records, microchip numbers, chronic conditions, or vet visit logs' },
+        { error: 'Forbidden: Vets may only add vaccination records, microchip numbers, or vet visit logs' },
         { status: 400 }
       );
     }
@@ -74,7 +74,6 @@ export async function POST(request: NextRequest) {
       owner_behavior_notes: '',
       vaccinations: [],
       microchip: null,
-      chronic_conditions: [],
       vet_visits: []
     };
 
@@ -86,7 +85,6 @@ export async function POST(request: NextRequest) {
             owner_behavior_notes: parsed.owner_behavior_notes || '',
             vaccinations: Array.isArray(parsed.vaccinations) ? parsed.vaccinations : [],
             microchip: parsed.microchip || null,
-            chronic_conditions: Array.isArray(parsed.chronic_conditions) ? parsed.chronic_conditions : [],
             vet_visits: Array.isArray(parsed.vet_visits) ? parsed.vet_visits : []
           };
         } else {
@@ -135,18 +133,6 @@ export async function POST(request: NextRequest) {
         added_by: addedByLabel,
         date_added: timestamp
       };
-    } else if (entry_type === 'chronic_condition') {
-      if (!data.condition) {
-        return NextResponse.json({ error: 'Chronic condition requires condition name' }, { status: 400 });
-      }
-      const newCondition = {
-        id: `cond_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-        condition: String(data.condition).trim(),
-        date_diagnosed: data.date_diagnosed ? String(data.date_diagnosed).trim() : timestamp,
-        added_by: addedByLabel,
-        date_added: timestamp
-      };
-      parsedNotes.chronic_conditions.push(newCondition);
     } else if (entry_type === 'vet_visit') {
       if (!data.visit_date || !data.reason || !data.summary) {
         return NextResponse.json({ error: 'Vet visit requires visit_date, reason, and summary' }, { status: 400 });

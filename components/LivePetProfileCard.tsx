@@ -18,7 +18,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [accessStatus, setAccessStatus] = useState<'active' | 'pending' | 'denied' | 'revoked' | 'none' | null>(null);
 
   // Vet Add Entry Modal States
-  const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit' | null>(null);
+  const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'vet_visit' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -28,8 +28,6 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
   const [vaxDateAdmin, setVaxDateAdmin] = useState('');
   const [vaxDateExp, setVaxDateExp] = useState('');
   const [chipNumber, setChipNumber] = useState('');
-  const [conditionName, setConditionName] = useState('');
-  const [conditionDate, setConditionDate] = useState('');
   const [visitDate, setVisitDate] = useState('');
   const [visitReason, setVisitReason] = useState('');
   const [visitWeight, setVisitWeight] = useState('');
@@ -64,7 +62,7 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
     fetchLiveProfile();
   }, [petId, partnerId, partnerType]);
 
-  const handleAddMedicalEntry = async (entryType: 'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit') => {
+  const handleAddMedicalEntry = async (entryType: 'vaccination' | 'microchip' | 'vet_visit') => {
     setSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(null);
@@ -84,13 +82,6 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         return;
       }
       payloadData = { number: chipNumber };
-    } else if (entryType === 'chronic_condition') {
-      if (!conditionName) {
-        setSubmitError('Condition / diagnosis name is required');
-        setSubmitting(false);
-        return;
-      }
-      payloadData = { condition: conditionName, date_diagnosed: conditionDate };
     } else if (entryType === 'vet_visit') {
       if (!visitDate || !visitReason || !visitSummary) {
         setSubmitError('Visit date, reason for visit, and clinical summary are required');
@@ -127,7 +118,6 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
         // Reset inputs
         setVaxName(''); setVaxDateAdmin(''); setVaxDateExp('');
         setChipNumber('');
-        setConditionName(''); setConditionDate('');
         setVisitDate(''); setVisitReason(''); setVisitWeight(''); setVisitSummary(''); setVisitTreatment(''); setVisitNextDate(''); setVisitFollowUp('');
 
         setTimeout(() => {
@@ -335,31 +325,6 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
                     onChange={(e) => setChipNumber(e.target.value)}
                     className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
                   />
-                </div>
-              )}
-
-              {/* CHRONIC CONDITION FORM */}
-              {activeModal === 'chronic_condition' && (
-                <div className="space-y-2.5">
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Condition / Diagnosis Name *</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Chronic Kidney Disease, Hip Dysplasia"
-                      value={conditionName}
-                      onChange={(e) => setConditionName(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-gray-700 block mb-1">Date Diagnosed</label>
-                    <input
-                      type="date"
-                      value={conditionDate}
-                      onChange={(e) => setConditionDate(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
                 </div>
               )}
 

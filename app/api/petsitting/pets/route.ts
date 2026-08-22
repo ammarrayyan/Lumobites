@@ -135,7 +135,6 @@ export async function POST(request: NextRequest) {
       photo_url: processedPhotoUrls[0] || '',
       photo_urls: processedPhotoUrls,
       vaccination_records,
-      chronic_conditions: body.chronic_conditions,
       microchip_number,
       allergies,
       emergency_contact_name,
@@ -168,16 +167,7 @@ export async function POST(request: NextRequest) {
         );
         const mergedVaccines = [...existingVetVaccines, ...submittedOwnerVaccines];
 
-        // 2. Preserve all Vet-added chronic conditions
-        const existingVetConditions = (unpackedExisting?.chronic_conditions || []).filter(
-          (c: any) => c.added_by && c.added_by !== 'Owner Log' && c.added_by !== 'Added by Owner'
-        );
-        const submittedOwnerConditions = (Array.isArray(body.chronic_conditions) ? body.chronic_conditions : []).filter(
-          (c: any) => !c.added_by || c.added_by === 'Owner Log' || c.added_by === 'Added by Owner'
-        );
-        const mergedConditions = [...existingVetConditions, ...submittedOwnerConditions];
-
-        // 3. Preserve Vet-verified microchip if set by a clinic
+        // 2. Preserve Vet-verified microchip if set by a clinic
         let resolvedMicrochip = microchip_number;
         let resolvedMicrochipAddedBy = 'Added by Owner';
         if (
@@ -190,7 +180,7 @@ export async function POST(request: NextRequest) {
           resolvedMicrochipAddedBy = unpackedExisting.microchip_added_by;
         }
 
-        // 4. Preserve all Vet Visit logs
+        // 3. Preserve all Vet Visit logs
         const existingVetVisits = unpackedExisting?.vet_visits || [];
 
         petPayload = packPetProfile({
@@ -210,7 +200,6 @@ export async function POST(request: NextRequest) {
           photo_url: processedPhotoUrls[0] || existingPet.photo_url || '',
           photo_urls: processedPhotoUrls.length > 0 ? processedPhotoUrls : (unpackedExisting?.photo_urls || []),
           vaccination_records: mergedVaccines,
-          chronic_conditions: mergedConditions,
           vet_visits: existingVetVisits,
           microchip_number: resolvedMicrochip,
           microchip_added_by: resolvedMicrochipAddedBy,

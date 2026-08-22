@@ -28,18 +28,14 @@ export interface VaccineRecord {
   notes?: string;
 }
 
-export interface ChronicCondition {
-  condition: string;
-  date_diagnosed?: string;
-  date_added?: string;
-  added_by?: string;
-}
-
 export interface VetVisitRecord {
   id?: string;
   visit_date: string;
   reason: string;
   summary: string;
+  weight_at_visit?: string;
+  treatment_administered?: string;
+  next_visit_date?: string;
   follow_up_notes?: string;
   clinic_name?: string;
   added_by?: string;
@@ -71,7 +67,6 @@ export interface PetProfileData {
   insurance_provider?: string;
   insurance_policy_number?: string;
   vaccination_records?: VaccineRecord[];
-  chronic_conditions?: ChronicCondition[];
   vet_visits?: VetVisitRecord[];
 }
 
@@ -81,7 +76,7 @@ export interface PetProfileCardProps {
   layout?: 'card' | 'compact' | 'full';
   headerTitle?: string;
   actions?: React.ReactNode;
-  onAddMedicalEntry?: (entryType: 'vaccination' | 'microchip' | 'chronic_condition' | 'vet_visit') => void;
+  onAddMedicalEntry?: (entryType: 'vaccination' | 'microchip' | 'vet_visit') => void;
   className?: string;
   collapsible?: boolean;
   defaultExpanded?: boolean;
@@ -116,7 +111,6 @@ export default function PetProfileCard({
   let parsedVaccinations: VaccineRecord[] = Array.isArray(pet.vaccination_records) ? pet.vaccination_records : [];
   let parsedMicrochip: string | undefined = pet.microchip_number;
   let parsedMicrochipAddedBy: string | undefined = pet.microchip_added_by;
-  let parsedChronicConditions: ChronicCondition[] = Array.isArray(pet.chronic_conditions) ? pet.chronic_conditions : [];
   let parsedVetVisits: VetVisitRecord[] = Array.isArray(pet.vet_visits) ? pet.vet_visits : [];
 
   if (pet.behavior_notes && pet.behavior_notes.trim().startsWith('{')) {
@@ -129,9 +123,6 @@ export default function PetProfileCard({
         if (parsed.microchip) {
           parsedMicrochip = parsed.microchip.number || parsedMicrochip;
           parsedMicrochipAddedBy = parsed.microchip.added_by || parsedMicrochipAddedBy;
-        }
-        if (Array.isArray(parsed.chronic_conditions) && parsedChronicConditions.length === 0) {
-          parsedChronicConditions = parsed.chronic_conditions;
         }
         if (Array.isArray(parsed.vet_visits) && parsedVetVisits.length === 0) {
           parsedVetVisits = parsed.vet_visits;
@@ -421,50 +412,6 @@ export default function PetProfileCard({
                     <p className="text-[11px] text-gray-400 italic">No vaccination records on file.</p>
                   )}
                 </div>
-
-                {/* Chronic Conditions & Diagnoses */}
-                {(isVet || parsedChronicConditions.length > 0) && (
-                  <div className="bg-white p-3 rounded-lg border border-emerald-100 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-gray-900 text-xs flex items-center gap-1.5">
-                        <HeartPulse className="w-3.5 h-3.5 text-blue-600" /> Chronic Conditions & Clinical Notes
-                      </span>
-                      {isVet && onAddMedicalEntry && (
-                        <button
-                          type="button"
-                          onClick={() => onAddMedicalEntry('chronic_condition')}
-                          className="bg-blue-600 text-white hover:bg-blue-700 font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
-                        >
-                          <Plus className="w-3 h-3" /> Add Diagnosis
-                        </button>
-                      )}
-                    </div>
-
-                    {parsedChronicConditions.length > 0 ? (
-                      <div className="space-y-1.5 mt-2">
-                        {parsedChronicConditions.map((cond, i) => (
-                          <div key={i} className="bg-stone-50 p-2 rounded-lg border border-stone-200/70 text-[11px]">
-                            <div className="flex items-center justify-between font-bold text-gray-900">
-                              <span>{cond.condition}</span>
-                              <span className="text-[10px] text-gray-500 font-medium">
-                                Diagnosed: {cond.date_diagnosed || cond.date_added || 'N/A'}
-                              </span>
-                            </div>
-                            {cond.added_by && (
-                              <div className="mt-0.5">
-                                <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-100 text-[10px] px-1.5 py-0.2 rounded-md">
-                                  {cond.added_by}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-gray-400 italic mt-1">No chronic conditions recorded.</p>
-                    )}
-                  </div>
-                )}
 
                 {/* 🏥 Vet Visit History & Follow-Up Notes */}
                 {(isVet || parsedVetVisits.length > 0) && (
