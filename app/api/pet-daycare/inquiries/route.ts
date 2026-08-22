@@ -34,8 +34,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Fetch pets for all owner emails in these inquiries
+    const ownerEmails = [...new Set((inquiries || []).map((i: any) => (i.owner_email || '').toLowerCase().trim()).filter(Boolean))];
+    const { data: ownerPets } = ownerEmails.length > 0
+      ? await supabaseAdmin.from('owner_pets').select('id, owner_email, pet_name, pet_type, photo_url').in('owner_email', ownerEmails)
+      : { data: [] };
+
+    const petByEmail = new Map<string, any>();
+    (ownerPets || []).forEach((p: any) => {
+      const em = (p.owner_email || '').toLowerCase().trim();
+      if (!petByEmail.has(em)) {
+        petByEmail.set(em, p);
+      }
+    });
+
     const enrichedInquiries = await Promise.all(
       (inquiries || []).map(async (inq: any) => {
+        const cleanOwner = (inq.owner_email || '').toLowerCase().trim();
+        const pet = petByEmail.get(cleanOwner);
         const daycareEmail = inq.pet_daycares?.email?.toLowerCase().trim();
         const { data: msgs } = await supabaseAdmin
           .from('messages')
@@ -62,6 +78,10 @@ export async function GET(request: NextRequest) {
 
         return {
           ...inq,
+          pet_id: pet?.id || null,
+          pet_name: pet?.pet_name || null,
+          pet_type: pet?.pet_type || null,
+          pet_photo: pet?.photo_url || null,
           unread_count: unreadCount,
           daycare_replied: daycareReplied,
           latest_message: latestMessage,

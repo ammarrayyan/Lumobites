@@ -4331,6 +4331,16 @@ export function PetSittingContent() {
                         })();
 
                         const actionButtons = (() => {
+                          if (req.partner_type === 'vet' || req.partner_type === 'daycare') {
+                            return (
+                              <button
+                                onClick={() => router.push(`/petsitting/messages/${req.id}`)}
+                                className="w-full sm:w-auto bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5 text-white" /> Open Chat
+                              </button>
+                            );
+                          }
                           if (['completed', 'declined', 'cancelled', 'no_show'].includes(req.status)) {
                             return (
                               <button onClick={() => handleRequestAgain(req)} className="w-full sm:w-auto bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors cursor-pointer">
@@ -4356,6 +4366,8 @@ export function PetSittingContent() {
                           );
                         })();
 
+                        const partnerCategoryLabel = req.partner_type === 'vet' ? '🏥 Vet Clinic' : req.partner_type === 'daycare' ? '🏢 Daycare' : 'Sitter';
+
                         return (
                           <div 
                             key={req.id} 
@@ -4364,14 +4376,18 @@ export function PetSittingContent() {
                           >
                             {/* Header: booking number + status */}
                             <div className="flex items-center justify-between px-4 py-3 bg-[#FAF6F4] border-b border-[#E8DDD4]">
-                              <span className="text-xs font-bold text-[#4A3E3D]">{req.booking_number || `Booking #${req.id.substring(0, 8)}`}</span>
+                              <span className="text-xs font-bold text-[#4A3E3D] flex items-center gap-2">
+                                {req.partner_type === 'vet' && <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2 py-0.5 rounded-full">🏥 Vet Boarding</span>}
+                                {req.partner_type === 'daycare' && <span className="text-[10px] bg-amber-100 text-amber-900 font-extrabold px-2 py-0.5 rounded-full">🏢 Daycare</span>}
+                                {req.booking_number || `Booking #${req.id.substring(0, 8)}`}
+                              </span>
                               {statusBadge}
                             </div>
 
                             {/* Body: 2-col on mobile, 4-col on sm+ */}
                             <div className="px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                               <div>
-                                <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Sitter</p>
+                                <p className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">{partnerCategoryLabel}</p>
                                 <div className="flex items-center gap-2">
                                   {req.sitters?.photo_url || req.sitter_photo_url ? (
                                     <img src={req.sitters?.photo_url || req.sitter_photo_url} alt={sitterDisplayName} className="w-7 h-7 rounded-full object-cover border border-[#E8DDD4] flex-shrink-0 pointer-events-none" />

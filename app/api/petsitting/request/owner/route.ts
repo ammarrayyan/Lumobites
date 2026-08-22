@@ -10,76 +10,109 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Owner email is required' }, { status: 400 });
     }
 
-    const { data, error } = await supabaseAdmin
+    const cleanEmail = email.toLowerCase().trim();
+
+    // 1. Fetch Sitting Requests
+    const { data: sitRequests, error: sitErr } = await supabaseAdmin
       .from('sitting_requests')
       .select('*, sitters(name, email, phone_number, phone_visible, photo_url)')
-      .eq('owner_email', email.toLowerCase().trim())
+      .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('[Owner Requests GET] Supabase Error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (sitErr) {
+      console.error('[Owner Requests GET] Sitting Error:', sitErr);
     }
 
-    const isBookingDateActive = (datesStr: string): boolean => {
-      if (!datesStr) return false;
-      try {
-        let startDateStr = '';
-        let endDateStr = '';
-        
-        const cleanDates = datesStr.replace(/\s+/g, ' ');
-        if (cleanDates.includes('→')) {
-          const parts = cleanDates.split('→');
-          startDateStr = parts[0].trim();
-          endDateStr = parts[1].trim();
-        } else if (cleanDates.includes('->')) {
-          const parts = cleanDates.split('->');
-          startDateStr = parts[0].trim();
-          endDateStr = parts[1].trim();
-        } else if (cleanDates.includes('-')) {
-          const parts = cleanDates.split('-');
-          if (parts.length === 2 && parts[0].length > 4) {
-            startDateStr = parts[0].trim();
-            endDateStr = parts[1].trim();
-          } else {
-            startDateStr = cleanDates.trim();
-            endDateStr = cleanDates.trim();
-          }
-        } else {
-          startDateStr = cleanDates.trim();
-          endDateStr = cleanDates.trim();
-        }
-        
-        const startDate = new Date(startDateStr);
-        const endDate = new Date(endDateStr);
-        
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          return false;
-        }
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(0, 0, 0, 0);
-        
-        return today >= startDate && today <= endDate;
-      } catch (e) {
-        return false;
-      }
-    };
+    // 2. Fetch Vet Boarding Inquiries
+    const { data: vetInquiries, error: vetErr } = await supabaseAdmin
+      .from('vet_inquiries')
+      .select('*, vet_clinics(id, clinic_name, email, org_photo_url, city, state)')
+      .eq('owner_email', cleanEmail)
+      .order('created_at', { ascending: false });
 
-    const requests = (data || []).map((req: any) => {
+    if (vetErr) {
+      console.error('[Owner Requests GET] Vet Error:', vetErr);
+    }
+
+    // 3. Fetch Daycare Inquiries
+    const { data: dayInquiries, error: dayErr } = await supabaseAdmin
+      .from('daycare_inquiries')
+      .select('*, pet_daycares(id, business_name, email, logo_url, city, state)')
+      .eq('owner_email', cleanEmail)
+      .order('created_at', { ascending: false });
+
+    if (dayErr) {
+      console.error('[Owner Requests GET] Daycare Error:', dayErr);
+    }
+
+    // 4. Fetch Owner Pets for metadata resolution
+    const { data: ownerPets } = await supabaseAdmin
+      .from('owner_pets')
+      .select('id, pet_name, pet_type, photo_url')
+      .eq('owner_email', cleanEmail);
+
+    const primaryPet = ownerPets && ownerPets.length > 0 ? ownerPets[0] : null;
+
+    // Build unified requests list
+    const combined: any[] = [];
+
+    // Sitting requests
+    (sitRequests || []).forEach((req: any) => {
       const sitter = req.sitters || {};
-      return {
+      combined.push({
         ...req,
+        partner_type: 'sitter',
         sitter_name: sitter.name || 'Local Sitter',
         sitter_photo_url: sitter.photo_url || '',
         sitter_email: '***@***.***',
         sitter_phone: null
-      };
+      });
     });
 
-    return NextResponse.json({ requests });
+    // Vet inquiries
+    (vetInquiries || []).forEach((inq: any) => {
+      const clinic = inq.vet_clinics || {};
+      combined.push({
+        id: inq.id,
+        partner_type: 'vet',
+        booking_number: `Boarding Inquiry #${inq.id.substring(0, 8)}`,
+        status: inq.status || 'pending',
+        created_at: inq.created_at,
+        dates: 'Veterinary Boarding Inquiry',
+        sitter_name: clinic.clinic_name || 'Vet Clinic',
+        sitter_photo_url: clinic.org_photo_url || '',
+        pet_name: primaryPet?.pet_name || 'Pet',
+        pet_type: primaryPet?.pet_type || 'dog',
+        clinic_id: inq.clinic_id,
+        clinic_city: clinic.city,
+        clinic_state: clinic.state,
+      });
+    });
+
+    // Daycare inquiries
+    (dayInquiries || []).forEach((inq: any) => {
+      const daycare = inq.pet_daycares || {};
+      combined.push({
+        id: inq.id,
+        partner_type: 'daycare',
+        booking_number: `Daycare Inquiry #${inq.id.substring(0, 8)}`,
+        status: inq.status || 'pending',
+        created_at: inq.created_at,
+        dates: 'Pet Daycare Inquiry',
+        sitter_name: daycare.business_name || 'Pet Daycare',
+        sitter_photo_url: daycare.logo_url || '',
+        pet_name: primaryPet?.pet_name || 'Pet',
+        pet_type: primaryPet?.pet_type || 'dog',
+        daycare_id: inq.daycare_id,
+        daycare_city: daycare.city,
+        daycare_state: daycare.state,
+      });
+    });
+
+    // Sort all by created_at descending
+    combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    return NextResponse.json({ requests: combined });
   } catch (err: any) {
     console.error('[Owner Requests GET] Error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { createPortal } from 'react-dom';
-import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock, ArrowLeft } from 'lucide-react';
+import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock, ArrowLeft, MessageSquare } from 'lucide-react';
 import PetProfileCard from '@/components/PetProfileCard';
 
 interface VaccineRecord {
@@ -432,7 +433,14 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
+                          <Link
+                            href={`/petsitting/messages/${grant.id}`}
+                            className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl border border-[#DFD3C7] bg-white hover:bg-[#FAF6F2] text-[#4A3E3D] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 no-underline"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                            View Chat
+                          </Link>
                           <button
                             type="button"
                             onClick={() => handleAccessDecision(grant.id, 'deny', grant.partner_type, grant.partner_name)}
@@ -499,13 +507,22 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                           </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleAccessDecision(grant.id, 'revoke', grant.partner_type, grant.partner_name)}
-                          className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
-                        >
-                          Revoke Access
-                        </button>
+                        <div className="flex items-center gap-2 self-end sm:self-center">
+                          <Link
+                            href={`/petsitting/messages/${grant.id}`}
+                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all bg-[#FAF6F2] hover:bg-[#F0E6DD] text-[#4A3E3D] border border-[#DFD3C7] flex items-center gap-1.5 no-underline"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                            View Chat
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleAccessDecision(grant.id, 'revoke', grant.partner_type, grant.partner_name)}
+                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                          >
+                            Revoke Access
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -546,13 +563,22 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                           </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleAccessDecision(grant.id, 'restore', grant.partner_type, grant.partner_name)}
-                          className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200"
-                        >
-                          Restore Access
-                        </button>
+                        <div className="flex items-center gap-2 self-end sm:self-center">
+                          <Link
+                            href={`/petsitting/messages/${grant.id}`}
+                            className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all bg-white hover:bg-[#FAF6F2] text-[#4A3E3D] border border-gray-300 flex items-center gap-1.5 no-underline"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                            View Chat
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleAccessDecision(grant.id, 'restore', grant.partner_type, grant.partner_name)}
+                            className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200"
+                          >
+                            Restore Access
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
