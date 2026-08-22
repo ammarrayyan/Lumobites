@@ -65,6 +65,33 @@ export default function VetBoardingDashboardPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [activeInquiry, setActiveInquiry] = useState<any>(null);
 
+  const handleInquiryAction = async (inqId: string, action: 'accept' | 'decline' | 'complete' | 'no_show') => {
+    const actionLabels: Record<string, string> = {
+      accept: 'accept this boarding inquiry',
+      decline: 'decline this boarding inquiry',
+      complete: 'mark this stay as completed',
+      no_show: 'mark this appointment as no-show'
+    };
+    if (!confirm(`Are you sure you want to ${actionLabels[action]}?`)) return;
+
+    try {
+      const res = await fetch('/api/vet-boarding/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inqId, action })
+      });
+      if (res.ok) {
+        const newStatus = action === 'accept' ? 'accepted' : action === 'decline' ? 'declined' : action === 'complete' ? 'completed' : 'no_show';
+        setInquiries(prev => prev.map(i => i.id === inqId ? { ...i, status: newStatus } : i));
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to update inquiry status.');
+      }
+    } catch (err) {
+      console.error('Failed to update inquiry:', err);
+    }
+  };
+
   const handleToggleArchiveInquiry = async (inqId: string, currentArchived: boolean) => {
     if (!currentArchived) {
       if (!confirm('Archive this inquiry? It will be moved to the Archived tab.')) return;
@@ -616,7 +643,13 @@ export default function VetBoardingDashboardPage() {
                 filteredInquiries = filteredInquiries.filter(i => i.archived === true);
               } else {
                 filteredInquiries = filteredInquiries.filter(i => !i.archived);
-                if (inquiryFilter === 'unread') {
+                if (inquiryFilter === 'pending') {
+                  filteredInquiries = filteredInquiries.filter(i => i.status === 'pending');
+                } else if (inquiryFilter === 'accepted') {
+                  filteredInquiries = filteredInquiries.filter(i => i.status === 'accepted' || i.status === 'confirmed');
+                } else if (inquiryFilter === 'completed') {
+                  filteredInquiries = filteredInquiries.filter(i => i.status === 'completed');
+                } else if (inquiryFilter === 'unread') {
                   filteredInquiries = filteredInquiries.filter(i => (i.unread_count || 0) > 0);
                 } else if (inquiryFilter === 'replied') {
                   filteredInquiries = filteredInquiries.filter(i => i.clinic_replied);
@@ -626,7 +659,7 @@ export default function VetBoardingDashboardPage() {
               return (
                 <>
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <div className="flex bg-gray-100 p-1 rounded-xl flex-wrap gap-1">
                       <button
                         onClick={() => setInquiryFilter('all')}
                         className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
@@ -634,16 +667,28 @@ export default function VetBoardingDashboardPage() {
                         All
                       </button>
                       <button
+                        onClick={() => setInquiryFilter('pending')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'pending' ? 'bg-white shadow-sm text-amber-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Pending
+                      </button>
+                      <button
+                        onClick={() => setInquiryFilter('accepted')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'accepted' ? 'bg-white shadow-sm text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Accepted
+                      </button>
+                      <button
+                        onClick={() => setInquiryFilter('completed')}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'completed' ? 'bg-white shadow-sm text-blue-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        Completed
+                      </button>
+                      <button
                         onClick={() => setInquiryFilter('unread')}
                         className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'unread' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                       >
                         Unread
-                      </button>
-                      <button
-                        onClick={() => setInquiryFilter('replied')}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${inquiryFilter === 'replied' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                      >
-                        Replied
                       </button>
                       <button
                         onClick={() => setInquiryFilter('archived')}
@@ -655,7 +700,7 @@ export default function VetBoardingDashboardPage() {
 
                     <div className="flex items-center gap-2">
                       <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-xl">
-                        {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
+                        {filteredInquiries.length} {filteredInquiries.length === 1 ? 'inquiry' : 'inquiries'}
                       </span>
                       <button
                         onClick={() => clinic?.id && loadInquiries(clinic.id)}
@@ -708,13 +753,31 @@ export default function VetBoardingDashboardPage() {
                             <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
                           )}
                           <div className="mt-1 flex items-center gap-2">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              inq.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                              inq.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
-                              {inq.status === 'pending' ? '⏳ Awaiting Reply' : inq.status === 'confirmed' ? '✅ Confirmed' : inq.status}
-                            </span>
+                            {inq.status === 'pending' && (
+                              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
+                                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" /> ⏳ Pending Review
+                              </span>
+                            )}
+                            {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                              <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" /> ✅ Accepted
+                              </span>
+                            )}
+                            {inq.status === 'completed' && (
+                              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /> 🎉 Completed
+                              </span>
+                            )}
+                            {inq.status === 'declined' && (
+                              <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" /> ❌ Declined
+                              </span>
+                            )}
+                            {inq.status === 'no_show' && (
+                              <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-orange-200 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" /> ⚠️ No Show
+                              </span>
+                            )}
                             {inq.clinic_replied && (
                               <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
                                 ✓ Replied
@@ -725,6 +788,52 @@ export default function VetBoardingDashboardPage() {
                           {/* 🐾 LIVE PET PROFILE CARD */}
                           <div className="mt-3">
                             <LivePetProfileCard petId={inq.pet_id} partnerId={clinic.id} partnerType="vet" />
+                          </div>
+
+                          {/* ── APPOINTMENT LIFECYCLE ACTION BAR ── */}
+                          <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider">
+                              Appointment Actions
+                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {inq.status === 'pending' && (
+                                <>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'accept')}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1"
+                                  >
+                                    ✓ Accept
+                                  </button>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'decline')}
+                                    className="bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-600 border border-gray-200 hover:border-red-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                  >
+                                    ✕ Decline
+                                  </button>
+                                </>
+                              )}
+                              {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                                <>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'complete')}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1"
+                                  >
+                                    🎉 Mark Completed
+                                  </button>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'no_show')}
+                                    className="bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                  >
+                                    ⚠️ Report No-Show
+                                  </button>
+                                </>
+                              )}
+                              {['completed', 'declined', 'no_show'].includes(inq.status) && (
+                                <span className="text-xs font-bold text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-xl">
+                                  Archived in History
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="shrink-0 flex items-center gap-2">

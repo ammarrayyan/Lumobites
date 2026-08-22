@@ -180,28 +180,82 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ─── PATCH /api/vet-boarding/inquiries — Archive or restore inquiry ───────────
+// ─── PATCH /api/vet-boarding/inquiries — Lifecycle actions or Archive/Restore ─
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, archived } = body;
+    const { id, action, archived } = body;
 
-    if (!id || typeof archived !== 'boolean') {
-      return NextResponse.json({ error: 'Missing id or archived status' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Missing inquiry id' }, { status: 400 });
+    }
+
+    const updatePayload: any = {};
+
+    if (action === 'accept') {
+      updatePayload.status = 'accepted';
+    } else if (action === 'decline') {
+      updatePayload.status = 'declined';
+    } else if (action === 'complete') {
+      updatePayload.status = 'completed';
+    } else if (action === 'no_show') {
+      updatePayload.status = 'no_show';
+    } else if (action === 'archive') {
+      updatePayload.archived = true;
+    } else if (action === 'restore') {
+      updatePayload.archived = false;
+    } else if (typeof archived === 'boolean') {
+      updatePayload.archived = archived;
+    } else {
+      return NextResponse.json({ error: 'Valid action or archived status is required' }, { status: 400 });
     }
 
     const { data: inquiry, error } = await supabaseAdmin
       .from('vet_inquiries')
-      .update({ archived })
+      .update(updatePayload)
       .eq('id', id)
-      .select('*')
+      .select('*, vet_clinics(clinic_name, email)')
       .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ inquiry });
+    // Trigger owner notification for status changes
+    if (['accept', 'decline', 'complete', 'no_show'].includes(action) && inquiry?.owner_email) {
+      try {
+        const clinicName = (inquiry.vet_clinics as any)?.clinic_name || 'Vet Clinic';
+        let notifTitle = 'Boarding Inquiry Updated 🐾';
+        let notifMessage = `Your boarding inquiry with ${clinicName} has been updated.`;
+
+        if (action === 'accept') {
+          notifTitle = 'Boarding Inquiry Accepted! 🎉';
+          notifMessage = `Great news! ${clinicName} has accepted your veterinary boarding request.`;
+        } else if (action === 'decline') {
+          notifTitle = 'Boarding Inquiry Declined';
+          notifMessage = `${clinicName} was unable to accept your veterinary boarding request.`;
+        } else if (action === 'complete') {
+          notifTitle = 'Boarding Stay Completed! 🎉';
+          notifMessage = `Your boarding stay with ${clinicName} has been marked as completed.`;
+        } else if (action === 'no_show') {
+          notifTitle = 'Appointment Marked as No Show';
+          notifMessage = `Your appointment with ${clinicName} was marked as no-show.`;
+        }
+
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: inquiry.owner_email.toLowerCase().trim(),
+          type: 'pet_access_decision',
+          title: notifTitle,
+          message: notifMessage,
+          link: '/petsitting',
+          read: false,
+        });
+      } catch (notifErr) {
+        console.warn('[Vet Inquiry PATCH] Notification warning:', notifErr);
+      }
+    }
+
+    return NextResponse.json({ success: true, inquiry });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

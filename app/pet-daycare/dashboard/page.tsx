@@ -55,6 +55,33 @@ export default function DaycareDashboard() {
   const [chatOpen, setChatOpen] = useState(false);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
 
+  const handleInquiryAction = async (inqId: string, action: 'accept' | 'decline' | 'complete' | 'no_show') => {
+    const actionLabels: Record<string, string> = {
+      accept: 'accept this daycare inquiry',
+      decline: 'decline this daycare inquiry',
+      complete: 'mark this daycare visit as completed',
+      no_show: 'mark this appointment as no-show'
+    };
+    if (!confirm(`Are you sure you want to ${actionLabels[action]}?`)) return;
+
+    try {
+      const res = await fetch('/api/pet-daycare/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inqId, action })
+      });
+      if (res.ok) {
+        const newStatus = action === 'accept' ? 'accepted' : action === 'decline' ? 'declined' : action === 'complete' ? 'completed' : 'no_show';
+        setInquiries(prev => prev.map(i => i.id === inqId ? { ...i, status: newStatus } : i));
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to update inquiry status.');
+      }
+    } catch (err) {
+      console.error('Failed to update inquiry:', err);
+    }
+  };
+
   const handleToggleArchiveInquiry = async (inqId: string, currentArchived: boolean) => {
     if (!currentArchived) {
       if (!confirm('Archive this inquiry? It will be moved to the Archived tab.')) return;
@@ -521,7 +548,13 @@ export default function DaycareDashboard() {
                 filteredInquiries = filteredInquiries.filter((i: any) => i.archived === true);
               } else {
                 filteredInquiries = filteredInquiries.filter((i: any) => !i.archived);
-                if (inquiryFilter === 'unread') {
+                if (inquiryFilter === 'pending') {
+                  filteredInquiries = filteredInquiries.filter((i: any) => i.status === 'pending');
+                } else if (inquiryFilter === 'accepted') {
+                  filteredInquiries = filteredInquiries.filter((i: any) => i.status === 'accepted' || i.status === 'confirmed');
+                } else if (inquiryFilter === 'completed') {
+                  filteredInquiries = filteredInquiries.filter((i: any) => i.status === 'completed');
+                } else if (inquiryFilter === 'unread') {
                   filteredInquiries = filteredInquiries.filter((i: any) => (i.unread_count || 0) > 0);
                 } else if (inquiryFilter === 'replied') {
                   filteredInquiries = filteredInquiries.filter((i: any) => i.daycare_replied);
@@ -533,8 +566,8 @@ export default function DaycareDashboard() {
                   <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
                     <h2 className="text-base font-black text-[#2E2419]">Owner Inquiries</h2>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex bg-[#FAF6F2] p-1 rounded-xl border border-[#E2D5C8]">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex bg-[#FAF6F2] p-1 rounded-xl border border-[#E2D5C8] flex-wrap gap-1">
                         <button
                           onClick={() => setInquiryFilter('all')}
                           className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'all' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
@@ -542,16 +575,28 @@ export default function DaycareDashboard() {
                           All
                         </button>
                         <button
+                          onClick={() => setInquiryFilter('pending')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'pending' ? 'bg-white shadow-xs text-amber-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Pending
+                        </button>
+                        <button
+                          onClick={() => setInquiryFilter('accepted')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'accepted' ? 'bg-white shadow-xs text-emerald-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Accepted
+                        </button>
+                        <button
+                          onClick={() => setInquiryFilter('completed')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'completed' ? 'bg-white shadow-xs text-blue-800 font-extrabold' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          Completed
+                        </button>
+                        <button
                           onClick={() => setInquiryFilter('unread')}
                           className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'unread' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                           Unread
-                        </button>
-                        <button
-                          onClick={() => setInquiryFilter('replied')}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer border-none ${inquiryFilter === 'replied' ? 'bg-white shadow-xs text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                          Replied
                         </button>
                         <button
                           onClick={() => setInquiryFilter('archived')}
@@ -563,7 +608,7 @@ export default function DaycareDashboard() {
 
                       <div className="flex items-center gap-2">
                         <span className="bg-[#FAF6F2] border border-[#E2D5C8] text-[#8B5E3C] text-xs font-bold px-3 py-1.5 rounded-xl">
-                          {filteredInquiries.length} {filteredInquiries.length === 1 ? 'conversation' : 'conversations'}
+                          {filteredInquiries.length} {filteredInquiries.length === 1 ? 'inquiry' : 'inquiries'}
                         </span>
                         <button
                           onClick={() => daycare?.id && fetchInquiries(daycare.id)}
@@ -590,52 +635,128 @@ export default function DaycareDashboard() {
                       {filteredInquiries.map((inq: any) => (
                         <div
                           key={inq.id}
-                          className="p-4 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-between hover:border-[#8B5E3C] transition-all"
+                          className="p-4 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex flex-col gap-3 hover:border-[#8B5E3C] transition-all"
                         >
-                          <div className="flex-1 min-w-0 pr-3">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {inq.unread_count > 0 ? (
-                                <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
-                              ) : (
-                                <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0 pr-3">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {inq.unread_count > 0 ? (
+                                  <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
+                                ) : (
+                                  <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                                )}
+                                <p className="text-sm font-bold text-[#2E2419] truncate">{inq.owner_email}</p>
+                                {inq.unread_count > 0 && (
+                                  <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                    {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-[#8B7E7D] mt-0.5">
+                                Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
+                              </p>
+                              {inq.latest_message && (
+                                <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
                               )}
-                              <p className="text-sm font-bold text-[#2E2419] truncate">{inq.owner_email}</p>
-                              {inq.unread_count > 0 && (
-                                <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                  {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
+                              <div className="mt-1 flex items-center gap-2">
+                                {inq.status === 'pending' && (
+                                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" /> ⏳ Pending Review
+                                  </span>
+                                )}
+                                {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                                  <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" /> ✅ Accepted
+                                  </span>
+                                )}
+                                {inq.status === 'completed' && (
+                                  <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /> 🎉 Completed
+                                  </span>
+                                )}
+                                {inq.status === 'declined' && (
+                                  <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" /> ❌ Declined
+                                  </span>
+                                )}
+                                {inq.status === 'no_show' && (
+                                  <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-orange-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" /> ⚠️ No Show
+                                  </span>
+                                )}
+                                {inq.daycare_replied && (
+                                  <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    ✓ Replied
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* 🐾 LIVE PET PROFILE CARD */}
+                              <div className="mt-3">
+                                <LivePetProfileCard petId={inq.pet_id} partnerId={center.id} partnerType="daycare" />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                onClick={() => handleToggleArchiveInquiry(inq.id, inq.archived)}
+                                className="px-2.5 py-1.5 text-xs text-[#8B7E7D] hover:text-gray-900 border border-[#E2D5C8] rounded-xl hover:bg-white transition-colors cursor-pointer"
+                              >
+                                {inq.archived ? 'Unarchive' : 'Archive'}
+                              </button>
+                              <button
+                                onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                                className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl transition-colors cursor-pointer border-none shadow-xs flex items-center gap-1.5"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" /> Chat
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* ── APPOINTMENT LIFECYCLE ACTION BAR ── */}
+                          <div className="pt-3 border-t border-[#E2D5C8] flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider">
+                              Appointment Actions
+                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {inq.status === 'pending' && (
+                                <>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'accept')}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
+                                  >
+                                    ✓ Accept
+                                  </button>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'decline')}
+                                    className="bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 border border-[#E2D5C8] hover:border-red-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                  >
+                                    ✕ Decline
+                                  </button>
+                                </>
+                              )}
+                              {(inq.status === 'accepted' || inq.status === 'confirmed') && (
+                                <>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'complete')}
+                                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
+                                  >
+                                    🎉 Mark Completed
+                                  </button>
+                                  <button
+                                    onClick={() => handleInquiryAction(inq.id, 'no_show')}
+                                    className="bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                  >
+                                    ⚠️ Report No-Show
+                                  </button>
+                                </>
+                              )}
+                              {['completed', 'declined', 'no_show'].includes(inq.status) && (
+                                <span className="text-xs font-bold text-gray-500 bg-white border border-[#E2D5C8] px-2.5 py-1 rounded-xl">
+                                  Archived in History
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-[#8B7E7D] mt-0.5">
-                              Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
-                            </p>
-                            {inq.latest_message && (
-                              <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
-                            )}
-                            {inq.daycare_replied && (
-                              <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                ✓ Replied
-                              </span>
-                            )}
-
-                            {/* 🐾 LIVE PET PROFILE CARD */}
-                            <div className="mt-3">
-                              <LivePetProfileCard petId={inq.pet_id} partnerId={center.id} partnerType="daycare" />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <button
-                              onClick={() => handleToggleArchiveInquiry(inq.id, inq.archived)}
-                              className="px-2.5 py-1.5 text-xs text-[#8B7E7D] hover:text-gray-900 border border-[#E2D5C8] rounded-xl hover:bg-white transition-colors cursor-pointer"
-                            >
-                              {inq.archived ? 'Unarchive' : 'Archive'}
-                            </button>
-                            <button
-                              onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                              className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl transition-colors cursor-pointer border-none shadow-xs"
-                            >
-                              View & Reply →
-                            </button>
                           </div>
                         </div>
                       ))}
