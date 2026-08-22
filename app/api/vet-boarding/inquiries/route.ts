@@ -254,7 +254,8 @@ export async function PATCH(request: NextRequest) {
           type: 'pet_access_decision',
           title: notifTitle,
           message: notifMessage,
-          link: '/petsitting',
+          link: `/petsitting?booking=${inquiry.id}&tab=owner`,
+          booking_id: inquiry.id,
           read: false,
         });
       } catch (notifErr) {
