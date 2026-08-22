@@ -99,8 +99,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const adminKey = request.headers.get('x-admin-key');
-    if (adminKey !== ADMIN_SECRET) {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

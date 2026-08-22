@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendShelterApprovalEmail, sendShelterRejectionEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
-const ADMIN_SECRET = process.env.ADMIN_API_KEY;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function GET(request: NextRequest) {
   try {
-    const adminKey = request.headers.get('x-admin-key');
-    if (adminKey !== ADMIN_SECRET) {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -30,8 +29,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const adminKey = request.headers.get('x-admin-key');
-    if (adminKey !== ADMIN_SECRET) {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -81,8 +79,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const adminKey = request.headers.get('x-admin-key');
-    if (adminKey !== ADMIN_SECRET) {
+    if (!isAuthorizedAdmin(request)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
