@@ -4060,14 +4060,14 @@ export function PetSittingContent() {
                               {reqEmail ? (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
-                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
                                 >
                                   <MessageSquare className="w-4 h-4" /> Inquire About Boarding
                                 </button>
                               ) : (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
-                                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200"
+                                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200 btn-gloss cursor-pointer"
                                 >
                                   Sign in to Inquire
                                 </button>
@@ -4145,14 +4145,14 @@ export function PetSittingContent() {
                               {isOwnerPro ? (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
-                                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer"
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
                                 >
                                   <MessageSquare className="w-4 h-4" /> Inquire About Daycare
                                 </button>
                               ) : (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
-                                  className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer"
+                                  className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer btn-gloss"
                                 >
                                   Sign in to Inquire
                                 </button>

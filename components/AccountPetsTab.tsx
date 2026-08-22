@@ -327,7 +327,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="px-3.5 py-2 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer btn-gloss"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Pet
@@ -571,7 +571,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs transition-colors cursor-pointer btn-gloss"
                 title="Go back without saving"
               >
                 <ArrowLeft className="w-4 h-4 text-[#8B5E3C]" />
@@ -593,7 +593,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                 type="submit"
                 form="account-pet-edit-form"
                 disabled={saving}
-                className="px-5 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 btn-gloss"
               >
                 {saving ? 'Saving...' : 'Save Profile 🐾'}
               </button>
@@ -1053,7 +1053,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 sm:flex-initial px-6 py-3 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold text-sm transition-colors cursor-pointer text-center"
+              className="flex-1 sm:flex-initial px-6 py-3 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold text-sm transition-colors cursor-pointer text-center btn-gloss"
             >
               Cancel
             </button>
@@ -1061,7 +1061,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
               type="submit"
               form="account-pet-edit-form"
               disabled={saving}
-              className="flex-1 sm:flex-initial px-8 py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 text-center"
+              className="flex-1 sm:flex-initial px-8 py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 text-center btn-gloss"
             >
               {saving ? 'Saving...' : 'Save Profile 🐾'}
             </button>
@@ -1124,7 +1124,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                     setCopiedLink(true);
                     setTimeout(() => setCopiedLink(false), 3000);
                   }}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-800 hover:bg-gray-50 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                  className="flex-1 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs btn-gloss cursor-pointer"
                 >
                   {copiedLink ? (
                     <>
@@ -1142,7 +1142,7 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
                   target="_blank"
                   rel="noreferrer"
                   download={`${qrPet.pet_name}-partner-qr.png`}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md btn-gloss cursor-pointer"
                 >
                   <Download className="w-4 h-4" /> Save High-Res QR
                 </a>

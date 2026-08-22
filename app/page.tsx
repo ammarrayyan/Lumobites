@@ -164,7 +164,7 @@ export default function Home() {
                   placeholder="Enter your email"
                   className="w-full bg-[#FDFAF7] border border-[#E8DDD4] rounded-full px-5 py-3 text-sm outline-none focus:border-[#8B5E3C] transition-colors"
                 />
-                <button type="submit" className="w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-full hover:bg-[#7A5234] transition-colors border-none cursor-pointer">
+                <button type="submit" className="w-full bg-[#8B5E3C] text-white font-bold py-3 rounded-full hover:bg-[#7A5234] transition-colors border-none cursor-pointer btn-gloss">
                   Notify Me When It Launches
                 </button>
               </form>
@@ -185,7 +185,7 @@ export default function Home() {
           onClick={() => setPartnerModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl p-6 sm:p-8 max-w-[440px] w-full shadow-2xl relative"
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-[440px] w-full shadow-2xl relative text-left"
             onClick={e => e.stopPropagation()}
           >
             <button
@@ -195,84 +195,75 @@ export default function Home() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="w-14 h-14 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-[#E8DDD4]">
-              <Building2 className="w-7 h-7 text-[#8B5E3C]" />
+            <div className="w-12 h-12 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mb-4">
+              <Building2 className="w-6 h-6 text-[#8B5E3C]" />
             </div>
 
-            <h3 className="text-xl font-black text-[#4A3E3D] text-center mb-1">
-              Partner Portal
+            <h3 className="text-xl font-black text-[#4A3E3D] mb-1">
+              Partner Portals
             </h3>
-            <p className="text-[#8B7E7D] text-xs text-center mb-6">
-              Select your organization type to access your portal or submit a partner application:
+            <p className="text-[#8B7E7D] text-xs leading-relaxed mb-5">
+              Select your service type to access your dedicated dashboard.
             </p>
 
             <div className="space-y-3">
-              {/* Option 1: Shelter / Rescue */}
-              <Link
-                href="/adoption?register=shelter"
-                onClick={handleSelectShelter}
-                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F5EDE4] border border-[#E8DDD4] hover:border-[#8B5E3C] transition-all text-left group"
-                style={{ textDecoration: 'none' }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
-                    <span className="text-xl">🏛️</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-[#8B5E3C] transition-colors">
-                      Shelter or Rescue
-                    </p>
-                    <p className="text-xs text-[#8B7E7D]">
-                      Post pets for adoption & manage adoption inquiries
-                    </p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-[#8B5E3C] group-hover:translate-x-1 transition-all shrink-0" />
-                </div>
-              </Link>
-
-              {/* Option 2: Vet Clinic */}
+              {/* Option 1: Vet Boarding */}
               <Link
                 href="/vet-boarding"
-                onClick={handleSelectVet}
-                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#EEF4FF] border border-[#E8DDD4] hover:border-blue-400 transition-all text-left group"
+                onClick={() => setPartnerModalOpen(false)}
+                className="block p-4 rounded-2xl border-2 border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all group"
                 style={{ textDecoration: 'none' }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                    <span className="text-xl">🏥</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-blue-600 transition-colors">
-                      Veterinary Boarding Clinic
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-extrabold text-sm text-blue-900 group-hover:text-blue-950 flex items-center gap-1.5">
+                      🏥 Veterinary Boarding
                     </p>
                     <p className="text-xs text-[#8B7E7D]">
-                      List boarding services & manage owner inquiries
+                      Medical & clinical boarding portal for licensed clinics
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-blue-700 group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
               </Link>
 
-              {/* Option 3: Pet Daycare */}
+              {/* Option 2: Pet Daycare */}
               <Link
                 href="/pet-daycare"
-                onClick={handleSelectDaycare}
-                className="block p-4 rounded-2xl bg-[#FDFAF7] hover:bg-[#F0FDF4] border border-[#E8DDD4] hover:border-emerald-400 transition-all text-left group"
+                onClick={() => setPartnerModalOpen(false)}
+                className="block p-4 rounded-2xl border-2 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group"
                 style={{ textDecoration: 'none' }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <span className="text-xl">🐕</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[#4A3E3D] text-sm group-hover:text-emerald-700 transition-colors">
-                      Pet Daycare Facility
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-extrabold text-sm text-emerald-900 group-hover:text-emerald-950 flex items-center gap-1.5">
+                      🐕 Pet Daycare
                     </p>
                     <p className="text-xs text-[#8B7E7D]">
                       Daycare & playgroup listings for local pet owners
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-emerald-700 group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+              </Link>
+
+              {/* Option 3: Shelter / Rescue */}
+              <Link
+                href="/adoption?register=shelter"
+                onClick={handleSelectShelter}
+                className="block p-4 rounded-2xl border-2 border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-300 transition-all group"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-extrabold text-sm text-orange-900 group-hover:text-orange-950 flex items-center gap-1.5">
+                      🏛️ Shelter or Rescue
+                    </p>
+                    <p className="text-xs text-[#8B7E7D]">
+                      Post pets for adoption & manage inquiries
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#8B7E7D] group-hover:text-orange-700 group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
               </Link>
             </div>
@@ -311,7 +302,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setDaycareNoticeOpen(false)}
-              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-2xl transition-colors border-none cursor-pointer text-sm"
+              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-2xl transition-colors border-none cursor-pointer text-sm btn-gloss"
             >
               Got It
             </button>
