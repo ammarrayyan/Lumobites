@@ -45,7 +45,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'active') {
+        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
         if (existing.status === 'revoked' || existing.status === 'denied') {
@@ -72,7 +72,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'active') {
+        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
         if (existing.status === 'revoked' || existing.status === 'denied') {
@@ -99,7 +99,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         .maybeSingle();
 
       if (existing) {
-        if (existing.status === 'active') {
+        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
         if (existing.status === 'revoked' || existing.status === 'denied') {
@@ -208,7 +208,7 @@ export async function verifyPetAccess(
       status = req.status || 'pending';
     }
 
-    if (status === 'active') {
+    if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(status)) {
       return { allowed: true, status: 'active' };
     }
     if (status === 'pending') {
