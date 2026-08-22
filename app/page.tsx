@@ -357,19 +357,19 @@ export default function Home() {
 
       {/* MOBILE QUICK ACCESS BUTTONS (My Pets Quick Banner + 3+3 Square Grid) */}
       <section className="md:hidden w-full px-4 pt-1 pb-6">
-        {/* 🐾 My Pets Quick Banner (Compact, Light & Refined) */}
+        {/* 🐾 My Pets Quick Banner (Warm Caramel / Amber) */}
         <Link href="/account?tab=pets" className="block max-w-sm mx-auto mb-2.5" style={{ textDecoration: 'none' }}>
           <div 
             style={{ boxShadow: '0 1px 4px rgba(139, 94, 60, 0.05)' }}
-            className="bg-[#FAF5EE] border border-[#EADBCE] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F4ECE2] active:scale-[0.99] transition-all btn-gloss"
+            className="bg-[#FDF5E8] border border-[#EAD3B8] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F9ECCF] active:scale-[0.99] transition-all btn-gloss"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-7 h-7 rounded-xl bg-[#F5E2CC] text-[#8B5E3C] flex items-center justify-center text-sm font-bold shrink-0">
                 🐾
               </div>
               <div className="text-left">
                 <p className="font-bold text-xs text-[#2E2419] leading-tight">My Pet Profiles</p>
-                <p className="text-[10px] text-[#7A6B5E] font-medium leading-tight">Manage records & partner access</p>
+                <p className="text-[10px] text-[#8B5E3C] font-medium leading-tight">Manage records & partner access</p>
               </div>
             </div>
             <div className="flex items-center gap-1 text-[#8B5E3C] font-bold text-[11px]">
@@ -402,14 +402,14 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* 3. Become Sitter */}
+          {/* 3. Become Sitter (Sunny Champagne / Sparkle Gold) */}
           <Link href="/petsitting?tab=become" className="block" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(74, 54, 41, 0.04)' }}
-              className="aspect-square w-full p-2 bg-[#F8F3EC] border border-[#EADBCE] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              style={{ boxShadow: '0 2px 6px rgba(180, 83, 9, 0.05)' }}
+              className="aspect-square w-full p-2 bg-[#FEF5E7] border border-[#F7DCB0] text-[#92400E] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <Sparkles className="w-5 h-5 text-[#5C4533]" />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Become Sitter</span>
+              <Sparkles className="w-5 h-5 text-[#B45309]" />
+              <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#92400E]">Become Sitter</span>
             </div>
           </Link>
 
@@ -424,15 +424,15 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* 5. Partner Portal */}
+          {/* 5. Partner Portal (Trust Royal Indigo / Sapphire Blue) */}
           <button
             type="button"
             onClick={handleOpenPartnerPortal}
             style={{ textDecoration: 'none' }}
-            className="aspect-square w-full p-2 bg-[#FAF5EE] border border-[#EADBCE] text-[#5C4533] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+            className="aspect-square w-full p-2 bg-[#EEF4FF] border border-[#C7D9FD] text-[#1E40AF] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
           >
-            <Building2 className="w-5 h-5 text-[#5C4533]" />
-            <span className="text-[11px] leading-tight font-extrabold tracking-tight">Partner Portal</span>
+            <Building2 className="w-5 h-5 text-[#2563EB]" />
+            <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#1E40AF]">Partner Portal</span>
           </button>
 
           {/* 6. City Board */}
