@@ -36,23 +36,26 @@ export default function AdminPage() {
   }, []);
 
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [activeLostPets, setActiveLostPets] = useState<number | string>('-');
   const [recentFoundPets, setRecentFoundPets] = useState<number | string>('-');
   const [totalMatches, setTotalMatches] = useState<number | string>('-');
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetch('/api/reports', {
+      fetch('/api/admin/badges', {
         headers: { 'x-admin-key': password }
       })
       .then(res => res.json())
       .then(data => {
-        if (data.reports) {
-          const pending = data.reports.filter((r: any) => r.status === 'pending').length;
-          setPendingReportsCount(pending);
+        if (data.badges) {
+          setBadgeCounts(data.badges);
+          if (data.badges.reports !== undefined) {
+            setPendingReportsCount(data.badges.reports);
+          }
         }
       })
-      .catch(err => console.error('Failed to fetch reports count:', err));
+      .catch(err => console.error('Failed to fetch admin badges:', err));
     }
   }, [isAuthenticated, activeTab, password]);
 
@@ -320,29 +323,29 @@ export default function AdminPage() {
               {
                 title: 'Services & Partners',
                 items: [
-                  { id: 'sitters', label: 'Sitter Management', icon: '🐶' },
-                  { id: 'shelters', label: 'Shelters & Rescues', icon: '🏠' },
-                  { id: 'vet-clinics', label: 'Vet Clinics', icon: '🏥' },
-                  { id: 'pet-daycares', label: 'Pet Daycares', icon: '🐾' },
-                  { id: 'requests', label: 'Sitting Requests', icon: '📋' },
+                  { id: 'sitters', label: 'Sitter Management', icon: '🐶', badge: badgeCounts['sitters'] },
+                  { id: 'shelters', label: 'Shelters & Rescues', icon: '🏠', badge: badgeCounts['shelters'] },
+                  { id: 'vet-clinics', label: 'Vet Clinics', icon: '🏥', badge: badgeCounts['vet-clinics'] },
+                  { id: 'pet-daycares', label: 'Pet Daycares', icon: '🐾', badge: badgeCounts['pet-daycares'] },
+                  { id: 'requests', label: 'Sitting Requests', icon: '📋', badge: badgeCounts['requests'] },
                 ]
               },
               {
                 title: 'Community & Content',
                 items: [
                   { id: 'accounts', label: 'All Accounts', icon: '👥' },
-                  { id: 'lost-pets', label: 'Lost Pets', icon: '🚨' },
+                  { id: 'lost-pets', label: 'Lost Pets', icon: '🚨', badge: badgeCounts['lost-pets'] },
                   { id: 'adoption-pets', label: 'Adoption Pets', icon: '🐾' },
-                  { id: 'reviews', label: 'Reviews', icon: '⭐' },
+                  { id: 'reviews', label: 'Reviews', icon: '⭐', badge: badgeCounts['reviews'] },
                   { id: 'city-board', label: 'City Board', icon: '💬' },
                   { id: 'twin-gallery', label: 'Pet Twin Gallery', icon: '👯' },
-                  { id: 'reports', label: 'Reports', icon: '🚩', badge: pendingReportsCount },
+                  { id: 'reports', label: 'Reports', icon: '🚩', badge: badgeCounts['reports'] ?? pendingReportsCount },
                 ]
               },
               {
                 title: 'Growth & Automation',
                 items: [
-                  { id: 'affiliates', label: 'Affiliates', icon: '🤝' },
+                  { id: 'affiliates', label: 'Affiliates', icon: '🤝', badge: badgeCounts['affiliates'] },
                   { id: 'pet-matching', label: 'Pet Matching', icon: '🔍' },
                   { id: 'outreach', label: 'Outreach', icon: '✉️' },
                   { id: 'broadcast', label: 'Broadcast', icon: '📢' },
