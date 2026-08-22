@@ -25,7 +25,9 @@ import {
   Phone,
   CheckCircle2,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const DAYCARE_SERVICES = [
@@ -54,6 +56,11 @@ export default function DaycareDashboard() {
   const [activeInquiry, setActiveInquiry] = useState<any>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
+  const [expandedInquiries, setExpandedInquiries] = useState<Record<string, boolean>>({});
+
+  const toggleInquiryExpand = (id: string) => {
+    setExpandedInquiries(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleInquiryAction = async (inqId: string, action: 'accept' | 'decline' | 'complete' | 'no_show') => {
     const actionLabels: Record<string, string> = {
@@ -632,134 +639,169 @@ export default function DaycareDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {filteredInquiries.map((inq: any) => (
-                        <div
-                          key={inq.id}
-                          className="p-4 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex flex-col gap-3 hover:border-[#8B5E3C] transition-all"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0 pr-3">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                {inq.unread_count > 0 ? (
-                                  <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
-                                ) : (
-                                  <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
-                                )}
-                                <p className="text-sm font-bold text-[#2E2419] truncate">{inq.owner_email}</p>
-                                {inq.unread_count > 0 && (
-                                  <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                    {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-[#8B7E7D] mt-0.5">
-                                Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
-                              </p>
-                              {inq.latest_message && (
-                                <p className="text-xs text-gray-600 italic line-clamp-1 mt-1">"{inq.latest_message}"</p>
-                              )}
-                              <div className="mt-1 flex items-center gap-2">
-                                {(!inq.status || inq.status === 'pending') && (
-                                  <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
-                                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" /> ⏳ Pending Review
-                                  </span>
-                                )}
-                                {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
-                                  <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" /> ✅ Accepted
-                                  </span>
-                                )}
-                                {inq.status === 'completed' && (
-                                  <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-200 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" /> 🎉 Completed
-                                  </span>
-                                )}
-                                {(inq.status === 'declined' || inq.status === 'denied' || inq.status === 'revoked') && (
-                                  <span className="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-red-200 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" /> ❌ Declined
-                                  </span>
-                                )}
-                                {inq.status === 'no_show' && (
-                                  <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-orange-200 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" /> ⚠️ No Show
-                                  </span>
-                                )}
-                                {inq.daycare_replied && (
-                                  <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                    ✓ Replied
-                                  </span>
-                                )}
+                      {filteredInquiries.map((inq: any) => {
+                        const isExpanded = !!expandedInquiries[inq.id];
+                        return (
+                          <div
+                            key={inq.id}
+                            className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-2xl overflow-hidden hover:border-[#8B5E3C] transition-all"
+                          >
+                            {/* ── CARD HEADER (COLLAPSED / SUMMARY ROW) ── */}
+                            <div
+                              onClick={() => toggleInquiryExpand(inq.id)}
+                              className="p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-white/60 transition-colors"
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-10 h-10 bg-gradient-to-br from-[#8B5E3C] to-[#5C3D26] rounded-full flex items-center justify-center shrink-0 shadow-xs">
+                                  <span className="text-white font-black text-sm">{inq.owner_email?.[0]?.toUpperCase() || '?'}</span>
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {inq.unread_count > 0 ? (
+                                      <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" title="Unread" />
+                                    ) : (
+                                      <div className="w-2 h-2 rounded-full bg-gray-300" title="Read" />
+                                    )}
+                                    <p className="text-sm font-bold text-[#2E2419] truncate">{inq.owner_email}</p>
+                                    {inq.pet_name && (
+                                      <span className="bg-[#EFE5DA] text-[#8B5E3C] text-xs font-extrabold px-2 py-0.5 rounded-md border border-[#E2D5C8]">
+                                        🐾 {inq.pet_name}
+                                      </span>
+                                    )}
+                                    {inq.unread_count > 0 && (
+                                      <span className="bg-red-50 text-red-600 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                        {inq.unread_count > 1 ? `${inq.unread_count} New` : 'New'}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                                    <span className="text-xs text-[#8B7E7D]">
+                                      Inquiry Date: {new Date(inq.created_at).toLocaleDateString()}
+                                    </span>
+                                    {inq.latest_message && (
+                                      <span className="text-xs text-gray-600 italic truncate max-w-[200px] sm:max-w-xs">
+                                        • "{inq.latest_message}"
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
 
-                              {/* 🐾 LIVE PET PROFILE CARD */}
-                              <div className="mt-3">
-                                <LivePetProfileCard petId={inq.pet_id} partnerId={center.id} partnerType="daycare" />
+                              {/* Status Badge + Actions */}
+                              <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-1.5">
+                                  {(!inq.status || inq.status === 'pending') && (
+                                    <span className="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" /> ⏳ Pending
+                                    </span>
+                                  )}
+                                  {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
+                                    <span className="bg-green-100 text-green-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-green-200 flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" /> ✅ Accepted
+                                    </span>
+                                  )}
+                                  {inq.status === 'completed' && (
+                                    <span className="bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-blue-200 flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" /> 🎉 Completed
+                                    </span>
+                                  )}
+                                  {(inq.status === 'declined' || inq.status === 'denied' || inq.status === 'revoked') && (
+                                    <span className="bg-red-100 text-red-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-red-200 flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" /> ❌ Declined
+                                    </span>
+                                  )}
+                                  {inq.status === 'no_show' && (
+                                    <span className="bg-orange-100 text-orange-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-orange-200 flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" /> ⚠️ No Show
+                                    </span>
+                                  )}
+                                </div>
+
+                                <button
+                                  onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
+                                  className="px-3 py-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl transition-colors cursor-pointer border-none shadow-xs flex items-center gap-1"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Chat</span>
+                                </button>
+
+                                <button
+                                  onClick={() => toggleInquiryExpand(inq.id)}
+                                  className="p-1.5 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-white transition-colors cursor-pointer flex items-center gap-1 text-xs font-bold"
+                                  title={isExpanded ? 'Collapse details' : 'Expand details'}
+                                >
+                                  <span className="hidden sm:inline">{isExpanded ? 'Hide' : 'Details'}</span>
+                                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </button>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                onClick={() => handleToggleArchiveInquiry(inq.id, inq.archived)}
-                                className="px-2.5 py-1.5 text-xs text-[#8B7E7D] hover:text-gray-900 border border-[#E2D5C8] rounded-xl hover:bg-white transition-colors cursor-pointer"
-                              >
-                                {inq.archived ? 'Unarchive' : 'Archive'}
-                              </button>
-                              <button
-                                onClick={() => { setActiveInquiry(inq); setChatOpen(true); }}
-                                className="px-3.5 py-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl transition-colors cursor-pointer border-none shadow-xs flex items-center gap-1.5"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5" /> Chat
-                              </button>
-                            </div>
+                            {/* ── EXPANDED DETAILS SECTION ── */}
+                            {isExpanded && (
+                              <div className="p-4 pt-0 border-t border-[#E2D5C8] bg-white/50 space-y-4">
+                                {/* 🐾 LIVE PET PROFILE CARD */}
+                                <div className="pt-3">
+                                  <LivePetProfileCard petId={inq.pet_id} partnerId={center.id} partnerType="daycare" />
+                                </div>
+
+                                {/* ── APPOINTMENT LIFECYCLE ACTION BAR ── */}
+                                <div className="pt-3 border-t border-[#E2D5C8] flex flex-wrap items-center justify-between gap-2">
+                                  <span className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider">
+                                    Appointment Actions
+                                  </span>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    {(!inq.status || inq.status === 'pending') && (
+                                      <>
+                                        <button
+                                          onClick={() => handleInquiryAction(inq.id, 'accept')}
+                                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
+                                        >
+                                          ✓ Accept
+                                        </button>
+                                        <button
+                                          onClick={() => handleInquiryAction(inq.id, 'decline')}
+                                          className="bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 border border-[#E2D5C8] hover:border-red-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                        >
+                                          ✕ Decline
+                                        </button>
+                                      </>
+                                    )}
+                                    {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
+                                      <>
+                                        <button
+                                          onClick={() => handleInquiryAction(inq.id, 'complete')}
+                                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
+                                        >
+                                          🎉 Mark Completed
+                                        </button>
+                                        <button
+                                          onClick={() => handleInquiryAction(inq.id, 'no_show')}
+                                          className="bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
+                                        >
+                                          ⚠️ Report No-Show
+                                        </button>
+                                      </>
+                                    )}
+                                    {['completed', 'declined', 'denied', 'revoked', 'no_show'].includes(inq.status) && (
+                                      <span className="text-xs font-bold text-gray-500 bg-white border border-[#E2D5C8] px-2.5 py-1 rounded-xl">
+                                        Archived in History
+                                      </span>
+                                    )}
+
+                                    <button
+                                      onClick={() => handleToggleArchiveInquiry(inq.id, inq.archived)}
+                                      className="px-2.5 py-1.5 text-xs text-[#8B7E7D] hover:text-gray-900 border border-[#E2D5C8] rounded-xl hover:bg-white transition-colors cursor-pointer ml-2"
+                                    >
+                                      {inq.archived ? 'Unarchive' : 'Archive'}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
-
-                          {/* ── APPOINTMENT LIFECYCLE ACTION BAR ── */}
-                          <div className="pt-3 border-t border-[#E2D5C8] flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider">
-                              Appointment Actions
-                            </span>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {(!inq.status || inq.status === 'pending') && (
-                                <>
-                                  <button
-                                    onClick={() => handleInquiryAction(inq.id, 'accept')}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
-                                  >
-                                    ✓ Accept
-                                  </button>
-                                  <button
-                                    onClick={() => handleInquiryAction(inq.id, 'decline')}
-                                    className="bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 border border-[#E2D5C8] hover:border-red-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
-                                  >
-                                    ✕ Decline
-                                  </button>
-                                </>
-                              )}
-                              {(inq.status === 'accepted' || inq.status === 'confirmed' || inq.status === 'active') && (
-                                <>
-                                  <button
-                                    onClick={() => handleInquiryAction(inq.id, 'complete')}
-                                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer shadow-xs flex items-center gap-1 border-none"
-                                  >
-                                    🎉 Mark Completed
-                                  </button>
-                                  <button
-                                    onClick={() => handleInquiryAction(inq.id, 'no_show')}
-                                    className="bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold py-1.5 px-3 rounded-xl transition-colors cursor-pointer"
-                                  >
-                                    ⚠️ Report No-Show
-                                  </button>
-                                </>
-                              )}
-                              {['completed', 'declined', 'denied', 'revoked', 'no_show'].includes(inq.status) && (
-                                <span className="text-xs font-bold text-gray-500 bg-white border border-[#E2D5C8] px-2.5 py-1 rounded-xl">
-                                  Archived in History
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </>
