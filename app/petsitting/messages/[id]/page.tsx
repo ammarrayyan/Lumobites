@@ -331,11 +331,24 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   };
 
   if (inquiryData) {
+    const isPartner = inquiryData.otherUserType === 'user';
+    const handleClose = () => {
+      if (isPartner) {
+        router.push(inquiryData.type === 'vet' ? '/vet-boarding/dashboard' : '/pet-daycare/dashboard');
+      } else {
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+          router.back();
+        } else {
+          router.push('/petsitting');
+        }
+      }
+    };
+
     return (
       <div className="min-h-screen bg-[#FDFAF7]">
         <ChatModal
           isOpen={true}
-          onClose={() => router.push(inquiryData.type === 'vet' ? '/vet-boarding/dashboard' : '/pet-daycare/dashboard')}
+          onClose={handleClose}
           bookingId={bookingId}
           bookingDetails={inquiryData.title}
           currentUserEmail={currentUserEmail}
