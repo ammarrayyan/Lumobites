@@ -164,16 +164,15 @@ export default function TwinPage() {
   // Load and verify Pro status on page mount
   useEffect(() => {
     const syncStatus = () => {
-      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const email = getSignedInUserEmail();
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      const isOwnerEmail = email?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || email?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         setIsPro(true);
-        setProEmail(cachedEmail || 'admin@lumobites.com');
-      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
-        setIsPro(true);
-        setProEmail(cachedEmail);
+        setProEmail(email || 'admin@lumobites.com');
+      } else if (email && email !== 'undefined' && email !== 'null' && email.trim() !== '') {
+        setProEmail(email);
       } else {
         setIsPro(false);
         setProEmail('');
@@ -222,39 +221,45 @@ export default function TwinPage() {
           window.history.replaceState({}, document.title, window.location.pathname);
         });
     } else {
-      const cachedEmail = localStorage.getItem('lumo_pro_email');
+      const activeEmail = getSignedInUserEmail();
       const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-      console.log('[Lumo Twin Pro] Retrieved cached email from localStorage:', cachedEmail, 'isAdminBypass:', isAdminBypass);
+      console.log('[Lumo Twin Pro] Retrieved active email:', activeEmail, 'isAdminBypass:', isAdminBypass);
       
-      const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
+      const isOwnerEmail = activeEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || activeEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
       
       if (isAdminBypass || isOwnerEmail) {
         console.log('[Lumo Twin Pro] Admin/Owner bypass detected in localStorage. Activating Pro status.');
         setIsPro(true);
-        setProEmail(cachedEmail || 'admin@lumobites.com');
-      } else if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
-        console.log('[Lumo Twin Pro] Active cached email found. Activating optimistic Pro state.');
-        setProEmail(cachedEmail);
-        setIsPro(true);
+        setProEmail(activeEmail || 'admin@lumobites.com');
+      } else if (activeEmail && activeEmail !== 'undefined' && activeEmail !== 'null' && activeEmail.trim() !== '') {
+        setProEmail(activeEmail);
         
-        console.log('[Lumo Twin Pro] Syncing status with database for email:', cachedEmail);
+        console.log('[Lumo Twin Pro] Syncing status with database for email:', activeEmail);
         fetch('/api/stripe/status', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cachedEmail })
+          body: JSON.stringify({ email: activeEmail })
         })
         .then(res => res.json())
         .then(data => {
-          console.log('[Lumo Twin Pro] Database status reply:', data);
+          if (data && data.session_invalidated_at) {
+            const sessionStarted = localStorage.getItem('lumo_session_started_at');
+            if (sessionStarted) {
+              const startedDate = new Date(sessionStarted);
+              const invalidatedDate = new Date(data.session_invalidated_at);
+              if (invalidatedDate > startedDate) {
+                localStorage.clear();
+                document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                alert("You have been signed out of all devices for security.");
+                window.location.href = "/";
+                return;
+              }
+            }
+          }
           if (data.isPro) {
             setIsPro(true);
-            window.dispatchEvent(new Event('lumo-pro-update'));
-            console.log('[Lumo Twin Pro] Pro status confirmed by Supabase.');
           } else {
             setIsPro(false);
-            localStorage.removeItem('lumo_pro_email');
-            window.dispatchEvent(new Event('lumo-pro-update'));
-            console.log('[Lumo Twin Pro] Pro status rejected by Supabase. Downgraded to free tier.');
           }
         })
         .catch((err) => {
