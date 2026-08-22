@@ -2,16 +2,39 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard } from 'lucide-react';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2 } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 
 type Step = 'email' | 'verification' | 'dashboard';
+type AccountTab = 'pets' | 'access' | 'subscription' | 'security';
 
 export default function AccountPage() {
   const [step, setStep] = useState<Step>('email');
+  const [accountTab, setAccountTab] = useState<AccountTab>('pets');
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [email, setEmail] = useState('');
   const [isLocked, setIsLocked] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'pets' || tabParam === 'access' || tabParam === 'subscription' || tabParam === 'security') {
+        setAccountTab(tabParam as AccountTab);
+      } else if (tabParam === 'business' || tabParam === 'plan') {
+        setAccountTab('subscription');
+      }
+    }
+  }, []);
+
+  const handleTabSelect = (tab: AccountTab) => {
+    setAccountTab(tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   useEffect(() => {
     const checkSession = async () => {
@@ -734,463 +757,544 @@ export default function AccountPage() {
                     </p>
                   </div>
 
-                  {/* 🐾 UNIFIED PET PROFILES & LIVE ACCESS CONTROL */}
-                  <AccountPetsTab ownerEmail={email} />
-
-                  {!subDetails.active ? (
-                    <div 
-                      style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                      className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
+                  {/* 🐾 4-TAB NAVIGATION HEADER */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 bg-[#F5EFEB] p-1.5 rounded-2xl gap-1.5 border border-[#EBE3DC]">
+                    <button
+                      type="button"
+                      onClick={() => handleTabSelect('pets')}
+                      className={`py-3 px-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none ${
+                        accountTab === 'pets'
+                          ? 'bg-white text-[#191919] shadow-xs'
+                          : 'bg-transparent text-[#777777] hover:text-[#191919]'
+                      }`}
                     >
-                      <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
-                            👤
-                          </span>
-                          Account Status
-                        </span>
-                        <span className="bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200">
-                          Free Account
-                        </span>
-                      </div>
-                      
-                      <div className="p-5 flex flex-col gap-4">
-                        <div className="flex flex-col gap-1.5 text-left">
-                          <span className="text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">AI Usage Allowance</span>
-                          <p className="text-xs text-gray-600 leading-relaxed">
-                            Standard free accounts get <strong>2 lifetime AI checks</strong> across all tools.
-                          </p>
-                        </div>
+                      <PawPrint className="w-4 h-4 text-[#8B5E3C] shrink-0" />
+                      <span>My Pets</span>
+                    </button>
 
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            setLoading(true);
-                            setError(null);
-                            try {
-                              const res = await fetch('/api/stripe/checkout', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email: email.trim() })
-                              });
-                              const data = await res.json();
-                              if (data.url) {
-                                window.location.href = data.url;
-                              } else {
-                                throw new Error(data.error || 'Failed to start checkout');
-                              }
-                            } catch (err: any) {
-                              setError(err.message || 'Failed to start checkout.');
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
-                          disabled={loading}
-                          className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          Upgrade to Membership ($4.99/mo) →
-                        </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTabSelect('access')}
+                      className={`py-3 px-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none ${
+                        accountTab === 'access'
+                          ? 'bg-white text-[#191919] shadow-xs'
+                          : 'bg-transparent text-[#777777] hover:text-[#191919]'
+                      }`}
+                    >
+                      <ShieldCheck className="w-4 h-4 text-[#63825D] shrink-0" />
+                      <span>Access Control</span>
+                    </button>
 
-                        {/* Subtle Partner Registration Note */}
-                        <div className="pt-2.5 mt-1 border-t border-gray-100 text-center">
-                          <p className="text-[11px] text-gray-500 font-medium">
-                            Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
-                            <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
-                              Register as a Partner →
-                            </Link>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {error && (
-                        <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                          <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
-                        </p>
+                    <button
+                      type="button"
+                      onClick={() => handleTabSelect('subscription')}
+                      className={`py-3 px-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none ${
+                        accountTab === 'subscription'
+                          ? 'bg-white text-[#191919] shadow-xs'
+                          : 'bg-transparent text-[#777777] hover:text-[#191919]'
+                      }`}
+                    >
+                      {subDetails.isPartner ? (
+                        <>
+                          <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
+                          <span>Business Plan</span>
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4 text-[#8B5E3C] shrink-0" />
+                          <span>Subscription</span>
+                        </>
                       )}
+                    </button>
 
-                      {subDetails.adminBypass ? (
-                        <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
-                          <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
-                        </div>
-                      ) : subDetails.isPartner ? (
-                        <div className="flex flex-col gap-4">
-                          <div 
-                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                            className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
-                          >
-                            <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
-                              <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
-                                  🏢
-                                </span>
-                                Subscription Status
+                    <button
+                      type="button"
+                      onClick={() => handleTabSelect('security')}
+                      className={`py-3 px-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none ${
+                        accountTab === 'security'
+                          ? 'bg-white text-[#191919] shadow-xs'
+                          : 'bg-transparent text-[#777777] hover:text-[#191919]'
+                      }`}
+                    >
+                      <Lock className="w-4 h-4 text-gray-500 shrink-0" />
+                      <span>Security</span>
+                    </button>
+                  </div>
+
+                  {/* TAB 1: 🐾 MY PETS */}
+                  {accountTab === 'pets' && (
+                    <AccountPetsTab ownerEmail={email} forcedTab="pets" />
+                  )}
+
+                  {/* TAB 2: 🛡️ PROFILE ACCESS CONTROL */}
+                  {accountTab === 'access' && (
+                    <AccountPetsTab ownerEmail={email} forcedTab="access" />
+                  )}
+
+                  {/* TAB 3: 💳 SUBSCRIPTION / BUSINESS PLAN */}
+                  {accountTab === 'subscription' && (
+                    <div className="flex flex-col gap-4 animate-fade-in">
+                      {!subDetails.active ? (
+                        <div 
+                          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                          className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
+                        >
+                          <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                            <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
+                                👤
                               </span>
-                              {subDetails.rawSubscriptionStatus === 'trialing' ? (
-                                <span className="bg-amber-100 text-amber-900 border border-amber-300/70 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-3xs flex items-center gap-1.5">
-                                  <Sparkles className="w-3.5 h-3.5 text-amber-700" /> {subDetails.billingHealthLabel || 'Free Trial Active'}
-                                </span>
-                              ) : subDetails.cancelAtPeriodEnd ? (
-                                <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                                  Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                                </span>
-                              ) : (
-                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                                  Active Partner Listing <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                </span>
-                              )}
+                              Account Status
+                            </span>
+                            <span className="bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-gray-200">
+                              Free Account
+                            </span>
+                          </div>
+                          
+                          <div className="p-5 flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5 text-left">
+                              <span className="text-xs font-bold text-[#4A3E3D] uppercase tracking-wider">AI Usage Allowance</span>
+                              <p className="text-xs text-gray-600 leading-relaxed">
+                                Standard free accounts get <strong>2 lifetime AI checks</strong> across all tools.
+                              </p>
                             </div>
 
-                            <div className="p-5 flex flex-col gap-3.5">
-                              <div className="flex flex-col gap-1">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Business Name</span>
-                                <p className="text-[#191919] font-extrabold text-base">
-                                  {subDetails.businessName}
-                                </p>
-                              </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                setLoading(true);
+                                setError(null);
+                                try {
+                                  const res = await fetch('/api/stripe/checkout', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email: email.trim() })
+                                  });
+                                  const data = await res.json();
+                                  if (data.url) {
+                                    window.location.href = data.url;
+                                  } else {
+                                    throw new Error(data.error || 'Failed to start checkout');
+                                  }
+                                } catch (err: any) {
+                                  setError(err.message || 'Failed to start checkout.');
+                                } finally {
+                                  setLoading(false);
+                                }
+                              }}
+                              disabled={loading}
+                              className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              Upgrade to Membership ($4.99/mo) →
+                            </button>
 
-                              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#FAF6F2]">
-                                <div>
-                                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Business Plan</span>
-                                  <p className="text-xs font-extrabold text-[#8B5E3C] mt-0.5">
-                                    {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 40}/mo)
-                                  </p>
-                                </div>
-                                <div>
-                                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
-                                    {subDetails.rawSubscriptionStatus === 'trialing' ? 'Trial Ends On' : subDetails.cancelAtPeriodEnd ? 'Access Ends On' : 'Next Billing Date'}
-                                  </span>
-                                  <p className="text-xs font-extrabold text-gray-800 mt-0.5">
-                                    {subDetails.nextBillingDate}
-                                  </p>
-                                </div>
-                              </div>
+                            {/* Subtle Partner Registration Note */}
+                            <div className="pt-2.5 mt-1 border-t border-gray-100 text-center">
+                              <p className="text-[11px] text-gray-500 font-medium">
+                                Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
+                                <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
+                                  Register as a Partner →
+                                </Link>
+                              </p>
                             </div>
                           </div>
-
-                          {subDetails.cancelAtPeriodEnd && (
-                            <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-semibold leading-relaxed">
-                              Subscription scheduled to cancel — listing stays active until <strong>{subDetails.nextBillingDate}</strong>.
-                            </div>
+                        </div>
+                      ) : (
+                        <>
+                          {error && (
+                            <p className="text-xs text-red-500 font-semibold text-center leading-normal">
+                              <span className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
+                            </p>
                           )}
 
-                          {subDetails.rawSubscriptionStatus === 'trialing' ? (
-                            <div className="flex gap-2.5">
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  if (!subDetails.dbPartnerType) return;
-                                  setLoading(true);
-                                  setError(null);
-                                  try {
-                                    const res = await fetch('/api/stripe/checkout-partner', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        partner_id: subDetails.partnerId,
-                                        partner_type: subDetails.dbPartnerType,
-                                        email: email.trim(),
-                                      }),
-                                    });
-                                    const data = await res.json();
-                                    if (!res.ok) throw new Error(data.error || 'Failed to start checkout.');
-                                    if (data.url) window.location.href = data.url;
-                                  } catch (err: any) {
-                                    setError(err.message || 'Unable to connect to Stripe.');
-                                    setLoading(false);
-                                  }
-                                }}
-                                disabled={loading}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                          {subDetails.adminBypass ? (
+                            <div className="bg-amber-50 border border-amber-200/50 text-amber-800 rounded-xl p-4 text-xs font-medium text-center leading-relaxed">
+                              <Info className="w-4 h-4 text-amber-600 shrink-0 inline mr-1.5" /> Admin accounts represent permanent lifetime credentials and cannot be cancelled through this dashboard.
+                            </div>
+                          ) : subDetails.isPartner ? (
+                            <div className="flex flex-col gap-4">
+                              <div 
+                                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                                className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
                               >
-                                {loading ? (
-                                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <>
-                                    <CreditCard className="w-3.5 h-3.5" />
-                                    Start Billing Now (${subDetails.priceUsd || 40}/mo)
-                                  </>
-                                )}
-                              </button>
-                              <Link
-                                href={subDetails.dashboardUrl || '/'}
-                                className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
-                              >
-                                Business Dashboard →
-                              </Link>
+                                <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                                  <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                                      🏢
+                                    </span>
+                                    Subscription Status
+                                  </span>
+                                  {subDetails.rawSubscriptionStatus === 'trialing' ? (
+                                    <span className="bg-amber-100 text-amber-900 border border-amber-300/70 text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-3xs flex items-center gap-1.5">
+                                      <Sparkles className="w-3.5 h-3.5 text-amber-700" /> {subDetails.billingHealthLabel || 'Free Trial Active'}
+                                    </span>
+                                  ) : subDetails.cancelAtPeriodEnd ? (
+                                    <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                      Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                                    </span>
+                                  ) : (
+                                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                      Active Partner Listing <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="p-5 flex flex-col gap-3.5">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Business Name</span>
+                                    <p className="text-[#191919] font-extrabold text-base">
+                                      {subDetails.businessName}
+                                    </p>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#FAF6F2]">
+                                    <div>
+                                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Business Plan</span>
+                                      <p className="text-xs font-extrabold text-[#8B5E3C] mt-0.5">
+                                        {subDetails.partnerLabel || 'Partner'} (${subDetails.priceUsd || 40}/mo)
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                                        {subDetails.rawSubscriptionStatus === 'trialing' ? 'Trial Ends On' : subDetails.cancelAtPeriodEnd ? 'Access Ends On' : 'Next Billing Date'}
+                                      </span>
+                                      <p className="text-xs font-extrabold text-gray-800 mt-0.5">
+                                        {subDetails.nextBillingDate}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {subDetails.cancelAtPeriodEnd && (
+                                <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs font-semibold leading-relaxed">
+                                  Subscription scheduled to cancel — listing stays active until <strong>{subDetails.nextBillingDate}</strong>.
+                                </div>
+                              )}
+
+                              {subDetails.rawSubscriptionStatus === 'trialing' ? (
+                                <div className="flex gap-2.5">
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      if (!subDetails.dbPartnerType) return;
+                                      setLoading(true);
+                                      setError(null);
+                                      try {
+                                        const res = await fetch('/api/stripe/checkout-partner', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                            partner_id: subDetails.partnerId,
+                                            partner_type: subDetails.dbPartnerType,
+                                            email: email.trim(),
+                                          }),
+                                        });
+                                        const data = await res.json();
+                                        if (!res.ok) throw new Error(data.error || 'Failed to start checkout.');
+                                        if (data.url) window.location.href = data.url;
+                                      } catch (err: any) {
+                                        setError(err.message || 'Unable to connect to Stripe.');
+                                        setLoading(false);
+                                      }
+                                    }}
+                                    disabled={loading}
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                  >
+                                    {loading ? (
+                                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      <>
+                                        <CreditCard className="w-3.5 h-3.5" />
+                                        Start Billing Now (${subDetails.priceUsd || 40}/mo)
+                                      </>
+                                    )}
+                                  </button>
+                                  <Link
+                                    href={subDetails.dashboardUrl || '/'}
+                                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                  >
+                                    Business Dashboard →
+                                  </Link>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col gap-2.5">
+                                  {subDetails.cancelAtPeriodEnd && (
+                                    <button
+                                      type="button"
+                                      onClick={handleReactivatePartnerSubscription}
+                                      disabled={loading}
+                                      className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                    >
+                                      {loading ? (
+                                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      ) : (
+                                        <>
+                                          <Sparkles className="w-3.5 h-3.5" />
+                                          Resume Automatic Renewal (${subDetails.priceUsd || 40}/mo)
+                                        </>
+                                      )}
+                                    </button>
+                                  )}
+                                  <Link
+                                    href={subDetails.dashboardUrl || '/'}
+                                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
+                                  >
+                                    Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
+                                  </Link>
+                                  {!subDetails.cancelAtPeriodEnd && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowConfirmCancel(true)}
+                                      className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center mt-1 flex items-center justify-center gap-1.5"
+                                    >
+                                      <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> Cancel Subscription
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ) : (
-                            <div className="flex flex-col gap-2.5">
-                              {subDetails.cancelAtPeriodEnd && (
-                                <button
-                                  type="button"
-                                  onClick={handleReactivatePartnerSubscription}
-                                  disabled={loading}
-                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-extrabold text-xs transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
-                                >
-                                  {loading ? (
-                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Sparkles className="w-3.5 h-3.5" />
-                                      Resume Automatic Renewal (${subDetails.priceUsd || 40}/mo)
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                              <Link
-                                href={subDetails.dashboardUrl || '/'}
-                                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-extrabold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-2"
+                            <div className="flex flex-col gap-4">
+                              <div 
+                                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                                className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
                               >
-                                Manage {subDetails.partnerLabel || 'Partner'} Listing in Dashboard →
-                              </Link>
-                              {!subDetails.cancelAtPeriodEnd && (
+                                <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                                  <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                                      ✨
+                                    </span>
+                                    Membership Status
+                                  </span>
+                                  {subDetails.cancelAtPeriodEnd ? (
+                                    <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                      Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                                    </span>
+                                  ) : (
+                                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
+                                      Active Membership <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="p-5 flex flex-col gap-3">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                      {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
+                                    </span>
+                                    <p className="text-[#191919] font-extrabold text-sm mt-0.5">
+                                      {subDetails.nextBillingDate}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {subDetails.cancelAtPeriodEnd ? (
+                                <div className="flex flex-col gap-3">
+                                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
+                                    Subscription cancelled — Membership access continues until <strong>{subDetails.nextBillingDate}</strong> (5 daily AI checks).
+                                    {subDetails.daysRemaining !== undefined && (
+                                      <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
+                                    )}
+                                  </div>
+                                  {(subDetails.daysRemaining ?? 0) > 0 ? (
+                                    <button
+                                      onClick={async () => {
+                                        setLoading(true);
+                                        setError(null);
+                                        try {
+                                          const res = await fetch('/api/stripe/reactivate-subscription', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
+                                          });
+                                          const data = await res.json();
+                                          if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
+                                          setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
+                                        } catch (err: any) {
+                                          setError(err.message);
+                                        } finally {
+                                          setLoading(false);
+                                        }
+                                      }}
+                                      disabled={loading}
+                                      className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                    >
+                                      {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                        <>
+                                          <RefreshCw className="w-4 h-4" />
+                                          Reactivate Membership
+                                        </>
+                                      )}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={async () => {
+                                        setLoading(true);
+                                        setError(null);
+                                        try {
+                                          const res = await fetch('/api/stripe/checkout', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ email: email.trim() })
+                                          });
+                                          const data = await res.json();
+                                          if (data.url) {
+                                            window.location.href = data.url;
+                                          } else {
+                                            throw new Error(data.error || 'Failed to start checkout');
+                                          }
+                                        } catch (err: any) {
+                                          setError(err.message);
+                                          setLoading(false);
+                                        }
+                                      }}
+                                      disabled={loading}
+                                      className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
+                                    >
+                                      {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
+                                        <>
+                                          <Sparkles className="w-4 h-4 text-white" />
+                                          Upgrade to Membership ($4.99/mo)
+                                        </>
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
                                 <button
                                   type="button"
                                   onClick={() => setShowConfirmCancel(true)}
-                                  className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer text-center mt-1 flex items-center justify-center gap-1.5"
+                                  className="w-full bg-white hover:bg-red-50 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
                                 >
-                                  <AlertTriangle className="w-3.5 h-3.5 text-red-500" /> Cancel Subscription
+                                  Cancel Membership
                                 </button>
                               )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 4: 🔒 SECURITY & PRIVACY */}
+                  {accountTab === 'security' && (
+                    <div className="flex flex-col gap-4 animate-fade-in">
+                      {/* Blocked Pet Sitters & Owners (Pet Sitting) */}
+                      <div 
+                        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                        className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden"
+                      >
+                        <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                          <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
+                              🚫
+                            </span>
+                            Blocked Sitters & Owners
+                          </span>
+                        </div>
+
+                        <div className="p-5 flex flex-col gap-3">
+                          {blockedUsers.length === 0 ? (
+                            <p className="text-xs text-gray-400 font-medium italic">No blocked users</p>
+                          ) : (
+                            <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                              {blockedUsers.map((user: any) => (
+                                <div key={user.id} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
+                                  <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={user.blocked_email}>
+                                    {user.blocked_email}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnblockUser(user.blocked_email)}
+                                    className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                                  >
+                                    Unblock
+                                  </button>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
-                      ) : (
-                        <div className="flex flex-col gap-4">
-                          <div 
-                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                            className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden shadow-xs"
-                          >
-                            <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
-                              <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
-                                  ✨
-                                </span>
-                                Membership Status
+                      </div>
+
+                      {/* Blocked Users Section */}
+                      {blockedEmails.length > 0 && (
+                        <div 
+                          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                          className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden"
+                        >
+                          <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
+                            <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
+                                🚫
                               </span>
-                              {subDetails.cancelAtPeriodEnd ? (
-                                <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                                  Scheduled to Cancel <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                                </span>
-                              ) : (
-                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-3xs flex items-center gap-1">
-                                  Active Membership <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="p-5 flex flex-col gap-3">
-                              <div className="flex flex-col gap-1">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                  {subDetails.cancelAtPeriodEnd ? "Access Ends On" : "Next Billing Date"}
-                                </span>
-                                <p className="text-[#191919] font-extrabold text-sm mt-0.5">
-                                  {subDetails.nextBillingDate}
-                                </p>
-                              </div>
-                            </div>
+                              Blocked Users
+                            </span>
                           </div>
-
-                          {subDetails.cancelAtPeriodEnd ? (
-                            <div className="flex flex-col gap-3">
-                              <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-sm font-semibold leading-relaxed">
-                                Subscription cancelled — Membership access continues until <strong>{subDetails.nextBillingDate}</strong> (5 daily AI checks).
-                                {subDetails.daysRemaining !== undefined && (
-                                  <span className="text-amber-700 font-normal block mt-1">{subDetails.daysRemaining} days remaining.</span>
-                                )}
+                          <div className="p-5 flex flex-col gap-2 max-h-40 overflow-y-auto">
+                            {blockedEmails.map((blockedEmail) => (
+                              <div key={blockedEmail} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
+                                <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedEmail}>
+                                  {blockedEmail}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUnblockEmail(blockedEmail)}
+                                  className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                                >
+                                  Unblock
+                                </button>
                               </div>
-                              {(subDetails.daysRemaining ?? 0) > 0 ? (
-                                <button
-                                  onClick={async () => {
-                                    setLoading(true);
-                                    setError(null);
-                                    try {
-                                      const res = await fetch('/api/stripe/reactivate-subscription', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ subscriptionId: subDetails.subscriptionId })
-                                      });
-                                      const data = await res.json();
-                                      if (!res.ok) throw new Error(data.error || 'Failed to reactivate');
-                                      setSubDetails(prev => prev ? { ...prev, cancelAtPeriodEnd: false } : null);
-                                    } catch (err: any) {
-                                      setError(err.message);
-                                    } finally {
-                                      setLoading(false);
-                                    }
-                                  }}
-                                  disabled={loading}
-                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
-                                >
-                                  {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                                    <>
-                                      <RefreshCw className="w-4 h-4" />
-                                      Reactivate Membership
-                                    </>
-                                  )}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={async () => {
-                                    setLoading(true);
-                                    setError(null);
-                                    try {
-                                      const res = await fetch('/api/stripe/checkout', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ email: email.trim() })
-                                      });
-                                      const data = await res.json();
-                                      if (data.url) {
-                                        window.location.href = data.url;
-                                      } else {
-                                        throw new Error(data.error || 'Failed to start checkout');
-                                      }
-                                    } catch (err: any) {
-                                      setError(err.message);
-                                      setLoading(false);
-                                    }
-                                  }}
-                                  disabled={loading}
-                                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm transition-all shadow-md cursor-pointer text-center flex items-center justify-center gap-1.5"
-                                >
-                                  {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> : (
-                                    <>
-                                      <Sparkles className="w-4 h-4 text-white" />
-                                      Upgrade to Membership ($4.99/mo)
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmCancel(true)}
-                              className="w-full bg-white hover:bg-red-50 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-1.5"
-                            >
-                              Cancel Membership
-                            </button>
-                          )}
+                            ))}
+                          </div>
                         </div>
                       )}
-                    </>
-                  )}
 
-                   {/* Blocked Pet Sitters & Owners (Pet Sitting) */}
-                   <div 
-                     style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                     className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden mt-4"
-                   >
-                     <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
-                       <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
-                         <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
-                           🚫
-                         </span>
-                         Blocked Sitters & Owners
-                       </span>
-                     </div>
-
-                     <div className="p-5 flex flex-col gap-3">
-                       {blockedUsers.length === 0 ? (
-                         <p className="text-xs text-gray-400 font-medium italic">No blocked users</p>
-                       ) : (
-                         <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                           {blockedUsers.map((user: any) => (
-                             <div key={user.id} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
-                               <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={user.blocked_email}>
-                                 {user.blocked_email}
-                               </span>
-                               <button
-                                 type="button"
-                                 onClick={() => handleUnblockUser(user.blocked_email)}
-                                 className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
-                               >
-                                 Unblock
-                               </button>
-                             </div>
-                           ))}
-                         </div>
-                       )}
-                     </div>
-                   </div>
-
-                   {/* Blocked Users Section */}
-                  {blockedEmails.length > 0 && (
-                    <div 
-                      style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                      className="bg-white border border-[#DFD3C7] rounded-2xl overflow-hidden mt-4"
-                    >
-                      <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
-                            🚫
-                          </span>
-                          Blocked Users
-                        </span>
-                      </div>
-                      <div className="p-5 flex flex-col gap-2 max-h-40 overflow-y-auto">
-                        {blockedEmails.map((blockedEmail) => (
-                          <div key={blockedEmail} className="flex items-center justify-between bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-2.5 shadow-2xs">
-                            <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedEmail}>
-                              {blockedEmail}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleUnblockEmail(blockedEmail)}
-                              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
-                            >
-                              Unblock
-                            </button>
+                      {/* Blocked Cookies Section */}
+                      {blockedCookies.length > 0 && (
+                        <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3">
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Community Posters</span>
+                          <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+                            {blockedCookies.map((blockedCookie) => (
+                              <div key={blockedCookie} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedCookie}>
+                                  Poster {blockedCookie.substring(0, 8)}...
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUnblockCookie(blockedCookie)}
+                                  className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
+                                >
+                                  Unblock
+                                </button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      )}
+
+                      {/* Sign Out All Devices Button */}
+                      <button
+                        type="button"
+                        onClick={handleSignOutAllDevices}
+                        className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+                      >
+                        <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
+                      </button>
+
+                      {/* Delete My Account Button */}
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmDelete(true)}
+                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2"
+                      >
+                        <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
+                      </button>
                     </div>
                   )}
-
-                  {/* Blocked Cookies Section */}
-                  {blockedCookies.length > 0 && (
-                    <div className="bg-[#FAF6F4] border border-[#8B5E3C]/10 rounded-2xl p-5 flex flex-col gap-3 mt-4">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Blocked Community Posters</span>
-                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
-                        {blockedCookies.map((blockedCookie) => (
-                          <div key={blockedCookie} className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                            <span className="text-xs font-bold text-gray-700 truncate max-w-[200px]" title={blockedCookie}>
-                              Poster {blockedCookie.substring(0, 8)}...
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleUnblockCookie(blockedCookie)}
-                              className="text-xs text-[#8B5E3C] hover:text-[#734A2E] font-extrabold hover:underline cursor-pointer bg-transparent border-none"
-                            >
-                              Unblock
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Sign Out All Devices Button */}
-                  <button
-                    type="button"
-                    onClick={handleSignOutAllDevices}
-                    className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
-                  >
-                    <Lock className="w-4 h-4 text-gray-500" /> Sign Out All Devices
-                  </button>
-
-                  {/* Delete My Account Button */}
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmDelete(true)}
-                    className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center mt-2 flex items-center justify-center gap-2"
-                  >
-                    <AlertTriangle className="w-4 h-4 text-red-500" /> Delete My Account
-                  </button>
                 </div>
               )}
               {showConfirmCancel && (

@@ -59,12 +59,24 @@ interface AccessGrant {
   };
 }
 
-export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
+export default function AccountPetsTab({ 
+  ownerEmail,
+  forcedTab
+}: { 
+  ownerEmail: string;
+  forcedTab?: 'pets' | 'access';
+}) {
   const [pets, setPets] = useState<Pet[]>([]);
   const [grants, setGrants] = useState<AccessGrant[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'pets' | 'access'>('pets');
+  const [activeTab, setActiveTab] = useState<'pets' | 'access'>(forcedTab || 'pets');
+
+  useEffect(() => {
+    if (forcedTab) {
+      setActiveTab(forcedTab);
+    }
+  }, [forcedTab]);
   
   // Edit modal state
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
@@ -282,38 +294,40 @@ export default function AccountPetsTab({ ownerEmail }: { ownerEmail: string }) {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* Sub-nav toggle */}
-      <div className="flex bg-[#F5EFEB] p-1 rounded-2xl gap-1 border border-[#EBE3DC]">
-        <button
-          type="button"
-          onClick={() => setActiveTab('pets')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === 'pets' ? 'bg-white text-[#191919] shadow-xs' : 'text-[#777777] hover:text-[#191919]'
-          }`}
-        >
-          <PawPrint className="w-3.5 h-3.5 text-[#8B5E3C]" />
-          My Pets ({pets.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('access')}
-          className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === 'access' ? 'bg-white text-[#191919] shadow-xs' : 'text-[#777777] hover:text-[#191919]'
-          }`}
-        >
-          <ShieldCheck className="w-3.5 h-3.5 text-[#63825D]" />
-          Profile Access Control
-          {grants.filter(g => (g.effective_status || g.status) === 'pending').length > 0 ? (
-            <span className="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse">
-              {grants.filter(g => (g.effective_status || g.status) === 'pending').length} Pending
-            </span>
-          ) : (
-            <span className="text-gray-400 font-normal">
-              ({grants.filter(g => (g.effective_status || g.status) === 'active').length} Active)
-            </span>
-          )}
-        </button>
-      </div>
+      {/* Sub-nav toggle — hidden if controlled externally */}
+      {!forcedTab && (
+        <div className="flex bg-[#F5EFEB] p-1 rounded-2xl gap-1 border border-[#EBE3DC]">
+          <button
+            type="button"
+            onClick={() => setActiveTab('pets')}
+            className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'pets' ? 'bg-white text-[#191919] shadow-xs' : 'text-[#777777] hover:text-[#191919]'
+            }`}
+          >
+            <PawPrint className="w-3.5 h-3.5 text-[#8B5E3C]" />
+            My Pets ({pets.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('access')}
+            className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'access' ? 'bg-white text-[#191919] shadow-xs' : 'text-[#777777] hover:text-[#191919]'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#63825D]" />
+            Profile Access Control
+            {grants.filter(g => (g.effective_status || g.status) === 'pending').length > 0 ? (
+              <span className="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse">
+                {grants.filter(g => (g.effective_status || g.status) === 'pending').length} Pending
+              </span>
+            ) : (
+              <span className="text-gray-400 font-normal">
+                ({grants.filter(g => (g.effective_status || g.status) === 'active').length} Active)
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex flex-col items-center py-10 gap-2">
