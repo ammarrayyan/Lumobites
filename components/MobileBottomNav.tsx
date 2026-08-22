@@ -45,23 +45,26 @@ export default function MobileBottomNav() {
         WebkitTransform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         zIndex: 9999,
-        backgroundColor: 'rgba(255, 255, 255, 0.45)',
-        backdropFilter: 'blur(24px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(200%)',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(224, 231, 239, 0.72) 22%, rgba(255, 255, 255, 0.95) 45%, rgba(203, 213, 225, 0.65) 55%, rgba(241, 245, 249, 0.80) 80%, rgba(255, 255, 255, 0.92) 100%)',
+        backdropFilter: 'blur(32px) saturate(220%) brightness(104%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(220%) brightness(104%)',
+        boxShadow: 'inset 0 1.5px 0.5px rgba(255, 255, 255, 0.95), inset 0 -1.5px 1px rgba(100, 116, 139, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 16px 44px -8px rgba(15, 23, 42, 0.20), 0 4px 12px rgba(0, 0, 0, 0.08)',
         borderRadius: '36px',
-        border: '1px solid rgba(255, 255, 255, 0.55)',
+        border: '1px solid rgba(255, 255, 255, 0.75)',
         pointerEvents: 'auto',
       }}
     >
-      {/* Sliding Active Pill Background Indicator with Spring Bouncing Effect */}
+      {/* Sliding Active Pill in Polished Platinum / Chrome */}
       {activeIndex >= 0 && (
         <div 
-          className="absolute top-1.5 bottom-1.5 rounded-full bg-white/75 shadow-xs border border-white/60 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
+          className="absolute top-1.5 bottom-1.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
           style={{
             width: `calc(${100 / tabs.length}% - 6px)`,
             left: `calc(${activeIndex * (100 / tabs.length)}% + 3px)`,
             zIndex: 0,
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(226, 232, 240, 0.88) 50%, rgba(241, 245, 249, 0.95) 100%)',
+            boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 1), inset 0 -1px 1px rgba(148, 163, 184, 0.4), 0 2px 8px rgba(15, 23, 42, 0.12)',
+            border: '1px solid rgba(255, 255, 255, 0.9)',
           }}
         />
       )}
@@ -88,7 +91,7 @@ export default function MobileBottomNav() {
             <Icon
               className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#1F1712' : '#78716C',
+                color: isActive ? '#0F172A' : '#64748B',
                 fill: isActive ? 'currentColor' : 'none',
                 transform: isActive ? 'scale(1.18) translateY(-1px)' : 'scale(1)',
                 strokeWidth: isActive ? 2.4 : 1.8,
@@ -99,7 +102,7 @@ export default function MobileBottomNav() {
             <span
               className="text-[9.5px] font-extrabold tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#1F1712' : '#78716C',
+                color: isActive ? '#0F172A' : '#64748B',
                 fontWeight: isActive ? 800 : 600,
               }}
             >
@@ -108,7 +111,7 @@ export default function MobileBottomNav() {
 
             {/* Active Indicator Dot */}
             <span 
-              className="w-1 h-1 rounded-full bg-[#8B5E3C] absolute bottom-1 transition-all duration-300 ease-out"
+              className="w-1 h-1 rounded-full bg-[#0F172A] absolute bottom-1 transition-all duration-300 ease-out"
               style={{
                 opacity: isActive ? 1 : 0,
                 transform: isActive ? 'scale(1)' : 'scale(0)',
