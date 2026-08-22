@@ -11,6 +11,14 @@ interface Stats {
   proOwners: number;
   proSitters: number;
   proMembersCount: number;
+  payingVetCount?: number;
+  trialVetCount?: number;
+  payingDaycareCount?: number;
+  trialDaycareCount?: number;
+  payingShelterCount?: number;
+  trialShelterCount?: number;
+  totalPayingPartners?: number;
+  totalTrialPartners?: number;
   partnerVetCount: number;
   partnerDaycareCount: number;
   partnerShelterCount: number;
@@ -18,6 +26,7 @@ interface Stats {
   unlimitedAdminCount: number;
   monthlyAiMemberRevenue: number;
   monthlyPartnerRevenue: number;
+  potentialTrialPartnerRevenue?: number;
   totalMonthlyRevenue: number;
   newSignups: number;
   totalLostPets: number;
@@ -61,6 +70,9 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
     return <div className="text-red-600 text-center py-12">Error loading statistics.</div>;
   }
 
+  const payingPartners = stats.totalPayingPartners ?? 0;
+  const trialPartners = stats.totalTrialPartners ?? (stats.totalPartnersCount - payingPartners);
+
   return (
     <div className="space-y-8">
       <div>
@@ -77,7 +89,9 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
             <div className="text-3xl font-extrabold text-emerald-700">
               ${(stats.totalMonthlyRevenue || 0).toFixed(2)}<span className="text-sm font-normal text-emerald-600">/mo</span>
             </div>
-            <p className="text-xs text-emerald-700/80 mt-2">Combined partner subscriptions + AI memberships</p>
+            <p className="text-xs text-emerald-700/80 mt-2">
+              Combined active paying partner subscriptions + AI memberships
+            </p>
           </div>
 
           <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/20 p-6 rounded-2xl border border-purple-200 flex flex-col justify-between">
@@ -102,7 +116,7 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
               ${(stats.monthlyPartnerRevenue || 0).toFixed(2)}<span className="text-sm font-normal text-blue-600">/mo</span>
             </div>
             <p className="text-xs text-blue-700/80 mt-2">
-              {stats.totalPartnersCount} active partners (Vet/Daycare/Shelter)
+              {payingPartners} paying {payingPartners === 1 ? 'partner' : 'partners'} • {trialPartners} {trialPartners === 1 ? 'trial' : 'trials'} ($0 revenue yet)
             </p>
           </div>
         </div>
@@ -115,22 +129,33 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
               <span className="text-xs text-gray-500 block mb-1">AI Members</span>
               <span className="text-2xl font-bold text-purple-600">{stats.proMembersCount}</span>
+              <span className="text-[10px] text-gray-400 block mt-0.5">$4.99/mo</span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-              <span className="text-xs text-gray-500 block mb-1">Vet Boarding ($40/mo)</span>
-              <span className="text-2xl font-bold text-blue-600">{stats.partnerVetCount}</span>
+              <span className="text-xs text-gray-500 block mb-1">Vet Boarding</span>
+              <span className="text-2xl font-bold text-blue-600">{stats.payingVetCount ?? 0}</span>
+              <span className="text-[10px] text-blue-700/70 block mt-0.5 font-medium">
+                {stats.trialVetCount ? `+${stats.trialVetCount} trialing` : '$40/mo'}
+              </span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-              <span className="text-xs text-gray-500 block mb-1">Daycare ($30/mo)</span>
-              <span className="text-2xl font-bold text-amber-600">{stats.partnerDaycareCount}</span>
+              <span className="text-xs text-gray-500 block mb-1">Daycare</span>
+              <span className="text-2xl font-bold text-amber-600">{stats.payingDaycareCount ?? 0}</span>
+              <span className="text-[10px] text-amber-700/70 block mt-0.5 font-medium">
+                {stats.trialDaycareCount ? `+${stats.trialDaycareCount} trialing` : '$30/mo'}
+              </span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
-              <span className="text-xs text-gray-500 block mb-1">Shelters ($20/mo)</span>
-              <span className="text-2xl font-bold text-emerald-600">{stats.partnerShelterCount}</span>
+              <span className="text-xs text-gray-500 block mb-1">Shelters</span>
+              <span className="text-2xl font-bold text-emerald-600">{stats.payingShelterCount ?? 0}</span>
+              <span className="text-[10px] text-emerald-700/70 block mt-0.5 font-medium">
+                {stats.trialShelterCount ? `+${stats.trialShelterCount} trialing` : '$20/mo'}
+              </span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">
               <span className="text-xs text-gray-500 block mb-1">Admin Unlimited</span>
               <span className="text-2xl font-bold text-gray-700">{stats.unlimitedAdminCount}</span>
+              <span className="text-[10px] text-gray-400 block mt-0.5">Complimentary</span>
             </div>
           </div>
         </div>
