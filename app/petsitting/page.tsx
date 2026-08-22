@@ -1327,11 +1327,13 @@ export function PetSittingContent() {
     try {
       const email = reqEmail || (typeof window !== 'undefined' ? (localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email')) : null) || '';
       const sitterIds = filteredSitters.map(s => s.id);
+      const clinicIds = filteredVetClinics.map(c => c.id);
+      const daycareIds = filteredPetDaycares.map(d => d.id);
       
       const response = await fetch('/api/petsitting/ai-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: aiSitterSearch, email, sitterIds })
+        body: JSON.stringify({ query: aiSitterSearch, email, sitterIds, clinicIds, daycareIds })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -1343,11 +1345,11 @@ export function PetSittingContent() {
         }
         throw new Error(data.error || 'Search failed');
       }
-      setAiSitterResults(data.sitters || []);
+      setAiSitterResults(data.results || data.sitters || []);
     } catch (error: any) {
       console.error('AI search error:', error);
       setAiSitterResults([]); // empty array to trigger fallback
-      alert('Search unavailable — showing all sitters instead');
+      alert('Search unavailable — showing all options instead');
     } finally {
       setAiSearchLoading(false);
     }
@@ -3428,19 +3430,24 @@ export function PetSittingContent() {
     }
   }
 
-  if (aiSitterResults !== null && aiSitterResults.length > 0) {
-    filteredSitters = aiSitterResults.map(s => {
-      if (searchCoords && s.lat && s.lng) {
-        return { ...s, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, s.lat, s.lng) };
-      }
-      return s;
-    });
+  const isAiActive = aiSitterResults !== null;
+
+  if (isAiActive && aiSitterResults.length > 0) {
+    filteredSitters = aiSitterResults
+      .filter((s: any) => !s.type || s.type === 'sitter')
+      .map(s => {
+        const sitter = s.raw || s;
+        if (searchCoords && sitter.lat && sitter.lng) {
+          return { ...sitter, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(sitter.lat), Number(sitter.lng)) };
+        }
+        return sitter;
+      });
   }
 
-  const showVetSection = filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
-  const showDaycareSection = filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
-  const showSittersSection = (searchServiceType === 'all' || (searchServiceType !== 'Veterinary Boarding' && searchServiceType !== 'Pet Daycare')) && filteredSitters.length > 0;
-  const hasAnySearchResults = showVetSection || showDaycareSection || showSittersSection;
+  const showVetSection = !isAiActive && filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
+  const showDaycareSection = !isAiActive && filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
+  const showSittersSection = !isAiActive && (searchServiceType === 'all' || (searchServiceType !== 'Veterinary Boarding' && searchServiceType !== 'Pet Daycare')) && filteredSitters.length > 0;
+  const hasAnySearchResults = isAiActive ? aiSitterResults.length > 0 : (showVetSection || showDaycareSection || showSittersSection);
 
   const hasAnyRate = sitterRateDropins || sitterRateWalking || sitterRateOvernight || sitterRateBoarding || sitterRateDaycare;
   const isFormValid = sitterEmail.trim() && sitterFirstName.trim() && sitterLastName.trim() && sitterPhoto && (sitterIdPhoto || hasExistingIdPhoto) && sitterLocationInput.trim() && sitterLocationVerified && hasAnyRate && sitterBio.trim();
@@ -3808,171 +3815,408 @@ export function PetSittingContent() {
               </div>
             ) : (
               <>
-                {aiSitterResults !== null && aiSitterResults.length === 0 && (
-                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-5 text-sm font-semibold flex items-center gap-2 mb-6">
-                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                    <span>No exact matches found for "{aiSitterSearch}". Showing all results in your area instead.</span>
-                  </div>
-                )}
                 <div className="flex flex-col md:flex-row gap-8">
-                {/* Sitters List (Left on desktop, Below on mobile) */}
+                {/* Sitters & Care Providers List (Left on desktop, Below on mobile) */}
                 <div className="flex-1 order-2 md:order-1 min-h-[600px]">
-                  {showSittersSection && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredSitters.map(sitter => (
-                      <div
-                        key={sitter.id}
-                        id={`sitter-card-${sitter.id}`}
-                        onClick={() => handleViewReviews(sitter)}
-                        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                        className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
-                          highlightedSitterId === sitter.id 
-                            ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
-                            : 'border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-[#8B5E3C]/40 hover:-translate-y-0.5'
-                        }`}
-                      >
-                        {sitter.matchScore !== undefined && (
-                          <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-xl p-3.5 flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
-                                {sitter.matchScore}% Match
-                              </span>
-                            </div>
-                            {sitter.matchReason && (
-                              <p className="text-xs text-emerald-800 font-medium italic mt-1 leading-normal">
-                                "{sitter.matchReason}"
-                              </p>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-4 mb-4">
-                          {sitter.photo_url ? (
-                            <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
-                          ) : (
-                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0">
-                              {formatSitterName(sitter.name).charAt(0)}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                               <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
-                               {sitter.gender && (
-                                 <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
-                                   {sitter.gender}
-                                 </span>
-                               )}
-                               {sitter.approval_status === 'approved' && (
-                                 <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-green-200">
-                                   <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
-                                 </div>
-                               )}
-                               {sitter.completed_bookings && sitter.completed_bookings > 0 ? (
-                                 <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-[#8B5E3C]/20">
-                                   <Footprints className="w-3.5 h-3.5 inline mr-1" /> {sitter.completed_bookings} {sitter.completed_bookings === 1 ? 'booking' : 'bookings'} completed
-                                 </div>
-                               ) : null}
-                             </div>
-                             {reqEmail && (
-                                <div className="text-sm mb-1">
-                                  {sitter.review_count ? (
-                                    <span className="text-[#D97706] font-bold flex items-center gap-1">
-                                      <Star className="w-3.5 h-3.5 fill-[#D97706] text-[#D97706]" />
-                                      {sitter.avg_rating} <span className="text-[#8B7E7D] font-normal">({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})</span>
-                                    </span>
+                  {isAiActive && aiSitterResults && aiSitterResults.length > 0 ? (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-black text-[#4A3E3D]">✨ AI Care Matches</span>
+                          <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                            {aiSitterResults.length} {aiSitterResults.length === 1 ? 'Match' : 'Matches'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-[#8B7E7D] italic">Ranked by Claude AI</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {aiSitterResults.map((item: any) => {
+                          const isSitter = !item.type || item.type === 'sitter';
+                          const isVet = item.type === 'vet';
+                          const isDaycare = item.type === 'daycare';
+
+                          if (isSitter) {
+                            const sitter = item.raw || item;
+                            return (
+                              <div
+                                key={`ai-sitter-${sitter.id || item.id}`}
+                                id={`sitter-card-${sitter.id}`}
+                                onClick={() => handleViewReviews(sitter)}
+                                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                                className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer flex flex-col justify-between ${
+                                  highlightedSitterId === sitter.id 
+                                    ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
+                                    : 'border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-[#8B5E3C]/40 hover:-translate-y-0.5'
+                                }`}
+                              >
+                                <div>
+                                  {/* AI Match Header */}
+                                  <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-xl p-3.5 flex flex-col gap-1">
+                                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                                      <span className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
+                                        {item.matchScore || sitter.matchScore || 90}% Match
+                                      </span>
+                                      <span className="bg-amber-100 text-amber-900 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
+                                        🐾 Pet Sitter
+                                      </span>
+                                    </div>
+                                    {(item.matchReason || sitter.matchReason) && (
+                                      <p className="text-xs text-emerald-800 font-medium italic mt-1 leading-normal">
+                                        "{item.matchReason || sitter.matchReason}"
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="flex flex-col gap-4 mb-4">
+                                    {sitter.photo_url ? (
+                                      <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
+                                    ) : (
+                                      <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0">
+                                        {formatSitterName(sitter.name).charAt(0)}
+                                      </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                        <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
+                                        {sitter.approval_status === 'approved' && (
+                                          <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-green-200">
+                                            <ShieldCheck className="w-3.5 h-3.5" /> Verified
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-[#8B7E7D] mb-2 flex items-center gap-1">
+                                        <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                                        <span>{formatPublicCity(sitter.city)}</span>
+                                      </div>
+                                      {sitter.bio && (
+                                        <p className={`text-sm text-[#555555] line-clamp-3 mb-4 leading-relaxed ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>
+                                          {sitter.bio}
+                                        </p>
+                                      )}
+                                      {sitter.service_types && (
+                                        <div className="flex flex-wrap gap-1.5 mb-2">
+                                          {sitter.service_types.map((type: string) => (
+                                            <span key={type} className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-[#FAF6F4] text-[#8B5E3C] rounded-lg border border-[#E8DDD4]/60">
+                                              {type}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-[#DFD3C7]/60 flex items-center justify-between mt-auto">
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B7E7D]">Starting from</span>
+                                    <div className="flex items-baseline gap-1">
+                                      <span className="text-xl font-black text-[#8B5E3C]">
+                                        ${sitter.rate_per_night || 35}
+                                      </span>
+                                      <span className="text-xs text-[#8B7E7D]">/night</span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleViewReviews(sitter); }}
+                                    className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                  >
+                                    View Profile & Book &rarr;
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (isVet) {
+                            const clinic = item.raw || item;
+                            return (
+                              <div
+                                key={`ai-vet-${clinic.id || item.id}`}
+                                className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                                onClick={() => {
+                                  if (!reqEmail) {
+                                    window.dispatchEvent(new Event('lumo-open-signin'));
+                                    return;
+                                  }
+                                  setInquiringClinic(clinic);
+                                }}
+                              >
+                                <div>
+                                  {/* AI Match Header */}
+                                  <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-xl p-3.5 flex flex-col gap-1">
+                                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                                      <span className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
+                                        {item.matchScore || 90}% Match
+                                      </span>
+                                      <span className="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-blue-200 flex items-center gap-1">
+                                        🏥 Vet Boarding Clinic
+                                      </span>
+                                    </div>
+                                    {item.matchReason && (
+                                      <p className="text-xs text-blue-900 font-medium italic mt-1 leading-normal">
+                                        "{item.matchReason}"
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="flex gap-4 mb-3">
+                                    <div className="shrink-0">
+                                      {clinic.org_photo_url ? (
+                                        <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
+                                      ) : (
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">
+                                          🏥
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                                        <h3 className="text-base font-bold text-[#4A3E3D]">{clinic.clinic_name}</h3>
+                                        <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                          <ShieldCheck className="w-3 h-3" /> Verified
+                                        </span>
+                                      </div>
+                                      <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-2">
+                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-blue-600" />
+                                        {formatPublicCity(clinic.city || clinic.address)}
+                                      </p>
+                                      {clinic.description && (
+                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
+                                      )}
+                                      {clinic.services && clinic.services.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mb-2">
+                                          {clinic.services.slice(0, 4).map((s: string) => (
+                                            <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{s}</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-4 pt-3 border-t border-gray-100">
+                                  {reqEmail ? (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
+                                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
+                                    >
+                                      <MessageSquare className="w-4 h-4" /> Inquire About Boarding
+                                    </button>
                                   ) : (
-                                    <span className="text-[#8B7E7D]">No reviews yet</span>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
+                                      className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200 btn-gloss cursor-pointer"
+                                    >
+                                      Sign in to Inquire
+                                    </button>
                                   )}
                                 </div>
-                              )}
-                            <p className="text-[#8B7E7D] text-sm flex items-center gap-1">
-                              <MapPin className="w-3.5 h-3.5 text-gray-400" /> {formatPublicCity(sitter.city)}
-                            </p>
-                            {sitter.phone_number && (
-                              <p className="text-[#8B7E7D] text-sm flex items-center gap-1 mt-1">
-                                <Phone className="w-3.5 h-3.5 text-gray-400" /> <span className={sitter.phone_number.includes('***') && !reqEmail ? 'blur-[3px] select-none text-[#555555]' : 'font-semibold text-[#4A3E3D]'}>{sitter.phone_number}</span>
-                              </p>
-                            )}
-                            {sitter.distance !== undefined && (
-                              <p className="text-[#8B5E3C] text-xs font-bold mt-0.5 ml-5">
-                                {sitter.distance.toFixed(1)} miles away
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                              </div>
+                            );
+                          }
 
-                        <p className={`text-[#555555] text-sm mb-4 line-clamp-3 h-[60px] ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{sitter.bio}</p>
+                          if (isDaycare) {
+                            const daycare = item.raw || item;
+                            return (
+                              <div
+                                key={`ai-daycare-${daycare.id || item.id}`}
+                                className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-emerald-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                                onClick={() => {
+                                  if (!reqEmail) {
+                                    window.dispatchEvent(new Event('lumo-open-signin'));
+                                    return;
+                                  }
+                                  setInquiringDaycare(daycare);
+                                }}
+                              >
+                                <div>
+                                  {/* AI Match Header */}
+                                  <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-xl p-3.5 flex flex-col gap-1">
+                                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                                      <span className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
+                                        {item.matchScore || 90}% Match
+                                      </span>
+                                      <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                                        🐕 Pet Daycare
+                                      </span>
+                                    </div>
+                                    {item.matchReason && (
+                                      <p className="text-xs text-emerald-900 font-medium italic mt-1 leading-normal">
+                                        "{item.matchReason}"
+                                      </p>
+                                    )}
+                                  </div>
 
-                        <div className="flex flex-col gap-2 mb-4">
-                          {(sitter.available_days?.length || 0) > 0 && (
-                            <p className="text-xs text-[#8B7E7D] flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-gray-400" /> <span className="font-semibold text-[#4A3E3D]">Available:</span> {sitter.available_days?.length === 7 ? 'All Week' : sitter.available_days?.includes('Saturday') && sitter.available_days?.includes('Sunday') && sitter.available_days?.length === 2 ? 'Weekends Only' : sitter.available_days?.join(', ')}
-                            </p>
-                          )}
-                          {(sitter.service_types?.length || 0) > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {sitter.service_types?.map(st => (
-                                <span key={st} className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#FAF6F4] px-2 py-0.5 rounded border border-[#E8DDD4] inline-flex items-center gap-1">
-                                  {st === 'Home visits' ? (
-                                    <><Home className="w-3 h-3" /> Drop-in</>
-                                  ) : st === 'Overnight stays' ? (
-                                    <><Moon className="w-3 h-3" /> Overnight</>
-                                  ) : st === 'Dog walking' ? (
-                                    <><Footprints className="w-3 h-3" /> Walking</>
+                                  <div className="flex gap-4 mb-3">
+                                    <div className="shrink-0">
+                                      {daycare.logo_url ? (
+                                        <img src={daycare.logo_url} alt={daycare.business_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
+                                      ) : (
+                                        <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl">
+                                          🐕
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                                        <h3 className="text-base font-bold text-[#4A3E3D]">{daycare.business_name}</h3>
+                                        <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                          <ShieldCheck className="w-3 h-3" /> Verified
+                                        </span>
+                                      </div>
+                                      <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-2">
+                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                                        {formatPublicCity(daycare.city || daycare.address)}
+                                      </p>
+                                      {daycare.description && (
+                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
+                                      )}
+                                      {daycare.services && daycare.services.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mb-2">
+                                          {daycare.services.slice(0, 4).map((s: string) => (
+                                            <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-4 pt-3 border-t border-gray-100">
+                                  {isOwnerPro ? (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
+                                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
+                                    >
+                                      <MessageSquare className="w-4 h-4" /> Inquire About Daycare
+                                    </button>
                                   ) : (
-                                    <><Home className="w-3 h-3" /> Boarding</>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setShowProPerksModal(true); }}
+                                      className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer flex items-center justify-center gap-1.5"
+                                    >
+                                      <Crown className="w-4 h-4 text-amber-500" /> Daycare Inquiries — Pro Feature
+                                    </button>
                                   )}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="text-sm font-semibold text-[#8B5E3C] bg-[#FAF6F4] px-3 py-1 rounded-lg">
-                            {sitter.pet_types === 'both' ? 'Dogs & Cats' : sitter.pet_types === 'dog' ? 'Dogs Only' : 'Cats Only'}
-                          </div>
-                          <div className="flex flex-col items-end gap-1 text-sm font-bold text-[#4A3E3D]">
-                            {sitter.rate_dropins && <div>Drop-in ${sitter.rate_dropins}<span className="text-[#8B7E7D] text-xs font-medium">/visit</span></div>}
-                            {sitter.rate_walking && <div>Walking ${sitter.rate_walking}<span className="text-[#8B7E7D] text-xs font-medium">/walk</span></div>}
-                            {sitter.rate_overnight && <div>Overnight ${sitter.rate_overnight}<span className="text-[#8B7E7D] text-xs font-medium">/night</span></div>}
-                            {sitter.rate_boarding && <div>Boarding ${sitter.rate_boarding}<span className="text-[#8B7E7D] text-xs font-medium">/night</span></div>}
-                            {sitter.rate_daycare && <div>Daycare ${sitter.rate_daycare}<span className="text-[#8B7E7D] text-xs font-medium">/day</span></div>}
-                            {!sitter.rate_dropins && !sitter.rate_walking && !sitter.rate_overnight && !sitter.rate_boarding && !sitter.rate_daycare && (
-                              <div className="text-lg">
-                                {(sitter.service_types?.length || 0) > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${sitter.rate_per_night}</> : <>${sitter.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/{sitter.rate_type || 'night'}</span></>}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {showSittersSection && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {filteredSitters.map(sitter => (
+                          <div
+                            key={sitter.id}
+                            id={`sitter-card-${sitter.id}`}
+                            onClick={() => handleViewReviews(sitter)}
+                            style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                            className={`bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer ${
+                              highlightedSitterId === sitter.id 
+                                ? 'border-[#8B5E3C] ring-4 ring-[#8B5E3C]/20 shadow-md scale-[1.01]' 
+                                : 'border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-[#8B5E3C]/40 hover:-translate-y-0.5'
+                            }`}
+                          >
+                            {sitter.matchScore !== undefined && (
+                              <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-xl p-3.5 flex flex-col gap-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-3xs">
+                                    {sitter.matchScore}% Match
+                                  </span>
+                                </div>
+                                {sitter.matchReason && (
+                                  <p className="text-xs text-emerald-800 font-medium italic mt-1 leading-normal">
+                                    "{sitter.matchReason}"
+                                  </p>
+                                )}
                               </div>
                             )}
-                          </div>
-                        </div>
+                            <div className="flex flex-col gap-4 mb-4">
+                              {sitter.photo_url ? (
+                                <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
+                              ) : (
+                                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#E8DDD4] flex items-center justify-center text-[#8B5E3C] font-bold text-4xl flex-shrink-0">
+                                  {formatSitterName(sitter.name).charAt(0)}
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                   <h3 className="text-xl font-bold text-[#4A3E3D]">{formatSitterName(sitter.name)}</h3>
+                                   {sitter.gender && (
+                                     <span className="text-[#8B7E7D] text-xs font-semibold px-2 py-0.5 bg-[#FAF6F4] rounded border border-[#E8DDD4]">
+                                       {sitter.gender}
+                                     </span>
+                                   )}
+                                   {sitter.approval_status === 'approved' && (
+                                     <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-green-200">
+                                       <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
+                                     </div>
+                                   )}
+                                   {sitter.completed_bookings && sitter.completed_bookings > 0 ? (
+                                     <div className="inline-flex items-center gap-1 bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold px-2.5 py-0.5 rounded-full mb-1 border border-[#8B5E3C]/20">
+                                       <Footprints className="w-3.5 h-3.5 inline mr-1" /> {sitter.completed_bookings} {sitter.completed_bookings === 1 ? 'booking' : 'bookings'} completed
+                                     </div>
+                                   ) : null}
+                                 </div>
+                                 {reqEmail && (
+                                    <div className="text-sm mb-1">
+                                      {sitter.review_count ? (
+                                        <span className="text-[#D97706] font-bold flex items-center gap-1">
+                                          <Star className="w-4 h-4 fill-current" />
+                                          {Number(sitter.avg_rating || 0).toFixed(1)} ({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})
+                                        </span>
+                                      ) : (
+                                        <span className="text-xs text-[#8B7E7D]">★ 5.0 (0 reviews) • New Sitter</span>
+                                      )}
+                                    </div>
+                                 )}
+                                 <div className="text-xs text-[#8B7E7D] mb-3 flex items-center gap-1">
+                                   <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                                   <span>{formatPublicCity(sitter.city)}</span>
+                                 </div>
+                                 {sitter.bio && (
+                                   <p className={`text-sm text-[#555555] line-clamp-3 mb-4 leading-relaxed ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>
+                                     {sitter.bio}
+                                   </p>
+                                 )}
+                                 {sitter.service_types && (
+                                   <div className="flex flex-wrap gap-1.5 mb-4">
+                                     {sitter.service_types.map((type: string) => (
+                                       <span key={type} className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-[#FAF6F4] text-[#8B5E3C] rounded-lg border border-[#E8DDD4]/60">
+                                         {type}
+                                       </span>
+                                     ))}
+                                   </div>
+                                 )}
+                              </div>
+                            </div>
 
-                        {(!reqEmail || !sitter.email || reqEmail.toLowerCase().trim() !== sitter.email.toLowerCase().trim()) && (
-                          <div className="mt-3 flex flex-col gap-2">
                             {reqEmail ? (
-                              <div className="flex flex-col gap-2">
+                              <div className="pt-4 border-t border-[#DFD3C7]/60 flex items-center justify-between mt-auto">
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B7E7D]">Starting from</span>
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-black text-[#8B5E3C]">
+                                      ${sitter.rate_per_night || 35}
+                                    </span>
+                                    <span className="text-xs text-[#8B7E7D]">/night</span>
+                                  </div>
+                                </div>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setSelectedSitter(sitter);
-                                    setRequestModalOpen(true);
+                                    handleViewReviews(sitter);
                                   }}
-                                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                                 >
-                                  <span>Request Sitter</span>
+                                  View Profile & Book &rarr;
                                 </button>
-                                {sitter.email && (
-                                  <div className="flex justify-end">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleBlockSitter(sitter.email);
-                                      }}
-                                      className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 bg-transparent border-none cursor-pointer"
-                                    >
-                                      <Ban className="w-3 h-3" />
-                                      Block Sitter
-                                    </button>
-                                  </div>
-                                )}
                               </div>
                             ) : (
                               <div className="text-center py-3 border-t border-[#E8DDD4] mt-3">
@@ -3988,181 +4232,181 @@ export function PetSittingContent() {
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  )}
-
-                  {/* ─── Veterinary Boarding Clinics ─────────────────────── */}
-                  {filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding') && (
-                    <div className="mt-8">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-base font-black text-[#4A3E3D]">🏥 Veterinary Boarding Clinics Near You</span>
-                        <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">Partner Clinics</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredVetClinics.map((clinic: any) => (
-                          <div
-                            key={clinic.id}
-                            className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
-                            onClick={() => {
-                              if (!reqEmail) {
-                                window.dispatchEvent(new Event('lumo-open-signin'));
-                                return;
-                              }
-                              setInquiringClinic(clinic);
-                            }}
-                          >
-                            <div className="flex gap-4">
-                              <div className="shrink-0">
-                                {clinic.org_photo_url ? (
-                                  <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
-                                ) : (
-                                  <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center">
-                                    <span className="text-2xl">🏥</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  <h3 className="text-base font-bold text-[#4A3E3D]">{clinic.clinic_name}</h3>
-                                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                    <ShieldCheck className="w-3 h-3" /> Verified
-                                  </span>
-                                  {clinic.today_status === 'full' ? (
-                                    <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
-                                      ⛔ Full today — ask about other dates
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                                      ✅ Available today
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
-                                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                  {formatPublicCity(clinic.city || clinic.address)}
-                                </p>
-                                {clinic.description && (
-                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
-                                )}
-                                {clinic.services && clinic.services.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {clinic.services.slice(0, 4).map((s: string) => (
-                                      <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{s}</span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="mt-4">
-                              {reqEmail ? (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
-                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
-                                >
-                                  <MessageSquare className="w-4 h-4" /> Inquire About Boarding
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
-                                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200 btn-gloss cursor-pointer"
-                                >
-                                  Sign in to Inquire
-                                </button>
-                              )}
-                            </div>
-                          </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* ─── Pet Daycare Facilities ─────────────────────────── */}
-                  {filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare') && (
-                    <div className="mt-8">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-base font-black text-[#4A3E3D]">🐕 Pet Daycare Facilities Near You</span>
-                        <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">Verified Daycares</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredPetDaycares.map((daycare: any) => (
-                          <div
-                            key={daycare.id}
-                            className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
-                            onClick={() => {
-                              if (!reqEmail) {
-                                window.dispatchEvent(new Event('lumo-open-signin'));
-                                return;
-                              }
-                              setInquiringDaycare(daycare);
-                            }}
-                          >
-                            <div className="flex gap-4">
-                              <div className="shrink-0">
-                                {daycare.logo_url ? (
-                                  <img src={daycare.logo_url} alt={daycare.business_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
-                                ) : (
-                                  <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                                    <span className="text-2xl">🐕</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  <h3 className="text-base font-bold text-[#4A3E3D]">{daycare.business_name}</h3>
-                                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                    <ShieldCheck className="w-3 h-3" /> Verified
-                                  </span>
-                                  {daycare.today_status === 'full' ? (
-                                    <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
-                                      ⛔ Full today — ask about other dates
-                                    </span>
+                    {/* ─── Veterinary Boarding Clinics ─────────────────────── */}
+                    {showVetSection && (
+                      <div className="mt-8">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-base font-black text-[#4A3E3D]">🏥 Veterinary Boarding Clinics Near You</span>
+                          <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">Partner Clinics</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {filteredVetClinics.map((clinic: any) => (
+                            <div
+                              key={clinic.id}
+                              className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
+                              onClick={() => {
+                                if (!reqEmail) {
+                                  window.dispatchEvent(new Event('lumo-open-signin'));
+                                  return;
+                                }
+                                setInquiringClinic(clinic);
+                              }}
+                            >
+                              <div className="flex gap-4">
+                                <div className="shrink-0">
+                                  {clinic.org_photo_url ? (
+                                    <img src={clinic.org_photo_url} alt={clinic.clinic_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                                      ✅ Available today
-                                    </span>
+                                    <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center">
+                                      <span className="text-2xl">🏥</span>
+                                    </div>
                                   )}
                                 </div>
-                                <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
-                                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                  {formatPublicCity(daycare.city || daycare.address)}
-                                </p>
-                                {daycare.description && (
-                                  <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
-                                )}
-                                {daycare.services && daycare.services.length > 0 && (
-                                  <div className="flex flex-wrap gap-1">
-                                    {daycare.services.slice(0, 4).map((s: string) => (
-                                      <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
-                                    ))}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <h3 className="text-base font-bold text-[#4A3E3D]">{clinic.clinic_name}</h3>
+                                    <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                      <ShieldCheck className="w-3 h-3" /> Verified
+                                    </span>
+                                    {clinic.today_status === 'full' ? (
+                                      <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
+                                        ⛔ Full today — ask about other dates
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                        ✅ Available today
+                                      </span>
+                                    )}
                                   </div>
+                                  <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                    {formatPublicCity(clinic.city || clinic.address)}
+                                  </p>
+                                  {clinic.description && (
+                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
+                                  )}
+                                  {clinic.services && clinic.services.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {clinic.services.slice(0, 4).map((s: string) => (
+                                        <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">{s}</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="mt-4">
+                                {reqEmail ? (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
+                                  >
+                                    <MessageSquare className="w-4 h-4" /> Inquire About Boarding
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
+                                    className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl transition-colors text-sm border border-blue-200 btn-gloss cursor-pointer"
+                                  >
+                                    Sign in to Inquire
+                                  </button>
                                 )}
                               </div>
                             </div>
-                            <div className="mt-4">
-                              {isOwnerPro ? (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
-                                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
-                                >
-                                  <MessageSquare className="w-4 h-4" /> Inquire About Daycare
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
-                                  className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer btn-gloss"
-                                >
-                                  Sign in to Inquire
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {/* ─── Pet Daycare Facilities ─────────────────────────── */}
+                    {showDaycareSection && (
+                      <div className="mt-8">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-base font-black text-[#4A3E3D]">🐕 Pet Daycare Facilities Near You</span>
+                          <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">Verified Daycares</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {filteredPetDaycares.map((daycare: any) => (
+                            <div
+                              key={daycare.id}
+                              className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
+                              onClick={() => {
+                                if (!reqEmail) {
+                                  window.dispatchEvent(new Event('lumo-open-signin'));
+                                  return;
+                                }
+                                setInquiringDaycare(daycare);
+                              }}
+                            >
+                              <div className="flex gap-4">
+                                <div className="shrink-0">
+                                  {daycare.logo_url ? (
+                                    <img src={daycare.logo_url} alt={daycare.business_name} className="w-16 h-16 rounded-2xl object-cover border border-gray-200" />
+                                  ) : (
+                                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                                      <span className="text-2xl">🐕</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <h3 className="text-base font-bold text-[#4A3E3D]">{daycare.business_name}</h3>
+                                    <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
+                                      <ShieldCheck className="w-3 h-3" /> Verified
+                                    </span>
+                                    {daycare.today_status === 'full' ? (
+                                      <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
+                                        ⛔ Full today — ask about other dates
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                                        ✅ Available today
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                    {formatPublicCity(daycare.city || daycare.address)}
+                                  </p>
+                                  {daycare.description && (
+                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
+                                  )}
+                                  {daycare.services && daycare.services.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {daycare.services.slice(0, 4).map((s: string) => (
+                                        <span key={s} className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{s}</span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="mt-4">
+                                {isOwnerPro ? (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
+                                  >
+                                    <MessageSquare className="w-4 h-4" /> Inquire About Daycare
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
+                                    className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer btn-gloss"
+                                  >
+                                    Sign in to Inquire
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
                 </div>
 
                 {/* Map (Right on desktop, Above on mobile) */}

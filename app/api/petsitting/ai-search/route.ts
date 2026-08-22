@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { query: searchQuery, email: ownerEmail, sitterIds } = body;
+    const { query: searchQuery, email: ownerEmail, sitterIds, clinicIds, daycareIds } = body;
 
     const verifiedEmail = await getVerifiedSessionEmail(request);
     const limitCheck = await checkAndTrackAiUsage({
@@ -32,54 +32,108 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
     }
 
-    // 1. Fetch all active approved sitters from database
-    const { data: sitters, error: dbError } = await supabaseAdmin
-      .from('sitters')
-      .select('id, name, photo_url, cover_photo_url, cover_photo_position, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
-      .eq('approval_status', 'approved')
-      .eq('availability', true);
+    // 1. Fetch active approved Sitters, Vet Clinics, and Pet Daycares in parallel
+    const [sittersRes, vetsRes, daycaresRes] = await Promise.all([
+      supabaseAdmin
+        .from('sitters')
+        .select('id, name, photo_url, cover_photo_url, cover_photo_position, city, zip, country, lat, lng, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, approval_status, avg_rating, review_count, available_days, available_times, service_types, completed_bookings')
+        .eq('approval_status', 'approved')
+        .eq('availability', true),
+      supabaseAdmin
+        .from('vet_clinics')
+        .select('id, clinic_name, license_number, email, phone, address, city, state, zip, website, org_photo_url, description, services, status, lat, lng')
+        .eq('status', 'approved'),
+      supabaseAdmin
+        .from('pet_daycares')
+        .select('id, business_name, license_number, email, phone, address, city, state, zip, website, description, services, logo_url, status, is_paused, lat, lng')
+        .eq('status', 'approved')
+    ]);
 
-    if (dbError) throw dbError;
+    if (sittersRes.error) throw sittersRes.error;
+    if (vetsRes.error) throw vetsRes.error;
+    if (daycaresRes.error) throw daycaresRes.error;
 
-    if (!sitters || sitters.length === 0) {
-      return NextResponse.json({ sitters: [] });
-    }
+    const sitters = sittersRes.data || [];
+    const vetClinics = vetsRes.data || [];
+    const petDaycares = (daycaresRes.data || []).filter(d => !d.is_paused);
 
-    // Filter to selected area sitters if specified
+    // Apply area filters if provided
     let candidateSitters = sitters;
-    if (sitterIds && Array.isArray(sitterIds)) {
+    if (sitterIds && Array.isArray(sitterIds) && sitterIds.length > 0) {
       candidateSitters = sitters.filter(s => sitterIds.includes(s.id));
     }
 
-    if (candidateSitters.length === 0) {
-      return NextResponse.json({ sitters: [] });
+    let candidateVets = vetClinics;
+    if (clinicIds && Array.isArray(clinicIds) && clinicIds.length > 0) {
+      candidateVets = vetClinics.filter(v => clinicIds.includes(v.id));
     }
 
-    const sitterDataForClaude = candidateSitters.map(s => ({
-      id: s.id,
-      name: s.name,
-      bio: s.bio,
-      pet_types: s.pet_types,
-      rating: s.avg_rating,
-      price: s.rate_per_night,
-      location: formatPublicCity(s.city),
-      services: s.service_types
-    }));
+    let candidateDaycares = petDaycares;
+    if (daycareIds && Array.isArray(daycareIds) && daycareIds.length > 0) {
+      candidateDaycares = petDaycares.filter(d => daycareIds.includes(d.id));
+    }
 
-    console.log('[AI Sitter Search] Sitter data sent to Claude:', JSON.stringify(sitterDataForClaude, null, 2));
+    const totalCandidates = candidateSitters.length + candidateVets.length + candidateDaycares.length;
+    if (totalCandidates === 0) {
+      return NextResponse.json({ results: [], sitters: [] });
+    }
 
-    // 2. Query Claude AI to rank and score the sitters
-    const prompt = `You are a pet sitter matching assistant.
+    // 2. Prepare structured provider profiles for Claude Sonnet
+    const providersForClaude = [
+      ...candidateSitters.map(s => ({
+        id: s.id,
+        type: 'sitter',
+        name: s.name,
+        bio: s.bio || '',
+        pet_types: s.pet_types || [],
+        rating: s.avg_rating || 5,
+        price: s.rate_per_night ? `$${s.rate_per_night}/night` : 'Varies',
+        location: formatPublicCity(s.city),
+        services: s.service_types || ['Pet Sitting', 'Boarding', 'Drop-ins', 'Dog Walking']
+      })),
+      ...candidateVets.map(v => ({
+        id: v.id,
+        type: 'vet',
+        name: v.clinic_name,
+        bio: v.description || 'Professional Veterinary Hospital offering medical boarding, medication administration, and 24/7 clinical supervision.',
+        pet_types: ['Dogs', 'Cats', 'Special Needs & Medical Pets'],
+        rating: 5,
+        price: 'Medical Boarding Rates',
+        location: formatPublicCity(v.city || `${v.city}, ${v.state}`),
+        services: (v.services && v.services.length > 0) ? v.services : ['Veterinary Boarding', 'Medical Boarding', 'Medication Administration', 'Post-Surgical Care', 'Emergency Boarding']
+      })),
+      ...candidateDaycares.map(d => ({
+        id: d.id,
+        type: 'daycare',
+        name: d.business_name,
+        bio: d.description || 'Supervised Pet Daycare center with indoor/outdoor play yards, webcam monitoring, and puppy socialization.',
+        pet_types: ['Dogs', 'Cats'],
+        rating: 5,
+        price: 'Daycare Packages',
+        location: formatPublicCity(d.city || `${d.city}, ${d.state}`),
+        services: (d.services && d.services.length > 0) ? d.services : ['Group Play', 'Supervised Outdoor Time', 'Puppy Socialization', 'Webcam/Live Monitoring', 'Basic Grooming/Bath Add-On']
+      }))
+    ];
 
-User is looking for: "${searchQuery}"
+    // 3. Query Claude AI to rank across all care categories
+    const prompt = `You are an expert AI pet care matching assistant for Lumo Bites.
 
-Available sitters:
-${JSON.stringify(sitterDataForClaude)}
+User is searching for: "${searchQuery}"
 
-Evaluate all sitters based on how well they match the user's description. Read their bio carefully to extract gender details, background qualifications, vet experience, preferences, etc.
-Rank them from best to worst match.
-Return ONLY a valid JSON array of sitter IDs ranked by best match, with a match score (0-100) and a short one-sentence reason explaining why they match the query:
-[{"id": "sitter_id", "score": 95, "reason": "Female sitter with 5 years vet experience"}]
+Available care providers (Pet Sitters, Vet Boarding Clinics, and Pet Daycares):
+${JSON.stringify(providersForClaude)}
+
+Evaluate all care providers based on how well they match the user's specific request and intent:
+- If user requests medical care, insulin injections, medication administration, post-surgical care, senior/sick pets, or clinical hospital supervision -> prioritize Vet Boarding clinics and sitters with verified vet-tech experience.
+- If user requests puppy socialization, daytime group play, live webcams, work-hours care -> prioritize Pet Daycare facilities.
+- If user requests in-home overnight sitting, drop-in visits, walking, personalized home care -> prioritize Pet Sitters.
+- If user query is general (e.g. "pet care while I'm away for 4 days"), rank all relevant options according to quality and fit.
+
+Rank the providers from best to worst match.
+Return ONLY a valid JSON array of ranked items with id, type ('sitter' | 'vet' | 'daycare'), match score (0-100), and a concise one-sentence reason explaining why they match the query:
+[
+  {"id": "provider_id", "type": "sitter", "score": 95, "reason": "Experienced pet sitter with 5 years vet-tech background"}
+]
 
 Do not include any intro, outro, markdown block, or conversational text. Return ONLY the raw JSON array.`;
 
@@ -92,7 +146,7 @@ Do not include any intro, outro, markdown block, or conversational text. Return 
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        max_tokens: 1200,
         messages: [{
           role: 'user',
           content: prompt
@@ -102,7 +156,7 @@ Do not include any intro, outro, markdown block, or conversational text. Return 
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[AI Sitter Search] Anthropic API Error:', errorText);
+      console.error('[AI Care Search] Anthropic API Error:', errorText);
       throw new Error(`Anthropic API returned status ${response.status}`);
     }
 
@@ -118,43 +172,84 @@ Do not include any intro, outro, markdown block, or conversational text. Return 
 
     const rankings = JSON.parse(text);
 
-    // 3. Match rankings back to original sitters
-    const rankedSitters = rankings
-      .map((r: any) => {
-        const sitter = sitters.find(s => s.id === r.id);
-        if (!sitter) return null;
-        return {
-          ...sitter,
-          matchScore: r.score,
-          matchReason: r.reason
-        };
-      })
-      .filter(Boolean);
-
-    // 4. Return full sitter profile for signed-in users, prompt sign-in for visitors
     const cleanOwnerEmail = ownerEmail ? ownerEmail.toLowerCase().trim() : '';
     const isSignedIn = !!cleanOwnerEmail;
 
-    const maskedSitters = rankedSitters.map((sitter: any) => {
-      if (isSignedIn) {
-        return {
-          ...sitter,
-          phone_number: sitter.phone_visible ? sitter.phone_number : null
-        };
-      }
-      
-      return {
-        ...sitter,
-        name: 'Local Sitter',
-        photo_url: '',
-        bio: "Sign in to view full profile, photos, and contact information.",
-        phone_number: sitter.phone_visible && sitter.phone_number ? '(***) ***-****' : null
-      };
-    });
+    // 4. Hydrate rankings back to unified results objects
+    const unifiedResults = rankings
+      .map((r: any) => {
+        if (r.type === 'sitter') {
+          const sitter = sitters.find(s => s.id === r.id);
+          if (!sitter) return null;
+          return {
+            id: sitter.id,
+            type: 'sitter',
+            title: isSignedIn ? sitter.name : 'Local Sitter',
+            subtitle: formatPublicCity(sitter.city),
+            photo_url: isSignedIn ? sitter.photo_url : null,
+            rate: sitter.rate_per_night ? `$${sitter.rate_per_night}/night` : null,
+            rating: sitter.avg_rating || 5,
+            review_count: sitter.review_count || 0,
+            services: sitter.service_types || [],
+            matchScore: r.score,
+            matchReason: r.reason,
+            raw: {
+              ...sitter,
+              name: isSignedIn ? sitter.name : 'Local Sitter',
+              photo_url: isSignedIn ? sitter.photo_url : null,
+              phone_number: isSignedIn && sitter.phone_visible ? sitter.phone_number : null,
+              matchScore: r.score,
+              matchReason: r.reason
+            }
+          };
+        } else if (r.type === 'vet') {
+          const clinic = candidateVets.find(v => v.id === r.id);
+          if (!clinic) return null;
+          return {
+            id: clinic.id,
+            type: 'vet',
+            title: clinic.clinic_name,
+            subtitle: formatPublicCity(clinic.city || `${clinic.city}, ${clinic.state}`),
+            photo_url: clinic.org_photo_url || null,
+            rate: 'Medical Boarding',
+            rating: 5,
+            review_count: 0,
+            services: (clinic.services && clinic.services.length > 0) ? clinic.services : ['Veterinary Boarding', 'Medical Boarding'],
+            matchScore: r.score,
+            matchReason: r.reason,
+            raw: clinic
+          };
+        } else if (r.type === 'daycare') {
+          const daycare = candidateDaycares.find(d => d.id === r.id);
+          if (!daycare) return null;
+          return {
+            id: daycare.id,
+            type: 'daycare',
+            title: daycare.business_name,
+            subtitle: formatPublicCity(daycare.city || `${daycare.city}, ${daycare.state}`),
+            photo_url: daycare.logo_url || null,
+            rate: 'Daycare Services',
+            rating: 5,
+            review_count: 0,
+            services: (daycare.services && daycare.services.length > 0) ? daycare.services : ['Group Play', 'Socialization'],
+            matchScore: r.score,
+            matchReason: r.reason,
+            raw: daycare
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
 
-    return NextResponse.json({ sitters: maskedSitters, isSignedIn });
+    // Extract sitter-only list for full backwards compatibility
+    const rankedSitters = unifiedResults
+      .filter((res: any) => res.type === 'sitter')
+      .map((res: any) => res.raw);
+
+    return NextResponse.json({ results: unifiedResults, sitters: rankedSitters, isSignedIn });
   } catch (error: any) {
-    console.error('[AI Sitter Search API] Error:', error);
+    console.error('[AI Care Search API] Error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
