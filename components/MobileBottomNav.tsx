@@ -54,39 +54,62 @@ export default function MobileBottomNav() {
         pointerEvents: 'auto',
       }}
     >
-      {/* 🫧 Apple iOS / WhatsApp "Liquid Glass" Active Tab Indicator */}
+      {/* 🫧 WhatsApp-Style Liquid Glass Active Droplet Lens */}
       {activeIndex >= 0 && (
         <div 
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.45,0.64,1)]"
           style={{
-            top: '4px',
-            bottom: '4px',
-            width: `calc(${100 / tabs.length}% - 4px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% + 2px)`,
+            top: '-6px',
+            bottom: '-6px',
+            width: `calc(${100 / tabs.length}% + 14px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% - 7px)`,
             borderRadius: '9999px',
-            border: '1px solid transparent',
-            backgroundImage: `
-              linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), 
-              conic-gradient(from 180deg, 
-                rgba(255, 182, 193, 0.65), 
-                rgba(173, 216, 230, 0.65), 
-                rgba(221, 160, 221, 0.65), 
-                rgba(255, 182, 193, 0.65)
-              )
-            `,
-            backgroundOrigin: 'border-box',
-            backgroundClip: 'padding-box, border-box',
-            backdropFilter: 'blur(16px) saturate(150%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(150%)',
-            boxShadow: `
-              0 4px 12px rgba(0, 0, 0, 0.08),
-              0 1px 2px rgba(0, 0, 0, 0.04),
-              inset 0 1px 1px rgba(255, 255, 255, 0.6)
-            `,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            zIndex: 0,
+            zIndex: 1,
           }}
-        />
+        >
+          {/* 1. Chromatic / Prismatic Aberration Rainbow Glow along Top & Bottom Curvatures */}
+          <div 
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              padding: '2px',
+              background: `
+                radial-gradient(ellipse at 50% 0%, rgba(255, 75, 130, 0.9) 0%, rgba(255, 200, 60, 0.8) 30%, rgba(0, 220, 255, 0.85) 65%, transparent 85%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 230, 240, 0.85) 0%, rgba(160, 100, 255, 0.85) 40%, rgba(255, 80, 150, 0.8) 75%, transparent 90%),
+                conic-gradient(from 180deg at 50% 50%, rgba(255, 80, 140, 0.7), rgba(255, 185, 60, 0.7), rgba(50, 225, 240, 0.8), rgba(150, 100, 255, 0.75), rgba(255, 80, 140, 0.7))
+              `,
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor',
+              maskComposite: 'exclude',
+              filter: 'blur(0.4px)',
+              opacity: 0.92,
+            }}
+          />
+
+          {/* 2. Frosted Liquid Glass Core with Multi-layered Depth & Caustics */}
+          <div 
+            className="absolute inset-0 rounded-full"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.42)',
+              backdropFilter: 'blur(20px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+              boxShadow: `
+                0 10px 28px -2px rgba(0, 0, 0, 0.15),
+                0 4px 10px rgba(0, 0, 0, 0.06),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.05)
+              `,
+              border: '0.5px solid rgba(255, 255, 255, 0.65)',
+            }}
+          />
+
+          {/* 3. Top Curved Specular Glare / Lens Reflection */}
+          <div 
+            className="absolute top-0.5 left-2.5 right-2.5 h-[42%] rounded-t-full pointer-events-none opacity-90"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.2) 65%, transparent 100%)',
+            }}
+          />
+        </div>
       )}
 
       {tabs.map((tab, idx) => {
