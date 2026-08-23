@@ -54,49 +54,51 @@ export default function MobileBottomNav() {
         pointerEvents: 'auto',
       }}
     >
-      {/* 🫧 WhatsApp-Style Liquid Glass Active Droplet Lens */}
+      {/* 🫧 WhatsApp-Style Liquid Glass Rounded Rectangle Active Pill */}
       {activeIndex >= 0 && (
         <div 
           className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.45,0.64,1)]"
           style={{
-            top: '-6px',
-            bottom: '-6px',
-            width: `calc(${100 / tabs.length}% + 14px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% - 7px)`,
-            borderRadius: '9999px',
+            top: '3px',
+            bottom: '3px',
+            width: `calc(${100 / tabs.length}% + 8px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% - 4px)`,
+            borderRadius: '24px',
             zIndex: 1,
           }}
         >
-          {/* 1. Chromatic / Prismatic Aberration Rainbow Glow along Top & Bottom Curvatures */}
+          {/* 1. Saturated Chromatic Dispersion / Prismatic Fringe along Curved Top & Bottom Rims */}
           <div 
-            className="absolute inset-0 rounded-full pointer-events-none"
+            className="absolute inset-0 pointer-events-none"
             style={{
+              borderRadius: '24px',
               padding: '2px',
               background: `
-                radial-gradient(ellipse at 50% 0%, rgba(255, 75, 130, 0.9) 0%, rgba(255, 200, 60, 0.8) 30%, rgba(0, 220, 255, 0.85) 65%, transparent 85%),
-                radial-gradient(ellipse at 50% 100%, rgba(0, 230, 240, 0.85) 0%, rgba(160, 100, 255, 0.85) 40%, rgba(255, 80, 150, 0.8) 75%, transparent 90%),
-                conic-gradient(from 180deg at 50% 50%, rgba(255, 80, 140, 0.7), rgba(255, 185, 60, 0.7), rgba(50, 225, 240, 0.8), rgba(150, 100, 255, 0.75), rgba(255, 80, 140, 0.7))
+                radial-gradient(ellipse at 50% 0%, #FF0055 0%, #FFAA00 30%, #00F0FF 65%, transparent 85%),
+                radial-gradient(ellipse at 50% 100%, #00F0FF 0%, #8B00FF 40%, #FF0066 75%, transparent 90%),
+                conic-gradient(from 180deg at 50% 50%, #FF007A 0%, #FFAA00 25%, #00E5FF 50%, #8B00FF 75%, #FF007A 100%)
               `,
               WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
               WebkitMaskComposite: 'xor',
               maskComposite: 'exclude',
               filter: 'blur(0.4px)',
-              opacity: 0.92,
+              opacity: 0.95,
             }}
           />
 
-          {/* 2. Frosted Liquid Glass Core with Multi-layered Depth & Caustics */}
+          {/* 2. Frosted Liquid Glass Core with Caustic Bevel & Depth */}
           <div 
-            className="absolute inset-0 rounded-full"
+            className="absolute inset-0"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.42)',
+              borderRadius: '24px',
+              backgroundColor: 'rgba(255, 255, 255, 0.48)',
               backdropFilter: 'blur(20px) saturate(200%)',
               WebkitBackdropFilter: 'blur(20px) saturate(200%)',
               boxShadow: `
-                0 10px 28px -2px rgba(0, 0, 0, 0.15),
-                0 4px 10px rgba(0, 0, 0, 0.06),
+                0 8px 24px -2px rgba(0, 0, 0, 0.16),
+                0 3px 8px rgba(0, 0, 0, 0.08),
                 inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
-                inset 0 -2px 3px rgba(0, 0, 0, 0.05)
+                inset 0 -1.5px 2px rgba(0, 0, 0, 0.06)
               `,
               border: '0.5px solid rgba(255, 255, 255, 0.65)',
             }}
@@ -104,9 +106,10 @@ export default function MobileBottomNav() {
 
           {/* 3. Top Curved Specular Glare / Lens Reflection */}
           <div 
-            className="absolute top-0.5 left-2.5 right-2.5 h-[42%] rounded-t-full pointer-events-none opacity-90"
+            className="absolute top-0.5 left-2 right-2 h-[40%] pointer-events-none opacity-90"
             style={{
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.2) 65%, transparent 100%)',
+              borderRadius: '22px 22px 10px 10px',
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.25) 60%, transparent 100%)',
             }}
           />
         </div>
