@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,17 +16,22 @@ export async function GET(request: NextRequest) {
 
     const cleanEmail = ownerEmail.toLowerCase().trim();
 
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // 1. Fetch vet inquiries
     const { data: vetInquiries } = await supabaseAdmin
       .from('vet_inquiries')
-      .select('id, clinic_id, owner_email, status, created_at, vet_clinics(clinic_name, email, org_photo_url)')
+      .select('id, clinic_id, owner_email, pet_id, status, created_at, vet_clinics(clinic_name, email, org_photo_url)')
       .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
     // 2. Fetch daycare inquiries
     const { data: daycareInquiries } = await supabaseAdmin
       .from('daycare_inquiries')
-      .select('id, daycare_id, owner_email, status, created_at, pet_daycares(business_name, email, logo_url)')
+      .select('id, daycare_id, owner_email, pet_id, status, created_at, pet_daycares(business_name, email, logo_url)')
       .eq('owner_email', cleanEmail)
       .order('created_at', { ascending: false });
 
@@ -128,6 +134,12 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
+
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const newStatus = action === 'approve' || action === 'restore' ? 'active' : action === 'deny' ? 'denied' : 'revoked';
 
     if (partner_type === 'vet') {

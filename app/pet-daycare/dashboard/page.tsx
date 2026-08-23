@@ -62,6 +62,14 @@ export default function DaycareDashboard() {
     setExpandedInquiries(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const getSessionHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lumo_account_session_token') : null;
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'x-account-session': token } : {})
+    };
+  };
+
   const handleInquiryAction = async (inqId: string, action: 'accept' | 'decline' | 'complete' | 'no_show') => {
     const actionLabels: Record<string, string> = {
       accept: 'accept this daycare inquiry',
@@ -74,7 +82,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/pet-daycare/inquiries', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: inqId, action })
       });
       if (res.ok) {
@@ -96,7 +104,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/pet-daycare/inquiries', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: inqId, archived: !currentArchived })
       });
       if (res.ok) {
@@ -131,7 +139,9 @@ export default function DaycareDashboard() {
       const params = new URLSearchParams(window.location.search);
       const targetInquiryId = params.get('inquiry');
       if (targetInquiryId) {
-        fetch(`/api/pet-daycare/inquiries?id=${targetInquiryId}`)
+        fetch(`/api/pet-daycare/inquiries?id=${targetInquiryId}`, {
+          headers: getSessionHeaders()
+        })
           .then(r => r.json())
           .then(data => {
             if (data.inquiry) {
@@ -153,7 +163,10 @@ export default function DaycareDashboard() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/pet-daycare?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { 
+        headers: getSessionHeaders(),
+        cache: 'no-store' 
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.daycare && data.daycare.status === 'approved') {
@@ -178,7 +191,9 @@ export default function DaycareDashboard() {
   const fetchInquiries = async (daycareId: string) => {
     setInquiriesLoading(true);
     try {
-      const res = await fetch(`/api/pet-daycare/inquiries?daycare_id=${daycareId}`);
+      const res = await fetch(`/api/pet-daycare/inquiries?daycare_id=${daycareId}`, {
+        headers: getSessionHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         const loadedInqs = data.inquiries || [];
@@ -205,7 +220,9 @@ export default function DaycareDashboard() {
 
   const fetchAvailability = async (daycareId: string) => {
     try {
-      const res = await fetch(`/api/pet-daycare/availability?daycare_id=${daycareId}`);
+      const res = await fetch(`/api/pet-daycare/availability?daycare_id=${daycareId}`, {
+        headers: getSessionHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         const dates = (data.availability || [])
@@ -227,7 +244,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/pet-daycare/availability', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({
           daycare_id: daycare.id,
           date: dateStr,
@@ -257,7 +274,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/pet-daycare', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: daycare.id, is_paused: newPausedState })
       });
       if (res.ok) {
@@ -277,7 +294,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/pet-daycare', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: daycare.id, ...editForm })
       });
       const data = await res.json();
@@ -296,23 +313,28 @@ export default function DaycareDashboard() {
       localStorage.removeItem('lumo_pro_email');
       localStorage.removeItem('lumo_sitter_email');
       localStorage.removeItem('lumo_shelter_email');
+      localStorage.removeItem('lumo_account_session_token');
       document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'lumo_account_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       window.dispatchEvent(new Event('lumo-pro-update'));
       router.push('/pet-daycare');
     }
   };
 
   const handleDeleteDaycareAccount = async () => {
-    if (!daycare || !daycare.email) return;
+    if (!confirm('Are you sure you want to delete your Pet Daycare listing? This cannot be undone.')) return;
     setDeletingAccount(true);
     try {
-      const res = await fetch(`/api/pet-daycare?id=${daycare.id}`, {
-        method: 'DELETE'
+      const res = await fetch('/api/pet-daycare', {
+        method: 'DELETE',
+        headers: getSessionHeaders(),
+        body: JSON.stringify({ id: daycare?.id, email: daycare?.email })
       });
       if (res.ok) {
         localStorage.removeItem('lumo_pro_email');
         localStorage.removeItem('lumo_sitter_email');
         localStorage.removeItem('lumo_shelter_email');
+        localStorage.removeItem('lumo_account_session_token');
         window.dispatchEvent(new Event('lumo-pro-update'));
         alert('Your daycare account and all associated data have been deleted.');
         router.push('/pet-daycare');

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,12 +96,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { sitter_id, email, blocked_dates } = body;
-
-    if (!sitter_id && !email) {
-      return NextResponse.json({ error: 'sitter_id or email is required' }, { status: 400 });
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified sitter account.', requires_auth: true },
+        { status: 401 }
+      );
     }
+
+    const body = await request.json();
+    const { sitter_id, blocked_dates } = body;
 
     if (!Array.isArray(blocked_dates)) {
       return NextResponse.json({ error: 'blocked_dates must be an array' }, { status: 400 });
@@ -108,9 +113,9 @@ export async function POST(request: NextRequest) {
 
     let updateQuery = supabaseAdmin.from('sitters').update({ blocked_dates });
     if (sitter_id) {
-      updateQuery = updateQuery.eq('id', sitter_id);
+      updateQuery = updateQuery.or(`id.eq.${sitter_id},email.eq.${verifiedEmail}`).eq('email', verifiedEmail);
     } else {
-      updateQuery = updateQuery.eq('email', email.toLowerCase().trim());
+      updateQuery = updateQuery.eq('email', verifiedEmail);
     }
 
     const { error } = await updateQuery;

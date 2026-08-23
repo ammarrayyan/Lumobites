@@ -2,16 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { id, email } = body;
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
 
-    if (!id || !email) {
-      return NextResponse.json({ error: 'Missing booking ID or email' }, { status: 400 });
+    const body = await request.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing booking ID' }, { status: 400 });
     }
 
     // 1. Fetch current request status and details
@@ -26,8 +35,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Authorization check
-    if (reqRow.owner_email.toLowerCase().trim() !== email.toLowerCase().trim()) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    if (reqRow.owner_email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to report no-show on this booking.' }, { status: 403 });
     }
 
     if (reqRow.status !== 'accepted') {

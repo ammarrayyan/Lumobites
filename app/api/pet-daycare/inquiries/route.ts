@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
 // ─── GET /api/pet-daycare/inquiries?daycare_id= ────────────────────────────────
 export async function GET(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const daycare_id = searchParams.get('daycare_id');
     const owner_email = searchParams.get('owner_email');
@@ -23,9 +32,22 @@ export async function GET(request: NextRequest) {
     if (id) {
       query = query.eq('id', id);
     } else if (daycare_id) {
+      // Verify daycare_id belongs to verifiedEmail
+      const { data: daycareCheck } = await supabaseAdmin
+        .from('pet_daycares')
+        .select('id, email')
+        .eq('id', daycare_id)
+        .maybeSingle();
+
+      if (!daycareCheck || daycareCheck.email.toLowerCase().trim() !== verifiedEmail) {
+        return NextResponse.json({ error: 'Forbidden: You do not have access to these daycare inquiries.' }, { status: 403 });
+      }
       query = query.eq('daycare_id', daycare_id);
     } else if (owner_email) {
-      query = query.eq('owner_email', owner_email.toLowerCase().trim());
+      if (owner_email.toLowerCase().trim() !== verifiedEmail) {
+        return NextResponse.json({ error: 'Forbidden: You do not have access to these owner inquiries.' }, { status: 403 });
+      }
+      query = query.eq('owner_email', verifiedEmail);
     }
 
     const { data: inquiries, error } = await query;
@@ -186,11 +208,37 @@ export async function POST(request: NextRequest) {
 // ─── PATCH /api/pet-daycare/inquiries — Lifecycle actions or Archive/Restore ─
 export async function PATCH(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { id, action, archived } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Missing inquiry id' }, { status: 400 });
+    }
+
+    // Verify user owns this inquiry as daycare or owner
+    const { data: existingInq } = await supabaseAdmin
+      .from('daycare_inquiries')
+      .select('*, pet_daycares(email)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!existingInq) {
+      return NextResponse.json({ error: 'Inquiry not found' }, { status: 404 });
+    }
+
+    const isDaycare = existingInq.pet_daycares?.email?.toLowerCase().trim() === verifiedEmail;
+    const isOwner = existingInq.owner_email?.toLowerCase().trim() === verifiedEmail;
+
+    if (!isDaycare && !isOwner) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this inquiry.' }, { status: 403 });
     }
 
     const updatePayload: any = {};

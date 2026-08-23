@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { extractOgImage } from '@/lib/og-fetcher';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 import Stripe from 'stripe';
 import {
   sendVetClinicRegistrationEmail,
   sendAdminNewPartnerNotificationEmail,
+  sendPartnerAccountDeletionEmail,
 } from '@/lib/adoption-email';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -22,10 +24,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Enforce verified session matching clinic email
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const { data: clinic, error } = await supabaseAdmin
       .from('vet_clinics')
       .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .eq('email', cleanEmail)
       .single();
 
     const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
@@ -245,11 +258,30 @@ export async function POST(request: NextRequest) {
 // ─── PATCH /api/vet-boarding — Update profile ────────────────────────────────
 export async function PATCH(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { id, email, org_photo_url, website, clinic_name, description, services, status, phone, address, city, state, zip } = body;
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing clinic id or email' }, { status: 400 });
+    }
+
+    // Verify clinic belongs to verifiedEmail
+    const { data: existingClinic } = await supabaseAdmin
+      .from('vet_clinics')
+      .select('*')
+      .or(id ? `id.eq.${id},email.eq.${verifiedEmail}` : `email.eq.${verifiedEmail}`)
+      .maybeSingle();
+
+    if (!existingClinic || existingClinic.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this clinic.' }, { status: 403 });
     }
 
     // Only allow clinics to set status to 'approved' or 'paused' (not pending/rejected — that's admin only)
@@ -298,7 +330,7 @@ export async function PATCH(request: NextRequest) {
     if (id) {
       query = query.eq('id', id);
     } else {
-      query = query.eq('email', email.toLowerCase().trim());
+      query = query.eq('email', verifiedEmail);
     }
 
     const { data: clinic, error } = await query.select('*').single();
@@ -315,6 +347,14 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const emailParam = searchParams.get('email');
     let email = emailParam;
@@ -328,20 +368,16 @@ export async function DELETE(request: NextRequest) {
       } catch (e) {}
     }
 
-    if (!email && !id) {
-      return NextResponse.json({ error: 'Missing email or id parameter' }, { status: 400 });
-    }
-
     let query = supabaseAdmin.from('vet_clinics').select('*');
     if (id) {
       query = query.eq('id', id);
-    } else if (email) {
-      query = query.eq('email', email.toLowerCase().trim());
+    } else {
+      query = query.eq('email', verifiedEmail);
     }
 
-    const { data: clinic } = await query.single();
-    if (!clinic) {
-      return NextResponse.json({ error: 'Vet clinic not found' }, { status: 404 });
+    const { data: clinic } = await query.maybeSingle();
+    if (!clinic || clinic.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this clinic.' }, { status: 403 });
     }
 
     // Cancel active Stripe subscriptions FIRST

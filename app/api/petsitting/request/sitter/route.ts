@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified sitter account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const sitterId = request.nextUrl.searchParams.get('sitter_id');
     if (!sitterId) {
       return NextResponse.json({ error: 'Sitter ID is required' }, { status: 400 });
+    }
+
+    // Verify sitter_id belongs to verifiedEmail
+    const { data: sitterCheck } = await supabaseAdmin
+      .from('sitters')
+      .select('id, email')
+      .or(`id.eq.${sitterId},email.eq.${verifiedEmail}`)
+      .maybeSingle();
+
+    if (!sitterCheck || sitterCheck.email?.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have access to these sitter requests.' }, { status: 403 });
     }
 
     const { data, error } = await supabaseAdmin

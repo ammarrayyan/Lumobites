@@ -3,27 +3,43 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
 export async function POST(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { id, sitter_id } = body;
 
-    if (!id || !sitter_id) {
-      return NextResponse.json({ error: 'Missing request ID or sitter ID' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Missing request ID' }, { status: 400 });
     }
 
     // 1. Fetch current request status to prevent double completion
     const { data: reqRow, error: reqError } = await supabaseAdmin
       .from('sitting_requests')
-      .select('status, owner_email, sitter_id')
+      .select('status, owner_email, sitter_id, sitters(email)')
       .eq('id', id)
       .single();
 
     if (reqError || !reqRow) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 });
+    }
+
+    const isSitter = (reqRow as any).sitters?.email?.toLowerCase().trim() === verifiedEmail;
+    const isOwner = reqRow.owner_email?.toLowerCase().trim() === verifiedEmail;
+
+    if (!isSitter && !isOwner) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to complete this booking.' }, { status: 403 });
     }
 
     if (reqRow.status === 'completed') {

@@ -1,28 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { unpackPetProfile } from '@/lib/petProfileSchema';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    // 0. AUTHENTICATION REQUIREMENT: Enforce signed server-side session
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { 
+          error: 'Authentication required. Please sign in with your verified partner account to add medical records.',
+          requires_auth: true 
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { pet_id, partner_id, partner_type, entry_type, data } = body;
 
-    if (!pet_id || !partner_id || !partner_type || !entry_type || !data) {
+    if (!pet_id || !entry_type || !data) {
       return NextResponse.json(
-        { error: 'Missing required fields: pet_id, partner_id, partner_type, entry_type, data' },
+        { error: 'Missing required fields: pet_id, entry_type, data' },
         { status: 400 }
       );
     }
 
-    // 1. Strict Role & Field Scoping
-    if (partner_type !== 'vet') {
+    // 1. Resolve Vet Clinic associated with the verified session
+    const { data: vetData } = await supabaseAdmin
+      .from('vet_clinics')
+      .select('*')
+      .eq('email', verifiedEmail)
+      .maybeSingle();
+
+    // Check if user is pet owner
+    const { data: petCheck } = await supabaseAdmin
+      .from('owner_pets')
+      .select('owner_email')
+      .eq('id', pet_id)
+      .maybeSingle();
+
+    const isOwner = petCheck?.owner_email?.toLowerCase().trim() === verifiedEmail;
+
+    if (!vetData && !isOwner) {
       return NextResponse.json(
-        { error: 'Forbidden: Direct medical entry addition is strictly restricted to licensed Vet Clinics' },
+        { error: 'Forbidden: Direct medical entry addition is strictly restricted to registered Vet Clinics or pet owners.' },
         { status: 403 }
       );
     }
+
+    const resolvedPartnerId = vetData?.id || verifiedEmail;
 
     const ALLOWED_ENTRIES = ['vaccination', 'microchip', 'vet_visit'];
     if (!ALLOWED_ENTRIES.includes(entry_type)) {
@@ -32,24 +62,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Access Grant Verification
-    const { verifyPetAccess } = await import('@/lib/petAccessHelper');
-    const accessCheck = await verifyPetAccess(pet_id, partner_id, 'vet');
-    if (!accessCheck.allowed) {
-      return NextResponse.json(
-        { error: `Access denied: ${accessCheck.reason}` },
-        { status: 403 }
-      );
+    // 2. Access Grant Verification (if not owner)
+    if (!isOwner) {
+      const { verifyPetAccess } = await import('@/lib/petAccessHelper');
+      const accessCheck = await verifyPetAccess(pet_id, String(resolvedPartnerId), 'vet');
+      if (!accessCheck.allowed) {
+        return NextResponse.json(
+          { error: `Access denied: ${accessCheck.reason}` },
+          { status: 403 }
+        );
+      }
     }
 
-    // 3. Resolve Vet Clinic Name
-    let clinicName = 'Veterinary Clinic';
-    const { data: vetData } = await supabaseAdmin
-      .from('vet_clinics')
-      .select('*')
-      .or(`id.eq.${partner_id},email.eq.${partner_id}`)
-      .maybeSingle();
-
+    // 3. Resolve Clinic Name
+    let clinicName = isOwner ? 'Pet Owner' : 'Veterinary Clinic';
     if (vetData?.clinic_name) {
       clinicName = vetData.clinic_name;
     } else if (vetData?.name) {

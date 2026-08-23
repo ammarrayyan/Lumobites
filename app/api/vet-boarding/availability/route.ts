@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,25 +38,30 @@ export async function GET(request: NextRequest) {
 // ─── POST /api/vet-boarding/availability ─────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { clinic_id, email, date, status } = body;
+    const { clinic_id, date, status } = body;
 
     if (!clinic_id || !date || !status) {
       return NextResponse.json({ error: 'Missing clinic_id, date, or status' }, { status: 400 });
     }
 
-    // Verify clinic exists & email matches if supplied
-    if (email) {
-      const { data: clinic } = await supabaseAdmin
-        .from('vet_clinics')
-        .select('id')
-        .eq('id', clinic_id)
-        .eq('email', email.toLowerCase().trim())
-        .maybeSingle();
+    // Verify clinic exists & belongs to verified session email
+    const { data: clinic } = await supabaseAdmin
+      .from('vet_clinics')
+      .select('id, email')
+      .eq('id', clinic_id)
+      .maybeSingle();
 
-      if (!clinic) {
-        return NextResponse.json({ error: 'Unauthorized clinic access' }, { status: 403 });
-      }
+    if (!clinic || clinic.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this clinic availability.' }, { status: 403 });
     }
 
     if (status === 'full') {

@@ -70,6 +70,14 @@ export default function VetBoardingDashboardPage() {
     setExpandedInquiries(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const getSessionHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lumo_account_session_token') : null;
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'x-account-session': token } : {})
+    };
+  };
+
   const handleInquiryAction = async (inqId: string, action: 'accept' | 'decline' | 'complete' | 'no_show') => {
     const actionLabels: Record<string, string> = {
       accept: 'accept this boarding inquiry',
@@ -82,7 +90,7 @@ export default function VetBoardingDashboardPage() {
     try {
       const res = await fetch('/api/vet-boarding/inquiries', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: inqId, action })
       });
       if (res.ok) {
@@ -104,7 +112,7 @@ export default function VetBoardingDashboardPage() {
     try {
       const res = await fetch('/api/vet-boarding/inquiries', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({ id: inqId, archived: !currentArchived })
       });
       if (res.ok) {
@@ -134,7 +142,9 @@ export default function VetBoardingDashboardPage() {
     const params = new URLSearchParams(window.location.search);
     const targetInquiryId = params.get('inquiry');
     if (targetInquiryId) {
-      fetch(`/api/vet-boarding/inquiries?id=${targetInquiryId}`)
+      fetch(`/api/vet-boarding/inquiries?id=${targetInquiryId}`, {
+        headers: getSessionHeaders()
+      })
         .then(r => r.json())
         .then(data => {
           if (data.inquiry) {
@@ -155,7 +165,10 @@ export default function VetBoardingDashboardPage() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/vet-boarding?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { 
+        headers: getSessionHeaders(),
+        cache: 'no-store' 
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.clinic) {
@@ -180,7 +193,9 @@ export default function VetBoardingDashboardPage() {
   const loadAvailability = async (clinicId: string) => {
     setLoadingAvailability(true);
     try {
-      const res = await fetch(`/api/vet-boarding/availability?clinic_id=${clinicId}`);
+      const res = await fetch(`/api/vet-boarding/availability?clinic_id=${clinicId}`, {
+        headers: getSessionHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         setFullDates(data.full_dates || []);
@@ -201,7 +216,7 @@ export default function VetBoardingDashboardPage() {
     try {
       const res = await fetch('/api/vet-boarding/availability', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionHeaders(),
         body: JSON.stringify({
           clinic_id: clinic.id,
           email: clinic.email,
@@ -227,7 +242,9 @@ export default function VetBoardingDashboardPage() {
   const loadInquiries = async (clinicId: string) => {
     setInquiriesLoading(true);
     try {
-      const res = await fetch(`/api/vet-boarding/inquiries?clinic_id=${clinicId}`);
+      const res = await fetch(`/api/vet-boarding/inquiries?clinic_id=${clinicId}`, {
+        headers: getSessionHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         const loadedInqs = data.inquiries || [];

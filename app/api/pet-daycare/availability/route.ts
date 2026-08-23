@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,11 +32,30 @@ export async function GET(request: NextRequest) {
 // ─── POST /api/pet-daycare/availability — Toggle date status ──────────────────
 export async function POST(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { daycare_id, date, status } = body;
 
     if (!daycare_id || !date) {
       return NextResponse.json({ error: 'Missing daycare_id or date' }, { status: 400 });
+    }
+
+    // Verify daycare exists & belongs to verified session email
+    const { data: daycare } = await supabaseAdmin
+      .from('pet_daycares')
+      .select('id, email')
+      .eq('id', daycare_id)
+      .maybeSingle();
+
+    if (!daycare || daycare.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this daycare availability.' }, { status: 403 });
     }
 
     // Check if entry exists

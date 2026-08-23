@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { unpackPetProfile } from '@/lib/petProfileSchema';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,18 +9,38 @@ export const dynamic = 'force-dynamic';
 // Validates partner scanning, verifies partner DB status, registers access grant, and returns tiered pet profile data.
 export async function POST(request: NextRequest) {
   try {
+    // 0. AUTHENTICATION REQUIREMENT: Enforce signed server-side session
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { 
+          error: 'Authentication required. Please sign in to your verified account to scan QR codes and access pet profiles.',
+          requires_auth: true 
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { pet_id, partner_email, partner_type, partner_name } = body;
 
-    if (!pet_id || !partner_email || !partner_type) {
+    if (!pet_id || !partner_type) {
       return NextResponse.json(
-        { error: 'Pet ID, partner email, and partner type are required.' },
+        { error: 'Pet ID and partner type are required.' },
         { status: 400 }
       );
     }
 
+    // Enforce that client cannot forge another email
+    if (partner_email && partner_email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Forbidden: Session email does not match requested partner email.' },
+        { status: 403 }
+      );
+    }
+
     const cleanPetId = pet_id.trim();
-    const cleanPartnerEmail = partner_email.toLowerCase().trim();
+    const cleanPartnerEmail = verifiedEmail;
     const cleanPartnerType = (partner_type as string).toLowerCase().trim() as 'vet' | 'daycare' | 'sitter';
 
     if (!['vet', 'daycare', 'sitter'].includes(cleanPartnerType)) {
@@ -138,7 +159,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         access_tier: 'full_vet',
-        granted_at: accessGrant?.granted_at || new Date().toISOString(),
+        granted_at: new Date().toISOString(),
         pet: unpackedPet,
       });
     } else {
@@ -167,7 +188,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         access_tier: 'care_level',
-        granted_at: accessGrant?.granted_at || new Date().toISOString(),
+        granted_at: new Date().toISOString(),
         pet: careLevelPet,
       });
     }

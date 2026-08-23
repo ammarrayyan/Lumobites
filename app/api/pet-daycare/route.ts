@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { extractOgImage } from '@/lib/og-fetcher';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 import { sendDaycareRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -19,10 +20,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email parameter' }, { status: 400 });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
+    // Enforce verified session matching daycare email
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail || verifiedEmail !== cleanEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const { data: daycare, error } = await supabaseAdmin
       .from('pet_daycares')
       .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .eq('email', cleanEmail)
       .maybeSingle();
 
     const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
@@ -258,6 +270,14 @@ export async function POST(request: NextRequest) {
 // ─── PATCH /api/pet-daycare — Update Profile / Pause Status ────────────────────
 export async function PATCH(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const {
       id,
@@ -278,6 +298,17 @@ export async function PATCH(request: NextRequest) {
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing daycare id or email' }, { status: 400 });
+    }
+
+    // Verify daycare belongs to verifiedEmail
+    const { data: existingDaycare } = await supabaseAdmin
+      .from('pet_daycares')
+      .select('*')
+      .or(id ? `id.eq.${id},email.eq.${verifiedEmail}` : `email.eq.${verifiedEmail}`)
+      .maybeSingle();
+
+    if (!existingDaycare || existingDaycare.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this daycare.' }, { status: 403 });
     }
 
     let updatedLogo = logo_url;
@@ -323,7 +354,7 @@ export async function PATCH(request: NextRequest) {
     if (id) {
       query = query.eq('id', id);
     } else {
-      query = query.eq('email', email.toLowerCase().trim());
+      query = query.eq('email', verifiedEmail);
     }
 
     const { data: daycare, error } = await query.select('*').single();
@@ -340,6 +371,14 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified partner account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const emailParam = searchParams.get('email');
     let email = emailParam;
@@ -353,20 +392,16 @@ export async function DELETE(request: NextRequest) {
       } catch (e) {}
     }
 
-    if (!email && !id) {
-      return NextResponse.json({ error: 'Missing email or id parameter' }, { status: 400 });
-    }
-
     let query = supabaseAdmin.from('pet_daycares').select('*');
     if (id) {
       query = query.eq('id', id);
-    } else if (email) {
-      query = query.eq('email', email.toLowerCase().trim());
+    } else {
+      query = query.eq('email', verifiedEmail);
     }
 
-    const { data: daycare } = await query.single();
-    if (!daycare) {
-      return NextResponse.json({ error: 'Pet daycare not found' }, { status: 404 });
+    const { data: daycare } = await query.maybeSingle();
+    if (!daycare || daycare.email.toLowerCase().trim() !== verifiedEmail) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this daycare.' }, { status: 403 });
     }
 
     // Cancel active Stripe subscriptions FIRST
