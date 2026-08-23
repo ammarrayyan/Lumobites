@@ -419,15 +419,15 @@ export default function AdminPage() {
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-center">
+                <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-xs">
                   <p className="text-2xl font-bold text-[#8B5E3C]">{activeLostPets}</p>
                   <p className="text-xs text-gray-500">Active Lost Pets</p>
                 </div>
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-center">
+                <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-xs">
                   <p className="text-2xl font-bold text-[#8B5E3C]">{recentFoundPets}</p>
                   <p className="text-xs text-gray-500">Found Pets (7 days)</p>
                 </div>
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-center">
+                <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-center shadow-xs">
                   <p className="text-2xl font-bold text-[#8B5E3C]">{totalMatches}</p>
                   <p className="text-xs text-gray-500">Total Matches Sent</p>
                 </div>
@@ -660,7 +660,7 @@ export default function AdminPage() {
 
                     {/* Results */}
                     {outreachResults && (
-                      <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
+                      <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1 shadow-xs">
                         <p><strong>✅ Sent:</strong> {outreachResults.sent}</p>
                         <p><strong>❌ Failed:</strong> {outreachResults.failed}</p>
                         {outreachResults.errors?.length > 0 && (
@@ -686,7 +686,7 @@ export default function AdminPage() {
                   </div>
 
                   <div className="bg-white border border-[#E8DDD4] rounded-xl p-6 space-y-4">
-                    <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-xs space-y-1">
+                    <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-xs space-y-1 shadow-xs">
                       <p className="font-medium text-[#4A3E3D]">Twilio Account Stats</p>
                       <p className="text-gray-400">
                         Current balance: $19.83 (~2,500 messages)
@@ -703,7 +703,7 @@ export default function AdminPage() {
                         onChange={(e) => setSmsNumbers(e.target.value)}
                         rows={6}
                         placeholder={"+15025551234\n+15025555678\n+12125559012"}
-                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono"
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm font-mono bg-white"
                       />
                       <p className="text-xs text-gray-400 mt-1">
                         {smsNumbers.split('\n').filter(n => n.trim()).length} recipients
@@ -721,7 +721,7 @@ export default function AdminPage() {
                         rows={4}
                         maxLength={160}
                         placeholder="Your message here... lumobites.net"
-                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm"
+                        className="w-full mt-1 border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm bg-white"
                       />
                       <p className="text-xs text-gray-400 mt-1">
                         {smsMessage.length}/160 characters
@@ -739,7 +739,7 @@ export default function AdminPage() {
 
                     {/* Results */}
                     {smsResults && (
-                      <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1">
+                      <div className="bg-white border border-[#E8DDD4] rounded-xl p-4 text-sm space-y-1 shadow-xs">
                         <p>✅ Sent: <strong>{smsResults.sent ?? 0}</strong></p>
                         <p>❌ Failed: <strong>{smsResults.failed ?? 0}</strong></p>
                         <p>💰 Cost: ~$<strong>{((smsResults.sent ?? 0) * 0.0079).toFixed(4)}</strong></p>
@@ -768,7 +768,7 @@ export default function AdminPage() {
                     {outreachHistory.map((log: any) => (
                       <div 
                         key={log.id} 
-                        className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4"
+                        className="bg-white border border-[#E8DDD4] rounded-xl p-4 shadow-xs"
                       >
                         <div className="flex justify-between items-start">
                           <div>

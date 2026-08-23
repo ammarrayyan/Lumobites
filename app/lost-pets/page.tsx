@@ -609,7 +609,7 @@ export default function LostPetsFeed() {
                       placeholder="Search by city or zip code..."
                       value={searchQuery}
                       onChange={(e) => { setSearchQuery(e.target.value); setLocationVerified(false); }}
-                      className={`w-full bg-[#FAF6F4] border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium pr-12`}
+                      className={`w-full bg-white border ${locationVerified ? 'border-green-500' : 'border-[#E8DDD4]'} rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium pr-12 shadow-2xs`}
                     />
                     {isGeocoding && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin" />
@@ -629,7 +629,7 @@ export default function LostPetsFeed() {
                     onClick={handleUseMyLocation}
                     type="button"
                     disabled={isDetectingLocation}
-                    className={`bg-[#FAF6F4] hover:bg-[#E8DDD4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 ${isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`bg-white hover:bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-[16px] md:text-sm text-[#8B5E3C] font-semibold flex items-center gap-2 transition duration-200 shrink-0 shadow-2xs ${isDetectingLocation ? 'opacity-70 cursor-not-allowed' : ''}`}
                     title="Use my current location"
                   >
                     {isDetectingLocation ? (
@@ -639,18 +639,18 @@ export default function LostPetsFeed() {
                     )}
                   </button>
                 </div>
-                <select value={searchRadius} onChange={(e) => setSearchRadius(e.target.value)} className={`bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={!searchCoords && !!searchQuery}>
+                <select value={searchRadius} onChange={(e) => setSearchRadius(e.target.value)} className={`bg-white border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium shadow-2xs ${!searchCoords && searchQuery ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={!searchCoords && !!searchQuery}>
                   <option value="10">Within 10 miles</option>
                   <option value="25">Within 25 miles</option>
                   <option value="50">Within 50 miles</option>
                   <option value="100">Within 100 miles</option>
                 </select>
-                <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium">
+                <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="bg-white border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium shadow-2xs">
                   <option value="all">All Types</option>
                   <option value="lost">Lost Pets</option>
                   <option value="found">Found Pets</option>
                 </select>
-                <select value={filterSpecies} onChange={(e) => setFilterSpecies(e.target.value)} className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium">
+                <select value={filterSpecies} onChange={(e) => setFilterSpecies(e.target.value)} className="bg-white border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium shadow-2xs">
                   <option value="all">All Species</option>
                   <option value="dog">Dogs</option>
                   <option value="cat">Cats</option>
@@ -809,10 +809,10 @@ export default function LostPetsFeed() {
                   <button
                     type="button"
                     onClick={() => setAiSearchTab('photo')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
                       aiSearchTab === 'photo'
                         ? 'bg-[#8B5E3C] text-white shadow-sm'
-                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                        : 'bg-white text-[#4A3E3D] border border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
                     }`}
                   >
                     <Camera className="w-3.5 h-3.5" /> Search by Photo
@@ -820,10 +820,10 @@ export default function LostPetsFeed() {
                   <button
                     type="button"
                     onClick={() => setAiSearchTab('text')}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${
                       aiSearchTab === 'text'
                         ? 'bg-[#8B5E3C] text-white shadow-sm'
-                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                        : 'bg-white text-[#4A3E3D] border border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
                     }`}
                   >
                     <PenLine className="w-3.5 h-3.5" /> Describe Pet instead
@@ -834,11 +834,11 @@ export default function LostPetsFeed() {
                   {/* Input column */}
                   <div className="md:col-span-2 space-y-4">
                     {aiSearchTab === 'photo' ? (
-                      <div className="flex flex-col items-center justify-center border-2 border-dashed border-[#E8DDD4] rounded-2xl p-6 bg-[#FAF6F4] relative hover:bg-[#F3EAE3] transition-colors">
+                      <div className="flex flex-col items-center justify-center border-2 border-dashed border-[#E8DDD4] rounded-2xl p-6 bg-white relative hover:bg-[#FAF6F4] transition-colors shadow-2xs">
                         {uploadedPhoto ? (
                           <div className="flex flex-col items-center gap-3">
                             <img src={uploadedPhoto} alt="Uploaded pet preview" className="max-h-48 object-contain rounded-xl shadow-sm" />
-                            <button type="button" onClick={() => setUploadedPhoto(null)} className="text-xs font-bold text-red-600 hover:underline">Remove Photo</button>
+                            <button type="button" onClick={() => setUploadedPhoto(null)} className="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove Photo</button>
                           </div>
                         ) : (
                           <label className="flex flex-col items-center gap-2 cursor-pointer w-full h-full py-6">
@@ -854,7 +854,7 @@ export default function LostPetsFeed() {
                         value={petDescription}
                         onChange={(e) => setPetDescription(e.target.value)}
                         placeholder="Describe your pet (e.g. golden retriever, wearing a red collar, white spot on chest, friendly...)"
-                        className="w-full h-40 bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-sm resize-none"
+                        className="w-full h-40 bg-white border border-[#E8DDD4] rounded-2xl p-4 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-sm resize-none shadow-2xs"
                       />
                     )}
 

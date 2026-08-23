@@ -453,8 +453,8 @@ export default function CityBoardPostPage() {
                 title={!userEmail ? 'Sign in to save discussions' : isBookmarked ? 'Remove bookmark' : 'Bookmark discussion'}
                 className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
                   isBookmarked && userEmail 
-                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' 
-                    : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C]'
+                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs' 
+                    : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C] shadow-2xs'
                 }`}
               >
                 <Bookmark className={`w-3.5 h-3.5 ${isBookmarked && userEmail ? 'fill-white' : ''}`} />
@@ -490,7 +490,7 @@ export default function CityBoardPostPage() {
                     navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
                     showToast('Link copied to clipboard ✓');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-4 py-2 rounded-xl transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-white border border-[#E8DDD4] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
                   <Share2 className="w-3.5 h-3.5" /> Copy Link
                 </button>

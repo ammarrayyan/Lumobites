@@ -476,7 +476,7 @@ export default function CityBoardPage() {
               className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                 searchCategory === 'All'
                   ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                  : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
+                  : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
               }`}
             >
               <MessageSquare className="w-4 h-4" /> All Topics
@@ -488,7 +488,7 @@ export default function CityBoardPage() {
               className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                 searchCategory === 'Saved'
                   ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                  : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
+                  : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
               }`}
             >
               <Bookmark className={`w-4 h-4 ${searchCategory === 'Saved' ? 'fill-white' : 'text-[#8B5E3C]'}`} />
@@ -505,7 +505,7 @@ export default function CityBoardPage() {
                   className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
                     isActive
                       ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                      : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#E8DDD4]'
+                      : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" /> {cat}

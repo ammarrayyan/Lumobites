@@ -382,7 +382,7 @@ export default function AffiliateDashboard() {
                 </div>
 
                 {/* This Month Earnings */}
-                <div className="bg-[#FFF9F2]/50 border border-[#8B5E3C]/10 p-5 rounded-3xl shadow-sm relative overflow-hidden">
+                <div className="bg-white border border-[#8B5E3C]/20 p-5 rounded-3xl shadow-sm relative overflow-hidden">
                   <div className="absolute -top-1.5 -right-1.5 p-4 opacity-5 text-[#8B5E3C]">
                     <DollarSign size={48} />
                   </div>

@@ -599,7 +599,7 @@ function ShelterDashboardContent() {
                 <img src={shelterInfo.org_photo_url} alt={shelterInfo.org_name} className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F2] border border-[#E2D5C8] flex items-center justify-center text-[#8B5E3C] shrink-0 font-bold">
+              <div className="w-14 h-14 rounded-2xl bg-white border border-[#DFD3C7] flex items-center justify-center text-[#8B5E3C] shrink-0 font-bold shadow-2xs">
                 <Building2 className="w-7 h-7" />
               </div>
             )}
@@ -853,7 +853,7 @@ function ShelterDashboardContent() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as any)}
-                className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3 py-1.5 text-xs font-semibold text-[#2E2419]"
+                className="bg-white border border-[#DFD3C7] rounded-xl px-3 py-1.5 text-xs font-semibold text-[#2E2419] shadow-2xs"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>

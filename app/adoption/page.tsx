@@ -676,7 +676,7 @@ function AdoptionContent() {
             <select
               value={species}
               onChange={e => setSpecies(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0 shadow-2xs"
             >
               <option value="all">All Species</option>
               <option value="dog">Dogs</option>
@@ -687,7 +687,7 @@ function AdoptionContent() {
             <select
               value={age}
               onChange={e => setAge(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0 shadow-2xs"
             >
               <option value="all">All Ages</option>
               <option value="puppy">Puppy / Kitten</option>
@@ -699,7 +699,7 @@ function AdoptionContent() {
             <select
               value={size}
               onChange={e => setSize(e.target.value)}
-              className="bg-[#FAF6F0] border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 font-bold text-gray-800 shrink-0 shadow-2xs"
             >
               <option value="all">All Sizes</option>
               <option value="small">Small</option>
@@ -726,7 +726,7 @@ function AdoptionContent() {
                     setDebouncedCitySearch(citySearch);
                   }
                 }}
-                className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl pl-8 pr-14 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
+                className="w-full bg-white border border-gray-200 rounded-xl pl-8 pr-14 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C] shadow-2xs"
               />
               <div className="absolute right-2 top-1.5 flex items-center gap-1">
                 {citySearch && (
@@ -738,27 +738,27 @@ function AdoptionContent() {
                       setCityOptions([]);
                       setShowCityOptions(false);
                     }}
-                    title="Clear location filter"
-                    className="text-gray-400 hover:text-gray-600 p-0.5 rounded-md bg-transparent border-none cursor-pointer text-xs font-bold"
+                    className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
                   >
-                    X
+                    <X className="w-3 h-3" />
                   </button>
                 )}
                 <button
                   type="button"
-                  onClick={handleGPSDetect}
-                  disabled={isLocating}
-                  title="Detect current location"
-                  className="text-[#8B5E3C] hover:text-[#734A2E] p-1 rounded-md bg-transparent border-none cursor-pointer"
+                  onClick={() => {
+                    setShowCityOptions(false);
+                    setDebouncedCitySearch(citySearch);
+                  }}
+                  className="bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold px-2 py-0.5 rounded-lg text-[10px] cursor-pointer transition-colors shadow-2xs"
                 >
-                  {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+                  Search
                 </button>
               </div>
             </div>
 
             {/* City Autocomplete Dropdown */}
             {showCityOptions && cityOptions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-40 mt-1 bg-white border border-[#E8DDD4] rounded-2xl shadow-lg max-h-48 overflow-y-auto divide-y divide-gray-100 text-xs">
+              <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-[#E8DDD4] rounded-2xl shadow-xl overflow-hidden animate-fade-in text-left">
                 {cityOptions.map((opt, i) => {
                   const displayText = typeof opt === 'string' ? opt : ((opt as any)?.clean_city || (opt as any)?.formatted_address || '');
                   if (!displayText) return null;
@@ -771,10 +771,9 @@ function AdoptionContent() {
                         setDebouncedCitySearch(displayText);
                         setShowCityOptions(false);
                       }}
-                      className="w-full text-left p-2.5 hover:bg-amber-50 text-gray-700 font-medium cursor-pointer border-none bg-transparent flex items-center gap-1.5"
+                      className="w-full px-4 py-2.5 text-left text-xs font-semibold text-gray-700 hover:bg-[#FAF6F4] hover:text-[#8B5E3C] transition-colors border-b border-gray-50 last:border-none flex items-center gap-2 cursor-pointer"
                     >
-                      <Building2 className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
-                      <span className="truncate">{displayText}</span>
+                      <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" /> {displayText}
                     </button>
                   );
                 })}
@@ -791,7 +790,7 @@ function AdoptionContent() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowMap(!showMap)}
-              className="bg-[#FAF6F0] hover:bg-[#F5EDE4] text-[#8B5E3C] border border-[#E8DDD4] font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
+              className="bg-white hover:bg-[#F5EDE4] text-[#8B5E3C] border border-[#E8DDD4] font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs"
             >
               <MapIcon className="w-4 h-4 text-[#8B5E3C]" />
               <span>{showMap ? 'Hide Map' : 'Show Map'}</span>
