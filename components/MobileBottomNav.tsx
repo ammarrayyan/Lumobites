@@ -45,61 +45,48 @@ export default function MobileBottomNav() {
         WebkitTransform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         zIndex: 9999,
-        backgroundColor: 'rgba(255, 255, 255, 0.68)',
-        backdropFilter: 'blur(28px) saturate(190%)',
-        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
-        boxShadow: '0 14px 40px -4px rgba(0, 0, 0, 0.09), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1.5px rgba(255, 255, 255, 0.85)',
-        borderRadius: '38px',
-        border: '1px solid rgba(255, 255, 255, 0.7)',
+        backgroundColor: 'rgba(255, 255, 255, 0.65)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
+        borderRadius: '36px',
+        border: '1px solid rgba(255, 255, 255, 0.55)',
         pointerEvents: 'auto',
       }}
     >
-      {/* 🫧 WhatsApp-Style Liquid Glass Active Droplet Bubble */}
+      {/* 🫧 Apple iOS / WhatsApp "Liquid Glass" Active Tab Indicator */}
       {activeIndex >= 0 && (
         <div 
-          className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.48,0.64,1)]"
+          className="absolute pointer-events-none"
           style={{
-            top: '-5px',
-            bottom: '-5px',
-            width: `calc(${100 / tabs.length}% + 12px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% - 6px)`,
+            top: '4px',
+            bottom: '4px',
+            width: `calc(${100 / tabs.length}% - 4px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% + 2px)`,
             borderRadius: '9999px',
+            border: '1px solid transparent',
+            backgroundImage: `
+              linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), 
+              conic-gradient(from 180deg, 
+                rgba(255, 182, 193, 0.65), 
+                rgba(173, 216, 230, 0.65), 
+                rgba(221, 160, 221, 0.65), 
+                rgba(255, 182, 193, 0.65)
+              )
+            `,
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
+            backdropFilter: 'blur(16px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(150%)',
+            boxShadow: `
+              0 4px 12px rgba(0, 0, 0, 0.08),
+              0 1px 2px rgba(0, 0, 0, 0.04),
+              inset 0 1px 1px rgba(255, 255, 255, 0.6)
+            `,
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             zIndex: 0,
           }}
-        >
-          {/* Iridescent / Chromatic Aberration Refraction Edge */}
-          <div 
-            className="absolute inset-0 rounded-full"
-            style={{
-              padding: '1.5px',
-              background: 'linear-gradient(135deg, rgba(255, 80, 140, 0.85) 0%, rgba(255, 180, 50, 0.8) 25%, rgba(60, 220, 230, 0.9) 50%, rgba(140, 110, 255, 0.85) 75%, rgba(255, 80, 160, 0.85) 100%)',
-              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-              WebkitMaskComposite: 'xor',
-              maskComposite: 'exclude',
-              filter: 'blur(0.35px)',
-              opacity: 0.85,
-            }}
-          />
-
-          {/* Frosted Glass Droplet Core with Specular Inner Glow */}
-          <div 
-            className="absolute inset-0 rounded-full"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.52)',
-              backdropFilter: 'blur(16px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-              boxShadow: '0 10px 24px -2px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(0, 0, 0, 0.04), inset 0 1.5px 2px rgba(255, 255, 255, 0.95), inset 0 -1.5px 2px rgba(0, 0, 0, 0.03)',
-            }}
-          />
-
-          {/* Top Specular Arc Reflection */}
-          <div 
-            className="absolute top-0.5 left-2 right-2 h-[45%] rounded-t-full pointer-events-none opacity-80"
-            style={{
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%)',
-            }}
-          />
-        </div>
+        />
       )}
 
       {tabs.map((tab, idx) => {
@@ -120,13 +107,13 @@ export default function MobileBottomNav() {
             className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-0.5 group active:scale-90 transition-transform duration-150 select-none"
             style={{ textDecoration: 'none' }}
           >
-            {/* Icon with Scale & Spring Movement */}
+            {/* Icon with Solid Black & Bold Treatment for Active */}
             <Icon
-              className="w-[21px] h-[21px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#0A0A0A' : '#78716C',
+                color: isActive ? '#000000' : '#8E8E93',
                 fill: isActive ? 'currentColor' : 'none',
-                transform: isActive ? 'scale(1.14) translateY(-1px)' : 'scale(1)',
+                transform: isActive ? 'scale(1.12) translateY(-1px)' : 'scale(1)',
                 strokeWidth: isActive ? 2.5 : 1.8,
               }}
             />
@@ -135,7 +122,7 @@ export default function MobileBottomNav() {
             <span
               className="text-[9.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#0A0A0A' : '#78716C',
+                color: isActive ? '#000000' : '#8E8E93',
                 fontWeight: isActive ? 800 : 600,
                 transform: isActive ? 'scale(1.02)' : 'scale(1)',
               }}
