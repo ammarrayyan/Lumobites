@@ -623,44 +623,13 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             )}
 
             {isSignedIn && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowProMenu(!showProMenu)}
-                  className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
-                  title={proEmail || sitterEmail || shelterEmail || 'Account'}
-                >
-                  {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
-                </button>
-
-                {showProMenu && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                      onClick={() => setShowProMenu(false)}
-                    />
-                    
-                    <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                      <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                        {proEmail || sitterEmail || shelterEmail || "User Account"}
-                      </div>
-                      <Link 
-                        href="/account"
-                        onClick={() => setShowProMenu(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
-                      >
-                        <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+              <Link
+                href="/account"
+                className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none text-decoration-none"
+                title={proEmail || sitterEmail || shelterEmail || 'My Account'}
+              >
+                {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
+              </Link>
             )}
           </div>
         </div>
@@ -686,44 +655,13 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               Sign In
             </button>
           ) : (
-            <div className="relative">
-              <button
-                onClick={() => setShowProMenu(!showProMenu)}
-                className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] cursor-pointer border-none transition-colors select-none"
-                title={proEmail || sitterEmail || shelterEmail || 'Account'}
-              >
-                {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
-              </button>
-
-              {showProMenu && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                    onClick={() => setShowProMenu(false)}
-                  />
-                  
-                  <div className="absolute right-0 mt-2.5 w-52 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
-                    <div className="px-3 py-2 border-b border-gray-150 text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate select-none">
-                      {proEmail || sitterEmail || shelterEmail || "User Account"}
-                    </div>
-                    <Link 
-                      href="/account"
-                      onClick={() => setShowProMenu(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-xs text-[#555555] hover:text-[#8B5E3C] font-semibold hover:bg-[#FAF6F4] rounded-xl transition-all"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <Settings className="w-3.5 h-3.5 text-[#8B5E3C]" /> Manage Account
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 font-semibold hover:bg-red-50 rounded-xl transition-all text-left bg-transparent border-none cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5 text-red-600" /> Sign Out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            <Link
+              href="/account"
+              className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none text-decoration-none"
+              title={proEmail || sitterEmail || shelterEmail || 'My Account'}
+            >
+              {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
+            </Link>
           )}
         </div>
       </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Check } from 'lucide-react';
+import Link from 'next/link';
+import { Bell } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Notification {
@@ -184,170 +185,19 @@ export default function NotificationBell({
   if (!email) return null;
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative z-50 p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center text-gray-600 bell-btn"
+    <div className="relative">
+      <Link 
+        href="/notifications"
+        className="relative p-2 rounded-full hover:bg-gray-100 transition-transform active:scale-95 flex items-center justify-center text-gray-600 bell-btn text-decoration-none"
+        aria-label="View notifications"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white">
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
-      </button>
-
-      {isOpen && (
-        <div 
-          className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-left bell-dropdown"
-          style={{
-            top: '100%',
-            zIndex: 40
-          }}
-        >
-          <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 min-h-[46px]">
-            {showMarkConfirm ? (
-              <div className="flex items-center justify-between w-full animate-fade-in">
-                <span className="text-xs font-bold text-gray-700">Mark all as read?</span>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => { markAllAsRead(); setShowMarkConfirm(false); }}
-                    className="text-[11px] bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
-                  >
-                    Yes
-                  </button>
-                  <button 
-                    onClick={() => setShowMarkConfirm(false)}
-                    className="text-[11px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : showClearConfirm ? (
-              <div className="flex items-center justify-between w-full animate-fade-in">
-                <span className="text-xs font-bold text-red-600">Clear all notifications?</span>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => { clearAllNotifications(); setShowClearConfirm(false); }}
-                    className="text-[11px] bg-red-600 hover:bg-red-700 text-white font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
-                  >
-                    Yes
-                  </button>
-                  <button 
-                    onClick={() => setShowClearConfirm(false)}
-                    className="text-[11px] bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer border-none"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h3 className="font-bold text-gray-800 text-sm">Notifications</h3>
-                <div className="flex gap-2">
-                  {unreadCount > 0 && (
-                    <button 
-                      onClick={() => { setShowMarkConfirm(true); setShowClearConfirm(false); }}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none"
-                    >
-                      <Check size={12} /> Mark read
-                    </button>
-                  )}
-                  {notifications.length > 0 && (
-                    <button 
-                      onClick={() => { setShowClearConfirm(true); setShowMarkConfirm(false); }}
-                      className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1 cursor-pointer bg-transparent border-none"
-                    >
-                      Clear all
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-          
-          <div className="max-h-[400px] overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-500 text-sm">
-                No notifications yet
-              </div>
-            ) : (
-              notifications.map((notif) => (
-                <button
-                  key={notif.id}
-                  onClick={() => handleNotificationClick(notif)}
-                  className={`w-full text-left p-3 border-b border-gray-50 last:border-none transition-colors ${notif.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50'}`}
-                >
-                  <div className="flex gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm mb-0.5 ${notif.read ? 'text-gray-700 font-medium' : 'text-gray-900 font-bold'}`}>
-                        {notif.title}
-                      </p>
-                      <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                        {notif.message}
-                      </p>
-                      <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
-                        {new Date(notif.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    {!notif.read && (
-                      <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                    )}
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-          <div className="p-2 border-t border-gray-100 bg-gray-50/50 text-center">
-            <button 
-              onClick={() => {
-                setIsOpen(false);
-                router.push('/petsitting?tab=owner&section=history');
-              }}
-              className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors bg-transparent border-none cursor-pointer"
-            >
-              See all activity →
-            </button>
-          </div>
-        </div>
-      )}
-
-
-
-      {toast && (
-        <div 
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            zIndex: 9999,
-            backgroundColor: toast.type === 'error' ? '#DC2626' : toast.type === 'success' ? '#10B981' : '#1F1F1F',
-            color: '#FFFFFF',
-            fontSize: '13px',
-            fontWeight: '600',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: `1px solid ${toast.type === 'error' ? '#EF4444' : toast.type === 'success' ? '#34D399' : '#374151'}`,
-            animation: 'fadeIn 0.2s ease-out'
-          }}
-        >
-          <span 
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#FFFFFF',
-              display: 'inline-block'
-            }}
-          />
-          <span>{toast.message}</span>
-        </div>
-      )}
+      </Link>
     </div>
   );
 }
