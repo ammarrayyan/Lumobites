@@ -67,22 +67,22 @@ export default function MobileBottomNav() {
             zIndex: 1,
           }}
         >
-          {/* 1. Saturated Chromatic Dispersion / Prismatic Fringe along Curved Top & Bottom Rims */}
+          {/* 1. Subtle Pastel Shimmer / Iridescent Prismatic Fringe */}
           <div 
             className="absolute inset-0 pointer-events-none"
             style={{
               borderRadius: '24px',
-              padding: '2px',
+              padding: '1.5px',
               background: `
-                radial-gradient(ellipse at 50% 0%, #FF0055 0%, #FFAA00 30%, #00F0FF 65%, transparent 85%),
-                radial-gradient(ellipse at 50% 100%, #00F0FF 0%, #8B00FF 40%, #FF0066 75%, transparent 90%),
-                conic-gradient(from 180deg at 50% 50%, #FF007A 0%, #FFAA00 25%, #00E5FF 50%, #8B00FF 75%, #FF007A 100%)
+                radial-gradient(ellipse at 50% 0%, rgba(255, 120, 160, 0.45) 0%, rgba(255, 195, 110, 0.40) 30%, rgba(100, 220, 245, 0.45) 65%, transparent 85%),
+                radial-gradient(ellipse at 50% 100%, rgba(100, 220, 245, 0.45) 0%, rgba(185, 145, 250, 0.40) 40%, rgba(255, 130, 170, 0.40) 75%, transparent 90%),
+                conic-gradient(from 180deg at 50% 50%, rgba(255, 130, 170, 0.35) 0%, rgba(255, 195, 110, 0.35) 25%, rgba(100, 220, 245, 0.40) 50%, rgba(185, 145, 250, 0.35) 75%, rgba(255, 130, 170, 0.35) 100%)
               `,
               WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
               WebkitMaskComposite: 'xor',
               maskComposite: 'exclude',
-              filter: 'blur(0.4px)',
-              opacity: 0.95,
+              filter: 'blur(0.3px)',
+              opacity: 0.55,
             }}
           />
 
