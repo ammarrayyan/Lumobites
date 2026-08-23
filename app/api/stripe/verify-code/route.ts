@@ -18,7 +18,16 @@ export async function POST(request: NextRequest) {
     // Apple reviewer bypass
     if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
       console.log(`[Verify Code API] Apple reviewer bypass triggered`);
-      return NextResponse.json({ success: true, isPro: true, existed: true, isSitter: false, sitterId: null });
+      const response = NextResponse.json({
+        success: true,
+        isPro: true,
+        existed: true,
+        isSitter: false,
+        sitterId: null,
+        token: createAccountSessionToken(cleanEmail)
+      });
+      setAccountSessionCookie(response, cleanEmail);
+      return response;
     }
 
     // 1. Check if the code exists

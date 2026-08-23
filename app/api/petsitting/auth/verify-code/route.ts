@@ -16,7 +16,14 @@ export async function POST(request: NextRequest) {
     // Apple reviewer bypass
     if (cleanEmail === 'reviewer@lumobites.net' && code === '123456') {
       console.log(`[Sitter Auth Verify Code] Apple reviewer bypass triggered`);
-      return NextResponse.json({ success: true, message: 'Logged in successfully', existed: true });
+      const response = NextResponse.json({
+        success: true,
+        message: 'Logged in successfully',
+        existed: true,
+        token: createAccountSessionToken(cleanEmail)
+      });
+      setAccountSessionCookie(response, cleanEmail);
+      return response;
     }
 
     // 0. Brute Force Check
