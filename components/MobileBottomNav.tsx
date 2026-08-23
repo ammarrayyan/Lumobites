@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
       className="lg:hidden px-1.5 flex items-center justify-between w-[calc(100%-24px)] max-w-[430px] h-[66px] relative select-none"
       style={{
         position: 'fixed',
-        bottom: '14px',
+        bottom: '16px',
         left: 0,
         right: 0,
         marginLeft: 'auto',
@@ -45,25 +45,61 @@ export default function MobileBottomNav() {
         WebkitTransform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         zIndex: 9999,
-        backgroundColor: 'rgba(255, 255, 255, 0.45)',
-        backdropFilter: 'blur(24px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(200%)',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.65)',
-        borderRadius: '36px',
-        border: '1px solid rgba(255, 255, 255, 0.55)',
+        backgroundColor: 'rgba(255, 255, 255, 0.68)',
+        backdropFilter: 'blur(28px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+        boxShadow: '0 14px 40px -4px rgba(0, 0, 0, 0.09), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1.5px rgba(255, 255, 255, 0.85)',
+        borderRadius: '38px',
+        border: '1px solid rgba(255, 255, 255, 0.7)',
         pointerEvents: 'auto',
       }}
     >
-      {/* Sliding Active Pill Background Indicator with Spring Bouncing Effect */}
+      {/* 🫧 WhatsApp-Style Liquid Glass Active Droplet Bubble */}
       {activeIndex >= 0 && (
         <div 
-          className="absolute top-1.5 bottom-1.5 rounded-full bg-white/75 shadow-xs border border-white/60 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
+          className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.48,0.64,1)]"
           style={{
-            width: `calc(${100 / tabs.length}% - 6px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% + 3px)`,
+            top: '-5px',
+            bottom: '-5px',
+            width: `calc(${100 / tabs.length}% + 12px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% - 6px)`,
+            borderRadius: '9999px',
             zIndex: 0,
           }}
-        />
+        >
+          {/* Iridescent / Chromatic Aberration Refraction Edge */}
+          <div 
+            className="absolute inset-0 rounded-full"
+            style={{
+              padding: '1.5px',
+              background: 'linear-gradient(135deg, rgba(255, 80, 140, 0.85) 0%, rgba(255, 180, 50, 0.8) 25%, rgba(60, 220, 230, 0.9) 50%, rgba(140, 110, 255, 0.85) 75%, rgba(255, 80, 160, 0.85) 100%)',
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor',
+              maskComposite: 'exclude',
+              filter: 'blur(0.35px)',
+              opacity: 0.85,
+            }}
+          />
+
+          {/* Frosted Glass Droplet Core with Specular Inner Glow */}
+          <div 
+            className="absolute inset-0 rounded-full"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.52)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              boxShadow: '0 10px 24px -2px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(0, 0, 0, 0.04), inset 0 1.5px 2px rgba(255, 255, 255, 0.95), inset 0 -1.5px 2px rgba(0, 0, 0, 0.03)',
+            }}
+          />
+
+          {/* Top Specular Arc Reflection */}
+          <div 
+            className="absolute top-0.5 left-2 right-2 h-[45%] rounded-t-full pointer-events-none opacity-80"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.1) 70%, transparent 100%)',
+            }}
+          />
+        </div>
       )}
 
       {tabs.map((tab, idx) => {
@@ -86,34 +122,26 @@ export default function MobileBottomNav() {
           >
             {/* Icon with Scale & Spring Movement */}
             <Icon
-              className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[21px] h-[21px] relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#1F1712' : '#78716C',
+                color: isActive ? '#0A0A0A' : '#78716C',
                 fill: isActive ? 'currentColor' : 'none',
-                transform: isActive ? 'scale(1.18) translateY(-1px)' : 'scale(1)',
-                strokeWidth: isActive ? 2.4 : 1.8,
+                transform: isActive ? 'scale(1.14) translateY(-1px)' : 'scale(1)',
+                strokeWidth: isActive ? 2.5 : 1.8,
               }}
             />
 
             {/* Label */}
             <span
-              className="text-[9.5px] font-extrabold tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
+              className="text-[9.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#1F1712' : '#78716C',
+                color: isActive ? '#0A0A0A' : '#78716C',
                 fontWeight: isActive ? 800 : 600,
+                transform: isActive ? 'scale(1.02)' : 'scale(1)',
               }}
             >
               {tab.label}
             </span>
-
-            {/* Active Indicator Dot */}
-            <span 
-              className="w-1 h-1 rounded-full bg-[#8B5E3C] absolute bottom-1 transition-all duration-300 ease-out"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transform: isActive ? 'scale(1)' : 'scale(0)',
-              }}
-            />
           </Link>
         );
       })}
