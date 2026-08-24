@@ -8019,8 +8019,8 @@ export function PetSittingContent() {
             rate: sitterRate,
             rate_type: sitterRateType,
             is_pro: isProSitter,
-            rating: sitterRating,
-            review_count: sitterReviewsCount,
+            rating: '5.0',
+            review_count: 0,
           }}
         />
       )}
