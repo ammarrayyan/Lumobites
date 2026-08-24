@@ -13,28 +13,28 @@
   --accent: #C17D3C;
   
   /* Responsive Font Size Variables - Standardized mobile readability scale */
-  --text-body: 15.75px;
-  --text-desc: 15.25px;
-  --text-card-desc: 14.75px;
-  --text-small: 11.75px;
-  --text-small-caption: 10.75px;
-  --text-btn: 14.25px;
-  --text-nav: 13.75px;
+  --text-body: 15.0px;
+  --text-desc: 14.5px;
+  --text-card-desc: 14.0px;
+  --text-small: 11.25px;
+  --text-small-caption: 10.5px;
+  --text-btn: 13.75px;
+  --text-nav: 13.25px;
   --text-badge: 11px;
-  --text-hero-sub: 16.25px;
+  --text-hero-sub: 15.5px;
 }
 
 @media (min-width: 768px) {
   :root {
-    --text-body: 16.25px;
-    --text-desc: 15.75px;
-    --text-card-desc: 15.25px;
-    --text-small: 13px;
-    --text-small-caption: 12px;
-    --text-btn: 14.25px;
-    --text-nav: 14.25px;
+    --text-body: 15.5px;
+    --text-desc: 15.0px;
+    --text-card-desc: 14.5px;
+    --text-small: 12.5px;
+    --text-small-caption: 11.5px;
+    --text-btn: 13.75px;
+    --text-nav: 13.75px;
     --text-badge: 12px;
-    --text-hero-sub: 16.75px;
+    --text-hero-sub: 16.0px;
   }
 }
 
