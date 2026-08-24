@@ -4731,7 +4731,7 @@ export function PetSittingContent() {
           )}
         {/* BECOME A SITTER TAB */}
         {activeTab === 'become' && (
-          <div className={`mx-auto bg-white rounded-3xl p-6 sm:p-8 md:p-10 border border-[#E8DDD4] shadow-sm animate-fade-in ${profilePreviewMode ? 'max-w-2xl' : 'max-w-4xl'}`}>
+          <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DDD4] shadow-sm animate-fade-in">
             {/* Back Button */}
             <div className="mb-6 flex justify-start">
               <button 
@@ -5464,115 +5464,26 @@ export function PetSittingContent() {
               </div>
             ) : (
               <>
-                {/* Hero Introduction */}
-                <div className="text-center mb-10">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-[#8B5E3C] border border-amber-200 mb-3 shadow-2xs">
-                    <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> 100% Commission-Free Sitter Network
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-3">
-                    Become a Trusted Pet Sitter on Lumo Bites
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#4A3E3D] leading-relaxed max-w-2xl mx-auto font-medium">
-                    Turn your love for animals into flexible earnings. Connect directly with pet owners in your community, set your own services and rates, and keep 100% of what you earn.
-                  </p>
-                </div>
-
-                {/* 4 Key Benefits Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                  <div className="bg-[#FAF6F4] p-5 rounded-2xl border border-[#E8DDD4] shadow-2xs space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                      <DollarSign className="w-5 h-5 text-emerald-700" />
-                    </div>
-                    <h3 className="text-base font-extrabold text-[#2B231D]">Keep 100% of Your Earnings</h3>
-                    <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">
-                      Zero platform commission fees or hidden deductions. Every dollar pet parents pay goes directly into your pocket.
-                    </p>
-                  </div>
-
-                  <div className="bg-[#FAF6F4] p-5 rounded-2xl border border-[#E8DDD4] shadow-2xs space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
-                      <MessageSquare className="w-5 h-5 text-blue-700" />
-                    </div>
-                    <h3 className="text-base font-extrabold text-[#2B231D]">Direct Pet Parent Chat</h3>
-                    <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">
-                      Message and coordinate with local pet parents in real time. Schedule meet-and-greets before confirming any booking.
-                    </p>
-                  </div>
-
-                  <div className="bg-[#FAF6F4] p-5 rounded-2xl border border-[#E8DDD4] shadow-2xs space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-[#8B5E3C] flex items-center justify-center font-bold">
-                      <Calendar className="w-5 h-5 text-[#8B5E3C]" />
-                    </div>
-                    <h3 className="text-base font-extrabold text-[#2B231D]">Complete Schedule Freedom</h3>
-                    <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">
-                      Offer drop-ins, dog walking, house sitting, boarding, or daycare. Set custom daily availability and accepted pet sizes.
-                    </p>
-                  </div>
-
-                  <div className="bg-[#FAF6F4] p-5 rounded-2xl border border-[#E8DDD4] shadow-2xs space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                      <ShieldCheck className="w-5 h-5 text-purple-700" />
-                    </div>
-                    <h3 className="text-base font-extrabold text-[#2B231D]">Verified Trust & Safety</h3>
-                    <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">
-                      Earn trust with an ID-verified badge, and get instant QR access to emergency vet contacts and feeding routines.
-                    </p>
-                  </div>
-                </div>
-
-                {/* How It Works (3 Steps) */}
-                <div className="bg-gradient-to-b from-[#FAF6F4] to-white p-6 md:p-8 rounded-3xl border border-[#E8DDD4] mb-10 shadow-2xs">
-                  <h3 className="text-lg font-black text-[#2B231D] mb-6 text-center">How Becoming a Sitter Works</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="flex flex-col items-center text-center space-y-2">
-                      <div className="w-9 h-9 rounded-full bg-[#8B5E3C] text-white flex items-center justify-center font-black text-sm shadow-xs">
-                        1
-                      </div>
-                      <h4 className="font-bold text-sm text-[#2B231D]">Submit Application</h4>
-                      <p className="text-xs text-[#666666] leading-relaxed">
-                        Add your bio, photo, and government ID for quick safety verification.
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col items-center text-center space-y-2">
-                      <div className="w-9 h-9 rounded-full bg-[#8B5E3C] text-white flex items-center justify-center font-black text-sm shadow-xs">
-                        2
-                      </div>
-                      <h4 className="font-bold text-sm text-[#2B231D]">Set Services & Rates</h4>
-                      <p className="text-xs text-[#666666] leading-relaxed">
-                        Choose the services you provide and define your custom pricing per visit or night.
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col items-center text-center space-y-2">
-                      <div className="w-9 h-9 rounded-full bg-[#8B5E3C] text-white flex items-center justify-center font-black text-sm shadow-xs">
-                        3
-                      </div>
-                      <h4 className="font-bold text-sm text-[#2B231D]">Accept Local Bookings</h4>
-                      <p className="text-xs text-[#666666] leading-relaxed">
-                        Receive inquiries from neighborhood pet parents, accept bookings, and get paid.
-                      </p>
-                    </div>
-                  </div>
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-black text-[#4A3E3D] mb-2">Join as a Pet Sitter</h2>
+                  <p className="text-[#8B7E7D] mb-4">Offer pet sitting services in your neighborhood and connect with local pet parents.</p>
                 </div>
 
             {sitterAuthMode === 'email' && (
-              <div className="text-center space-y-5 animate-fade-in bg-[#FAF6F4] p-8 rounded-3xl border border-[#E8DDD4] shadow-xs max-w-lg mx-auto">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white border border-[#E8DDD4] shadow-2xs">
-                  <Lock className="w-6 h-6 text-[#8B5E3C]" />
+              <div className="text-center space-y-6 animate-fade-in bg-white p-8 rounded-2xl border border-[#E8DDD4] shadow-sm max-w-md mx-auto">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#FAF6F4] mb-2">
+                  <Lock className="w-8 h-8 text-[#8B5E3C]" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-black text-[#2B231D]">Ready to Start Sitting?</h3>
-                  <p className="text-xs sm:text-sm text-[#555555] mt-1.5 leading-relaxed">
-                    Sign in to your free Lumo Bites account to complete your application in under 3 minutes.
-                  </p>
-                </div>
+                <h3 className="text-xl font-black text-[#4A3E3D]">Sign In Required</h3>
+                <p className="text-[#8B7E7D] text-sm leading-relaxed">
+                  You must be signed in to your free member account to apply or manage your pet sitter profile.
+                </p>
                 <button
                   type="button"
                   onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-sm"
+                  className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-sm"
                 >
-                  <Key className="w-4 h-4" /> Sign In / Create Free Account to Apply
+                  <Key className="w-4 h-4" /> Sign In to Continue
                 </button>
               </div>
             )}
