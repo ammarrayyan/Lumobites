@@ -8,7 +8,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import PetProfileCard from '@/components/PetProfileCard';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft, DollarSign } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft, DollarSign, QrCode } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +26,7 @@ const SitterMap = dynamic(() => import('@/components/SitterMap'), {
 
 const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false });
 const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
+const SitterPromoPosterModal = dynamic(() => import('@/components/SitterPromoPosterModal'), { ssr: false });
 
 export function formatSitterName(fullName) {
   if (!fullName) return 'Sitter';
@@ -452,6 +453,7 @@ export function PetSittingContent() {
   const [sitterReviews, setSitterReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [highlightedSitterId, setHighlightedSitterId] = useState<string | null>(null);
+  const [isPromoPosterOpen, setIsPromoPosterOpen] = useState(false);
   
   // Request Form State
   const [reqEmail, setReqEmail] = useState('');
@@ -846,6 +848,25 @@ export function PetSittingContent() {
     if (statusParam) {
       setRequestFilter(statusParam);
       setHistoryFilter(statusParam);
+    }
+
+    const sitterParam = searchParams.get('sitter') || searchParams.get('sitterId');
+    if (sitterParam) {
+      setActiveTab('find');
+      const existing = sitters.find(s => s.id === sitterParam);
+      if (existing) {
+        handleViewReviews(existing);
+      } else {
+        fetch(`/api/petsitting/sitters?id=${sitterParam}&t=${Date.now()}`)
+          .then(res => res.json())
+          .then(data => {
+            const found = data.sitters?.find((s: any) => s.id === sitterParam) || data.sitter;
+            if (found) {
+              handleViewReviews(found);
+            }
+          })
+          .catch(e => console.error('Failed to deep link to sitter profile', e));
+      }
     }
   }, [searchParams]);
 
@@ -4954,7 +4975,15 @@ export function PetSittingContent() {
                 {profileMessage && <div className="text-red-600 text-sm font-bold mb-4">{profileMessage}</div>}
 
                 <div className="flex flex-col gap-3 max-w-lg mx-auto">
-                  <button onClick={() => { setProfilePreviewMode(false); setProfileSuccessMessage(''); }} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-4 rounded-xl transition-all shadow-sm">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsPromoPosterOpen(true)} 
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer text-sm"
+                  >
+                    <QrCode className="w-4 h-4" /> Share My Sitter Card & QR Poster
+                  </button>
+
+                  <button onClick={() => { setProfilePreviewMode(false); setProfileSuccessMessage(''); }} className="w-full bg-[#FAF6F4] border border-[#E8DDD4] hover:bg-[#E8DDD4] text-[#4A3E3D] font-bold py-3.5 rounded-xl transition-all shadow-sm cursor-pointer">
                     Edit Profile
                   </button>
                   
@@ -7967,6 +7996,27 @@ export function PetSittingContent() {
           daycare={inquiringDaycare}
           ownerEmail={reqEmail}
           onClose={() => setInquiringDaycare(null)}
+        />
+      )}
+
+      {/* Sitter Promo Poster & QR Modal */}
+      {isPromoPosterOpen && (
+        <SitterPromoPosterModal
+          isOpen={isPromoPosterOpen}
+          onClose={() => setIsPromoPosterOpen(false)}
+          sitter={{
+            id: sitterId,
+            first_name: sitterFirstName,
+            last_name: sitterLastName,
+            photo: sitterPhoto,
+            city: sitterCity || sitterLocationInput,
+            service_types: sitterServiceTypes,
+            rate: sitterRate,
+            rate_type: sitterRateType,
+            is_pro: isProSitter,
+            rating: sitterRating,
+            review_count: sitterReviewsCount,
+          }}
         />
       )}
 

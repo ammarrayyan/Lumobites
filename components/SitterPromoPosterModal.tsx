@@ -1,0 +1,309 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import QRCode from 'qrcode';
+import html2canvas from 'html2canvas';
+import { QrCode, Download, Share2, Copy, Check, X, ShieldCheck, Star, MapPin, Sparkles, Dog, Cat, Loader2 } from 'lucide-react';
+import { formatSitterName } from '@/app/petsitting/page';
+
+interface SitterPromoPosterModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  sitter: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    name?: string;
+    photo?: string;
+    avatar_url?: string;
+    city?: string;
+    state?: string;
+    location?: string;
+    rating?: number | string;
+    review_count?: number;
+    reviews_count?: number;
+    service_types?: string[];
+    services?: string[];
+    rate?: string | number;
+    rate_type?: string;
+    is_pro?: boolean;
+    approval_status?: string;
+  };
+}
+
+const SERVICE_LABELS: Record<string, string> = {
+  home_visits: 'Drop-In Visits',
+  drop_in: 'Drop-In Visits',
+  overnight: 'Overnight Sitting',
+  dog_walking: 'Dog Walking',
+  walking: 'Dog Walking',
+  boarding: 'Home Boarding',
+  daycare: 'Pet Daycare',
+};
+
+export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: SitterPromoPosterModalProps) {
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [isGeneratingDownload, setIsGeneratingDownload] = useState(false);
+  const posterRef = useRef<HTMLDivElement | null>(null);
+
+  const fullName = sitter.name || `${sitter.first_name || ''} ${sitter.last_name || ''}`.trim() || 'Pet Sitter';
+  const displayName = formatSitterName(fullName);
+  const displayLocation = sitter.city || sitter.location || 'Local Community';
+  const profileUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/petsitting?sitter=${sitter.id}` 
+    : `https://lumobites.net/petsitting?sitter=${sitter.id}`;
+
+  const rawServices = sitter.service_types || sitter.services || [];
+  const displayServices = rawServices.map(s => SERVICE_LABELS[s] || s.replace(/_/g, ' ')).slice(0, 3).join(' • ') || 'Dog Walking • Drop-Ins • Sitting';
+
+  useEffect(() => {
+    if (isOpen && sitter.id) {
+      QRCode.toDataURL(profileUrl, {
+        margin: 1,
+        width: 320,
+        color: {
+          dark: '#2B231D',
+          light: '#FFFFFF',
+        },
+        errorCorrectionLevel: 'H',
+      })
+        .then((url) => setQrDataUrl(url))
+        .catch((err) => console.error('Failed to generate QR code', err));
+    }
+  }, [isOpen, sitter.id, profileUrl]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy link', err);
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${displayName} - Pet Sitter on Lumo Bites`,
+          text: `Need loving pet care in your neighborhood? View my pet sitting profile and book directly on Lumo Bites!`,
+          url: profileUrl,
+        });
+      } catch (err) {
+        handleCopyLink();
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    if (!posterRef.current || isGeneratingDownload) return;
+    setIsGeneratingDownload(true);
+
+    try {
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2.5,
+        useCORS: true,
+        backgroundColor: '#FFFFFF',
+        logging: false,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      const sanitizedName = displayName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      link.download = `lumo-sitter-${sanitizedName}-poster.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Failed to download poster image', err);
+    } finally {
+      setIsGeneratingDownload(false);
+    }
+  };
+
+  if (!isOpen || typeof window === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-[#FDFBF9] rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#E8DDD4] my-auto animate-in fade-in zoom-in-95 duration-150 relative">
+        {/* Top Modal Bar */}
+        <div className="flex items-center justify-between border-b border-[#E8DDD4] pb-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-[#8B5E3C] flex items-center justify-center font-bold">
+              <QrCode className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-[#2B231D] text-base leading-tight">My Sitter Profile Poster & QR</h3>
+              <p className="text-xs text-[#8B7E7D]">Share on social media or print to connect with local pet parents</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 text-gray-500 border border-[#E8DDD4] flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* ── PRINTABLE / SHAREABLE POSTER CANVAS ── */}
+        <div className="flex justify-center mb-4">
+          <div
+            ref={posterRef}
+            className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm w-full max-w-[360px] text-center space-y-4 relative overflow-hidden"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 90% 10%, rgba(245, 158, 11, 0.05) 0%, transparent 60%), radial-gradient(circle at 10% 90%, rgba(139, 94, 60, 0.04) 0%, transparent 60%)',
+            }}
+          >
+            {/* Top Catchphrase */}
+            <div>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-[#8B5E3C] border border-amber-200 mb-2">
+                <Sparkles className="w-3 h-3 text-[#8B5E3C]" /> Trusted Local Pet Care
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-[#2B231D] tracking-tight leading-tight">
+                Need loving pet care in your neighborhood?
+              </h2>
+            </div>
+
+            {/* Sitter Profile Snapshot Card */}
+            <div className="bg-[#FAF6F4] rounded-2xl p-3.5 border border-[#E8DDD4] flex items-center gap-3 text-left shadow-2xs">
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#8B5E3C]/30 shrink-0 bg-amber-100 flex items-center justify-center">
+                {sitter.photo || sitter.avatar_url ? (
+                  <img
+                    src={sitter.photo || sitter.avatar_url}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                    crossOrigin="anonymous"
+                  />
+                ) : (
+                  <span className="text-lg font-black text-[#8B5E3C]">
+                    {displayName.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-extrabold text-[#2B231D] text-base truncate leading-tight">
+                  {displayName}
+                </h4>
+                <div className="flex items-center gap-1 text-xs text-[#555555] mt-0.5">
+                  <MapPin className="w-3 h-3 text-[#8B5E3C] shrink-0" />
+                  <span className="truncate">{displayLocation}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded-md">
+                    <ShieldCheck className="w-2.5 h-2.5 text-emerald-700" /> Verified Sitter
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-md">
+                    <Star className="w-2.5 h-2.5 text-amber-600 fill-amber-600" /> {sitter.rating || '5.0'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Services Line */}
+            <div className="text-[11px] font-semibold text-[#666666] bg-[#FAF6F4]/60 py-1.5 px-2.5 rounded-xl border border-[#E8DDD4]/60">
+              🐾 {displayServices}
+            </div>
+
+            {/* Visual Mascot & QR Code Grid */}
+            <div className="grid grid-cols-2 gap-2.5 items-center pt-1">
+              {/* Pet Graphics Mascot */}
+              <div className="bg-gradient-to-b from-amber-50 to-white rounded-2xl p-3 border border-amber-200/60 flex flex-col items-center justify-center text-center space-y-1.5 h-full">
+                <div className="flex items-center justify-center gap-1">
+                  <div className="w-9 h-9 rounded-full bg-amber-100 text-[#8B5E3C] flex items-center justify-center shadow-xs">
+                    <Dog className="w-5 h-5 text-[#8B5E3C]" />
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-amber-100 text-[#8B5E3C] flex items-center justify-center shadow-xs">
+                    <Cat className="w-5 h-5 text-[#8B5E3C]" />
+                  </div>
+                </div>
+                <p className="text-[10px] font-bold text-[#4A3E3D] leading-tight mt-1">
+                  Direct Booking & Real-Time Updates
+                </p>
+              </div>
+
+              {/* QR Code Container */}
+              <div className="bg-white rounded-2xl p-2.5 border border-[#E8DDD4] shadow-xs flex flex-col items-center">
+                {qrDataUrl ? (
+                  <img
+                    src={qrDataUrl}
+                    alt={`QR Code for ${displayName}`}
+                    className="w-24 h-24 rounded-lg object-contain"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#8B5E3C]" />
+                  </div>
+                )}
+                <span className="text-[9px] font-extrabold text-[#8B5E3C] uppercase tracking-wider mt-1">
+                  Scan to Book Me
+                </span>
+              </div>
+            </div>
+
+            {/* Direct Link & Footer */}
+            <div className="pt-1 space-y-1 border-t border-[#E8DDD4]/60">
+              <p className="text-[11px] font-bold text-[#8B5E3C] tracking-wide">
+                lumobites.net/petsitting?sitter={sitter.id ? sitter.id.substring(0, 8) : 'id'}
+              </p>
+              <div className="flex items-center justify-center gap-1.5 text-[10px] font-black text-[#2B231D] tracking-wider uppercase">
+                <span>🐾 Lumo Bites Pet Sitting</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── ACTION BUTTONS ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={handleDownloadImage}
+            disabled={isGeneratingDownload || !qrDataUrl}
+            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+          >
+            {isGeneratingDownload ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+              </>
+            ) : (
+              <>
+                <Download className="w-3.5 h-3.5" /> Download Poster
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="w-full bg-white hover:bg-[#FAF6F4] text-[#4A3E3D] border border-[#E8DDD4] font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+          >
+            {copiedLink ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-600" /> Link Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5 text-gray-500" /> Copy Profile Link
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleShare}
+            className="w-full bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] border border-[#8B5E3C]/30 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+          >
+            <Share2 className="w-3.5 h-3.5" /> Share Poster
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
