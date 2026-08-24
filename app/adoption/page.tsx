@@ -990,14 +990,14 @@ function AdoptionContent() {
               <button onClick={() => setIsLifestyleModalOpen(false)} className="text-xs font-bold text-gray-400 hover:text-gray-600 cursor-pointer border-none bg-transparent">Close</button>
             </div>
 
-            <p className="text-xs text-gray-500">Describe your living situation and pet preferences (e.g., "small dog, low energy, good with kids, apartment friendly").</p>
+            <p className="text-xs text-gray-500">Describe your home, routine, and ideal companion.</p>
 
             <div className="space-y-3">
               <textarea
                 rows={3}
                 value={lifestylePrompt}
                 onChange={e => setLifestylePrompt(e.target.value)}
-                placeholder="e.g. I live in a 2-bedroom apartment with a toddler. Looking for a quiet, low-energy companion dog…"
+                placeholder="e.g. 2-bedroom apartment, toddler at home. Looking for a calm, low-energy dog."
                 className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-3 text-xs text-gray-800 focus:outline-none focus:border-[#8B5E3C]"
               />
 
@@ -1384,7 +1384,7 @@ function AdoptionContent() {
                       label="Address / Location *"
                       value={shelterFormData.city}
                       onChange={val => setShelterFormData({ ...shelterFormData, city: val })}
-                      placeholder="Enter city or full street address (e.g. Austin, TX)"
+                      placeholder="e.g. Austin, TX or 123 Main St"
                       required
                     />
                   </div>

@@ -1281,8 +1281,9 @@ function ShelterDashboardContent() {
                         value={profileForm.org_photo_url || ''}
                         onChange={e => setProfileForm({ ...profileForm, org_photo_url: e.target.value })}
                         className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
-                        placeholder="https://... or leave blank to auto-fetch from website"
+                        placeholder="https://... (optional)"
                       />
+                      <p className="text-[11px] text-[#8B7E7D]">Auto-fetched from website if left blank.</p>
                       {profileForm.org_photo_url && (
                         <div className="flex items-center gap-2">
                           <img src={profileForm.org_photo_url} alt="Logo preview" className="w-10 h-10 rounded-xl object-cover border border-[#DFD3C7]" />
@@ -1322,7 +1323,7 @@ function ShelterDashboardContent() {
                     label="Address / Location *"
                     value={profileForm.city || profileForm.address || ''}
                     onChange={val => setProfileForm({ ...profileForm, city: val, address: val })}
-                    placeholder="Enter city or full street address (e.g. 1239 Lexington Rd, Louisville, KY)"
+                    placeholder="e.g. 1239 Lexington Rd, Louisville, KY"
                     inputClassName="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-sm text-[#2E2419] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20"
                     required
                   />

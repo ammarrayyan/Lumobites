@@ -621,7 +621,7 @@ export default function CityBoardPage() {
           <div className="flex gap-2.5 w-full overflow-x-auto pb-1 hide-scrollbar">
             <input 
               type="text" 
-              placeholder="🔍 Search keyword..." 
+              placeholder="Search discussions..." 
               value={searchKeyword}
               onChange={e => setSearchKeyword(e.target.value)}
               className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white min-w-[150px] transition-all font-medium"
@@ -629,7 +629,7 @@ export default function CityBoardPage() {
             <div className="relative min-w-[150px]">
               <input 
                 type="text" 
-                placeholder="📍 Filter city..." 
+                placeholder="Filter by city..." 
                 value={searchCity}
                 onChange={e => setSearchCity(e.target.value)}
                 className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3.5 py-2 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium"

@@ -232,7 +232,7 @@ export default function SitterReviewPage() {
                     id="reviewText"
                     required
                     rows={4}
-                    placeholder="Describe your pet's experience with the sitter. Was the sitter responsive? Did they send updates? (minimum 20 characters)"
+                    placeholder="Share details about your pet's stay, updates received, and overall experience..."
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-4 py-3 text-sm text-[#2E2419] outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 transition-colors resize-none"

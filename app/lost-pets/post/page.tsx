@@ -386,7 +386,7 @@ export default function PostLostPet() {
                   value={description} 
                   onChange={e => setDescription(e.target.value)} 
                   className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20" 
-                  placeholder="Breed, color, collar/tag details, microchip info, behavior traits..." 
+                  placeholder="Distinctive markings, collar, microchip, or behavior traits..." 
                 />
               </div>
             </div>
@@ -426,7 +426,7 @@ export default function PostLostPet() {
                       }} 
                       onBlur={handleLocationBlur}
                       className={`w-full bg-[#FAF6F2] border ${locationVerified ? 'border-emerald-500' : 'border-[#E2D5C8]'} rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 pr-12`} 
-                      placeholder="Enter city name OR 5-digit zip code..." 
+                      placeholder="City or 5-digit zip code" 
                     />
                     {isLocating && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>

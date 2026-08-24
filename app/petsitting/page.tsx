@@ -3691,14 +3691,14 @@ export function PetSittingContent() {
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
-                    <p className="text-xs text-gray-550 mt-0.5">Describe what you need in plain English (e.g. "e.g. experienced with dogs, highly rated, good with senior pets...")</p>
+                    <p className="text-xs text-gray-550 mt-0.5">Describe what you need (e.g. experienced with dogs, good with senior pets)</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-3">
                   <input
                     type="text"
-                    placeholder="Describe your ideal sitter... e.g. experienced with dogs, female, 5 star"
+                    placeholder="e.g. Experienced with large dogs, highly rated, good with senior cats"
                     value={aiSitterSearch}
                     disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
                     onChange={(e) => setAiSitterSearch(e.target.value)}

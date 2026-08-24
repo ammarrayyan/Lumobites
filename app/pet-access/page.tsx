@@ -200,7 +200,7 @@ function PetAccessContent() {
           </div>
           <h1 className="text-xl font-extrabold text-gray-900">No Pet Specified</h1>
           <p className="text-xs text-gray-500 max-w-xs">
-            This URL requires a valid pet QR code scanner link (e.g. <code className="bg-gray-100 px-1 py-0.5 rounded text-[11px]">/pet-access?id=123</code>).
+            Please scan a valid pet QR tag to access this profile.
           </p>
           <Link
             href="/"

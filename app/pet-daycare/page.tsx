@@ -527,7 +527,7 @@ export default function DaycareRegistrationPage() {
               onChange={val => {
                 setForm(p => ({ ...p, address: val, city: formatPublicCity(val) }));
               }}
-              placeholder="e.g. 1239 Lexington Rd, Louisville, KY or Louisville, KY"
+              placeholder="e.g. 1239 Lexington Rd, Louisville, KY"
               inputClassName="w-full px-4 py-2.5 rounded-xl bg-[#FDFAF7] border border-[#E8DDD4] text-sm focus:outline-none focus:border-emerald-500"
             />
           </div>
