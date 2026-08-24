@@ -508,7 +508,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
               <div className="bg-[#FAF6F4] p-6 rounded-2xl mb-8">
                 <h3 className="font-bold text-[#4A3E3D] mb-2 text-lg">Description</h3>
-                <p className="text-[#555555] leading-relaxed whitespace-pre-wrap">{pet.description}</p>
+                <p className="text-[#4A3E3D] text-[15px] sm:text-base leading-relaxed whitespace-pre-wrap">{pet.description}</p>
               </div>
 
               <div className="flex flex-col gap-4">
@@ -660,7 +660,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                             </button>
                           )}
                         </div>
-                        <p className="text-[#555555] mt-2">{comment.comment_text}</p>
+                        <p className="text-[#4A3E3D] text-[15px] leading-relaxed mt-2">{comment.comment_text}</p>
 
                         {/* Comment Photo Thumbnail */}
                         {comment.photo_url && (

@@ -716,7 +716,7 @@ export default function LostPetsFeed() {
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">{pet.description}</p>
+                              <p className="text-[#4A3E3D] text-[15px] leading-relaxed mb-6 line-clamp-3 flex-1">{pet.description}</p>
                               <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
                                 <div className="flex justify-between items-center mb-4">
                                   <span className="text-xs font-semibold text-[#8B7E7D]">

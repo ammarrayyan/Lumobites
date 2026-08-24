@@ -574,7 +574,7 @@ export default function CityBoardPostPage() {
                       </div>
 
                       {/* Reply Text */}
-                      <p className="text-[#2B231D] text-sm leading-relaxed whitespace-pre-wrap font-normal">
+                      <p className="text-[#2B231D] text-[15px] sm:text-base leading-relaxed whitespace-pre-wrap font-normal">
                         {reply.content}
                       </p>
                     </div>
@@ -595,7 +595,7 @@ export default function CityBoardPostPage() {
               {shown.length === 0 && (
                 <div className="bg-white rounded-2xl p-8 border border-[#E8DDD4] shadow-xs text-center flex flex-col items-center justify-center">
                   <PenLine className="w-8 h-8 text-gray-300 mb-3" />
-                  <p className="text-[#8B7E7D] text-xs font-bold">No replies yet. Be the first to join the conversation!</p>
+                  <p className="text-[#8B7E7D] text-sm font-bold">No replies yet. Be the first to join the conversation!</p>
                 </div>
               )}
             </div>

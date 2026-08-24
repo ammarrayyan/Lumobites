@@ -206,7 +206,7 @@ export default function PetProfileCard({
                 )}
               </div>
 
-              <p className="text-xs text-gray-500 mt-0.5 font-medium">
+              <p className="text-sm text-gray-500 mt-0.5 font-medium">
                 {subtitleParts.length > 0 ? subtitleParts.join(' • ') : 'Mixed • Details N/A'}
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function PetProfileCard({
                   <strong className="font-extrabold text-[11px] block uppercase tracking-wider text-rose-900">
                     Allergies & Medical Alerts
                   </strong>
-                  <p className="text-xs font-semibold leading-relaxed mt-0.5">{pet.allergies}</p>
+                  <p className="text-sm font-semibold leading-relaxed mt-0.5">{pet.allergies}</p>
                 </div>
               </div>
             )}
@@ -241,7 +241,7 @@ export default function PetProfileCard({
                 <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
                   🥣 Feeding Schedule
                 </span>
-                <p className="text-gray-700 text-xs leading-relaxed">
+                <p className="text-gray-700 text-sm leading-relaxed">
                   {pet.feeding_schedule || <span className="text-gray-400 italic">None specified</span>}
                 </p>
               </div>
@@ -249,7 +249,7 @@ export default function PetProfileCard({
                 <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
                   💊 Medications & Dosing
                 </span>
-                <p className="text-gray-700 text-xs leading-relaxed">
+                <p className="text-gray-700 text-sm leading-relaxed">
                   {pet.medication || <span className="text-gray-400 italic">None</span>}
                 </p>
               </div>
@@ -261,7 +261,7 @@ export default function PetProfileCard({
                 <span className="font-bold text-gray-800 block text-[11px] mb-0.5 flex items-center gap-1">
                   <FileText className="w-3.5 h-3.5 text-[#8B5E3C]" /> Behavior & Routine Notes
                 </span>
-                <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">
+                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                   {cleanBehaviorNotes}
                 </p>
               </div>
@@ -274,16 +274,16 @@ export default function PetProfileCard({
                   <Stethoscope className="w-3.5 h-3.5 text-[#8B5E3C]" /> Primary Vet
                 </span>
                 {pet.vet_name || pet.vet_phone ? (
-                  <div className="text-gray-700 text-xs leading-tight">
+                  <div className="text-gray-700 text-sm leading-tight">
                     <p className="font-semibold">{pet.vet_name || 'Veterinarian'}</p>
                     {pet.vet_phone && (
-                      <p className="text-gray-500 font-mono text-[11px] mt-0.5 flex items-center gap-1">
+                      <p className="text-gray-500 font-mono text-xs mt-0.5 flex items-center gap-1">
                         <Phone className="w-3 h-3 text-gray-400" /> {pet.vet_phone}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-400 italic text-xs">No vet specified</p>
+                  <p className="text-gray-400 italic text-sm">No vet specified</p>
                 )}
               </div>
 
@@ -292,10 +292,10 @@ export default function PetProfileCard({
                   <Phone className="w-3.5 h-3.5 text-rose-600" /> Emergency Contact
                 </span>
                 {pet.emergency_contact_name || pet.emergency_contact_phone ? (
-                  <div className="text-gray-700 text-xs leading-tight">
+                  <div className="text-gray-700 text-sm leading-tight">
                     <p className="font-semibold">{pet.emergency_contact_name || 'Designated Contact'}</p>
                     {pet.emergency_contact_phone && (
-                      <p className="text-gray-500 font-mono text-[11px] mt-0.5 flex items-center gap-1">
+                      <p className="text-gray-500 font-mono text-xs mt-0.5 flex items-center gap-1">
                         <Phone className="w-3 h-3 text-gray-400" /> {pet.emergency_contact_phone}
                       </p>
                     )}

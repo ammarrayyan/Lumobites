@@ -877,7 +877,7 @@ function AdoptionContent() {
                             <h3 className="font-extrabold text-base text-gray-900 truncate">{pet.name}</h3>
                             <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full capitalize">{pet.age}</span>
                           </div>
-                          <p className="text-xs text-gray-500 font-medium">{pet.breed} &bull; {pet.size} &bull; {pet.sex}</p>
+                          <p className="text-sm text-gray-500 font-medium">{pet.breed} &bull; {pet.size} &bull; {pet.sex}</p>
                           <div className="text-[11px] text-[#8B5E3C] font-bold mt-1.5 flex items-center gap-1.5">
                             {(pet as any).shelter_photo_url ? (
                               <img src={(pet as any).shelter_photo_url} alt={pet.shelter_name} className="w-4 h-4 rounded-full object-cover shrink-0 border border-amber-200" />
@@ -887,7 +887,7 @@ function AdoptionContent() {
                             <span className="truncate">{pet.shelter_name}</span>
                           </div>
                           {pet.temperament && (
-                            <p className={`text-xs text-gray-600 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed ${!isLoggedIn ? 'blur-[3px] select-none' : ''}`}>
+                            <p className={`text-sm text-gray-700 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed ${!isLoggedIn ? 'blur-[3px] select-none' : ''}`}>
                               {pet.temperament}
                             </p>
                           )}
@@ -915,7 +915,7 @@ function AdoptionContent() {
                   <h2 className="text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
                     <Heart className="w-6 h-6 text-amber-600" /> More Pets Nearby (via RescueGroups)
                   </h2>
-                  <p className="text-xs text-gray-600">External partner listings — click full listing to contact rescue</p>
+                  <p className="text-sm text-gray-600">External partner listings — click full listing to contact rescue</p>
                   <p className="text-[10px] text-amber-600/80 mt-1 italic font-medium">*Note: Partner listings are periodically synced and may occasionally reflect pets that have just been adopted.</p>
                 </div>
                 <span className="bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-2xs">

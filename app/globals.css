@@ -12,29 +12,29 @@
   --primary: #8B5E3C;
   --accent: #C17D3C;
   
-  /* Responsive Font Size Variables */
-  --text-body: 13px;
-  --text-desc: 13px;
-  --text-card-desc: 12px;
-  --text-small: 11px;
-  --text-small-caption: 10px;
-  --text-btn: 13px;
-  --text-nav: 13px;
+  /* Responsive Font Size Variables - Standardized mobile readability scale */
+  --text-body: 15.5px;
+  --text-desc: 15px;
+  --text-card-desc: 14.5px;
+  --text-small: 12px;
+  --text-small-caption: 11px;
+  --text-btn: 14px;
+  --text-nav: 14px;
   --text-badge: 11px;
-  --text-hero-sub: 14px;
+  --text-hero-sub: 16px;
 }
 
 @media (min-width: 768px) {
   :root {
-    --text-body: 15px;
-    --text-desc: 15px;
-    --text-card-desc: 14px;
-    --text-small: 12px;
+    --text-body: 16px;
+    --text-desc: 15.5px;
+    --text-card-desc: 15px;
+    --text-small: 13px;
     --text-small-caption: 12px;
-    --text-btn: 14px;
-    --text-nav: 14px;
+    --text-btn: 14.5px;
+    --text-nav: 14.5px;
     --text-badge: 12px;
-    --text-hero-sub: 15px;
+    --text-hero-sub: 16.5px;
   }
 }
 
