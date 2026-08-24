@@ -849,25 +849,6 @@ export function PetSittingContent() {
       setRequestFilter(statusParam);
       setHistoryFilter(statusParam);
     }
-
-    const sitterParam = searchParams.get('sitter') || searchParams.get('sitterId');
-    if (sitterParam) {
-      setActiveTab('find');
-      const existing = sitters.find(s => s.id === sitterParam);
-      if (existing) {
-        handleViewReviews(existing);
-      } else {
-        fetch(`/api/petsitting/sitters?id=${sitterParam}&t=${Date.now()}`)
-          .then(res => res.json())
-          .then(data => {
-            const found = data.sitters?.find((s: any) => s.id === sitterParam) || data.sitter;
-            if (found) {
-              handleViewReviews(found);
-            }
-          })
-          .catch(e => console.error('Failed to deep link to sitter profile', e));
-      }
-    }
   }, [searchParams]);
 
   // Automatically fetch owner's booking history and pets whenever their email is authenticated
@@ -1456,6 +1437,30 @@ export function PetSittingContent() {
       }
     }, 100);
   };
+
+  // Deep-link to sitter profile if ?sitter=<id> or ?sitterId=<id> is in URL
+  useEffect(() => {
+    const sitterParam = searchParams.get('sitter') || searchParams.get('sitterId');
+    if (!sitterParam) return;
+
+    setActiveTab('find');
+    
+    // Check if already in sitters list
+    const existing = sitters.find(s => s.id === sitterParam);
+    if (existing) {
+      handleViewReviews(existing);
+    } else {
+      fetch(`/api/petsitting/sitters?id=${sitterParam}&t=${Date.now()}`)
+        .then(res => res.json())
+        .then(data => {
+          const found = data.sitters?.find((s: any) => s.id === sitterParam) || data.sitter;
+          if (found) {
+            handleViewReviews(found);
+          }
+        })
+        .catch(err => console.error('Failed to load deep-linked sitter', err));
+    }
+  }, [searchParams, sitters]);
 
   const fetchSitterRequests = async (id: string) => {
     if (!id) return;
