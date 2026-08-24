@@ -191,7 +191,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
             type="text"
             value={newReferrerName}
             onChange={(e) => setNewReferrerName(e.target.value)}
-            placeholder="Enter referrer name (e.g. Omar)"
+            placeholder="e.g. Omar"
             className="flex-1 bg-white border border-gray-200 rounded-xl p-3 text-[#191919] focus:outline-none focus:border-[#c2e59c]"
             disabled={creating}
           />

@@ -1000,7 +1000,7 @@ export default function AccountPetsTab({
                         <div key={originalIndex} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#FAF6F2] p-3 rounded-xl border border-[#E2D5C8]">
                           <input
                             type="text"
-                            placeholder="Vaccine Name (e.g. Rabies 3-Yr, DHPP)"
+                            placeholder="e.g. Rabies 3-Yr, DHPP"
                             value={vax.name || vax.vaccine || ''}
                             onChange={e => {
                               const updated = [...(editingPet.vaccination_records || [])];

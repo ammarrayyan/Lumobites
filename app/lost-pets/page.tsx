@@ -853,7 +853,7 @@ export default function LostPetsFeed() {
                       <textarea
                         value={petDescription}
                         onChange={(e) => setPetDescription(e.target.value)}
-                        placeholder="Describe your pet (e.g. golden retriever, wearing a red collar, white spot on chest, friendly...)"
+                        placeholder="e.g. Golden retriever, red collar, white spot on chest, friendly"
                         className="w-full h-40 bg-white border border-[#E8DDD4] rounded-2xl p-4 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] text-sm resize-none shadow-2xs"
                       />
                     )}

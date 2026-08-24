@@ -3562,7 +3562,7 @@ export function PetSittingContent() {
                     <input
                       id="locationSearchInput"
                       type="text"
-                      placeholder="City or Zip Code (e.g. Louisville or 40202)"
+                      placeholder="e.g. Louisville or 40202"
                       className="flex-grow bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-3 py-2 md:px-4 md:py-3 text-xs md:text-sm text-[#2B231D] focus:outline-none focus:border-[#8B5E3C] font-medium"
                       value={searchZip}
                       onChange={(e) => setSearchZip(e.target.value)}
@@ -3691,14 +3691,14 @@ export function PetSittingContent() {
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-[#4A3E3D] uppercase tracking-wider">AI Sitter Search</h3>
-                    <p className="text-xs text-gray-550 mt-0.5">Describe what you need (e.g. experienced with dogs, good with senior pets)</p>
+                    <p className="text-xs text-gray-550 mt-0.5">Describe your ideal sitter, routine, or specific pet care needs.</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-3">
                   <input
                     type="text"
-                    placeholder="e.g. Experienced with large dogs, highly rated, good with senior cats"
+                    placeholder="e.g. Experienced with senior dogs, daily updates, fenced yard"
                     value={aiSitterSearch}
                     disabled={!(searchZip.trim() && searchCoords) || aiSearchLoading}
                     onChange={(e) => setAiSitterSearch(e.target.value)}
@@ -5869,7 +5869,7 @@ export function PetSittingContent() {
                           }} 
                           onBlur={handleSitterLocationBlur}
                           className={`w-full bg-[#FAF6F4] border ${sitterLocationVerified ? 'border-green-500' : !!formErrors['location'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] pr-12`} 
-                          placeholder="Enter city name OR 5-digit zip code..." 
+                          placeholder="City or 5-digit zip code" 
                         />
                         {sitterIsLocating && (
                           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
