@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
-import { QrCode, Download, Share2, Copy, Check, X, ShieldCheck, Star, MapPin, Sparkles, Dog, Cat, Loader2, Smartphone, FileText, CreditCard } from 'lucide-react';
+import { QrCode, Download, Share2, Copy, Check, X, ShieldCheck, Star, MapPin, Sparkles, Dog, Cat, Loader2, FileText, CreditCard } from 'lucide-react';
 import { formatSitterName } from '@/app/petsitting/page';
 
 interface SitterPromoPosterModalProps {
@@ -42,7 +42,7 @@ const SERVICE_LABELS: Record<string, string> = {
   daycare: 'Pet Daycare',
 };
 
-type PosterFormat = 'flyer' | 'story' | 'card';
+type PosterFormat = 'flyer' | 'card';
 
 export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: SitterPromoPosterModalProps) {
   const [format, setFormat] = useState<PosterFormat>('flyer');
@@ -143,7 +143,7 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
             </div>
             <div>
               <h3 className="font-extrabold text-[#2B231D] text-base leading-tight">My Sitter Profile Poster & QR</h3>
-              <p className="text-xs text-[#8B7E7D]">Download or share your branded card across 3 formats</p>
+              <p className="text-xs text-[#8B7E7D]">Download or share your branded flyer or business card</p>
             </div>
           </div>
           <button
@@ -160,35 +160,24 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
           <button
             type="button"
             onClick={() => setFormat('flyer')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               format === 'flyer'
                 ? 'bg-white text-[#2B231D] shadow-xs'
                 : 'text-[#666666] hover:text-[#2B231D]'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" /> Flyer / Poster
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormat('story')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              format === 'story'
-                ? 'bg-white text-[#2B231D] shadow-xs'
-                : 'text-[#666666] hover:text-[#2B231D]'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" /> IG Story (9:16)
+            <FileText className="w-4 h-4 text-[#8B5E3C]" /> Flyer / Poster
           </button>
           <button
             type="button"
             onClick={() => setFormat('card')}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               format === 'card'
                 ? 'bg-white text-[#2B231D] shadow-xs'
                 : 'text-[#666666] hover:text-[#2B231D]'
             }`}
           >
-            <CreditCard className="w-3.5 h-3.5" /> Business Card
+            <CreditCard className="w-4 h-4 text-[#8B5E3C]" /> Business Card
           </button>
         </div>
 
@@ -302,97 +291,7 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
             </div>
           )}
 
-          {/* FORMAT 2: INSTAGRAM STORY (9:16) */}
-          {format === 'story' && (
-            <div
-              ref={posterRef}
-              className="bg-white rounded-3xl p-6 border border-[#E8DDD4] shadow-sm w-full max-w-[320px] text-center flex flex-col justify-between space-y-4 relative overflow-hidden"
-              style={{
-                aspectRatio: '9/16',
-                backgroundImage: 'radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.08) 0%, transparent 60%), radial-gradient(circle at 50% 90%, rgba(139, 94, 60, 0.06) 0%, transparent 60%)',
-              }}
-            >
-              {/* Top Logo & Title */}
-              <div className="flex flex-col items-center pt-2">
-                <img
-                  src="/lumo-bites-logo.png"
-                  alt="Lumo Bites"
-                  className="h-10 object-contain mb-2"
-                  crossOrigin="anonymous"
-                />
-                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-[#8B5E3C] border border-amber-200 mb-2">
-                  <Sparkles className="w-3 h-3 text-[#8B5E3C]" /> Local Pet Sitter
-                </span>
-                <h2 className="text-xl font-black text-[#2B231D] tracking-tight leading-snug">
-                  Need loving pet care in {displayLocation}?
-                </h2>
-              </div>
-
-              {/* Sitter Avatar & Details */}
-              <div className="bg-[#FAF6F4] rounded-2xl p-4 border border-[#E8DDD4] text-center space-y-2 shadow-2xs">
-                <div className="w-18 h-18 rounded-full overflow-hidden border-2 border-[#8B5E3C] mx-auto bg-amber-100 flex items-center justify-center shadow-xs">
-                  {sitter.photo || sitter.avatar_url ? (
-                    <img
-                      src={sitter.photo || sitter.avatar_url}
-                      alt={displayName}
-                      className="w-full h-full object-cover"
-                      crossOrigin="anonymous"
-                    />
-                  ) : (
-                    <span className="text-2xl font-black text-[#8B5E3C]">
-                      {displayName.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-extrabold text-[#2B231D] text-lg leading-tight">
-                  {displayName}
-                </h3>
-                <div className="flex items-center justify-center gap-1 text-xs text-[#555555]">
-                  <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" />
-                  <span>{displayLocation}</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
-                    <ShieldCheck className="w-3 h-3 text-emerald-700" /> Verified Sitter
-                  </span>
-                  <span className="inline-flex items-center gap-0.5 text-[10.5px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md">
-                    <Star className="w-3 h-3 text-amber-600 fill-amber-600" /> {sitter.rating || '5.0'}
-                  </span>
-                </div>
-                <p className="text-[11px] font-medium text-[#666666] pt-1">
-                  🐾 {displayServices}
-                </p>
-              </div>
-
-              {/* Big QR Code Section */}
-              <div className="bg-white rounded-2xl p-4 border border-[#E8DDD4] shadow-xs flex flex-col items-center space-y-1.5">
-                {qrDataUrl ? (
-                  <img
-                    src={qrDataUrl}
-                    alt={`QR Code for ${displayName}`}
-                    className="w-28 h-28 rounded-lg object-contain"
-                  />
-                ) : (
-                  <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                    <Loader2 className="w-5 h-5 animate-spin text-[#8B5E3C]" />
-                  </div>
-                )}
-                <span className="text-[10px] font-black text-[#8B5E3C] uppercase tracking-wider">
-                  Scan to View Profile & Book
-                </span>
-                <span className="text-[9px] text-[#888888]">
-                  lumobites.net/petsitting
-                </span>
-              </div>
-
-              {/* Bottom Tagline */}
-              <div className="pb-2 text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider">
-                🐾 Book direct with 0% hassle
-              </div>
-            </div>
-          )}
-
-          {/* FORMAT 3: BUSINESS CARD (HORIZONTAL 3:2) */}
+          {/* FORMAT 2: BUSINESS CARD (HORIZONTAL 3:2) */}
           {format === 'card' && (
             <div
               ref={posterRef}
