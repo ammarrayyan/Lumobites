@@ -72,10 +72,10 @@ export default function FloatingQRCode() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button (Desktop / Tablet only) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[90] bg-[#3B2410] hover:bg-[#5a391c] text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center floating-qr-btn"
+        className="hidden md:flex fixed md:bottom-8 md:right-8 z-[90] bg-[#3B2410] hover:bg-[#5a391c] text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-105 items-center justify-center floating-qr-btn"
         aria-label="Show QR Code"
       >
         <QrCode size={26} />
