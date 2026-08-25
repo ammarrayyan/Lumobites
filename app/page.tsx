@@ -364,8 +364,8 @@ export default function Home() {
             className="bg-[#FDF5E8] border border-[#EAD3B8] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F9ECCF] active:scale-[0.99] transition-all btn-gloss"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-[#F5E2CC] text-[#8B5E3C] flex items-center justify-center text-sm font-bold shrink-0">
-                🐾
+              <div className="w-8 h-8 rounded-xl bg-[#F5E2CC] text-[#8B5E3C] flex items-center justify-center font-bold shrink-0">
+                <PawPrint className="w-4.5 h-4.5 text-[#8B5E3C]" />
               </div>
               <div className="text-left">
                 <p className="font-bold text-xs text-[#2E2419] leading-tight">My Pet Profiles</p>
@@ -386,7 +386,7 @@ export default function Home() {
               style={{ boxShadow: '0 2px 6px rgba(92, 50, 37, 0.05)' }}
               className="aspect-square w-full p-2 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <Footprints className="w-5 h-5 text-[#5C4533]" />
+              <Footprints className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
               <span className="text-[11px] leading-tight font-extrabold tracking-tight">Lost Pets</span>
             </div>
           </Link>
@@ -397,7 +397,7 @@ export default function Home() {
               style={{ boxShadow: '0 2px 6px rgba(43, 61, 53, 0.04)' }}
               className="aspect-square w-full p-2 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <PawPrint className="w-5 h-5 text-[#5C4533]" />
+              <PawPrint className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
               <span className="text-[11px] leading-tight font-extrabold tracking-tight">Find Sitter</span>
             </div>
           </Link>
@@ -408,7 +408,7 @@ export default function Home() {
               style={{ boxShadow: '0 2px 6px rgba(180, 83, 9, 0.05)' }}
               className="aspect-square w-full p-2 bg-[#FEF5E7] border border-[#F7DCB0] text-[#92400E] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <Sparkles className="w-5 h-5 text-[#B45309]" />
+              <Sparkles className="w-7 h-7 text-[#B45309]" strokeWidth={2.2} />
               <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#92400E]">Become Sitter</span>
             </div>
           </Link>
@@ -419,7 +419,7 @@ export default function Home() {
               style={{ boxShadow: '0 2px 6px rgba(139, 94, 60, 0.04)' }}
               className="aspect-square w-full p-2 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <Heart className="w-5 h-5 text-[#8B5E3C]" />
+              <Heart className="w-7 h-7 text-[#8B5E3C]" strokeWidth={2.2} />
               <span className="text-[11px] leading-tight font-extrabold tracking-tight">Adopt Pet</span>
             </div>
           </Link>
@@ -431,7 +431,7 @@ export default function Home() {
             style={{ textDecoration: 'none' }}
             className="aspect-square w-full p-2 bg-[#EEF4FF] border border-[#C7D9FD] text-[#1E40AF] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
           >
-            <Building2 className="w-5 h-5 text-[#2563EB]" />
+            <Building2 className="w-7 h-7 text-[#2563EB]" strokeWidth={2.2} />
             <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#1E40AF]">Partner Portal</span>
           </button>
 
@@ -441,7 +441,7 @@ export default function Home() {
               style={{ boxShadow: '0 2px 6px rgba(100, 80, 60, 0.04)' }}
               className="aspect-square w-full p-2 bg-[#F2F5F8] border border-[#D9E2E8] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
             >
-              <MessageSquare className="w-5 h-5 text-[#5C4533]" />
+              <MessageSquare className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
               <span className="text-[11px] leading-tight font-extrabold tracking-tight">City Board</span>
             </div>
           </Link>
