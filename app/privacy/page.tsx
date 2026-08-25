@@ -67,7 +67,7 @@ export default function PrivacyPage() {
         <p className="mt-2">This Privacy Policy is governed by the laws of the State of Kentucky, United States.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>16. Data Deletion Requests</h2>
-        <p className="mt-2">You have the right to request deletion of your account and associated personal data at any time by contacting us. Certain information may be retained where required by law or for legitimate business purposes, such as fraud prevention or resolving disputes.</p>
+        <p className="mt-2">You have the right to request deletion of your account and associated personal data at any time by visiting our <a href="/account-deletion" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>Account Deletion page</a> or by contacting us directly. Certain information may be retained where required by law or for legitimate business purposes, such as tax records, fraud prevention, or resolving disputes.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Cookies & Local Storage</h2>
         <p className="mt-2">We use cookies and local storage to maintain your session, remember preferences, and track referrals. We do not use cookies for cross-site advertising or tracking. You may clear cookies through your browser settings at any time.</p>
