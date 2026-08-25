@@ -9,7 +9,7 @@ import MobileFloatingAction from '@/components/MobileFloatingAction';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
-  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark, PenLine
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark, PenLine, X
 } from 'lucide-react';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
@@ -81,7 +81,7 @@ export default function CityBoardPage() {
 
     // Signed-in requirement check
     if (!userEmail) {
-      showToast('Sign in to save discussions to your bookmarks 🔖');
+      showToast('Sign in to save discussions to your bookmarks');
       window.dispatchEvent(new Event('lumo-open-signin'));
       return;
     }
@@ -92,7 +92,7 @@ export default function CityBoardPage() {
       showToast('Removed from your saved bookmarks');
     } else {
       updated = [...savedPostIds, postId];
-      showToast('Discussion saved to bookmarks 🔖');
+      showToast('Discussion saved to bookmarks');
     }
     setSavedPostIds(updated);
     if (typeof window !== 'undefined') {
@@ -103,7 +103,7 @@ export default function CityBoardPage() {
 
   const handleSelectCategory = (cat: string) => {
     if (cat === 'Saved' && !userEmail) {
-      showToast('Sign in to view your saved discussions 🔖');
+      showToast('Sign in to view your saved discussions');
       window.dispatchEvent(new Event('lumo-open-signin'));
       return;
     }
@@ -343,7 +343,7 @@ export default function CityBoardPage() {
       if (res.ok) {
         setNewContent('');
         setNewCategory('General');
-        showToast('Discussion posted successfully! ✨');
+        showToast('Discussion posted successfully!');
         fetchPosts();
       } else {
         const err = await res.json();
@@ -376,7 +376,7 @@ export default function CityBoardPage() {
               : p
           )
         );
-        showToast('Voted helpful! 👍');
+        showToast('Voted helpful');
       } else {
         const err = await res.json();
         showToast(err.error || 'Failed to vote helpful');
@@ -829,7 +829,7 @@ export default function CityBoardPage() {
                         <button 
                           onClick={() => {
                             navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
-                            showToast('Link copied to clipboard ✓');
+                            showToast('Link copied to clipboard');
                           }}
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-3.5 py-1.5 rounded-xl transition-all cursor-pointer"
                           title="Copy link to post"
@@ -853,7 +853,9 @@ export default function CityBoardPage() {
       {reportPostId && (
         <div className="modal-overlay fixed inset-0 bg-black/50 backdrop-blur-xs z-[60] flex items-center justify-center p-4" onClick={() => setReportPostId(null)}>
           <div className="bg-white rounded-2xl p-8 max-w-md w-full border border-[#E8DDD4] shadow-2xl relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#4A3E3D] font-bold border border-[#E8DDD4] cursor-pointer">✕</button>
+            <button onClick={() => setReportPostId(null)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAF6F4] text-[#4A3E3D] font-bold border border-[#E8DDD4] cursor-pointer" aria-label="Close">
+              <X className="w-4 h-4" />
+            </button>
             <h3 className="text-xl font-bold text-rose-700 mb-2 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-700" /> Report Post
             </h3>

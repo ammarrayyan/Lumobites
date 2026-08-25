@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert, Home, Info } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
@@ -878,8 +878,9 @@ function AdoptionContent() {
                       <div className="p-4 space-y-3">
                         <div className="relative">
                           <PetPhotoCarousel photoUrls={pet.photo_urls || []} petType={pet.species} className="w-full h-48 rounded-2xl" />
-                          <span className="absolute top-2 left-2 bg-[#8B5E3C] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
-                            🏠 Lumo Bites Shelter
+                          <span className="absolute top-2 left-2 bg-[#8B5E3C] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10">
+                            <Home className="w-3 h-3" />
+                            <span>Lumo Bites Shelter</span>
                           </span>
                         </div>
                         <div>
@@ -934,8 +935,9 @@ function AdoptionContent() {
               </div>
 
               {rescueGroupsFallbackMessage && (
-                <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl text-xs text-amber-900 font-medium">
-                  ℹ️ {rescueGroupsFallbackMessage}
+                <div className="bg-amber-50 border border-amber-200 p-3 px-4 rounded-2xl text-xs text-amber-900 font-medium flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <span>{rescueGroupsFallbackMessage}</span>
                 </div>
               )}
 
@@ -946,8 +948,9 @@ function AdoptionContent() {
                     <div className="p-4 space-y-3">
                       <div className="relative">
                         <img src={pet.photo || '/placeholder-pet.png'} alt={pet.name} className="w-full h-48 rounded-2xl object-cover" />
-                        <span className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
-                          🔗 RescueGroups Partner
+                        <span className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10">
+                          <ExternalLink className="w-3 h-3" />
+                          <span>RescueGroups Partner</span>
                         </span>
                       </div>
                       <div>
@@ -1171,8 +1174,9 @@ function AdoptionContent() {
 
             {/* VISUAL RESULTS */}
             {visualEmptyMessage ? (
-              <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900 font-medium text-center">
-                ℹ️ {visualEmptyMessage}
+              <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900 font-medium text-center flex items-center justify-center gap-1.5">
+                <Info className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>{visualEmptyMessage}</span>
               </div>
             ) : visualMatches.length > 0 ? (
               <div className="space-y-3 pt-2 border-t border-gray-100">

@@ -263,9 +263,9 @@ export default function AccountPage() {
       window.dispatchEvent(new Event('lumo-pro-update'));
 
       if (data.existed) {
-        alert('Welcome back! ✨');
+        alert('Welcome back!');
       } else {
-        alert('Account created! 🐾');
+        alert('Account created!');
       }
 
       // If code verified successfully, fetch subscription details
@@ -627,8 +627,9 @@ export default function AccountPage() {
               </div>
 
               <form onSubmit={handleVerifyCode} className="flex flex-col gap-4">
-                <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mb-1 animate-fade-in">
-                  📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mb-1 animate-fade-in flex items-center justify-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
+                  <span>Code sent! Check your inbox (and spam folder if not received in 1 minute).</span>
                 </div>
                 <div className="flex flex-col gap-1.5 text-left">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
@@ -1350,8 +1351,9 @@ export default function AccountPage() {
                       <p className="text-xs text-gray-500 mt-2 leading-relaxed">
                         Are you sure you want to delete your account? This will permanently delete all your data including bookings, pets, and posts.
                         {subDetails?.active && (
-                          <span className="block mt-2 font-semibold text-red-600">
-                            ⚠️ This will also immediately cancel your active {subDetails.isPartner ? (subDetails.partnerLabel || 'Partner') : 'Membership'} subscription.
+                          <span className="flex items-center gap-1.5 justify-center mt-2 font-semibold text-red-600">
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                            <span>This will also immediately cancel your active {subDetails.isPartner ? (subDetails.partnerLabel || 'Partner') : 'Membership'} subscription.</span>
                           </span>
                         )}
                         <span className="block mt-1 font-medium text-gray-600">This cannot be undone.</span>

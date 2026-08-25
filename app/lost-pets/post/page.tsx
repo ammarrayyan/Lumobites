@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Footprints, CheckCircle, MapPin, RefreshCw, Lock } from 'lucide-react';
+import { Footprints, CheckCircle, MapPin, RefreshCw, Lock, PawPrint, Navigation, Camera, Upload, Phone } from 'lucide-react';
 
 export default function PostLostPet() {
   const router = useRouter();
@@ -319,7 +319,7 @@ export default function PostLostPet() {
             <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
-                  🐾
+                  <PawPrint className="w-3.5 h-3.5" />
                 </span>
                 Pet Identity & Type
               </h3>
@@ -348,9 +348,9 @@ export default function PostLostPet() {
                     onChange={e => setSpecies(e.target.value as any)} 
                     className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-[#2E2419] text-sm focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/20 font-bold"
                   >
-                    <option value="dog">Dog 🐶</option>
-                    <option value="cat">Cat 🐱</option>
-                    <option value="other">Other 🐾</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
@@ -400,7 +400,7 @@ export default function PostLostPet() {
             <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
-                  📍
+                  <MapPin className="w-3.5 h-3.5" />
                 </span>
                 Last Seen Location
               </h3>
@@ -453,7 +453,7 @@ export default function PostLostPet() {
                       </>
                     ) : (
                       <>
-                        <span>📍</span>
+                        <Navigation className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Use My Location</span>
                       </>
                     )}
@@ -500,7 +500,7 @@ export default function PostLostPet() {
             <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
-                  📷
+                  <Camera className="w-3.5 h-3.5" />
                 </span>
                 Pet Photos (up to 5)
               </h3>
@@ -554,7 +554,8 @@ export default function PostLostPet() {
                     disabled={photoUrls.length >= 5}
                     className="flex-1 min-w-[140px] bg-[#FAF6F4] border border-[#DFD3C7] hover:bg-[#F0E6DD] text-[#8B5E3C] font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
-                    📁 Choose from Gallery
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Choose from Gallery</span>
                   </button>
                   <button
                     type="button"
@@ -562,7 +563,8 @@ export default function PostLostPet() {
                     disabled={photoUrls.length >= 5}
                     className="flex-1 min-w-[140px] bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
-                    📷 Take Photo
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Take Photo</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-[#8B7E7D] mt-2 font-medium">
@@ -580,7 +582,7 @@ export default function PostLostPet() {
             <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
               <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
                 <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
-                  📞
+                  <Phone className="w-3.5 h-3.5" />
                 </span>
                 Contact Information & Alerts
               </h3>
@@ -655,9 +657,16 @@ export default function PostLostPet() {
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-3.5 rounded-xl transition-all shadow-md text-base mt-8 disabled:opacity-70 cursor-pointer"
+            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-3.5 rounded-xl transition-all shadow-md text-base mt-8 disabled:opacity-70 cursor-pointer flex items-center justify-center gap-2"
           >
-            {loading ? 'Posting...' : 'Post to Community Board 🐾'}
+            {loading ? (
+              <span>Posting...</span>
+            ) : (
+              <>
+                <PawPrint className="w-4 h-4" />
+                <span>Post to Community Board</span>
+              </>
+            )}
           </button>
         </form>
       </main>
