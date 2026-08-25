@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef, useCallback, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, ShieldAlert, Lock } from 'lucide-react';
+import { ArrowLeft, Send, CheckCheck, Check, PawPrint, AlertTriangle, ShieldAlert, Lock, Camera, Utensils, HeartPulse, Brain, Stethoscope, MessageSquare } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import ChatModal from '@/components/ChatModal';
+import BookingProgressStepper from '@/components/BookingProgressStepper';
+import SendPetUpdateModal from '@/components/SendPetUpdateModal';
 
 interface Message {
   id: string;
@@ -95,6 +97,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [showPetProfile, setShowPetProfile] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
   const [showReportConfirm, setShowReportConfirm] = useState(false);
 
@@ -275,6 +278,37 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     }
   };
 
+  const handleSendPetUpdate = async (update: { photo_url?: string; category: string; note: string }) => {
+    const payload = `[PET_UPDATE]${JSON.stringify(update)}`;
+    const tempId = `temp-${Date.now()}`;
+    setMessages(prev => [...prev, {
+      id: tempId,
+      booking_id: bookingId,
+      sender_email: currentUserEmail,
+      receiver_email: otherUserEmail,
+      message: payload,
+      read: false,
+      created_at: new Date().toISOString(),
+    }]);
+
+    try {
+      const res = await fetch('/api/petsitting/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          booking_id: bookingId,
+          sender_email: currentUserEmail,
+          message: payload,
+        }),
+      });
+      if (res.ok) {
+        await fetchMessages(true);
+      }
+    } catch (err) {
+      console.error('Failed to send pet update', err);
+    }
+  };
+
   // Determine counterpart identity
   const isOwner = booking ? currentUserEmail.toLowerCase() === (booking.owner_email || '').toLowerCase() : false;
   const otherUserName = booking
@@ -447,6 +481,15 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
         </div>
       </header>
 
+      {/* Visual Booking Progress Tracker Stepper */}
+      {booking && (
+        <BookingProgressStepper
+          status={booking.status}
+          dates={booking.dates}
+          createdAt={(booking as any).created_at}
+        />
+      )}
+
       {/* Report confirmation notification */}
       {reportSuccess && (
         <div className="bg-emerald-600 text-white text-xs font-bold text-center py-2 px-4 animate-fade-in">
@@ -487,16 +530,16 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
               </h3>
               <button 
                 onClick={() => setShowPetProfile(false)}
-                className="text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer border-none bg-transparent"
+                className="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
               >
-                Close Profile
+                ✕ Close
               </button>
             </div>
 
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4 bg-[#FAF6F0] p-4 rounded-2xl border border-[#E8DDD4]">
               <PetPhotoCarousel
-                photoUrls={petDetails.photo_urls || (petDetails.photo_url ? [petDetails.photo_url] : [])}
-                petType={petDetails.pet_type}
+                photos={petDetails.photo_urls && petDetails.photo_urls.length > 0 ? petDetails.photo_urls : petDetails.photo_url ? [petDetails.photo_url] : []}
+                alt={petDetails.pet_name}
                 className="w-16 h-16 rounded-2xl"
               />
               <div>
@@ -520,7 +563,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
               {petDetails.feeding_schedule && (
                 <div className="space-y-1 md:col-span-2">
-                  <span className="font-bold text-gray-600 block">🥣 Feeding Schedule</span>
+                  <span className="font-bold text-gray-600 flex items-center gap-1.5">
+                    <Utensils className="w-3.5 h-3.5 text-[#8B5E3C]" /> Feeding Schedule
+                  </span>
                   <div className="bg-amber-50/60 border border-amber-100 p-3 rounded-xl leading-relaxed">
                     {petDetails.feeding_schedule}
                   </div>
@@ -529,7 +574,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
               {petDetails.medication && (
                 <div className="space-y-1 md:col-span-2">
-                  <span className="font-bold text-gray-600 block">💊 Medications</span>
+                  <span className="font-bold text-gray-600 flex items-center gap-1.5">
+                    <HeartPulse className="w-3.5 h-3.5 text-rose-500" /> Medications
+                  </span>
                   <div className="bg-red-50/50 border border-red-100 p-3 rounded-xl leading-relaxed">
                     {petDetails.medication}
                   </div>
@@ -538,7 +585,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
               {petDetails.behavior_notes && (
                 <div className="space-y-1 md:col-span-2">
-                  <span className="font-bold text-gray-600 block">🧠 Behavior Notes</span>
+                  <span className="font-bold text-gray-600 flex items-center gap-1.5">
+                    <Brain className="w-3.5 h-3.5 text-blue-500" /> Behavior Notes
+                  </span>
                   <div className="bg-blue-50/50 border border-blue-100 p-3 rounded-xl leading-relaxed">
                     {petDetails.behavior_notes}
                   </div>
@@ -547,7 +596,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
               {(petDetails.vet_name || petDetails.vet_phone) && (
                 <div className="space-y-1 md:col-span-2">
-                  <span className="font-bold text-gray-600 block">🏥 Veterinary Contact</span>
+                  <span className="font-bold text-gray-600 flex items-center gap-1.5">
+                    <Stethoscope className="w-3.5 h-3.5 text-emerald-600" /> Veterinary Contact
+                  </span>
                   <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-1">
                     {petDetails.vet_name && <div><strong>Clinic/Vet:</strong> {petDetails.vet_name}</div>}
                     {petDetails.vet_phone && <div><strong>Phone:</strong> {petDetails.vet_phone}</div>}
@@ -572,8 +623,8 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="w-20 h-20 rounded-full bg-amber-100/80 flex items-center justify-center">
-              <span className="text-4xl">👋</span>
+            <div className="w-16 h-16 rounded-2xl bg-[#8B5E3C]/10 text-[#8B5E3C] flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 text-[#8B5E3C]" />
             </div>
             <div>
               <p className="font-extrabold text-gray-800 text-base">Say hello to {displayName}</p>
@@ -611,6 +662,14 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
                       const isLast = mi === group.msgs.length - 1;
                       const isOptimistic = msg.id.startsWith('temp-');
 
+                      const isPetUpdate = msg.message.startsWith('[PET_UPDATE]');
+                      let updateData: { photo_url?: string; category?: string; note?: string } | null = null;
+                      if (isPetUpdate) {
+                        try {
+                          updateData = JSON.parse(msg.message.slice(12));
+                        } catch {}
+                      }
+
                       const myRadius = [
                         isFirst ? 'rounded-tl-2xl rounded-tr-2xl' : 'rounded-tl-2xl rounded-tr-xs',
                         isLast ? 'rounded-bl-2xl rounded-br-xs' : 'rounded-bl-xs rounded-br-xs',
@@ -622,15 +681,43 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
                       return (
                         <div key={msg.id}>
-                          <div
-                            className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words whitespace-pre-wrap ${
-                              isMine
-                                ? `bg-[#8B5E3C] text-white ${myRadius} ${isOptimistic ? 'opacity-70' : 'opacity-100'}`
-                                : `bg-white text-gray-900 shadow-sm border border-[#E8DDD4] ${theirRadius}`
-                            }`}
-                          >
-                            {msg.message}
-                          </div>
+                          {updateData ? (
+                            /* Rich Pet Care Update Card */
+                            <div className={`p-4 rounded-2xl border shadow-sm max-w-sm space-y-2.5 ${
+                              isMine ? 'bg-[#FAF6F0] border-[#E8DDD4] text-[#2B231D]' : 'bg-white border-[#E8DDD4] text-[#2B231D]'
+                            }`}>
+                              <div className="flex items-center justify-between border-b border-[#E8DDD4]/60 pb-2">
+                                <div className="flex items-center gap-1.5 text-xs font-black text-[#8B5E3C]">
+                                  <Camera className="w-3.5 h-3.5" />
+                                  <span>Pet Care Update</span>
+                                </div>
+                                {updateData.category && (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-[#8B5E3C] border border-[#E8DDD4]">
+                                    {updateData.category}
+                                  </span>
+                                )}
+                              </div>
+                              {updateData.photo_url && (
+                                <div className="rounded-xl overflow-hidden border border-[#E8DDD4] aspect-video max-h-56 bg-[#FAF6F4] flex items-center justify-center">
+                                  <img src={updateData.photo_url} alt="Pet update photo" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <p className="text-xs text-[#2B231D] font-medium leading-relaxed whitespace-pre-wrap">
+                                {updateData.note}
+                              </p>
+                            </div>
+                          ) : (
+                            /* Standard Chat Message */
+                            <div
+                              className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words whitespace-pre-wrap ${
+                                isMine
+                                  ? `bg-[#8B5E3C] text-white ${myRadius} ${isOptimistic ? 'opacity-70' : 'opacity-100'}`
+                                  : `bg-white text-gray-900 shadow-sm border border-[#E8DDD4] ${theirRadius}`
+                              }`}
+                            >
+                              {msg.message}
+                            </div>
+                          )}
 
                           {isLast && (
                             <div className={`flex items-center gap-1 mt-1 px-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
@@ -670,6 +757,17 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
             <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2.5 ${
               newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
             }`}>
+              {booking && (
+                <button
+                  type="button"
+                  onClick={() => setShowUpdateModal(true)}
+                  title="Send Pet Care Update"
+                  className="pressable p-2 rounded-xl text-[#8B5E3C] bg-white hover:bg-[#F5EDE4] border border-[#E8DDD4] flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-2xs mb-0.5"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span className="hidden sm:inline">Update</span>
+                </button>
+              )}
               <textarea
                 ref={textareaRef}
                 value={newMessage}
@@ -703,6 +801,14 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
           </div>
         </footer>
       )}
+
+      {/* Send Pet Update Modal */}
+      <SendPetUpdateModal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        petName={booking?.pet_name}
+        onSendUpdate={handleSendPetUpdate}
+      />
     </div>
   );
 }

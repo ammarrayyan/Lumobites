@@ -570,7 +570,8 @@ export default function LostPetsFeed() {
               href="/lost-pets/post" 
               className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
             >
-              🐾 Report Lost/Found Pet
+              <PawPrint className="w-4 h-4" />
+              <span>Report Lost/Found Pet</span>
             </Link>
           </div>
 

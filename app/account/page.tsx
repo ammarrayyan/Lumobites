@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2 } from 'lucide-react';
+import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 
 type Step = 'email' | 'verification' | 'dashboard';
@@ -842,7 +842,7 @@ export default function AccountPage() {
                           <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
                             <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
                               <span className="w-6 h-6 rounded-lg bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-xs">
-                                👤
+                                <User className="w-3.5 h-3.5" />
                               </span>
                               Account Status
                             </span>
@@ -921,7 +921,7 @@ export default function AccountPage() {
                                 <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
                                   <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
                                     <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
-                                      🏢
+                                      <Building2 className="w-3.5 h-3.5" />
                                     </span>
                                     Subscription Status
                                   </span>
@@ -1064,7 +1064,7 @@ export default function AccountPage() {
                                 <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
                                   <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
                                     <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
-                                      ✨
+                                      <Sparkles className="w-3.5 h-3.5" />
                                     </span>
                                     Membership Status
                                   </span>
@@ -1172,12 +1172,12 @@ export default function AccountPage() {
                                   Cancel Membership
                                 </button>
                               )}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
 
                   {/* TAB 4: 🔒 SECURITY & PRIVACY */}
                   {accountTab === 'security' && (
@@ -1190,7 +1190,7 @@ export default function AccountPage() {
                         <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
                           <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
                             <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
-                              🚫
+                              <Ban className="w-3.5 h-3.5" />
                             </span>
                             Blocked Sitters & Owners
                           </span>
@@ -1229,7 +1229,7 @@ export default function AccountPage() {
                           <div className="bg-[#FAF5EE] px-5 py-3 border-b border-[#EADBCE] flex items-center justify-between">
                             <span className="text-xs font-extrabold text-[#2E2419] flex items-center gap-2">
                               <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center text-xs">
-                                🚫
+                                <Ban className="w-3.5 h-3.5" />
                               </span>
                               Blocked Users
                             </span>
