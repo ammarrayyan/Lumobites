@@ -3,15 +3,25 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
-import AdoptionPetsMap from '@/components/AdoptionPetsMap';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+
+const AdoptionPetsMap = dynamic(() => import('@/components/AdoptionPetsMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-80 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] animate-pulse flex flex-col items-center justify-center gap-2 text-[#8B5E3C]">
+      <Loader2 className="w-6 h-6 animate-spin text-[#8B5E3C]" />
+      <span className="text-xs font-semibold">Loading adoption map...</span>
+    </div>
+  ),
+});
 
 interface PetListing {
   id: string;

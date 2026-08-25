@@ -5,12 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
-import LostPetsMap from '@/components/LostPetsMap';
 import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+
+const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-80 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] animate-pulse flex flex-col items-center justify-center gap-2 text-[#8B5E3C]">
+      <Loader2 className="w-6 h-6 animate-spin text-[#8B5E3C]" />
+      <span className="text-xs font-semibold">Loading interactive map...</span>
+    </div>
+  ),
+});
 
 export default function LostPetsFeed() {
   const router = useRouter();
@@ -1106,6 +1116,19 @@ export default function LostPetsFeed() {
           reason={aiLimitReason}
           isPro={aiLimitIsPro}
         />
+
+        {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
+        <div className="md:hidden fixed bottom-[88px] right-4 z-40">
+          <Link
+            href="/lost-pets/post"
+            prefetch={true}
+            className="pressable flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold text-xs py-3 px-4 rounded-full shadow-lg hover:shadow-xl border border-white/20 active:scale-95 transition-transform select-none"
+            style={{ textDecoration: 'none' }}
+          >
+            <PawPrint className="w-4 h-4" />
+            <span>Report Pet</span>
+          </Link>
+        </div>
         </main>
 
       </div>

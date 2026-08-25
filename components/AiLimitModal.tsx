@@ -31,7 +31,7 @@ export default function AiLimitModal({ isOpen, onClose, reason, isPro }: AiLimit
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in text-center select-none">
-      <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-[#E8DDD4] flex flex-col items-center gap-5 relative animate-scale-up">
+      <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-[#E8DDD4] flex flex-col items-center gap-5 relative animate-modal-spring">
         
         {/* Close Button */}
         <button

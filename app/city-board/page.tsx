@@ -8,7 +8,7 @@ import MobileCommunityNav from '@/components/MobileCommunityNav';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
-  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark, PenLine
 } from 'lucide-react';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
@@ -518,7 +518,7 @@ export default function CityBoardPage() {
         <div className="min-w-0 space-y-6">
 
         {/* COMPOSER CARD (SITE-WIDE CONSISTENT CARD STYLING) */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E8DDD4]">
+        <div id="city-board-composer" className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E8DDD4]">
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-1">
               <img src="/Logo.png" alt="Lumo Bites" className="h-6 w-auto object-contain" />
@@ -879,6 +879,25 @@ export default function CityBoardPage() {
           </div>
         </div>
       )}
+      {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
+      <div className="md:hidden fixed bottom-[88px] right-4 z-40">
+        <button
+          type="button"
+          onClick={() => {
+            const composer = document.getElementById('city-board-composer');
+            if (composer) {
+              composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const textarea = composer.querySelector('textarea');
+              if (textarea) textarea.focus();
+            }
+          }}
+          className="pressable flex items-center gap-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-3 px-4 rounded-full shadow-lg hover:shadow-xl border border-white/20 active:scale-95 transition-transform select-none cursor-pointer"
+          aria-label="New Discussion"
+        >
+          <PenLine className="w-4 h-4" />
+          <span>New Post</span>
+        </button>
+      </div>
       </div>
     </div>
   );

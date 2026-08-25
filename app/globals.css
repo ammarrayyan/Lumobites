@@ -255,5 +255,51 @@ select::placeholder,
   transform: translateY(0.5px) scale(0.985) !important;
 }
 
+/* ─── Universal Tap & Touch Optimization ─────────────────────────────────── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
 
+/* Micro-interaction tactile tap feedback */
+.pressable {
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.12s ease;
+  user-select: none;
+}
+.pressable:active {
+  transform: scale(0.96);
+}
+
+/* Apple / iOS Spring Curves for Modals & Bottom Sheets */
+@keyframes modalSpringIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes sheetSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-modal-spring {
+  animation: modalSpringIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-sheet-up {
+  animation: sheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

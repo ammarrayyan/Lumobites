@@ -134,7 +134,7 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-[#FDFBF9] rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#E8DDD4] my-auto animate-in fade-in zoom-in-95 duration-150 relative">
+      <div className="bg-[#FDFBF9] rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-[#E8DDD4] my-auto animate-modal-spring relative">
         {/* Top Modal Bar */}
         <div className="flex items-center justify-between border-b border-[#E8DDD4] pb-3 mb-3">
           <div className="flex items-center gap-2">
