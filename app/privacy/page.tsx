@@ -69,14 +69,21 @@ export default function PrivacyPage() {
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>16. Data Deletion Requests</h2>
         <p className="mt-2">You have the right to request deletion of your account and associated personal data at any time by visiting our <a href="/account-deletion" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>Account Deletion page</a> or by contacting us directly. Certain information may be retained where required by law or for legitimate business purposes, such as tax records, fraud prevention, or resolving disputes.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Cookies & Local Storage</h2>
-        <p className="mt-2">We use cookies and local storage to maintain your session, remember preferences, and track referrals. We do not use cookies for cross-site advertising or tracking. You may clear cookies through your browser settings at any time.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>17. Cookies, Local Storage & Tracking Technologies</h2>
+        <p className="mt-2">We use cookies, browser local storage, and standard web tracking technologies to operate the platform and deliver essential features. Specifically:</p>
+        <ul className="list-disc ml-5 mt-2 space-y-1">
+          <li><strong>Essential & Authentication Storage:</strong> We use first-party browser local storage and session cookies to authenticate users and partners, maintain active sign-in sessions across page reloads, and remember user preferences (such as selected city filters).</li>
+          <li><strong>Web Analytics:</strong> We use Google Analytics (via Google Tag Manager) and server-level hosting performance metrics to collect aggregate, non-personally identifiable traffic information (such as pages visited, general device/browser type, session duration, and approximate geographic region). This information is used exclusively to evaluate site performance, diagnose technical errors, and optimize user experience.</li>
+          <li><strong>Referral Attribution:</strong> We use local storage identifiers to properly credit affiliate partners and community referral links when a new user registers.</li>
+          <li><strong>No Cross-Site Ad Tracking:</strong> We do not sell user data to third-party data brokers or use third-party advertising cookies to track your behavior across unrelated third-party websites.</li>
+        </ul>
+        <p className="mt-2">You can instruct your browser to block or alert you about cookies, or clear local storage through your browser settings at any time; however, disabling essential storage may affect your ability to stay signed in or use certain interactive platform features.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>18. Your Privacy Rights</h2>
         <p className="mt-2">Depending on your location, you may have rights to access, correct, delete, restrict processing of, port, or object to the processing of your personal data. Residents of certain jurisdictions, including California, and users in regions covered by GDPR or similar frameworks, may have additional rights under applicable local law. To exercise any of these rights, contact us using the information below.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>19. Children's Privacy</h2>
-        <p className="mt-2">Lumo Bites is not intended for use by anyone under 18. We do not knowingly collect personal information from minors. If you believe a minor has provided personal information to us, please contact us immediately so we can delete it.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>19. Children's Privacy (COPPA & Minor Protection)</h2>
+        <p className="mt-2">Lumo Bites is intended solely for adults and is not directed to children under the age of 13 (or minors under 18). We do not knowingly collect, solicit, or maintain personal information from children under 13. In the event that we learn that a child under 13 has provided personal data to the platform without verified parental consent, we will promptly delete that information from our servers and active databases. If you are a parent or legal guardian and believe that your child has provided us with personal information, please contact us immediately at <a href="mailto:info@lumobitespet.com" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>info@lumobitespet.com</a> so we can take immediate corrective action.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>20. International Users</h2>
         <p className="mt-2">Lumo Bites is operated from the United States. If you access our platform from outside the United States, your information may be transferred to, stored, and processed in the United States.</p>
