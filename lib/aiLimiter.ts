@@ -67,6 +67,24 @@ async function getStripeSubscriptionStatus(email: string, subId?: string | null)
   return { cancelAtPeriodEnd: false, endDateStr: '' };
 }
 
+export function normalizeEmail(email?: string | null): string {
+  if (!email) return '';
+  const clean = email.trim().toLowerCase();
+  const atIndex = clean.indexOf('@');
+  if (atIndex === -1) return clean;
+  
+  let user = clean.substring(0, atIndex);
+  const domain = clean.substring(atIndex + 1);
+  
+  // Strip +tags (e.g. user+tag@gmail.com -> user@gmail.com)
+  const plusIndex = user.indexOf('+');
+  if (plusIndex !== -1) {
+    user = user.substring(0, plusIndex);
+  }
+  
+  return `${user}@${domain}`;
+}
+
 export interface ProStatusDetails {
   isPro: boolean;
   proSource: 'unlimited' | 'partner_vet' | 'partner_daycare' | 'partner_shelter' | 'ai_member' | 'none';
@@ -76,7 +94,7 @@ export interface ProStatusDetails {
 
 export async function getUserProStatusDetails(email?: string | null): Promise<ProStatusDetails> {
   if (!email) return { isPro: false, proSource: 'none', rawSubscriptionStatus: 'none', billingHealthLabel: 'N/A' };
-  const cleanEmail = email.toLowerCase().trim();
+  const cleanEmail = normalizeEmail(email);
 
   // 1. Unlimited Admin
   if (UNLIMITED_EMAILS.includes(cleanEmail)) {
@@ -218,7 +236,7 @@ export async function checkAndTrackAiUsage({
   verifiedEmail?: string | null;
   request?: Request;
 }): Promise<{ allowed: boolean; reason?: string; isUnlimited?: boolean; isPro?: boolean }> {
-  const normalizedEmail = (userEmail || '').trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(userEmail);
   if (!normalizedEmail) {
     return {
       allowed: false,
@@ -227,7 +245,7 @@ export async function checkAndTrackAiUsage({
     };
   }
 
-  const normalizedVerifiedEmail = (verifiedEmail || '').trim().toLowerCase();
+  const normalizedVerifiedEmail = normalizeEmail(verifiedEmail);
   const proDetails = normalizedVerifiedEmail
     ? await getUserProStatusDetails(normalizedVerifiedEmail)
     : { isPro: false, proSource: 'none' as const, rawSubscriptionStatus: 'none' as const, billingHealthLabel: 'N/A' };
