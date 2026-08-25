@@ -11,6 +11,7 @@ import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+import MobileFloatingAction from '@/components/MobileFloatingAction';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -1118,17 +1119,17 @@ export default function LostPetsFeed() {
         />
 
         {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
-        <div className="md:hidden fixed bottom-[88px] right-4 z-40">
+        <MobileFloatingAction bottomOffset="92px">
           <Link
             href="/lost-pets/post"
             prefetch={true}
-            className="pressable flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold text-xs py-3 px-4 rounded-full shadow-lg hover:shadow-xl border border-white/20 active:scale-95 transition-transform select-none"
+            className="pressable flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl hover:shadow-2xl border border-white/30 active:scale-95 transition-transform select-none"
             style={{ textDecoration: 'none' }}
           >
             <PawPrint className="w-4 h-4" />
             <span>Report Pet</span>
           </Link>
-        </div>
+        </MobileFloatingAction>
         </main>
 
       </div>

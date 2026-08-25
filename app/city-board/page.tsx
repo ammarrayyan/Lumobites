@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
+import MobileFloatingAction from '@/components/MobileFloatingAction';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
@@ -880,7 +881,7 @@ export default function CityBoardPage() {
         </div>
       )}
       {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
-      <div className="md:hidden fixed bottom-[88px] right-4 z-40">
+      <MobileFloatingAction bottomOffset="92px">
         <button
           type="button"
           onClick={() => {
@@ -891,13 +892,13 @@ export default function CityBoardPage() {
               if (textarea) textarea.focus();
             }
           }}
-          className="pressable flex items-center gap-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-3 px-4 rounded-full shadow-lg hover:shadow-xl border border-white/20 active:scale-95 transition-transform select-none cursor-pointer"
+          className="pressable flex items-center gap-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl border border-white/25 active:scale-95 transition-transform select-none cursor-pointer"
           aria-label="New Discussion"
         >
           <PenLine className="w-4 h-4" />
           <span>New Post</span>
         </button>
-      </div>
+      </MobileFloatingAction>
       </div>
     </div>
   );
