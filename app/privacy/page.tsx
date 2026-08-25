@@ -10,10 +10,17 @@ export default function PrivacyPage() {
         <p className="mb-8">Lumo Bites is operated by Premier Pet Nutrition LLC ("Lumo Bites," "we," "us," or "our").</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>1. Information We Collect</h2>
-        <p className="mt-2">We collect information you provide directly, including your name, email address, location (city/zip code), and pet information. This includes information provided when creating a Pet Sitter profile, a Shelter/Rescue partner account, or submitting a request or listing. For pet sitters, we also collect government-issued ID for identity verification. For Shelter/Rescue accounts, we collect organization details necessary to verify legitimacy. We collect phone numbers for identity verification and for optional SMS notification features you choose to opt into. We collect location data when you use location-based features. We collect photos you choose to upload across the platform's various features.</p>
+        <p className="mt-2">We collect information you provide directly or that is generated through your use of the platform. This falls into several general categories:</p>
+        <ul className="list-disc ml-5 mt-2 space-y-1">
+          <li><strong>Account & Contact Information:</strong> Name, email address, phone number (for verification or SMS alerts), and general location (city/zip code).</li>
+          <li><strong>Pet Care & Identification Data:</strong> Pet details including names, species, breeds, physical traits, photos, microchip numbers, dietary instructions, vaccination dates, medication schedules, behavioral notes, and emergency veterinary contacts provided by pet owners.</li>
+          <li><strong>Service & Partner Profile Data:</strong> Information submitted by pet sitters, veterinary clinics, pet daycares, and animal shelters/rescues to establish public profiles, service offerings, rates, and availability.</li>
+          <li><strong>Verification Documents:</strong> Government-issued ID or organization registration documentation submitted for identity or partner verification.</li>
+          <li><strong>Platform Activity & Media:</strong> Messages, community posts, replies, reviews, lost/found pet reports, photos, and AI feature usage logs.</li>
+        </ul>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>2. Information We Do Not Collect</h2>
-        <p className="mt-2">We do not collect social security numbers, medical records, or credit card numbers directly on our servers.</p>
+        <p className="mt-2">We do not collect government social security numbers, human medical records, or credit card numbers directly on our servers. All payment processing is handled securely by our third-party payment processor. Pet health, care, and dietary notes stored on the platform are voluntary and managed directly by the user for pet care coordination.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>3. Analytics Data</h2>
         <p className="mt-2">We collect anonymous usage data to understand feature usage and improve our platform. This data cannot be used to identify you personally.</p>
@@ -21,8 +28,13 @@ export default function PrivacyPage() {
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Identity & Organization Verification</h2>
         <p className="mt-2">Government ID and organization verification documents are used solely to confirm identity or legitimacy before granting certain account types. These documents are stored securely and are only accessible to authorized administrators. We do not share this information with third parties. Verification documents are retained only as long as reasonably necessary to provide the service or comply with legal obligations. You may request deletion of your verification documents by contacting us.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. How We Use Information</h2>
-        <p className="mt-2">We use your information to operate our marketplace and community features, including connecting pet sitters with owners, connecting adopters with shelters and rescues, facilitating platform communication, and providing personalized recommendations.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. How We Use & Share Information</h2>
+        <p className="mt-2">We use collected information to operate our marketplace, community, and care coordination features. Information is shared only as necessary to facilitate requested platform interactions:</p>
+        <ul className="list-disc ml-5 mt-2 space-y-1">
+          <li><strong>Service Bookings & Inquiries:</strong> Connecting pet owners with pet sitters, veterinary boarding facilities, pet daycares, and animal shelters, including sharing necessary pet care notes and emergency contacts with chosen care providers.</li>
+          <li><strong>Public Profiles & QR Passports:</strong> Information designated for public sharing (such as Sitter Profile Posters or Pet Emergency QR Cards) is accessible to individuals who view the profile or scan the associated QR code.</li>
+          <li><strong>Community & Reunification:</strong> Displaying community board discussions, lost pet alerts, and adoption listings to help connect local pet parents and shelters.</li>
+        </ul>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>6. SMS Communications</h2>
         <p className="mt-2">We may send SMS messages for identity verification or for features you voluntarily opt into. SMS opt-in is always optional and is never required to use the core features of the platform. We may limit the number or frequency of messages sent. You may opt out at any time by following the instructions included in the message. We do not share your phone number with third parties for marketing purposes. Your phone number is used solely to deliver the SMS notifications you have opted into and for identity verification.</p>
@@ -37,7 +49,7 @@ export default function PrivacyPage() {
         <p className="mt-2">Certain features display information sourced from third-party services, such as pet adoption listing providers. We do not control and are not responsible for the data practices of these third parties.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>10. AI-Powered Features & Usage Logs</h2>
-        <p className="mt-2">Lumo Bites uses artificial intelligence, including third-party AI service providers, to power certain features such as ingredient safety recommendations, pet photo matching, and adoption search. To deliver these features and enforce account tier limits, we record usage logs (including feature type, timestamp, estimated API cost, and your account email or IP address). AI-generated results are provided for informational purposes only, may not always be accurate, and should not replace independent judgment or professional advice.</p>
+        <p className="mt-2">Lumo Bites uses artificial intelligence, including third-party AI service providers, to power certain features such as ingredient safety recommendations, pet photo matching, and adoption search. To deliver these features and enforce account tier limits, we record usage logs (including feature type, timestamp, estimated API cost, and your normalized account identifier or IP address). AI-generated results are provided for informational purposes only, may not always be accurate, and should not replace independent judgment or professional advice.</p>
         
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>11. Data Sharing & Disclosure</h2>
         <p className="mt-2">We never sell your personal data. Information is shared only as necessary to operate the platform &mdash; for example, sharing relevant profile information between users engaging in a transaction or conversation. We may also disclose information if required by law, or to protect our legal rights, our users, or the public.</p>
@@ -73,27 +85,18 @@ export default function PrivacyPage() {
         <p className="mt-2">Certain features use automated systems, including AI, to generate suggestions or recommendations. These results should not be solely relied upon and do not constitute professional advice.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>22. Third-Party Services</h2>
-        <p className="mt-2">We use a variety of trusted third-party services to operate the platform, which may include:</p>
-        <ul className="list-disc ml-5 mt-2 space-y-1">
-          <li>Stripe (payments)</li>
-          <li>Twilio (SMS)</li>
-          <li>Firebase (push notifications)</li>
-          <li>Supabase (hosting/database)</li>
-          <li>Resend (email)</li>
-          <li>Amazon Associates (affiliate program)</li>
-          <li>AI service providers</li>
-          <li>Pet listing data providers</li>
-          <li>Mapping/location providers</li>
-        </ul>
-        <p className="mt-2">Each of these providers maintains their own privacy policy governing their handling of data.</p>
+        <p className="mt-2">We use a variety of trusted third-party services to operate the platform, which may include payment processors, SMS providers, notification services, database hosting, email delivery, affiliate programs, AI providers, and mapping providers. Each of these providers maintains their own privacy policy governing their handling of data.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>23. Changes to This Privacy Policy</h2>
-        <p className="mt-2">We may update this Privacy Policy from time to time. Continued use of Lumo Bites after updates constitutes acceptance of the revised policy.</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>23. Feature Evolution & Policy Updates</h2>
+        <p className="mt-2">As Lumo Bites introduces new features, services, and integrations, our information practices may be updated. We reserve the right to update this Privacy Policy at any time. Continued use of Lumo Bites following any updates constitutes your acknowledgment and acceptance of the revised policy.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>24. Related Documents</h2>
         <p className="mt-2">Your use of Lumo Bites is also governed by our <a href="/terms" style={{ color: '#8B5E3C', fontWeight: 'bold' }}>Terms of Service</a>.</p>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>25. Contact Information</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>25. Legal Notice & Disclaimer</h2>
+        <p className="mt-2">This document is provided for operational transparency and informational purposes regarding platform practices. It does not constitute formal legal counsel. Users and stakeholders are encouraged to consult qualified legal counsel for binding legal advice.</p>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>26. Contact Information</h2>
         <div className="mt-2">
           <p>Premier Pet Nutrition LLC</p>
           <p>Louisville, Kentucky, USA</p>
