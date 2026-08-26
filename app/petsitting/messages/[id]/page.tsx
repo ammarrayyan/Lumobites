@@ -430,65 +430,69 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="min-h-screen bg-[#FDF9F5] flex flex-col justify-between">
-      {/* ── HEADER BAR ── */}
-      <header 
-        className="sticky z-30 bg-white/95 backdrop-blur-md border-b border-[#E8DDD4] px-4 py-3 flex items-center justify-between shadow-sm"
+      {/* ── TOP STICKY BAR: HEADER + PROGRESS STEPPER ── */}
+      <div 
+        className="sticky z-30 bg-white shadow-sm border-b border-[#E8DDD4]"
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => router.push('/petsitting')}
-            className="p-1.5 rounded-xl hover:bg-[#FAF6F0] text-[#8B5E3C] transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
-            title="Back to Pet Sitting"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+        <header className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => router.push('/petsitting')}
+              className="p-1.5 rounded-xl hover:bg-[#FAF6F0] text-[#8B5E3C] transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center"
+              title="Back to Pet Sitting"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
 
-          <div className="relative shrink-0">
-            <Avatar name={displayName} size="sm" />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-white" />
+            <div className="relative shrink-0">
+              <Avatar name={displayName} size="sm" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-white" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h1 className="font-bold text-gray-900 text-sm md:text-base leading-tight truncate">{displayName}</h1>
+              <p className="text-[11px] text-[#8B7E7D] truncate font-medium">{bookingDetails}</p>
+            </div>
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h1 className="font-bold text-gray-900 text-sm md:text-base leading-tight truncate">{displayName}</h1>
-            <p className="text-[11px] text-[#8B7E7D] truncate font-medium">{bookingDetails}</p>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {petDetails && (
+              <button 
+                onClick={() => setShowPetProfile(prev => !prev)} 
+                title="View Pet Care Profile"
+                className={`p-2 rounded-xl flex items-center gap-1 text-xs font-bold transition-all cursor-pointer border-none ${
+                  showPetProfile ? 'bg-[#8B5E3C] text-white' : 'bg-[#FAF6F0] text-[#8B5E3C] hover:bg-[#F5EDE4]'
+                }`}
+              >
+                <PawPrint className="w-4 h-4" />
+                <span className="hidden sm:inline">Pet Profile</span>
+              </button>
+            )}
+
+            {otherUserEmail && (
+              <button 
+                onClick={() => setShowReportConfirm(true)} 
+                title={`Report ${displayName}`}
+                className="p-2 rounded-xl hover:bg-red-50 text-red-500 transition-colors cursor-pointer border-none bg-transparent"
+              >
+                <ShieldAlert className="w-5 h-5" />
+              </button>
+            )}
           </div>
-        </div>
+        </header>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {petDetails && (
-            <button 
-              onClick={() => setShowPetProfile(prev => !prev)} 
-              title="View Pet Care Profile"
-              className={`p-2 rounded-xl flex items-center gap-1 text-xs font-bold transition-all cursor-pointer border-none ${
-                showPetProfile ? 'bg-[#8B5E3C] text-white' : 'bg-[#FAF6F0] text-[#8B5E3C] hover:bg-[#F5EDE4]'
-              }`}
-            >
-              <PawPrint className="w-4 h-4" />
-              <span className="hidden sm:inline">Pet Profile</span>
-            </button>
-          )}
-
-          {otherUserEmail && (
-            <button 
-              onClick={() => setShowReportConfirm(true)} 
-              title={`Report ${displayName}`}
-              className="p-2 rounded-xl hover:bg-red-50 text-red-500 transition-colors cursor-pointer border-none bg-transparent"
-            >
-              <ShieldAlert className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* Visual Booking Progress Tracker Stepper */}
-      {booking && (
-        <BookingProgressStepper
-          status={booking.status}
-          dates={booking.dates}
-          createdAt={(booking as any).created_at}
-        />
-      )}
+        {/* Visual Booking Progress Tracker Stepper */}
+        {booking && (
+          <div className="border-t border-gray-100">
+            <BookingProgressStepper
+              status={booking.status}
+              dates={booking.dates}
+              createdAt={(booking as any).created_at}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Report confirmation notification */}
       {reportSuccess && (
