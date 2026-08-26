@@ -762,7 +762,7 @@ export default function LostPetsFeed() {
                   <div className="flex flex-col md:flex-row gap-8 items-start">
                     {/* Pets Grid */}
                     <div className="flex-1 order-2 md:order-1 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
@@ -774,16 +774,16 @@ export default function LostPetsFeed() {
                             onClick={(e) => handleCardClick(e, pet.id)}
                             onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
                             style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                            className="bg-white rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                            className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                           >
-                            <div className="relative h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
+                            <div className="relative h-48 sm:h-52 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
                               {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
                               )}
-                              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
+                              <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
                                   pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                   pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                                 }`}>
@@ -791,35 +791,35 @@ export default function LostPetsFeed() {
                                 </span>
                               </div>
                             </div>
-                            <div className="p-6 flex flex-col flex-1">
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">{pet.pet_name || 'Unknown Pet'}</h3>
-                                <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">{pet.species}</span>
+                            <div className="p-4 sm:p-5 flex flex-col flex-1">
+                              <div className="flex justify-between items-start mb-1.5">
+                                <h3 className="text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
+                                <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-2 py-0.5 rounded-md capitalize">{pet.species}</span>
                               </div>
-                              <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
+                              <p className="text-xs sm:text-sm font-semibold text-[#8B7E7D] mb-2.5 flex flex-col gap-1">
                                 <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
                                 {pet.distance !== undefined && pet.distance !== null && (
-                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
+                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded-md uppercase tracking-wide">
                                     {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[#4A3E3D] text-[15px] leading-relaxed mb-6 line-clamp-3 flex-1">{pet.description}</p>
-                              <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
-                                <div className="flex justify-between items-center mb-4">
-                                  <span className="text-xs font-semibold text-[#8B7E7D]">
-                                    {pet.type === 'lost' ? 'Lost on:' : 'Found on:'} {new Date(pet.date_lost_found).toLocaleDateString()}
+                              <p className="text-[#4A3E3D] text-sm leading-relaxed mb-3.5 line-clamp-2 flex-1">{pet.description}</p>
+                              <div className="border-t border-[#E8DDD4] pt-3 mt-auto">
+                                <div className="flex justify-between items-center mb-2.5 text-xs text-[#8B7E7D]">
+                                  <span className="font-semibold">
+                                    {pet.type === 'lost' ? 'Lost:' : 'Found:'} {new Date(pet.date_lost_found).toLocaleDateString()}
                                   </span>
-                                  <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
+                                  <span>Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
                                 <div className="flex gap-2 w-full">
-                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
+                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2.5 rounded-xl transition-colors text-xs sm:text-sm">
                                     View Details &amp; Help
                                   </Link>
                                   {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                                     <button 
                                       onClick={() => handleDeletePostDirectly(pet.id)}
-                                      className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                      className="px-2.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
                                       title="Delete immediately"
                                     >
                                       Delete
@@ -828,7 +828,7 @@ export default function LostPetsFeed() {
                                     <>
                                       <button 
                                         onClick={() => handleReportPost(pet.id, pet.contact_email)}
-                                        className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                        className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
                                         title="Report post"
                                       >
                                         Flag
@@ -1073,7 +1073,7 @@ export default function LostPetsFeed() {
                       <p className="text-[#8B7E7D]">Try lowering the match score threshold, widening the radius, or using &quot;Any time&quot; for timeframe.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                       {aiMatches
                         .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                         .map((pet) => (
@@ -1084,23 +1084,23 @@ export default function LostPetsFeed() {
                           aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
                           onClick={(e) => handleCardClick(e, pet.id)}
                           onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
-                          className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                          className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                         >
-                          <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
+                          <div className="relative h-48 sm:h-52 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                             {pet.photo_url ? (
                               <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
                             )}
-                            <div className="absolute top-4 left-4 flex flex-col gap-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
+                            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
                                 pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                 (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
                               }`}>
                                 {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : (pet.type || pet.pet_type)}
                               </span>
                               {pet.score !== undefined && (
-                                <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md text-white ${
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase shadow-md text-white ${
                                   pet.score >= 80 ? 'bg-emerald-600' : pet.score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
                                 }`}>
                                   {pet.score}% Match
@@ -1108,40 +1108,40 @@ export default function LostPetsFeed() {
                               )}
                             </div>
                           </div>
-                          <div className="p-6 flex flex-col flex-1">
+                          <div className="p-4 sm:p-5 flex flex-col flex-1">
                             {pet.matchSummary && (
-                              <div className="mb-4 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-xs font-bold text-[#8B5E3C]">
+                              <div className="mb-2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-2.5 text-xs font-bold text-[#8B5E3C]">
                                 <Sparkles className="w-3 h-3 inline mr-1" />{pet.matchSummary}
                               </div>
                             )}
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">{pet.pet_name || 'Unknown Pet'}</h3>
-                              <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">{pet.species}</span>
+                            <div className="flex justify-between items-start mb-1.5">
+                              <h3 className="text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
+                              <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-2 py-0.5 rounded-md capitalize">{pet.species}</span>
                             </div>
-                            <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
+                            <p className="text-xs sm:text-sm font-semibold text-[#8B7E7D] mb-2.5 flex flex-col gap-1">
                               <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
                               {pet.distance !== undefined && pet.distance !== null && (
-                                <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
+                                <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded-md uppercase tracking-wide">
                                   {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
                                 </span>
                               )}
                             </p>
-                            <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">{pet.description}</p>
-                            <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
-                              <div className="flex justify-between items-center mb-4">
-                                <span className="text-xs font-semibold text-[#8B7E7D]">
-                                  Found on: {new Date(pet.date_lost_found).toLocaleDateString()}
+                            <p className="text-[#555555] text-sm leading-relaxed mb-3.5 line-clamp-2 flex-1">{pet.description}</p>
+                            <div className="border-t border-[#E8DDD4] pt-3 mt-auto">
+                              <div className="flex justify-between items-center mb-2.5 text-xs text-[#8B7E7D]">
+                                <span className="font-semibold">
+                                  Found: {new Date(pet.date_lost_found).toLocaleDateString()}
                                 </span>
-                                <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
+                                <span>Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
                               </div>
                               <div className="flex gap-2 w-full">
-                                <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
+                                <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2.5 rounded-xl transition-colors text-xs sm:text-sm">
                                   View Details &amp; Contact
                                 </Link>
                                 {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                                   <button 
                                     onClick={() => handleDeletePostDirectly(pet.id)}
-                                    className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                    className="px-2.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
                                     title="Delete immediately"
                                   >
                                     Delete
@@ -1150,7 +1150,7 @@ export default function LostPetsFeed() {
                                   <>
                                     <button 
                                       onClick={() => handleReportPost(pet.id, pet.contact_email)}
-                                      className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                      className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
                                       title="Report post"
                                     >
                                       Flag
