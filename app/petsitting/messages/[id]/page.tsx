@@ -429,9 +429,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="h-[calc(100dvh-72px)] bg-[#FDF9F5] flex flex-col justify-between overflow-hidden">
-      {/* ── TOP STICKY BAR: HEADER + PROGRESS STEPPER ── */}
-      <div className="shrink-0 bg-white shadow-sm border-b border-[#E8DDD4] z-30">
+    <div className="bg-[#FDF9F5] flex flex-col min-h-[calc(100vh-140px)] pb-12">
+      {/* ── TOP BAR: HEADER + PROGRESS STEPPER ── */}
+      <div className="bg-white shadow-sm border-b border-[#E8DDD4] max-w-2xl w-full mx-auto sm:rounded-2xl overflow-hidden">
         <header className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <button
