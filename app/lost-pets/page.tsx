@@ -762,7 +762,7 @@ export default function LostPetsFeed() {
                   <div className="flex flex-col md:flex-row gap-8 items-start">
                     {/* Pets Grid */}
                     <div className="flex-1 order-2 md:order-1 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
@@ -776,13 +776,18 @@ export default function LostPetsFeed() {
                             style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                             className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                           >
-                            <div className="relative h-48 sm:h-52 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
+                            {/* Photo Container: large & edge-to-edge */}
+                            <div className="relative h-56 sm:h-60 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
                               {pet.photo_url ? (
-                                <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
+                                <img 
+                                  src={pet.photo_url} 
+                                  alt={pet.pet_name} 
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                                />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
                               )}
-                              <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                              <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
                                 <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
                                   pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                   pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
@@ -791,29 +796,31 @@ export default function LostPetsFeed() {
                                 </span>
                               </div>
                             </div>
-                            <div className="p-4 sm:p-5 flex flex-col flex-1">
-                              <div className="flex justify-between items-start mb-1.5">
-                                <h3 className="text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
-                                <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-2 py-0.5 rounded-md capitalize">{pet.species}</span>
+
+                            {/* Card Details: tight & compact */}
+                            <div className="p-3.5 sm:p-4 flex flex-col flex-1">
+                              <div className="flex justify-between items-start mb-1">
+                                <h3 className="text-lg sm:text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
+                                <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize">{pet.species}</span>
                               </div>
-                              <p className="text-xs sm:text-sm font-semibold text-[#8B7E7D] mb-2.5 flex flex-col gap-1">
-                                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                              <p className="text-xs font-semibold text-[#8B7E7D] mb-2 flex flex-col gap-0.5">
+                                <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
                                 {pet.distance !== undefined && pet.distance !== null && (
-                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded-md uppercase tracking-wide">
-                                    {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                    {pet.distance < 0.1 ? '< 0.1 mi away' : `${pet.distance.toFixed(1)} mi away`}
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[#4A3E3D] text-sm leading-relaxed mb-3.5 line-clamp-2 flex-1">{pet.description}</p>
-                              <div className="border-t border-[#E8DDD4] pt-3 mt-auto">
-                                <div className="flex justify-between items-center mb-2.5 text-xs text-[#8B7E7D]">
+                              <p className="text-[#555] text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{pet.description}</p>
+                              <div className="border-t border-[#E8DDD4] pt-2.5 mt-auto">
+                                <div className="flex justify-between items-center mb-2 text-[11px] text-[#8B7E7D]">
                                   <span className="font-semibold">
                                     {pet.type === 'lost' ? 'Lost:' : 'Found:'} {new Date(pet.date_lost_found).toLocaleDateString()}
                                   </span>
-                                  <span>Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
+                                  <span>{formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
                                 <div className="flex gap-2 w-full">
-                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2.5 rounded-xl transition-colors text-xs sm:text-sm">
+                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs">
                                     View Details &amp; Help
                                   </Link>
                                   {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
@@ -1073,7 +1080,7 @@ export default function LostPetsFeed() {
                       <p className="text-[#8B7E7D]">Try lowering the match score threshold, widening the radius, or using &quot;Any time&quot; for timeframe.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {aiMatches
                         .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                         .map((pet) => (
@@ -1084,15 +1091,21 @@ export default function LostPetsFeed() {
                           aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
                           onClick={(e) => handleCardClick(e, pet.id)}
                           onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
+                          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                           className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                         >
-                          <div className="relative h-48 sm:h-52 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
+                          {/* Photo Container: large & edge-to-edge */}
+                          <div className="relative h-56 sm:h-60 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                             {pet.photo_url ? (
-                              <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
+                              <img 
+                                src={pet.photo_url} 
+                                alt={pet.pet_name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
                             )}
-                            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                            <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
                               <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
                                 pet.status === 'resolved' ? 'bg-green-500 text-white' :
                                 (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
@@ -1108,34 +1121,36 @@ export default function LostPetsFeed() {
                               )}
                             </div>
                           </div>
-                          <div className="p-4 sm:p-5 flex flex-col flex-1">
+
+                          {/* Card Details: tight & compact */}
+                          <div className="p-3.5 sm:p-4 flex flex-col flex-1">
                             {pet.matchSummary && (
-                              <div className="mb-2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-2.5 text-xs font-bold text-[#8B5E3C]">
+                              <div className="mb-2 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-2 text-xs font-bold text-[#8B5E3C]">
                                 <Sparkles className="w-3 h-3 inline mr-1" />{pet.matchSummary}
                               </div>
                             )}
-                            <div className="flex justify-between items-start mb-1.5">
-                              <h3 className="text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
-                              <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-2 py-0.5 rounded-md capitalize">{pet.species}</span>
+                            <div className="flex justify-between items-start mb-1">
+                              <h3 className="text-lg sm:text-xl font-black text-[#4A3E3D] truncate pr-2 group-hover:text-[#8B5E3C] transition-colors">{pet.pet_name || 'Unknown Pet'}</h3>
+                              <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize">{pet.species}</span>
                             </div>
-                            <p className="text-xs sm:text-sm font-semibold text-[#8B7E7D] mb-2.5 flex flex-col gap-1">
-                              <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                            <p className="text-xs font-semibold text-[#8B7E7D] mb-2 flex flex-col gap-0.5">
+                              <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
                               {pet.distance !== undefined && pet.distance !== null && (
-                                <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded-md uppercase tracking-wide">
-                                  {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+                                <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                  {pet.distance < 0.1 ? '< 0.1 mi away' : `${pet.distance.toFixed(1)} mi away`}
                                 </span>
                               )}
                             </p>
-                            <p className="text-[#555555] text-sm leading-relaxed mb-3.5 line-clamp-2 flex-1">{pet.description}</p>
-                            <div className="border-t border-[#E8DDD4] pt-3 mt-auto">
-                              <div className="flex justify-between items-center mb-2.5 text-xs text-[#8B7E7D]">
+                            <p className="text-[#555] text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{pet.description}</p>
+                            <div className="border-t border-[#E8DDD4] pt-2.5 mt-auto">
+                              <div className="flex justify-between items-center mb-2 text-[11px] text-[#8B7E7D]">
                                 <span className="font-semibold">
                                   Found: {new Date(pet.date_lost_found).toLocaleDateString()}
                                 </span>
-                                <span>Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
+                                <span>{formatDistanceToNow(new Date(pet.created_at))} ago</span>
                               </div>
                               <div className="flex gap-2 w-full">
-                                <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2.5 rounded-xl transition-colors text-xs sm:text-sm">
+                                <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs">
                                   View Details &amp; Contact
                                 </Link>
                                 {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (

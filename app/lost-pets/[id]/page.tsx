@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, Maximize2 } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send } from 'lucide-react';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -76,8 +76,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   }, [userEmail]);
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -467,23 +465,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                     {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
                   </span>
                 </div>
-
-                {/* Explicit Fullscreen / Zoom Button */}
-                {photosList.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLightboxIndex(activePhotoIndex);
-                      setLightboxOpen(true);
-                    }}
-                    className="absolute bottom-3 right-3 bg-black/70 hover:bg-black text-white px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide flex items-center gap-1.5 shadow-md transition-all cursor-pointer hover:scale-105 z-10 btn-gloss"
-                    title="View fullscreen high-res photo"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5 text-white" />
-                    <span>Fullscreen</span>
-                  </button>
-                )}
               </div>
 
               {/* Gallery Thumbnails List */}
@@ -777,56 +758,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           </div>
         </div>
       </main>
-
-      {/* Lightbox / Zoom Overlay */}
-      {lightboxOpen && photosList.length > 0 && (
-        <div 
-          className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-4 animate-fade-in"
-          onClick={() => setLightboxOpen(false)}
-        >
-          {/* Close button */}
-          <button
-            onClick={() => setLightboxOpen(false)}
-            className="absolute top-6 right-6 text-white/80 hover:text-white text-4xl font-bold transition-colors cursor-pointer bg-white/10 hover:bg-white/20 rounded-full w-12 h-12 flex items-center justify-center border border-white/10"
-            title="Close Lightbox"
-          >
-            &times;
-          </button>
-
-          {/* Lightbox Main Image */}
-          <div className="relative max-w-4xl max-h-[80vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <img 
-              src={photosList[lightboxIndex]} 
-              alt={`Zoomed Pet ${lightboxIndex + 1}`} 
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-scale-up"
-            />
-
-            {/* Lightbox Navigation Arrows */}
-            {photosList.length > 1 && (
-              <>
-                <button
-                  onClick={() => setLightboxIndex(prev => (prev - 1 + photosList.length) % photosList.length)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center font-bold text-3xl transition-all cursor-pointer border border-white/5"
-                >
-                  &#8249;
-                </button>
-                <button
-                  onClick={() => setLightboxIndex(prev => (prev + 1) % photosList.length)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center font-bold text-3xl transition-all cursor-pointer border border-white/5"
-                >
-                  &#8250;
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Indicator Info */}
-          <div className="text-white/60 text-sm font-semibold mt-4">
-            Photo {lightboxIndex + 1} of {photosList.length}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
