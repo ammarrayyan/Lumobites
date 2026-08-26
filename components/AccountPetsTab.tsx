@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { PawPrint, ShieldCheck, ShieldAlert, Plus, Trash2, Edit2, Check, Clock, UserX, AlertCircle, RefreshCw, ChevronDown, ChevronUp, QrCode, Share2, Copy, Download, X, Lock, ArrowLeft, MessageSquare } from 'lucide-react';
 import PetProfileCard from '@/components/PetProfileCard';
+import { formatSitterName } from '@/lib/email-template';
 
 interface VaccineRecord {
   id?: string;
@@ -404,9 +405,9 @@ export default function AccountPetsTab({
             </p>
           </div>
 
-          {/* ── 1. PENDING ACCESS REQUESTS ── */}
+          {/* ── 1. PENDING ACCESS REQUESTS (NEEDS OWNER APPROVAL) ── */}
           {grants.filter(g => (g.effective_status || g.status) === 'pending').length > 0 && (
-            <div className="flex flex-col gap-3">
+            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/60 rounded-3xl p-5 sm:p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
                 <h4 className="font-extrabold text-amber-950 text-sm">
@@ -419,6 +420,7 @@ export default function AccountPetsTab({
                   .filter(g => (g.effective_status || g.status) === 'pending')
                   .map(grant => {
                     const petName = grant.owner_pets?.pet_name || 'Pet';
+                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
                     const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic (Full Medical Access)' : grant.partner_type === 'daycare' ? '🐕 Daycare (Care Access)' : '🏡 Pet Sitter (Care Access)';
 
                     return (
@@ -429,7 +431,7 @@ export default function AccountPetsTab({
                       >
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-black text-gray-900 text-sm">{grant.partner_name}</span>
+                            <span className="font-black text-gray-900 text-sm">{partnerDisplayName}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-100">
                               {typeBadge}
                             </span>
@@ -457,14 +459,14 @@ export default function AccountPetsTab({
                           </Link>
                           <button
                             type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'deny', grant.partner_type, grant.partner_name)}
+                            onClick={() => handleAccessDecision(grant.id, 'deny', grant.partner_type, partnerDisplayName)}
                             className="flex-1 sm:flex-initial px-4 py-2 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold text-xs transition-colors cursor-pointer text-center"
                           >
                             Decline
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'approve', grant.partner_type, grant.partner_name)}
+                            onClick={() => handleAccessDecision(grant.id, 'approve', grant.partner_type, partnerDisplayName)}
                             className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
                           >
                             <ShieldCheck className="w-3.5 h-3.5" />
@@ -498,6 +500,7 @@ export default function AccountPetsTab({
                   .filter(g => (g.effective_status || g.status) === 'active')
                   .map(grant => {
                     const petName = grant.owner_pets?.pet_name || 'Pet';
+                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
                     const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic (Full Access)' : grant.partner_type === 'daycare' ? '🐕 Daycare (Care Access)' : '🏡 Pet Sitter (Care Access)';
 
                     return (
@@ -508,7 +511,7 @@ export default function AccountPetsTab({
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-extrabold text-gray-900 text-sm">{grant.partner_name}</span>
+                            <span className="font-extrabold text-gray-900 text-sm">{partnerDisplayName}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-100">
                               {typeBadge}
                             </span>
@@ -531,7 +534,7 @@ export default function AccountPetsTab({
                           </Link>
                           <button
                             type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'revoke', grant.partner_type, grant.partner_name)}
+                            onClick={() => handleAccessDecision(grant.id, 'revoke', grant.partner_type, partnerDisplayName)}
                             className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
                           >
                             Revoke Access
@@ -557,6 +560,7 @@ export default function AccountPetsTab({
                   .map(grant => {
                     const st = grant.effective_status || grant.status;
                     const petName = grant.owner_pets?.pet_name || 'Pet';
+                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
                     const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic' : grant.partner_type === 'daycare' ? '🐕 Daycare' : '🏡 Pet Sitter';
 
                     return (
@@ -566,7 +570,7 @@ export default function AccountPetsTab({
                       >
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-gray-700 text-xs">{grant.partner_name}</span>
+                            <span className="font-bold text-gray-700 text-xs">{partnerDisplayName}</span>
                             <span className="text-[10px] text-gray-500">{typeBadge}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">
                               {st === 'denied' ? 'Declined' : 'Revoked'}
@@ -587,7 +591,7 @@ export default function AccountPetsTab({
                           </Link>
                           <button
                             type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'restore', grant.partner_type, grant.partner_name)}
+                            onClick={() => handleAccessDecision(grant.id, 'restore', grant.partner_type, partnerDisplayName)}
                             className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200"
                           >
                             Restore Access

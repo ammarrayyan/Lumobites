@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { formatSitterName } from '@/lib/email-template';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,14 +98,14 @@ export async function GET(request: NextRequest) {
     (sittingRequests || []).forEach(req => {
       const sitter = (req as any).sitters;
       const pet = petMap.get(req.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
-      const sitterName = sitter?.name || 'Pet Sitter';
+      const sitterName = sitter?.name ? formatSitterName(sitter.name) : 'Pet Sitter';
       const st = req.status || 'pending';
       const isGrantActive = ['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(st);
       unifiedGrants.push({
         id: req.id,
         partner_id: req.sitter_id,
         partner_type: 'sitter',
-        partner_name: sitterName || 'Pet Sitter',
+        partner_name: sitterName,
         partner_email: sitter?.email || '',
         owner_email: req.owner_email,
         pet_id: req.pet_id || pet?.id,

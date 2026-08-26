@@ -1,4 +1,5 @@
 import { supabaseAdmin } from './supabase.ts';
+import { formatSitterName } from './email-template.ts';
 
 export interface GrantPetAccessParams {
   petId: string;
@@ -149,11 +150,12 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
     if (currentStatus === 'pending') {
       try {
         const partnerTypeLabel = partnerType === 'vet' ? 'Vet Clinic' : partnerType === 'daycare' ? 'Daycare' : 'Pet Sitter';
+        const displayPartnerName = partnerType === 'sitter' ? formatSitterName(partnerName) : partnerName;
         await supabaseAdmin.from('notifications').insert({
           recipient_email: cleanOwnerEmail,
           type: 'pet_access_request',
           title: 'Pet Profile Access Request 🐾',
-          message: `${partnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Tap to review and approve.`,
+          message: `${displayPartnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Tap to review and approve.`,
           link: '/account?tab=pets',
           read: false,
         });
