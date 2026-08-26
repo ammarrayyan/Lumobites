@@ -4164,7 +4164,7 @@ export function PetSittingContent() {
                                 )}
                               </div>
                             )}
-                            <div className="flex flex-col gap-4 mb-4">
+                            <div className="flex gap-4 mb-4">
                               {sitter.photo_url ? (
                                 <img src={sitter.photo_url} alt={formatSitterName(sitter.name)} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-3 border-[#FAF6F4] flex-shrink-0 shadow-md pointer-events-none" />
                               ) : (
@@ -4193,13 +4193,15 @@ export function PetSittingContent() {
                                  </div>
                                  {reqEmail && (
                                     <div className="text-sm mb-1">
-                                      {sitter.review_count ? (
+                                      {sitter.review_count && sitter.review_count > 0 ? (
                                         <span className="text-[#D97706] font-bold flex items-center gap-1">
                                           <Star className="w-4 h-4 fill-current" />
                                           {Number(sitter.avg_rating || 0).toFixed(1)} ({sitter.review_count} {sitter.review_count === 1 ? 'review' : 'reviews'})
                                         </span>
                                       ) : (
-                                        <span className="text-xs text-[#8B7E7D]">★ 5.0 (0 reviews) • New Sitter</span>
+                                        <span className="inline-flex items-center gap-1.5 text-xs text-[#8B7E7D] font-medium bg-[#FAF6F4] px-2.5 py-0.5 rounded-full border border-[#E8DDD4]/60">
+                                          <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> New Sitter • No reviews yet
+                                        </span>
                                       )}
                                     </div>
                                  )}
@@ -7355,12 +7357,14 @@ export function PetSittingContent() {
                     <span className="text-xs font-semibold select-none">
                       🔒 Reviews locked
                     </span>
-                  ) : selectedSitterForReviews.review_count ? (
-                    <span className="text-[#D97706] font-bold whitespace-nowrap">
-                      ⭐ {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
+                  ) : selectedSitterForReviews.review_count && selectedSitterForReviews.review_count > 0 ? (
+                    <span className="text-[#D97706] font-bold whitespace-nowrap flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-current text-amber-500" /> {selectedSitterForReviews.avg_rating} <span className="text-[#8B7E7D] font-normal">({selectedSitterForReviews.review_count} {selectedSitterForReviews.review_count === 1 ? 'review' : 'reviews'})</span>
                     </span>
                   ) : (
-                    <span className="text-[#8B7E7D] whitespace-nowrap">No reviews yet</span>
+                    <span className="inline-flex items-center gap-1 text-xs text-[#8B7E7D] font-medium bg-[#FAF6F4] px-2.5 py-0.5 rounded-full border border-[#E8DDD4]">
+                      <Sparkles className="w-3.5 h-3.5 text-[#8B5E3C]" /> New Sitter • No reviews yet
+                    </span>
                   )}
 
                   <span className="text-[#E8DDD4]">•</span>

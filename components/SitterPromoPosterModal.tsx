@@ -236,9 +236,15 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded-md">
                       <ShieldCheck className="w-2.5 h-2.5 text-emerald-700" /> Verified Sitter
                     </span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-md">
-                      <Star className="w-2.5 h-2.5 text-amber-600 fill-amber-600" /> {sitter.rating || '5.0'}
-                    </span>
+                    {((sitter.review_count && sitter.review_count > 0) || (sitter.reviews_count && sitter.reviews_count > 0)) ? (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded-md">
+                        <Star className="w-2.5 h-2.5 text-amber-600 fill-amber-600" /> {sitter.rating}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#8B5E3C] bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200">
+                        <Sparkles className="w-2.5 h-2.5 text-[#8B5E3C]" /> New Sitter
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -342,9 +348,15 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
                   <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
                     🛡️ Verified Sitter
                   </span>
-                  <span className="text-[9px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded">
-                    ⭐ {sitter.rating || '5.0'}
-                  </span>
+                  {((sitter.review_count && sitter.review_count > 0) || (sitter.reviews_count && sitter.reviews_count > 0)) ? (
+                    <span className="text-[9px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded">
+                      <Star className="w-2 h-2 text-amber-600 fill-amber-600 inline mr-0.5" /> {sitter.rating}
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-[#8B5E3C] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                      New Sitter
+                    </span>
+                  )}
                 </div>
               </div>
 
