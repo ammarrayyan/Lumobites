@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, Maximize2 } from 'lucide-react';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -404,16 +404,9 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
               
               {/* Main Image Slideshow Container */}
               <div 
-                className="flex-1 relative flex items-center justify-center overflow-hidden cursor-pointer"
+                className="flex-1 relative flex items-center justify-center overflow-hidden"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, photosList.length)}
-                onClick={() => {
-                  if (photosList.length > 0) {
-                    setLightboxIndex(activePhotoIndex);
-                    setLightboxOpen(true);
-                  }
-                }}
-                title="Click to zoom in"
               >
                 {photosList.length > 0 ? (
                   <img 
@@ -461,11 +454,21 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   </span>
                 </div>
 
-                {/* Click to Zoom indicator */}
+                {/* Explicit Fullscreen / Zoom Button */}
                 {photosList.length > 0 && (
-                  <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide uppercase flex items-center gap-1.5 shadow-sm transition-all hover:bg-black">
-                    <Search className="w-3.5 h-3.5 text-white" /> Click to Zoom
-                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex(activePhotoIndex);
+                      setLightboxOpen(true);
+                    }}
+                    className="absolute bottom-3 right-3 bg-black/70 hover:bg-black text-white px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide flex items-center gap-1.5 shadow-md transition-all cursor-pointer hover:scale-105 z-10 btn-gloss"
+                    title="View fullscreen high-res photo"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-white" />
+                    <span>Fullscreen</span>
+                  </button>
                 )}
               </div>
 
