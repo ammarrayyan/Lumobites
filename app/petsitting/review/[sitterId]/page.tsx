@@ -131,7 +131,20 @@ export default function SitterReviewPage() {
   return (
     <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col">
       
-      <main className="flex-1 max-w-[600px] w-full mx-auto px-4 py-12">
+      <main className="flex-1 max-w-[600px] w-full mx-auto px-4 py-8 md:py-12">
+        <button 
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push('/petsitting');
+            }
+          }}
+          className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-sm"
+        >
+          &larr; Back to Pet Sitting
+        </button>
         <div 
           style={{ boxShadow: '0 4px 20px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)' }}
           className="bg-white border border-[#DFD3C7] rounded-3xl overflow-hidden"
