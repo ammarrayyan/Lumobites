@@ -146,8 +146,44 @@ function AdoptionContent() {
         ''
       ).trim();
       setIsLoggedIn(!!email);
+
+      // Restore saved adoption search and filter state
+      try {
+        const saved = sessionStorage.getItem('lumo_adoption_search_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.species !== undefined) setSpecies(parsed.species);
+          if (parsed.age !== undefined) setAge(parsed.age);
+          if (parsed.size !== undefined) setSize(parsed.size);
+          if (parsed.citySearch !== undefined) setCitySearch(parsed.citySearch);
+          if (parsed.showMap !== undefined) setShowMap(parsed.showMap);
+
+          if (parsed.scrollY) {
+            setTimeout(() => {
+              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+            }, 120);
+          }
+        }
+      } catch (e) {}
     }
   }, []);
+
+  // Sync adoption search state to sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stateToSave = {
+          species,
+          age,
+          size,
+          citySearch,
+          showMap,
+          scrollY: window.scrollY
+        };
+        sessionStorage.setItem('lumo_adoption_search_state', JSON.stringify(stateToSave));
+      } catch (e) {}
+    }
+  }, [species, age, size, citySearch, showMap]);
 
   const [isVisualModalOpen, setIsVisualModalOpen] = useState(false);
   const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
-import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
@@ -30,6 +30,22 @@ export default function LostPetsFeed() {
     if (target.closest('button, a, input, select, textarea, [data-interactive="true"]')) {
       return;
     }
+    if (typeof window !== 'undefined') {
+      try {
+        const stateToSave = {
+          searchQuery: currentContextRef.current.searchQuery,
+          searchRadius: currentContextRef.current.searchRadius,
+          filterType: currentContextRef.current.filterType,
+          filterSpecies: currentContextRef.current.filterSpecies,
+          searchCoords: currentContextRef.current.searchCoords,
+          searchLocationName,
+          locationVerified,
+          activeTab,
+          scrollY: window.scrollY
+        };
+        sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
+      } catch (err) {}
+    }
     router.push(`/lost-pets/${petId}`);
   };
 
@@ -40,6 +56,22 @@ export default function LostPetsFeed() {
         return;
       }
       e.preventDefault();
+      if (typeof window !== 'undefined') {
+        try {
+          const stateToSave = {
+            searchQuery: currentContextRef.current.searchQuery,
+            searchRadius: currentContextRef.current.searchRadius,
+            filterType: currentContextRef.current.filterType,
+            filterSpecies: currentContextRef.current.filterSpecies,
+            searchCoords: currentContextRef.current.searchCoords,
+            searchLocationName,
+            locationVerified,
+            activeTab,
+            scrollY: window.scrollY
+          };
+          sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
+        } catch (err) {}
+      }
       router.push(`/lost-pets/${petId}`);
     }
   };
@@ -105,8 +137,52 @@ export default function LostPetsFeed() {
       if (tabParam === 'ai' || tabParam === 'ai-search' || tabParam === 'search') {
         setActiveTab('ai');
       }
+
+      // Restore saved filters and scroll state from sessionStorage
+      try {
+        const saved = sessionStorage.getItem('lumo_lost_pets_search_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.searchQuery) {
+            skipGeocodeRef.current = true;
+            setSearchQuery(parsed.searchQuery);
+          }
+          if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
+          if (parsed.filterType) setFilterType(parsed.filterType);
+          if (parsed.filterSpecies) setFilterSpecies(parsed.filterSpecies);
+          if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
+          if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
+          if (parsed.locationVerified !== undefined) setLocationVerified(parsed.locationVerified);
+          if (parsed.activeTab && !tabParam) setActiveTab(parsed.activeTab);
+
+          if (parsed.scrollY) {
+            setTimeout(() => {
+              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+            }, 120);
+          }
+        }
+      } catch (e) {}
     }
   }, []);
+
+  // Sync state changes to sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stateToSave = {
+          searchQuery,
+          searchRadius,
+          filterType,
+          filterSpecies,
+          searchCoords,
+          searchLocationName,
+          locationVerified,
+          activeTab
+        };
+        sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
+      } catch (e) {}
+    }
+  }, [searchQuery, searchRadius, filterType, filterSpecies, searchCoords, searchLocationName, locationVerified, activeTab]);
 
   const handleTabSwitch = (tab: 'board' | 'ai') => {
     setActiveTab(tab);
@@ -686,7 +762,7 @@ export default function LostPetsFeed() {
                   <div className="flex flex-col md:flex-row gap-8 items-start">
                     {/* Pets Grid */}
                     <div className="flex-1 order-2 md:order-1 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex flex-col gap-3.5">
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
@@ -698,52 +774,85 @@ export default function LostPetsFeed() {
                             onClick={(e) => handleCardClick(e, pet.id)}
                             onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
                             style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                            className="bg-white rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
+                            className="bg-white rounded-2xl p-3.5 sm:p-4 border border-[#DFD3C7] shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer group flex gap-3.5 sm:gap-4 items-center focus:outline-none focus:ring-2 focus:ring-[#8B5E3C] hover:border-[#8B5E3C]/40 hover:-translate-y-0.5"
                           >
-                            <div className="relative h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
-                              {pet.photo_url ? (
-                                <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
+                            {/* Left: Compact Thumbnail with Badge */}
+                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-[#FAF5EE] overflow-hidden border border-[#EADBCE] shrink-0">
+                              {pet.photo_url || (pet.photos && pet.photos.length > 0) ? (
+                                <img 
+                                  src={pet.photo_url || pet.photos[0]} 
+                                  alt={pet.pet_name || 'Pet'} 
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                                />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-semibold">No Photo</div>
                               )}
-                              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
-                                  pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                                  pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                              <div className="absolute top-1.5 left-1.5">
+                                <span className={`px-2 py-0.5 rounded-md text-[9.5px] font-black tracking-wider uppercase shadow-xs ${
+                                  pet.status === 'resolved' ? 'bg-green-600 text-white' :
+                                  pet.type === 'lost' ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white'
                                 }`}>
-                                  {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : pet.type}
+                                  {pet.status === 'resolved' ? 'Resolved' : pet.type}
                                 </span>
                               </div>
                             </div>
-                            <div className="p-6 flex flex-col flex-1">
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">{pet.pet_name || 'Unknown Pet'}</h3>
-                                <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">{pet.species}</span>
-                              </div>
-                              <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
-                                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
-                                {pet.distance !== undefined && pet.distance !== null && (
-                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
-                                    {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+
+                            {/* Middle / Right: Content Details */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
+                              <div>
+                                {/* Row 1: Pet Name & Species & Date */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <h3 className="text-base sm:text-lg font-bold text-[#4A3E3D] truncate group-hover:text-[#8B5E3C] transition-colors leading-snug">
+                                      {pet.pet_name || 'Unknown Pet'}
+                                    </h3>
+                                    <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize shrink-0">
+                                      {pet.species}
+                                    </span>
+                                  </div>
+                                  <span className="text-[11px] text-[#8B7E7D] shrink-0 whitespace-nowrap">
+                                    {formatDistanceToNow(new Date(pet.created_at))} ago
                                   </span>
-                                )}
-                              </p>
-                              <p className="text-[#4A3E3D] text-[15px] leading-relaxed mb-6 line-clamp-3 flex-1">{pet.description}</p>
-                              <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
-                                <div className="flex justify-between items-center mb-4">
-                                  <span className="text-xs font-semibold text-[#8B7E7D]">
-                                    {pet.type === 'lost' ? 'Lost on:' : 'Found on:'} {new Date(pet.date_lost_found).toLocaleDateString()}
-                                  </span>
-                                  <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
-                                <div className="flex gap-2 w-full">
-                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
-                                    View Details &amp; Help
-                                  </Link>
+
+                                {/* Row 2: Location & Distance */}
+                                <p className="text-xs text-[#8B7E7D] font-medium mt-1 flex items-center gap-1.5 flex-wrap">
+                                  <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-none">
+                                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                    <span className="truncate">{pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                                  </span>
+                                  {pet.distance !== undefined && pet.distance !== null && (
+                                    <span className="text-[#8B5E3C] font-extrabold text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded shrink-0">
+                                      {pet.distance < 0.1 ? '< 0.1 mi' : `${pet.distance.toFixed(1)} mi away`}
+                                    </span>
+                                  )}
+                                </p>
+
+                                {/* Row 3: Description Excerpt */}
+                                {pet.description && (
+                                  <p className="text-xs text-[#666666] line-clamp-1 mt-1 leading-normal">
+                                    {pet.description}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Row 4: Footer Meta & Quick Engagement */}
+                              <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-[#F0EAE3] text-xs text-[#8B7E7D]">
+                                <div className="flex items-center gap-3">
+                                  <span className="flex items-center gap-1 font-semibold text-[11px] text-[#4A3E3D]">
+                                    <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                                    <span>{pet.comment_count || 0} {pet.comment_count === 1 ? 'comment' : 'comments'}</span>
+                                  </span>
+                                  <span className="text-[11px] text-[#8B7E7D] hidden sm:inline">
+                                    {pet.type === 'lost' ? 'Lost' : 'Found'}: {new Date(pet.date_lost_found).toLocaleDateString()}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
                                   {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                                     <button 
-                                      onClick={() => handleDeletePostDirectly(pet.id)}
-                                      className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                      onClick={(e) => { e.stopPropagation(); handleDeletePostDirectly(pet.id); }}
+                                      className="text-[11px] px-2 py-0.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-md font-bold transition-colors cursor-pointer"
                                       title="Delete immediately"
                                     >
                                       Delete
@@ -751,16 +860,16 @@ export default function LostPetsFeed() {
                                   ) : (
                                     <>
                                       <button 
-                                        onClick={() => handleReportPost(pet.id, pet.contact_email)}
-                                        className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                        onClick={(e) => { e.stopPropagation(); handleReportPost(pet.id, pet.contact_email); }}
+                                        className="text-[11px] text-[#8B7E7D] hover:text-red-600 px-1 py-0.5 rounded transition-colors cursor-pointer"
                                         title="Report post"
                                       >
                                         Flag
                                       </button>
                                       {pet.contact_email && (
                                         <button 
-                                          onClick={() => handleBlockUser(pet.contact_email)}
-                                          className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                                          onClick={(e) => { e.stopPropagation(); handleBlockUser(pet.contact_email); }}
+                                          className="text-[11px] text-[#8B7E7D] hover:text-red-600 px-1 py-0.5 rounded transition-colors cursor-pointer"
                                           title="Block poster"
                                         >
                                           Block
@@ -768,8 +877,10 @@ export default function LostPetsFeed() {
                                       )}
                                     </>
                                   )}
+                                  <span className="text-xs font-bold text-[#8B5E3C] group-hover:translate-x-0.5 transition-transform flex items-center">
+                                    View &rarr;
+                                  </span>
                                 </div>
-                                <PostReactions postId={pet.id} />
                               </div>
                             </div>
                           </div>
@@ -997,114 +1108,142 @@ export default function LostPetsFeed() {
                       <p className="text-[#8B7E7D]">Try lowering the match score threshold, widening the radius, or using &quot;Any time&quot; for timeframe.</p>
                     </div>
                   ) : (
-                    <>
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-black text-[#4A3E3D]">
-                          <Sparkles className="w-5 h-5 text-[#8B5E3C]" /> {aiMatches.length} Potential {aiMatches.length === 1 ? 'Match' : 'Matches'} Found
-                        </h2>
-                        <span className="text-xs text-[#8B7E7D] font-semibold">Sorted by match confidence</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[500px]">
-                        {aiMatches
-                          .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
-                          .map((pet) => (
-                          <div 
-                            key={pet.id} 
-                            tabIndex={0}
-                            role="link"
-                            aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
-                            onClick={(e) => handleCardClick(e, pet.id)}
-                            onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
-                            className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
-                          >
-                            <div className="relative h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
-                              {pet.photo_url ? (
-                                <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
-                              )}
-                              <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
-                                  pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                                  (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                    <div className="flex flex-col gap-3.5">
+                      {aiMatches
+                        .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
+                        .map((pet) => (
+                        <div 
+                          key={pet.id} 
+                          tabIndex={0}
+                          role="link"
+                          aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
+                          onClick={(e) => handleCardClick(e, pet.id)}
+                          onKeyDown={(e) => handleCardKeyDown(e, pet.id)}
+                          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                          className="bg-white rounded-2xl p-3.5 sm:p-4 border border-[#DFD3C7] shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer group flex gap-3.5 sm:gap-4 items-center focus:outline-none focus:ring-2 focus:ring-[#8B5E3C] hover:border-[#8B5E3C]/40 hover:-translate-y-0.5"
+                        >
+                          {/* Left: Compact Thumbnail with Match Badge */}
+                          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-[#FAF5EE] overflow-hidden border border-[#EADBCE] shrink-0">
+                            {pet.photo_url || (pet.photos && pet.photos.length > 0) ? (
+                              <img 
+                                src={pet.photo_url || pet.photos[0]} 
+                                alt={pet.pet_name || 'Pet'} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-semibold">No Photo</div>
+                            )}
+                            <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
+                              <span className={`px-2 py-0.5 rounded-md text-[9.5px] font-black tracking-wider uppercase shadow-xs ${
+                                pet.status === 'resolved' ? 'bg-green-600 text-white' :
+                                (pet.type || pet.pet_type) === 'lost' ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white'
+                              }`}>
+                                {pet.status === 'resolved' ? 'Resolved' : (pet.type || pet.pet_type)}
+                              </span>
+                              {pet.score !== undefined && (
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase shadow-xs text-white ${
+                                  pet.score >= 80 ? 'bg-emerald-600' : pet.score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
                                 }`}>
-                                  {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : (pet.type || pet.pet_type)}
+                                  {pet.score}% Match
                                 </span>
-                                {pet.score !== undefined && (
-                                  <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase shadow-md text-white ${
-                                    pet.score >= 80 ? 'bg-emerald-600' : pet.score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
-                                  }`}>
-                                    {pet.score}% Match
-                                  </span>
-                                )}
-                              </div>
+                              )}
                             </div>
-                            <div className="p-6 flex flex-col flex-1">
+                          </div>
+
+                          {/* Middle / Right: Content Details */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
+                            <div>
                               {pet.matchSummary && (
-                                <div className="mb-4 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-xs font-bold text-[#8B5E3C]">
-                                  <Sparkles className="w-3 h-3 inline mr-1" />{pet.matchSummary}
+                                <div className="mb-1.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-lg px-2.5 py-1 text-[11px] font-bold text-[#8B5E3C] line-clamp-1">
+                                  <Sparkles className="w-3.5 h-3.5 inline mr-1 text-[#8B5E3C]" />{pet.matchSummary}
                                 </div>
                               )}
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-2xl font-black text-[#4A3E3D] truncate pr-2">{pet.pet_name || 'Unknown Pet'}</h3>
-                                <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] px-2 py-1 rounded-lg capitalize">{pet.species}</span>
+                              {/* Row 1: Pet Name & Species & Date */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <h3 className="text-base sm:text-lg font-bold text-[#4A3E3D] truncate group-hover:text-[#8B5E3C] transition-colors leading-snug">
+                                    {pet.pet_name || 'Unknown Pet'}
+                                  </h3>
+                                  <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize shrink-0">
+                                    {pet.species}
+                                  </span>
+                                </div>
+                                <span className="text-[11px] text-[#8B7E7D] shrink-0 whitespace-nowrap">
+                                  {formatDistanceToNow(new Date(pet.created_at))} ago
+                                </span>
                               </div>
-                              <p className="text-sm font-semibold text-[#8B7E7D] mb-4 flex flex-col gap-1.5">
-                                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gray-400" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+
+                              {/* Row 2: Location & Distance */}
+                              <p className="text-xs text-[#8B7E7D] font-medium mt-1 flex items-center gap-1.5 flex-wrap">
+                                <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-none">
+                                  <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                  <span className="truncate">{pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                                </span>
                                 {pet.distance !== undefined && pet.distance !== null && (
-                                  <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[11px] bg-[#F5EDE4] px-2 py-1 rounded-md uppercase tracking-wide">
-                                    {pet.distance < 0.1 ? 'Less than 0.1 miles away' : `${pet.distance.toFixed(1)} miles away`}
+                                  <span className="text-[#8B5E3C] font-extrabold text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded shrink-0">
+                                    {pet.distance < 0.1 ? '< 0.1 mi' : `${pet.distance.toFixed(1)} mi away`}
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[#555555] text-sm mb-6 line-clamp-3 flex-1">{pet.description}</p>
-                              <div className="border-t border-[#E8DDD4] pt-4 mt-auto">
-                                <div className="flex justify-between items-center mb-4">
-                                  <span className="text-xs font-semibold text-[#8B7E7D]">
-                                    Found on: {new Date(pet.date_lost_found).toLocaleDateString()}
-                                  </span>
-                                  <span className="text-xs text-[#8B7E7D]">Posted {formatDistanceToNow(new Date(pet.created_at))} ago</span>
-                                </div>
-                                <div className="flex gap-2 w-full">
-                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 rounded-xl transition-colors text-sm">
-                                    View Details &amp; Contact
-                                  </Link>
-                                  {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
+
+                              {/* Row 3: Description Excerpt */}
+                              {pet.description && (
+                                <p className="text-xs text-[#666666] line-clamp-1 mt-1 leading-normal">
+                                  {pet.description}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Row 4: Footer Meta & Quick Engagement */}
+                            <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-[#F0EAE3] text-xs text-[#8B7E7D]">
+                              <div className="flex items-center gap-3">
+                                <span className="flex items-center gap-1 font-semibold text-[11px] text-[#4A3E3D]">
+                                  <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                                  <span>{pet.comment_count || 0} {pet.comment_count === 1 ? 'comment' : 'comments'}</span>
+                                </span>
+                                <span className="text-[11px] text-[#8B7E7D] hidden sm:inline">
+                                  {pet.type === 'lost' ? 'Lost' : 'Found'}: {new Date(pet.date_lost_found).toLocaleDateString()}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5">
+                                {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); handleDeletePostDirectly(pet.id); }}
+                                    className="text-[11px] px-2 py-0.5 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-md font-bold transition-colors cursor-pointer"
+                                    title="Delete immediately"
+                                  >
+                                    Delete
+                                  </button>
+                                ) : (
+                                  <>
                                     <button 
-                                      onClick={() => handleDeletePostDirectly(pet.id)}
-                                      className="px-3 border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors font-bold text-xs cursor-pointer"
-                                      title="Delete immediately"
+                                      onClick={(e) => { e.stopPropagation(); handleReportPost(pet.id, pet.contact_email); }}
+                                      className="text-[11px] text-[#8B7E7D] hover:text-red-600 px-1 py-0.5 rounded transition-colors cursor-pointer"
+                                      title="Report post"
                                     >
-                                      Delete
+                                      Flag
                                     </button>
-                                  ) : (
-                                    <>
+                                    {pet.contact_email && (
                                       <button 
-                                        onClick={() => handleReportPost(pet.id, pet.contact_email)}
-                                        className="px-2.5 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
-                                        title="Report post"
+                                        onClick={(e) => { e.stopPropagation(); handleBlockUser(pet.contact_email); }}
+                                        className="text-[11px] text-[#8B7E7D] hover:text-red-600 px-1 py-0.5 rounded transition-colors cursor-pointer"
+                                        title="Block poster"
                                       >
-                                        Flag
+                                        Block
                                       </button>
-                                      {pet.contact_email && (
-                                        <button 
-                                          onClick={() => handleBlockUser(pet.contact_email)}
-                                          className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
-                                          title="Block poster"
-                                        >
-                                          Block
-                                        </button>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                                <PostReactions postId={pet.id} />
+                                    )}
+                                  </>
+                                )}
+                                <span className="text-xs font-bold text-[#8B5E3C] group-hover:translate-x-0.5 transition-transform flex items-center">
+                                  View &rarr;
+                                </span>
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}

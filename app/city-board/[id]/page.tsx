@@ -384,13 +384,19 @@ export default function CityBoardPostPage() {
         
         {/* Back Link with Swipe Hint */}
         <div className="flex items-center justify-between mb-5">
-          <Link
-            href="/city-board"
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] transition-colors"
-            style={{ textDecoration: 'none' }}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push('/city-board');
+              }
+            }}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] transition-colors cursor-pointer bg-transparent border-0 p-0"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Discussions
-          </Link>
+          </button>
           <span className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider hidden sm:inline-block">
             👉 Swipe right to go back
           </span>

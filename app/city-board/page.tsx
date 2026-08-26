@@ -43,6 +43,13 @@ export default function CityBoardPage() {
   const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Filters
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchCity, setSearchCity] = useState('');
+  const [searchCategory, setSearchCategory] = useState('All');
+  const [searchPostId, setSearchPostId] = useState('');
+  const [showMyPosts, setShowMyPosts] = useState(false);
+
   // Auto-dismiss toast notification
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -72,8 +79,42 @@ export default function CityBoardPage() {
           try { setSavedPostIds(JSON.parse(saved)); } catch (e) {}
         }
       }
+
+      // Restore city board search and filter state
+      try {
+        const savedSearch = sessionStorage.getItem('lumo_city_board_search_state');
+        if (savedSearch) {
+          const parsed = JSON.parse(savedSearch);
+          if (parsed.searchKeyword !== undefined) setSearchKeyword(parsed.searchKeyword);
+          if (parsed.searchCity !== undefined) setSearchCity(parsed.searchCity);
+          if (parsed.searchCategory !== undefined) setSearchCategory(parsed.searchCategory);
+          if (parsed.showMyPosts !== undefined) setShowMyPosts(parsed.showMyPosts);
+
+          if (parsed.scrollY) {
+            setTimeout(() => {
+              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+            }, 120);
+          }
+        }
+      } catch (e) {}
     }
   }, []);
+
+  // Sync city board search state to sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stateToSave = {
+          searchKeyword,
+          searchCity,
+          searchCategory,
+          showMyPosts,
+          scrollY: window.scrollY
+        };
+        sessionStorage.setItem('lumo_city_board_search_state', JSON.stringify(stateToSave));
+      } catch (e) {}
+    }
+  }, [searchKeyword, searchCity, searchCategory, showMyPosts]);
 
   const toggleSavePost = (postId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -144,13 +185,6 @@ export default function CityBoardPage() {
       showToast(err.message || "Failed to delete post.");
     }
   };
-
-  // Filters
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchCity, setSearchCity] = useState('');
-  const [searchCategory, setSearchCategory] = useState('All');
-  const [searchPostId, setSearchPostId] = useState('');
-  const [showMyPosts, setShowMyPosts] = useState(false);
 
   // Refresh State
   const [isRefreshing, setIsRefreshing] = useState(false);

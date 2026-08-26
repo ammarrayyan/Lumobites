@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, Maximize2 } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const getAvatarLetter = (name: string) => {
 const COMMENTS_PAGE_SIZE = 10;
 
 export default function LostPetDetail({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const unwrappedParams = use(params);
   const id = unwrappedParams.id;
   
@@ -384,7 +386,19 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     <div className="min-h-screen bg-[#F7F3EE] font-sans">
       
       <main className="max-w-5xl mx-auto px-4 py-8 md:py-12">
-        <Link href="/lost-pets" className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-block">&larr; Back to Board</Link>
+        <button 
+          type="button"
+          onClick={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push('/lost-pets');
+            }
+          }}
+          className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-base"
+        >
+          &larr; Back to Board
+        </button>
 
         {pet.status === 'resolved' && (
           <div className="bg-green-100 border border-green-300 text-green-800 p-6 rounded-2xl mb-8 flex items-center justify-center gap-4 shadow-sm animate-fade-in">

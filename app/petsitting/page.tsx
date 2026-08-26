@@ -827,11 +827,58 @@ export function PetSittingContent() {
     };
     window.addEventListener('storage', onStorage);
 
+    // Restore saved search and filter state from sessionStorage
+    try {
+      const saved = sessionStorage.getItem('lumo_petsitting_search_state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.searchZip) {
+          skipGeocodeRef.current = true;
+          setSearchZip(parsed.searchZip);
+        }
+        if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
+        if (parsed.searchPetType) setSearchPetType(parsed.searchPetType);
+        if (parsed.searchDay) setSearchDay(parsed.searchDay);
+        if (parsed.searchTimeSlot) setSearchTimeSlot(parsed.searchTimeSlot);
+        if (parsed.searchServiceType) setSearchServiceType(parsed.searchServiceType);
+        if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
+        if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
+        if (parsed.aiSitterSearch) setAiSitterSearch(parsed.aiSitterSearch);
+
+        if (parsed.scrollY) {
+          setTimeout(() => {
+            window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+          }, 120);
+        }
+      }
+    } catch (e) {}
+
     return () => {
       window.removeEventListener('lumo-pro-update', initializeSession);
       window.removeEventListener('storage', onStorage);
     };
   }, []);
+
+  // Sync petsitting search state changes to sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stateToSave = {
+          searchZip,
+          searchRadius,
+          searchPetType,
+          searchDay,
+          searchTimeSlot,
+          searchServiceType,
+          searchCoords,
+          searchLocationName,
+          aiSitterSearch,
+          scrollY: window.scrollY
+        };
+        sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(stateToSave));
+      } catch (e) {}
+    }
+  }, [searchZip, searchRadius, searchPetType, searchDay, searchTimeSlot, searchServiceType, searchCoords, searchLocationName, aiSitterSearch]);
 
   // Listen for search parameters changes to support in-page navigation (e.g. notification clicks)
   const searchParams = useSearchParams();

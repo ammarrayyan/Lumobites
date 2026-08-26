@@ -47,6 +47,27 @@ export async function GET(request: NextRequest) {
       return R * c;
     };
 
+    // Query comment counts for returned pet IDs
+    const petIds = (data || []).map(p => p.id);
+    let commentCountsMap: Record<string, number> = {};
+    if (petIds.length > 0) {
+      try {
+        const { data: commentRows } = await supabaseAdmin
+          .from('lost_pet_comments')
+          .select('lost_pet_id')
+          .in('lost_pet_id', petIds);
+        if (commentRows) {
+          commentRows.forEach(r => {
+            if (r.lost_pet_id) {
+              commentCountsMap[r.lost_pet_id] = (commentCountsMap[r.lost_pet_id] || 0) + 1;
+            }
+          });
+        }
+      } catch (cErr) {
+        console.warn('[Lost Pets API] Error querying comment counts:', cErr);
+      }
+    }
+
     // Filter out the edit_token from public responses, calculate distance, and format photos
     let sanitizedData = data.map(pet => {
       const { edit_token, pet_type, ...safePet } = pet;
@@ -84,7 +105,8 @@ export async function GET(request: NextRequest) {
         type: pet_type, 
         distance,
         photos,
-        description: cleanDesc
+        description: cleanDesc,
+        comment_count: commentCountsMap[pet.id] || 0
       };
     });
 
