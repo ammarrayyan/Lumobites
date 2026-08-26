@@ -429,12 +429,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF9F5] flex flex-col justify-between">
+    <div className="h-[calc(100dvh-72px)] bg-[#FDF9F5] flex flex-col justify-between overflow-hidden">
       {/* ── TOP STICKY BAR: HEADER + PROGRESS STEPPER ── */}
-      <div 
-        className="sticky z-30 bg-white shadow-sm border-b border-[#E8DDD4]"
-        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 72px)' }}
-      >
+      <div className="shrink-0 bg-white shadow-sm border-b border-[#E8DDD4] z-30">
         <header className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -615,7 +612,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
       )}
 
       {/* ── MAIN MESSAGES LIST ── */}
-      <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4 space-y-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="flex gap-2">
@@ -749,14 +746,14 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
 
       {/* ── STICKY INPUT FOOTER ── */}
       {booking?.status === 'completed' ? (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-4 text-center shadow-sm">
+        <footer className="shrink-0 bg-white border-t border-[#E8DDD4] p-4 text-center shadow-sm pb-20 md:pb-4 z-30">
           <div className="max-w-2xl mx-auto flex items-center justify-center gap-2 text-xs font-bold text-amber-900 bg-amber-50/80 py-3 px-4 rounded-xl border border-amber-200">
             <Lock className="w-4 h-4 text-amber-700 shrink-0" />
             This booking has been completed. Messaging is closed.
           </div>
         </footer>
       ) : (
-        <footer className="sticky bottom-0 z-30 bg-white border-t border-[#E8DDD4] p-3 md:p-4">
+        <footer className="shrink-0 bg-white border-t border-[#E8DDD4] p-3 md:p-4 pb-20 md:pb-4 z-30">
           <div className="max-w-2xl mx-auto">
             <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3.5 py-2.5 ${
               newMessage ? 'border-[#8B5E3C] bg-white shadow-sm' : 'border-gray-200 bg-[#FAF6F0]'
