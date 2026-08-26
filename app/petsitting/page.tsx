@@ -29,11 +29,30 @@ const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false }
 const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
 const SitterPromoPosterModal = dynamic(() => import('@/components/SitterPromoPosterModal'), { ssr: false });
 
-export function formatSitterName(fullName) {
+export function formatSitterName(fullName: string | null | undefined): string {
   if (!fullName) return 'Sitter';
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0];
-  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+  const clean = fullName.trim();
+  if (!clean) return 'Sitter';
+
+  // Handle email addresses (derive privacy-friendly display like "J." or "John D.")
+  if (clean.includes('@')) {
+    const userPart = clean.split('@')[0].trim();
+    if (!userPart) return 'Sitter';
+    const dotParts = userPart.split(/[._-]/).filter(Boolean);
+    if (dotParts.length > 1) {
+      const first = dotParts[0].charAt(0).toUpperCase() + dotParts[0].slice(1).toLowerCase();
+      const lastInit = dotParts[dotParts.length - 1].charAt(0).toUpperCase();
+      return `${first} ${lastInit}.`;
+    }
+    return `${userPart.charAt(0).toUpperCase()}.`;
+  }
+
+  const parts = clean.split(/\s+/);
+  if (parts.length === 1) {
+    if (parts[0].length === 1) return `${parts[0].toUpperCase()}.`;
+    return parts[0];
+  }
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0).toUpperCase()}.`;
 }
 
 export const getCroppedImg = (
