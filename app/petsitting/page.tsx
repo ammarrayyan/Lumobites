@@ -8,6 +8,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import PetProfileCard from '@/components/PetProfileCard';
+import BookingProgressStepper from '@/components/BookingProgressStepper';
 import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft, DollarSign, QrCode } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
@@ -4654,6 +4655,15 @@ export function PetSittingContent() {
                               {statusBadge}
                             </div>
 
+                            {/* Visual Booking Progress Tracker */}
+                            <div className="border-b border-[#E8DDD4] bg-[#FAF6F4]/50">
+                              <BookingProgressStepper
+                                status={req.status}
+                                dates={req.dates}
+                                createdAt={req.created_at}
+                              />
+                            </div>
+
                             {/* Body: 2-col on mobile, 4-col on sm+ */}
                             <div className="px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                               <div>
@@ -5288,6 +5298,15 @@ export function PetSittingContent() {
                                   expandedRequests.has(req.id) ? 'rotate-180' : ''
                                 }`}/>
                               </div>
+                            </div>
+
+                            {/* Visual Booking Progress Tracker */}
+                            <div className="bg-white rounded-xl border border-[#E8DDD4] overflow-hidden">
+                              <BookingProgressStepper
+                                status={req.status}
+                                dates={req.dates}
+                                createdAt={req.created_at}
+                              />
                             </div>
 
                             {/* COLLAPSIBLE - only show when expanded */}
@@ -7535,6 +7554,9 @@ export function PetSittingContent() {
         <ChatModal
           bookingId={activeChatBooking.id}
           bookingDetails={`${activeChatBooking.pet_name || 'Pet'} • ${activeChatBooking.dates || 'Dates TBA'}`}
+          bookingStatus={activeChatBooking.status}
+          bookingDates={activeChatBooking.dates}
+          bookingCreatedAt={activeChatBooking.created_at}
           isOpen={chatModalOpen}
           onClose={() => {
             setChatModalOpen(false);

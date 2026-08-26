@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
 import PetPhotoCarousel from './PetPhotoCarousel';
+import BookingProgressStepper from './BookingProgressStepper';
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -36,6 +37,9 @@ interface ChatModalProps {
   petDetails?: any;
   chatType?: 'petsitting' | 'adoption';
   shelterId?: string;
+  bookingStatus?: string;
+  bookingDates?: string;
+  bookingCreatedAt?: string;
 }
 
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
@@ -83,6 +87,9 @@ export default function ChatModal({
   petDetails,
   chatType = 'petsitting',
   shelterId,
+  bookingStatus,
+  bookingDates,
+  bookingCreatedAt,
 }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showPetProfile, setShowPetProfile] = useState(false);
@@ -329,6 +336,17 @@ export default function ChatModal({
             </button>
           </div>
         </div>
+
+        {/* Visual Booking Progress Tracker Stepper */}
+        {bookingStatus && (
+          <div className="border-b border-gray-100 bg-white">
+            <BookingProgressStepper
+              status={bookingStatus}
+              dates={bookingDates}
+              createdAt={bookingCreatedAt}
+            />
+          </div>
+        )}
 
         {/* ── MESSAGES ── */}
         <div

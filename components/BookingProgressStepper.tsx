@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { Send, CheckCircle2, Calendar, Sparkles, Award, AlertCircle } from 'lucide-react';
@@ -51,8 +51,8 @@ export default function BookingProgressStepper({ status, dates, createdAt }: Boo
     let dayProgress = '';
 
     if (dates) {
-      // Matches formats like "2026-08-25 to 2026-08-27" or "Aug 25 - Aug 27, 2026"
-      const dateParts = dates.split(/ - | to | – /);
+      // Matches formats like "Aug 30, 2026 → Aug 30, 2026", "2026-08-25 to 2026-08-27", or "Aug 25 - Aug 27, 2026"
+      const dateParts = dates.split(/\s*(?:-|–|—|→|->|to)\s*/i);
       if (dateParts.length === 2) {
         const start = new Date(dateParts[0].trim());
         const end = new Date(dateParts[1].trim());
