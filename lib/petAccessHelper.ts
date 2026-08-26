@@ -37,14 +37,19 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
     let currentStatus = 'pending';
 
     if (partnerType === 'vet') {
-      const { data: existing } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('vet_inquiries')
         .select('*')
         .eq('clinic_id', String(partnerId))
         .eq('owner_email', cleanOwnerEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const existing = rows && rows.length > 0 ? rows[0] : null;
 
       if (existing) {
+        if (petId && !existing.pet_id) {
+          await supabaseAdmin.from('vet_inquiries').update({ pet_id: petId }).eq('id', existing.id);
+        }
         if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
@@ -56,6 +61,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         const { error: insErr } = await supabaseAdmin.from('vet_inquiries').insert({
           clinic_id: String(partnerId),
           owner_email: cleanOwnerEmail,
+          pet_id: petId || null,
           status: 'pending',
           archived: false
         });
@@ -64,14 +70,19 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         }
       }
     } else if (partnerType === 'daycare') {
-      const { data: existing } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('daycare_inquiries')
         .select('*')
         .eq('daycare_id', String(partnerId))
         .eq('owner_email', cleanOwnerEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const existing = rows && rows.length > 0 ? rows[0] : null;
 
       if (existing) {
+        if (petId && !existing.pet_id) {
+          await supabaseAdmin.from('daycare_inquiries').update({ pet_id: petId }).eq('id', existing.id);
+        }
         if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
@@ -83,6 +94,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         const { error: insErr } = await supabaseAdmin.from('daycare_inquiries').insert({
           daycare_id: String(partnerId),
           owner_email: cleanOwnerEmail,
+          pet_id: petId || null,
           status: 'pending',
           archived: false
         });
@@ -91,14 +103,19 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         }
       }
     } else if (partnerType === 'sitter') {
-      const { data: existing } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('sitting_requests')
         .select('*')
         .eq('sitter_id', String(partnerId))
         .eq('owner_email', cleanOwnerEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const existing = rows && rows.length > 0 ? rows[0] : null;
 
       if (existing) {
+        if (petId && !existing.pet_id) {
+          await supabaseAdmin.from('sitting_requests').update({ pet_id: petId }).eq('id', existing.id);
+        }
         if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
           return { success: true, status: 'active' };
         }
@@ -107,10 +124,21 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         }
         currentStatus = existing.status || 'pending';
       } else {
+        let fallbackPetName = resolvedPetName !== 'your pet' ? resolvedPetName : null;
+        let fallbackPetType = null;
+        if (petId) {
+          const { data: p } = await supabaseAdmin.from('owner_pets').select('pet_name, pet_type').eq('id', petId).maybeSingle();
+          if (p) {
+            fallbackPetName = p.pet_name || fallbackPetName;
+            fallbackPetType = p.pet_type || null;
+          }
+        }
         await supabaseAdmin.from('sitting_requests').insert({
           sitter_id: String(partnerId),
           owner_email: cleanOwnerEmail,
           pet_id: petId || null,
+          pet_name: fallbackPetName,
+          pet_type: fallbackPetType,
           status: 'pending',
           dates: 'Ongoing Care'
         });
@@ -171,41 +199,44 @@ export async function verifyPetAccess(
     let status = 'none';
 
     if (partnerType === 'vet') {
-      const { data: inq } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('vet_inquiries')
         .select('id, status, created_at')
         .eq('clinic_id', cleanPartnerId)
         .eq('owner_email', cleanEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (!inq) {
+      if (!rows || rows.length === 0) {
         return { allowed: false, reason: 'No inquiry thread found for this clinic', status: 'none' };
       }
-      status = inq.status || 'pending';
+      status = rows[0].status || 'pending';
     } else if (partnerType === 'daycare') {
-      const { data: inq } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('daycare_inquiries')
         .select('id, status, created_at')
         .eq('daycare_id', cleanPartnerId)
         .eq('owner_email', cleanEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (!inq) {
+      if (!rows || rows.length === 0) {
         return { allowed: false, reason: 'No inquiry thread found for this daycare', status: 'none' };
       }
-      status = inq.status || 'pending';
+      status = rows[0].status || 'pending';
     } else if (partnerType === 'sitter') {
-      const { data: req } = await supabaseAdmin
+      const { data: rows } = await supabaseAdmin
         .from('sitting_requests')
         .select('id, status, created_at')
         .eq('sitter_id', cleanPartnerId)
         .eq('owner_email', cleanEmail)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (!req) {
+      if (!rows || rows.length === 0) {
         return { allowed: false, reason: 'No booking request found for this sitter', status: 'none' };
       }
-      status = req.status || 'pending';
+      status = rows[0].status || 'pending';
     }
 
     if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(status)) {
