@@ -220,10 +220,12 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
     };
   }, [bookingId, fetchMessages]);
 
-  // Auto-scroll to latest message
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to latest message inside container only (never scroll whole window)
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = mainScrollRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -612,7 +614,7 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
       )}
 
       {/* ── MAIN MESSAGES LIST ── */}
-      <main className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4 space-y-4">
+      <main ref={mainScrollRef} className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4 space-y-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="flex gap-2">
