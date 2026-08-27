@@ -27,6 +27,7 @@ const SitterMap = dynamic(() => import('@/components/SitterMap'), {
 
 const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false });
 const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
+const BookingLimitModal = dynamic(() => import('@/components/BookingLimitModal'), { ssr: false });
 const SitterPromoPosterModal = dynamic(() => import('@/components/SitterPromoPosterModal'), { ssr: false });
 const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
 const PartnerGalleryModal = dynamic(() => import('@/components/PartnerGalleryModal'), { ssr: false });
