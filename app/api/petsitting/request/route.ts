@@ -35,7 +35,18 @@ export async function POST(request: NextRequest) {
 
     // 1. Check Membership / Pro status using the existing system
     const proDetails = await getUserProStatusDetails(cleanEmail);
-    const isOwnerPro = proDetails.isPro;
+    let isOwnerPro = proDetails.isPro;
+
+    if (!isOwnerPro) {
+      const { data: directEmail } = await supabaseAdmin
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+      if (directEmail?.is_pro) {
+        isOwnerPro = true;
+      }
+    }
 
     // 2. Free-tier Monthly Booking Limit: Max 2 inquiries per calendar month
     if (!isOwnerPro) {

@@ -117,10 +117,21 @@ export async function GET(request: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).toISOString();
     const monthlyInquiryCount = (sitRequests || []).filter((r: any) => r.created_at >= startOfMonth).length;
     const proDetails = await getUserProStatusDetails(cleanEmail);
+    let isOwnerPro = proDetails.isPro;
+    if (!isOwnerPro) {
+      const { data: directEmail } = await supabaseAdmin
+        .from('emails')
+        .select('is_pro')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+      if (directEmail?.is_pro) {
+        isOwnerPro = true;
+      }
+    }
 
     return NextResponse.json({ 
       requests: combined,
-      is_pro: proDetails.isPro,
+      is_pro: isOwnerPro,
       monthly_inquiries_used: monthlyInquiryCount,
       monthly_inquiries_limit: 2
     });
