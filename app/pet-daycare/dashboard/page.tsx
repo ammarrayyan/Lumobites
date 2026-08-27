@@ -7,6 +7,7 @@ import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
+import BookingProgressStepper from '@/components/BookingProgressStepper';
 import { formatPublicCity } from '@/lib/formatCity';
 import {
   Building2,
@@ -668,6 +669,15 @@ export default function DaycareDashboard() {
                             key={inq.id}
                             className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-2xl overflow-hidden hover:border-[#8B5E3C] transition-all"
                           >
+                            {/* Visual Booking Progress Tracker Stepper */}
+                            <div className="border-b border-[#E2D5C8] bg-white/40">
+                              <BookingProgressStepper
+                                status={inq.status || 'pending'}
+                                dates={inq.dates || inq.requested_date || (inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '')}
+                                createdAt={inq.created_at}
+                              />
+                            </div>
+
                             {/* ── CARD HEADER (COLLAPSED / SUMMARY ROW) ── */}
                             <div
                               onClick={() => toggleInquiryExpand(inq.id)}
@@ -1251,6 +1261,9 @@ export default function DaycareDashboard() {
           onClose={() => { setChatOpen(false); setActiveInquiry(null); }}
           bookingId={activeInquiry.id}
           bookingDetails={`Daycare Inquiry • ${daycare?.business_name || 'Pet Daycare'}`}
+          bookingStatus={activeInquiry.status || 'pending'}
+          bookingDates={activeInquiry.dates || activeInquiry.requested_date || (activeInquiry.created_at ? new Date(activeInquiry.created_at).toLocaleDateString() : '')}
+          bookingCreatedAt={activeInquiry.created_at}
           currentUserEmail={daycare?.email || ''}
           otherUserName={activeInquiry.owner_email?.split('@')[0] || 'Pet Owner'}
           otherUserEmail={activeInquiry.owner_email || ''}

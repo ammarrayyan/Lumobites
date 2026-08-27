@@ -13,6 +13,7 @@ import ChatModal from '@/components/ChatModal';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
+import BookingProgressStepper from '@/components/BookingProgressStepper';
 import { formatPublicCity } from '@/lib/formatCity';
 
 const VET_SERVICES = [
@@ -754,6 +755,15 @@ export default function VetBoardingDashboardPage() {
                     const isExpanded = !!expandedInquiries[inq.id];
                     return (
                       <div key={inq.id} className="bg-white rounded-3xl border border-blue-100 shadow-xs hover:border-blue-200 transition-all overflow-hidden">
+                        {/* Visual Booking Progress Tracker Stepper */}
+                        <div className="border-b border-blue-100 bg-blue-50/20">
+                          <BookingProgressStepper
+                            status={inq.status || 'pending'}
+                            dates={inq.dates || inq.requested_date || (inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '')}
+                            createdAt={inq.created_at}
+                          />
+                        </div>
+
                         {/* ── CARD HEADER (COLLAPSED / SUMMARY ROW) ── */}
                         <div
                           onClick={() => toggleInquiryExpand(inq.id)}
@@ -1338,6 +1348,9 @@ export default function VetBoardingDashboardPage() {
         <ChatModal
           bookingId={activeInquiry.id}
           bookingDetails={`Boarding Inquiry • ${clinic.clinic_name}`}
+          bookingStatus={activeInquiry.status || 'pending'}
+          bookingDates={activeInquiry.dates || activeInquiry.requested_date || (activeInquiry.created_at ? new Date(activeInquiry.created_at).toLocaleDateString() : '')}
+          bookingCreatedAt={activeInquiry.created_at}
           isOpen={chatOpen}
           onClose={() => { setChatOpen(false); setActiveInquiry(null); }}
           currentUserEmail={clinic.email}

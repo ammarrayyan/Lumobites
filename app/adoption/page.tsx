@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert, Home, Info } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert, Home, Info, LogOut } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
@@ -1244,51 +1244,63 @@ function AdoptionContent() {
       {/* SHELTER REGISTRATION MODAL */}
       {isShelterRegOpen && typeof window !== 'undefined' && createPortal(
         <div className="modal-overlay fixed inset-0 z-[100000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-hidden">
-          <div className="bg-white rounded-3xl max-w-md w-full max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
-            {/* Header */}
-            <div className="p-6 border-b border-gray-100 relative shrink-0">
+          {shelterConflictMsg ? (
+            <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-rose-100 text-center relative animate-modal-spring">
               <button
                 onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all cursor-pointer border-none bg-transparent"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
-
-              <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Rescue / Shelter Registration
-              </h3>
+              <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                <ShieldAlert className="w-7 h-7 text-rose-600" />
+              </div>
+              <h1 className="text-xl font-black text-[#4A3E3D] mb-2">Account Conflict</h1>
+              <p className="text-xs text-[#8B7E7D] leading-relaxed mb-6">
+                {shelterConflictMsg}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('lumo_pro_email');
+                  localStorage.removeItem('lumo_sitter_email');
+                  localStorage.removeItem('lumo_shelter_email');
+                  localStorage.removeItem('lumo_account_session_token');
+                  document.cookie = 'lumo_pro_email=; path=/; max-age=0';
+                  setShelterConflictMsg('');
+                  setShelterOtpStep('email');
+                  setShelterOtpEmail('');
+                }}
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md cursor-pointer text-sm flex items-center justify-center gap-2 border-none"
+              >
+                <LogOut className="w-4 h-4" /> Sign Out / Switch Account
+              </button>
             </div>
+          ) : (
+            <div className="bg-white rounded-3xl max-w-md w-full max-h-[90dvh] flex flex-col shadow-2xl relative overflow-hidden">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-100 relative shrink-0">
+                <button
+                  onClick={() => { setIsShelterRegOpen(false); router.push('/'); }}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 border-none bg-transparent cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
 
-            {/* Scrollable Content Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 text-left">
-              {shelterConflictMsg ? (
-                <div className="bg-rose-50 border border-rose-200 p-5 rounded-2xl text-center space-y-3 text-xs text-rose-900 font-medium">
-                  <ShieldAlert className="w-8 h-8 text-rose-600 mx-auto" />
-                  <p className="font-black text-sm text-rose-950">Account Conflict</p>
-                  <p className="leading-relaxed text-rose-800">{shelterConflictMsg}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.removeItem('lumo_pro_email');
-                      localStorage.removeItem('lumo_sitter_email');
-                      localStorage.removeItem('lumo_shelter_email');
-                      localStorage.removeItem('lumo_account_session_token');
-                      document.cookie = 'lumo_pro_email=; path=/; max-age=0';
-                      setShelterConflictMsg('');
-                      setShelterOtpStep('email');
-                      setShelterOtpEmail('');
-                    }}
-                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-all shadow-sm text-xs border-none cursor-pointer"
-                  >
-                    Sign Out / Switch Account
-                  </button>
-                </div>
-              ) : shelterRegSuccess ? (
-                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2 text-xs text-emerald-900 font-medium">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                  <p className="font-bold text-sm">Application Submitted!</p>
-                  <p>Your shelter application is pending admin review. You will receive an update once approved.</p>
-                </div>
+                <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-[#8B5E3C]" /> Rescue / Shelter Registration
+                </h3>
+              </div>
+
+              {/* Scrollable Content Body */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 text-left">
+                {shelterRegSuccess ? (
+                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2 text-xs text-emerald-900 font-medium">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                    <p className="font-bold text-sm">Application Submitted!</p>
+                    <p>Your shelter application is pending admin review. You will receive an update once approved.</p>
+                  </div>
               ) : shelterOtpStep === 'email' ? (
                 <div className="space-y-4 text-xs">
                   <p className="text-gray-600">
@@ -1469,9 +1481,10 @@ function AdoptionContent() {
               )}
             </div>
           </div>
-        </div>,
-        document.body
-      )}
+        )}
+      </div>,
+      document.body
+    )}
 
       {/* ADOPTION PET INQUIRY CHAT MODAL */}
       {activeChatPet && (
