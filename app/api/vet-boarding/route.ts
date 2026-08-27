@@ -267,7 +267,26 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, email, org_photo_url, website, clinic_name, description, services, status, phone, address, city, state, zip } = body;
+    const {
+      id,
+      email,
+      org_photo_url,
+      website,
+      clinic_name,
+      description,
+      services,
+      status,
+      phone,
+      address,
+      city,
+      state,
+      zip,
+      gallery_urls,
+      hours,
+      starting_rate,
+      pricing_type,
+      pricing_note,
+    } = body;
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing clinic id or email' }, { status: 400 });
@@ -297,11 +316,30 @@ export async function PATCH(request: NextRequest) {
       } catch (e) {}
     }
 
-    const updatePayload: Record<string, any> = {};
+    const { extractPartnerMeta, packPartnerDescription } = await import('@/lib/partnerProfileHelper');
+    const existingMeta = extractPartnerMeta(existingClinic);
+
+    const mergedMeta = {
+      hours: hours !== undefined ? hours : existingMeta.hours,
+      gallery: gallery_urls !== undefined ? gallery_urls : existingMeta.gallery,
+      pricing: {
+        startingRate: starting_rate !== undefined ? starting_rate : existingMeta.pricing.startingRate,
+        pricingType: pricing_type !== undefined ? pricing_type : existingMeta.pricing.pricingType,
+        pricingNote: pricing_note !== undefined ? pricing_note : existingMeta.pricing.pricingNote,
+        unit: 'night',
+      },
+    };
+
+    const rawCleanDesc = description !== undefined ? description : existingMeta.cleanDescription;
+    const packedDescription = packPartnerDescription(rawCleanDesc, mergedMeta);
+
+    const updatePayload: Record<string, any> = {
+      description: packedDescription,
+    };
+
     if (resolvedPhoto !== undefined) updatePayload.org_photo_url = resolvedPhoto || '';
     if (website !== undefined) updatePayload.website = website;
     if (clinic_name !== undefined) updatePayload.clinic_name = clinic_name;
-    if (description !== undefined) updatePayload.description = description;
     if (services !== undefined) updatePayload.services = services;
     if (status !== undefined) updatePayload.status = status;
     if (phone !== undefined) updatePayload.phone = phone;

@@ -8,6 +8,9 @@ import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
 import BookingProgressStepper from '@/components/BookingProgressStepper';
+import PartnerHoursEditor from '@/components/PartnerHoursEditor';
+import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
+import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 import {
   Building2,
@@ -47,9 +50,13 @@ export default function DaycareDashboard() {
   const [loading, setLoading] = useState(true);
   const [daycare, setDaycare] = useState<any>(null);
   const [monthlyPrice, setMonthlyPrice] = useState<number>(30);
-  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'calendar' | 'profile'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'calendar' | 'profile' | 'reviews'>('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+
+  // Reviews State
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   // Inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
@@ -171,10 +178,23 @@ export default function DaycareDashboard() {
       if (res.ok) {
         const data = await res.json();
         if (data.daycare && data.daycare.status === 'approved') {
-          setDaycare(data.daycare);
-          setEditForm({ ...data.daycare });
+          const meta = extractPartnerMeta(data.daycare);
+          const enrichedDaycare = {
+            ...data.daycare,
+            description: meta.cleanDescription,
+            hours: meta.hours || {},
+            gallery_urls: meta.gallery || [],
+            starting_rate: meta.pricing.startingRate,
+            pricing_type: meta.pricing.pricingType || 'starting_from',
+            pricing_note: meta.pricing.pricingNote || '',
+            avg_rating: meta.avgRating,
+            review_count: meta.reviewCount,
+          };
+          setDaycare(enrichedDaycare);
+          setEditForm({ ...enrichedDaycare });
           fetchInquiries(data.daycare.id);
           fetchAvailability(data.daycare.id);
+          loadReviews(data.daycare.id);
         } else {
           router.push('/pet-daycare');
         }
@@ -186,6 +206,21 @@ export default function DaycareDashboard() {
       router.push('/pet-daycare');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadReviews = async (daycareId: string) => {
+    setLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/pet-daycare/reviews?daycare_id=${daycareId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReviewsList(data.reviews || []);
+      }
+    } catch (e) {
+      console.error('Failed to load daycare reviews:', e);
+    } finally {
+      setLoadingReviews(false);
     }
   };
 
@@ -488,6 +523,16 @@ export default function DaycareDashboard() {
             }`}
           >
             <User className="w-4 h-4" /> Profile
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 border-none cursor-pointer ${
+              activeTab === 'reviews'
+                ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20'
+                : 'text-[#8B7E7D] hover:bg-[#FAF6F2] hover:text-[#2E2419]'
+            }`}
+          >
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> Reviews ({reviewsList.length})
           </button>
         </div>
 
@@ -1188,6 +1233,59 @@ export default function DaycareDashboard() {
                   </div>
                 </div>
 
+                {/* Pricing Display Configuration */}
+                <div className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-2xl p-5 space-y-3">
+                  <h3 className="text-sm font-black text-[#2E2419] flex items-center gap-1.5">
+                    💲 Pricing Display & Rates
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Model</label>
+                      <select
+                        value={editForm.pricing_type || 'starting_from'}
+                        onChange={e => setEditForm({ ...editForm, pricing_type: e.target.value })}
+                        className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                      >
+                        <option value="starting_from">Starting From Day Rate ($/day)</option>
+                        <option value="inquire">Contact for Rates & Custom Packages</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-[#2E2419] block mb-1">Starting Base Rate ($ / day)</label>
+                      <input
+                        type="number"
+                        value={editForm.starting_rate || ''}
+                        onChange={e => setEditForm({ ...editForm, starting_rate: e.target.value ? Number(e.target.value) : null })}
+                        placeholder="e.g. 30"
+                        className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Notes / Package Policy</label>
+                    <input
+                      type="text"
+                      value={editForm.pricing_note || ''}
+                      onChange={e => setEditForm({ ...editForm, pricing_note: e.target.value })}
+                      placeholder="e.g. Half-day, multi-day, and sibling discounts available"
+                      className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                    />
+                  </div>
+                </div>
+
+                {/* Hours of Operation Editor */}
+                <PartnerHoursEditor
+                  hours={editForm.hours}
+                  onChange={h => setEditForm({ ...editForm, hours: h })}
+                  showEmergencyToggle={false}
+                />
+
+                {/* Photo Gallery Uploader */}
+                <PartnerGalleryUploader
+                  gallery={editForm.gallery_urls}
+                  onChange={g => setEditForm({ ...editForm, gallery_urls: g })}
+                />
+
                 {/* Account & Billing Card */}
                 <div className="bg-amber-50/70 rounded-3xl p-5 border border-amber-200/70 mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
@@ -1212,6 +1310,65 @@ export default function DaycareDashboard() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── Reviews Tab ─────────────────────────────────────────────── */}
+        {activeTab === 'reviews' && (
+          <div className="space-y-6">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs p-6"
+            >
+              <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-[#E2D5C8]">
+                <div>
+                  <h2 className="text-base font-black text-[#2E2419]">Client Reviews & Feedback</h2>
+                  <p className="text-xs text-[#8B7E7D]">Verified feedback left by pet parents for your daycare</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#FAF6F2] px-3.5 py-2 rounded-xl border border-[#E2D5C8]">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-black text-[#2E2419]">{daycare.avg_rating > 0 ? daycare.avg_rating.toFixed(1) : 'New'}</span>
+                  <span className="text-xs text-[#8B7E7D]">({reviewsList.length} {reviewsList.length === 1 ? 'review' : 'reviews'})</span>
+                </div>
+              </div>
+
+              <div className="pt-5 space-y-3">
+                {loadingReviews ? (
+                  <div className="text-center py-10 text-[#8B7E7D]">
+                    <div className="w-6 h-6 border-2 border-[#8B5E3C] border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-xs mt-2">Loading reviews...</p>
+                  </div>
+                ) : reviewsList.length === 0 ? (
+                  <div className="text-center py-10 text-[#8B7E7D] space-y-2">
+                    <Star className="w-8 h-8 mx-auto opacity-30 text-amber-500" />
+                    <p className="text-sm font-bold text-[#2E2419]">No reviews yet</p>
+                    <p className="text-xs">When pet parents complete daycare visits, their verified reviews will appear here.</p>
+                  </div>
+                ) : (
+                  reviewsList.map((r, i) => (
+                    <div key={r.id || i} className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
+                            {(r.ownerName || 'P')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-[#2E2419]">{r.ownerName || 'Verified Pet Parent'}</p>
+                            <p className="text-[10px] text-[#8B7E7D]">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-amber-400">
+                          {[...Array(r.rating || 5)].map((_, idx) => (
+                            <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#4A3E3D] italic">&quot;{r.reviewText}&quot;</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         )}
       </main>

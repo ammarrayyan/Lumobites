@@ -1,0 +1,59 @@
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { getPartnerReviews, submitPartnerReview } from '@/lib/partnerReviewsHelper';
+import { supabaseAdmin } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const shelter_id = searchParams.get('shelter_id');
+
+    if (!shelter_id) {
+      return NextResponse.json({ error: 'Missing shelter_id parameter' }, { status: 400 });
+    }
+
+    const { reviews, avgRating, reviewCount } = await getPartnerReviews(shelter_id, 'shelter');
+
+    const { data: shelter } = await supabaseAdmin
+      .from('shelters')
+      .select('id, org_name, city, state, org_photo_url, avg_rating, review_count')
+      .eq('id', shelter_id)
+      .maybeSingle();
+
+    return NextResponse.json(
+      { reviews, shelter, avg_rating: avgRating || shelter?.avg_rating || 0, review_count: reviewCount || shelter?.review_count || 0 },
+      { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
+    );
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { shelter_id, owner_email, owner_name, rating, review_text } = body;
+
+    if (!shelter_id || !owner_email || !rating || !review_text) {
+      return NextResponse.json({ error: 'Missing required review fields' }, { status: 400 });
+    }
+
+    const result = await submitPartnerReview({
+      partnerId: shelter_id,
+      partnerType: 'shelter',
+      ownerEmail: owner_email,
+      ownerName: owner_name || owner_email.split('@')[0],
+      rating: Number(rating),
+      reviewText: String(review_text),
+    });
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || 'Failed to submit review' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, avg_rating: result.avgRating, review_count: result.reviewCount });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

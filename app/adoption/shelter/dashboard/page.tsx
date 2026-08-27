@@ -4,11 +4,14 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw, Power, BarChart3 } from 'lucide-react';
+import { Building2, Plus, Search, Filter, Trash2, CheckCircle2, Edit3, ArrowLeft, PawPrint, Calendar, ShieldCheck, Mail, MessageSquare, Camera, Upload, X, Image as ImageIcon, RefreshCw, Power, BarChart3, Star, Loader2 } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import ChatModal from '@/components/ChatModal';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
+import PartnerHoursEditor from '@/components/PartnerHoursEditor';
+import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
+import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 
 interface ShelterPet {
   id: string;
@@ -38,11 +41,13 @@ function ShelterDashboardContent() {
   const [loading, setLoading] = useState(true);
 
   // Filters & Controls
-  const [activeTab, setActiveTab] = useState<'overview' | 'available' | 'pending' | 'adopted' | 'inquiries' | 'profile' | 'all'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'available' | 'pending' | 'adopted' | 'inquiries' | 'profile' | 'reviews' | 'all'>('overview');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState<any>({});
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaveError, setProfileSaveError] = useState('');
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -198,11 +203,24 @@ function ShelterDashboardContent() {
       if (res.ok) {
         const data = await res.json();
         if (data.shelter) {
-          setShelterInfo(data.shelter);
-          setProfileForm(data.shelter);
+          const meta = extractPartnerMeta(data.shelter);
+          const enrichedShelter = {
+            ...data.shelter,
+            description: meta.cleanDescription,
+            hours: meta.hours || {},
+            gallery_urls: meta.gallery || [],
+            starting_rate: meta.pricing.startingRate,
+            pricing_type: meta.pricing.pricingType,
+            pricing_note: meta.pricing.pricingNote,
+            avg_rating: meta.avgRating,
+            review_count: meta.reviewCount,
+          };
+          setShelterInfo(enrichedShelter);
+          setProfileForm(enrichedShelter);
           if (data.shelter.id) {
             fetchShelterPets(data.shelter.id);
             fetchShelterInquiries(data.shelter.id, data.shelter.email);
+            fetchShelterReviews(data.shelter.id);
           }
         } else {
           router.push('/adoption');
@@ -214,6 +232,21 @@ function ShelterDashboardContent() {
       router.push('/adoption');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchShelterReviews = async (shelterId: string) => {
+    setLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/adoption/shelter-reviews?shelter_id=${shelterId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReviewsList(data.reviews || []);
+      }
+    } catch (e) {
+      console.error('Failed to load shelter reviews:', e);
+    } finally {
+      setLoadingReviews(false);
     }
   };
 
@@ -266,12 +299,31 @@ function ShelterDashboardContent() {
           address: profileForm.address,
           state: profileForm.state,
           zip: profileForm.zip,
+          hours: profileForm.hours,
+          gallery_urls: profileForm.gallery_urls,
+          pricing: {
+            pricingType: profileForm.pricing_type,
+            startingRate: profileForm.starting_rate,
+            pricingNote: profileForm.pricing_note,
+          },
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update shelter profile');
-      setShelterInfo(data.shelter);
-      setProfileForm(data.shelter);
+      const meta = extractPartnerMeta(data.shelter);
+      const enriched = {
+        ...data.shelter,
+        description: meta.cleanDescription,
+        hours: meta.hours || {},
+        gallery_urls: meta.gallery || [],
+        starting_rate: meta.pricing.startingRate,
+        pricing_type: meta.pricing.pricingType,
+        pricing_note: meta.pricing.pricingNote,
+        avg_rating: meta.avgRating,
+        review_count: meta.reviewCount,
+      };
+      setShelterInfo(enriched);
+      setProfileForm(enriched);
       setIsEditingProfile(false);
     } catch (err: any) {
       setProfileSaveError(err.message || 'Error updating profile');
@@ -800,7 +852,7 @@ function ShelterDashboardContent() {
           className="flex items-center justify-between flex-wrap gap-3 bg-white p-2 rounded-2xl border border-[#DFD3C7] shadow-xs"
         >
           <div className="flex gap-2 flex-wrap">
-            {(['overview', 'available', 'pending', 'adopted', 'inquiries', 'profile', 'all'] as const).map(tab => {
+            {(['overview', 'available', 'pending', 'adopted', 'inquiries', 'profile', 'reviews', 'all'] as const).map(tab => {
               const cleanShelterEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
               const sortedInqMsgs = [...inquiries].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
               const threadKeys = new Set<string>();
@@ -813,6 +865,8 @@ function ShelterDashboardContent() {
 
               const count = tab === 'inquiries'
                 ? threadKeys.size
+                : tab === 'reviews'
+                ? reviewsList.length
                 : tab === 'profile' || tab === 'overview'
                 ? null
                 : pets.filter(p => tab === 'all' || p.status === tab).length;
@@ -837,6 +891,10 @@ function ShelterDashboardContent() {
                   ) : tab === 'profile' ? (
                     <>
                       <Building2 className="w-3.5 h-3.5" /> Profile
+                    </>
+                  ) : tab === 'reviews' ? (
+                    <>
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> Reviews ({count})
                     </>
                   ) : (
                     <>{tab} ({count})</>
@@ -1335,6 +1393,67 @@ function ShelterDashboardContent() {
               </div>
             </div>
 
+            {/* Hours of Operation */}
+            {isEditingProfile ? (
+              <PartnerHoursEditor
+                hours={profileForm.hours}
+                onChange={h => setProfileForm({ ...profileForm, hours: h })}
+                showEmergencyToggle={false}
+              />
+            ) : (
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                      🕒
+                    </span>
+                    Visiting Hours & Adoption Center Schedule
+                  </h3>
+                </div>
+                <div className="p-5 sm:p-6 text-xs text-[#2E2419] font-bold">
+                  {formatPartnerHoursSummary(shelterInfo.hours)}
+                </div>
+              </div>
+            )}
+
+            {/* Photo Gallery */}
+            {isEditingProfile ? (
+              <PartnerGalleryUploader
+                gallery={profileForm.gallery_urls}
+                onChange={g => setProfileForm({ ...profileForm, gallery_urls: g })}
+              />
+            ) : (
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-900 flex items-center justify-center text-xs">
+                      📷
+                    </span>
+                    Shelter & Facility Photos ({shelterInfo.gallery_urls?.length || 0})
+                  </h3>
+                </div>
+                <div className="p-5 sm:p-6">
+                  {(shelterInfo.gallery_urls || []).length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {shelterInfo.gallery_urls.map((url: string, idx: number) => (
+                        <div key={url + idx} className="aspect-4/3 rounded-xl overflow-hidden border border-[#E2D5C8] bg-gray-100">
+                          <img src={url} alt={`Shelter photo ${idx + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#8B7E7D]">No shelter facility photos uploaded yet. Click &quot;Edit Organization Details&quot; to add photos.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Account & Billing Card */}
             <div 
               style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
@@ -1358,6 +1477,62 @@ function ShelterDashboardContent() {
                 >
                   Manage Account on /account →
                 </Link>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'reviews' ? (
+          <div className="space-y-6">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs p-6"
+            >
+              <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-[#E2D5C8]">
+                <div>
+                  <h2 className="text-base font-black text-[#2E2419]">Adopter Reviews & Community Feedback</h2>
+                  <p className="text-xs text-[#8B7E7D]">Feedback left by adopters and supporters for your rescue</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#FAF6F2] px-3.5 py-2 rounded-xl border border-[#E2D5C8]">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-black text-[#2E2419]">{shelterInfo.avg_rating > 0 ? shelterInfo.avg_rating.toFixed(1) : 'New'}</span>
+                  <span className="text-xs text-[#8B7E7D]">({reviewsList.length} {reviewsList.length === 1 ? 'review' : 'reviews'})</span>
+                </div>
+              </div>
+
+              <div className="pt-5 space-y-3">
+                {loadingReviews ? (
+                  <div className="text-center py-10 text-[#8B7E7D]">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-[#8B5E3C]" />
+                    <p className="text-xs mt-2">Loading reviews...</p>
+                  </div>
+                ) : reviewsList.length === 0 ? (
+                  <div className="text-center py-10 text-[#8B7E7D] space-y-2">
+                    <Star className="w-8 h-8 mx-auto opacity-30 text-amber-500" />
+                    <p className="text-sm font-bold text-[#2E2419]">No reviews yet</p>
+                    <p className="text-xs">When adopters leave feedback for your shelter, it will appear here.</p>
+                  </div>
+                ) : (
+                  reviewsList.map((r, i) => (
+                    <div key={r.id || i} className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-[#8B5E3C] text-white text-xs font-bold flex items-center justify-center">
+                            {(r.ownerName || 'A')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-[#2E2419]">{r.ownerName || 'Verified Adopter'}</p>
+                            <p className="text-[10px] text-[#8B7E7D]">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-amber-400">
+                          {[...Array(r.rating || 5)].map((_, idx) => (
+                            <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#4A3E3D] italic">&quot;{r.reviewText}&quot;</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

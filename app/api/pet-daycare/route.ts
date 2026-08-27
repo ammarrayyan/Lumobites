@@ -293,7 +293,12 @@ export async function PATCH(request: NextRequest) {
       description,
       services,
       logo_url,
-      is_paused
+      is_paused,
+      gallery_urls,
+      hours,
+      starting_rate,
+      pricing_type,
+      pricing_note,
     } = body;
 
     if (!id && !email) {
@@ -319,12 +324,30 @@ export async function PATCH(request: NextRequest) {
       } catch (e) {}
     }
 
-    const updateFields: any = {};
+    const { extractPartnerMeta, packPartnerDescription } = await import('@/lib/partnerProfileHelper');
+    const existingMeta = extractPartnerMeta(existingDaycare);
+
+    const mergedMeta = {
+      hours: hours !== undefined ? hours : existingMeta.hours,
+      gallery: gallery_urls !== undefined ? gallery_urls : existingMeta.gallery,
+      pricing: {
+        startingRate: starting_rate !== undefined ? starting_rate : existingMeta.pricing.startingRate,
+        pricingType: pricing_type !== undefined ? pricing_type : existingMeta.pricing.pricingType,
+        pricingNote: pricing_note !== undefined ? pricing_note : existingMeta.pricing.pricingNote,
+        unit: 'day',
+      },
+    };
+
+    const rawCleanDesc = description !== undefined ? description : existingMeta.cleanDescription;
+    const packedDescription = packPartnerDescription(rawCleanDesc, mergedMeta);
+
+    const updateFields: any = {
+      description: packedDescription,
+    };
     if (business_name !== undefined) updateFields.business_name = business_name;
     if (license_number !== undefined) updateFields.license_number = license_number;
     if (phone !== undefined) updateFields.phone = phone;
     if (website !== undefined) updateFields.website = website;
-    if (description !== undefined) updateFields.description = description;
     if (services !== undefined) updateFields.services = services;
     if (updatedLogo !== undefined) updateFields.logo_url = updatedLogo;
     if (is_paused !== undefined) updateFields.is_paused = is_paused;

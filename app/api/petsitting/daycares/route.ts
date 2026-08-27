@@ -49,12 +49,22 @@ export async function GET(request: NextRequest) {
       .eq('date', today)
       .eq('status', 'full');
 
-    const fullDaycareSet = new Set((fullRecords || []).map((r: any) => r.daycare_id));
+    const { extractPartnerMeta, formatPartnerHoursSummary } = await import('@/lib/partnerProfileHelper');
 
-    const enrichedDaycares = daycares.map((d: any) => ({
-      ...d,
-      today_status: fullDaycareSet.has(d.id) ? 'full' : 'available',
-    }));
+    const enrichedDaycares = daycares.map((d: any) => {
+      const meta = extractPartnerMeta(d);
+      return {
+        ...d,
+        description: meta.cleanDescription,
+        gallery_urls: meta.gallery,
+        hours: meta.hours,
+        hours_summary: formatPartnerHoursSummary(meta.hours),
+        pricing: meta.pricing,
+        avg_rating: meta.avgRating,
+        review_count: meta.reviewCount,
+        today_status: fullDaycareSet.has(d.id) ? 'full' : 'available',
+      };
+    });
 
     return NextResponse.json({ daycares: enrichedDaycares });
   } catch (err: any) {

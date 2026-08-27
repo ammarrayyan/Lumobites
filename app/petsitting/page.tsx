@@ -27,8 +27,9 @@ const SitterMap = dynamic(() => import('@/components/SitterMap'), {
 
 const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false });
 const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
-const BookingLimitModal = dynamic(() => import('@/components/BookingLimitModal'), { ssr: false });
 const SitterPromoPosterModal = dynamic(() => import('@/components/SitterPromoPosterModal'), { ssr: false });
+const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
+const PartnerGalleryModal = dynamic(() => import('@/components/PartnerGalleryModal'), { ssr: false });
 
 export function formatSitterName(fullName: string | null | undefined): string {
   if (!fullName) return 'Sitter';
@@ -361,6 +362,10 @@ export function PetSittingContent() {
   const [reportReason, setReportReason] = useState('Inappropriate behavior');
   const [reportDetails, setReportDetails] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
+
+  // Partner Reviews & Gallery Modals
+  const [selectedPartnerForReviews, setSelectedPartnerForReviews] = useState<{ id: string; name: string; type: 'vet' | 'daycare' | 'shelter' } | null>(null);
+  const [selectedPartnerForGallery, setSelectedPartnerForGallery] = useState<{ photos: string[]; name: string } | null>(null);
 
   const handleOpenReportModal = (email: string, type: 'sitter' | 'user', bookingId?: string, sitterId?: string) => {
     setReportTargetEmail(email || '');
@@ -4087,11 +4092,46 @@ export function PetSittingContent() {
                                         <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
                                           <ShieldCheck className="w-3 h-3" /> Verified
                                         </span>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPartnerForReviews({ id: clinic.id, name: clinic.clinic_name, type: 'vet' });
+                                          }}
+                                          className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-black cursor-pointer transition-colors"
+                                        >
+                                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                          {clinic.avg_rating > 0 ? `${clinic.avg_rating} (${clinic.review_count})` : 'New'}
+                                        </button>
+                                        {clinic.pricing?.startingRate && (
+                                          <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded-full border border-blue-100">
+                                            From ${clinic.pricing.startingRate}/night
+                                          </span>
+                                        )}
+                                        {clinic.gallery_urls && clinic.gallery_urls.length > 1 && (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setSelectedPartnerForGallery({ photos: clinic.gallery_urls, name: clinic.clinic_name });
+                                            }}
+                                            className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full cursor-pointer transition-colors"
+                                          >
+                                            <Camera className="w-3 h-3" /> {clinic.gallery_urls.length} Photos
+                                          </button>
+                                        )}
                                       </div>
-                                      <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-2">
-                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-blue-600" />
-                                        {formatPublicCity(clinic.city || clinic.address)}
-                                      </p>
+                                      <div className="flex items-center gap-3 flex-wrap text-xs text-[#8B7E7D] mb-2">
+                                        <p className="flex items-center gap-1">
+                                          <MapPin className="w-3.5 h-3.5 shrink-0 text-blue-600" />
+                                          {formatPublicCity(clinic.city || clinic.address)}
+                                        </p>
+                                        {clinic.hours_summary && (
+                                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                            <Clock className="w-3 h-3 text-blue-600" /> {clinic.hours_summary}
+                                          </span>
+                                        )}
+                                      </div>
                                       {clinic.description && (
                                         <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
                                       )}
@@ -4175,11 +4215,46 @@ export function PetSittingContent() {
                                         <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
                                           <ShieldCheck className="w-3 h-3" /> Verified
                                         </span>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPartnerForReviews({ id: daycare.id, name: daycare.business_name, type: 'daycare' });
+                                          }}
+                                          className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-black cursor-pointer transition-colors"
+                                        >
+                                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                          {daycare.avg_rating > 0 ? `${daycare.avg_rating} (${daycare.review_count})` : 'New'}
+                                        </button>
+                                        {daycare.pricing?.startingRate && (
+                                          <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
+                                            From ${daycare.pricing.startingRate}/day
+                                          </span>
+                                        )}
+                                        {daycare.gallery_urls && daycare.gallery_urls.length > 1 && (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setSelectedPartnerForGallery({ photos: daycare.gallery_urls, name: daycare.business_name });
+                                            }}
+                                            className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full cursor-pointer transition-colors"
+                                          >
+                                            <Camera className="w-3 h-3" /> {daycare.gallery_urls.length} Photos
+                                          </button>
+                                        )}
                                       </div>
-                                      <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-2">
-                                        <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
-                                        {formatPublicCity(daycare.city || daycare.address)}
-                                      </p>
+                                      <div className="flex items-center gap-3 flex-wrap text-xs text-[#8B7E7D] mb-2">
+                                        <p className="flex items-center gap-1">
+                                          <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                                          {formatPublicCity(daycare.city || daycare.address)}
+                                        </p>
+                                        {daycare.hours_summary && (
+                                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                            <Clock className="w-3 h-3 text-emerald-600" /> {daycare.hours_summary}
+                                          </span>
+                                        )}
+                                      </div>
                                       {daycare.description && (
                                         <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                       )}
@@ -4473,20 +4548,46 @@ export function PetSittingContent() {
                                     <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
                                       <ShieldCheck className="w-3 h-3" /> Verified
                                     </span>
-                                    {daycare.today_status === 'full' ? (
-                                      <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-rose-200">
-                                        ⛔ Full today — ask about other dates
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedPartnerForReviews({ id: daycare.id, name: daycare.business_name, type: 'daycare' });
+                                      }}
+                                      className="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full text-[10px] font-black cursor-pointer transition-colors"
+                                    >
+                                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                      {daycare.avg_rating > 0 ? `${daycare.avg_rating} (${daycare.review_count})` : 'New'}
+                                    </button>
+                                    {daycare.pricing?.startingRate && (
+                                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
+                                        From ${daycare.pricing.startingRate}/day
                                       </span>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                                        ✅ Available today
+                                    )}
+                                    {daycare.gallery_urls && daycare.gallery_urls.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedPartnerForGallery({ photos: daycare.gallery_urls, name: daycare.business_name });
+                                        }}
+                                        className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-full cursor-pointer transition-colors"
+                                      >
+                                        <Camera className="w-3 h-3" /> {daycare.gallery_urls.length} Photos
+                                      </button>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 flex-wrap text-xs text-[#8B7E7D] mb-1.5">
+                                    <p className="flex items-center gap-1">
+                                      <MapPin className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                                      {formatPublicCity(daycare.city || daycare.address)}
+                                    </p>
+                                    {daycare.hours_summary && (
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-600 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                        <Clock className="w-3 h-3 text-emerald-600" /> {daycare.hours_summary}
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-[#8B7E7D] text-xs flex items-center gap-1 mb-1">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                    {formatPublicCity(daycare.city || daycare.address)}
-                                  </p>
                                   {daycare.description && (
                                     <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                   )}
@@ -8161,6 +8262,27 @@ export function PetSittingContent() {
             rating: '5.0',
             review_count: 0,
           }}
+        />
+      )}
+      {/* Partner Reviews Modal */}
+      {selectedPartnerForReviews && (
+        <PartnerReviewsListModal
+          isOpen={!!selectedPartnerForReviews}
+          onClose={() => setSelectedPartnerForReviews(null)}
+          partnerId={selectedPartnerForReviews.id}
+          partnerName={selectedPartnerForReviews.name}
+          partnerType={selectedPartnerForReviews.type}
+          currentUserEmail={reqEmail}
+        />
+      )}
+
+      {/* Partner Photo Gallery Modal */}
+      {selectedPartnerForGallery && (
+        <PartnerGalleryModal
+          isOpen={!!selectedPartnerForGallery}
+          onClose={() => setSelectedPartnerForGallery(null)}
+          photos={selectedPartnerForGallery.photos}
+          partnerName={selectedPartnerForGallery.name}
         />
       )}
 

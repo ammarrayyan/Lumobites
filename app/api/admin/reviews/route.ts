@@ -13,6 +13,52 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const { searchParams } = new URL(req.url);
+    const type = searchParams.get('type') || 'sitter';
+
+    if (type === 'vet') {
+      const { data } = await supabaseAdmin
+        .from('vet_reviews')
+        .select('*, vet_clinics(clinic_name)')
+        .order('created_at', { ascending: false });
+
+      const formatted = (data || []).map((r: any) => ({
+        ...r,
+        partner_name: r.vet_clinics?.clinic_name || 'Unknown Clinic',
+        partner_type: 'vet',
+      }));
+      return NextResponse.json({ reviews: formatted });
+    }
+
+    if (type === 'daycare') {
+      const { data } = await supabaseAdmin
+        .from('daycare_reviews')
+        .select('*, pet_daycares(business_name)')
+        .order('created_at', { ascending: false });
+
+      const formatted = (data || []).map((r: any) => ({
+        ...r,
+        partner_name: r.pet_daycares?.business_name || 'Unknown Daycare',
+        partner_type: 'daycare',
+      }));
+      return NextResponse.json({ reviews: formatted });
+    }
+
+    if (type === 'shelter') {
+      const { data } = await supabaseAdmin
+        .from('shelter_reviews')
+        .select('*, shelters(org_name)')
+        .order('created_at', { ascending: false });
+
+      const formatted = (data || []).map((r: any) => ({
+        ...r,
+        partner_name: r.shelters?.org_name || 'Unknown Shelter',
+        partner_type: 'shelter',
+      }));
+      return NextResponse.json({ reviews: formatted });
+    }
+
+    // Default: Sitter reviews
     const { data, error } = await supabaseAdmin
       .from('sitter_reviews')
       .select('*, sitters(name)')
@@ -20,9 +66,10 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error;
 
-    const formattedData = data.map((review: any) => ({
+    const formattedData = (data || []).map((review: any) => ({
       ...review,
-      sitter_name: review.sitters?.name || 'Unknown Sitter'
+      partner_name: review.sitters?.name || 'Unknown Sitter',
+      partner_type: 'sitter',
     }));
 
     return NextResponse.json({ reviews: formattedData });
@@ -40,25 +87,49 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const reviewId = searchParams.get('id');
-    const sitterId = searchParams.get('sitter_id');
+    const partnerId = searchParams.get('partner_id') || searchParams.get('sitter_id');
+    const partnerType = searchParams.get('type') || 'sitter';
 
-    if (!reviewId || !sitterId) {
+    if (!reviewId || !partnerId) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    // Delete the review
-    const { error: deleteError } = await supabaseAdmin
-      .from('sitter_reviews')
-      .delete()
-      .eq('id', reviewId);
+    const tableName =
+      partnerType === 'vet'
+        ? 'vet_reviews'
+        : partnerType === 'daycare'
+        ? 'daycare_reviews'
+        : partnerType === 'shelter'
+        ? 'shelter_reviews'
+        : 'sitter_reviews';
 
+    const partnerIdCol =
+      partnerType === 'vet'
+        ? 'clinic_id'
+        : partnerType === 'daycare'
+        ? 'daycare_id'
+        : partnerType === 'shelter'
+        ? 'shelter_id'
+        : 'sitter_id';
+
+    const parentTable =
+      partnerType === 'vet'
+        ? 'vet_clinics'
+        : partnerType === 'daycare'
+        ? 'pet_daycares'
+        : partnerType === 'shelter'
+        ? 'shelters'
+        : 'sitters';
+
+    // Delete the review
+    const { error: deleteError } = await supabaseAdmin.from(tableName).delete().eq('id', reviewId);
     if (deleteError) throw deleteError;
 
-    // Recalculate sitter rating
+    // Recalculate partner rating
     const { data: allReviews, error: fetchError } = await supabaseAdmin
-      .from('sitter_reviews')
+      .from(tableName)
       .select('rating')
-      .eq('sitter_id', sitterId);
+      .eq(partnerIdCol, partnerId);
 
     if (fetchError) throw fetchError;
 
@@ -70,12 +141,7 @@ export async function DELETE(req: NextRequest) {
       avg_rating = Math.round((total / review_count) * 10) / 10;
     }
 
-    const { error: updateError } = await supabaseAdmin
-      .from('sitters')
-      .update({ avg_rating, review_count })
-      .eq('id', sitterId);
-
-    if (updateError) throw updateError;
+    await supabaseAdmin.from(parentTable).update({ avg_rating, review_count }).eq('id', partnerId);
 
     return NextResponse.json({ success: true, avg_rating, review_count });
   } catch (error: any) {

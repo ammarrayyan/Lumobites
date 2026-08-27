@@ -14,6 +14,9 @@ import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
 import BookingProgressStepper from '@/components/BookingProgressStepper';
+import PartnerHoursEditor from '@/components/PartnerHoursEditor';
+import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
+import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 
 const VET_SERVICES = [
@@ -44,9 +47,13 @@ export default function VetBoardingDashboardPage() {
   // Inquiries
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'availability' | 'profile'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'availability' | 'profile' | 'reviews'>('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+
+  // Reviews State
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   // Availability Calendar State
   const [fullDates, setFullDates] = useState<string[]>([]);
@@ -173,11 +180,24 @@ export default function VetBoardingDashboardPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.clinic) {
-          setClinic(data.clinic);
-          setEditForm({ ...data.clinic });
+          const meta = extractPartnerMeta(data.clinic);
+          const enrichedClinic = {
+            ...data.clinic,
+            description: meta.cleanDescription,
+            hours: meta.hours || {},
+            gallery_urls: meta.gallery || [],
+            starting_rate: meta.pricing.startingRate,
+            pricing_type: meta.pricing.pricingType || 'inquire',
+            pricing_note: meta.pricing.pricingNote || '',
+            avg_rating: meta.avgRating,
+            review_count: meta.reviewCount,
+          };
+          setClinic(enrichedClinic);
+          setEditForm({ ...enrichedClinic });
           if (data.clinic.status === 'approved' || data.clinic.status === 'paused') {
             loadInquiries(data.clinic.id);
             loadAvailability(data.clinic.id);
+            loadReviews(data.clinic.id);
           }
         } else {
           // No clinic — redirect to registration
@@ -188,6 +208,21 @@ export default function VetBoardingDashboardPage() {
       console.error('Failed to load clinic');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadReviews = async (clinicId: string) => {
+    setLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/vet-boarding/reviews?clinic_id=${clinicId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReviewsList(data.reviews || []);
+      }
+    } catch (e) {
+      console.error('Failed to load clinic reviews:', e);
+    } finally {
+      setLoadingReviews(false);
     }
   };
 
@@ -443,6 +478,7 @@ export default function VetBoardingDashboardPage() {
             { id: 'inquiries', label: `Inquiries${inquiries.length ? ` (${inquiries.length})` : ''}`, emoji: '💬' },
             { id: 'availability', label: 'Availability', emoji: '📅' },
             { id: 'profile', label: 'Profile', emoji: '🏥' },
+            { id: 'reviews', label: `Reviews${reviewsList.length ? ` (${reviewsList.length})` : ''}`, emoji: '⭐' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1246,6 +1282,129 @@ export default function VetBoardingDashboardPage() {
               </div>
             </div>
 
+            {/* Pricing Display Configuration */}
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+            >
+              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center text-xs">
+                    💲
+                  </span>
+                  Pricing Display & Rates
+                </h3>
+              </div>
+
+              <div className="p-5 sm:p-6 space-y-4">
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Model</label>
+                        <select
+                          value={editForm.pricing_type || 'inquire'}
+                          onChange={e => setEditForm((p: any) => ({ ...p, pricing_type: e.target.value }))}
+                          className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                        >
+                          <option value="inquire">Inquire for Rates (Care-based / Medical Need)</option>
+                          <option value="starting_from">Starting From Base Rate ($/night)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-[#2E2419] block mb-1">Starting Base Rate ($ / night)</label>
+                        <input
+                          type="number"
+                          value={editForm.starting_rate || ''}
+                          onChange={e => setEditForm((p: any) => ({ ...p, starting_rate: e.target.value ? Number(e.target.value) : null }))}
+                          placeholder="e.g. 45"
+                          className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Notes / Care Policy</label>
+                      <input
+                        type="text"
+                        value={editForm.pricing_note || ''}
+                        onChange={e => setEditForm((p: any) => ({ ...p, pricing_note: e.target.value }))}
+                        placeholder="e.g. Exact rates depend on medication schedule, isolation, and medical monitoring required"
+                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1 text-xs text-[#4A3E3D]">
+                    <p className="font-bold text-[#2E2419]">
+                      Display: {clinic.pricing?.startingRate ? `Starting from $${clinic.pricing.startingRate}/night` : 'Inquire for Rates (Care-based)'}
+                    </p>
+                    {clinic.pricing?.pricingNote && <p className="text-[#8B7E7D]">{clinic.pricing.pricingNote}</p>}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Hours of Operation */}
+            {isEditing ? (
+              <PartnerHoursEditor
+                hours={editForm.hours}
+                onChange={h => setEditForm((p: any) => ({ ...p, hours: h }))}
+                showEmergencyToggle={true}
+              />
+            ) : (
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
+                      🕒
+                    </span>
+                    Hours of Operation
+                  </h3>
+                </div>
+                <div className="p-5 sm:p-6 text-xs text-[#2E2419] font-bold">
+                  {formatPartnerHoursSummary(clinic.hours)}
+                </div>
+              </div>
+            )}
+
+            {/* Photo Gallery */}
+            {isEditing ? (
+              <PartnerGalleryUploader
+                gallery={editForm.gallery_urls}
+                onChange={g => setEditForm((p: any) => ({ ...p, gallery_urls: g }))}
+              />
+            ) : (
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-900 flex items-center justify-center text-xs">
+                      📷
+                    </span>
+                    Facility Photos ({clinic.gallery_urls?.length || 0})
+                  </h3>
+                </div>
+                <div className="p-5 sm:p-6">
+                  {(clinic.gallery_urls || []).length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {clinic.gallery_urls.map((url: string, idx: number) => (
+                        <div key={url + idx} className="aspect-4/3 rounded-xl overflow-hidden border border-[#E2D5C8] bg-gray-100">
+                          <img src={url} alt={`Facility photo ${idx + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#8B7E7D]">No gallery photos uploaded yet. Click &quot;Edit Profile&quot; to add photos.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div 
               style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
@@ -1298,6 +1457,65 @@ export default function VetBoardingDashboardPage() {
                     Manage Account on /account →
                   </Link>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Reviews Tab ───────────────────────────────────────────── */}
+        {activeTab === 'reviews' && (
+          <div className="space-y-6">
+            <div 
+              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs p-6"
+            >
+              <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-[#E2D5C8]">
+                <div>
+                  <h2 className="text-base font-black text-[#2E2419]">Client Reviews & Feedback</h2>
+                  <p className="text-xs text-[#8B7E7D]">Verified feedback left by pet owners after their stays</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#FAF6F2] px-3.5 py-2 rounded-xl border border-[#E2D5C8]">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-black text-[#2E2419]">{clinic.avg_rating > 0 ? clinic.avg_rating.toFixed(1) : 'New'}</span>
+                  <span className="text-xs text-[#8B7E7D]">({reviewsList.length} {reviewsList.length === 1 ? 'review' : 'reviews'})</span>
+                </div>
+              </div>
+
+              <div className="pt-5 space-y-3">
+                {loadingReviews ? (
+                  <div className="text-center py-10 text-[#8B7E7D]">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-[#8B5E3C]" />
+                    <p className="text-xs mt-2">Loading reviews...</p>
+                  </div>
+                ) : reviewsList.length === 0 ? (
+                  <div className="text-center py-10 text-[#8B7E7D] space-y-2">
+                    <Star className="w-8 h-8 mx-auto opacity-30 text-amber-500" />
+                    <p className="text-sm font-bold text-[#2E2419]">No reviews yet</p>
+                    <p className="text-xs">When pet owners complete boarding stays, their verified reviews will appear here.</p>
+                  </div>
+                ) : (
+                  reviewsList.map((r, i) => (
+                    <div key={r.id || i} className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-[#8B5E3C] text-white text-xs font-bold flex items-center justify-center">
+                            {(r.ownerName || 'C')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-[#2E2419]">{r.ownerName || 'Verified Client'}</p>
+                            <p className="text-[10px] text-[#8B7E7D]">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center text-amber-400">
+                          {[...Array(r.rating || 5)].map((_, idx) => (
+                            <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#4A3E3D] italic">&quot;{r.reviewText}&quot;</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

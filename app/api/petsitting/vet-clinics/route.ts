@@ -55,10 +55,22 @@ export async function GET(request: NextRequest) {
 
     const fullClinicSet = new Set((fullRecords || []).map((r: any) => r.clinic_id));
 
-    const enrichedClinics = clinics.map((c: any) => ({
-      ...c,
-      today_status: fullClinicSet.has(c.id) ? 'full' : 'available',
-    }));
+    const { extractPartnerMeta, formatPartnerHoursSummary } = await import('@/lib/partnerProfileHelper');
+
+    const enrichedClinics = clinics.map((c: any) => {
+      const meta = extractPartnerMeta(c);
+      return {
+        ...c,
+        description: meta.cleanDescription,
+        gallery_urls: meta.gallery,
+        hours: meta.hours,
+        hours_summary: formatPartnerHoursSummary(meta.hours),
+        pricing: meta.pricing,
+        avg_rating: meta.avgRating,
+        review_count: meta.reviewCount,
+        today_status: fullClinicSet.has(c.id) ? 'full' : 'available',
+      };
+    });
 
     return NextResponse.json({ clinics: enrichedClinics });
   } catch (err: any) {

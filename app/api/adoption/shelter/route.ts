@@ -240,11 +240,36 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, org_name, tax_id, phone, org_photo_url, website, address, city, state, zip, is_paused } = body;
+    const {
+      id,
+      email,
+      org_name,
+      tax_id,
+      phone,
+      org_photo_url,
+      website,
+      address,
+      city,
+      state,
+      zip,
+      is_paused,
+      description,
+      gallery_urls,
+      hours,
+      starting_rate,
+      pricing_type,
+      pricing_note,
+    } = body;
 
     if (!id && !email) {
       return NextResponse.json({ error: 'Missing shelter id or email' }, { status: 400 });
     }
+
+    const { data: existingShelter } = await supabaseAdmin
+      .from('shelters')
+      .select('*')
+      .or(id ? `id.eq.${id}` : `email.eq.${email.toLowerCase().trim()}`)
+      .maybeSingle();
 
     let updatedPhoto = org_photo_url;
     if (!updatedPhoto && website) {
@@ -254,7 +279,26 @@ export async function PATCH(request: NextRequest) {
       } catch (e) {}
     }
 
-    const updateFields: any = {};
+    const { extractPartnerMeta, packPartnerDescription } = await import('@/lib/partnerProfileHelper');
+    const existingMeta = extractPartnerMeta(existingShelter);
+
+    const mergedMeta = {
+      hours: hours !== undefined ? hours : existingMeta.hours,
+      gallery: gallery_urls !== undefined ? gallery_urls : existingMeta.gallery,
+      pricing: {
+        startingRate: starting_rate !== undefined ? starting_rate : existingMeta.pricing.startingRate,
+        pricingType: pricing_type !== undefined ? pricing_type : existingMeta.pricing.pricingType,
+        pricingNote: pricing_note !== undefined ? pricing_note : existingMeta.pricing.pricingNote,
+        unit: 'adoption',
+      },
+    };
+
+    const rawCleanDesc = description !== undefined ? description : existingMeta.cleanDescription;
+    const packedDescription = packPartnerDescription(rawCleanDesc, mergedMeta);
+
+    const updateFields: any = {
+      description: packedDescription,
+    };
     if (org_name !== undefined) updateFields.org_name = org_name;
     if (tax_id !== undefined) updateFields.tax_id = tax_id;
     if (phone !== undefined) updateFields.phone = phone;
