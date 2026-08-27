@@ -14,8 +14,8 @@ export interface BookingLimitModalProps {
 export default function BookingLimitModal({
   isOpen,
   onClose,
-  used = 2,
-  limit = 2,
+  used = 3,
+  limit = 3,
 }: BookingLimitModalProps) {
   if (!isOpen) return null;
 

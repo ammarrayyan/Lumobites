@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
       requests: combined,
       is_pro: isOwnerPro,
       monthly_inquiries_used: monthlyInquiryCount,
-      monthly_inquiries_limit: 2
+      monthly_inquiries_limit: 3
     });
   } catch (err: any) {
     console.error('[Owner Requests GET] Error:', err);

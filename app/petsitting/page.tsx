@@ -611,7 +611,7 @@ export function PetSittingContent() {
   const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
   const [isBookingLimitModalOpen, setIsBookingLimitModalOpen] = useState(false);
   const [monthlyBookingUsed, setMonthlyBookingUsed] = useState(0);
-  const [monthlyBookingLimit, setMonthlyBookingLimit] = useState(2);
+  const [monthlyBookingLimit, setMonthlyBookingLimit] = useState(3);
   const [needsReapproval, setNeedsReapproval] = useState(false);
 
   // Bookings Flow State
@@ -7199,7 +7199,7 @@ export function PetSittingContent() {
                   {!isOwnerPro && (
                     <div className="mt-3 text-center">
                       <p className="text-xs text-[#8B7E7D]">
-                        🐾 Free tier: <strong>{Math.min(monthlyBookingUsed, 2)}/2</strong> monthly bookings used •{' '}
+                        🐾 Free tier: <strong>{Math.min(monthlyBookingUsed, monthlyBookingLimit)}/{monthlyBookingLimit}</strong> monthly bookings used •{' '}
                         <button 
                           type="button"
                           onClick={() => {

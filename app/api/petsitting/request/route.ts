@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Free-tier Monthly Booking Limit: Max 2 inquiries per calendar month
+    // 2. Free-tier Monthly Booking Limit: Max 3 inquiries per calendar month
     if (!isOwnerPro) {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).toISOString();
@@ -61,11 +61,11 @@ export async function POST(request: NextRequest) {
 
       if (monthlyCountErr) {
         console.error('[Request POST] Monthly booking count error:', monthlyCountErr);
-      } else if (monthlyCount !== null && monthlyCount >= 2) {
+      } else if (monthlyCount !== null && monthlyCount >= 3) {
         return NextResponse.json({
           error: 'monthly_limit_reached',
-          message: "You've reached your free limit of 2 sitter inquiries this month. Upgrade to Membership ($4.99/mo) for unlimited bookings!",
-          limit: 2,
+          message: "You've reached your free limit of 3 sitter inquiries this month. Upgrade to Membership ($4.99/mo) for unlimited bookings!",
+          limit: 3,
           used: monthlyCount,
           is_pro: false
         }, { status: 403 });
