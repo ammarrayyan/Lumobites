@@ -14,13 +14,17 @@ export default function BookingProgressStepper({ status, dates, createdAt }: Boo
 
   const normalizedStatus = status.toLowerCase().trim();
 
-  // If declined or cancelled, show clean alert banner
-  if (normalizedStatus === 'declined' || normalizedStatus === 'cancelled' || normalizedStatus === 'canceled') {
+  // If declined, cancelled, denied, revoked, or no-show, show clean alert banner
+  if (['declined', 'cancelled', 'canceled', 'denied', 'revoked', 'no_show'].includes(normalizedStatus)) {
+    const alertLabel = normalizedStatus === 'no_show' 
+      ? 'Appointment marked as No Show' 
+      : `Booking ${normalizedStatus}`;
+
     return (
       <div className="bg-[#FAF6F4] border-b border-[#E8DDD4] px-4 py-2.5 flex items-center justify-between text-xs text-[#8B7E7D]">
         <div className="flex items-center gap-2 font-semibold">
           <AlertCircle className="w-4 h-4 text-rose-500" />
-          <span className="capitalize text-gray-700">Booking {normalizedStatus}</span>
+          <span className="capitalize text-gray-700">{alertLabel}</span>
         </div>
         {dates && <span className="text-[11px] text-gray-500 font-medium">{dates}</span>}
       </div>
@@ -30,20 +34,20 @@ export default function BookingProgressStepper({ status, dates, createdAt }: Boo
   // Parse dates to determine if Upcoming vs In Progress vs Completed
   let currentStep = 1; // 1: Inquiry, 2: Accepted, 3: Upcoming, 4: In Progress, 5: Completed
   let stageLabel = 'Inquiry Sent';
-  let stageSubtext = 'Awaiting sitter confirmation';
+  let stageSubtext = 'Awaiting confirmation';
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (normalizedStatus === 'pending') {
+  if (normalizedStatus === 'pending' || !normalizedStatus) {
     currentStep = 1;
     stageLabel = 'Inquiry Sent';
-    stageSubtext = 'Awaiting sitter response';
+    stageSubtext = 'Awaiting partner response';
   } else if (normalizedStatus === 'completed') {
     currentStep = 5;
     stageLabel = 'Completed';
-    stageSubtext = 'Stay successfully completed';
-  } else if (normalizedStatus === 'accepted') {
+    stageSubtext = 'Stay / visit successfully completed';
+  } else if (normalizedStatus === 'accepted' || normalizedStatus === 'confirmed' || normalizedStatus === 'active') {
     // Attempt date parsing
     let isUpcoming = true;
     let isInProgress = false;
