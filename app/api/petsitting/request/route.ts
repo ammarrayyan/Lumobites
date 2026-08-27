@@ -3,6 +3,7 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -32,14 +33,33 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = owner_email.toLowerCase().trim();
 
-    // 1. Check if owner is PRO (Code intact for future)
-    const { data: emailData } = await supabaseAdmin
-      .from('emails')
-      .select('is_pro')
-      .eq('email', cleanEmail)
-      .single();
+    // 1. Check Membership / Pro status using the existing system
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    const isOwnerPro = proDetails.isPro;
 
-    const isOwnerPro = emailData?.is_pro || false;
+    // 2. Free-tier Monthly Booking Limit: Max 2 inquiries per calendar month
+    if (!isOwnerPro) {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).toISOString();
+
+      const { count: monthlyCount, error: monthlyCountErr } = await supabaseAdmin
+        .from('sitting_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_email', cleanEmail)
+        .gte('created_at', startOfMonth);
+
+      if (monthlyCountErr) {
+        console.error('[Request POST] Monthly booking count error:', monthlyCountErr);
+      } else if (monthlyCount !== null && monthlyCount >= 2) {
+        return NextResponse.json({
+          error: 'monthly_limit_reached',
+          message: "You've reached your free limit of 2 sitter inquiries this month. Upgrade to Membership ($4.99/mo) for unlimited bookings!",
+          limit: 2,
+          used: monthlyCount,
+          is_pro: false
+        }, { status: 403 });
+      }
+    }
 
     // 2. Get Sitter details
     const { data: sitter, error: sitterError } = await supabaseAdmin

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getUserProStatusDetails } from '@/lib/aiLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +113,17 @@ export async function GET(request: NextRequest) {
     // Sort all by created_at descending
     combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-    return NextResponse.json({ requests: combined });
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).toISOString();
+    const monthlyInquiryCount = (sitRequests || []).filter((r: any) => r.created_at >= startOfMonth).length;
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+
+    return NextResponse.json({ 
+      requests: combined,
+      is_pro: proDetails.isPro,
+      monthly_inquiries_used: monthlyInquiryCount,
+      monthly_inquiries_limit: 2
+    });
   } catch (err: any) {
     console.error('[Owner Requests GET] Error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

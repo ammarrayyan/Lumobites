@@ -27,6 +27,7 @@ const SitterMap = dynamic(() => import('@/components/SitterMap'), {
 
 const ChatModal = dynamic(() => import('@/components/ChatModal'), { ssr: false });
 const AiLimitModal = dynamic(() => import('@/components/AiLimitModal'), { ssr: false });
+const BookingLimitModal = dynamic(() => import('@/components/BookingLimitModal'), { ssr: false });
 const SitterPromoPosterModal = dynamic(() => import('@/components/SitterPromoPosterModal'), { ssr: false });
 
 export function formatSitterName(fullName: string | null | undefined): string {
@@ -608,6 +609,9 @@ export function PetSittingContent() {
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
+  const [isBookingLimitModalOpen, setIsBookingLimitModalOpen] = useState(false);
+  const [monthlyBookingUsed, setMonthlyBookingUsed] = useState(0);
+  const [monthlyBookingLimit, setMonthlyBookingLimit] = useState(2);
   const [needsReapproval, setNeedsReapproval] = useState(false);
 
   // Bookings Flow State
@@ -1554,6 +1558,15 @@ export function PetSittingContent() {
       const data = await res.json();
       if (res.ok && data.requests) {
         setOwnerRequests(data.requests);
+        if (typeof data.monthly_inquiries_used === 'number') {
+          setMonthlyBookingUsed(data.monthly_inquiries_used);
+        }
+        if (typeof data.monthly_inquiries_limit === 'number') {
+          setMonthlyBookingLimit(data.monthly_inquiries_limit);
+        }
+        if (typeof data.is_pro === 'boolean') {
+          setIsOwnerPro(data.is_pro);
+        }
         setOwnerHistoryFetched(true);
         setOwnerLastUpdated(new Date());
         localStorage.setItem('lumo_owner_history_email', email);
@@ -3188,8 +3201,11 @@ export function PetSittingContent() {
           fetchOwnerRequests(reqEmail);
         }
       } else {
-        if (data.error === 'requires_pro') {
-          setReqError('requires_pro');
+        if (data.error === 'monthly_limit_reached' || data.error === 'requires_pro') {
+          if (typeof data.used === 'number') setMonthlyBookingUsed(data.used);
+          if (typeof data.limit === 'number') setMonthlyBookingLimit(data.limit);
+          setRequestModalOpen(false);
+          setIsBookingLimitModalOpen(true);
         } else {
           setReqError(data.error || 'Failed to submit request');
         }
@@ -7179,7 +7195,25 @@ export function PetSittingContent() {
 
                   {reqError && <div className="text-red-600 text-sm font-bold mt-2">{reqError}</div>}
  
-                  <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-6 shadow-sm cursor-pointer">
+                  {!isOwnerPro && (
+                    <div className="mt-3 text-center">
+                      <p className="text-xs text-[#8B7E7D]">
+                        🐾 Free tier: <strong>{Math.min(monthlyBookingUsed, 2)}/2</strong> monthly bookings used •{' '}
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setRequestModalOpen(false);
+                            setIsBookingLimitModalOpen(true);
+                          }}
+                          className="text-[#8B5E3C] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer text-xs"
+                        >
+                          Upgrade for unlimited
+                        </button>
+                      </p>
+                    </div>
+                  )}
+
+                  <button disabled={reqLoading} type="submit" className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors mt-4 shadow-sm cursor-pointer">
                     {reqLoading ? 'Sending...' : 'Send Request'}
                   </button>
                 </form>
@@ -7653,6 +7687,13 @@ export function PetSittingContent() {
         onClose={() => setIsAiLimitModalOpen(false)}
         reason={aiLimitReason}
         isPro={aiLimitIsPro}
+      />
+
+      <BookingLimitModal
+        isOpen={isBookingLimitModalOpen}
+        onClose={() => setIsBookingLimitModalOpen(false)}
+        used={monthlyBookingUsed}
+        limit={monthlyBookingLimit}
       />
 
       {/* Report Modal */}
