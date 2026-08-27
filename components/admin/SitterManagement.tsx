@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trash2, AlertTriangle, CheckCircle, Eye, RefreshCw, LogOut, XCircle } from 'lucide-react';
+import SitterMap from '@/components/SitterMap';
 
 export default function SitterManagement({ adminKey, onUnauthorized }: { adminKey: string, onUnauthorized: () => void }) {
   const [sitters, setSitters] = useState<any[]>([]);
@@ -202,12 +203,23 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
     .filter(s => filter === 'all' || s.approval_status === filter)
     .filter(s => availabilityFilter === 'all' || s.availability === true);
 
+  const sittersWithLocation = sitters.filter(s => s.lat && s.lng);
+
   if (loading) {
     return <div className="text-gray-500 animate-pulse text-center py-12">Loading sitters...</div>;
   }
 
   return (
     <div>
+      <div className="mb-6">
+        <p className="text-sm text-[#555555] mb-2">
+          Showing {sittersWithLocation.length} of {sitters.length} sitters with saved location data
+        </p>
+        <div className="w-full h-[450px]">
+          <SitterMap sitters={sittersWithLocation} onSelectSitter={() => {}} />
+        </div>
+      </div>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
         <h2 className="text-xl font-semibold text-[#191919]">Sitter Management</h2>
         <div className="flex flex-wrap gap-2 items-center">
