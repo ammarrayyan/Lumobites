@@ -3205,6 +3205,7 @@ export function PetSittingContent() {
           if (typeof data.used === 'number') setMonthlyBookingUsed(data.used);
           if (typeof data.limit === 'number') setMonthlyBookingLimit(data.limit);
           setRequestModalOpen(false);
+          setSelectedSitter(null);
           setIsBookingLimitModalOpen(true);
         } else {
           setReqError(data.error || 'Failed to submit request');
@@ -7203,6 +7204,7 @@ export function PetSittingContent() {
                           type="button"
                           onClick={() => {
                             setRequestModalOpen(false);
+                            setSelectedSitter(null);
                             setIsBookingLimitModalOpen(true);
                           }}
                           className="text-[#8B5E3C] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer text-xs"
