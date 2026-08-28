@@ -14,6 +14,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import MobileFloatingAction from '@/components/MobileFloatingAction';
 
 const SitterMap = dynamic(() => import('@/components/SitterMap'), {
   ssr: false,
@@ -6380,6 +6381,24 @@ export function PetSittingContent() {
           </>
           )}
           </div>
+        )}
+
+        {/* Mobile Floating Action Button for One-Handed Thumb Reach (Become a Sitter) */}
+        {activeTab === 'find' && (
+          <MobileFloatingAction bottomOffset="92px">
+            <button
+              onClick={() => {
+                setActiveTab('become');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="pressable flex items-center gap-2 bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-bold text-xs py-3 px-4 rounded-full shadow-[0_8px_20px_rgba(193,125,60,0.40)] hover:shadow-xl border border-white/40 active:scale-95 transition-transform select-none cursor-pointer"
+              style={{ textDecoration: 'none' }}
+              aria-label="Become a Pet Sitter"
+            >
+              <Sparkles className="w-4 h-4 text-[#FFF2D6]" />
+              <span>Become a Sitter</span>
+            </button>
+          </MobileFloatingAction>
         )}
 
       </main>
