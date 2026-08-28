@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendPushNotification } from '@/lib/push';
 
 const ADMIN_EMAILS = ['ammar-rayyan@hotmail.com', 'reviewer@lumobites.net'];
 
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    // ── Send In-App & Firebase Push Notifications to Pet Owner ───────────────
+    // ── Send In-App Bell Notification to Pet Owner ───────────────
     try {
       const { data: pet, error: petQueryErr } = await supabaseAdmin
         .from('lost_pets')
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
           const notifBody = `${author_name}: "${comment_text.slice(0, 80)}"`;
           const notifLink = `/lost-pets/${lost_pet_id}`;
 
-          // Channel 1: In-App Bell Notification
+          // In-App Bell Notification Only
           const { error: notifInsertErr } = await supabaseAdmin.from('notifications').insert({
             recipient_email: ownerEmail,
             type: 'lost_pet_update',
@@ -103,18 +102,6 @@ export async function POST(request: NextRequest) {
             console.error('[Lost Pets Comments POST] In-App notif error:', notifInsertErr);
           } else {
             console.log('[Lost Pets Comments POST] In-app notification created for:', ownerEmail);
-          }
-
-          // Channel 2: Firebase Mobile Push Notification
-          try {
-            await sendPushNotification(
-              ownerEmail,
-              notifTitle,
-              notifBody,
-              notifLink
-            );
-          } catch (pushErr) {
-            console.error('[Lost Pets Comments POST] Push notif error:', pushErr);
           }
         }
       }
