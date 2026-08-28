@@ -7,31 +7,31 @@ import { Home, PawPrint, MapPin, Utensils, Users, Globe } from 'lucide-react';
 
 // Paw-in-ID-card icon for Pet Profiles matching Lucide icon styling
 function PetProfileIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  const isFilled = style?.fill && style.fill !== 'none';
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      fill={isFilled ? 'currentColor' : 'none'}
+      fill="none"
       stroke={style?.color || 'currentColor'}
       strokeWidth={style?.strokeWidth || 2}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      style={style}
+      style={{ ...style, fill: 'none' }}
     >
       {/* ID Badge Card Outline */}
-      <rect width="18" height="18" x="3" y="3" rx="4" />
+      <rect width="18" height="18" x="3" y="3" rx="4" fill="none" />
       {/* ID Lanyard Slot */}
       <line x1="9.5" x2="14.5" y1="6" y2="6" strokeWidth={2} />
       {/* Paw Print Inside ID Badge */}
-      <circle cx="9.5" cy="11.5" r="0.9" fill="currentColor" />
-      <circle cx="14.5" cy="11.5" r="0.9" fill="currentColor" />
-      <circle cx="8" cy="14" r="0.8" fill="currentColor" />
-      <circle cx="16" cy="14" r="0.8" fill="currentColor" />
+      <circle cx="9.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="14" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="14" r="0.9" fill="currentColor" stroke="none" />
       <path
-        d="M12 17.2c-1.5 0-2.5-.8-2.5-1.7 0-.6.5-1 1.2-1 .6 0 .8.4 1.3.4s.7-.4 1.3-.4c.7 0 1.2.4 1.2 1 0 .9-1 1.7-2.5 1.7z"
+        d="M12 17.5c-1.5 0-2.5-.8-2.5-1.7 0-.6.5-1 1.2-1 .6 0 .8.4 1.3.4s.7-.4 1.3-.4c.7 0 1.2.4 1.2 1 0 .9-1 1.7-2.5 1.7z"
         fill="currentColor"
+        stroke="none"
       />
     </svg>
   );
