@@ -355,73 +355,108 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MOBILE QUICK ACCESS BUTTONS (3+3 Square Grid) */}
-      <section className="md:hidden w-full px-4 pt-1.5 pb-6">
-        <div className="grid grid-cols-3 gap-2.5 max-w-sm mx-auto">
+      {/* MOBILE QUICK ACCESS LAUNCHER (Microsoft 365 Squircle App Launcher Style) */}
+      <section className="md:hidden w-full px-4 pt-2.5 pb-8">
+        <div className="grid grid-cols-3 gap-x-2 gap-y-3 max-w-xs mx-auto">
           {/* 1. Lost Pets */}
-          <Link href="/lost-pets" className="block" style={{ textDecoration: 'none' }}>
+          <Link href="/lost-pets" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(92, 50, 37, 0.05)' }}
-              className="aspect-square w-full p-2 bg-[#F3E1DC] border border-[#E6C4BC] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
+                boxShadow: '0 6px 14px -2px rgba(196, 77, 52, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
             >
-              <Footprints className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Lost Pets</span>
+              <Footprints className="w-7 h-7 text-white" strokeWidth={2.2} />
             </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              Lost Pets
+            </span>
           </Link>
 
           {/* 2. Find Sitter */}
-          <Link href="/petsitting" className="block" style={{ textDecoration: 'none' }}>
+          <Link href="/petsitting" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(43, 61, 53, 0.04)' }}
-              className="aspect-square w-full p-2 bg-[#E4ECE8] border border-[#CDDFD6] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
+                boxShadow: '0 6px 14px -2px rgba(46, 120, 82, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
             >
-              <PawPrint className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Find Sitter</span>
+              <PawPrint className="w-7 h-7 text-white" strokeWidth={2.2} />
             </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              Find Sitter
+            </span>
           </Link>
 
-          {/* 3. Become Sitter (Sunny Champagne / Sparkle Gold) */}
-          <Link href="/petsitting?tab=become" className="block" style={{ textDecoration: 'none' }}>
+          {/* 3. Become Sitter */}
+          <Link href="/petsitting?tab=become" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(180, 83, 9, 0.05)' }}
-              className="aspect-square w-full p-2 bg-[#FEF5E7] border border-[#F7DCB0] text-[#92400E] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
+                boxShadow: '0 6px 14px -2px rgba(196, 117, 24, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
             >
-              <Sparkles className="w-7 h-7 text-[#B45309]" strokeWidth={2.2} />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#92400E]">Become Sitter</span>
+              <Sparkles className="w-7 h-7 text-white" strokeWidth={2.2} />
             </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              Become Sitter
+            </span>
           </Link>
 
           {/* 4. Adopt Pet */}
-          <Link href="/adoption" className="block" style={{ textDecoration: 'none' }}>
+          <Link href="/adoption" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(139, 94, 60, 0.04)' }}
-              className="aspect-square w-full p-2 bg-[#FDF3EB] border border-[#F3DFC9] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
+                boxShadow: '0 6px 14px -2px rgba(191, 68, 86, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
             >
-              <Heart className="w-7 h-7 text-[#8B5E3C]" strokeWidth={2.2} />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight">Adopt Pet</span>
+              <Heart className="w-7 h-7 text-white" strokeWidth={2.2} />
             </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              Adopt Pet
+            </span>
           </Link>
 
-          {/* 5. Partner Portal (Trust Royal Indigo / Sapphire Blue) */}
+          {/* 5. Partner Portal */}
           <button
             type="button"
             onClick={handleOpenPartnerPortal}
+            className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95 cursor-pointer border-none bg-transparent"
             style={{ textDecoration: 'none' }}
-            className="aspect-square w-full p-2 bg-[#EEF4FF] border border-[#C7D9FD] text-[#1E40AF] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
           >
-            <Building2 className="w-7 h-7 text-[#2563EB]" strokeWidth={2.2} />
-            <span className="text-[11px] leading-tight font-extrabold tracking-tight text-[#1E40AF]">Partner Portal</span>
+            <div 
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
+                boxShadow: '0 6px 14px -2px rgba(116, 74, 41, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
+            >
+              <Building2 className="w-7 h-7 text-white" strokeWidth={2.2} />
+            </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              Partner Portal
+            </span>
           </button>
 
           {/* 6. City Board */}
-          <Link href="/city-board" className="block" style={{ textDecoration: 'none' }}>
+          <Link href="/city-board" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 6px rgba(100, 80, 60, 0.04)' }}
-              className="aspect-square w-full p-2 bg-[#F2F5F8] border border-[#D9E2E8] text-[#2E2419] font-bold rounded-2xl flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-150 ease-in-out hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md active:scale-[0.97] cursor-pointer btn-gloss"
+              className="w-[58px] h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
+                boxShadow: '0 6px 14px -2px rgba(59, 95, 118, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+              }}
             >
-              <MessageSquare className="w-7 h-7 text-[#5C4533]" strokeWidth={2.2} />
-              <span className="text-[11px] leading-tight font-extrabold tracking-tight">City Board</span>
+              <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.2} />
             </div>
+            <span className="mt-2 text-[12px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+              City Board
+            </span>
           </Link>
         </div>
       </section>
