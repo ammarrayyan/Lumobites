@@ -3615,9 +3615,9 @@ export function PetSittingContent() {
           {activeTab === 'find' && (
             <button
               onClick={() => setActiveTab('become')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#8B5E3C] hover:bg-[#734A2E] active:bg-[#5C381E] text-white shadow-[0_4px_14px_rgba(139,94,60,0.35)] transition-all duration-200 cursor-pointer shrink-0 active:scale-95 border border-[#7A5234]/30"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[#C17D3C] hover:bg-[#B06D2B] active:bg-[#9B5C20] text-white shadow-[0_4px_14px_rgba(193,125,60,0.35)] transition-all duration-200 cursor-pointer shrink-0 active:scale-95 border border-[#B06D2B]/30"
             >
-              <Sparkles className="w-4 h-4 text-[#FDE68A]" />
+              <Sparkles className="w-4 h-4 text-[#FFF2D6]" />
               <span>Become a Sitter</span>
               <ArrowRight className="w-3.5 h-3.5 text-white/90" />
             </button>
