@@ -199,11 +199,11 @@ export default function MobileBottomNav() {
 
               {/* Label */}
               <span
-                className="text-[8.5px] tracking-tight select-none transition-all duration-300"
+                className="text-[9px] sm:text-[9.5px] tracking-tight select-none transition-all duration-300"
                 style={{
                   marginTop: '-11px',
-                  color: isActive ? '#8B5E3C' : '#8E8E93',
-                  fontWeight: isActive ? 800 : 600,
+                  color: isActive ? '#5C381E' : '#4A3E3D',
+                  fontWeight: isActive ? 900 : 700,
                   transform: isActive ? 'scale(1.04)' : 'scale(1)',
                 }}
               >
@@ -231,19 +231,19 @@ export default function MobileBottomNav() {
             <Icon
               className="w-[18px] h-[18px] relative z-10 transition-all duration-300 ease-out"
               style={{
-                color: isActive ? '#000000' : '#8E8E93',
+                color: isActive ? '#000000' : '#4A3E3D',
                 fill: isActive ? 'currentColor' : 'none',
                 transform: isActive ? 'scale(1.12) translateY(-1px)' : 'scale(1)',
-                strokeWidth: isActive ? 2.5 : 1.8,
+                strokeWidth: isActive ? 2.5 : 2,
               }}
             />
 
             {/* Label */}
             <span
-              className="text-[8.5px] sm:text-[9px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
+              className="text-[9px] sm:text-[9.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
               style={{
-                color: isActive ? '#000000' : '#8E8E93',
-                fontWeight: isActive ? 800 : 600,
+                color: isActive ? '#000000' : '#4A3E3D',
+                fontWeight: isActive ? 900 : 700,
                 transform: isActive ? 'scale(1.02)' : 'scale(1)',
               }}
             >
