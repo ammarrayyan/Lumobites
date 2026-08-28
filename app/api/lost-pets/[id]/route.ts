@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { formatPublicCity } from '@/lib/formatCity';
 
 export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   try {
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
     return NextResponse.json({ 
       pet: { 
         ...safePet, 
+        city: formatPublicCity(data.city) || data.city,
         type: pet_type,
         photos,
         description: cleanDesc

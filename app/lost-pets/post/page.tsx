@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Footprints, CheckCircle, MapPin, RefreshCw, Lock, PawPrint, Navigation, Camera, Upload, Phone } from 'lucide-react';
+import { formatPublicCity } from '@/lib/formatCity';
 
 export default function PostLostPet() {
   const router = useRouter();
@@ -218,7 +219,8 @@ export default function PostLostPet() {
     e.preventDefault();
     setError('');
 
-    const finalCity = city || locationInput.trim();
+    const rawLocation = city || locationInput.trim();
+    const finalCity = formatPublicCity(rawLocation) || rawLocation;
     const finalLat = selectedLocation ? selectedLocation.lat : null;
     const finalLng = selectedLocation ? selectedLocation.lng : null;
 

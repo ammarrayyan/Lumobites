@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { Resend } from 'resend';
 import { randomUUID } from 'crypto';
+import { formatPublicCity } from '@/lib/formatCity';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -102,6 +103,7 @@ export async function GET(request: NextRequest) {
 
       return { 
         ...safePet, 
+        city: formatPublicCity(pet.city) || pet.city,
         type: pet_type, 
         distance,
         photos,
@@ -181,8 +183,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Generate edit token
+    // 2. Generate edit token & sanitize public city
     const editToken = randomUUID();
+    const publicCity = formatPublicCity(city) || city;
 
     // 3. Insert into DB with self-healing fallback
     let data = null;
@@ -196,7 +199,7 @@ export async function POST(request: NextRequest) {
         photo_url: finalPhotoUrls[0] || '',
         photos: finalPhotoUrls,
         description,
-        city,
+        city: publicCity,
         zip_code,
         latitude,
         longitude,
@@ -225,7 +228,7 @@ export async function POST(request: NextRequest) {
         species,
         photo_url: finalPhotoUrls[0] || '',
         description: encodedDesc,
-        city,
+        city: publicCity,
         zip_code,
         latitude,
         longitude,

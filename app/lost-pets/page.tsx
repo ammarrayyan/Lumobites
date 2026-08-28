@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import { formatPublicCity } from '@/lib/formatCity';
 import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 
@@ -804,7 +805,7 @@ export default function LostPetsFeed() {
                                 <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize">{pet.species}</span>
                               </div>
                               <p className="text-xs font-semibold text-[#8B7E7D] mb-2 flex flex-col gap-0.5">
-                                <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                                <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {formatPublicCity(pet.city) || pet.city}{pet.zip_code && `, ${pet.zip_code}`}</span>
                                 {pet.distance !== undefined && pet.distance !== null && (
                                   <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded uppercase tracking-wide">
                                     {pet.distance < 0.1 ? '< 0.1 mi away' : `${pet.distance.toFixed(1)} mi away`}
@@ -1134,7 +1135,7 @@ export default function LostPetsFeed() {
                               <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-1.5 py-0.5 rounded capitalize">{pet.species}</span>
                             </div>
                             <p className="text-xs font-semibold text-[#8B7E7D] mb-2 flex flex-col gap-0.5">
-                              <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {pet.city} {pet.zip_code && `, ${pet.zip_code}`}</span>
+                              <span className="flex items-center gap-1 truncate"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {formatPublicCity(pet.city) || pet.city}{pet.zip_code && `, ${pet.zip_code}`}</span>
                               {pet.distance !== undefined && pet.distance !== null && (
                                 <span className="inline-flex w-fit text-[#8B5E3C] font-black text-[10px] bg-[#F5EDE4] px-1.5 py-0.5 rounded uppercase tracking-wide">
                                   {pet.distance < 0.1 ? '< 0.1 mi away' : `${pet.distance.toFixed(1)} mi away`}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, X } from 'lucide-react';
+import { formatPublicCity } from '@/lib/formatCity';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -210,7 +211,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
   const handleShare = async () => {
     if (!pet) return;
-    const text = `🚨 ${pet.type === 'lost' ? 'Lost' : 'Found'} ${pet.species} in ${pet.city} ${pet.zip_code} — have you seen ${pet.pet_name || 'them'}?`;
+    const publicCity = formatPublicCity(pet.city) || pet.city;
+    const text = `🚨 ${pet.type === 'lost' ? 'Lost' : 'Found'} ${pet.species} in ${publicCity}${pet.zip_code ? ` ${pet.zip_code}` : ''} — have you seen ${pet.pet_name || 'them'}?`;
     const url = window.location.href;
 
     if (navigator.share) {
@@ -521,7 +523,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 <div className="flex items-center gap-2 text-xs sm:text-sm text-[#8B7E7D] font-medium mb-4 flex-wrap">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
-                    {pet.city}, {pet.zip_code}
+                    {formatPublicCity(pet.city) || pet.city}{pet.zip_code ? `, ${pet.zip_code}` : ''}
                   </span>
                   <span>•</span>
                   <span>{pet.type === 'lost' ? 'Lost on' : 'Found on'}: {new Date(pet.date_lost_found).toLocaleDateString()}</span>
