@@ -68,11 +68,15 @@ export async function POST(request: NextRequest) {
 
     // ── Send In-App & Firebase Push Notifications to Pet Owner ───────────────
     try {
-      const { data: pet } = await supabaseAdmin
+      const { data: pet, error: petQueryErr } = await supabaseAdmin
         .from('lost_pets')
-        .select('contact_email, pet_name, species, type')
+        .select('contact_email, pet_name, species')
         .eq('id', lost_pet_id)
         .single();
+
+      if (petQueryErr) {
+        console.error('[Lost Pets Comments POST] Pet lookup error:', petQueryErr);
+      }
 
       if (pet && pet.contact_email) {
         const ownerEmail = pet.contact_email.toLowerCase().trim();
@@ -86,22 +90,32 @@ export async function POST(request: NextRequest) {
           const notifLink = `/lost-pets/${lost_pet_id}`;
 
           // Channel 1: In-App Bell Notification
-          await supabaseAdmin.from('notifications').insert({
+          const { error: notifInsertErr } = await supabaseAdmin.from('notifications').insert({
             recipient_email: ownerEmail,
             type: 'lost_pet_update',
             title: notifTitle,
             message: notifBody,
             link: notifLink,
             read: false
-          }).catch(err => console.error('[Lost Pets Comments POST] In-App notif error:', err));
+          });
+
+          if (notifInsertErr) {
+            console.error('[Lost Pets Comments POST] In-App notif error:', notifInsertErr);
+          } else {
+            console.log('[Lost Pets Comments POST] In-app notification created for:', ownerEmail);
+          }
 
           // Channel 2: Firebase Mobile Push Notification
-          await sendPushNotification(
-            ownerEmail,
-            notifTitle,
-            notifBody,
-            notifLink
-          ).catch(err => console.error('[Lost Pets Comments POST] Push notif error:', err));
+          try {
+            await sendPushNotification(
+              ownerEmail,
+              notifTitle,
+              notifBody,
+              notifLink
+            );
+          } catch (pushErr) {
+            console.error('[Lost Pets Comments POST] Push notif error:', pushErr);
+          }
         }
       }
     } catch (notifErr) {
