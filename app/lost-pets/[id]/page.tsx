@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, X } from 'lucide-react';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -68,6 +68,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [userEmail, setUserEmail] = useState<string>('');
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_PAGE_SIZE);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Auto-derive the comment display name from the signed-in email — no manual typing,
   // no PII shown (see getDisplayNameFromEmail).
@@ -381,9 +382,9 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F3EE] font-sans">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans pb-16">
       
-      <main className="max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <main className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <button 
           type="button"
           onClick={() => {
@@ -393,41 +394,50 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
               router.push('/lost-pets');
             }
           }}
-          className="text-[#8B5E3C] font-bold hover:underline mb-6 inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-base"
+          className="text-[#8B5E3C] font-bold hover:underline mb-4 inline-flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0 text-xs sm:text-sm transition-colors"
         >
-          &larr; Back to Board
+          &larr; Back to Lost & Found Board
         </button>
 
         {pet.status === 'resolved' && (
-          <div className="bg-green-100 border border-green-300 text-green-800 p-6 rounded-2xl mb-8 flex items-center justify-center gap-4 shadow-sm animate-fade-in">
-            <span className="text-4xl">🎉</span>
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 sm:p-5 rounded-2xl mb-5 flex items-center gap-3.5 shadow-xs">
+            <span className="text-3xl">🎉</span>
             <div>
-              <h2 className="text-2xl font-black">Great News!</h2>
-              <p className="font-medium">This pet has been {pet.type === 'lost' ? 'found and returned home safely' : 'reunited with their owner'}!</p>
+              <h2 className="text-lg sm:text-xl font-black text-emerald-950">Great News!</h2>
+              <p className="text-xs sm:text-sm font-medium text-emerald-800">
+                This pet has been {pet.type === 'lost' ? 'found and returned home safely' : 'reunited with their owner'}!
+              </p>
             </div>
           </div>
         )}
 
-        <div style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-        className="bg-white rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs mb-12">
+        {/* Main Pet Card */}
+        <div className="bg-white rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-xs mb-6 sm:mb-8">
           <div className="flex flex-col md:flex-row">
             {/* Photo Gallery Column */}
-            <div className="md:w-[58%] relative bg-[#FAF5EE] flex flex-col justify-between border-r border-[#EADBCE] min-h-[400px] md:min-h-[550px]">
+            <div className="md:w-[52%] relative bg-[#FAF6F4] flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E8DDD4] min-h-[320px] md:min-h-[460px]">
               
               {/* Main Image Slideshow Container */}
               <div 
-                className="flex-1 relative flex items-center justify-center overflow-hidden"
+                className="flex-1 relative flex items-center justify-center overflow-hidden cursor-zoom-in"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, photosList.length)}
+                onClick={() => {
+                  if (photosList[activePhotoIndex]) {
+                    setPreviewImage(photosList[activePhotoIndex]);
+                  }
+                }}
               >
                 {photosList.length > 0 ? (
                   <img 
                     src={photosList[activePhotoIndex]} 
                     alt={`${pet.pet_name || 'Pet'} - Image ${activePhotoIndex + 1}`} 
-                    className="w-full h-full object-contain max-h-[500px] transition-all duration-300"
+                    className="w-full h-full object-contain max-h-[440px] transition-all duration-300 select-none"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo Available</div>
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-semibold">
+                    No Photo Available
+                  </div>
                 )}
 
                 {/* Left/Right Click Navs */}
@@ -439,7 +449,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                         e.stopPropagation();
                         setActivePhotoIndex(prev => (prev - 1 + photosList.length) % photosList.length);
                       }}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-lg transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-base transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                      aria-label="Previous photo"
                     >
                       &#8249;
                     </button>
@@ -449,7 +460,8 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                         e.stopPropagation();
                         setActivePhotoIndex(prev => (prev + 1) % photosList.length);
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-lg transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center font-bold text-base transition-all shadow-md cursor-pointer hover:scale-105 z-10"
+                      aria-label="Next photo"
                     >
                       &#8250;
                     </button>
@@ -457,25 +469,34 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 )}
 
                 {/* Badge Overlay */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className={`px-4 py-2 rounded-full text-xs font-black tracking-wider uppercase shadow-md ${
-                    pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                    pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5">
+                  <span className={`px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase shadow-xs ${
+                    pet.status === 'resolved' ? 'bg-emerald-600 text-white' :
+                    pet.type === 'lost' ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white'
                   }`}>
                     {pet.status === 'resolved' ? 'Resolved 🎉' : pet.type}
                   </span>
+                  {photosList.length > 1 && (
+                    <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {activePhotoIndex + 1} / {photosList.length}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Gallery Thumbnails List */}
               {photosList.length > 1 && (
-                <div className="p-4 bg-white border-t border-[#E8DDD4] flex justify-center gap-2 overflow-x-auto">
+                <div className="p-3 bg-white border-t border-[#E8DDD4] flex justify-center gap-2 overflow-x-auto">
                   {photosList.map((url: string, index: number) => (
                     <button
                       key={index}
-                      onClick={() => setActivePhotoIndex(index)}
-                      className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                        activePhotoIndex === index ? 'border-[#8B5E3C] scale-105 shadow-sm' : 'border-transparent hover:border-gray-300'
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex(index);
+                      }}
+                      className={`w-11 h-11 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                        activePhotoIndex === index ? 'border-[#8B5E3C] scale-105 shadow-xs' : 'border-transparent hover:border-gray-300 opacity-70 hover:opacity-100'
                       }`}
                     >
                       <img src={url} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
@@ -483,54 +504,58 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   ))}
                 </div>
               )}
-
             </div>
 
             {/* Details Column */}
-            <div className="md:w-[42%] p-8 md:p-10 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-4xl font-black text-[#4A3E3D]">{pet.pet_name || 'Unknown Pet'}</h1>
-                <span className="text-sm font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-3 py-1 rounded-lg capitalize">
-                  {pet.species}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-[#8B7E7D] font-medium mb-6">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  {pet.city}, {pet.zip_code}
-                </span>
-                <span>•</span>
-                <span>{pet.type === 'lost' ? 'Lost on' : 'Found on'}: {new Date(pet.date_lost_found).toLocaleDateString()}</span>
+            <div className="md:w-[48%] p-5 sm:p-7 flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-3 mb-1.5 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#3B2410] tracking-tight">
+                    {pet.pet_name || 'Unknown Pet'}
+                  </h1>
+                  <span className="text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-2.5 py-1 rounded-xl capitalize shrink-0">
+                    {pet.species}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-[#8B7E7D] font-medium mb-4 flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
+                    {pet.city}, {pet.zip_code}
+                  </span>
+                  <span>•</span>
+                  <span>{pet.type === 'lost' ? 'Lost on' : 'Found on'}: {new Date(pet.date_lost_found).toLocaleDateString()}</span>
+                </div>
+
+                <div className="bg-[#FAF6F4] p-4 rounded-2xl mb-5 border border-[#E8DDD4]/70">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-[#8B5E3C] mb-1.5">Description</h3>
+                  <p className="text-[#4A3E3D] text-sm leading-relaxed whitespace-pre-wrap">{pet.description}</p>
+                </div>
               </div>
 
-              <div className="bg-[#FAF6F4] p-6 rounded-2xl mb-8">
-                <h3 className="font-bold text-[#4A3E3D] mb-2 text-lg">Description</h3>
-                <p className="text-[#4A3E3D] text-[15px] sm:text-base leading-relaxed whitespace-pre-wrap">{pet.description}</p>
-              </div>
-
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2.5 pt-2">
                 {pet.status === 'active' && (
                   <>
                     {!showContact ? (
                       <button 
+                        type="button"
                         onClick={() => setShowContact(true)}
-                        className="w-full bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold py-4 rounded-xl transition-all shadow-md text-lg flex items-center justify-center gap-2"
+                        className="w-full bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <Phone className="w-5 h-5 text-white" /> Contact {pet.type === 'lost' ? 'Owner' : 'Finder'}
+                        <Phone className="w-4 h-4 text-white" /> Contact {pet.type === 'lost' ? 'Owner' : 'Finder'}
                       </button>
                     ) : (
-                      <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-center animate-fade-in">
-                        <h4 className="font-bold text-blue-900 mb-2">Contact Info</h4>
+                      <div className="bg-blue-50/80 border border-blue-200 p-3.5 rounded-xl text-center animate-fade-in">
+                        <h4 className="font-bold text-blue-900 text-xs uppercase tracking-wider mb-2">Contact Information</h4>
                         {pet.contact_phone && (
-                          <p className="text-blue-800 text-lg font-bold mb-1 flex items-center justify-center gap-1.5">
-                            <Phone className="w-4 h-4 text-blue-800" /> {pet.contact_phone}
+                          <p className="text-blue-900 text-sm sm:text-base font-bold mb-1 flex items-center justify-center gap-1.5">
+                            <Phone className="w-4 h-4 text-blue-700" /> {pet.contact_phone}
                           </p>
                         )}
                         {pet.contact_email && (
-                          <p className="text-blue-800 text-lg font-bold flex items-center justify-center gap-1.5">
-                            <Mail className="w-4 h-4 text-blue-800" />{' '}
-                            <a href={`mailto:${pet.contact_email}`} className="hover:underline">
+                          <p className="text-blue-900 text-sm sm:text-base font-bold flex items-center justify-center gap-1.5">
+                            <Mail className="w-4 h-4 text-blue-700" />{' '}
+                            <a href={`mailto:${pet.contact_email}`} className="hover:underline text-blue-800">
                               {pet.contact_email}
                             </a>
                           </p>
@@ -541,72 +566,79 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 )}
 
                 <button 
+                  type="button"
                   onClick={handleShare}
-                  className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-4 rounded-xl transition-all text-lg flex items-center justify-center gap-2"
+                  className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-3 px-4 rounded-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Share2 className="w-5 h-5 text-[#8B5E3C]" /> {copied ? 'Link Copied!' : 'Share this post'}
+                  <Share2 className="w-4 h-4 text-[#8B5E3C]" /> {copied ? 'Link Copied!' : 'Share this post'}
                 </button>
 
                 {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
-                  <div className="mt-6 border-t border-[#E8DDD4] pt-6">
-                    <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
-                      <Settings className="w-5 h-5 text-gray-500" /> Manage Your Post
+                  <div className="mt-4 border-t border-[#E8DDD4] pt-4">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-[#4A3E3D] mb-2.5 flex items-center gap-1.5">
+                      <Settings className="w-3.5 h-3.5 text-gray-500" /> Manage Your Post
                     </h4>
-                    <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
                       {pet.status === 'active' && (
                         <button 
+                          type="button"
                           onClick={() => handleOwnerAction('resolve')}
                           disabled={actionLoading}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                          className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-3 rounded-xl transition-all shadow-xs text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
                         >
                           {actionLoading ? 'Processing...' : 'Mark as Resolved 🎉'}
                         </button>
                       )}
                       <button 
+                        type="button"
                         onClick={() => handleOwnerAction('delete')}
                         disabled={actionLoading}
-                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                        className="flex-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold py-2.5 px-3 rounded-xl transition-all shadow-xs text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
                       >
-                        {actionLoading ? 'Processing...' : 'Delete My Post'}
+                        {actionLoading ? 'Processing...' : 'Delete Post'}
                       </button>
                     </div>
                   </div>
                 ) : editToken ? (
-                  <div className="mt-6 border-t border-[#E8DDD4] pt-6">
-                    <h4 className="font-bold text-[#4A3E3D] mb-3 flex items-center gap-2">
-                      <Settings className="w-5 h-5 text-gray-500" /> Manage Your Post
+                  <div className="mt-4 border-t border-[#E8DDD4] pt-4">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-[#4A3E3D] mb-2.5 flex items-center gap-1.5">
+                      <Settings className="w-3.5 h-3.5 text-gray-500" /> Manage Your Post
                     </h4>
-                    <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
                       {pet.status === 'active' && (
                         <button 
+                          type="button"
                           onClick={() => handleOwnerAction('resolve')}
                           disabled={actionLoading}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                          className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2.5 px-3 rounded-xl transition-all shadow-xs text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
                         >
                           {actionLoading ? 'Processing...' : 'Mark as Resolved 🎉'}
                         </button>
                       )}
                       <button 
+                        type="button"
                         onClick={() => handleOwnerAction('delete')}
                         disabled={actionLoading}
-                        className="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold py-3 rounded-xl transition-all shadow-sm text-sm disabled:opacity-50 cursor-pointer"
+                        className="flex-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold py-2.5 px-3 rounded-xl transition-all shadow-xs text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
                       >
-                        {actionLoading ? 'Processing...' : 'Delete My Post'}
+                        {actionLoading ? 'Processing...' : 'Delete Post'}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-6 border-t border-[#E8DDD4] pt-6 flex gap-3">
+                  <div className="mt-3 border-t border-[#E8DDD4]/80 pt-3 flex gap-2">
                     <button 
+                      type="button"
                       onClick={handleReportPost}
-                      className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-3 rounded-xl transition-all text-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-2 px-3 rounded-xl transition-all text-xs cursor-pointer text-center flex items-center justify-center gap-1"
                     >
                       Flag Post
                     </button>
                     {pet.contact_email && (
                       <button 
+                        type="button"
                         onClick={handleBlockUser}
-                        className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-3 rounded-xl transition-all text-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
+                        className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-[#8B7E7D] font-bold py-2 px-3 rounded-xl transition-all text-xs cursor-pointer text-center flex items-center justify-center gap-1"
                       >
                         Block Poster
                       </button>
@@ -618,13 +650,84 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           </div>
         </div>
 
-        {/* Comments Section */}
-        <div className="max-w-3xl mx-auto">
-          <h3 className="text-2xl font-black text-[#4A3E3D] mb-6">Community Updates ({comments.length})</h3>
-          
-          <div className="mb-8">
-            {comments.length > 0 && (
-              <div className="space-y-3">
+        {/* Community Updates & Comments Section */}
+        <section className="w-full">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-extrabold text-[#3B2410]">Community Updates</h2>
+              <span className="text-xs font-bold bg-white text-[#8B5E3C] border border-[#E8DDD4] px-2.5 py-0.5 rounded-full shadow-xs">
+                {comments.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Leave an Update Composer */}
+          <div className="bg-white p-4 rounded-2xl border border-[#E8DDD4] shadow-xs mb-4">
+            <h3 className="text-xs uppercase tracking-wider font-bold text-[#8B5E3C] mb-2.5 flex items-center gap-1.5">
+              <span>💬</span> Leave a Sighting or Update
+            </h3>
+            {!userEmail ? (
+              <div className="text-center py-4 bg-[#FAF6F4] rounded-xl border border-[#E8DDD4]/60">
+                <p className="text-xs text-[#8B7E7D] font-medium mb-2.5">Sign in to comment or share a sighting</p>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
+                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                >
+                  Sign In — It's Free
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleCommentSubmit}>
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-3 focus-within:border-[#8B5E3C] focus-within:bg-white transition-all">
+                  <textarea
+                    required
+                    rows={2}
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                    placeholder="Share a sighting, location detail, or helpful update..."
+                    className="w-full text-[#4A3E3D] text-sm focus:outline-none resize-none placeholder:text-[#8B7E7D]/70 bg-transparent"
+                  />
+                  <div className="flex items-center justify-between pt-2 border-t border-[#E8DDD4]/80 mt-1.5">
+                    <label
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-[#8B5E3C] hover:bg-white cursor-pointer transition-all border border-transparent hover:border-[#E8DDD4]"
+                      title={commentPhotoPreview ? 'Change photo' : 'Attach a photo'}
+                    >
+                      <Camera className="w-4 h-4" />
+                      <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={submittingComment || !newComment.trim()}
+                      className="inline-flex items-center gap-1.5 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-1.5 px-4 rounded-xl transition-all disabled:opacity-50 text-xs shadow-xs cursor-pointer"
+                    >
+                      {submittingComment ? 'Posting...' : 'Post Update'} <Send className="w-3 h-3" />
+                    </button>
+                  </div>
+                  {commentPhotoPreview && (
+                    <div className="mt-2.5 relative inline-block">
+                      <img src={commentPhotoPreview} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-[#E8DDD4]" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCommentPhoto(null);
+                          setCommentPhotoPreview(null);
+                        }}
+                        className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-md hover:bg-rose-700 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Comment Feed Items */}
+          <div className="space-y-3">
+            {comments.length > 0 ? (
+              <>
                 {comments.slice(0, visibleCommentsCount).map((comment) => {
                   const isAuthor = userEmail && (
                     (comment.author_email && comment.author_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) ||
@@ -635,46 +738,44 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   const avatarLetter = getAvatarLetter(comment.author_name);
 
                   return (
-                    <div key={comment.id} className="flex gap-3">
+                    <div key={comment.id} className="flex gap-2.5 items-start">
                       <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm font-black text-sm"
+                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-xs font-black text-xs border border-black/5"
                         style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
                       >
                         {avatarLetter}
                       </div>
-                      <div className="flex-1 bg-white p-5 rounded-2xl shadow-sm border border-[#E8DDD4] min-w-0">
-                        <div className="flex justify-between items-start gap-2 flex-wrap">
-                          <div>
-                            <h4 className="font-bold text-[#4A3E3D] text-sm">{comment.author_name}</h4>
-                            <span className="text-xs text-[#8B7E7D]">{formatDistanceToNow(new Date(comment.created_at))} ago</span>
+                      <div className="flex-1 bg-white p-3.5 sm:p-4 rounded-2xl shadow-xs border border-[#E8DDD4] min-w-0">
+                        <div className="flex justify-between items-center gap-2 flex-wrap mb-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-[#3B2410] text-xs sm:text-sm">{comment.author_name}</h4>
+                            <span className="text-[11px] text-[#8B7E7D]">
+                              {formatDistanceToNow(new Date(comment.created_at))} ago
+                            </span>
                           </div>
                           {isAuthor && (
                             <button
+                              type="button"
                               onClick={() => handleDeleteComment(comment.id)}
-                              className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                              className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-all flex items-center gap-1 cursor-pointer"
                               title="Delete your update"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                              <Trash2 className="w-3 h-3" /> Delete
                             </button>
                           )}
                         </div>
-                        <p className="text-[#4A3E3D] text-[15px] leading-relaxed mt-2">{comment.comment_text}</p>
+                        <p className="text-[#4A3E3D] text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{comment.comment_text}</p>
 
                         {/* Comment Photo Thumbnail */}
                         {comment.photo_url && (
-                          <div className="pt-3">
+                          <div className="pt-2.5">
                             <img
                               src={comment.photo_url}
                               alt="Sighting Attachment"
-                              onClick={() => {
-                                // Insert comment photo dynamically into photosList for zoom
-                                photosList.unshift(comment.photo_url);
-                                setLightboxIndex(0);
-                                setLightboxOpen(true);
-                              }}
-                              className="w-36 h-36 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
+                              onClick={() => setPreviewImage(comment.photo_url)}
+                              className="w-28 h-28 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
                             />
-                            <p className="text-[10px] text-gray-400 mt-1 italic">Click image to zoom</p>
+                            <p className="text-[10px] text-[#8B7E7D] mt-1 italic">Click photo to view full size</p>
                           </div>
                         )}
                       </div>
@@ -684,79 +785,46 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
 
                 {comments.length > visibleCommentsCount && (
                   <button
+                    type="button"
                     onClick={() => setVisibleCommentsCount(c => c + COMMENTS_PAGE_SIZE)}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-bold text-[#4A3E3D]/70 hover:text-[#4A3E3D] bg-white border border-[#E8DDD4] hover:border-[#8B5E3C]/40 py-3 rounded-xl shadow-sm transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-[#4A3E3D]/80 hover:text-[#4A3E3D] bg-white border border-[#E8DDD4] hover:border-[#8B5E3C]/40 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
                   >
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-3.5 h-3.5" />
                     Show {Math.min(comments.length - visibleCommentsCount, COMMENTS_PAGE_SIZE)} more {comments.length - visibleCommentsCount === 1 ? 'update' : 'updates'}
                   </button>
                 )}
-              </div>
-            )}
-            {comments.length === 0 && (
-              <p className="text-[#8B7E7D] text-center italic py-4">No updates yet. Be the first to share information!</p>
-            )}
-          </div>
-
-          <div className="bg-[#FAF6F4] p-6 md:p-8 rounded-3xl border border-[#E8DDD4]">
-            <h4 className="font-bold text-[#4A3E3D] mb-4">Leave an Update</h4>
-            {!userEmail ? (
-              <div className="text-center py-6">
-                <p className="text-gray-500 mb-3">Sign in to comment</p>
-                <button
-                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-                  className="bg-[#8B5E3C] text-white px-6 py-3 rounded-xl font-medium"
-                >
-                  Sign In — It's Free
-                </button>
-              </div>
+              </>
             ) : (
-              <form onSubmit={handleCommentSubmit}>
-                <div className="bg-white border border-[#E8DDD4] rounded-2xl p-3 focus-within:border-[#8B5E3C] transition-all">
-                  <textarea
-                    required
-                    rows={2}
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder="Share a sighting or helpful info..."
-                    className="w-full text-[#4A3E3D] focus:outline-none resize-none placeholder:text-[#8B7E7D]/70"
-                  />
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E8DDD4] mt-2">
-                    <label
-                      className="inline-flex items-center justify-center w-9 h-9 rounded-full text-[#8B5E3C] hover:bg-[#FAF6F4] cursor-pointer transition-all"
-                      title={commentPhotoPreview ? 'Change photo' : 'Attach a photo'}
-                    >
-                      <Camera className="w-5 h-5" />
-                      <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
-                    </label>
-                    <button
-                      type="submit"
-                      disabled={submittingComment || !newComment.trim()}
-                      className="inline-flex items-center gap-1.5 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-2 px-5 rounded-full transition-all disabled:opacity-50 text-sm"
-                    >
-                      {submittingComment ? 'Posting...' : 'Post'} <Send className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  {commentPhotoPreview && (
-                    <div className="mt-3 relative inline-block">
-                      <img src={commentPhotoPreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-[#E8DDD4]" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCommentPhoto(null);
-                          setCommentPhotoPreview(null);
-                        }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </form>
+              <div className="bg-white p-6 rounded-2xl border border-[#E8DDD4] text-center shadow-xs">
+                <p className="text-xs text-[#8B7E7D] font-medium">No community updates yet. Be the first to share helpful sightings or information!</p>
+              </div>
             )}
           </div>
-        </div>
+        </section>
+
+        {/* Full Image Preview Modal */}
+        {previewImage && (
+          <div 
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div className="relative max-w-3xl max-h-[90vh] bg-black rounded-2xl overflow-hidden shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setPreviewImage(null)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center font-bold z-10 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <img 
+                src={previewImage} 
+                alt="Full size preview" 
+                className="max-w-full max-h-[85vh] object-contain mx-auto"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
