@@ -3628,6 +3628,21 @@ export function PetSittingContent() {
         {/* FIND A SITTER TAB */}
         {activeTab === 'find' && (
           <div className="animate-fade-in">
+            {/* Quick Floating Action Button for One-Handed Reach on Mobile */}
+            <MobileFloatingAction bottomOffset="92px">
+              <button
+                onClick={() => {
+                  setActiveTab('become');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="pressable flex items-center gap-2 bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-bold text-xs py-3 px-4 rounded-full shadow-[0_8px_20px_rgba(193,125,60,0.40)] hover:shadow-xl border border-white/40 active:scale-95 transition-transform select-none cursor-pointer"
+                style={{ textDecoration: 'none' }}
+                aria-label="Become a Pet Sitter"
+              >
+                <Sparkles className="w-4 h-4 text-[#FFF2D6]" />
+                <span>Become a Sitter</span>
+              </button>
+            </MobileFloatingAction>
             {reqEmail && (
               <div className="flex justify-center gap-2 mb-8 max-w-lg mx-auto border-b border-[#E8DDD4] pb-2">
                 <button
@@ -6381,24 +6396,6 @@ export function PetSittingContent() {
           </>
           )}
           </div>
-        )}
-
-        {/* Mobile Floating Action Button for One-Handed Thumb Reach (Become a Sitter) */}
-        {activeTab === 'find' && (
-          <MobileFloatingAction bottomOffset="92px">
-            <button
-              onClick={() => {
-                setActiveTab('become');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="pressable flex items-center gap-2 bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-bold text-xs py-3 px-4 rounded-full shadow-[0_8px_20px_rgba(193,125,60,0.40)] hover:shadow-xl border border-white/40 active:scale-95 transition-transform select-none cursor-pointer"
-              style={{ textDecoration: 'none' }}
-              aria-label="Become a Pet Sitter"
-            >
-              <Sparkles className="w-4 h-4 text-[#FFF2D6]" />
-              <span>Become a Sitter</span>
-            </button>
-          </MobileFloatingAction>
         )}
 
       </main>
