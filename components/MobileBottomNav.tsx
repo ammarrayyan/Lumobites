@@ -13,11 +13,11 @@ export default function MobileBottomNav() {
   const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
 
   const tabs = [
-    { label: 'Home', icon: Home, href: '/', isActive: pathname === '/' },
     { label: 'Sitting', icon: PawPrint, href: '/petsitting', isActive: pathname === '/petsitting' },
     { label: 'Lost Pets', icon: MapPin, href: '/lost-pets', isActive: pathname === '/lost-pets' },
-    { label: 'Pet Food', icon: Utensils, href: '/chat', isActive: isFoodActive },
     { label: 'Community', icon: Users, href: '/city-board', isActive: isCommunityActive },
+    { label: 'Home', icon: Home, href: '/', isActive: pathname === '/', isRaised: true },
+    { label: 'Pet Food', icon: Utensils, href: '/chat', isActive: isFoodActive },
     { label: 'Explore', icon: Globe, href: '/explore', isActive: pathname === '/explore' },
   ];
 
@@ -29,7 +29,8 @@ export default function MobileBottomNav() {
     setTappedIndex(null);
   }, [pathname]);
 
-  const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 0);
+  const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 3);
+  const isRaisedActive = activeIndex >= 0 && tabs[activeIndex]?.isRaised;
 
   return (
     <div 
@@ -45,24 +46,24 @@ export default function MobileBottomNav() {
         WebkitTransform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         zIndex: 9999,
-        backgroundColor: 'rgba(255, 255, 255, 0.65)',
+        backgroundColor: 'rgba(255, 255, 255, 0.72)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
         boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
         borderRadius: '36px',
-        border: '1px solid rgba(255, 255, 255, 0.55)',
+        border: '1px solid rgba(255, 255, 255, 0.65)',
         pointerEvents: 'auto',
       }}
     >
-      {/* 🫧 WhatsApp-Style Liquid Glass Rounded Rectangle Active Pill */}
-      {activeIndex >= 0 && (
+      {/* 🫧 WhatsApp-Style Liquid Glass Rounded Rectangle Active Pill (For Flat Items) */}
+      {activeIndex >= 0 && !isRaisedActive && (
         <div 
           className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.45,0.64,1)]"
           style={{
-            top: '3px',
-            bottom: '3px',
-            width: `calc(${100 / tabs.length}% + 8px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% - 4px)`,
+            top: '4px',
+            bottom: '4px',
+            width: `calc(${100 / tabs.length}% + 6px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% - 3px)`,
             borderRadius: '24px',
             zIndex: 1,
           }}
@@ -91,7 +92,7 @@ export default function MobileBottomNav() {
             className="absolute inset-0"
             style={{
               borderRadius: '24px',
-              backgroundColor: 'rgba(255, 255, 255, 0.48)',
+              backgroundColor: 'rgba(255, 255, 255, 0.52)',
               backdropFilter: 'blur(20px) saturate(200%)',
               WebkitBackdropFilter: 'blur(20px) saturate(200%)',
               boxShadow: `
@@ -119,6 +120,65 @@ export default function MobileBottomNav() {
         const Icon = tab.icon;
         const isActive = activeIndex === idx;
 
+        if (tab.isRaised) {
+          return (
+            <Link
+              key={tab.label}
+              href={tab.href}
+              prefetch={true}
+              onClick={() => setTappedIndex(idx)}
+              onTouchStart={() => {
+                setTappedIndex(idx);
+                router.prefetch(tab.href);
+              }}
+              onMouseEnter={() => router.prefetch(tab.href)}
+              className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer select-none group z-20"
+              style={{ textDecoration: 'none' }}
+              aria-label="Home"
+            >
+              {/* Elevated Floating Circular Button */}
+              <div 
+                className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.34,1.45,0.64,1)] group-active:scale-90"
+                style={{
+                  transform: 'translateY(-14px)',
+                  background: isActive
+                    ? 'linear-gradient(135deg, #9C6C48 0%, #8B5E3C 50%, #744A29 100%)'
+                    : 'linear-gradient(135deg, #FFFFFF 0%, #FAF5EE 100%)',
+                  boxShadow: isActive
+                    ? '0 12px 28px -2px rgba(139, 94, 60, 0.50), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.40)'
+                    : '0 8px 20px -2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05), inset 0 1.5px 2px rgba(255, 255, 255, 0.90)',
+                  border: isActive
+                    ? '3px solid #FFFFFF'
+                    : '2.5px solid rgba(255, 255, 255, 0.95)',
+                }}
+              >
+                <Icon
+                  className="w-[24px] h-[24px] transition-all duration-300"
+                  style={{
+                    color: isActive ? '#FFFFFF' : '#8B5E3C',
+                    fill: isActive ? 'currentColor' : 'none',
+                    strokeWidth: isActive ? 2.5 : 2,
+                    filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Label */}
+              <span
+                className="text-[9px] tracking-tight select-none transition-all duration-300"
+                style={{
+                  marginTop: '-11px',
+                  color: isActive ? '#8B5E3C' : '#8E8E93',
+                  fontWeight: isActive ? 800 : 600,
+                  transform: isActive ? 'scale(1.04)' : 'scale(1)',
+                }}
+              >
+                {tab.label}
+              </span>
+            </Link>
+          );
+        }
+
         return (
           <Link
             key={tab.label}
@@ -130,12 +190,12 @@ export default function MobileBottomNav() {
               router.prefetch(tab.href);
             }}
             onMouseEnter={() => router.prefetch(tab.href)}
-            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-0.5 group active:scale-90 transition-transform duration-150 select-none"
+            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-0.5 group active:scale-90 transition-transform duration-150 select-none z-10"
             style={{ textDecoration: 'none' }}
           >
             {/* Icon with Solid Black & Bold Treatment for Active */}
             <Icon
-              className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[19px] h-[19px] relative z-10 transition-all duration-300 ease-out"
               style={{
                 color: isActive ? '#000000' : '#8E8E93',
                 fill: isActive ? 'currentColor' : 'none',
@@ -146,7 +206,7 @@ export default function MobileBottomNav() {
 
             {/* Label */}
             <span
-              className="text-[9.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
+              className="text-[9px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
               style={{
                 color: isActive ? '#000000' : '#8E8E93',
                 fontWeight: isActive ? 800 : 600,
