@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import PetProfileCard from '@/components/PetProfileCard';
 import BookingProgressStepper from '@/components/BookingProgressStepper';
-import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft, DollarSign, QrCode } from 'lucide-react';
+import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Camera, ShieldCheck, MessageSquare, Key, AlertTriangle, Clipboard, Share2, Upload, RefreshCw, MessageCircle, Sun, BookOpen, Clock, PawPrint, Check, CheckCircle, XCircle, Sparkles, Plus, Info, Dog, Cat, Pencil, Trash2, Search, ChevronDown, Loader2, LayoutDashboard, FileText, Ban, X, ArrowLeft, ArrowRight, DollarSign, QrCode } from 'lucide-react';
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
@@ -3606,36 +3606,22 @@ export function PetSittingContent() {
         </div>
       )}
 
-      {/* Sticky Secondary Nav Bar */}
-      <div className="sticky-secondary-header border-b border-[#E8DDD4] w-full flex justify-center py-3 px-4">
-        <div className="flex items-center gap-2 max-w-full px-1 justify-center">
-          <button
-            onClick={() => setActiveTab('find')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              activeTab === 'find'
-                ? 'bg-[#8B5E3C] text-white shadow-sm'
-                : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-            }`}
-          >
-            Find a Sitter
-          </button>
-          <button
-            onClick={() => setActiveTab('become')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              activeTab === 'become'
-                ? 'bg-[#8B5E3C] text-white shadow-sm'
-                : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-            }`}
-          >
-            Become a Pet Sitter
-          </button>
-        </div>
-      </div>
-
-      <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
-        <div className="text-center mb-10">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-3">Lumo Bites Pet Sitting</h1>
-          <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Connect with trusted, local pet sitters in your community.</p>
+      <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-1.5">Lumo Bites Pet Sitting</h1>
+            <p className="text-xs sm:text-sm md:text-base font-normal text-[#6B5E5D] leading-relaxed">Connect with trusted, local pet sitters in your community.</p>
+          </div>
+          {activeTab === 'find' && (
+            <button
+              onClick={() => setActiveTab('become')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-[0_4px_14px_rgba(16,185,129,0.30)] transition-all duration-200 cursor-pointer shrink-0 active:scale-95 border border-emerald-500/80"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-200" />
+              <span>Become a Sitter</span>
+              <ArrowRight className="w-3.5 h-3.5 text-emerald-200" />
+            </button>
+          )}
         </div>
 
         {/* FIND A SITTER TAB */}
