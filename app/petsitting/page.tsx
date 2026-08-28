@@ -4650,119 +4650,31 @@ export function PetSittingContent() {
 
             {/* Owner Booking History Section */}
             {ownerSubTab === 'dashboard' && reqEmail && (
-              <div id="owner-history" style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }} className="bg-white rounded-3xl p-8 border border-[#DFD3C7] shadow-xs max-w-4xl mx-auto text-left">
+              <div id="owner-history" style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }} className="bg-white rounded-3xl p-6 sm:p-8 border border-[#DFD3C7] shadow-xs max-w-4xl mx-auto text-left animate-fade-in">
               <div id="messages" />
-              <div className="mb-6">
-                <h3 className="text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
-                  <Clipboard className="w-6 h-6 text-[#8B5E3C]" /> Owner Dashboard
-                </h3>
-              </div>
               <div className="space-y-6">
-                  {/* Tabs Navigation */}
-                  <div className="flex gap-2 border-b border-[#E8DDD4] pb-2">
-                    <button 
-                      onClick={() => setOwnerActiveTab('bookings')} 
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-                        ownerActiveTab === 'bookings' 
-                          ? 'bg-[#8B5E3C] text-white shadow-sm' 
-                          : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-                      }`}
-                    >
-                      📅 My Bookings
-                    </button>
-                    <button 
-                      onClick={() => setOwnerActiveTab('pets')} 
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
-                        ownerActiveTab === 'pets' 
-                          ? 'bg-[#8B5E3C] text-white shadow-sm' 
-                          : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
-                      }`}
-                    >
-                      🐾 My Pets
-                    </button>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#E8DDD4]">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#4A3E3D] flex items-center gap-2">
+                      <Clipboard className="w-6 h-6 text-[#8B5E3C]" /> My Bookings
+                    </h3>
+                    <p className="text-xs text-[#8B7E7D] mt-0.5">Track your pet sitting requests, dates, and status updates.</p>
                   </div>
-                  
-                  {ownerActiveTab === 'pets' && (
-                  <div className="pb-8 animate-fade-in">
-                    <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-                      <div>
-                        <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
-                          <PawPrint className="w-5 h-5 text-[#8B5E3C]" /> My Pets
-                        </h4>
-                        <p className="text-xs text-[#8B7E7D] mt-0.5">
-                          Manage your pets' profiles to automatically share their care details with sitters.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => openPetModal()}
-                        className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer border-none"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Add a Pet
-                      </button>
-                    </div>
+                  <select
+                    value={historyFilter}
+                    onChange={(e) => setHistoryFilter(e.target.value)}
+                    className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
+                  >
+                    <option value="all">All Bookings</option>
+                    <option value="pending">Pending</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="declined">Declined</option>
+                  </select>
+                </div>
 
-                    {loadingOwnerPets && ownerPets.length === 0 ? (
-                      <div className="text-center py-12 flex flex-col items-center justify-center gap-3 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
-                        <div className="w-8 h-8 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs text-[#8B7E7D]">Loading pet profiles...</p>
-                      </div>
-                    ) : ownerPets.length === 0 ? (
-                      <div className="text-center py-8 text-[#8B7E7D] bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4] flex flex-col items-center gap-2">
-                        <PawPrint className="w-8 h-8 text-[#8B5E3C] opacity-60" />
-                        <p className="text-sm font-semibold text-[#4A3E3D]">No pets added yet</p>
-                        <p className="text-xs max-w-xs leading-relaxed px-4">Add your pet's details (breed, feeding, medications) to make booking sitters quick and easy.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {ownerPets.map((pet) => (
-                          <PetProfileCard
-                            key={pet.id}
-                            pet={pet}
-                            tier="owner"
-                            actions={
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => openPetModal(pet)}
-                                  className="text-xs font-bold text-[#8B5E3C] hover:underline cursor-pointer border-none bg-none px-1 py-0.5"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeletePet(pet.id)}
-                                  className="text-xs font-bold text-red-600 hover:underline cursor-pointer border-none bg-none px-1 py-0.5"
-                                >
-                                  Delete
-                                </button>
-                              </>
-                            }
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  )}
-
-                  {ownerActiveTab === 'bookings' && (
-                  <div className="space-y-4 animate-fade-in">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-lg font-black text-[#4A3E3D] flex items-center gap-2">
-                        📅 My Bookings
-                      </h4>
-                      <select
-                        value={historyFilter}
-                        onChange={(e) => setHistoryFilter(e.target.value)}
-                        className="bg-white border-2 border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold rounded-xl px-4 py-2 focus:outline-none focus:border-[#8B5E3C] shadow-sm appearance-none outline-none cursor-pointer"
-                      >
-                        <option value="all">All Bookings</option>
-                        <option value="pending">Pending</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="declined">Declined</option>
-                      </select>
-                    </div>
+                <div className="space-y-4">
                   {!ownerHistoryFetched && ownerRequests.length === 0 ? (
                     <div className="text-center py-12 flex flex-col items-center justify-center gap-3 bg-[#FAF6F4] rounded-2xl border border-dashed border-[#E8DDD4]">
                       <div className="w-8 h-8 border-4 border-[#8B5E3C] border-t-transparent rounded-full animate-spin"></div>
@@ -4952,7 +4864,6 @@ export function PetSittingContent() {
                     </div>
                   )}
                   </div>
-                  )}
                 </div>
               </div>
             )}
