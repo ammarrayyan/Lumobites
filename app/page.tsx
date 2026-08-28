@@ -355,30 +355,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MOBILE QUICK ACCESS BUTTONS (My Pets Quick Banner + 3+3 Square Grid) */}
-      <section className="md:hidden w-full px-4 pt-1 pb-6">
-        {/* 🐾 My Pets Quick Banner (Warm Caramel / Amber) */}
-        <Link href="/account?tab=pets" className="block max-w-sm mx-auto mb-2.5" style={{ textDecoration: 'none' }}>
-          <div 
-            style={{ boxShadow: '0 1px 4px rgba(139, 94, 60, 0.05)' }}
-            className="bg-[#FDF5E8] border border-[#EAD3B8] text-[#2E2419] py-2.5 px-3.5 rounded-2xl flex items-center justify-between hover:bg-[#F9ECCF] active:scale-[0.99] transition-all btn-gloss"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#F5E2CC] text-[#8B5E3C] flex items-center justify-center font-bold shrink-0">
-                <PawPrint className="w-4.5 h-4.5 text-[#8B5E3C]" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-xs text-[#2E2419] leading-tight">My Pet Profiles</p>
-                <p className="text-[10px] text-[#8B5E3C] font-medium leading-tight">Manage records & partner access</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-[#8B5E3C] font-bold text-[11px]">
-              <span>View</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-        </Link>
-
+      {/* MOBILE QUICK ACCESS BUTTONS (3+3 Square Grid) */}
+      <section className="md:hidden w-full px-4 pt-1.5 pb-6">
         <div className="grid grid-cols-3 gap-2.5 max-w-sm mx-auto">
           {/* 1. Lost Pets */}
           <Link href="/lost-pets" className="block" style={{ textDecoration: 'none' }}>

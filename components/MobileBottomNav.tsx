@@ -1,9 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, PawPrint, MapPin, Utensils, Users, Globe } from 'lucide-react';
+
+// Paw-in-ID-card icon for Pet Profiles matching Lucide icon styling
+function PetProfileIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const isFilled = style?.fill && style.fill !== 'none';
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill={isFilled ? 'currentColor' : 'none'}
+      stroke={style?.color || 'currentColor'}
+      strokeWidth={style?.strokeWidth || 2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={style}
+    >
+      {/* ID Badge Card Outline */}
+      <rect width="18" height="18" x="3" y="3" rx="4" />
+      {/* ID Lanyard Slot */}
+      <line x1="9.5" x2="14.5" y1="6" y2="6" strokeWidth={2} />
+      {/* Paw Print Inside ID Badge */}
+      <circle cx="9.5" cy="11.5" r="0.9" fill="currentColor" />
+      <circle cx="14.5" cy="11.5" r="0.9" fill="currentColor" />
+      <circle cx="8" cy="14" r="0.8" fill="currentColor" />
+      <circle cx="16" cy="14" r="0.8" fill="currentColor" />
+      <path
+        d="M12 17.2c-1.5 0-2.5-.8-2.5-1.7 0-.6.5-1 1.2-1 .6 0 .8.4 1.3.4s.7-.4 1.3-.4c.7 0 1.2.4 1.2 1 0 .9-1 1.7-2.5 1.7z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -11,12 +43,14 @@ export default function MobileBottomNav() {
 
   const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies' || pathname === '/recalls';
   const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
+  const isPetsActive = pathname === '/account' || pathname === '/pet-access' || pathname.startsWith('/pets/');
 
   const tabs = [
     { label: 'Sitting', icon: PawPrint, href: '/petsitting', isActive: pathname === '/petsitting' },
     { label: 'Lost Pets', icon: MapPin, href: '/lost-pets', isActive: pathname === '/lost-pets' },
-    { label: 'Community', icon: Users, href: '/city-board', isActive: isCommunityActive },
+    { label: 'My Pets', icon: PetProfileIcon, href: '/account?tab=pets', isActive: isPetsActive },
     { label: 'Home', icon: Home, href: '/', isActive: pathname === '/', isRaised: true },
+    { label: 'Community', icon: Users, href: '/city-board', isActive: isCommunityActive },
     { label: 'Pet Food', icon: Utensils, href: '/chat', isActive: isFoodActive },
     { label: 'Explore', icon: Globe, href: '/explore', isActive: pathname === '/explore' },
   ];
@@ -34,7 +68,7 @@ export default function MobileBottomNav() {
 
   return (
     <div 
-      className="lg:hidden px-1.5 flex items-center justify-between w-[calc(100%-24px)] max-w-[430px] h-[66px] relative select-none"
+      className="lg:hidden px-1 flex items-center justify-between w-[calc(100%-20px)] max-w-[430px] h-[66px] relative select-none"
       style={{
         position: 'fixed',
         bottom: '16px',
@@ -62,8 +96,8 @@ export default function MobileBottomNav() {
           style={{
             top: '4px',
             bottom: '4px',
-            width: `calc(${100 / tabs.length}% + 6px)`,
-            left: `calc(${activeIndex * (100 / tabs.length)}% - 3px)`,
+            width: `calc(${100 / tabs.length}% + 4px)`,
+            left: `calc(${activeIndex * (100 / tabs.length)}% - 2px)`,
             borderRadius: '24px',
             zIndex: 1,
           }}
@@ -107,7 +141,7 @@ export default function MobileBottomNav() {
 
           {/* 3. Top Curved Specular Glare / Lens Reflection */}
           <div 
-            className="absolute top-0.5 left-2 right-2 h-[40%] pointer-events-none opacity-90"
+            className="absolute top-0.5 left-1.5 right-1.5 h-[40%] pointer-events-none opacity-90"
             style={{
               borderRadius: '22px 22px 10px 10px',
               background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.25) 60%, transparent 100%)',
@@ -138,7 +172,7 @@ export default function MobileBottomNav() {
             >
               {/* Elevated Floating Circular Button */}
               <div 
-                className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.34,1.45,0.64,1)] group-active:scale-90"
+                className="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.34,1.45,0.64,1)] group-active:scale-90"
                 style={{
                   transform: 'translateY(-14px)',
                   background: isActive
@@ -153,7 +187,7 @@ export default function MobileBottomNav() {
                 }}
               >
                 <Icon
-                  className="w-[24px] h-[24px] transition-all duration-300"
+                  className="w-[23px] h-[23px] transition-all duration-300"
                   style={{
                     color: isActive ? '#FFFFFF' : '#8B5E3C',
                     fill: isActive ? 'currentColor' : 'none',
@@ -165,7 +199,7 @@ export default function MobileBottomNav() {
 
               {/* Label */}
               <span
-                className="text-[9px] tracking-tight select-none transition-all duration-300"
+                className="text-[8.5px] tracking-tight select-none transition-all duration-300"
                 style={{
                   marginTop: '-11px',
                   color: isActive ? '#8B5E3C' : '#8E8E93',
@@ -195,7 +229,7 @@ export default function MobileBottomNav() {
           >
             {/* Icon with Solid Black & Bold Treatment for Active */}
             <Icon
-              className="w-[19px] h-[19px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[18px] h-[18px] relative z-10 transition-all duration-300 ease-out"
               style={{
                 color: isActive ? '#000000' : '#8E8E93',
                 fill: isActive ? 'currentColor' : 'none',
@@ -206,7 +240,7 @@ export default function MobileBottomNav() {
 
             {/* Label */}
             <span
-              className="text-[9px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out"
+              className="text-[8.5px] sm:text-[9px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
               style={{
                 color: isActive ? '#000000' : '#8E8E93',
                 fontWeight: isActive ? 800 : 600,
