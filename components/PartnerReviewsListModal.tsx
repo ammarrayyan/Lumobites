@@ -1,9 +1,10 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Star, X, Loader2, MessageSquare, ShieldCheck, Plus } from 'lucide-react';
 import PartnerReviewModal from './PartnerReviewModal';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface PartnerReviewsListModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export default function PartnerReviewsListModal({
   partnerType,
   currentUserEmail,
 }: PartnerReviewsListModalProps) {
+  useScrollLock(isOpen);
+
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState<number>(0);
   const [reviewCount, setReviewCount] = useState<number>(0);

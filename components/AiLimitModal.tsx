@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Sparkles, LogIn, Crown, Clock, X } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export interface AiLimitModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ export interface AiLimitModalProps {
 }
 
 export default function AiLimitModal({ isOpen, onClose, reason, isPro }: AiLimitModalProps) {
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const cleanReason = (reason || '').trim();

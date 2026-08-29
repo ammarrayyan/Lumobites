@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import { Sparkles, Lock, Mail, AlertTriangle } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface SharedTwin {
   id: string;
@@ -27,6 +28,7 @@ export default function PetTwinPreview() {
 
   // States for Self-Service Deletion Modal
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  useScrollLock(removeModalOpen);
   const [removePostId, setRemovePostId] = useState<string | null>(null);
   const [removeEmail, setRemoveEmail] = useState('');
   const [removeStatus, setRemoveStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');

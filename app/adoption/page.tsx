@@ -12,6 +12,7 @@ import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 const AdoptionPetsMap = dynamic(() => import('@/components/AdoptionPetsMap'), {
   ssr: false,
@@ -213,6 +214,8 @@ function AdoptionContent() {
 
   // Shelter Registration Modal & Persistent User Shelter
   const [isShelterRegOpen, setIsShelterRegOpen] = useState(false);
+
+  useScrollLock(isLifestyleModalOpen || isVisualModalOpen || isShelterRegOpen || !!activeChatPet);
   const [shelterFormData, setShelterFormData] = useState({
     org_name: '',
     tax_id: '',

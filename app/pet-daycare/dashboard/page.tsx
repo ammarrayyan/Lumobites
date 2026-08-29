@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
+import { useScrollLock } from '@/lib/useScrollLock';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
@@ -52,6 +53,7 @@ export default function DaycareDashboard() {
   const [monthlyPrice, setMonthlyPrice] = useState<number>(30);
   const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'calendar' | 'profile' | 'reviews'>('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  useScrollLock(showDeleteModal);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Reviews State

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertCircle, RefreshCw, CheckCircle2, X } from 'lucide-react';
 import PetProfileCard from '@/components/PetProfileCard';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface LivePetProfileCardProps {
   petId?: string;
@@ -19,6 +20,8 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
 
   // Vet Add Entry Modal States
   const [activeModal, setActiveModal] = useState<'vaccination' | 'microchip' | 'vet_visit' | null>(null);
+  useScrollLock(!!activeModal);
+
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);

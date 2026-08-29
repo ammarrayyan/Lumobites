@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export default function Home() {
   const router = useRouter();
   const [petSittingModalOpen, setPetSittingModalOpen] = useState(false);
   const [partnerModalOpen, setPartnerModalOpen] = useState(false);
   const [daycareNoticeOpen, setDaycareNoticeOpen] = useState(false);
+  useScrollLock(petSittingModalOpen || partnerModalOpen || daycareNoticeOpen);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);

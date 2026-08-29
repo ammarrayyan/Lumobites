@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef } from 'react';
 import { Camera, Utensils, Footprints, HeartPulse, Moon, Sparkles, X, Check, Loader2, Upload } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface SendPetUpdateModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ const CATEGORIES = [
 ];
 
 export default function SendPetUpdateModal({ isOpen, onClose, petName = 'your pet', onSendUpdate }: SendPetUpdateModalProps) {
+  useScrollLock(isOpen);
+
   const [selectedCategory, setSelectedCategory] = useState('Walk');
   const [note, setNote] = useState(CATEGORIES[1].preset);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);

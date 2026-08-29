@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Crown, Sparkles, X, Check } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export interface BookingLimitModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export default function BookingLimitModal({
   used = 3,
   limit = 3,
 }: BookingLimitModalProps) {
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   return (

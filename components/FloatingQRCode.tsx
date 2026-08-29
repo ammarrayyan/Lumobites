@@ -4,10 +4,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import QRCode from 'qrcode';
 import { QrCode, X, Download } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export default function FloatingQRCode() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  useScrollLock(isOpen);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // The full URL based on the current page

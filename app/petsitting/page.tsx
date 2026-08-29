@@ -16,6 +16,7 @@ import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 const SitterMap = dynamic(() => import('@/components/SitterMap'), {
   ssr: false,
@@ -518,17 +519,6 @@ export function PetSittingContent() {
   const [loadingOwnerPets, setLoadingOwnerPets] = useState(false);
   const [petModalOpen, setPetModalOpen] = useState(false);
 
-  // Prevent background page scrolling when pet modal is open
-  useEffect(() => {
-    if (petModalOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [petModalOpen]);
-
   const [editingPet, setEditingPet] = useState<any | null>(null);
   const [selectedRequestPet, setSelectedRequestPet] = useState<any | null>(null);
   const [selectedRequestPets, setSelectedRequestPets] = useState<any[]>([]);
@@ -706,6 +696,20 @@ export function PetSittingContent() {
   // Zip Code Validation State
   const [zipGeocoding, setZipGeocoding] = useState(false);
   const [zipError, setZipError] = useState('');
+
+  // Site-wide scroll locking when any petsitting modal is open
+  const isPetsittingModalActive = !!(
+    requestModalOpen ||
+    reviewsModalOpen ||
+    cameraModalOpen ||
+    unlockModalOpen ||
+    deleteModalOpen ||
+    reportModalOpen ||
+    inquiringClinic ||
+    inquiringDaycare ||
+    petModalOpen
+  );
+  useScrollLock(isPetsittingModalActive);
 
   const loadOwnerProfile = async (email: string) => {
     if (!email) return;

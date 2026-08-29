@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { PawPrint, Plus, Trash2, Edit2, RefreshCw, QrCode, Share2, Copy, Download, X, Lock } from 'lucide-react';
 import PetProfileCard from '@/components/PetProfileCard';
 import PetProfileModal, { PetFormData } from '@/components/PetProfileModal';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export default function AccountPetsTab({ 
   ownerEmail
@@ -19,6 +20,8 @@ export default function AccountPetsTab({
   const [editingPet, setEditingPet] = useState<PetFormData | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [qrPet, setQrPet] = useState<PetFormData | null>(null);
+  useScrollLock(!!qrPet);
+
   const [copiedLink, setCopiedLink] = useState(false);
 
   const fetchPets = async () => {

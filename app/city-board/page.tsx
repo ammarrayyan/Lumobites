@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -420,6 +421,7 @@ export default function CityBoardPage() {
   };
 
   const [reportPostId, setReportPostId] = useState<string | null>(null);
+  useScrollLock(!!reportPostId);
   const [reportReason, setReportReason] = useState('Spam');
   const [submittingReport, setSubmittingReport] = useState(false);
 

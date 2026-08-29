@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThumbsUp, Trash2, Camera, Send, X, Share2, MoreHorizontal, ChevronDown, Check } from 'lucide-react';
 import FacebookReactionPicker from './FacebookReactionPicker';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 const AVATAR_COLORS = [
   { bg: '#FEE2E2', text: '#991B1B' },
@@ -121,6 +122,8 @@ export default function FacebookStyleCommentThread({
   const [likesMap, setLikesMap] = useState<Record<string, { count: number; liked: boolean }>>({});
   const [visibleCount, setVisibleCount] = useState(10);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  useScrollLock(!!previewImage);
 
   const replyInputRef = useRef<HTMLInputElement | null>(null);
 

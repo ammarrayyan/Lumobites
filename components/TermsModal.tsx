@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export default function TermsModal() {
   const [isOpen, setIsOpen] = useState(false);
+  useScrollLock(isOpen);
+
   const [agreed, setAgreed] = useState(false);
   const [showAgeCheck, setShowAgeCheck] = useState(false);
   const [ageDenied, setAgeDenied] = useState(false);

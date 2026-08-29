@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Star, X, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface PartnerReviewModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export default function PartnerReviewModal({
   currentUserName,
   onSuccess,
 }: PartnerReviewModalProps) {
+  useScrollLock(isOpen);
+
   const [rating, setRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [reviewText, setReviewText] = useState<string>('');

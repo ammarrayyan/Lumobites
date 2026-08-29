@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { PawPrint, Plus, Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { PawPrint, Plus, Trash2, ArrowLeft, AlertCircle, Camera, FolderOpen, Image as ImageIcon } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 export interface VaccineRecord {
   id?: string;
@@ -53,6 +54,12 @@ export default function PetProfileModal({
   initialPet,
   onSaved,
 }: PetProfileModalProps) {
+  // Lock background page scroll while modal is active
+  useScrollLock(isOpen);
+
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+
   const [formData, setFormData] = useState<PetFormData>({
     owner_email: ownerEmail || '',
     pet_name: '',
@@ -125,17 +132,6 @@ export default function PetProfileModal({
       setError(null);
     }
   }, [isOpen, initialPet, ownerEmail]);
-
-  // Lock background scrolling
-  useEffect(() => {
-    if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -652,37 +648,87 @@ export default function PetProfileModal({
               </div>
 
               <div>
-                <label className="font-bold text-gray-700 block mb-1">Pet Photos (Up to 3)</label>
-                <div className="flex items-center gap-3 flex-wrap pt-1">
+                <label className="font-bold text-gray-700 block mb-1.5 text-xs flex items-center justify-between">
+                  <span>Pet Photos (Up to 3)</span>
+                  <span className="text-[10px] text-[#8B5E3C] font-semibold">
+                    {formData.photo_urls?.length || 0}/3 uploaded
+                  </span>
+                </label>
+
+                {/* Photo Previews Grid */}
+                <div className="flex items-center gap-3 flex-wrap pt-1 mb-3">
                   {(formData.photo_urls || []).map((url, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-300 group">
-                      <img src={url} alt={`Pet ${i + 1}`} className="w-full h-full object-cover" />
+                    <div key={i} className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-[#DFD3C7] shadow-xs bg-[#FAF6F4]">
+                      <img src={url} alt={`Pet preview ${i + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => removePhoto(i)}
-                        className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-90 hover:opacity-100 cursor-pointer"
+                        className="absolute top-1.5 right-1.5 w-7 h-7 bg-black/75 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors cursor-pointer border-none shadow-sm"
+                        title="Remove photo"
                       >
-                        <Trash2 className="w-3 h-3 text-rose-300" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
 
-                  {(!formData.photo_urls || formData.photo_urls.length < 3) && (
-                    <label className="w-20 h-20 rounded-xl border-2 border-dashed border-[#DFD3C7] flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-[#FAF7F2] transition-colors">
-                      <Plus className="w-4 h-4 text-gray-400" />
-                      <span className="text-[10px] text-gray-400 font-bold">Upload</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={e => {
-                          const file = e.target.files?.[0];
-                          if (file) handlePhotoUpload(file);
-                        }}
-                      />
-                    </label>
+                  {(!formData.photo_urls || formData.photo_urls.length === 0) && (
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-[#FAF6F2] border-2 border-dashed border-[#DFD3C7] flex flex-col items-center justify-center text-stone-400 gap-1">
+                      <ImageIcon className="w-6 h-6 text-[#8B5E3C]/60" />
+                      <span className="text-[10px] font-bold">No photos yet</span>
+                    </div>
                   )}
                 </div>
+
+                {/* Large Ergonomic Touch Buttons for Mobile/Desktop */}
+                {(!formData.photo_urls || formData.photo_urls.length < 3) ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="min-h-[48px] px-4 py-3 bg-[#FAF6F4] hover:bg-[#F0E6DD] border-2 border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shadow-2xs"
+                    >
+                      <FolderOpen className="w-4 h-4 text-[#8B5E3C]" />
+                      <span>Choose from Gallery</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="min-h-[48px] px-4 py-3 bg-[#FAF6F4] hover:bg-[#F0E6DD] border-2 border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shadow-2xs"
+                    >
+                      <Camera className="w-4 h-4 text-[#8B5E3C]" />
+                      <span>Take Photo</span>
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#8B7E7D] italic bg-[#FAF6F4] p-2.5 rounded-xl border border-[#DFD3C7]">
+                    Maximum of 3 pet photos reached. Remove an existing photo to upload a new one.
+                  </p>
+                )}
+
+                {/* Hidden Native File Inputs */}
+                <input
+                  type="file"
+                  ref={galleryInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoUpload(file);
+                    e.target.value = '';
+                  }}
+                />
+                <input
+                  type="file"
+                  ref={cameraInputRef}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoUpload(file);
+                    e.target.value = '';
+                  }}
+                />
               </div>
             </div>
           </div>

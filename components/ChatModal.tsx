@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
 import PetPhotoCarousel from './PetPhotoCarousel';
 import BookingProgressStepper from './BookingProgressStepper';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -103,16 +104,7 @@ export default function ChatModal({
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [viewportTop, setViewportTop] = useState<number>(0);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-
-  // Lock background body scroll when chat modal is open
-  useEffect(() => {
-    if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // Track visualViewport height & top offset on mobile to keep modal pinned above software keyboard
   useEffect(() => {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 type Step = 'email' | 'verification' | 'dashboard';
 type AccountTab = 'pets' | 'subscription' | 'security';
@@ -125,6 +126,7 @@ export default function AccountPage() {
   const [cancelEndDate, setCancelEndDate] = useState<string>('');
   const [cancelDaysRemaining, setCancelDaysRemaining] = useState<number>(0);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  useScrollLock(showConfirmCancel || showConfirmDelete);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);

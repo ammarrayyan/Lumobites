@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Check, Loader2, X } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface MembershipUpgradeModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ export default function MembershipUpgradeModal({
   userEmail = '',
   triggerReason = "You've used both of your free AI checks. Upgrade to Membership for 5 checks a day!"
 }: MembershipUpgradeModalProps) {
+  useScrollLock(isOpen);
+
   const [email, setEmail] = useState(userEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

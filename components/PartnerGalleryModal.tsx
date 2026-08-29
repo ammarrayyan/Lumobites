@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface PartnerGalleryModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export default function PartnerGalleryModal({
   partnerName,
   initialIndex = 0,
 }: PartnerGalleryModalProps) {
+  useScrollLock(isOpen);
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   if (!isOpen || !photos || photos.length === 0 || typeof window === 'undefined') return null;

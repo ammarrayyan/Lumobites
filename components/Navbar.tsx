@@ -8,6 +8,7 @@ import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 const getInitialProEmail = () => {
   try {
@@ -101,6 +102,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const [showProMenu, setShowProMenu] = useState(false);
   const [showUpgradeMenu, setShowUpgradeMenu] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  useScrollLock(isOpen || showSignInModal);
   const [signInStep, setSignInStep] = useState<'email' | 'code'>('email');
   const [signInEmail, setSignInEmail] = useState('');
   const [signInCode, setSignInCode] = useState('');

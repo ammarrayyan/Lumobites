@@ -10,6 +10,7 @@ import {
   Mail, AlertCircle, Star, Trash2, Power,
 } from 'lucide-react';
 import ChatModal from '@/components/ChatModal';
+import { useScrollLock } from '@/lib/useScrollLock';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import LivePetProfileCard from '@/components/LivePetProfileCard';
@@ -49,6 +50,7 @@ export default function VetBoardingDashboardPage() {
   const [inquiriesLoading, setInquiriesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'inquiries' | 'availability' | 'profile' | 'reviews'>('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  useScrollLock(showDeleteModal);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Reviews State

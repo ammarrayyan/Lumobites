@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 import { QrCode, Download, Share2, Copy, Check, X, ShieldCheck, Star, MapPin, Sparkles, Dog, Cat, Loader2, FileText, CreditCard } from 'lucide-react';
 import { formatSitterName } from '@/app/petsitting/page';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface SitterPromoPosterModalProps {
   isOpen: boolean;
@@ -45,6 +46,8 @@ const SERVICE_LABELS: Record<string, string> = {
 type PosterFormat = 'flyer' | 'card';
 
 export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: SitterPromoPosterModalProps) {
+  useScrollLock(isOpen);
+
   const [format, setFormat] = useState<PosterFormat>('flyer');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState(false);
