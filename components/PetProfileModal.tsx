@@ -285,8 +285,8 @@ export default function PetProfileModal({
         </div>
       </div>
 
-      {/* Full-Screen Scrollable Form Body */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10">
+      {/* Full-Screen Scrollable Form Body with Mobile Bottom Clearance */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 pb-36 sm:pb-24">
         <form id="canonical-pet-profile-form" onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6 text-xs">
           {error && (
             <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center gap-2.5 text-rose-800 text-xs font-bold">
@@ -681,21 +681,21 @@ export default function PetProfileModal({
 
                 {/* Large Ergonomic Touch Buttons for Mobile/Desktop */}
                 {(!formData.photo_urls || formData.photo_urls.length < 3) ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => galleryInputRef.current?.click()}
-                      className="min-h-[48px] px-4 py-3 bg-[#FAF6F4] hover:bg-[#F0E6DD] border-2 border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shadow-2xs"
+                      className="min-h-[52px] px-5 py-3.5 bg-white hover:bg-[#FAF6F4] border-2 border-[#DFD3C7] text-[#4A3E3D] font-bold text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer active:scale-98 transition-all shadow-xs touch-manipulation select-none"
                     >
-                      <FolderOpen className="w-4 h-4 text-[#8B5E3C]" />
+                      <FolderOpen className="w-5 h-5 text-[#8B5E3C] shrink-0" />
                       <span>Choose from Gallery</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
-                      className="min-h-[48px] px-4 py-3 bg-[#FAF6F4] hover:bg-[#F0E6DD] border-2 border-[#DFD3C7] text-[#4A3E3D] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all shadow-2xs"
+                      className="min-h-[52px] px-5 py-3.5 bg-[#8B5E3C] hover:bg-[#734A2E] text-white border border-[#8B5E3C] font-bold text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer active:scale-98 transition-all shadow-md touch-manipulation select-none"
                     >
-                      <Camera className="w-4 h-4 text-[#8B5E3C]" />
+                      <Camera className="w-5 h-5 text-white shrink-0" />
                       <span>Take Photo</span>
                     </button>
                   </div>
