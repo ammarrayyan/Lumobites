@@ -8,12 +8,13 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
-import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
+import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -88,6 +89,56 @@ export default function LostPetsFeed() {
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
   const [pets, setPets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mobile Inline Expandable Comments State
+  const [expandedPetIds, setExpandedPetIds] = useState<Record<string, boolean>>({});
+  const [petCommentsMap, setPetCommentsMap] = useState<Record<string, any[]>>({});
+  const [loadingCommentsMap, setLoadingCommentsMap] = useState<Record<string, boolean>>({});
+
+  const toggleExpandPet = async (petId: string) => {
+    const isCurrentlyExpanded = !!expandedPetIds[petId];
+    setExpandedPetIds(prev => ({ ...prev, [petId]: !isCurrentlyExpanded }));
+
+    if (!isCurrentlyExpanded && !petCommentsMap[petId]) {
+      setLoadingCommentsMap(prev => ({ ...prev, [petId]: true }));
+      try {
+        const res = await fetch(`/api/lost-pets/comments?lost_pet_id=${petId}`);
+        const data = await res.json();
+        if (data.comments) {
+          setPetCommentsMap(prev => ({ ...prev, [petId]: data.comments }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch comments for lost pet:', err);
+      } finally {
+        setLoadingCommentsMap(prev => ({ ...prev, [petId]: false }));
+      }
+    }
+  };
+
+  const handleCommentClick = (e: React.MouseEvent, petId: string) => {
+    e.stopPropagation();
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      // Laptop / Desktop: navigate cleanly to full detail page without shifting feed layout
+      try {
+        const stateToSave = {
+          searchQuery: currentContextRef.current.searchQuery,
+          searchRadius: currentContextRef.current.searchRadius,
+          filterType: currentContextRef.current.filterType,
+          filterSpecies: currentContextRef.current.filterSpecies,
+          searchCoords: currentContextRef.current.searchCoords,
+          searchLocationName,
+          locationVerified,
+          activeTab,
+          scrollY: window.scrollY
+        };
+        sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
+      } catch (err) {}
+      router.push(`/lost-pets/${petId}#comments`);
+    } else {
+      // Mobile: restore original inline comment thread expansion
+      toggleExpandPet(petId);
+    }
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const skipGeocodeRef = useRef(false);
@@ -855,7 +906,7 @@ export default function LostPetsFeed() {
                                   )}
                                 </div>
                                 
-                                {/* Reaction Picker & Clean Detail Navigation Comments Button */}
+                                {/* Reaction Picker & Responsive Comments Button (Direct Detail on Desktop, Inline Expand on Mobile) */}
                                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#E8DDD4] gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
                                   <FacebookReactionPicker
                                     itemId={pet.id}
@@ -863,36 +914,115 @@ export default function LostPetsFeed() {
                                     showSummary={true}
                                   />
 
-                                  <Link
-                                    href={`/lost-pets/${pet.id}#comments`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (typeof window !== 'undefined') {
-                                        try {
-                                          const stateToSave = {
-                                            searchQuery: currentContextRef.current.searchQuery,
-                                            searchRadius: currentContextRef.current.searchRadius,
-                                            filterType: currentContextRef.current.filterType,
-                                            filterSpecies: currentContextRef.current.filterSpecies,
-                                            searchCoords: currentContextRef.current.searchCoords,
-                                            searchLocationName,
-                                            locationVerified,
-                                            activeTab,
-                                            scrollY: window.scrollY
-                                          };
-                                          sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
-                                        } catch (err) {}
-                                      }
-                                    }}
-                                    className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#8B5E3C] hover:text-white border-[#E8DDD4]"
-                                    title="View full updates and comments"
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleCommentClick(e, pet.id)}
+                                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                                      expandedPetIds[pet.id]
+                                        ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
+                                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#8B5E3C] hover:text-white border-[#E8DDD4]'
+                                    }`}
+                                    title="View comments and updates"
                                   >
                                     <MessageSquare className="w-3.5 h-3.5" />
                                     <span>
                                       {pet.comment_count || 0} {(pet.comment_count || 0) === 1 ? 'Comment' : 'Comments'}
                                     </span>
-                                  </Link>
+                                    <span className="md:hidden flex items-center">
+                                      {expandedPetIds[pet.id] ? (
+                                        <ChevronUp className="w-3.5 h-3.5 ml-0.5" />
+                                      ) : (
+                                        <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
+                                      )}
+                                    </span>
+                                  </button>
                                 </div>
+
+                                {/* Mobile-only Inline Expandable Comment Thread Section */}
+                                {expandedPetIds[pet.id] && (
+                                  <div className="md:hidden border-t border-[#E8DDD4] pt-4 mt-4 animate-fade-in text-left" onClick={e => e.stopPropagation()}>
+                                    {loadingCommentsMap[pet.id] ? (
+                                      <div className="py-6 text-center text-xs text-[#8B5E3C] font-bold flex items-center justify-center gap-2 animate-pulse">
+                                        <Loader2 className="w-4 h-4 animate-spin" /> Loading updates...
+                                      </div>
+                                    ) : (
+                                      <div>
+                                        <FacebookStyleCommentThread
+                                          comments={petCommentsMap[pet.id] || []}
+                                          currentUserEmail={userEmail}
+                                          currentUserName={userEmail ? userEmail.split('@')[0] : ''}
+                                          postAuthorEmail={pet.contact_email || ''}
+                                          isPostAuthor={!!(userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim())}
+                                          title={`Updates (${(petCommentsMap[pet.id] || []).length})`}
+                                          placeholder="Share a sighting or update..."
+                                          allowPhoto={true}
+                                          signInPromptText="Sign in to post a sighting or comment"
+                                          requireAuth={true}
+                                          onAddComment={async (text, photoUrl, parentId, replyToName) => {
+                                            let payloadText = text;
+                                            if (parentId && replyToName) {
+                                              payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
+                                            }
+
+                                            const res = await fetch('/api/lost-pets/comments', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({
+                                                lost_pet_id: pet.id,
+                                                author_name: userEmail ? userEmail.split('@')[0] : 'Community Member',
+                                                comment_text: payloadText,
+                                                author_email: userEmail,
+                                                photo_url: photoUrl
+                                              })
+                                            });
+                                            const data = await res.json();
+                                            if (!res.ok) throw new Error(data.error || 'Failed to post update');
+                                            if (data.comment) {
+                                              setPetCommentsMap(prev => ({
+                                                ...prev,
+                                                [pet.id]: [...(prev[pet.id] || []), data.comment]
+                                              }));
+                                              setPets(prev => prev.map(p => p.id === pet.id ? { ...p, comment_count: (p.comment_count || 0) + 1 } : p));
+                                            }
+                                          }}
+                                          onDeleteComment={async (commentId) => {
+                                            if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
+                                            const res = await fetch('/api/lost-pets/comments', {
+                                              method: 'DELETE',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ comment_id: commentId, email: userEmail })
+                                            });
+
+                                            if (!res.ok) {
+                                              const data = await res.json();
+                                              throw new Error(data.error || 'Failed to delete comment');
+                                            }
+
+                                            setPetCommentsMap(prev => ({
+                                              ...prev,
+                                              [pet.id]: (prev[pet.id] || []).filter(c => c.id !== commentId)
+                                            }));
+                                            setPets(prev => prev.map(p => p.id === pet.id ? { ...p, comment_count: Math.max(0, (p.comment_count || 1) - 1) } : p));
+                                          }}
+                                        />
+
+                                        <div className="pt-3 text-center">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleExpandPet(pet.id);
+                                            }}
+                                            className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors cursor-pointer border-none bg-transparent"
+                                          >
+                                            ▲ Hide comments
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
