@@ -52,6 +52,7 @@ export default function CityBoardPage() {
   const [searchCategory, setSearchCategory] = useState('All');
   const [searchPostId, setSearchPostId] = useState('');
   const [showMyPosts, setShowMyPosts] = useState(false);
+  const [topicsExpanded, setTopicsExpanded] = useState(false);
 
   // Inline Expandable Comments State
   const [expandedPostIds, setExpandedPostIds] = useState<Record<string, boolean>>({});
@@ -529,52 +530,89 @@ export default function CityBoardPage() {
         )}
 
       <main className="max-w-6xl mx-auto px-4 py-8 w-full grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
-
-        {/* TOPIC NAVIGATION (WRAP-GRID CHIP SYSTEM ON MOBILE, STICKY SIDEBAR ON DESKTOP) */}
+        {/* TOPIC NAVIGATION (COLLAPSIBLE WITH DEFAULT COLLAPSED STATE) */}
         <aside className="lg:sticky lg:top-24">
-          <h3 className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider mb-2.5 px-1">Topics</h3>
-          <div className="flex flex-wrap lg:flex-col gap-2 bg-white/80 lg:bg-transparent p-3 lg:p-0 rounded-2xl lg:rounded-none border border-[#E8DDD4] lg:border-0 shadow-xs lg:shadow-none backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-[#E8DDD4] p-3.5 shadow-xs">
+            {/* Header Toggle Button */}
             <button
-              onClick={() => handleSelectCategory('All')}
-              className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
-                searchCategory === 'All'
-                  ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                  : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
-              }`}
+              type="button"
+              onClick={() => setTopicsExpanded(prev => !prev)}
+              className="w-full flex items-center justify-between gap-2 text-left cursor-pointer border-none bg-transparent p-0 select-none group/topic"
             >
-              <MessageSquare className="w-4 h-4" /> All Topics
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider group-hover/topic:text-[#4A3E3D] transition-colors">
+                  {topicsExpanded ? 'Hide Topics' : 'Topics'}
+                </span>
+                {searchCategory !== 'All' && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FAF6F4] text-[#8B5E3C] border border-[#E8DDD4] truncate max-w-[130px]">
+                    {searchCategory === 'Saved' ? 'Saved' : searchCategory}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs font-bold text-[#8B5E3C] flex items-center gap-1 shrink-0 group-hover/topic:underline">
+                {topicsExpanded ? (
+                  <>
+                    <span className="text-[11px] hidden sm:inline">Hide Topics</span>
+                    <ChevronUp className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[11px] hidden sm:inline">Browse Topics</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </>
+                )}
+              </span>
             </button>
 
-            {/* Saved Bookmarks Tab */}
-            <button
-              onClick={() => handleSelectCategory('Saved')}
-              className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
-                searchCategory === 'Saved'
-                  ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                  : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 ${searchCategory === 'Saved' ? 'fill-white' : 'text-[#8B5E3C]'}`} />
-              <span>Saved {userEmail ? `(${savedPostIds.length})` : ''}</span>
-            </button>
-
-            {CATEGORIES.map(cat => {
-              const Icon = getCategoryIcon(cat);
-              const isActive = searchCategory === cat;
-              return (
+            {/* Collapsible Topics List */}
+            {topicsExpanded && (
+              <div className="mt-3 pt-3 border-t border-[#E8DDD4]/80 flex flex-wrap lg:flex-col gap-2 animate-fade-in">
                 <button
-                  key={cat}
-                  onClick={() => handleSelectCategory(cat)}
+                  type="button"
+                  onClick={() => handleSelectCategory('All')}
                   className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
-                    isActive
+                    searchCategory === 'All'
                       ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
-                      : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:bg-[#FAF6F4] shadow-2xs'
+                      : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-white shadow-2xs'
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" /> {cat}
+                  <MessageSquare className="w-4 h-4" /> All Topics
                 </button>
-              );
-            })}
+
+                {/* Saved Bookmarks Tab */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectCategory('Saved')}
+                  className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
+                    searchCategory === 'Saved'
+                      ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
+                      : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-white shadow-2xs'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${searchCategory === 'Saved' ? 'fill-white' : 'text-[#8B5E3C]'}`} />
+                  <span>Saved {userEmail ? `(${savedPostIds.length})` : ''}</span>
+                </button>
+
+                {CATEGORIES.map(cat => {
+                  const Icon = getCategoryIcon(cat);
+                  const isActive = searchCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => handleSelectCategory(cat)}
+                      className={`flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
+                          : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:bg-white shadow-2xs'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" /> {cat}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </aside>
 
