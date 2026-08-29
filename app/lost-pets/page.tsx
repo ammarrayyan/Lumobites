@@ -804,13 +804,13 @@ export default function LostPetsFeed() {
                             style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                             className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                           >
-                            {/* Photo Container: large & edge-to-edge */}
-                            <div className="relative h-56 sm:h-60 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
+                            {/* Photo Container: large & edge-to-edge with face-priority positioning */}
+                            <div className="relative h-60 sm:h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
                               {pet.photo_url ? (
                                 <img 
                                   src={pet.photo_url} 
                                   alt={pet.pet_name} 
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                                  className="w-full h-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
@@ -1239,13 +1239,13 @@ export default function LostPetsFeed() {
                           style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                           className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                         >
-                          {/* Photo Container: large & edge-to-edge */}
-                          <div className="relative h-56 sm:h-60 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
+                          {/* Photo Container: large & edge-to-edge with face-priority positioning */}
+                          <div className="relative h-60 sm:h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
                             {pet.photo_url ? (
                               <img 
                                 src={pet.photo_url} 
                                 alt={pet.pet_name} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+                                className="w-full h-full object-cover object-[center_top] group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
