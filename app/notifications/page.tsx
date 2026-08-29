@@ -175,7 +175,7 @@ export default function NotificationsPage() {
     if (type.includes('booking') || type.includes('inquiry') || type.includes('sitter')) {
       return <Calendar className="w-5 h-5 text-sky-600" />;
     }
-    if (type.includes('vet') || type.includes('daycare')) {
+    if (type.includes('vet') || type.includes('daycare') || type.includes('lost_pet')) {
       return <PawPrint className="w-5 h-5 text-[#8B5E3C]" />;
     }
     return <Sparkles className="w-5 h-5 text-amber-600" />;

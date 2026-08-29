@@ -129,9 +129,19 @@ export default function FacebookReactionPicker({
         counts: nextCounts,
         total,
       });
+
+      if (typeof window !== 'undefined' && itemId && itemId.includes('-')) {
+        const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
+        localStorage.setItem('lumo_device_id', deviceId);
+        fetch('/api/lost-pets/reactions', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: itemId, device_id: deviceId })
+        }).catch(() => {});
+      }
     } else {
       if (prevReaction) {
-        nextCounts[prevReaction] = Math.max(0, (nextCounts[prevReaction] || 0) - 1);
+        nextCounts[prevReaction] = Math.max(0, (prevReaction in nextCounts ? nextCounts[prevReaction] - 1 : 0));
       }
       nextCounts[type] = (nextCounts[type] || 0) + 1;
       const total = Object.values(nextCounts).reduce((a, b) => a + b, 0);
@@ -140,6 +150,16 @@ export default function FacebookReactionPicker({
         counts: nextCounts,
         total,
       });
+
+      if (typeof window !== 'undefined' && itemId && itemId.includes('-')) {
+        const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
+        localStorage.setItem('lumo_device_id', deviceId);
+        fetch('/api/lost-pets/reactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: itemId, reaction: type, device_id: deviceId })
+        }).catch(() => {});
+      }
     }
   };
 

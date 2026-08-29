@@ -56,6 +56,71 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
+    // ── Batched In-App Notification to Pet Owner (No push, no email) ──
+    try {
+      const { data: pet } = await supabaseAdmin
+        .from('lost_pets')
+        .select('contact_email, pet_name, species')
+        .eq('id', post_id)
+        .single();
+
+      if (pet && pet.contact_email) {
+        const ownerEmail = pet.contact_email.toLowerCase().trim();
+
+        // Get total reaction count for this post
+        const { count: totalReactions } = await supabaseAdmin
+          .from('post_reactions')
+          .select('*', { count: 'exact', head: true })
+          .eq('post_id', post_id);
+
+        const countNum = totalReactions || 1;
+        const petLabel = pet.pet_name || pet.species || 'pet';
+        const notifTitle = `Reactions on ${petLabel} 🐾`;
+        const notifMsg = countNum === 1
+          ? `1 person reacted to your post for ${petLabel}.`
+          : `${countNum} people reacted to your post for ${petLabel}.`;
+        const notifLink = `/lost-pets/${post_id}`;
+
+        // Check if an unread batched notification already exists
+        const { data: existingNotif } = await supabaseAdmin
+          .from('notifications')
+          .select('id')
+          .ilike('recipient_email', ownerEmail)
+          .eq('type', 'lost_pet_reaction')
+          .eq('link', notifLink)
+          .eq('read', false)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingNotif) {
+          // Update existing unread notification so it batches as ONE notification
+          await supabaseAdmin
+            .from('notifications')
+            .update({
+              title: notifTitle,
+              message: notifMsg,
+              created_at: new Date().toISOString()
+            })
+            .eq('id', existingNotif.id);
+        } else {
+          // Insert a new in-app only notification
+          await supabaseAdmin
+            .from('notifications')
+            .insert({
+              recipient_email: ownerEmail,
+              type: 'lost_pet_reaction',
+              title: notifTitle,
+              message: notifMsg,
+              link: notifLink,
+              read: false
+            });
+        }
+      }
+    } catch (notifErr) {
+      console.error('[Lost Pets Reactions POST] In-app notification error:', notifErr);
+    }
+
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
