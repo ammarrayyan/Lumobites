@@ -11,6 +11,7 @@ import FloatingQRCode from "@/components/FloatingQRCode";
 import PushManager from "@/components/PushManager";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import TermsModal from "@/components/TermsModal";
+import MobileLongPressProtection from "@/components/MobileLongPressProtection";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
             pointerEvents: 'none'
           }} 
         />
+        <MobileLongPressProtection />
         <TermsModal />
         <PwaRegister />
         <PushManager />

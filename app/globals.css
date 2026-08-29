@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @source "../app";
 @source "../components";
 
@@ -86,17 +86,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #8B5E3C;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent; 
-}
-::-webkit-scrollbar-thumb {
-  background: #e2e8f0; 
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1; 
 }
 
 /* Custom animations */
@@ -255,9 +244,33 @@ select::placeholder,
   transform: translateY(0.5px) scale(0.985) !important;
 }
 
-/* ─── Universal Tap & Touch Optimization ─────────────────────────────────── */
+/* ─── Universal Tap, Touch & iOS Long-Press Callout Suppression ───────────── */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+a,
+button,
+img,
+svg,
+[role="button"],
+.pressable,
+nav {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Allow normal text selection & text editing in forms */
+input,
+textarea,
+[contenteditable="true"] {
+  -webkit-touch-callout: default !important;
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
 }
 
 button, a, [role="button"] {
@@ -268,6 +281,7 @@ button, a, [role="button"] {
 .pressable {
   transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.12s ease;
   user-select: none;
+  -webkit-touch-callout: none !important;
 }
 .pressable:active {
   transform: scale(0.96);
