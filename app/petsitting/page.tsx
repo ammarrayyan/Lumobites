@@ -486,7 +486,13 @@ export function PetSittingContent() {
   const [isPromoPosterOpen, setIsPromoPosterOpen] = useState(false);
   
   // Request Form State
-  const [reqEmail, setReqEmail] = useState('');
+  const [reqEmail, setReqEmail] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return getSignedInUserEmail() || '';
+    }
+    return '';
+  });
+  const activeEmail = reqEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '');
   const [reqOwnerName, setReqOwnerName] = useState('');
   const [reqPetName, setReqPetName] = useState('');
   const [reqPetType, setReqPetType] = useState('dog');
@@ -524,7 +530,12 @@ export function PetSittingContent() {
   const [selectedRequestPets, setSelectedRequestPets] = useState<any[]>([]);
 
   // Become Sitter State
-  const [sitterEmail, setSitterEmail] = useState('');
+  const [sitterEmail, setSitterEmail] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('lumo_sitter_email') || getSignedInUserEmail() || '';
+    }
+    return '';
+  });
   const [sitterFirstName, setSitterFirstName] = useState('');
   const [sitterLastName, setSitterLastName] = useState('');
   const sitterName = `${sitterFirstName} ${sitterLastName}`.trim();
@@ -732,18 +743,14 @@ export function PetSittingContent() {
   };
 
   useEffect(() => {
-    const getSession = async () => {
+    const initializeSession = async () => {
       let email = getSignedInUserEmail();
       if (!email) {
-        // Wait 300ms and try again — Navbar or modal may still be setting it
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Yield briefly in case another component is setting localStorage
+        await new Promise(resolve => setTimeout(resolve, 50));
         email = getSignedInUserEmail();
       }
-      return email;
-    };
 
-    const initializeSession = async () => {
-      const email = await getSession();
       if (email && email !== 'undefined' && email.trim() !== '') {
         setReqEmail(email);
         fetchSitters(email);
@@ -810,9 +817,12 @@ export function PetSittingContent() {
 
     initializeSession();
     window.addEventListener('lumo-pro-update', initializeSession);
+    window.addEventListener('lumo-signin-success', initializeSession);
+    window.addEventListener('lumo-auth-changed', initializeSession);
+    window.addEventListener('focus', initializeSession);
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === 'lumo_pro_email' && e.newValue) {
+      if (!e.key || ['lumo_pro_email', 'lumo_sitter_email', 'lumo_shelter_email', 'lumo_user_email'].includes(e.key)) {
         initializeSession();
       }
     };
@@ -846,6 +856,9 @@ export function PetSittingContent() {
 
     return () => {
       window.removeEventListener('lumo-pro-update', initializeSession);
+      window.removeEventListener('lumo-signin-success', initializeSession);
+      window.removeEventListener('lumo-auth-changed', initializeSession);
+      window.removeEventListener('focus', initializeSession);
       window.removeEventListener('storage', onStorage);
     };
   }, []);
@@ -1466,6 +1479,10 @@ export function PetSittingContent() {
   };
 
   const handleViewReviews = async (sitter: Sitter) => {
+    const activeEmail = reqEmail || getSignedInUserEmail();
+    if (activeEmail && !reqEmail) {
+      setReqEmail(activeEmail);
+    }
     setHighlightedSitterId(sitter.id);
     setSelectedSitterForReviews(sitter);
     setReviewsModalOpen(true);
@@ -1487,6 +1504,10 @@ export function PetSittingContent() {
   };
 
   const handleSelectSitterFromMap = (sitter: Sitter) => {
+    const activeEmail = reqEmail || getSignedInUserEmail();
+    if (activeEmail && !reqEmail) {
+      setReqEmail(activeEmail);
+    }
     handleViewReviews(sitter);
     setTimeout(() => {
       const el = document.getElementById(`sitter-card-${sitter.id}`);
@@ -3840,7 +3861,7 @@ export function PetSittingContent() {
                                   </div>
 
                                   {sitter.bio && (
-                                    <p className={`text-xs sm:text-[13px] text-[#555555] line-clamp-2 mb-2.5 leading-snug ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>
+                                    <p className={`text-xs sm:text-[13px] text-[#555555] line-clamp-2 mb-2.5 leading-snug ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>
                                       {sitter.bio}
                                     </p>
                                   )}
@@ -3883,7 +3904,7 @@ export function PetSittingContent() {
                                 key={`ai-vet-${clinic.id || item.id}`}
                                 className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                                 onClick={() => {
-                                  if (!reqEmail) {
+                                  if (!activeEmail) {
                                     window.dispatchEvent(new Event('lumo-open-signin'));
                                     return;
                                   }
@@ -3965,7 +3986,7 @@ export function PetSittingContent() {
                                         )}
                                       </div>
                                       {clinic.description && (
-                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
+                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
                                       )}
                                       {clinic.services && clinic.services.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mb-2">
@@ -3979,7 +4000,7 @@ export function PetSittingContent() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                  {reqEmail ? (
+                                  {activeEmail ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
                                       className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4006,7 +4027,7 @@ export function PetSittingContent() {
                                 key={`ai-daycare-${daycare.id || item.id}`}
                                 className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-emerald-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                                 onClick={() => {
-                                  if (!reqEmail) {
+                                  if (!activeEmail) {
                                     window.dispatchEvent(new Event('lumo-open-signin'));
                                     return;
                                   }
@@ -4088,7 +4109,7 @@ export function PetSittingContent() {
                                         )}
                                       </div>
                                       {daycare.description && (
-                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
+                                        <p className={`text-sm text-[#555555] line-clamp-2 mb-3 ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                       )}
                                       {daycare.services && daycare.services.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mb-2">
@@ -4102,7 +4123,7 @@ export function PetSittingContent() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                  {reqEmail ? (
+                                  {activeEmail ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4183,7 +4204,7 @@ export function PetSittingContent() {
                                        </div>
                                      ) : null}
                                    </div>
-                                   {reqEmail && (
+                                   {activeEmail && (
                                       <div className="text-xs mb-1">
                                         {sitter.review_count && sitter.review_count > 0 ? (
                                           <span className="text-[#D97706] font-bold flex items-center gap-1">
@@ -4205,7 +4226,7 @@ export function PetSittingContent() {
                               </div>
 
                               {sitter.bio && (
-                                <p className={`text-xs sm:text-[13px] text-[#555555] line-clamp-2 mb-2.5 leading-snug ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>
+                                <p className={`text-xs sm:text-[13px] text-[#555555] line-clamp-2 mb-2.5 leading-snug ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>
                                   {sitter.bio}
                                 </p>
                               )}
@@ -4220,7 +4241,7 @@ export function PetSittingContent() {
                               )}
                             </div>
 
-                            {reqEmail ? (
+                            {activeEmail ? (
                               <div className="pt-2.5 border-t border-[#DFD3C7]/60 flex items-center justify-between mt-auto">
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold uppercase tracking-wider text-[#8B7E7D]">Starting from</span>
@@ -4310,7 +4331,7 @@ export function PetSittingContent() {
                                     {formatPublicCity(clinic.city || clinic.address)}
                                   </p>
                                   {clinic.description && (
-                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
+                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>{clinic.description}</p>
                                   )}
                                   {clinic.services && clinic.services.length > 0 && (
                                     <div className="flex flex-wrap gap-1">
@@ -4322,7 +4343,7 @@ export function PetSittingContent() {
                                 </div>
                               </div>
                               <div className="mt-4">
-                                {reqEmail ? (
+                                {activeEmail ? (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4357,7 +4378,7 @@ export function PetSittingContent() {
                               key={daycare.id}
                               className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
                               onClick={() => {
-                                if (!reqEmail) {
+                                if (!activeEmail) {
                                   window.dispatchEvent(new Event('lumo-open-signin'));
                                   return;
                                 }
@@ -4421,7 +4442,7 @@ export function PetSittingContent() {
                                     )}
                                   </div>
                                   {daycare.description && (
-                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!reqEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
+                                    <p className={`text-sm text-[#555555] line-clamp-2 mb-2 ${!activeEmail ? 'blur-[3px] select-none' : ''}`}>{daycare.description}</p>
                                   )}
                                   {daycare.services && daycare.services.length > 0 && (
                                     <div className="flex flex-wrap gap-1">
@@ -4433,7 +4454,7 @@ export function PetSittingContent() {
                                 </div>
                               </div>
                               <div className="mt-4">
-                                {reqEmail ? (
+                                {activeEmail ? (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
@@ -4443,7 +4464,7 @@ export function PetSittingContent() {
                                 ) : (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); window.dispatchEvent(new Event('lumo-open-signin')); }}
-                                    className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 cursor-pointer btn-gloss"
+                                    className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-2.5 rounded-xl transition-colors text-sm border border-emerald-200 btn-gloss cursor-pointer"
                                   >
                                     Sign in to Inquire
                                   </button>
@@ -7193,7 +7214,7 @@ export function PetSittingContent() {
                 )}
 
                 <div className="flex items-center justify-center gap-3 text-sm flex-wrap text-[#8B7E7D]">
-                  {!reqEmail ? (
+                  {!(reqEmail || (typeof window !== 'undefined' && getSignedInUserEmail())) ? (
                     <span className="text-xs font-semibold select-none">
                       🔒 Reviews locked
                     </span>
@@ -7293,7 +7314,7 @@ export function PetSittingContent() {
                   Reviews ({selectedSitterForReviews.review_count || 0})
                 </h4>
                 
-                {!reqEmail ? (
+                {!(reqEmail || (typeof window !== 'undefined' && getSignedInUserEmail())) ? (
                   <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-3xl p-6 text-center shadow-xs">
                     <Lock className="w-8 h-8 text-[#8B5E3C] mx-auto mb-3" />
                     <h5 className="font-extrabold text-[#4A3E3D] mb-1">Sign in to see reviews</h5>
@@ -7340,22 +7361,25 @@ export function PetSittingContent() {
                 Close
               </button>
               {(() => {
-                const isSelf = !!(reqEmail && selectedSitterForReviews?.email && reqEmail.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim());
+                const activeEmail = reqEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '');
+                const isSelf = !!(activeEmail && selectedSitterForReviews?.email && activeEmail.toLowerCase().trim() === selectedSitterForReviews.email.toLowerCase().trim());
                 return (
                   <button
                     disabled={isSelf}
                     onClick={() => {
                       setReviewsModalOpen(false);
-                      if (!reqEmail) {
+                      const currentEmail = reqEmail || getSignedInUserEmail();
+                      if (!currentEmail) {
                         window.dispatchEvent(new Event('lumo-open-signin'));
                       } else {
+                        if (!reqEmail) setReqEmail(currentEmail);
                         setSelectedSitter(selectedSitterForReviews);
                         setRequestModalOpen(true);
                       }
                     }}
                     className={`w-full sm:flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 text-center ${isSelf ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    <span>{reqEmail ? 'Request Sitter' : 'Sign in to Request'}</span>
+                    <span>{activeEmail ? 'Request Sitter' : 'Sign in to Request'}</span>
                   </button>
                 );
               })()}
