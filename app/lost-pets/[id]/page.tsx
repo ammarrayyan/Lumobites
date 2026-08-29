@@ -664,57 +664,59 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         </div>
 
         {/* Facebook-style Community Updates & Comments Section */}
-        <FacebookStyleCommentThread
-          comments={comments}
-          currentUserEmail={userEmail}
-          currentUserName={commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : '')}
-          postAuthorEmail={pet?.contact_email || ''}
-          isPostAuthor={!!(userEmail && pet?.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim())}
-          title="Community Updates"
-          placeholder="Share a sighting, location detail, or helpful update..."
-          allowPhoto={true}
-          signInPromptText="Sign in to comment or share a sighting"
-          requireAuth={true}
-          onAddComment={async (text, photoUrl, parentId, replyToName) => {
-            let payloadText = text;
-            if (parentId && replyToName) {
-              payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
-            }
+        <div id="comments" className="scroll-mt-8">
+          <FacebookStyleCommentThread
+            comments={comments}
+            currentUserEmail={userEmail}
+            currentUserName={commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : '')}
+            postAuthorEmail={pet?.contact_email || ''}
+            isPostAuthor={!!(userEmail && pet?.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim())}
+            title="Community Updates"
+            placeholder="Share a sighting, location detail, or helpful update..."
+            allowPhoto={true}
+            signInPromptText="Sign in to comment or share a sighting"
+            requireAuth={true}
+            onAddComment={async (text, photoUrl, parentId, replyToName) => {
+              let payloadText = text;
+              if (parentId && replyToName) {
+                payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
+              }
 
-            const res = await fetch('/api/lost-pets/comments', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                lost_pet_id: id,
-                author_name: commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : 'Community Member'),
-                comment_text: payloadText,
-                author_email: userEmail,
-                photo_url: photoUrl
-              })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to post comment');
-            if (data.comment) {
-              setComments(prev => [...prev, data.comment]);
-            }
-          }}
-          onDeleteComment={async (commentId) => {
-            if (!window.confirm("Are you sure you want to delete this comment?")) return;
-
-            const res = await fetch('/api/lost-pets/comments', {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ comment_id: commentId, email: userEmail })
-            });
-
-            if (!res.ok) {
+              const res = await fetch('/api/lost-pets/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  lost_pet_id: id,
+                  author_name: commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : 'Community Member'),
+                  comment_text: payloadText,
+                  author_email: userEmail,
+                  photo_url: photoUrl
+                })
+              });
               const data = await res.json();
-              throw new Error(data.error || 'Failed to delete comment');
-            }
+              if (!res.ok) throw new Error(data.error || 'Failed to post comment');
+              if (data.comment) {
+                setComments(prev => [...prev, data.comment]);
+              }
+            }}
+            onDeleteComment={async (commentId) => {
+              if (!window.confirm("Are you sure you want to delete this comment?")) return;
 
-            setComments(prev => prev.filter(c => c.id !== commentId));
-          }}
-        />
+              const res = await fetch('/api/lost-pets/comments', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment_id: commentId, email: userEmail })
+              });
+
+              if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete comment');
+              }
+
+              setComments(prev => prev.filter(c => c.id !== commentId));
+            }}
+          />
+        </div>
       </main>
     </div>
   );

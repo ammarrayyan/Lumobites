@@ -88,7 +88,7 @@ export default function LostPetsPreview() {
                   <Link href={`/lost-pets/${pet.id}`} key={pet.id} className="flex gap-4 items-center group text-decoration-none">
                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#F5EDE4] flex-shrink-0 relative">
                       {pet.photo_url ? (
-                        <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-cover object-[center_top] group-hover:scale-110 transition-transform duration-300" />
+                        <img src={pet.photo_url} alt={pet.pet_name} className="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Camera className="w-6 h-6 text-gray-400" />
