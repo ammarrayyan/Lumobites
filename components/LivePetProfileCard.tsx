@@ -154,63 +154,42 @@ export default function LivePetProfileCard({ petId, partnerId, partnerType }: Li
     );
   }
 
-  if (accessStatus === 'pending') {
+  if (accessStatus === 'completed') {
     return (
       <div 
         style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-        className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900"
+        className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-gray-700"
       >
-        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-base">
-          ⏳
+        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 text-base">
+          ✓
         </div>
         <div className="flex-1 min-w-0">
-          <strong className="font-extrabold text-amber-950 block text-xs mb-0.5">
-            Pet Profile Access Request Pending Owner Approval
+          <strong className="font-extrabold text-gray-900 block text-xs mb-0.5">
+            Booking Completed — Profile Access Ended
           </strong>
-          <span className="text-amber-800 leading-relaxed block text-[11px]">
-            A notification has been sent to the pet owner. Live profile records will unlock automatically once the owner approves access. You can still message and manage this booking normally in the meantime.
+          <span className="text-gray-500 leading-relaxed block text-[11px]">
+            Live profile access ended automatically when this booking was marked completed.
           </span>
         </div>
       </div>
     );
   }
 
-  if (accessStatus === 'denied') {
+  if (accessStatus === 'cancelled' || accessStatus === 'denied' || accessStatus === 'revoked') {
     return (
       <div 
         style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-        className="bg-[#FAF6F2] border border-[#DFD3C7] rounded-2xl p-4 flex items-start gap-3 text-xs text-[#5C4533]"
+        className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-gray-700"
       >
-        <div className="w-8 h-8 rounded-xl bg-[#F0E6DA] flex items-center justify-center shrink-0 text-base">
-          🔒
-        </div>
-        <div className="flex-1 min-w-0">
-          <strong className="font-extrabold text-[#2E2419] block text-xs mb-0.5">
-            Profile Access Declined by Owner
-          </strong>
-          <span className="text-[#7A6B5E] leading-relaxed block text-[11px]">
-            The pet owner chose not to share full profile records. You can still message, confirm, and complete this booking normally.
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (accessStatus === 'revoked') {
-    return (
-      <div 
-        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-        className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-rose-900"
-      >
-        <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 text-base">
+        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 text-base">
           ✕
         </div>
         <div className="flex-1 min-w-0">
-          <strong className="font-extrabold text-rose-950 block text-xs mb-0.5">
-            Profile Access Revoked by Owner
+          <strong className="font-extrabold text-gray-900 block text-xs mb-0.5">
+            Booking Cancelled — Profile Access Ended
           </strong>
-          <span className="text-rose-800 leading-relaxed block text-[11px]">
-            Access to live pet profile records was revoked by the pet owner.
+          <span className="text-gray-500 leading-relaxed block text-[11px]">
+            Live profile access ended automatically because this booking was cancelled or closed.
           </span>
         </div>
       </div>

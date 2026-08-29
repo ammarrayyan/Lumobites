@@ -13,10 +13,9 @@ export interface GrantPetAccessParams {
 
 /**
  * Establishes or checks pet profile access for a partner.
- * Under Explicit Owner Approval flow:
- * - If status is already active, preserve active.
- * - If status is revoked or denied, preserve that decision.
- * - Otherwise, create/update the grant in 'pending' status and notify the owner to approve/deny.
+ * Under Automatic Booking-Lifecycle Access Model:
+ * - The moment an inquiry or booking exists, access is automatically active at the partner's tier.
+ * - Access ends automatically when the booking is marked 'completed' or 'cancelled'.
  */
 export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promise<{ success: boolean; status?: string }> {
   try {
@@ -27,7 +26,6 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
     }
 
     const cleanOwnerEmail = ownerEmail.toLowerCase().trim();
-    const cleanPartnerEmail = (partnerEmail || '').toLowerCase().trim();
     let resolvedPetName = petName;
     if (!resolvedPetName && petId) {
       const { data: p } = await supabaseAdmin.from('owner_pets').select('pet_name').eq('id', petId).maybeSingle();
@@ -35,7 +33,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
     }
     if (!resolvedPetName) resolvedPetName = 'your pet';
 
-    let currentStatus = 'pending';
+    let currentStatus = 'active';
 
     if (partnerType === 'vet') {
       const { data: rows } = await supabaseAdmin
@@ -48,21 +46,11 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
       const existing = rows && rows.length > 0 ? rows[0] : null;
 
       if (existing) {
-        if (petId && !existing.pet_id) {
-          await supabaseAdmin.from('vet_inquiries').update({ pet_id: petId }).eq('id', existing.id);
-        }
-        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
-          return { success: true, status: 'active' };
-        }
-        if (existing.status === 'revoked' || existing.status === 'denied') {
-          return { success: true, status: existing.status };
-        }
-        currentStatus = existing.status || 'pending';
+        currentStatus = existing.status || 'active';
       } else {
         const { error: insErr } = await supabaseAdmin.from('vet_inquiries').insert({
           clinic_id: String(partnerId),
           owner_email: cleanOwnerEmail,
-          pet_id: petId || null,
           status: 'pending',
           archived: false
         });
@@ -81,21 +69,11 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
       const existing = rows && rows.length > 0 ? rows[0] : null;
 
       if (existing) {
-        if (petId && !existing.pet_id) {
-          await supabaseAdmin.from('daycare_inquiries').update({ pet_id: petId }).eq('id', existing.id);
-        }
-        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
-          return { success: true, status: 'active' };
-        }
-        if (existing.status === 'revoked' || existing.status === 'denied') {
-          return { success: true, status: existing.status };
-        }
-        currentStatus = existing.status || 'pending';
+        currentStatus = existing.status || 'active';
       } else {
         const { error: insErr } = await supabaseAdmin.from('daycare_inquiries').insert({
           daycare_id: String(partnerId),
           owner_email: cleanOwnerEmail,
-          pet_id: petId || null,
           status: 'pending',
           archived: false
         });
@@ -117,13 +95,7 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
         if (petId && !existing.pet_id) {
           await supabaseAdmin.from('sitting_requests').update({ pet_id: petId }).eq('id', existing.id);
         }
-        if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(existing.status)) {
-          return { success: true, status: 'active' };
-        }
-        if (existing.status === 'revoked' || existing.status === 'denied') {
-          return { success: true, status: existing.status };
-        }
-        currentStatus = existing.status || 'pending';
+        currentStatus = existing.status || 'active';
       } else {
         let fallbackPetName = resolvedPetName !== 'your pet' ? resolvedPetName : null;
         let fallbackPetType = null;
@@ -146,24 +118,6 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
       }
     }
 
-    // In-app access request notification to owner (non-blocking)
-    if (currentStatus === 'pending') {
-      try {
-        const partnerTypeLabel = partnerType === 'vet' ? 'Vet Clinic' : partnerType === 'daycare' ? 'Daycare' : 'Pet Sitter';
-        const displayPartnerName = partnerType === 'sitter' ? formatSitterName(partnerName) : partnerName;
-        await supabaseAdmin.from('notifications').insert({
-          recipient_email: cleanOwnerEmail,
-          type: 'pet_access_request',
-          title: 'Pet Profile Access Request 🐾',
-          message: `${displayPartnerName} (${partnerTypeLabel}) requested access to ${resolvedPetName}'s profile. Tap to review and approve.`,
-          link: '/account?tab=pets',
-          read: false,
-        });
-      } catch (notifErr) {
-        console.warn('[PetAccess] Notification insert warning:', notifErr);
-      }
-    }
-
     return { success: true, status: currentStatus };
   } catch (err: any) {
     console.error('[PetAccess] Exception in grantOrRenewPetAccess:', err);
@@ -172,7 +126,11 @@ export async function grantOrRenewPetAccess(params: GrantPetAccessParams): Promi
 }
 
 /**
- * Checks whether a partner has an approved active profile access grant for a pet.
+ * Checks whether a partner has active profile access for a pet based on booking lifecycle.
+ * Rules:
+ * 1. Booking in active state ('pending', 'active', 'accepted', 'confirmed'): ALLOWED immediately at their tier.
+ * 2. Booking in 'completed' state: NOT ALLOWED (Access ended upon completion).
+ * 3. Booking in 'cancelled', 'declined', 'denied', 'revoked', 'no_show': NOT ALLOWED (Access ended upon cancellation).
  */
 export async function verifyPetAccess(
   petId: string,
@@ -210,7 +168,7 @@ export async function verifyPetAccess(
         .limit(1);
 
       if (!rows || rows.length === 0) {
-        return { allowed: false, reason: 'No inquiry thread found for this clinic', status: 'none' };
+        return { allowed: false, reason: 'No inquiry or booking found for this clinic', status: 'none' };
       }
       status = rows[0].status || 'pending';
     } else if (partnerType === 'daycare') {
@@ -223,7 +181,7 @@ export async function verifyPetAccess(
         .limit(1);
 
       if (!rows || rows.length === 0) {
-        return { allowed: false, reason: 'No inquiry thread found for this daycare', status: 'none' };
+        return { allowed: false, reason: 'No inquiry or booking found for this daycare', status: 'none' };
       }
       status = rows[0].status || 'pending';
     } else if (partnerType === 'sitter') {
@@ -241,17 +199,19 @@ export async function verifyPetAccess(
       status = rows[0].status || 'pending';
     }
 
-    if (['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(status)) {
+    // 1. Active Booking Statuses -> Automatic Access Granted
+    if (['pending', 'active', 'accepted', 'confirmed'].includes(status)) {
       return { allowed: true, status: 'active' };
     }
-    if (status === 'pending') {
-      return { allowed: false, reason: 'Waiting for pet owner approval', status: 'pending' };
+
+    // 2. Completed Status -> Access Ended
+    if (status === 'completed') {
+      return { allowed: false, reason: 'Booking is completed. Profile access has ended.', status: 'completed' };
     }
-    if (status === 'denied') {
-      return { allowed: false, reason: 'Access request was declined by pet owner', status: 'denied' };
-    }
-    if (status === 'revoked') {
-      return { allowed: false, reason: 'The pet owner has revoked access for this business', status: 'revoked' };
+
+    // 3. Cancelled / Declined / Revoked / No Show -> Access Ended
+    if (['cancelled', 'declined', 'denied', 'revoked', 'rejected', 'no_show'].includes(status)) {
+      return { allowed: false, reason: 'Booking was cancelled or closed. Profile access has ended.', status: 'cancelled' };
     }
 
     return { allowed: false, reason: 'Profile access is not active', status };

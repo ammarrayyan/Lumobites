@@ -194,46 +194,7 @@ export default function AccountPetsTab({
     }
   };
 
-  const handleAccessDecision = async (
-    accessId: string,
-    action: 'approve' | 'deny' | 'revoke' | 'restore',
-    partnerType?: string,
-    partnerName?: string
-  ) => {
-    let confirmMsg = '';
-    if (action === 'approve') {
-      confirmMsg = `Approve profile access for ${partnerName || 'this business'}? They will be able to view the profile during your booking.`;
-    } else if (action === 'deny') {
-      confirmMsg = `Decline profile access for ${partnerName || 'this business'}? Your booking will still proceed, but profile details won't be shared.`;
-    } else if (action === 'revoke') {
-      confirmMsg = `Revoke access for ${partnerName || 'this business'}? They will no longer be able to view this pet profile.`;
-    } else if (action === 'restore') {
-      confirmMsg = `Restore profile access for ${partnerName || 'this business'}?`;
-    }
 
-    if (confirmMsg && !confirm(confirmMsg)) return;
-
-    try {
-      const res = await fetch('/api/pets/access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_id: accessId,
-          partner_type: partnerType,
-          owner_email: ownerEmail,
-          action,
-        }),
-      });
-
-      if (res.ok) {
-        fetchPetsAndGrants();
-      } else {
-        alert('Failed to update access status');
-      }
-    } catch (ex) {
-      alert('Error modifying access');
-    }
-  };
 
   const addVaccineRow = () => {
     if (!editingPet) return;
@@ -401,208 +362,146 @@ export default function AccountPetsTab({
           <div>
             <h3 className="font-extrabold text-[#191919] text-base">Pet Profile Access & Permissions</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Control which businesses and sitters can view your pet&apos;s records. All access requests require your explicit approval before profile details are unlocked.
+              View authorized businesses and sitters caring for your pets. Access is active automatically during bookings and inquiries, and ends when completed or cancelled.
             </p>
           </div>
 
-          {/* ── 1. PENDING ACCESS REQUESTS (NEEDS OWNER APPROVAL) ── */}
-          {grants.filter(g => (g.effective_status || g.status) === 'pending').length > 0 && (
-            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/60 rounded-3xl p-5 sm:p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-                <h4 className="font-extrabold text-amber-950 text-sm">
-                  Pending Access Requests ({grants.filter(g => (g.effective_status || g.status) === 'pending').length})
-                </h4>
+          <div className="space-y-6">
+            {/* Policy Banner */}
+            <div className="bg-[#FAF6F2] border border-[#DFD3C7] rounded-2xl p-4 flex items-start gap-3 text-xs text-[#5C4533]">
+              <div className="w-8 h-8 rounded-xl bg-[#F0E6DD] flex items-center justify-center shrink-0 text-[#8B5E3C]">
+                <ShieldCheck className="w-4 h-4" />
               </div>
-
-              <div className="flex flex-col gap-3">
-                {grants
-                  .filter(g => (g.effective_status || g.status) === 'pending')
-                  .map(grant => {
-                    const petName = grant.owner_pets?.pet_name || 'Pet';
-                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
-                    const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic (Full Medical Access)' : grant.partner_type === 'daycare' ? '🐕 Daycare (Care Access)' : '🏡 Pet Sitter (Care Access)';
-
-                    return (
-                      <div
-                        key={grant.id}
-                        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                        className="bg-white border-2 border-amber-300/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                      >
-                        <div className="space-y-1.5 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-black text-gray-900 text-sm">{partnerDisplayName}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-100">
-                              {typeBadge}
-                            </span>
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                              ⏳ Approval Needed
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            Requested access to <strong className="text-gray-900">{petName}</strong>&apos;s live profile • {new Date(grant.granted_at).toLocaleDateString()}
-                          </p>
-                          <p className="text-[11px] text-gray-400">
-                            {grant.partner_type === 'vet'
-                              ? 'Includes vaccinations, medical history, microchip, and clinical visit notes.'
-                              : 'Includes feeding instructions, medication schedule, allergies, behavior notes, and emergency contacts.'}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 flex-wrap">
-                          <Link
-                            href={`/petsitting/messages/${grant.id}`}
-                            className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl border border-[#DFD3C7] bg-white hover:bg-[#FAF6F2] text-[#4A3E3D] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 no-underline"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
-                            View Chat
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'deny', grant.partner_type, partnerDisplayName)}
-                            className="flex-1 sm:flex-initial px-4 py-2 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] hover:bg-[#F0E6DD] text-gray-700 font-bold text-xs transition-colors cursor-pointer text-center"
-                          >
-                            Decline
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'approve', grant.partner_type, partnerDisplayName)}
-                            className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
-                          >
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            Approve Access
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+              <div className="flex-1 min-w-0">
+                <strong className="font-extrabold text-[#2E2419] block text-xs mb-0.5">
+                  Automatic Booking-Lifecycle Access
+                </strong>
+                <span className="text-[#7A6B5E] leading-relaxed block text-[11px]">
+                  Profile access is granted automatically to authorized Vet Clinics (Full Medical), Daycares (Care Level), and Pet Sitters (Care Level) for active bookings and inquiries. Access ends automatically once a booking is completed or cancelled.
+                </span>
               </div>
             </div>
-          )}
 
-          {/* ── 2. ACTIVE ACCESS GRANTS ── */}
-          <div className="flex flex-col gap-3">
-            <h4 className="font-extrabold text-[#191919] text-sm">
-              Authorized Businesses & Sitters ({grants.filter(g => (g.effective_status || g.status) === 'active').length})
-            </h4>
+            {/* ── 1. ACTIVE BOOKING ACCESS PASSES ── */}
+            <div className="flex flex-col gap-3">
+              <h4 className="font-extrabold text-[#191919] text-sm">
+                Active Booking Access Passes ({grants.filter(g => ['pending', 'active', 'accepted', 'confirmed'].includes(g.status)).length})
+              </h4>
 
-            {grants.filter(g => (g.effective_status || g.status) === 'active').length === 0 ? (
-              <div className="text-center py-8 px-4 bg-[#FAF7F2] rounded-2xl border border-dashed border-[#EAE3D9] flex flex-col items-center gap-2">
-                <ShieldCheck className="w-7 h-7 text-emerald-600/40" />
-                <p className="font-bold text-gray-800 text-xs">No active access grants</p>
-                <p className="text-[11px] text-gray-500 max-w-xs">
-                  When a Vet, Daycare, or Sitter requests access for a booking, their request will appear above for your approval.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {grants
-                  .filter(g => (g.effective_status || g.status) === 'active')
-                  .map(grant => {
-                    const petName = grant.owner_pets?.pet_name || 'Pet';
-                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
-                    const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic (Full Access)' : grant.partner_type === 'daycare' ? '🐕 Daycare (Care Access)' : '🏡 Pet Sitter (Care Access)';
+              {grants.filter(g => ['pending', 'active', 'accepted', 'confirmed'].includes(g.status)).length === 0 ? (
+                <div className="text-center py-8 px-4 bg-[#FAF7F2] rounded-2xl border border-dashed border-[#EAE3D9] flex flex-col items-center gap-2">
+                  <ShieldCheck className="w-7 h-7 text-emerald-600/40" />
+                  <p className="font-bold text-gray-800 text-xs">No active booking access passes</p>
+                  <p className="text-[11px] text-gray-500 max-w-xs">
+                    When you submit an inquiry or booking with a Vet, Daycare, or Sitter, their active access pass will appear here automatically.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {grants
+                    .filter(g => ['pending', 'active', 'accepted', 'confirmed'].includes(g.status))
+                    .map(grant => {
+                      const petName = grant.owner_pets?.pet_name || 'Pet';
+                      const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
+                      const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic (Full Access)' : grant.partner_type === 'daycare' ? '🐕 Daycare (Care Access)' : '🏡 Pet Sitter (Care Access)';
+                      const chatLink = grant.partner_type === 'vet' 
+                        ? `/vet-boarding/dashboard?inquiry=${grant.id}`
+                        : grant.partner_type === 'daycare'
+                        ? `/pet-daycare/dashboard?inquiry=${grant.id}`
+                        : `/petsitting/messages/${grant.id}`;
 
-                    return (
-                      <div
-                        key={grant.id}
-                        style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-                        className="bg-white border border-[#DFD3C7] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-                      >
-                        <div className="space-y-1">
+                      return (
+                        <div
+                          key={grant.id}
+                          style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                          className="bg-white border border-[#DFD3C7] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                        >
+                          <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-extrabold text-gray-900 text-sm">{partnerDisplayName}</span>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-100">
                               {typeBadge}
                             </span>
                             <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                              ● Active
+                              ● Active Booking
                             </span>
                           </div>
                           <p className="text-xs text-gray-500">
-                            Pet: <strong className="text-gray-800">{petName}</strong> • Approved: {new Date(grant.granted_at).toLocaleDateString()}
+                            Pet: <strong className="text-gray-800">{petName}</strong> • Initiated: {new Date(grant.granted_at).toLocaleDateString()}
                           </p>
                         </div>
 
                         <div className="flex items-center gap-2 self-end sm:self-center">
                           <Link
-                            href={`/petsitting/messages/${grant.id}`}
+                            href={chatLink}
                             className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all bg-[#FAF6F2] hover:bg-[#F0E6DD] text-[#4A3E3D] border border-[#DFD3C7] flex items-center gap-1.5 no-underline"
                           >
                             <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
-                            View Chat
+                            View Booking & Chat
                           </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'revoke', grant.partner_type, partnerDisplayName)}
-                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
-                          >
-                            Revoke Access
-                          </button>
                         </div>
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </div>
+
+            {/* ── 2. COMPLETED / CANCELLED (ACCESS ENDED) ── */}
+            {grants.filter(g => ['completed', 'cancelled', 'declined', 'denied', 'revoked', 'no_show'].includes(g.status)).length > 0 && (
+              <div className="flex flex-col gap-3 pt-2">
+                <h4 className="font-extrabold text-gray-500 text-xs uppercase tracking-wider">
+                  Completed & Closed Bookings — Access Ended ({grants.filter(g => ['completed', 'cancelled', 'declined', 'denied', 'revoked', 'no_show'].includes(g.status)).length})
+                </h4>
+
+                <div className="flex flex-col gap-2.5">
+                  {grants
+                    .filter(g => ['completed', 'cancelled', 'declined', 'denied', 'revoked', 'no_show'].includes(g.status))
+                    .map(grant => {
+                      const st = grant.status;
+                      const petName = grant.owner_pets?.pet_name || 'Pet';
+                      const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
+                      const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic' : grant.partner_type === 'daycare' ? '🐕 Daycare' : '🏡 Pet Sitter';
+                      const chatLink = grant.partner_type === 'vet' 
+                        ? `/vet-boarding/dashboard?inquiry=${grant.id}`
+                        : grant.partner_type === 'daycare'
+                        ? `/pet-daycare/dashboard?inquiry=${grant.id}`
+                        : `/petsitting/messages/${grant.id}`;
+
+                      return (
+                        <div
+                          key={grant.id}
+                          className="bg-gray-50/80 border border-gray-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 opacity-80 hover:opacity-100 transition-opacity"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-gray-700 text-xs">{partnerDisplayName}</span>
+                              <span className="text-[10px] text-gray-500">{typeBadge}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">
+                                {st === 'completed' ? 'Completed' : 'Cancelled'} • Access Ended
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-500">
+                              Pet: {petName}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-end sm:self-center">
+                            <Link
+                              href={chatLink}
+                              className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all bg-white hover:bg-[#FAF6F2] text-[#4A3E3D] border border-gray-300 flex items-center gap-1.5 no-underline"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
+                              View History
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             )}
           </div>
-
-          {/* ── 3. DECLINED / REVOKED GRANTS ── */}
-          {grants.filter(g => (g.effective_status || g.status) === 'revoked' || (g.effective_status || g.status) === 'denied').length > 0 && (
-            <div className="flex flex-col gap-3 pt-2">
-              <h4 className="font-extrabold text-gray-500 text-xs uppercase tracking-wider">
-                Declined & Revoked Access ({grants.filter(g => (g.effective_status || g.status) === 'revoked' || (g.effective_status || g.status) === 'denied').length})
-              </h4>
-
-              <div className="flex flex-col gap-2.5">
-                {grants
-                  .filter(g => (g.effective_status || g.status) === 'revoked' || (g.effective_status || g.status) === 'denied')
-                  .map(grant => {
-                    const st = grant.effective_status || grant.status;
-                    const petName = grant.owner_pets?.pet_name || 'Pet';
-                    const partnerDisplayName = grant.partner_type === 'sitter' ? formatSitterName(grant.partner_name) : grant.partner_name;
-                    const typeBadge = grant.partner_type === 'vet' ? '🏥 Vet Clinic' : grant.partner_type === 'daycare' ? '🐕 Daycare' : '🏡 Pet Sitter';
-
-                    return (
-                      <div
-                        key={grant.id}
-                        className="bg-gray-50/80 border border-gray-200 rounded-2xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 opacity-80 hover:opacity-100 transition-opacity"
-                      >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-gray-700 text-xs">{partnerDisplayName}</span>
-                            <span className="text-[10px] text-gray-500">{typeBadge}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700">
-                              {st === 'denied' ? 'Declined' : 'Revoked'}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-gray-500">
-                            Pet: {petName}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 self-end sm:self-center">
-                          <Link
-                            href={`/petsitting/messages/${grant.id}`}
-                            className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all bg-white hover:bg-[#FAF6F2] text-[#4A3E3D] border border-gray-300 flex items-center gap-1.5 no-underline"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 text-[#8B5E3C]" />
-                            View Chat
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleAccessDecision(grant.id, 'restore', grant.partner_type, partnerDisplayName)}
-                            className="px-3 py-1.5 rounded-xl font-bold text-xs transition-all self-end sm:self-center cursor-pointer bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200"
-                          >
-                            Restore Access
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
         </div>
       )}
 

@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       const clinic = (inq as any).vet_clinics;
       const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
       const st = inq.status || 'pending';
-      const isGrantActive = ['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(st);
+      const isGrantActive = ['active', 'accepted', 'confirmed', 'pending'].includes(st);
       unifiedGrants.push({
         id: inq.id,
         partner_id: inq.clinic_id,
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         pet_id: inq.pet_id || pet?.id,
         owner_pets: pet,
         status: st,
-        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : isGrantActive ? 'active' : 'pending',
+        effective_status: isGrantActive ? 'active' : st === 'completed' ? 'completed' : 'cancelled',
         granted_at: inq.created_at,
         last_activity_at: inq.created_at
       });
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       const daycare = (inq as any).pet_daycares;
       const pet = petMap.get(inq.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
       const st = inq.status || 'pending';
-      const isGrantActive = ['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(st);
+      const isGrantActive = ['active', 'accepted', 'confirmed', 'pending'].includes(st);
       unifiedGrants.push({
         id: inq.id,
         partner_id: inq.daycare_id,
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
         pet_id: inq.pet_id || pet?.id,
         owner_pets: pet,
         status: st,
-        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : isGrantActive ? 'active' : 'pending',
+        effective_status: isGrantActive ? 'active' : st === 'completed' ? 'completed' : 'cancelled',
         granted_at: inq.created_at,
         last_activity_at: inq.created_at
       });
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       const pet = petMap.get(req.pet_id) || (pets && pets.length > 0 ? pets[0] : null);
       const sitterName = sitter?.name ? formatSitterName(sitter.name) : 'Pet Sitter';
       const st = req.status || 'pending';
-      const isGrantActive = ['active', 'accepted', 'confirmed', 'completed', 'no_show'].includes(st);
+      const isGrantActive = ['active', 'accepted', 'confirmed', 'pending'].includes(st);
       unifiedGrants.push({
         id: req.id,
         partner_id: req.sitter_id,
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
         pet_id: req.pet_id || pet?.id,
         owner_pets: pet,
         status: st,
-        effective_status: st === 'revoked' ? 'revoked' : st === 'denied' ? 'denied' : isGrantActive ? 'active' : 'pending',
+        effective_status: isGrantActive ? 'active' : st === 'completed' ? 'completed' : 'cancelled',
         granted_at: req.created_at,
         last_activity_at: req.created_at
       });
