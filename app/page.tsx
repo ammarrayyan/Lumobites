@@ -463,133 +463,202 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES GRID SECTION */}
-      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
-        {/* Desktop My Pets Quick Card (Light & Sleek) */}
-        <div className="max-w-[1360px] mx-auto mb-5">
+      {/* SERVICES GRID SECTION (Desktop Bento Grid Layout) */}
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 py-10 md:py-14">
+        {/* Desktop My Pets Quick Card (Elevated & Refined) */}
+        <div className="max-w-[1360px] mx-auto mb-6">
           <Link href="/account?tab=pets" className="block w-full" style={{ textDecoration: 'none' }}>
             <div 
-              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04)' }}
-              className="bg-[#FAF5EE] border border-[#EADBCE] hover:border-[#8B5E3C]/40 py-3 px-4.5 rounded-2xl flex items-center justify-between gap-4 transition-all hover:shadow-xs group cursor-pointer"
+              style={{ boxShadow: '0 2px 10px rgba(139, 94, 60, 0.05)' }}
+              className="bg-white border border-[#EADBCE] hover:border-[#8B5E3C]/50 py-3.5 px-5 rounded-2xl flex items-center justify-between gap-4 transition-all duration-200 hover:shadow-md group cursor-pointer"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-base font-bold shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[#FAF5EE] text-[#8B5E3C] flex items-center justify-center text-lg font-bold shrink-0 border border-[#EADBCE]">
                   🐾
                 </div>
                 <div>
-                  <h3 className="font-bold text-[#2E2419] text-sm flex items-center gap-2">
+                  <h3 className="font-extrabold text-[#2E2419] text-sm flex items-center gap-2">
                     My Pet Profiles
-                    <span className="text-[10px] font-semibold text-[#8B5E3C] bg-[#F3EBE1] px-2 py-0.5 rounded-full border border-[#E6D7C8]">
-                      Records & Access
+                    <span className="text-[10px] font-bold text-[#8B5E3C] bg-[#FAF5EE] px-2.5 py-0.5 rounded-full border border-[#E6D7C8]">
+                      Records &amp; Access
                     </span>
                   </h3>
                   <p className="text-xs text-[#7A6B5E] mt-0.5">
-                    Manage care routines, clinical credentials, and authorized partner permissions.
+                    Manage health records, care routines, vaccine dates, and authorized partner permissions in one place.
                   </p>
                 </div>
               </div>
-              <span className="px-3.5 py-1.5 rounded-xl bg-white border border-[#E0D2C4] text-[#5C4533] group-hover:bg-[#8B5E3C] group-hover:text-white group-hover:border-transparent font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 shrink-0">
+              <span className="px-4 py-2 rounded-xl bg-[#FAF5EE] border border-[#E0D2C4] text-[#5C4533] group-hover:bg-[#8B5E3C] group-hover:text-white group-hover:border-transparent font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 shrink-0">
                 View Pets <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </Link>
         </div>
 
-        <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+        {/* 12-Column Modern Bento Grid */}
+        <div className="max-w-[1360px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6">
 
-          {/* 1. Pet Sitting */}
-          <div className="bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10 mt-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
-                <HomeIcon className="w-6 h-6 text-[#C27353]" />
+          {/* Bento 1 (7-Col Hero Pillar): Pet Sitting & Care Network */}
+          <div className="md:col-span-7 bg-white border border-[#EADBCE] rounded-[28px] p-7 shadow-xs hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center text-xl text-[#C27353] border border-[#EADBCE]/80 shadow-2xs">
+                    <HomeIcon className="w-6 h-6 text-[#C27353]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-[#4A3E3D] group-hover:text-[#C27353] transition-colors">Pet Sitting &amp; Boarding</h3>
+                    <span className="text-xs text-[#8B7E7D] font-medium">Verified Sitters • Licensed Vet Boarding • Daycare</span>
+                  </div>
+                </div>
+                <span className="bg-[#FAF2EB] text-[#C27353] text-[11px] font-black px-3 py-1 rounded-full border border-[#EADBCE] shrink-0">
+                  0% Sitter Commission
+                </span>
               </div>
-              <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
-            </div>
-            <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm">
-              Find trusted, ID-verified pet sitters, licensed vet boarding, and daycare facilities near you. AI finds the perfect match instantly. Sitters keep 100%.
-            </p>
-            <div className="flex flex-col gap-2 relative z-10">
-              <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-[#C27353] hover:bg-[#B06040] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                Find Sitters &rarr;
-              </Link>
-              <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl border border-[#C27353]/30 text-[#C27353] font-bold text-center hover:bg-[#FAF2EB] hover:border-[#C27353]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
-                Become a Sitter &rarr;
-              </Link>
-            </div>
-          </div>
 
-          {/* 2. Lost Pets */}
-          <div className="bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
-                <Footprints className="w-6 h-6 text-[#517685]" />
-              </div>
-              <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
-            </div>
-            <p className="text-[#627985] leading-relaxed relative z-10 text-sm">
-              Post a lost or found pet instantly. AI searches found pet reports using photo recognition to reunite you faster.
-            </p>
-            <div className="relative z-10">
-              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#517685] hover:bg-[#426270] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                Post Lost Pet &rarr;
-              </Link>
-            </div>
-          </div>
+              <p className="text-sm text-[#66554F] leading-relaxed mb-6">
+                Connect with trusted, ID-verified pet sitters, clinical vet boarding, and licensed daycares near you. Instant AI matching ensures your pet gets the exact personalized care they need. Sitters keep 100%.
+              </p>
 
-          {/* 3. Pet Food & Safety */}
-          <div className="bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
-                <Utensils className="w-6 h-6 text-[#63825D]" />
+              {/* Feature Chips */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="bg-[#FAF5EE] border border-[#EADBCE]/70 rounded-2xl p-3 text-center">
+                  <span className="text-base">🛡️</span>
+                  <p className="text-xs font-bold text-[#4A3E3D] mt-1">ID Verified</p>
+                  <p className="text-[10px] text-[#8B7E7D]">Sitters &amp; Staff</p>
+                </div>
+                <div className="bg-[#FAF5EE] border border-[#EADBCE]/70 rounded-2xl p-3 text-center">
+                  <span className="text-base">🏥</span>
+                  <p className="text-xs font-bold text-[#4A3E3D] mt-1">Vet Boarding</p>
+                  <p className="text-[10px] text-[#8B7E7D]">Clinical Care</p>
+                </div>
+                <div className="bg-[#FAF5EE] border border-[#EADBCE]/70 rounded-2xl p-3 text-center">
+                  <span className="text-base">🐕</span>
+                  <p className="text-xs font-bold text-[#4A3E3D] mt-1">Pet Daycare</p>
+                  <p className="text-[10px] text-[#8B7E7D]">Local Playgroups</p>
+                </div>
               </div>
-              <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food</h3>
             </div>
-            <p className="text-[#61755E] leading-relaxed relative z-10 text-sm">
-              Scan pet food labels to flag hidden toxins. Get AI recommendations and live FDA recall alerts.
-            </p>
-            <div className="flex flex-col gap-2 relative z-10">
-              <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-[#63825D] hover:bg-[#516E4C] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                Find Food &rarr;
+
+            <div className="flex items-center gap-3 pt-4 border-t border-[#F0E6DA]">
+              <Link href="/petsitting" className="flex-1 text-center py-3 rounded-xl bg-[#C27353] hover:bg-[#A8583B] text-white font-bold text-xs transition-all shadow-xs" style={{ textDecoration: 'none' }}>
+                Find Sitters Near You &rarr;
+              </Link>
+              <Link href="/petsitting?tab=become" className="flex-1 text-center py-3 rounded-xl bg-[#FAF5EE] hover:bg-[#F2E8DC] border border-[#EADBCE] text-[#C27353] font-bold text-xs transition-all" style={{ textDecoration: 'none' }}>
+                Become a Sitter
               </Link>
             </div>
           </div>
 
-          {/* 4. Pet Adoption */}
-          <div className="bg-gradient-to-b from-[#FDF5F6] to-[#FAF0F2] border border-[#F4DCDD] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#E8BFC2] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#FCE8EA] flex items-center justify-center shadow-inner">
-                <Heart className="w-6 h-6 text-[#D94668]" />
+          {/* Bento 2 (5-Col Urgent Pillar): Lost Pets Emergency Network */}
+          <div className="md:col-span-5 bg-gradient-to-br from-[#FAF5F4] to-[#F5ECEB] border border-[#E8D4D2] rounded-[28px] p-7 shadow-xs hover:shadow-xl hover:border-[#DFCCD0] transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-xl text-[#517685] border border-[#E8D4D2] shadow-2xs">
+                    <Footprints className="w-6 h-6 text-[#517685]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-[#3D2527] group-hover:text-[#517685] transition-colors">Lost Pets Network</h3>
+                    <span className="text-xs text-[#8B7E7D] font-medium">AI Photo Search &amp; Community Alerts</span>
+                  </div>
+                </div>
+                <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full animate-pulse shrink-0">
+                  Live Alerts
+                </span>
               </div>
-              <h3 className="text-[#7A2A38] font-extrabold text-xl">Pet Adoption</h3>
+
+              <p className="text-sm text-[#664C4F] leading-relaxed mb-6">
+                Post lost or found alerts instantly. Our visual AI scans local sighting reports using photo recognition to reunite you with your pet faster.
+              </p>
+
+              <div className="bg-white/80 border border-[#E8D4D2] rounded-2xl p-3.5 mb-6 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#FCE8EA] text-[#D94668] flex items-center justify-center font-bold text-sm shrink-0">
+                  ⚡
+                </div>
+                <div className="text-xs">
+                  <p className="font-bold text-[#3D2527]">Photo Recognition Matching</p>
+                  <p className="text-[#8B7E7D] text-[11px]">Matches coat patterns, breed, and facial features</p>
+                </div>
+              </div>
             </div>
-            <p className="text-[#8F5561] leading-relaxed relative z-10 text-sm">
-              Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
-            </p>
-            <div className="relative z-10">
-              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#D94668] hover:bg-[#B83250] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+
+            <div className="pt-4 border-t border-[#E8D4D2]/80">
+              <Link href="/lost-pets" className="block w-full text-center py-3 rounded-xl bg-[#517685] hover:bg-[#426270] text-white font-bold text-xs transition-all shadow-xs" style={{ textDecoration: 'none' }}>
+                View Lost &amp; Found Pets &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* Bento 3 (4-Col Supporting): Food Safety & Nutrition */}
+          <div className="md:col-span-4 bg-white border border-[#EADBCE] rounded-[28px] p-6 shadow-xs hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#F2F6F1] flex items-center justify-center text-xl text-[#63825D] border border-[#DFE5DC]">
+                  <Utensils className="w-5 h-5 text-[#63825D]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#2E3B2C] group-hover:text-[#63825D] transition-colors">Pet Food Safety</h3>
+                  <span className="text-xs text-[#8B7E7D]">Ingredient Scanner &amp; Recalls</span>
+                </div>
+              </div>
+              <p className="text-xs text-[#5D6B5C] leading-relaxed mb-4">
+                Scan pet food labels to flag hidden toxins, compare formulas, and receive real-time FDA recall alerts.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#F0E6DA]">
+              <Link href="/chat" className="block w-full text-center py-2.5 rounded-xl bg-[#63825D] hover:bg-[#516E4C] text-white font-bold text-xs transition-all shadow-xs" style={{ textDecoration: 'none' }}>
+                Scan &amp; Compare Foods &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* Bento 4 (4-Col Supporting): Pet Adoption */}
+          <div className="md:col-span-4 bg-white border border-[#EADBCE] rounded-[28px] p-6 shadow-xs hover:shadow-xl hover:border-[#E8BFC2] transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#FDF0F3] flex items-center justify-center text-xl text-[#D94668] border border-[#F4DCDD]">
+                  <Heart className="w-5 h-5 text-[#D94668]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#422227] group-hover:text-[#D94668] transition-colors">Pet Adoption</h3>
+                  <span className="text-xs text-[#8B7E7D]">Rescue Shelters &amp; Matching</span>
+                </div>
+              </div>
+              <p className="text-xs text-[#735359] leading-relaxed mb-4">
+                Discover rescue pets waiting for a loving home with AI lifestyle matching, visual search, and shelter messaging.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#F0E6DA]">
+              <Link href="/adoption" className="block w-full text-center py-2.5 rounded-xl bg-[#D94668] hover:bg-[#B83250] text-white font-bold text-xs transition-all shadow-xs" style={{ textDecoration: 'none' }}>
                 Find to Adopt &rarr;
               </Link>
             </div>
           </div>
 
-          {/* 5. Partner Portal */}
-          <div className="bg-gradient-to-b from-[#F7F6FA] to-[#EFF0F7] border border-[#E0DDF2] rounded-3xl p-6 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-[#C8C3E8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-[#ECEAF7] flex items-center justify-center shadow-inner">
-                <Building2 className="w-6 h-6 text-[#635BFF]" />
+          {/* Bento 5 (4-Col Supporting): Partner & Clinic Portals */}
+          <div className="md:col-span-4 bg-white border border-[#EADBCE] rounded-[28px] p-6 shadow-xs hover:shadow-xl hover:border-[#C8C3E8] transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#ECEAF7] flex items-center justify-center text-xl text-[#635BFF] border border-[#E0DDF2]">
+                  <Building2 className="w-5 h-5 text-[#635BFF]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#2B2659] group-hover:text-[#635BFF] transition-colors">Partner Portals</h3>
+                  <span className="text-xs text-[#8B7E7D]">Shelters, Vets &amp; Daycares</span>
+                </div>
               </div>
-              <h3 className="text-[#3B347A] font-extrabold text-xl">Partner Portal</h3>
+              <p className="text-xs text-[#58537D] leading-relaxed mb-4">
+                Dedicated dashboards for licensed vet clinics, rescue shelters, and pet daycares to manage listings &amp; requests.
+              </p>
             </div>
-            <p className="text-[#645F94] leading-relaxed relative z-10 text-sm">
-              Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings &amp; inquiries.
-            </p>
-            <div className="relative z-10">
+            <div className="pt-3 border-t border-[#F0E6DA]">
               <button
                 type="button"
                 onClick={handleOpenPartnerPortal}
-                className="block w-full py-3 rounded-xl bg-[#635BFF] hover:bg-[#4E44E6] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                className="block w-full text-center py-2.5 rounded-xl bg-[#635BFF] hover:bg-[#4E44E6] text-white font-bold text-xs transition-all shadow-xs cursor-pointer border-none"
               >
-                Partner Portal &rarr;
+                Open Partner Portal &rarr;
               </button>
             </div>
           </div>
@@ -597,16 +666,15 @@ export default function Home() {
         </div>
       </section>
 
-
-      {/* EXPLORE TEASER BANNER */}
-      <section className="hidden md:block w-full bg-[#FCFAF8] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
-        <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
-            <Globe className="w-6 h-6 text-[#8B5E3C]" />
+      {/* EXPLORE TEASER BANNER (Confident Wide-Screen Proportion) */}
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-16 md:pb-24 text-center">
+        <div className="max-w-[800px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#F5ECE1] border border-[#EADBCE] rounded-[32px] p-10 shadow-xs flex flex-col items-center">
+          <div className="w-14 h-14 rounded-2xl bg-[#FAF5EE] border border-[#EADBCE] flex items-center justify-center mb-4 shadow-2xs">
+            <Globe className="w-7 h-7 text-[#8B5E3C]" />
           </div>
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] mb-2">Meet Your Pet Community</h2>
-          <p className="text-sm sm:text-base text-[#2B231D] leading-relaxed mb-6 font-normal">
-            Connect with local pet owners, follow lost pet alerts, and stay in the loop with everything happening in your neighborhood.
+          <h2 className="text-2xl font-black text-[#191919] mb-2.5">Meet Your Pet Community</h2>
+          <p className="text-sm text-[#7A6B5E] leading-relaxed mb-6 max-w-xl font-normal">
+            Connect with local pet owners, track neighborhood lost pet alerts, explore local pet tips, and stay in the loop with your city.
           </p>
           <Link 
             href="/explore"
@@ -618,17 +686,17 @@ export default function Home() {
               gap: '8px',
               backgroundColor: btnHover ? '#734A2E' : '#8B5E3C',
               color: 'white',
-              padding: '14px 32px',
+              padding: '14px 34px',
               borderRadius: '50px',
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '15px',
+              fontWeight: '700',
               textDecoration: 'none',
-              boxShadow: btnHover ? '0 6px 20px rgba(139, 94, 60, 0.45)' : '0 4px 15px rgba(139, 94, 60, 0.3)',
+              boxShadow: btnHover ? '0 6px 20px rgba(139, 94, 60, 0.4)' : '0 4px 14px rgba(139, 94, 60, 0.25)',
               transform: btnHover ? 'translateY(-1px)' : 'none',
               transition: 'all 0.2s ease',
             }}
           >
-            Explore Community <ArrowRight className="w-4 h-4" />
+            Explore City Board &amp; Community <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
