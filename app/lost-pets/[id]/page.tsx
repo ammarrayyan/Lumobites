@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
 import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
+import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -566,6 +567,16 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                     )}
                   </>
                 )}
+
+                {/* Post Reactions */}
+                <div className="py-2 px-1 border-t border-[#E8DDD4]/80 flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">React</span>
+                  <FacebookReactionPicker
+                    itemId={pet.id}
+                    size="md"
+                    showSummary={true}
+                  />
+                </div>
 
                 <button 
                   type="button"
