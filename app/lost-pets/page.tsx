@@ -672,7 +672,7 @@ export default function LostPetsFeed() {
             </div>
             <Link 
               href="/lost-pets/post" 
-              className="bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
+              className="bg-[#E05A47] hover:bg-[#C94735] text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
             >
               <PawPrint className="w-4 h-4" />
               <span>Report Lost/Found Pet</span>
@@ -1352,7 +1352,7 @@ export default function LostPetsFeed() {
           <Link
             href="/lost-pets/post"
             prefetch={true}
-            className="pressable flex items-center gap-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl hover:shadow-2xl border border-white/30 active:scale-95 transition-transform select-none"
+            className="pressable flex items-center gap-2 bg-[#E05A47] hover:bg-[#C94735] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl hover:shadow-2xl border border-white/30 active:scale-95 transition-transform select-none"
             style={{ textDecoration: 'none' }}
           >
             <PawPrint className="w-4 h-4" />

@@ -278,7 +278,7 @@ export default function AdminPage() {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black font-bold py-3 px-4 rounded-xl hover:opacity-90 transition-opacity"
+              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer"
             >
               Access Dashboard
             </button>
@@ -365,8 +365,8 @@ export default function AdminPage() {
                         className={`w-full text-left py-2 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
                           isActive
                             ? item.highlight
-                              ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-black shadow-md font-bold'
-                              : 'bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black shadow-md font-bold'
+                              ? 'bg-amber-500 text-white shadow-xs font-bold'
+                              : 'bg-[#8B5E3C] text-white shadow-xs font-bold'
                             : item.highlight
                               ? 'bg-amber-50 text-amber-900 hover:bg-amber-100'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

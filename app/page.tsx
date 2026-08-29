@@ -509,7 +509,7 @@ export default function Home() {
               Find trusted, ID-verified pet sitters, licensed vet boarding, and daycare facilities near you. AI finds the perfect match instantly. Sitters keep 100%.
             </p>
             <div className="flex flex-col gap-2 relative z-10">
-              <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C27353] to-[#B06040] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-[#C27353] hover:bg-[#B06040] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Sitters &rarr;
               </Link>
               <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl border border-[#C27353]/30 text-[#C27353] font-bold text-center hover:bg-[#FAF2EB] hover:border-[#C27353]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
@@ -530,7 +530,7 @@ export default function Home() {
               Post a lost or found pet instantly. AI searches found pet reports using photo recognition to reunite you faster.
             </p>
             <div className="relative z-10">
-              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#517685] to-[#426270] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#517685] hover:bg-[#426270] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Post Lost Pet &rarr;
               </Link>
             </div>
@@ -548,7 +548,7 @@ export default function Home() {
               Scan pet food labels to flag hidden toxins. Get AI recommendations and live FDA recall alerts.
             </p>
             <div className="flex flex-col gap-2 relative z-10">
-              <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-gradient-to-r from-[#63825D] to-[#516E4C] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-[#63825D] hover:bg-[#516E4C] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find Food &rarr;
               </Link>
             </div>
@@ -566,7 +566,7 @@ export default function Home() {
               Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
             </p>
             <div className="relative z-10">
-              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#D94668] to-[#B83250] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#D94668] hover:bg-[#B83250] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                 Find to Adopt &rarr;
               </Link>
             </div>
@@ -587,7 +587,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleOpenPartnerPortal}
-                className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#635BFF] to-[#4E44E6] text-white font-bold text-center hover:brightness-110 hover:shadow-md transition-all shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                className="block w-full py-3 rounded-xl bg-[#635BFF] hover:bg-[#4E44E6] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
               >
                 Partner Portal &rarr;
               </button>

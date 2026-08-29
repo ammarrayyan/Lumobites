@@ -587,7 +587,7 @@ export default function AccountPage() {
                             }
                           }}
                           disabled={loading}
-                          className="w-full mt-1 bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full mt-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? (
                             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

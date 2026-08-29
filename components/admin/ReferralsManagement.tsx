@@ -198,7 +198,7 @@ export default function ReferralsManagement({ adminKey, onUnauthorized }: Referr
           <button
             type="submit"
             disabled={creating || !newReferrerName.trim()}
-            className="bg-gradient-to-r from-[#c2e59c] to-[#64b3f4] text-black font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+            className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             <Plus size={18} />
             {creating ? 'Creating...' : 'Create Link'}

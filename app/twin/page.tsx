@@ -1484,7 +1484,7 @@ export default function TwinPage() {
                   </Link>
                   <Link 
                     href="/petsitting"
-                    className="bg-gradient-to-r from-[#FFB703] to-[#FB8500] hover:from-[#F5A623] hover:to-[#E67E22] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-md flex items-center justify-center gap-1.5"
+                    className="bg-[#FB8500] hover:bg-[#E07400] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
                     style={{ textDecoration: 'none' }}
                   >
                     <Footprints className="w-4 h-4 text-white" /> Search Sitters Near You &rarr;
@@ -1588,10 +1588,10 @@ export default function TwinPage() {
                       )}
                     </button>
 
-                    {/* Share to Instagram Story (Gradient) */}
+                    {/* Share to Instagram Story */}
                     <button 
                       onClick={shareToInstagramStory}
-                      className="flex-1 bg-gradient-to-r from-[#ee2a7b] to-[#6228d7] hover:from-[#d6246e] hover:to-[#551ec0] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer border-0"
+                      className="flex-1 bg-[#E1306C] hover:bg-[#C13584] text-white py-3.5 rounded-xl font-bold text-sm text-center transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer border-0"
                     >
                       <Camera className="w-4 h-4 text-white" /> Instagram Stories 📸
                     </button>

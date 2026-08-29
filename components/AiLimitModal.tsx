@@ -108,7 +108,7 @@ export default function AiLimitModal({ isOpen, onClose, reason, isPro }: AiLimit
               <Link
                 href="/account"
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-amber-500 to-[#8B5E3C] hover:from-amber-600 hover:to-[#734A2E] text-white py-3.5 px-6 rounded-xl font-extrabold text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 px-6 rounded-xl font-extrabold text-sm shadow-md transition-colors cursor-pointer flex items-center justify-center gap-2"
                 style={{ textDecoration: 'none' }}
               >
                 <Sparkles className="w-4 h-4 fill-current" /> Upgrade to Membership – $4.99/month
