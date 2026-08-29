@@ -185,7 +185,6 @@ export async function POST(request: NextRequest) {
       .from('owner_pets')
       .update({
         behavior_notes: serializedNotes,
-        ...(entry_type === 'microchip' ? { microchip_number: String(data.number).trim(), microchip_added_by: addedByLabel } : {})
       })
       .eq('id', pet_id)
       .select()
