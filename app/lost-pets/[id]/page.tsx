@@ -3,9 +3,9 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { formatDistanceToNow } from 'date-fns';
-import { Search, MapPin, Phone, Mail, Share2, Settings, Camera, Trash2, ChevronDown, Send, X } from 'lucide-react';
+import { MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
 import { formatPublicCity } from '@/lib/formatCity';
+import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -652,181 +652,58 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           </div>
         </div>
 
-        {/* Community Updates & Comments Section */}
-        <section className="w-full">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#3B2410]">Community Updates</h2>
-              <span className="text-xs font-bold bg-white text-[#8B5E3C] border border-[#E8DDD4] px-2.5 py-0.5 rounded-full shadow-xs">
-                {comments.length}
-              </span>
-            </div>
-          </div>
+        {/* Facebook-style Community Updates & Comments Section */}
+        <FacebookStyleCommentThread
+          comments={comments}
+          currentUserEmail={userEmail}
+          currentUserName={commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : '')}
+          postAuthorEmail={pet?.contact_email || ''}
+          isPostAuthor={!!(userEmail && pet?.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim())}
+          title="Community Updates"
+          placeholder="Share a sighting, location detail, or helpful update..."
+          allowPhoto={true}
+          signInPromptText="Sign in to comment or share a sighting"
+          requireAuth={true}
+          onAddComment={async (text, photoUrl, parentId, replyToName) => {
+            let payloadText = text;
+            if (parentId && replyToName) {
+              payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
+            }
 
-          {/* Leave an Update Composer */}
-          <div className="bg-white p-4 rounded-2xl border border-[#E8DDD4] shadow-xs mb-4">
-            <h3 className="text-xs uppercase tracking-wider font-bold text-[#8B5E3C] mb-2.5 flex items-center gap-1.5">
-              <span>💬</span> Leave a Sighting or Update
-            </h3>
-            {!userEmail ? (
-              <div className="text-center py-4 bg-[#FAF6F4] rounded-xl border border-[#E8DDD4]/60">
-                <p className="text-xs text-[#8B7E7D] font-medium mb-2.5">Sign in to comment or share a sighting</p>
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-                  className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-xs transition-colors cursor-pointer"
-                >
-                  Sign In — It's Free
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleCommentSubmit}>
-                <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-3 focus-within:border-[#8B5E3C] focus-within:bg-white transition-all">
-                  <textarea
-                    required
-                    rows={2}
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                    placeholder="Share a sighting, location detail, or helpful update..."
-                    className="w-full text-[#4A3E3D] text-sm focus:outline-none resize-none placeholder:text-[#8B7E7D]/70 bg-transparent"
-                  />
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E8DDD4]/80 mt-1.5">
-                    <label
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-full text-[#8B5E3C] hover:bg-white cursor-pointer transition-all border border-transparent hover:border-[#E8DDD4]"
-                      title={commentPhotoPreview ? 'Change photo' : 'Attach a photo'}
-                    >
-                      <Camera className="w-4 h-4" />
-                      <input type="file" accept="image/*" onChange={handleCommentPhotoChange} className="hidden" />
-                    </label>
-                    <button
-                      type="submit"
-                      disabled={submittingComment || !newComment.trim()}
-                      className="inline-flex items-center gap-1.5 bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-1.5 px-4 rounded-xl transition-all disabled:opacity-50 text-xs shadow-xs cursor-pointer"
-                    >
-                      {submittingComment ? 'Posting...' : 'Post Update'} <Send className="w-3 h-3" />
-                    </button>
-                  </div>
-                  {commentPhotoPreview && (
-                    <div className="mt-2.5 relative inline-block">
-                      <img src={commentPhotoPreview} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-[#E8DDD4]" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCommentPhoto(null);
-                          setCommentPhotoPreview(null);
-                        }}
-                        className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shadow-md hover:bg-rose-700 cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </form>
-            )}
-          </div>
+            const res = await fetch('/api/lost-pets/comments', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lost_pet_id: id,
+                author_name: commentAuthor || (userEmail ? getDisplayNameFromEmail(userEmail) : 'Community Member'),
+                comment_text: payloadText,
+                author_email: userEmail,
+                photo_url: photoUrl
+              })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to post comment');
+            if (data.comment) {
+              setComments(prev => [...prev, data.comment]);
+            }
+          }}
+          onDeleteComment={async (commentId) => {
+            if (!window.confirm("Are you sure you want to delete this comment?")) return;
 
-          {/* Comment Feed Items */}
-          <div className="space-y-3">
-            {comments.length > 0 ? (
-              <>
-                {comments.slice(0, visibleCommentsCount).map((comment) => {
-                  const isAuthor = userEmail && (
-                    (comment.author_email && comment.author_email.toLowerCase().trim() === userEmail.toLowerCase().trim()) ||
-                    userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' ||
-                    userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'
-                  );
-                  const avatarColor = getAvatarColor(comment.author_email || comment.author_name || comment.id);
-                  const avatarLetter = getAvatarLetter(comment.author_name);
+            const res = await fetch('/api/lost-pets/comments', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ comment_id: commentId, email: userEmail })
+            });
 
-                  return (
-                    <div key={comment.id} className="flex gap-2.5 items-start">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-xs font-black text-xs border border-black/5"
-                        style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
-                      >
-                        {avatarLetter}
-                      </div>
-                      <div className="flex-1 bg-white p-3.5 sm:p-4 rounded-2xl shadow-xs border border-[#E8DDD4] min-w-0">
-                        <div className="flex justify-between items-center gap-2 flex-wrap mb-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-[#3B2410] text-xs sm:text-sm">{comment.author_name}</h4>
-                            <span className="text-[11px] text-[#8B7E7D]">
-                              {formatDistanceToNow(new Date(comment.created_at))} ago
-                            </span>
-                          </div>
-                          {isAuthor && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteComment(comment.id)}
-                              className="text-[11px] font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-md transition-all flex items-center gap-1 cursor-pointer"
-                              title="Delete your update"
-                            >
-                              <Trash2 className="w-3 h-3" /> Delete
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[#4A3E3D] text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{comment.comment_text}</p>
+            if (!res.ok) {
+              const data = await res.json();
+              throw new Error(data.error || 'Failed to delete comment');
+            }
 
-                        {/* Comment Photo Thumbnail */}
-                        {comment.photo_url && (
-                          <div className="pt-2.5">
-                            <img
-                              src={comment.photo_url}
-                              alt="Sighting Attachment"
-                              onClick={() => setPreviewImage(comment.photo_url)}
-                              className="w-28 h-28 object-cover rounded-xl border border-[#E8DDD4] cursor-pointer hover:opacity-90 transition-opacity shadow-xs"
-                            />
-                            <p className="text-[10px] text-[#8B7E7D] mt-1 italic">Click photo to view full size</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {comments.length > visibleCommentsCount && (
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCommentsCount(c => c + COMMENTS_PAGE_SIZE)}
-                    className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-[#4A3E3D]/80 hover:text-[#4A3E3D] bg-white border border-[#E8DDD4] hover:border-[#8B5E3C]/40 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
-                  >
-                    <ChevronDown className="w-3.5 h-3.5" />
-                    Show {Math.min(comments.length - visibleCommentsCount, COMMENTS_PAGE_SIZE)} more {comments.length - visibleCommentsCount === 1 ? 'update' : 'updates'}
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="bg-white p-6 rounded-2xl border border-[#E8DDD4] text-center shadow-xs">
-                <p className="text-xs text-[#8B7E7D] font-medium">No community updates yet. Be the first to share helpful sightings or information!</p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Full Image Preview Modal */}
-        {previewImage && (
-          <div 
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-            onClick={() => setPreviewImage(null)}
-          >
-            <div className="relative max-w-3xl max-h-[90vh] bg-black rounded-2xl overflow-hidden shadow-2xl">
-              <button
-                type="button"
-                onClick={() => setPreviewImage(null)}
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center font-bold z-10 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <img 
-                src={previewImage} 
-                alt="Full size preview" 
-                className="max-w-full max-h-[85vh] object-contain mx-auto"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
-        )}
+            setComments(prev => prev.filter(c => c.id !== commentId));
+          }}
+        />
       </main>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, Search, Utensils, TreePine,
   GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, ArrowLeft, Bookmark
 } from 'lucide-react';
+import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -505,148 +506,63 @@ export default function CityBoardPostPage() {
           </div>
         </div>
 
-        {/* REPLIES SECTION */}
-        <div className="flex items-center justify-between mb-4 px-2">
-          <h3 className="text-lg font-bold text-[#4A3E3D] flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#8B5E3C]" /> Replies ({post.reply_count || replies.length})
-          </h3>
-          {replies.length > 1 && (
-            <button
-              onClick={() => setReplySort(prev => prev === 'oldest' ? 'newest' : 'oldest')}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-white border border-[#E8DDD4] px-3.5 py-1.5 rounded-xl shadow-xs transition-all cursor-pointer"
-            >
-              <ArrowUpDown className="w-3.5 h-3.5" />
-              {replySort === 'oldest' ? 'Oldest first' : 'Newest first'}
-            </button>
-          )}
-        </div>
+        {/* Facebook-style Discussion Replies Section */}
+        <div className="bg-white rounded-2xl p-5 sm:p-7 border border-[#E8DDD4] shadow-sm mb-8">
+          <FacebookStyleCommentThread
+            comments={replies.filter(r => !blockedCookies.includes(r.device_cookie))}
+            currentUserEmail={userEmail}
+            currentUserName={userEmail ? userEmail.split('@')[0] : ''}
+            postAuthorCookie={post.device_cookie}
+            currentUserCookie={deviceCookie}
+            isPostAuthor={post.device_cookie === deviceCookie}
+            title={`Replies (${post.reply_count || replies.length})`}
+            placeholder="Write a reply..."
+            allowPhoto={false}
+            signInPromptText="Sign in to reply to this discussion"
+            requireAuth={true}
+            onAddComment={async (text, _photo, parentId, replyToName) => {
+              let payloadText = text;
+              if (parentId && replyToName) {
+                payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
+              }
 
-        {/* Replies List */}
-        {(() => {
-          const visibleReplies = replies
-            .filter(reply => !blockedCookies.includes(reply.device_cookie))
-            .sort((a, b) => {
-              const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-              return replySort === 'oldest' ? diff : -diff;
-            });
-          const shown = visibleReplies.slice(0, visibleRepliesCount);
-          const remaining = visibleReplies.length - shown.length;
+              const res = await fetch('/api/city-board/replies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  post_id: post.post_id,
+                  content: payloadText,
+                  device_cookie: deviceCookie
+                })
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Failed to post reply');
+              if (data.reply) {
+                setReplies(prev => [...prev, data.reply]);
+                setPost((prev: any) => prev ? { ...prev, reply_count: (prev.reply_count || 0) + 1 } : prev);
+                showToast("Reply posted successfully.");
+              }
+            }}
+            onDeleteComment={async (replyId) => {
+              if (!window.confirm("Are you sure you want to delete this reply?")) return;
 
-          return (
-            <div className="mb-8 space-y-3">
-              {shown.length > 0 && shown.map(reply => {
-                const avatarColor = getAvatarColor(reply.device_cookie);
-                const isOP = reply.device_cookie === post.device_cookie;
-                const isYou = reply.device_cookie === deviceCookie;
+              const res = await fetch('/api/city-board/replies', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: replyId })
+              });
 
-                return (
-                  <div key={reply.id} className="bg-white rounded-2xl p-5 border border-[#E8DDD4] shadow-xs flex gap-3 sm:gap-4 items-start">
-                    
-                    {/* Avatar Icon */}
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: avatarColor.bg }}
-                    >
-                      <PawPrint className="w-4.5 h-4.5" style={{ color: avatarColor.text }} />
-                    </div>
+              if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete reply');
+              }
 
-                    <div className="flex-1 min-w-0">
-                      {/* Name & Timestamp Header */}
-                      <div className="flex justify-between items-center mb-1.5 gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-xs text-[#4A3E3D]">
-                            {isOP ? 'Original Poster' : 'Community Member'}
-                          </span>
-
-                          {isOP && (
-                            <span className="bg-[#8B5E3C] text-white px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold">OP</span>
-                          )}
-                          {isYou && (
-                            <span className="bg-[#FAF6F4] text-[#8B5E3C] px-2 py-0.5 rounded border border-[#E8DDD4] text-[9px] uppercase tracking-wider font-bold">You</span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-3 shrink-0">
-                          {!isYou && (
-                            <button
-                              onClick={() => handleBlockUser(reply.device_cookie)}
-                              className="text-[#8B7E7D] hover:text-rose-600 text-[10px] uppercase font-bold tracking-wider cursor-pointer border-none bg-transparent"
-                            >
-                              Block
-                            </button>
-                          )}
-                          <span className="text-xs text-[#8B7E7D] font-medium">{formatDistanceToNow(new Date(reply.created_at))} ago</span>
-                        </div>
-                      </div>
-
-                      {/* Reply Text */}
-                      <p className="text-[#2B231D] text-[15px] sm:text-base leading-relaxed whitespace-pre-wrap font-normal">
-                        {reply.content}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {remaining > 0 && (
-                <button
-                  onClick={() => setVisibleRepliesCount(c => c + REPLIES_PAGE_SIZE)}
-                  className="w-full flex items-center justify-center gap-2 text-xs font-bold text-[#8B5E3C] bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] py-3 rounded-xl shadow-xs transition-all cursor-pointer"
-                >
-                  <ChevronDown className="w-4 h-4" />
-                  Show {Math.min(remaining, REPLIES_PAGE_SIZE)} more {remaining === 1 ? 'reply' : 'replies'}
-                </button>
-              )}
-
-              {shown.length === 0 && (
-                <div className="bg-white rounded-2xl p-8 border border-[#E8DDD4] shadow-xs text-center flex flex-col items-center justify-center">
-                  <PenLine className="w-8 h-8 text-gray-300 mb-3" />
-                  <p className="text-[#8B7E7D] text-sm font-bold">No replies yet. Be the first to join the conversation!</p>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* REPLY COMPOSER FORM */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E8DDD4] shadow-sm">
-          {!userEmail ? (
-            <div className="text-center py-6">
-              <p className="text-[#8B7E7D] text-xs mb-3 font-medium">Sign in to reply to this discussion</p>
-              <button
-                onClick={() => window.dispatchEvent(new Event('lumo-open-signin'))}
-                className="bg-[#8B5E3C] text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer border-none shadow-xs"
-              >
-                Sign In — It&apos;s Free
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleCreateReply}>
-              <textarea 
-                value={newReply}
-                onChange={e => setNewReply(e.target.value)}
-                rows={3}
-                placeholder="Write your reply to this thread..."
-                className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all mb-3 font-medium placeholder:text-[#8B7E7D]"
-                required
-              />
-              {replyError && (
-                <div className="text-rose-600 text-xs font-bold mb-3 px-1 flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  {replyError}
-                </div>
-              )}
-              <div className="flex justify-end">
-                <button 
-                  type="submit" 
-                  disabled={isReplying} 
-                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-7 rounded-xl text-xs transition-all disabled:opacity-50 shadow-xs cursor-pointer border-none"
-                >
-                  {isReplying ? 'Posting...' : 'Post Reply'}
-                </button>
-              </div>
-            </form>
-          )}
+              setReplies(prev => prev.filter(r => r.id !== replyId));
+              setPost((prev: any) => prev ? { ...prev, reply_count: Math.max(0, (prev.reply_count || 1) - 1) } : prev);
+              showToast("Reply deleted.");
+            }}
+            onBlockUser={handleBlockUser}
+          />
         </div>
 
       </main>
