@@ -11,6 +11,7 @@ import {
   GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, ArrowLeft, Bookmark
 } from 'lucide-react';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
+import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -404,29 +405,8 @@ export default function CityBoardPostPage() {
         </div>
 
         {/* MAIN POST CARD (SITE-WIDE CONSISTENT CARD STYLING) */}
-        <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm mb-8 overflow-hidden flex gap-0">
-          
-          {/* Helpful Vote Sidebar */}
-          <div className="flex flex-col items-center justify-start gap-1 py-6 px-3.5 bg-[#FAF6F4]/60 shrink-0 border-r border-[#E8DDD4]">
-            <button
-              onClick={() => handleMarkHelpful(post.post_id)}
-              disabled={post.voted_helpful}
-              title="Mark as helpful"
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                post.voted_helpful
-                  ? 'bg-[#8B5E3C] text-white shadow-xs cursor-not-allowed'
-                  : 'bg-white text-[#4A3E3D] border border-[#E8DDD4] hover:bg-[#FAF6F4] hover:text-[#8B5E3C] cursor-pointer'
-              }`}
-            >
-              <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
-            </button>
-            <span className={`text-xs font-bold ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#4A3E3D]'}`}>
-              {post.helpful_count || 0}
-            </span>
-            <span className="text-[9px] text-[#8B7E7D] font-bold uppercase tracking-wider hidden sm:block">Helpful</span>
-          </div>
-
-          <div className="flex-1 min-w-0 p-6 sm:p-8 relative">
+        <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm mb-8 overflow-hidden">
+          <div className="p-6 sm:p-8 relative">
             {post.device_cookie === deviceCookie && (
               <div className="absolute top-6 right-6 bg-[#8B5E3C] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-md">
                 Your Post
@@ -453,20 +433,30 @@ export default function CityBoardPostPage() {
 
             {/* Action Row */}
             <div className="flex items-center justify-between border-t border-[#E8DDD4] pt-4 mt-4 flex-wrap gap-4">
-              {/* Bookmark Toggle - Signed-in Gated */}
-              <button
-                type="button"
-                onClick={toggleSavePost}
-                title={!userEmail ? 'Sign in to save discussions' : isBookmarked ? 'Remove bookmark' : 'Bookmark discussion'}
-                className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
-                  isBookmarked && userEmail 
-                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs' 
-                    : 'bg-white text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C] shadow-2xs'
-                }`}
-              >
-                <Bookmark className={`w-3.5 h-3.5 ${isBookmarked && userEmail ? 'fill-white' : ''}`} />
-                <span>{isBookmarked && userEmail ? 'Bookmarked' : 'Save Discussion'}</span>
-              </button>
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Facebook Reaction Picker */}
+                <FacebookReactionPicker
+                  itemId={post.post_id}
+                  initialHelpfulCount={post.helpful_count || 0}
+                  size="md"
+                  showSummary={true}
+                />
+
+                {/* Bookmark Toggle - Signed-in Gated */}
+                <button
+                  type="button"
+                  onClick={toggleSavePost}
+                  title={!userEmail ? 'Sign in to save discussions' : isBookmarked ? 'Remove bookmark' : 'Bookmark discussion'}
+                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                    isBookmarked && userEmail 
+                      ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs' 
+                      : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C]'
+                  }`}
+                >
+                  <Bookmark className={`w-3.5 h-3.5 ${isBookmarked && userEmail ? 'fill-white' : ''}`} />
+                  <span>{isBookmarked && userEmail ? 'Bookmarked' : 'Save'}</span>
+                </button>
+              </div>
 
               <div className="flex items-center gap-3 flex-wrap">
                 {post.device_cookie === deviceCookie ? (

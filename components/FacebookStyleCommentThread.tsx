@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ThumbsUp, Trash2, Camera, Send, X, Share2, MoreHorizontal, ChevronDown, Check } from 'lucide-react';
+import FacebookReactionPicker from './FacebookReactionPicker';
 
 const AVATAR_COLORS = [
   { bg: '#FEE2E2', text: '#991B1B' },
@@ -391,18 +392,13 @@ export default function FacebookStyleCommentThread({
               </div>
             )}
 
-            {/* Action Row: Thumbs Up / Like · Reply · Share · Delete */}
-            <div className="flex items-center gap-3 mt-1 text-xs font-semibold text-gray-500">
-              <button
-                type="button"
-                onClick={() => toggleLike(comment.id)}
-                className={`flex items-center gap-1 transition-colors cursor-pointer border-none bg-transparent p-0 ${
-                  likeState.liked ? 'text-[#8B5E3C] font-bold' : 'hover:text-gray-900'
-                }`}
-              >
-                <ThumbsUp className={`w-3.5 h-3.5 ${likeState.liked ? 'fill-[#8B5E3C]' : ''}`} />
-                <span>{likeState.count > 0 ? `${likeState.count} Like` : 'Like'}</span>
-              </button>
+            {/* Action Row: Reaction Picker · Reply · Share · Delete */}
+            <div className="flex items-center gap-3.5 mt-1 text-xs font-semibold text-gray-500">
+              <FacebookReactionPicker
+                itemId={comment.id}
+                size="sm"
+                showSummary={true}
+              />
 
               <button
                 type="button"

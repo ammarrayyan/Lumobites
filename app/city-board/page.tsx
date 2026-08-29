@@ -9,8 +9,11 @@ import MobileFloatingAction from '@/components/MobileFloatingAction';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
-  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark, PenLine, X
+  GraduationCap, HeartPulse, Heart, ShoppingBag, Camera, Star, Calendar, Flame, Check, Bookmark, PenLine, X,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
+import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
+import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -49,6 +52,31 @@ export default function CityBoardPage() {
   const [searchCategory, setSearchCategory] = useState('All');
   const [searchPostId, setSearchPostId] = useState('');
   const [showMyPosts, setShowMyPosts] = useState(false);
+
+  // Inline Expandable Comments State
+  const [expandedPostIds, setExpandedPostIds] = useState<Record<string, boolean>>({});
+  const [postRepliesMap, setPostRepliesMap] = useState<Record<string, any[]>>({});
+  const [loadingRepliesMap, setLoadingRepliesMap] = useState<Record<string, boolean>>({});
+
+  const toggleExpandPost = async (postId: string) => {
+    const isCurrentlyExpanded = !!expandedPostIds[postId];
+    setExpandedPostIds(prev => ({ ...prev, [postId]: !isCurrentlyExpanded }));
+
+    if (!isCurrentlyExpanded && !postRepliesMap[postId]) {
+      setLoadingRepliesMap(prev => ({ ...prev, [postId]: true }));
+      try {
+        const res = await fetch(`/api/city-board/replies?post_id=${postId}`);
+        const data = await res.json();
+        if (data.replies) {
+          setPostRepliesMap(prev => ({ ...prev, [postId]: data.replies }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch replies for post:', err);
+      } finally {
+        setLoadingRepliesMap(prev => ({ ...prev, [postId]: false }));
+      }
+    }
+  };
 
   // Auto-dismiss toast notification
   const showToast = (msg: string) => {
@@ -739,34 +767,17 @@ export default function CityBoardPage() {
               const isTrending = (post.helpful_count || 0) >= 3 || (post.reply_count || 0) >= 3;
               const isMine = post.device_cookie === deviceCookie;
               const isBookmarked = savedPostIds.includes(post.post_id);
+              const isExpanded = !!expandedPostIds[post.post_id];
+              const repliesForPost = (postRepliesMap[post.post_id] || []).filter(r => !blockedCookies.includes(r.device_cookie));
+              const isLoadingReplies = !!loadingRepliesMap[post.post_id];
 
               return (
                 <div 
                   key={post.id} 
-                  className={`rounded-2xl border transition-all duration-200 relative overflow-hidden flex gap-0 bg-white border-[#E8DDD4] shadow-sm hover:shadow-md`}
+                  className={`rounded-2xl border transition-all duration-200 relative overflow-hidden bg-white border-[#E8DDD4] shadow-sm hover:shadow-md`}
                 >
-                  {/* Helpful Vote Sidebar */}
-                  <div className="flex flex-col items-center justify-start gap-1 py-6 px-3.5 bg-[#FAF6F4]/60 shrink-0 border-r border-[#E8DDD4]">
-                    <button
-                      onClick={() => handleMarkHelpful(post.post_id)}
-                      disabled={post.voted_helpful}
-                      title="Mark as helpful"
-                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                        post.voted_helpful
-                          ? 'bg-[#8B5E3C] text-white shadow-xs cursor-not-allowed'
-                          : 'bg-white text-[#4A3E3D] border border-[#E8DDD4] hover:bg-[#FAF6F4] hover:text-[#8B5E3C] cursor-pointer'
-                      }`}
-                    >
-                      <ArrowBigUp className="w-5 h-5" fill={post.voted_helpful ? 'currentColor' : 'none'} />
-                    </button>
-                    <span className={`text-xs font-bold ${post.voted_helpful ? 'text-[#8B5E3C]' : 'text-[#4A3E3D]'}`}>
-                      {post.helpful_count || 0}
-                    </span>
-                    <span className="text-[9px] text-[#8B7E7D] font-bold uppercase tracking-wider hidden sm:block">Helpful</span>
-                  </div>
-
                   {/* Card Body */}
-                  <div className="flex-1 min-w-0 p-5 sm:p-7">
+                  <div className="p-5 sm:p-7">
                     
                     {/* Top Meta Bar */}
                     <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
@@ -818,24 +829,51 @@ export default function CityBoardPage() {
                       </div>
                     </div>
 
-                    {/* Main Title / Question Treatment */}
-                    <Link href={`/city-board/${post.post_id}`} className="block group/link" style={{ textDecoration: 'none' }}>
-                      <h3 className="text-lg sm:text-xl font-extrabold text-[#2B231D] leading-snug tracking-tight mb-2 group-hover/link:text-[#8B5E3C] transition-colors">
+                    {/* Main Title / Question Treatment (Click expands inline) */}
+                    <div 
+                      onClick={() => toggleExpandPost(post.post_id)} 
+                      className="cursor-pointer group/title"
+                    >
+                      <h3 className="text-lg sm:text-xl font-extrabold text-[#2B231D] leading-snug tracking-tight mb-2 group-hover/title:text-[#8B5E3C] transition-colors">
                         {post.content}
                       </h3>
-                    </Link>
+                    </div>
 
                     {/* Action Bar */}
                     <div className="flex items-center justify-between border-t border-[#E8DDD4] pt-4 mt-4 flex-wrap gap-3">
-                      <Link
-                        href={`/city-board/${post.post_id}`}
-                        className="inline-flex items-center gap-2 text-xs font-bold text-[#8B5E3C] bg-[#FAF6F4] hover:bg-[#8B5E3C] hover:text-white border border-[#E8DDD4] px-4 py-2 rounded-xl transition-all"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>{post.reply_count} {post.reply_count === 1 ? 'Reply' : 'Replies'}</span>
-                      </Link>
+                      {/* Left: Reaction Picker & Expand Comments Indicator */}
+                      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                        {/* Facebook Reaction Picker for Post */}
+                        <FacebookReactionPicker
+                          itemId={post.post_id}
+                          initialHelpfulCount={post.helpful_count || 0}
+                          size="sm"
+                          showSummary={true}
+                        />
 
+                        {/* Comment-Count Indicator / Expand Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => toggleExpandPost(post.post_id)}
+                          className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                            isExpanded
+                              ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
+                              : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#8B5E3C] hover:text-white border-[#E8DDD4]'
+                          }`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>
+                            {post.reply_count || 0} {post.reply_count === 1 ? 'Comment' : 'Comments'}
+                          </span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5 ml-0.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Right: Actions */}
                       <div className="flex items-center gap-3 flex-wrap">
                         {isMine ? (
                           <button
@@ -872,6 +910,91 @@ export default function CityBoardPage() {
                         </button>
                       </div>
                     </div>
+
+                    {/* Inline Expandable Comment Thread Section */}
+                    {isExpanded && (
+                      <div className="border-t border-[#E8DDD4] pt-5 mt-5 animate-fade-in">
+                        {isLoadingReplies ? (
+                          <div className="py-8 text-center text-xs text-[#8B5E3C] font-bold flex items-center justify-center gap-2 animate-pulse">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Loading comments...
+                          </div>
+                        ) : (
+                          <div>
+                            <FacebookStyleCommentThread
+                              comments={repliesForPost}
+                              currentUserEmail={userEmail}
+                              currentUserName={userEmail ? userEmail.split('@')[0] : ''}
+                              postAuthorCookie={post.device_cookie}
+                              currentUserCookie={deviceCookie}
+                              isPostAuthor={post.device_cookie === deviceCookie}
+                              title={`Comments (${post.reply_count || repliesForPost.length})`}
+                              placeholder="Write a comment..."
+                              allowPhoto={false}
+                              signInPromptText="Sign in to reply to this discussion"
+                              requireAuth={true}
+                              onAddComment={async (text, _photo, parentId, replyToName) => {
+                                let payloadText = text;
+                                if (parentId && replyToName) {
+                                  payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
+                                }
+
+                                const res = await fetch('/api/city-board/replies', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    post_id: post.post_id,
+                                    content: payloadText,
+                                    device_cookie: deviceCookie
+                                  })
+                                });
+                                const data = await res.json();
+                                if (!res.ok) throw new Error(data.error || 'Failed to post reply');
+                                if (data.reply) {
+                                  setPostRepliesMap(prev => ({
+                                    ...prev,
+                                    [post.post_id]: [...(prev[post.post_id] || []), data.reply]
+                                  }));
+                                  setPosts(prev => prev.map(p => p.post_id === post.post_id ? { ...p, reply_count: (p.reply_count || 0) + 1 } : p));
+                                  showToast("Reply posted successfully.");
+                                }
+                              }}
+                              onDeleteComment={async (replyId) => {
+                                if (!window.confirm("Are you sure you want to delete this reply?")) return;
+
+                                const res = await fetch('/api/city-board/replies', {
+                                  method: 'DELETE',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: replyId })
+                                });
+
+                                if (!res.ok) {
+                                  const data = await res.json();
+                                  throw new Error(data.error || 'Failed to delete reply');
+                                }
+
+                                setPostRepliesMap(prev => ({
+                                  ...prev,
+                                  [post.post_id]: (prev[post.post_id] || []).filter(r => r.id !== replyId)
+                                }));
+                                setPosts(prev => prev.map(p => p.post_id === post.post_id ? { ...p, reply_count: Math.max(0, (p.reply_count || 1) - 1) } : p));
+                                showToast("Reply deleted.");
+                              }}
+                              onBlockUser={handleBlockUser}
+                            />
+
+                            <div className="pt-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => toggleExpandPost(post.post_id)}
+                                className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors cursor-pointer border-none bg-transparent"
+                              >
+                                ▲ Hide comments
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
