@@ -6,7 +6,7 @@ import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, Refresh
 import AccountPetsTab from '@/components/AccountPetsTab';
 
 type Step = 'email' | 'verification' | 'dashboard';
-type AccountTab = 'pets' | 'access' | 'subscription' | 'security';
+type AccountTab = 'pets' | 'subscription' | 'security';
 
 export default function AccountPage() {
   const [step, setStep] = useState<Step>('email');
@@ -19,8 +19,10 @@ export default function AccountPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
-      if (tabParam === 'pets' || tabParam === 'access' || tabParam === 'subscription' || tabParam === 'security') {
+      if (tabParam === 'pets' || tabParam === 'subscription' || tabParam === 'security') {
         setAccountTab(tabParam as AccountTab);
+      } else if (tabParam === 'access') {
+        setAccountTab('pets');
       } else if (tabParam === 'business' || tabParam === 'plan') {
         setAccountTab('subscription');
       }
@@ -758,8 +760,8 @@ export default function AccountPage() {
                     </p>
                   </div>
 
-                  {/* 🐾 4-TAB NAVIGATION HEADER */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 bg-[#F5EFEB] p-1.5 rounded-2xl gap-1.5 border border-[#EBE3DC]">
+                  {/* 🐾 3-TAB NAVIGATION HEADER */}
+                  <div className="grid grid-cols-3 bg-[#F5EFEB] p-1.5 rounded-2xl gap-1.5 border border-[#EBE3DC]">
                     <button
                       type="button"
                       onClick={() => handleTabSelect('pets')}
@@ -771,19 +773,6 @@ export default function AccountPage() {
                     >
                       <PawPrint className="w-4 h-4 text-[#8B5E3C] shrink-0" />
                       <span>My Pets</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleTabSelect('access')}
-                      className={`py-3 px-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none ${
-                        accountTab === 'access'
-                          ? 'bg-white text-[#191919] shadow-xs'
-                          : 'bg-transparent text-[#777777] hover:text-[#191919]'
-                      }`}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-[#63825D] shrink-0" />
-                      <span>Access Control</span>
                     </button>
 
                     <button
@@ -824,15 +813,10 @@ export default function AccountPage() {
 
                   {/* TAB 1: 🐾 MY PETS */}
                   {accountTab === 'pets' && (
-                    <AccountPetsTab ownerEmail={email} forcedTab="pets" />
+                    <AccountPetsTab ownerEmail={email} />
                   )}
 
-                  {/* TAB 2: 🛡️ PROFILE ACCESS CONTROL */}
-                  {accountTab === 'access' && (
-                    <AccountPetsTab ownerEmail={email} forcedTab="access" />
-                  )}
-
-                  {/* TAB 3: 💳 SUBSCRIPTION / BUSINESS PLAN */}
+                  {/* TAB 2: 💳 SUBSCRIPTION / BUSINESS PLAN */}
                   {accountTab === 'subscription' && (
                     <div className="flex flex-col gap-4 animate-fade-in">
                       {!subDetails.active ? (
