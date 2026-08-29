@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThumbsUp } from 'lucide-react';
 
-export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
+export type ReactionType = 'like' | 'love' | 'care' | 'sad';
 
 export interface ReactionConfig {
   type: ReactionType;
@@ -16,10 +16,8 @@ export interface ReactionConfig {
 export const REACTIONS: ReactionConfig[] = [
   { type: 'like', emoji: '👍', label: 'Like', color: '#1877F2', textColor: 'text-blue-600' },
   { type: 'love', emoji: '❤️', label: 'Love', color: '#FA383E', textColor: 'text-rose-600' },
-  { type: 'haha', emoji: '😆', label: 'Haha', color: '#F7B125', textColor: 'text-amber-500' },
-  { type: 'wow', emoji: '😮', label: 'Wow', color: '#F7B125', textColor: 'text-amber-500' },
+  { type: 'care', emoji: '🥰', label: 'Care', color: '#F7B125', textColor: 'text-amber-500' },
   { type: 'sad', emoji: '😢', label: 'Sad', color: '#F7B125', textColor: 'text-amber-600' },
-  { type: 'angry', emoji: '😡', label: 'Angry', color: '#E0245E', textColor: 'text-orange-600' },
 ];
 
 export interface ReactionState {
@@ -61,10 +59,8 @@ export default function FacebookReactionPicker({
     const baseCounts: Record<ReactionType, number> = {
       like: initialCounts?.like ?? initialHelpfulCount ?? 0,
       love: initialCounts?.love ?? 0,
-      haha: initialCounts?.haha ?? 0,
-      wow: initialCounts?.wow ?? 0,
+      care: initialCounts?.care ?? 0,
       sad: initialCounts?.sad ?? 0,
-      angry: initialCounts?.angry ?? 0,
     };
     const total = Object.values(baseCounts).reduce((a, b) => a + b, 0);
     return {
@@ -85,12 +81,23 @@ export default function FacebookReactionPicker({
       const stored = localStorage.getItem(`lumo_reaction_${itemId}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setReactionState(prev => ({
-          ...prev,
-          userReaction: parsed.userReaction ?? prev.userReaction,
-          counts: { ...prev.counts, ...(parsed.counts || {}) },
-          total: Object.values({ ...prev.counts, ...(parsed.counts || {}) }).reduce((a: number, b: number) => a + b, 0),
-        }));
+        const validTypes: ReactionType[] = ['like', 'love', 'care', 'sad'];
+        const userReaction: ReactionType | null = validTypes.includes(parsed.userReaction) ? parsed.userReaction : null;
+        
+        setReactionState(prev => {
+          const validCounts: Record<ReactionType, number> = {
+            like: parsed.counts?.like ?? prev.counts.like ?? 0,
+            love: parsed.counts?.love ?? prev.counts.love ?? 0,
+            care: parsed.counts?.care ?? prev.counts.care ?? 0,
+            sad: parsed.counts?.sad ?? prev.counts.sad ?? 0,
+          };
+          const total = Object.values(validCounts).reduce((a, b) => a + b, 0);
+          return {
+            userReaction: userReaction ?? prev.userReaction,
+            counts: validCounts,
+            total,
+          };
+        });
       }
     } catch (e) {}
   }, [itemId]);
