@@ -17,6 +17,7 @@ import {
   Footprints, 
   MapPin 
 } from 'lucide-react';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 interface Product {
   id: string;
@@ -46,6 +47,10 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
+
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/chat' });
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [recallData, setRecallData] = useState<{ active: boolean; reason?: string } | null>(null);

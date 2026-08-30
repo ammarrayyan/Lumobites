@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { Footprints, AlertTriangle } from 'lucide-react';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 export function formatSitterName(fullName: string | null | undefined): string {
   if (!fullName) return 'Sitter';
@@ -39,6 +40,9 @@ export default function SitterReviewPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/petsitting' });
 
   const sitterId = params.sitterId as string;
   const tokenEmail = searchParams.get('token') || '';

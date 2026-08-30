@@ -15,6 +15,7 @@ import {
   ChevronRight,
   RefreshCw
 } from 'lucide-react';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 interface Notification {
   id: string;
@@ -33,6 +34,10 @@ type FilterTab = 'all' | 'access' | 'bookings' | 'system';
 
 export default function NotificationsPage() {
   const router = useRouter();
+
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/' });
+
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);

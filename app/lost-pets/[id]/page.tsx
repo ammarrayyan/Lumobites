@@ -7,6 +7,7 @@ import { MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
 import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
 const AVATAR_COLORS = [
@@ -51,6 +52,9 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const unwrappedParams = use(params);
   const id = unwrappedParams.id;
   
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/lost-pets' });
+
   const [pet, setPet] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

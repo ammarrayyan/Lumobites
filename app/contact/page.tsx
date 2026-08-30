@@ -2,9 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { Mail, Clock, ArrowLeft, Send } from 'lucide-react';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 export default function ContactPage() {
   const router = useRouter();
+  
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/' });
 
   return (
     <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col items-center py-16 px-4">

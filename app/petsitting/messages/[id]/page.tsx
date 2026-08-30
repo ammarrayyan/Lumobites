@@ -8,6 +8,7 @@ import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import ChatModal from '@/components/ChatModal';
 import BookingProgressStepper from '@/components/BookingProgressStepper';
 import SendPetUpdateModal from '@/components/SendPetUpdateModal';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 interface Message {
   id: string;
@@ -81,6 +82,9 @@ export default function SitterOwnerChatPage({ params }: { params: Promise<{ id: 
   const resolvedParams = use(params);
   const bookingId = resolvedParams.id;
   const router = useRouter();
+
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/petsitting?tab=messages' });
 
   const [booking, setBooking] = useState<SittingRequest | null>(null);
   const [inquiryData, setInquiryData] = useState<{

@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 const SitterMap = dynamic(() => import('@/components/SitterMap'), {
   ssr: false,
@@ -721,6 +722,23 @@ export function PetSittingContent() {
     petModalOpen
   );
   useScrollLock(isPetsittingModalActive);
+
+  // Swipe right from edge to dismiss any open modal/sheet
+  useSwipeBack({
+    enabled: isPetsittingModalActive,
+    onBack: () => {
+      if (requestModalOpen) setRequestModalOpen(false);
+      else if (reviewsModalOpen) setReviewsModalOpen(false);
+      else if (petModalOpen) setPetModalOpen(false);
+      else if (reportModalOpen) setReportModalOpen(false);
+      else if (chatModalOpen) setChatModalOpen(false);
+      else if (deleteModalOpen) setDeleteModalOpen(false);
+      else if (cameraModalOpen) setCameraModalOpen(false);
+      else if (unlockModalOpen) setUnlockModalOpen(false);
+      else if (inquiringClinic) setInquiringClinic(null);
+      else if (inquiringDaycare) setInquiringDaycare(null);
+    }
+  });
 
   const loadOwnerProfile = async (email: string) => {
     if (!email) return;

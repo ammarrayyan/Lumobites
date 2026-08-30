@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 interface PetDetails {
   id: string;
@@ -28,6 +29,9 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const resolvedParams = use(params);
   const petId = resolvedParams.id;
   const router = useRouter();
+
+  // Edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/adoption?tab=messages' });
 
   const [pet, setPet] = useState<PetDetails | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');

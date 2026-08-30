@@ -13,6 +13,7 @@ import {
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { useSwipeBack } from '@/lib/useSwipeBack';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -70,27 +71,8 @@ export default function CityBoardPostPage() {
   const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Touch Swipe Back Handlers
-  const touchStartXRef = useRef<number | null>(null);
-  const touchStartYRef = useRef<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-    touchStartYRef.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartYRef.current);
-
-    // If swiping right from left edge (deltaX > 75px) with low vertical movement (deltaY < 50px)
-    if (touchStartXRef.current < 60 && deltaX > 75 && deltaY < 50) {
-      router.back();
-    }
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-  };
+  // Native edge-swipe-right-to-go-back gesture
+  useSwipeBack({ fallbackUrl: '/city-board' });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -373,8 +355,6 @@ export default function CityBoardPostPage() {
   return (
     <div 
       className="min-h-screen bg-[#FCFAF8] font-sans flex flex-col pt-4 pb-16 relative"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
 
       {/* FLOATING TOAST NOTIFICATION */}
