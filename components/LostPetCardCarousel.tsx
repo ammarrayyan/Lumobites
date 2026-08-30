@@ -81,7 +81,7 @@ export default function LostPetCardCarousel({
 
   return (
     <div 
-      className="relative h-60 sm:h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE] select-none"
+      className="relative h-76 sm:h-88 md:h-96 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE] select-none"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -91,7 +91,7 @@ export default function LostPetCardCarousel({
         <img 
           src={validPhotos[currentIndex]} 
           alt={`${petName || 'Pet'} - photo ${currentIndex + 1}`} 
-          className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
+          className="w-full h-full object-contain p-0.5 group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
