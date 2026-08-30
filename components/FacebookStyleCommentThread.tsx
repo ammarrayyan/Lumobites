@@ -284,6 +284,13 @@ export default function FacebookStyleCommentThread({
       const authorName = c.author_name || c.commenter_name || (c.device_cookie === postAuthorCookie ? 'Original Poster' : 'Community Member');
       const badge = getBadgeForCommenter(c.author_email, c.device_cookie, authorName, parentId);
 
+      let photoUrl = c.photo_url || undefined;
+      const photoMatch = displayText.match(/\[\[photo:(.*?)\]\]/);
+      if (photoMatch) {
+        photoUrl = photoMatch[1];
+        displayText = displayText.replace(/\[\[photo:(.*?)\]\]/, '').trim();
+      }
+
       const threadedItem: ThreadedComment = {
         id: c.id,
         parentId,
@@ -292,7 +299,7 @@ export default function FacebookStyleCommentThread({
         authorEmail: c.author_email,
         deviceCookie: c.device_cookie,
         text: displayText,
-        photoUrl: c.photo_url,
+        photoUrl: photoUrl,
         createdAt: c.created_at,
         badge,
         replies: []

@@ -490,10 +490,10 @@ export default function CityBoardPostPage() {
             isPostAuthor={post.device_cookie === deviceCookie}
             title={`Replies (${post.reply_count || replies.length})`}
             placeholder="Write a reply..."
-            allowPhoto={false}
+            allowPhoto={true}
             signInPromptText="Sign in to reply to this discussion"
             requireAuth={true}
-            onAddComment={async (text, _photo, parentId, replyToName) => {
+            onAddComment={async (text, photo, parentId, replyToName) => {
               let payloadText = text;
               if (parentId && replyToName) {
                 payloadText = `[[reply_to:${parentId}:${replyToName}]] ${text}`;
@@ -505,7 +505,9 @@ export default function CityBoardPostPage() {
                 body: JSON.stringify({
                   post_id: post.post_id,
                   content: payloadText,
-                  device_cookie: deviceCookie
+                  device_cookie: deviceCookie,
+                  photo_url: photo,
+                  author_email: userEmail
                 })
               });
               const data = await res.json();
