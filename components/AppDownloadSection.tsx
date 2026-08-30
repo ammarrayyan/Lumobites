@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { Smartphone, CheckCircle2, Bell, ShieldCheck, Heart } from 'lucide-react';
@@ -84,7 +84,7 @@ export default function AppDownloadSection() {
               aria-label="Download on the App Store"
             >
               <img
-                src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg"
+                src="/app-store-badge.svg"
                 alt="Download on the App Store"
                 className="h-[40px] w-auto object-contain"
               />
