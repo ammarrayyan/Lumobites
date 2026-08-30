@@ -1496,8 +1496,37 @@ export function PetSittingContent() {
     }
   };
 
+  const sittersRef = useRef(sitters);
+  sittersRef.current = sitters;
+
+  // Real-time continuous scroll tracker
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let timeoutId: any = null;
+    const handleScroll = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.scrollY > 0) {
+          try {
+            const existing = sessionStorage.getItem('lumo_petsitting_search_state');
+            const parsed = existing ? JSON.parse(existing) : {};
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      }, 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   const fetchSitters = async (email?: string, dayOverride?: string, serviceOverride?: string) => {
-    setLoadingSitters(true);
+    if (sittersRef.current.length === 0) {
+      setLoadingSitters(true);
+    }
     try {
       const qEmail = email !== undefined ? email : reqEmail;
       const qDay = dayOverride !== undefined ? dayOverride : searchDay;
@@ -1511,13 +1540,32 @@ export function PetSittingContent() {
       const url = `/api/petsitting/sitters?${params.toString()}`;
       const [res] = await Promise.all([fetch(url), fetchVetClinics(), fetchPetDaycares()]);
       if (res.ok) {
-        setSitters(data.sitters);
+        const data = await res.json();
+        setSitters(data.sitters || []);
         setIsOwnerPro(data.isOwnerPro);
         if (typeof window !== 'undefined') {
           try {
             sessionStorage.setItem('lumo_sitters_cache', JSON.stringify(data.sitters || []));
           } catch (e) {}
         }
+        requestAnimationFrame(() => {
+          try {
+            const saved = sessionStorage.getItem('lumo_petsitting_search_state');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.targetSitterId) {
+                const el = document.getElementById(`sitter-card-${parsed.targetSitterId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
+              }
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            }
+          } catch (e) {}
+        });
       }
     } catch (e) {
       console.error('Failed to fetch sitters');

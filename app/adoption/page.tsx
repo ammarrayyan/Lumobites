@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -429,8 +429,37 @@ function AdoptionContent() {
     }
   };
 
+  const localPetsRef = useRef(localPets);
+  localPetsRef.current = localPets;
+
+  // Real-time continuous scroll tracker
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let timeoutId: any = null;
+    const handleScroll = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.scrollY > 0) {
+          try {
+            const existing = sessionStorage.getItem('lumo_adoption_search_state');
+            const parsed = existing ? JSON.parse(existing) : {};
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem('lumo_adoption_search_state', JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      }, 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   const fetchListings = async () => {
-    setLoading(true);
+    if (localPetsRef.current.length === 0) {
+      setLoading(true);
+    }
     try {
       // 1. Fetch Lumo Bites Shelter pets
       const localParams = new URLSearchParams();
@@ -466,6 +495,24 @@ function AdoptionContent() {
             sessionStorage.setItem('lumo_adoption_local_pets_cache', JSON.stringify(formatted));
           } catch (e) {}
         }
+        requestAnimationFrame(() => {
+          try {
+            const saved = sessionStorage.getItem('lumo_adoption_search_state');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.targetPetId) {
+                const el = document.getElementById(`adoption-pet-${parsed.targetPetId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
+              }
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            }
+          } catch (e) {}
+        });
       }
 
       // 2. Fetch RescueGroups pets

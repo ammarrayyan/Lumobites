@@ -590,11 +590,41 @@ export default function LostPetsFeed() {
     }
   };
 
+  const petsRef = useRef(pets);
+  petsRef.current = pets;
+
+  // Real-time continuous scroll tracker
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let timeoutId: any = null;
+    const handleScroll = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.scrollY > 0) {
+          try {
+            const existing = sessionStorage.getItem('lumo_lost_pets_search_state');
+            const parsed = existing ? JSON.parse(existing) : {};
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      }, 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   // ── Tab 1: Fetch pets from DB ─────────────────────────────────────────────
   const fetchPets = useCallback(async (showRefreshIndicator = false) => {
     if (isGeocoding) return;
-    if (showRefreshIndicator) setIsRefreshing(true);
-    else setLoading(true);
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    } else if (petsRef.current.length === 0) {
+      setLoading(true);
+    }
 
     const ctx = currentContextRef.current;
     try {
@@ -622,6 +652,25 @@ export default function LostPetsFeed() {
             sessionStorage.setItem('lumo_lost_pets_feed_cache', JSON.stringify(fetched));
           } catch (e) {}
         }
+        // Multi-frame scroll restoration check after network data arrives
+        requestAnimationFrame(() => {
+          try {
+            const saved = sessionStorage.getItem('lumo_lost_pets_search_state');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.targetPetId) {
+                const el = document.getElementById(`lost-pet-${parsed.targetPetId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
+              }
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            }
+          } catch (e) {}
+        });
       }
     } catch (err) {
       console.error(err);

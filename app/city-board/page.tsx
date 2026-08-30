@@ -336,12 +336,42 @@ export default function CityBoardPage() {
     return () => clearTimeout(debounceSearch);
   }, [searchCity]);
 
+  const postsRef = useRef(posts);
+  postsRef.current = posts;
+
+  // Real-time continuous scroll tracker
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let timeoutId: any = null;
+    const handleScroll = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.scrollY > 0) {
+          try {
+            const existing = sessionStorage.getItem('lumo_city_board_search_state');
+            const parsed = existing ? JSON.parse(existing) : {};
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem('lumo_city_board_search_state', JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      }, 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   const fetchPosts = useCallback(async (showRefreshIndicator = false) => {
     const ctx = currentContextRef.current;
     if (!ctx.deviceCookie) return;
     
-    if (showRefreshIndicator) setIsRefreshing(true);
-    else setLoading(true);
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    } else if (postsRef.current.length === 0) {
+      setLoading(true);
+    }
 
     try {
       const params = new URLSearchParams();
@@ -362,6 +392,25 @@ export default function CityBoardPage() {
             sessionStorage.setItem('lumo_city_board_feed_cache', JSON.stringify(fetchedPosts));
           } catch (e) {}
         }
+        // Multi-frame scroll restoration check after network data arrives
+        requestAnimationFrame(() => {
+          try {
+            const saved = sessionStorage.getItem('lumo_city_board_search_state');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.targetPostId) {
+                const el = document.getElementById(`city-post-${parsed.targetPostId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
+              }
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            }
+          } catch (e) {}
+        });
       }
     } catch (e) {
       console.error('Failed to fetch posts', e);
