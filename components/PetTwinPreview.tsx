@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { Sparkles, Lock, Mail, AlertTriangle } from 'lucide-react';
-import { useScrollLock } from '@/lib/useScrollLock';
+import { Sparkles, Trash2 } from 'lucide-react';
+import FacebookReactionPicker from './FacebookReactionPicker';
 
 interface SharedTwin {
   id: string;
@@ -15,6 +15,7 @@ interface SharedTwin {
   matchScore: number;
   traits: string[];
   quote: string;
+  helpful_count?: number;
   personalityBreakdown?: string;
   famousPets?: string[];
   bothSection?: string[];
@@ -25,14 +26,32 @@ interface SharedTwin {
 export default function PetTwinPreview() {
   const [shares, setShares] = useState<SharedTwin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [myPostTokens, setMyPostTokens] = useState<Record<string, string>>({});
 
-  // States for Self-Service Deletion Modal
-  const [removeModalOpen, setRemoveModalOpen] = useState(false);
-  useScrollLock(removeModalOpen);
-  const [removePostId, setRemovePostId] = useState<string | null>(null);
-  const [removeEmail, setRemoveEmail] = useState('');
-  const [removeStatus, setRemoveStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [removeMessage, setRemoveMessage] = useState('');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('lumo_my_twin_posts');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const tokenMap: Record<string, string> = {};
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item: any) => {
+              if (typeof item === 'string') {
+                tokenMap[item] = 'owner';
+              } else if (item?.postId) {
+                tokenMap[item.postId] = item.removalToken || 'owner';
+              }
+            });
+          }
+          setMyPostTokens(tokenMap);
+        }
+      } catch (e) {
+        console.error('Failed to load owned twin posts', e);
+      }
+    }
+  }, []);
 
   // High quality mock shares as fallback
   const mockShares: SharedTwin[] = [
@@ -50,7 +69,7 @@ export default function PetTwinPreview() {
     {
       id: 'mock-t2',
       created_at: new Date(Date.now() - 3600000).toISOString(),
-      userPhoto: '',
+      userPhoto: '', 
       petBreed: 'Siamese',
       petType: 'cat',
       petPhoto: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg',
@@ -61,7 +80,7 @@ export default function PetTwinPreview() {
     {
       id: 'mock-t3',
       created_at: new Date(Date.now() - 7200000).toISOString(),
-      userPhoto: '',
+      userPhoto: '', 
       petBreed: 'Corgi',
       petType: 'dog',
       petPhoto: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Welsh_Corgi_Pembroke_Portrait.jpg',
@@ -91,30 +110,33 @@ export default function PetTwinPreview() {
     fetchShares();
   }, []);
 
-  const handleRemoveSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!removePostId || !removeEmail.trim()) return;
-
-    setRemoveStatus('loading');
-    setRemoveMessage('');
+  const handleDeleteTwinPost = async (postId: string, removalToken?: string) => {
+    if (!confirm('Are you sure you want to remove your Pet Twin post?')) return;
+    setDeletingId(postId);
     try {
-      const res = await fetch('/api/twin/remove-request', {
-        method: 'POST',
+      const res = await fetch('/api/twin/share', {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: removePostId, email: removeEmail })
+        body: JSON.stringify({ postId, removalToken })
       });
-      const data = await res.json();
       if (res.ok) {
-        setRemoveStatus('success');
-        setRemoveMessage(data.message || 'Verification email sent! Please check your inbox.');
+        setShares(prev => prev.filter(s => s.id !== postId));
+        try {
+          const updated = { ...myPostTokens };
+          delete updated[postId];
+          setMyPostTokens(updated);
+          const arr = Object.entries(updated).map(([pId, tok]) => ({ postId: pId, removalToken: tok }));
+          localStorage.setItem('lumo_my_twin_posts', JSON.stringify(arr));
+        } catch (e) {}
       } else {
-        setRemoveStatus('error');
-        setRemoveMessage(data.error || 'Failed to send removal email.');
+        const data = await res.json();
+        alert(data.error || 'Failed to delete post.');
       }
     } catch (err) {
-      console.error(err);
-      setRemoveStatus('error');
-      setRemoveMessage('An unexpected error occurred. Please try again.');
+      console.error('Delete error', err);
+      alert('Error deleting post.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -213,20 +235,27 @@ export default function PetTwinPreview() {
                           </p>
                         </div>
 
-                        {/* Small Remove Link */}
-                        <div className="mt-2">
-                          <button
-                            onClick={() => {
-                              setRemovePostId(share.id);
-                              setRemoveEmail('');
-                              setRemoveStatus('idle');
-                              setRemoveMessage('');
-                              setRemoveModalOpen(true);
-                            }}
-                            className="text-[10px] text-gray-400 hover:text-red-500 font-bold transition-colors cursor-pointer border-0 bg-transparent p-0"
-                          >
-                            Remove my result
-                          </button>
+                        {/* Action Row: Heart Reaction & Direct Delete (for owner only) */}
+                        <div className="flex items-center justify-between border-t border-[#F0E8E0] pt-2 mt-2" onClick={e => e.stopPropagation()}>
+                          <FacebookReactionPicker
+                            itemId={share.id}
+                            initialHelpfulCount={share.helpful_count || 0}
+                            size="sm"
+                            minimalHeartStyle={true}
+                          />
+
+                          {!!myPostTokens[share.id] && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTwinPost(share.id, myPostTokens[share.id])}
+                              disabled={deletingId === share.id}
+                              className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
+                              title="Delete my result"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -251,94 +280,6 @@ export default function PetTwinPreview() {
         </div>
 
       </div>
-
-      {/* Self-Service Deletion Modal */}
-      {removeModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-[#E8DDD4] p-6 pb-32 md:pb-6 max-w-md w-full shadow-2xl relative animate-scale-up text-left">
-            <button
-              onClick={() => setRemoveModalOpen(false)}
-              className="absolute top-4 right-4 text-[#8B7E7D] hover:text-[#4A3E3D] text-2xl font-bold transition-colors cursor-pointer w-8 h-8 rounded-full bg-[#FAF6F4] flex items-center justify-center border-0"
-            >
-              &times;
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <Lock className="w-8 h-8 text-[#8B5E3C] shrink-0" />
-              <h3 className="text-xl font-black text-[#4A3E3D]">Remove My Result</h3>
-            </div>
-
-            {removeStatus === 'success' ? (
-              <div className="text-center py-4">
-                <Mail className="w-12 h-12 text-[#8B5E3C] mx-auto mb-3" />
-                <p className="text-sm text-emerald-600 font-bold mb-4">{removeMessage}</p>
-                <p className="text-xs text-[#8B7E7D] leading-relaxed mb-6">
-                  We've sent a secure deletion link to your email. Click the link in that email to permanently remove your result from the gallery.
-                </p>
-                <button
-                  onClick={() => setRemoveModalOpen(false)}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-sm font-bold py-3 rounded-xl transition-all cursor-pointer border-0"
-                >
-                  Close
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleRemoveSubmit} className="space-y-4">
-                <p className="text-xs text-[#8B7E7D] leading-relaxed">
-                  Enter the email address you provided when sharing this result. We will send you a verification link to permanently delete it.
-                </p>
-
-                {removeStatus === 'error' && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-semibold p-3 rounded-xl flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> {removeMessage}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-[#4A3E3D] mb-1.5">Your Associated Email</label>
-                  <input
-                    required
-                    type="email"
-                    value={removeEmail}
-                    onChange={(e) => setRemoveEmail(e.target.value)}
-                    disabled={removeStatus === 'loading'}
-                    placeholder="your@email.com"
-                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] transition-all"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setRemoveModalOpen(false)}
-                    disabled={removeStatus === 'loading'}
-                    className="flex-1 bg-white border border-[#E8DDD4] text-[#8B5E3C] text-sm font-bold py-3 rounded-xl hover:bg-[#FDF9F5] transition-colors cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={removeStatus === 'loading' || !removeEmail.trim()}
-                    className="flex-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-sm font-bold py-3 rounded-xl transition-all disabled:bg-gray-400 cursor-pointer flex items-center justify-center gap-1.5 border-0"
-                  >
-                    {removeStatus === 'loading' ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        Verifying...
-                      </>
-                    ) : (
-                      <span className="flex items-center gap-1.5">
-                        Send Link <Mail className="w-4 h-4" />
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
     </section>
   );
 }
