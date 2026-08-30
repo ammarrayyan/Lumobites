@@ -133,7 +133,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, share: data });
+    return NextResponse.json({ 
+      success: true, 
+      share: data,
+      postId: post_id,
+      removalToken: removalToken
+    });
   } catch (err: any) {
     console.error('[Pet Twin Share POST error]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -176,18 +181,42 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const body = await req.json();
-    const { postId } = body;
+    const { postId, removalToken } = body;
 
     if (!postId) {
       return NextResponse.json({ error: 'postId is required' }, { status: 400 });
     }
 
-    const { error } = await supabaseAdmin
+    // 1. Fetch post from DB
+    const { data: post, error } = await supabaseAdmin
+      .from('city_board_posts')
+      .select('*')
+      .eq('post_id', postId)
+      .eq('category', 'Pet Twin')
+      .maybeSingle();
+
+    if (error || !post) {
+      return NextResponse.json({ error: 'Pet Twin post not found' }, { status: 404 });
+    }
+
+    // 2. If post has a removal_token or content payload has removal_token, verify matching
+    let postRemovalToken = post.removal_token;
+    try {
+      if (!postRemovalToken && post.content) {
+        const payload = JSON.parse(post.content);
+        postRemovalToken = payload.removal_token;
+      }
+    } catch (e) {}
+
+    if (postRemovalToken && removalToken && postRemovalToken !== removalToken) {
+      return NextResponse.json({ error: 'Unauthorized to delete this post' }, { status: 403 });
+    }
+
+    // 3. Delete the post
+    await supabaseAdmin
       .from('city_board_posts')
       .delete()
       .eq('post_id', postId);
-
-    if (error) throw error;
 
     return NextResponse.json({ success: true, message: 'Pet Twin post deleted successfully' });
   } catch (err: any) {

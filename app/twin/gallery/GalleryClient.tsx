@@ -26,20 +26,53 @@ export default function GalleryClient() {
   const [hasMore, setHasMore] = useState(true);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [myPostTokens, setMyPostTokens] = useState<Record<string, string>>({});
 
-  const handleDeleteTwinPost = async (postId: string) => {
-    if (!confirm('Are you sure you want to remove this Pet Twin post?')) return;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('lumo_my_twin_posts');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const tokenMap: Record<string, string> = {};
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item: any) => {
+              if (typeof item === 'string') {
+                tokenMap[item] = 'owner';
+              } else if (item?.postId) {
+                tokenMap[item.postId] = item.removalToken || 'owner';
+              }
+            });
+          }
+          setMyPostTokens(tokenMap);
+        }
+      } catch (e) {
+        console.error('Failed to load owned twin posts', e);
+      }
+    }
+  }, []);
+
+  const handleDeleteTwinPost = async (postId: string, removalToken?: string) => {
+    if (!confirm('Are you sure you want to remove your Pet Twin post?')) return;
     setDeletingId(postId);
     try {
       const res = await fetch('/api/twin/share', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId })
+        body: JSON.stringify({ postId, removalToken })
       });
       if (res.ok) {
         setShares(prev => prev.filter(s => s.id !== postId));
+        try {
+          const updated = { ...myPostTokens };
+          delete updated[postId];
+          setMyPostTokens(updated);
+          const arr = Object.entries(updated).map(([pId, tok]) => ({ postId: pId, removalToken: tok }));
+          localStorage.setItem('lumo_my_twin_posts', JSON.stringify(arr));
+        } catch (e) {}
       } else {
-        alert('Failed to delete post.');
+        const data = await res.json();
+        alert(data.error || 'Failed to delete post.');
       }
     } catch (err) {
       console.error('Delete error', err);
@@ -178,7 +211,7 @@ export default function GalleryClient() {
                 {share.matchScore}% Match
               </div>
 
-              {/* Action Row: Heart Reaction & Direct Delete */}
+              {/* Action Row: Heart Reaction & Direct Delete (for owner only) */}
               <div className="w-full flex items-center justify-between border-t border-[#E8DDD4] pt-2.5 mt-3 gap-2" onClick={e => e.stopPropagation()}>
                 <FacebookReactionPicker
                   itemId={share.id}
@@ -187,16 +220,18 @@ export default function GalleryClient() {
                   minimalHeartStyle={true}
                 />
 
-                <button
-                  type="button"
-                  onClick={() => handleDeleteTwinPost(share.id)}
-                  disabled={deletingId === share.id}
-                  className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
-                  title="Delete post"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
-                </button>
+                {!!myPostTokens[share.id] && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteTwinPost(share.id, myPostTokens[share.id])}
+                    disabled={deletingId === share.id}
+                    className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
+                    title="Delete my post"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}

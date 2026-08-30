@@ -573,6 +573,17 @@ export default function TwinPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        if (data.postId && typeof window !== 'undefined') {
+          try {
+            const existing = JSON.parse(localStorage.getItem('lumo_my_twin_posts') || '[]');
+            const filtered = existing.filter((item: any) => (item?.postId || item) !== data.postId);
+            filtered.push({ postId: data.postId, removalToken: data.removalToken });
+            localStorage.setItem('lumo_my_twin_posts', JSON.stringify(filtered));
+          } catch (e) {
+            console.error('Failed to save twin post token', e);
+          }
+        }
         setPublicShareStatus('shared');
         setAgreedToShare(true);
       } else {
