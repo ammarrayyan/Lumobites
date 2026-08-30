@@ -52,7 +52,7 @@ export default function FacebookReactionPicker({
   initialHelpfulCount = 0,
   size = 'sm',
   showSummary = true,
-  minimalHeartStyle = false,
+  minimalHeartStyle = true,
   onReactionChange,
   className = '',
 }: FacebookReactionPickerProps) {
