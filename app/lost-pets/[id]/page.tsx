@@ -577,8 +577,10 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                   <span className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider">React</span>
                   <FacebookReactionPicker
                     itemId={pet.id}
+                    initialHelpfulCount={pet.reaction_count || 0}
                     size="md"
                     showSummary={true}
+                    minimalHeartStyle={true}
                   />
                 </div>
 

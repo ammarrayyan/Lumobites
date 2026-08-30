@@ -39,13 +39,19 @@ export async function GET(request: NextRequest, props: { params: Promise<{ id: s
       photos = data.photo_url ? [data.photo_url] : [];
     }
 
+    const { count: reactionCount } = await supabaseAdmin
+      .from('post_reactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', params.id);
+
     return NextResponse.json({ 
       pet: { 
         ...safePet, 
         city: formatPublicCity(data.city) || data.city,
         type: pet_type,
         photos,
-        description: cleanDesc
+        description: cleanDesc,
+        reaction_count: reactionCount || 0
       } 
     });
   } catch (err: any) {

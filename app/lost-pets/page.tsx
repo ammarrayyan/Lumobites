@@ -966,6 +966,7 @@ export default function LostPetsFeed() {
                                 <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-[#F0E6DA]" onClick={e => e.stopPropagation()}>
                                   <FacebookReactionPicker
                                     itemId={pet.id}
+                                    initialHelpfulCount={pet.reaction_count || 0}
                                     size="sm"
                                     showSummary={true}
                                     minimalHeartStyle={true}

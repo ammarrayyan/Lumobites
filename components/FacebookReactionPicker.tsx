@@ -99,6 +99,21 @@ export default function FacebookReactionPicker({
     } catch (e) {}
   }, [itemId]);
 
+  // Sync incoming server counts when loaded asynchronously
+  useEffect(() => {
+    const incomingTotal = (initialCounts?.like ?? 0) + (initialCounts?.love ?? 0) + (initialCounts?.care ?? 0) + (initialCounts?.sad ?? 0) + (initialHelpfulCount ?? 0);
+    if (incomingTotal > 0) {
+      setReactionState(prev => {
+        const finalTotal = Math.max(incomingTotal, prev.total);
+        return {
+          ...prev,
+          counts: { like: 0, love: finalTotal, care: 0, sad: 0 },
+          total: finalTotal,
+        };
+      });
+    }
+  }, [initialHelpfulCount, initialCounts]);
+
   const saveState = (newState: ReactionState) => {
     setReactionState(newState);
     if (typeof window !== 'undefined' && itemId) {
@@ -184,6 +199,7 @@ export default function FacebookReactionPicker({
 
   // Long-press handling for touch / mobile
   const handleTouchStart = () => {
+    if (minimalHeartStyle) return;
     longPressTimerRef.current = setTimeout(() => {
       setPickerOpen(true);
     }, 280);
@@ -198,6 +214,7 @@ export default function FacebookReactionPicker({
 
   // Hover handling for desktop
   const handleMouseEnter = () => {
+    if (minimalHeartStyle) return;
     hoverTimerRef.current = setTimeout(() => {
       setPickerOpen(true);
     }, 250);
@@ -241,7 +258,7 @@ export default function FacebookReactionPicker({
       onMouseLeave={handleMouseLeave}
     >
       {/* Floating Reaction Bar (Facebook / Instagram Style Flyout) */}
-      {pickerOpen && (
+      {!minimalHeartStyle && pickerOpen && (
         <div
           className="absolute bottom-full left-0 mb-2 z-50 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-200/90 py-1.5 px-2 flex items-center gap-1.5 sm:gap-2 animate-in fade-in zoom-in-95 duration-150"
           style={{ transformOrigin: 'bottom left' }}

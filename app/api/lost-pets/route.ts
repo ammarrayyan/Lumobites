@@ -48,24 +48,32 @@ export async function GET(request: NextRequest) {
       return R * c;
     };
 
-    // Query comment counts for returned pet IDs
-    const petIds = (data || []).map(p => p.id);
-    let commentCountsMap: Record<string, number> = {};
-    if (petIds.length > 0) {
+    // Query comments and reactions counts in batch for all pets
+    const commentCountsMap: Record<string, number> = {};
+    const reactionCountsMap: Record<string, number> = {};
+    if (data && data.length > 0) {
+      const petIds = data.map(p => p.id);
       try {
-        const { data: commentRows } = await supabaseAdmin
-          .from('lost_pet_comments')
-          .select('lost_pet_id')
-          .in('lost_pet_id', petIds);
-        if (commentRows) {
-          commentRows.forEach(r => {
+        const [commentsRes, reactionsRes] = await Promise.all([
+          supabaseAdmin.from('lost_pet_comments').select('lost_pet_id').in('lost_pet_id', petIds),
+          supabaseAdmin.from('post_reactions').select('post_id').in('post_id', petIds)
+        ]);
+        if (commentsRes.data) {
+          commentsRes.data.forEach(r => {
             if (r.lost_pet_id) {
               commentCountsMap[r.lost_pet_id] = (commentCountsMap[r.lost_pet_id] || 0) + 1;
             }
           });
         }
+        if (reactionsRes.data) {
+          reactionsRes.data.forEach(r => {
+            if (r.post_id) {
+              reactionCountsMap[r.post_id] = (reactionCountsMap[r.post_id] || 0) + 1;
+            }
+          });
+        }
       } catch (cErr) {
-        console.warn('[Lost Pets API] Error querying comment counts:', cErr);
+        console.warn('[Lost Pets API] Error querying counts:', cErr);
       }
     }
 
@@ -108,7 +116,8 @@ export async function GET(request: NextRequest) {
         distance,
         photos,
         description: cleanDesc,
-        comment_count: commentCountsMap[pet.id] || 0
+        comment_count: commentCountsMap[pet.id] || 0,
+        reaction_count: reactionCountsMap[pet.id] || 0
       };
     });
 
