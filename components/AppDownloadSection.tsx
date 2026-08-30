@@ -5,7 +5,7 @@ import { Smartphone, CheckCircle2, Bell, ShieldCheck, Heart } from 'lucide-react
 
 export default function AppDownloadSection() {
   return (
-    <section className="w-full bg-white border-y border-[#E8DDD4] py-16 sm:py-24 px-4 sm:px-8 lg:px-12 overflow-hidden">
+    <section className="hidden md:block w-full bg-white border-y border-[#E8DDD4] py-16 sm:py-24 px-4 sm:px-8 lg:px-12 overflow-hidden">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
         
         {/* Left Column: Copy & Store Badges */}
