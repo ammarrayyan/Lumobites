@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
+import ImageWheel from '@/components/ImageWheel';
+import AppDownloadSection from '@/components/AppDownloadSection';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -463,6 +465,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 3D DRAGGABLE IMAGE WHEEL SHOWCASE */}
+      <ImageWheel />
+
       {/* SERVICES GRID SECTION */}
       <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
         {/* Desktop My Pets Quick Card (Light & Sleek) */}
@@ -597,6 +602,8 @@ export default function Home() {
         </div>
       </section>
 
+      {/* APP DOWNLOAD WITH REALISTIC IPHONE MOCKUP */}
+      <AppDownloadSection />
 
       {/* EXPLORE TEASER BANNER */}
       <section className="hidden md:block w-full bg-[#FCFAF8] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
