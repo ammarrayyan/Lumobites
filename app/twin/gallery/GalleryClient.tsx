@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
-import { Footprints, User, PawPrint } from 'lucide-react';
+import { Footprints, User, PawPrint, Trash2 } from 'lucide-react';
+import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 
 interface SharedTwin {
   id: string;
@@ -14,6 +15,7 @@ interface SharedTwin {
   matchScore: number;
   traits: string[];
   quote: string;
+  helpful_count?: number;
 }
 
 export default function GalleryClient() {
@@ -22,6 +24,30 @@ export default function GalleryClient() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDeleteTwinPost = async (postId: string) => {
+    if (!confirm('Are you sure you want to remove this Pet Twin post?')) return;
+    setDeletingId(postId);
+    try {
+      const res = await fetch('/api/twin/share', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId })
+      });
+      if (res.ok) {
+        setShares(prev => prev.filter(s => s.id !== postId));
+      } else {
+        alert('Failed to delete post.');
+      }
+    } catch (err) {
+      console.error('Delete error', err);
+      alert('Error deleting post.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const RESULTS_PER_PAGE = 12;
 
@@ -152,16 +178,26 @@ export default function GalleryClient() {
                 {share.matchScore}% Match
               </div>
 
-              {/* Traits */}
-              {share.traits && share.traits.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 justify-center mt-auto">
-                  {share.traits.slice(0, 3).map(trait => (
-                    <span key={trait} className="text-[10px] bg-[#FAF6F4] text-[#8B7E7D] font-semibold px-2 py-1 rounded-md border border-[#E8DDD4]">
-                      {trait}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {/* Action Row: Heart Reaction & Direct Delete */}
+              <div className="w-full flex items-center justify-between border-t border-[#E8DDD4] pt-2.5 mt-3 gap-2" onClick={e => e.stopPropagation()}>
+                <FacebookReactionPicker
+                  itemId={share.id}
+                  initialHelpfulCount={share.helpful_count || 0}
+                  size="sm"
+                  minimalHeartStyle={true}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteTwinPost(share.id)}
+                  disabled={deletingId === share.id}
+                  className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
+                  title="Delete post"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
+                </button>
+              </div>
             </div>
           ))}
 

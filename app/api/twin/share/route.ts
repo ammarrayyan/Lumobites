@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
       .select('*')
       .eq('category', 'Pet Twin')
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(100);
 
     if (error) throw error;
 
@@ -158,6 +158,7 @@ export async function GET(req: NextRequest) {
         return {
           id: post.post_id,
           created_at: post.created_at,
+          helpful_count: post.helpful_count || 0,
           ...safePayload
         };
       } catch (e) {
@@ -168,6 +169,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ shares: formattedShares });
   } catch (err: any) {
     console.error('[Pet Twin Share GET error]', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { postId } = body;
+
+    if (!postId) {
+      return NextResponse.json({ error: 'postId is required' }, { status: 400 });
+    }
+
+    const { error } = await supabaseAdmin
+      .from('city_board_posts')
+      .delete()
+      .eq('post_id', postId);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Pet Twin post deleted successfully' });
+  } catch (err: any) {
+    console.error('[Pet Twin Share DELETE error]', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

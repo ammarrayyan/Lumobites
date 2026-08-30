@@ -1518,32 +1518,20 @@ export default function TwinPage() {
                   </div>
 
                   {agreedToShare && publicShareStatus !== 'shared' && (
-                    <div className="mt-1.5 flex flex-col gap-2 pl-7.5 animate-fade-in w-full">
-                      <label className="text-[11px] font-bold text-[#666] leading-relaxed">
-                        Email (optional) — we'll send you a link to remove your result anytime
-                      </label>
-                      <div className="flex gap-2 w-full">
-                        <input
-                          type="email"
-                          value={shareEmail}
-                          onChange={(e) => setShareEmail(e.target.value)}
-                          disabled={publicShareStatus === 'sharing'}
-                          placeholder="your@email.com"
-                          className="flex-1 bg-white border border-[#D9C0A8] rounded-xl px-3 py-1.5 text-xs text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:ring-2 focus:ring-[#8B5E3C]/10 transition-all"
-                        />
-                        <button
-                          onClick={() => handlePublicShare()}
-                          disabled={publicShareStatus === 'sharing'}
-                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer disabled:bg-gray-400 flex items-center gap-1 shrink-0 justify-center"
-                        >
-                          {publicShareStatus === 'sharing' ? 'Sharing...' : (
-                            <>
-                              Share Now
-                              <Footprints className="w-3.5 h-3.5" />
-                            </>
-                          )}
-                        </button>
-                      </div>
+                    <div className="mt-1.5 flex items-center gap-2 pl-7.5 animate-fade-in w-full">
+                      <button
+                        type="button"
+                        onClick={() => handlePublicShare()}
+                        disabled={publicShareStatus === 'sharing'}
+                        className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white text-xs font-bold py-2 px-4 rounded-xl transition-all cursor-pointer disabled:bg-gray-400 flex items-center gap-1.5 shadow-xs"
+                      >
+                        {publicShareStatus === 'sharing' ? 'Sharing...' : (
+                          <>
+                            <span>Share to Public Gallery</span>
+                            <Footprints className="w-3.5 h-3.5" />
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
 
