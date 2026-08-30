@@ -422,6 +422,7 @@ export default function CityBoardPostPage() {
                   initialHelpfulCount={post.helpful_count || 0}
                   size="md"
                   showSummary={true}
+                  minimalHeartStyle={true}
                 />
 
                 {/* Bookmark Toggle - Signed-in Gated */}

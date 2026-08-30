@@ -401,6 +401,7 @@ export default function FacebookStyleCommentThread({
                 itemId={comment.id}
                 size="sm"
                 showSummary={true}
+                minimalHeartStyle={true}
               />
 
               <button

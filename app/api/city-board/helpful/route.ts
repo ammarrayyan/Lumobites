@@ -54,3 +54,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { post_id, device_cookie } = body;
+
+    if (!post_id || !device_cookie) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Delete vote
+    await supabaseAdmin
+      .from('city_board_helpful')
+      .delete()
+      .eq('post_id', post_id)
+      .eq('device_cookie', device_cookie);
+
+    // Get current post's helpful_count
+    const { data: post } = await supabaseAdmin
+      .from('city_board_posts')
+      .select('helpful_count')
+      .eq('post_id', post_id)
+      .single();
+
+    const newCount = Math.max(0, (post?.helpful_count || 1) - 1);
+
+    // Update count
+    await supabaseAdmin
+      .from('city_board_posts')
+      .update({ helpful_count: newCount })
+      .eq('post_id', post_id);
+
+    return NextResponse.json({ success: true, helpful_count: newCount });
+  } catch (err: any) {
+    console.error('[City Board Helpful DELETE Error]', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

@@ -930,6 +930,7 @@ export default function CityBoardPage() {
                           initialHelpfulCount={post.helpful_count || 0}
                           size="sm"
                           showSummary={true}
+                          minimalHeartStyle={true}
                         />
 
                         {/* Comment-Count Indicator / Expand Toggle */}

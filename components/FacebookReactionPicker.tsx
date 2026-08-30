@@ -58,17 +58,18 @@ export default function FacebookReactionPicker({
 }: FacebookReactionPickerProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [reactionState, setReactionState] = useState<ReactionState>(() => {
+    // Consolidate all legacy counts (like, love, care, sad, initialHelpfulCount) into the single heart (love) count
+    const legacyTotal = (initialCounts?.like ?? 0) + (initialCounts?.love ?? 0) + (initialCounts?.care ?? 0) + (initialCounts?.sad ?? 0) + (initialHelpfulCount ?? 0);
     const baseCounts: Record<ReactionType, number> = {
-      like: initialCounts?.like ?? initialHelpfulCount ?? 0,
-      love: initialCounts?.love ?? 0,
-      care: initialCounts?.care ?? 0,
-      sad: initialCounts?.sad ?? 0,
+      like: 0,
+      love: legacyTotal,
+      care: 0,
+      sad: 0,
     };
-    const total = Object.values(baseCounts).reduce((a, b) => a + b, 0);
     return {
-      userReaction: initialUserReaction,
+      userReaction: initialUserReaction ? 'love' : null,
       counts: baseCounts,
-      total,
+      total: legacyTotal,
     };
   });
 
@@ -83,21 +84,15 @@ export default function FacebookReactionPicker({
       const stored = localStorage.getItem(`lumo_reaction_${itemId}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        const validTypes: ReactionType[] = ['like', 'love', 'care', 'sad'];
-        const userReaction: ReactionType | null = validTypes.includes(parsed.userReaction) ? parsed.userReaction : null;
+        const totalParsed = (parsed.counts?.like || 0) + (parsed.counts?.love || 0) + (parsed.counts?.care || 0) + (parsed.counts?.sad || 0) + (parsed.total || 0);
+        const userReacted = parsed.userReaction ? 'love' : null;
         
         setReactionState(prev => {
-          const validCounts: Record<ReactionType, number> = {
-            like: parsed.counts?.like ?? prev.counts.like ?? 0,
-            love: parsed.counts?.love ?? prev.counts.love ?? 0,
-            care: parsed.counts?.care ?? prev.counts.care ?? 0,
-            sad: parsed.counts?.sad ?? prev.counts.sad ?? 0,
-          };
-          const total = Object.values(validCounts).reduce((a, b) => a + b, 0);
+          const finalTotal = Math.max(prev.total, totalParsed);
           return {
-            userReaction: userReaction ?? prev.userReaction,
-            counts: validCounts,
-            total,
+            userReaction: userReacted ?? prev.userReaction,
+            counts: { like: 0, love: finalTotal, care: 0, sad: 0 },
+            total: finalTotal,
           };
         });
       }
@@ -111,30 +106,40 @@ export default function FacebookReactionPicker({
         localStorage.setItem(`lumo_reaction_${itemId}`, JSON.stringify({
           userReaction: newState.userReaction,
           counts: newState.counts,
+          total: newState.total,
         }));
       } catch (e) {}
     }
     onReactionChange?.(newState.userReaction, newState);
   };
 
-  const handleSelectReaction = (type: ReactionType) => {
+  const handleSelectReaction = (type: ReactionType = 'love') => {
     setPickerOpen(false);
-    const prevReaction = reactionState.userReaction;
-    const nextCounts = { ...reactionState.counts };
+    const isCurrentlyReacted = !!reactionState.userReaction;
 
-    if (prevReaction === type) {
+    if (isCurrentlyReacted) {
       // Toggle off
-      nextCounts[type] = Math.max(0, (nextCounts[type] || 0) - 1);
-      const total = Object.values(nextCounts).reduce((a, b) => a + b, 0);
+      const nextTotal = Math.max(0, reactionState.total - 1);
+      const nextCounts: Record<ReactionType, number> = { like: 0, love: nextTotal, care: 0, sad: 0 };
       saveState({
         userReaction: null,
         counts: nextCounts,
-        total,
+        total: nextTotal,
       });
 
-      if (typeof window !== 'undefined' && itemId && itemId.includes('-')) {
+      if (typeof window !== 'undefined' && itemId) {
         const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
         localStorage.setItem('lumo_device_id', deviceId);
+        const cityCookie = localStorage.getItem('lumo_city_board_cookie') || deviceId;
+
+        // Sync with City Board helpful API
+        fetch('/api/city-board/helpful', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: itemId, device_cookie: cityCookie })
+        }).catch(() => {});
+
+        // Sync with Lost Pets reactions API
         fetch('/api/lost-pets/reactions', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
@@ -142,37 +147,39 @@ export default function FacebookReactionPicker({
         }).catch(() => {});
       }
     } else {
-      if (prevReaction) {
-        nextCounts[prevReaction] = Math.max(0, (prevReaction in nextCounts ? nextCounts[prevReaction] - 1 : 0));
-      }
-      nextCounts[type] = (nextCounts[type] || 0) + 1;
-      const total = Object.values(nextCounts).reduce((a, b) => a + b, 0);
+      // Toggle on (Heart ❤️)
+      const nextTotal = reactionState.total + 1;
+      const nextCounts: Record<ReactionType, number> = { like: 0, love: nextTotal, care: 0, sad: 0 };
       saveState({
-        userReaction: type,
+        userReaction: 'love',
         counts: nextCounts,
-        total,
+        total: nextTotal,
       });
 
-      if (typeof window !== 'undefined' && itemId && itemId.includes('-')) {
+      if (typeof window !== 'undefined' && itemId) {
         const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
         localStorage.setItem('lumo_device_id', deviceId);
+        const cityCookie = localStorage.getItem('lumo_city_board_cookie') || deviceId;
+
+        // Sync with City Board helpful API
+        fetch('/api/city-board/helpful', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ post_id: itemId, device_cookie: cityCookie })
+        }).catch(() => {});
+
+        // Sync with Lost Pets reactions API
         fetch('/api/lost-pets/reactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: itemId, reaction: type, device_id: deviceId })
+          body: JSON.stringify({ post_id: itemId, reaction: 'love', device_id: deviceId })
         }).catch(() => {});
       }
     }
   };
 
   const handleQuickClick = () => {
-    if (pickerOpen) {
-      setPickerOpen(false);
-      return;
-    }
-    // Quick click toggles default reaction
-    const defaultReaction: ReactionType = minimalHeartStyle ? 'love' : 'like';
-    handleSelectReaction(reactionState.userReaction ? reactionState.userReaction : defaultReaction);
+    handleSelectReaction('love');
   };
 
   // Long-press handling for touch / mobile
