@@ -41,8 +41,24 @@ const CATEGORIES = Object.keys(CATEGORY_META);
 export default function CityBoardPage() {
   const [deviceCookie, setDeviceCookie] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_city_board_feed_cache');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_city_board_feed_cache');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
   const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -59,6 +75,22 @@ export default function CityBoardPage() {
   const [expandedPostIds, setExpandedPostIds] = useState<Record<string, boolean>>({});
   const [postRepliesMap, setPostRepliesMap] = useState<Record<string, any[]>>({});
   const [loadingRepliesMap, setLoadingRepliesMap] = useState<Record<string, boolean>>({});
+
+  const saveNavigationState = (postId?: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stateToSave = {
+        searchKeyword,
+        searchCity,
+        searchCategory,
+        showMyPosts,
+        expandedPostIds,
+        targetPostId: postId,
+        scrollY: window.scrollY
+      };
+      sessionStorage.setItem('lumo_city_board_search_state', JSON.stringify(stateToSave));
+    } catch (e) {}
+  };
 
   const toggleExpandPost = async (postId: string) => {
     const isCurrentlyExpanded = !!expandedPostIds[postId];
@@ -119,12 +151,25 @@ export default function CityBoardPage() {
           if (parsed.searchCity !== undefined) setSearchCity(parsed.searchCity);
           if (parsed.searchCategory !== undefined) setSearchCategory(parsed.searchCategory);
           if (parsed.showMyPosts !== undefined) setShowMyPosts(parsed.showMyPosts);
+          if (parsed.expandedPostIds) setExpandedPostIds(parsed.expandedPostIds);
 
-          if (parsed.scrollY) {
-            setTimeout(() => {
+          const restoreScroll = () => {
+            if (parsed.targetPostId) {
+              const el = document.getElementById(`city-post-${parsed.targetPostId}`);
+              if (el) {
+                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                return;
+              }
+            }
+            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
               window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }, 120);
-          }
+            }
+          };
+
+          restoreScroll();
+          requestAnimationFrame(restoreScroll);
+          setTimeout(restoreScroll, 50);
+          setTimeout(restoreScroll, 200);
         }
       } catch (e) {}
     }
@@ -132,19 +177,8 @@ export default function CityBoardPage() {
 
   // Sync city board search state to sessionStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stateToSave = {
-          searchKeyword,
-          searchCity,
-          searchCategory,
-          showMyPosts,
-          scrollY: window.scrollY
-        };
-        sessionStorage.setItem('lumo_city_board_search_state', JSON.stringify(stateToSave));
-      } catch (e) {}
-    }
-  }, [searchKeyword, searchCity, searchCategory, showMyPosts]);
+    saveNavigationState();
+  }, [searchKeyword, searchCity, searchCategory, showMyPosts, expandedPostIds]);
 
   const toggleSavePost = (postId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -321,7 +355,13 @@ export default function CityBoardPage() {
       const res = await fetch(`/api/city-board/posts?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setPosts(data.posts);
+        const fetchedPosts = data.posts || [];
+        setPosts(fetchedPosts);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('lumo_city_board_feed_cache', JSON.stringify(fetchedPosts));
+          } catch (e) {}
+        }
       }
     } catch (e) {
       console.error('Failed to fetch posts', e);
@@ -814,6 +854,7 @@ export default function CityBoardPage() {
               return (
                 <div 
                   key={post.id} 
+                  id={`city-post-${post.post_id}`}
                   className={`rounded-2xl border transition-all duration-200 relative overflow-hidden bg-white border-[#E8DDD4] shadow-sm hover:shadow-md`}
                 >
                   {/* Card Body */}

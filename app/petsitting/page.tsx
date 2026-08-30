@@ -447,7 +447,15 @@ export function PetSittingContent() {
   };
   
   // Find Sitter State
-  const [sitters, setSitters] = useState<Sitter[]>([]);
+  const [sitters, setSitters] = useState<Sitter[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_sitters_cache');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [vetClinics, setVetClinics] = useState<any[]>([]);
   const [inquiringClinic, setInquiringClinic] = useState<any | null>(null);
   const [petDaycares, setPetDaycares] = useState<any[]>([]);
@@ -851,6 +859,7 @@ export function PetSittingContent() {
       const saved = sessionStorage.getItem('lumo_petsitting_search_state');
       if (saved) {
         const parsed = JSON.parse(saved);
+        if (parsed.activeTab) setActiveTab(parsed.activeTab);
         if (parsed.searchZip) {
           skipGeocodeRef.current = true;
           setSearchZip(parsed.searchZip);
@@ -864,11 +873,23 @@ export function PetSittingContent() {
         if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
         if (parsed.aiSitterSearch) setAiSitterSearch(parsed.aiSitterSearch);
 
-        if (parsed.scrollY) {
-          setTimeout(() => {
+        const restoreScroll = () => {
+          if (parsed.targetSitterId) {
+            const el = document.getElementById(`sitter-card-${parsed.targetSitterId}`);
+            if (el) {
+              el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+              return;
+            }
+          }
+          if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
             window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-          }, 120);
-        }
+          }
+        };
+
+        restoreScroll();
+        requestAnimationFrame(restoreScroll);
+        setTimeout(restoreScroll, 50);
+        setTimeout(restoreScroll, 200);
       }
     } catch (e) {}
 
@@ -881,26 +902,31 @@ export function PetSittingContent() {
     };
   }, []);
 
+  const saveNavigationState = (sitterId?: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stateToSave = {
+        activeTab,
+        searchZip,
+        searchRadius,
+        searchPetType,
+        searchDay,
+        searchTimeSlot,
+        searchServiceType,
+        searchCoords,
+        searchLocationName,
+        aiSitterSearch,
+        targetSitterId: sitterId,
+        scrollY: window.scrollY
+      };
+      sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(stateToSave));
+    } catch (e) {}
+  };
+
   // Sync petsitting search state changes to sessionStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stateToSave = {
-          searchZip,
-          searchRadius,
-          searchPetType,
-          searchDay,
-          searchTimeSlot,
-          searchServiceType,
-          searchCoords,
-          searchLocationName,
-          aiSitterSearch,
-          scrollY: window.scrollY
-        };
-        sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(stateToSave));
-      } catch (e) {}
-    }
-  }, [searchZip, searchRadius, searchPetType, searchDay, searchTimeSlot, searchServiceType, searchCoords, searchLocationName, aiSitterSearch]);
+    saveNavigationState();
+  }, [activeTab, searchZip, searchRadius, searchPetType, searchDay, searchTimeSlot, searchServiceType, searchCoords, searchLocationName, aiSitterSearch]);
 
   // Listen for search parameters changes to support in-page navigation (e.g. notification clicks)
   const searchParams = useSearchParams();
@@ -1485,9 +1511,13 @@ export function PetSittingContent() {
       const url = `/api/petsitting/sitters?${params.toString()}`;
       const [res] = await Promise.all([fetch(url), fetchVetClinics(), fetchPetDaycares()]);
       if (res.ok) {
-        const data = await res.json();
         setSitters(data.sitters);
         setIsOwnerPro(data.isOwnerPro);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('lumo_sitters_cache', JSON.stringify(data.sitters || []));
+          } catch (e) {}
+        }
       }
     } catch (e) {
       console.error('Failed to fetch sitters');

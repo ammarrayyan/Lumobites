@@ -123,9 +123,25 @@ function AdoptionContent() {
   };
 
   // Listings data
-  const [localPets, setLocalPets] = useState<PetListing[]>([]);
+  const [localPets, setLocalPets] = useState<PetListing[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_adoption_local_pets_cache');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
   const [rescueGroupsPets, setRescueGroupsPets] = useState<PetListing[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_adoption_local_pets_cache');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
   const [rescueGroupsFallbackMessage, setRescueGroupsFallbackMessage] = useState('');
 
   // AI Matcher Modals
@@ -137,6 +153,22 @@ function AdoptionContent() {
   const [lifestyleMatches, setLifestyleMatches] = useState<any[]>([]);
   const [isLifestyleLoading, setIsLifestyleLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const saveNavigationState = (petId?: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stateToSave = {
+        species,
+        age,
+        size,
+        citySearch,
+        showMap,
+        targetPetId: petId,
+        scrollY: window.scrollY
+      };
+      sessionStorage.setItem('lumo_adoption_search_state', JSON.stringify(stateToSave));
+    } catch (e) {}
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -159,11 +191,23 @@ function AdoptionContent() {
           if (parsed.citySearch !== undefined) setCitySearch(parsed.citySearch);
           if (parsed.showMap !== undefined) setShowMap(parsed.showMap);
 
-          if (parsed.scrollY) {
-            setTimeout(() => {
+          const restoreScroll = () => {
+            if (parsed.targetPetId) {
+              const el = document.getElementById(`adoption-pet-${parsed.targetPetId}`);
+              if (el) {
+                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                return;
+              }
+            }
+            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
               window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }, 120);
-          }
+            }
+          };
+
+          restoreScroll();
+          requestAnimationFrame(restoreScroll);
+          setTimeout(restoreScroll, 50);
+          setTimeout(restoreScroll, 200);
         }
       } catch (e) {}
     }
@@ -171,19 +215,7 @@ function AdoptionContent() {
 
   // Sync adoption search state to sessionStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stateToSave = {
-          species,
-          age,
-          size,
-          citySearch,
-          showMap,
-          scrollY: window.scrollY
-        };
-        sessionStorage.setItem('lumo_adoption_search_state', JSON.stringify(stateToSave));
-      } catch (e) {}
-    }
+    saveNavigationState();
   }, [species, age, size, citySearch, showMap]);
 
   const [isVisualModalOpen, setIsVisualModalOpen] = useState(false);
@@ -429,6 +461,11 @@ function AdoptionContent() {
           status: p.status
         }));
         setLocalPets(formatted);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('lumo_adoption_local_pets_cache', JSON.stringify(formatted));
+          } catch (e) {}
+        }
       }
 
       // 2. Fetch RescueGroups pets

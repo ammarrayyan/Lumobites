@@ -29,27 +29,64 @@ const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
 
 export default function LostPetsFeed() {
   const router = useRouter();
+
+  // ── Page Tab ──────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
+  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
+  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
+  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
+
+  // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
+  const [pets, setPets] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_lost_pets_feed_cache');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('lumo_lost_pets_feed_cache');
+        if (cached && JSON.parse(cached).length > 0) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
+
+  // Mobile Inline Expandable Comments State
+  const [expandedPetIds, setExpandedPetIds] = useState<Record<string, boolean>>({});
+  const [petCommentsMap, setPetCommentsMap] = useState<Record<string, any[]>>({});
+  const [loadingCommentsMap, setLoadingCommentsMap] = useState<Record<string, boolean>>({});
+
+  const saveNavigationState = (petId?: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stateToSave = {
+        searchQuery: currentContextRef.current.searchQuery,
+        searchRadius: currentContextRef.current.searchRadius,
+        filterType: currentContextRef.current.filterType,
+        filterSpecies: currentContextRef.current.filterSpecies,
+        searchCoords: currentContextRef.current.searchCoords,
+        searchLocationName,
+        locationVerified,
+        activeTab,
+        expandedPetIds,
+        targetPetId: petId,
+        scrollY: window.scrollY
+      };
+      sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
+    } catch (err) {}
+  };
+
   const handleCardClick = (e: React.MouseEvent, petId: string) => {
     const target = e.target as HTMLElement;
     if (target.closest('button, a, input, select, textarea, [data-interactive="true"]')) {
       return;
     }
-    if (typeof window !== 'undefined') {
-      try {
-        const stateToSave = {
-          searchQuery: currentContextRef.current.searchQuery,
-          searchRadius: currentContextRef.current.searchRadius,
-          filterType: currentContextRef.current.filterType,
-          filterSpecies: currentContextRef.current.filterSpecies,
-          searchCoords: currentContextRef.current.searchCoords,
-          searchLocationName,
-          locationVerified,
-          activeTab,
-          scrollY: window.scrollY
-        };
-        sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
-      } catch (err) {}
-    }
+    saveNavigationState(petId);
     router.push(`/lost-pets/${petId}`);
   };
 
@@ -60,41 +97,10 @@ export default function LostPetsFeed() {
         return;
       }
       e.preventDefault();
-      if (typeof window !== 'undefined') {
-        try {
-          const stateToSave = {
-            searchQuery: currentContextRef.current.searchQuery,
-            searchRadius: currentContextRef.current.searchRadius,
-            filterType: currentContextRef.current.filterType,
-            filterSpecies: currentContextRef.current.filterSpecies,
-            searchCoords: currentContextRef.current.searchCoords,
-            searchLocationName,
-            locationVerified,
-            activeTab,
-            scrollY: window.scrollY
-          };
-          sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
-        } catch (err) {}
-      }
+      saveNavigationState(petId);
       router.push(`/lost-pets/${petId}`);
     }
   };
-
-  // ── Page Tab ──────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'board' | 'ai'>('board');
-  const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
-  const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
-  const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
-
-
-  // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
-  const [pets, setPets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Mobile Inline Expandable Comments State
-  const [expandedPetIds, setExpandedPetIds] = useState<Record<string, boolean>>({});
-  const [petCommentsMap, setPetCommentsMap] = useState<Record<string, any[]>>({});
-  const [loadingCommentsMap, setLoadingCommentsMap] = useState<Record<string, boolean>>({});
 
   const toggleExpandPet = async (petId: string) => {
     const isCurrentlyExpanded = !!expandedPetIds[petId];
@@ -192,7 +198,7 @@ export default function LostPetsFeed() {
         setActiveTab('ai');
       }
 
-      // Restore saved filters and scroll state from sessionStorage
+      // Restore saved filters, expanded comments, and scroll state from sessionStorage
       try {
         const saved = sessionStorage.getItem('lumo_lost_pets_search_state');
         if (saved) {
@@ -208,12 +214,26 @@ export default function LostPetsFeed() {
           if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
           if (parsed.locationVerified !== undefined) setLocationVerified(parsed.locationVerified);
           if (parsed.activeTab && !tabParam) setActiveTab(parsed.activeTab);
+          if (parsed.expandedPetIds) setExpandedPetIds(parsed.expandedPetIds);
 
-          if (parsed.scrollY) {
-            setTimeout(() => {
+          // Scroll restoration: Multi-frame attempt to guarantee precision
+          const restoreScroll = () => {
+            if (parsed.targetPetId) {
+              const el = document.getElementById(`lost-pet-${parsed.targetPetId}`);
+              if (el) {
+                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                return;
+              }
+            }
+            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
               window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }, 120);
-          }
+            }
+          };
+
+          restoreScroll();
+          requestAnimationFrame(restoreScroll);
+          setTimeout(restoreScroll, 50);
+          setTimeout(restoreScroll, 200);
         }
       } catch (e) {}
     }
@@ -221,22 +241,8 @@ export default function LostPetsFeed() {
 
   // Sync state changes to sessionStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stateToSave = {
-          searchQuery,
-          searchRadius,
-          filterType,
-          filterSpecies,
-          searchCoords,
-          searchLocationName,
-          locationVerified,
-          activeTab
-        };
-        sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(stateToSave));
-      } catch (e) {}
-    }
-  }, [searchQuery, searchRadius, filterType, filterSpecies, searchCoords, searchLocationName, locationVerified, activeTab]);
+    saveNavigationState();
+  }, [searchQuery, searchRadius, filterType, filterSpecies, searchCoords, searchLocationName, locationVerified, activeTab, expandedPetIds]);
 
   const handleTabSwitch = (tab: 'board' | 'ai') => {
     setActiveTab(tab);
@@ -608,7 +614,15 @@ export default function LostPetsFeed() {
 
       const res = await fetch(`/api/lost-pets?${params.toString()}`);
       const data = await res.json();
-      if (res.ok) setPets(data.pets || []);
+      if (res.ok) {
+        const fetched = data.pets || [];
+        setPets(fetched);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('lumo_lost_pets_feed_cache', JSON.stringify(fetched));
+          } catch (e) {}
+        }
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -822,6 +836,7 @@ export default function LostPetsFeed() {
                           .map((pet) => (
                           <div 
                             key={pet.id} 
+                            id={`lost-pet-${pet.id}`}
                             tabIndex={0}
                             role="link"
                             aria-label={`View details for ${pet.pet_name || 'Lost Pet'}`}
@@ -861,7 +876,11 @@ export default function LostPetsFeed() {
                                   <span>{formatDistanceToNow(new Date(pet.created_at))} ago</span>
                                 </div>
                                 <div className="flex gap-2 w-full">
-                                  <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs">
+                                  <Link 
+                                    href={`/lost-pets/${pet.id}`} 
+                                    onClick={() => saveNavigationState(pet.id)}
+                                    className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs"
+                                  >
                                     View Details &amp; Help
                                   </Link>
                                   {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
