@@ -710,22 +710,22 @@ export default function CityBoardPage() {
         <div className="min-w-0 space-y-6">
 
         {/* COMPOSER CARD (SITE-WIDE CONSISTENT CARD STYLING) */}
-        <div id="city-board-composer" className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E8DDD4]">
+        <div id="city-board-composer" className="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-[#E8DDD4]">
           <div className="mb-5">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1.5">
               <img src="/Logo.png" alt="Lumo Bites" className="h-6 w-auto object-contain" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C]">City Board</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5E3C] bg-[#8B5E3C]/10 px-2.5 py-0.5 rounded-full">City Board</span>
             </div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#191919] tracking-tight">
               Share with your pet community
             </h2>
-            <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed mt-1">Ask questions, share recommendations, or discuss local pet care — completely free.</p>
+            <p className="text-xs sm:text-sm font-normal text-[#666666] leading-relaxed mt-1">Ask questions, share recommendations, or discuss local pet care — completely free.</p>
           </div>
 
           <form onSubmit={handleCreatePost} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <label className="block text-xs font-bold text-[#4A3E3D] uppercase tracking-wider mb-1.5">City Location</label>
+                <label className="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">City Location</label>
                 <div className="relative">
                   <input 
                     type="text" 
@@ -735,7 +735,7 @@ export default function CityBoardPage() {
                       setNewCityVerified(false);
                     }} 
                     placeholder="e.g. Louisville, KY" 
-                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium"
+                    className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#191919] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium"
                     required
                   />
                   {isLocatingNewCity && (
@@ -771,11 +771,11 @@ export default function CityBoardPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#4A3E3D] uppercase tracking-wider mb-1.5">Topic Category</label>
+                <label className="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">Topic Category</label>
                 <select 
                   value={newCategory} 
-                  onChange={e => setNewCategory(e.target.value)}
-                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium cursor-pointer"
+                  onChange={e => setNewCategory(e.target.value)} 
+                  className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#191919] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all font-medium cursor-pointer"
                 >
                   {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
@@ -783,13 +783,13 @@ export default function CityBoardPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#4A3E3D] uppercase tracking-wider mb-1.5">Discussion Content</label>
+              <label className="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">Discussion Content</label>
               <textarea 
                 value={newContent} 
                 onChange={e => setNewContent(e.target.value)} 
                 rows={3} 
                 placeholder="What's on your mind? Ask a question or share local pet tips..." 
-                className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-sm text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all resize-y font-medium placeholder:text-[#8B7E7D]"
+                className="w-full bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#191919] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all resize-y font-medium placeholder:text-[#8B7E7D]"
                 required
               />
             </div>
@@ -800,7 +800,7 @@ export default function CityBoardPage() {
               <button 
                 type="submit" 
                 disabled={isPosting} 
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-8 rounded-xl text-sm transition-all disabled:opacity-50 shadow-sm hover:shadow-md cursor-pointer border-none"
+                className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-8 rounded-xl text-xs sm:text-sm transition-all disabled:opacity-50 shadow-sm hover:shadow-md cursor-pointer border-none"
               >
                 {isPosting ? 'Posting...' : 'Post Discussion'}
               </button>
@@ -913,25 +913,25 @@ export default function CityBoardPage() {
                     <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Category Badge */}
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-md border bg-[#FAF6F4] text-[#8B5E3C] border-[#E8DDD4]">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border bg-[#FAF6F4] text-[#8B5E3C] border-[#E8DDD4]">
                           {post.category}
                         </span>
 
                         {/* City Location */}
-                        <span className="text-xs font-semibold text-[#4A3E3D] bg-[#FAF6F4] border border-[#E8DDD4] px-3 py-1 rounded-md flex items-center gap-1">
+                        <span className="text-xs font-semibold text-[#191919] bg-[#FAF6F4] border border-[#E8DDD4] px-3 py-1 rounded-full flex items-center gap-1">
                           <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" /> {post.city}
                         </span>
 
                         {/* Trending Badge */}
                         {isTrending && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md flex items-center gap-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1">
                             <Flame className="w-3 h-3 text-amber-600 fill-amber-500" />
                             <span>Trending</span>
                           </span>
                         )}
 
                         {isMine && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-white bg-[#8B5E3C] px-2.5 py-1 rounded-md">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-white bg-[#8B5E3C] px-2.5 py-1 rounded-full">
                             Your Post
                           </span>
                         )}
@@ -964,7 +964,7 @@ export default function CityBoardPage() {
                       onClick={() => toggleExpandPost(post.post_id)} 
                       className="cursor-pointer group/title"
                     >
-                      <h3 className="text-lg sm:text-xl font-extrabold text-[#2B231D] leading-snug tracking-tight mb-2 group-hover/title:text-[#8B5E3C] transition-colors">
+                      <h3 className="text-lg sm:text-xl font-extrabold text-[#191919] leading-snug tracking-tight mb-2 group-hover/title:text-[#8B5E3C] transition-colors">
                         {post.content}
                       </h3>
                     </div>

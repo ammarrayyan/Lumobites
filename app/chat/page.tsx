@@ -576,16 +576,7 @@ function ChatPageContent() {
           const progress = getProgressPercentage(step);
 
   return (
-    <div 
-      className="px-5 pb-10 w-full pt-[52px] md:pt-0"
-      style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#FDFAF7', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center'
-      }}
-    >
+    <div className="min-h-screen bg-[#FDFAF7] font-sans flex flex-col items-center px-4 sm:px-6 pb-12 pt-14 md:pt-4 w-full">
       <MobileFoodNav />
 
       <AiLimitModal
@@ -596,74 +587,48 @@ function ChatPageContent() {
       />
       
       {flow === 'selection' && (
-        <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px', padding: '32px 24px' }} className="text-center animate-fade-in">
+        <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-3xl border border-[#E8DDD4] shadow-sm overflow-hidden mt-3 p-6 sm:p-8 text-center animate-fade-in flex flex-col items-center">
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-            <img src="/Logo.png" alt="Lumo Bites" style={{ height: '42px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-            <sup style={{ fontSize: '9px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '4px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+          <div className="flex items-center justify-center mb-5">
+            <img src="/Logo.png" alt="Lumo Bites" className="h-10 w-auto object-contain block" />
+            <sup className="text-[10px] text-[#8B5E3C] font-bold self-start mt-1 ml-0.5 select-none">™</sup>
           </div>
 
-          <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#191919', marginBottom: '8px', lineHeight: '1.3' }}>
+          <h2 className="text-lg sm:text-xl font-extrabold text-[#191919] mb-2 leading-snug tracking-tight">
             How would you like to find the best food for your pet?
           </h2>
-          <p style={{ fontSize: '13px', color: '#666666', marginBottom: '32px', lineHeight: '1.4' }}>
+          <p className="text-xs sm:text-sm text-[#666666] mb-6 leading-relaxed">
             Choose a method to start finding recommendations
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+          <div className="flex flex-col gap-3.5 w-full">
             {/* Option 1: Upload Pet Photo */}
             <button
+              type="button"
               onClick={() => setFlow('photo')}
-              style={{
-                width: '100%',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E8DDD4',
-                borderRadius: '20px',
-                padding: '20px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '16px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8B5E3C'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E8DDD4'; }}
+              className="w-full bg-white hover:bg-[#FAF6F4] border-2 border-[#E8DDD4] hover:border-[#8B5E3C] rounded-2xl p-4 sm:p-5 text-left flex items-start gap-4 transition-all cursor-pointer group shadow-2xs"
             >
-              <div style={{ padding: '10px', backgroundColor: '#FAF6F4', color: '#8B5E3C', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Camera size={24} />
+              <div className="p-3 bg-[#FAF6F4] group-hover:bg-white text-[#8B5E3C] rounded-xl flex items-center justify-center border border-[#E8DDD4]/60 transition-colors shrink-0 mt-0.5">
+                <Camera className="w-5 h-5" />
               </div>
-              <div style={{ flex: 1 }}>
-                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>Upload Pet Photo</span>
-                <span style={{ display: 'block', fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>AI analyzes your pet photo and suggests food instantly.</span>
+              <div className="flex-1 min-w-0">
+                <span className="block text-sm sm:text-base font-bold text-[#191919] mb-1">Upload Pet Photo</span>
+                <span className="block text-xs text-[#666666] leading-relaxed">AI analyzes your pet photo and suggests food instantly.</span>
               </div>
             </button>
 
             {/* Option 2: Answer Questions */}
             <button
+              type="button"
               onClick={() => setFlow('questions')}
-              style={{
-                width: '100%',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E8DDD4',
-                borderRadius: '20px',
-                padding: '20px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '16px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8B5E3C'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E8DDD4'; }}
+              className="w-full bg-white hover:bg-[#FAF6F4] border-2 border-[#E8DDD4] hover:border-[#8B5E3C] rounded-2xl p-4 sm:p-5 text-left flex items-start gap-4 transition-all cursor-pointer group shadow-2xs"
             >
-              <div style={{ padding: '10px', backgroundColor: '#FAF6F4', color: '#8B5E3C', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <MessageSquare size={24} />
+              <div className="p-3 bg-[#FAF6F4] group-hover:bg-white text-[#8B5E3C] rounded-xl flex items-center justify-center border border-[#E8DDD4]/60 transition-colors shrink-0 mt-0.5">
+                <MessageSquare className="w-5 h-5" />
               </div>
-              <div style={{ flex: 1 }}>
-                <span style={{ display: 'block', fontSize: '15px', fontWeight: '800', color: '#191919', marginBottom: '4px' }}>Answer Questions</span>
-                <span style={{ display: 'block', fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>Tell us about your pet's age, weight, and health step by step.</span>
+              <div className="flex-1 min-w-0">
+                <span className="block text-sm sm:text-base font-bold text-[#191919] mb-1">Answer Questions</span>
+                <span className="block text-xs text-[#666666] leading-relaxed">Tell us about your pet's age, weight, and health step by step.</span>
               </div>
             </button>
           </div>
@@ -671,10 +636,11 @@ function ChatPageContent() {
       )}
 
       {flow === 'photo' && (
-        <div style={{ width: '100%', maxWidth: '400px', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px' }} className="animate-fade-in">
+        <div className="w-full max-w-[440px] bg-white rounded-2xl sm:rounded-3xl border border-[#E8DDD4] shadow-sm overflow-hidden mt-3 animate-fade-in flex flex-col">
           {/* Header */}
-          <header style={{ backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #F5EDE4' }}>
+          <header className="bg-white/95 backdrop-blur-sm px-5 py-4 flex items-center justify-between border-b border-[#E8DDD4] shrink-0">
             <button
+              type="button"
               onClick={() => {
                 setFlow('selection');
                 setPhotoFile(null);
@@ -682,33 +648,24 @@ function ChatPageContent() {
                 setPhotoAnalysisResult(null);
                 setPhotoError(null);
               }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#8B5E3C',
-                fontSize: '13px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: 0
-              }}
+              className="bg-transparent border-none text-[#8B5E3C] hover:text-[#7A5234] text-xs font-bold cursor-pointer flex items-center gap-1 p-0 transition-colors"
             >
-              <ArrowLeft size={16} /> Back
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', margin: '0 auto' }}>
-              <img src="/Logo.png" alt="Lumo Bites" style={{ height: '32px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-              <sup style={{ fontSize: '8px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '2px', marginLeft: '1px', fontFamily: 'sans-serif' }}>™</sup>
+            <div className="flex items-center mx-auto">
+              <img src="/Logo.png" alt="Lumo Bites" className="h-7 w-auto object-contain block" />
+              <sup className="text-[8px] text-[#8B5E3C] font-bold self-start mt-0.5 ml-0.5 select-none">™</sup>
             </div>
-            <div style={{ width: '48px' }} />
+            <div className="w-12" />
           </header>
 
           {/* Body */}
-          <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', backgroundColor: '#FAFAFA' }}>
-            <div style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#191919', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}><Camera size={18} /> Upload Pet Photo</h3>
-              <p style={{ fontSize: '12px', color: '#666666', lineHeight: '1.4' }}>Take a picture or select one. AI will analyze your pet to suggest ideal foods.</p>
+          <div className="p-5 sm:p-6 flex flex-col gap-5 bg-[#FAF6F4]/40">
+            <div className="text-center">
+              <h3 className="text-base sm:text-lg font-extrabold text-[#191919] mb-1 flex items-center gap-1.5 justify-center">
+                <Camera className="w-4 h-4 text-[#8B5E3C]" /> Upload Pet Photo
+              </h3>
+              <p className="text-xs text-[#666666] leading-relaxed">Take a picture or select one. AI will analyze your pet to suggest ideal foods.</p>
             </div>
 
             {!photoAnalysisResult && (
@@ -847,23 +804,25 @@ function ChatPageContent() {
       )}
 
       {flow === 'questions' && (
-        <div style={{ width: '100%', maxWidth: '400px', height: 'calc(100dvh - 140px)', backgroundColor: '#FFFFFF', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #E8DDD4', marginTop: '12px' }}>
+        <div className="w-full max-w-[440px] h-[calc(100dvh-130px)] bg-white rounded-2xl sm:rounded-3xl border border-[#E8DDD4] shadow-sm overflow-hidden mt-3 flex flex-col">
           {/* Returning User Banner */}
           {returnBanner && step === 0 && (
-            <div style={{ background: '#F5EDE4', borderBottom: '1px solid #E8D5C0', padding: '14px 20px' }}>
-              <p style={{ fontSize: 'var(--text-body)', fontWeight: 700, color: '#191919', marginBottom: '8px' }}>
+            <div className="bg-[#F5EDE4] border-b border-[#E8D5C0] p-4 text-left animate-fade-in">
+              <p className="text-xs sm:text-sm font-bold text-[#191919] mb-2">
                 Welcome back! Search again for your {returnBanner.petType}?
               </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => { setReturnBanner(null); router.push(`/results?${returnBanner.params}`); }}
-                  style={{ flex: 1, background: '#8B5E3C', color: '#fff', border: 'none', borderRadius: '50px', padding: '10px', fontSize: 'var(--text-btn)', fontWeight: 700, cursor: 'pointer' }}
+                  className="flex-1 bg-[#8B5E3C] hover:bg-[#7A5234] text-white py-2 px-3 rounded-xl text-xs font-bold transition-colors cursor-pointer border-none shadow-2xs"
                 >
                   Yes, show results →
                 </button>
                 <button
+                  type="button"
                   onClick={() => { setReturnBanner(null); try { localStorage.removeItem(STORAGE_KEY); } catch(_) {} }}
-                  style={{ flex: 1, background: '#fff', color: '#8B5E3C', border: '1.5px solid #E8D5C0', borderRadius: '50px', padding: '10px', fontSize: 'var(--text-btn)', fontWeight: 600, cursor: 'pointer' }}
+                  className="flex-1 bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] border border-[#E8DDD4] py-2 px-3 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   No, start over
                 </button>
@@ -872,95 +831,80 @@ function ChatPageContent() {
           )}
 
           {/* Header */}
-          <header style={{ backgroundColor: '#FFFFFF', padding: '16px 24px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #F5EDE4' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <header className="bg-white px-5 py-3.5 flex flex-col gap-2.5 shrink-0 border-b border-[#E8DDD4]">
+            <div className="flex items-center justify-between">
               <button
+                type="button"
                 onClick={() => { setFlow('selection'); }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#8B5E3C',
-                  fontSize: '13px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: 0
-                }}
+                className="bg-transparent border-none text-[#8B5E3C] hover:text-[#7A5234] text-xs font-bold cursor-pointer flex items-center gap-1 p-0 transition-colors"
               >
-                <ArrowLeft size={16} /> Back
+                <ArrowLeft className="w-4 h-4" /> Back
               </button>
-              <Link href="/" style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <img src="/Logo.png" alt="Lumo Bites" style={{ height: '38px', width: 'auto', display: 'block', objectFit: 'contain' }} />
-                  <sup style={{ fontSize: '9px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '4px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
+              <Link href="/" className="no-underline">
+                <div className="flex items-center">
+                  <img src="/Logo.png" alt="Lumo Bites" className="h-7 w-auto object-contain block" />
+                  <sup className="text-[8px] text-[#8B5E3C] font-bold self-start mt-0.5 ml-0.5 select-none">™</sup>
                 </div>
               </Link>
-              <p className="text-xs text-[#8B5E3C] font-semibold">Question {getQuestionNumber(step)} of 4</p>
+              <span className="text-xs text-[#8B5E3C] font-bold">Question {getQuestionNumber(step)} of 4</span>
             </div>
             {selectedBrand && (
-              <div className="bg-[#8B5E3C] text-white py-1.5 px-4 text-[11px] font-bold text-center uppercase tracking-wider">
+              <div className="bg-[#8B5E3C] text-white py-1 px-3 rounded-md text-[10px] font-bold text-center uppercase tracking-wider">
                  Finding the best {selectedBrand} products for your pet
               </div>
             )}
-            <div style={{ width: '100%', height: '4px', backgroundColor: '#F5EDE4', borderRadius: '100px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', backgroundColor: '#8B5E3C', borderRadius: '100px', transition: 'width 0.4s ease', width: `${progress}%` }}></div>
+            <div className="w-full h-1.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-full overflow-hidden">
+              <div className="h-full bg-[#8B5E3C] rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
             </div>
           </header>
 
-          {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: '#FAFAFA' }}>
+          {/* Messages Feed */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-[#FAF6F4]/30">
             {messages.map((m, i) => (
               <ChatBubble key={i} role={m.role} content={m.content} />
             ))}
             {isTyping && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', alignSelf: 'flex-start', backgroundColor: '#EEEEEE', padding: '12px 16px', borderRadius: '16px', borderBottomLeftRadius: '4px' }}>
-                <div style={{ width: '6px', height: '6px', backgroundColor: '#888888', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both' }}></div>
-                <div style={{ width: '6px', height: '6px', backgroundColor: '#888888', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.2s' }}></div>
-                <div style={{ width: '6px', height: '6px', backgroundColor: '#888888', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.4s' }}></div>
+              <div className="flex items-center gap-1.5 self-start bg-white border border-[#E8DDD4] p-3 rounded-2xl shadow-2xs">
+                <div className="w-2 h-2 bg-[#8B5E3C] rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-[#8B5E3C] rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-2 h-2 bg-[#8B5E3C] rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
             )}
             
             {/* Interactive Health Chips UI */}
             {step === 3 && !isTyping && (
-               <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+               <div className="animate-fade-in flex flex-col gap-2.5 mt-2">
+                  <div className="flex flex-col gap-2 w-full">
                      {healthOptions.map(opt => {
                        const isSelected = selectedChips.includes(opt.id);
                        const Icon = opt.icon;
                        return (
                          <button
                            key={opt.id}
+                           type="button"
                            onClick={() => toggleChip(opt.id)}
-                           style={{
-                             width: '100%',
-                             textAlign: 'left',
-                             padding: '12px 16px',
-                             borderRadius: '12px',
-                             fontSize: 'var(--text-btn)',
-                             fontWeight: 600,
-                             cursor: 'pointer',
-                             transition: 'all 0.2s ease',
-                             border: `1px solid #8B5E3C`,
-                             backgroundColor: isSelected ? '#8B5E3C' : '#FFFFFF',
-                             color: isSelected ? '#FFFFFF' : '#8B5E3C',
-                           }}
+                           className={`w-full text-left p-3 rounded-xl text-xs font-bold transition-all border cursor-pointer flex items-center justify-between ${
+                             isSelected
+                               ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
+                               : 'bg-white text-[#4A3E3D] hover:bg-[#FAF6F4] border-[#E8DDD4]'
+                           }`}
                          >
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                             <Icon size={16} />
+                           <span className="flex items-center gap-2">
+                             <Icon className="w-4 h-4 shrink-0" />
                              {opt.label}
                            </span>
+                           {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
                          </button>
                        );
                      })}
                   </div>
                   {selectedChips.length > 0 && (
                     <button 
+                      type="button"
                       onClick={() => submitInput('', true)}
-                      style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer border-none"
                     >
-                      Continue <ChevronRight size={16} />
+                      Continue <ChevronRight className="w-4 h-4" />
                     </button>
                   )}
                </div>
@@ -968,43 +912,38 @@ function ChatPageContent() {
 
             {/* Interactive Food Type Chips UI */}
             {step === 4 && !isTyping && (
-               <div className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+               <div className="animate-fade-in flex flex-col gap-2.5 mt-2">
+                  <div className="flex flex-col gap-2 w-full">
                      {foodOptions.map(opt => {
                        const isSelected = selectedFoodType === opt.id;
                        const Icon = opt.icon;
                        return (
                          <button
                            key={opt.id}
+                           type="button"
                            onClick={() => toggleChip(opt.id)}
-                           style={{
-                             width: '100%',
-                             textAlign: 'left',
-                             padding: '12px 16px',
-                             borderRadius: '12px',
-                             fontSize: 'var(--text-btn)',
-                             fontWeight: 600,
-                             cursor: 'pointer',
-                             transition: 'all 0.2s ease',
-                             border: `1px solid #8B5E3C`,
-                             backgroundColor: isSelected ? '#8B5E3C' : '#FFFFFF',
-                             color: isSelected ? '#FFFFFF' : '#8B5E3C',
-                           }}
+                           className={`w-full text-left p-3 rounded-xl text-xs font-bold transition-all border cursor-pointer flex items-center justify-between ${
+                             isSelected
+                               ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
+                               : 'bg-white text-[#4A3E3D] hover:bg-[#FAF6F4] border-[#E8DDD4]'
+                           }`}
                          >
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                             <Icon size={16} />
+                           <span className="flex items-center gap-2">
+                             <Icon className="w-4 h-4 shrink-0" />
                              {opt.label}
                            </span>
+                           {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
                          </button>
                        );
                      })}
                   </div>
                    {selectedFoodType !== '' && (
                      <button 
+                       type="button"
                        onClick={() => submitInput('', true)}
-                       style={{ width: '100%', backgroundColor: '#8B5E3C', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(139, 94, 60, 0.2)', fontSize: 'var(--text-btn)' }}
+                       className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer border-none"
                      >
-                       Continue <ChevronRight size={16} />
+                       Continue <ChevronRight className="w-4 h-4" />
                      </button>
                    )}
                </div>
@@ -1013,12 +952,12 @@ function ChatPageContent() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div style={{ padding: '20px', borderTop: '1px solid #E8DDD4', backgroundColor: '#FFFFFF' }}>
+          {/* Input Footer */}
+          <div className="p-3.5 sm:p-4 border-t border-[#E8DDD4] bg-white">
             {step < 6 && (
-              <div className="mb-4 text-center px-4 py-2 bg-[#FDFAF7] rounded-xl border border-[#F5EDE4]">
-                 <p className="text-[#8B5E3C] font-bold uppercase tracking-wider mb-1" style={{ fontSize: 'var(--text-small-caption)' }}>Why this matters</p>
-                 <p className="text-[#666666] leading-snug" style={{ fontSize: 'var(--text-small)' }}>
+              <div className="mb-3 text-center px-3 py-1.5 bg-[#FAF6F4] rounded-xl border border-[#E8DDD4]">
+                 <p className="text-[10px] text-[#8B5E3C] font-bold uppercase tracking-wider mb-0.5">Why this matters</p>
+                 <p className="text-xs text-[#666666] leading-snug">
                     {Math.floor(step) === 0 && "Helps us filter for species-specific nutritional needs"}
                     {Math.floor(step) === 1 && "Helps us find food for the right life stage"}
                     {Math.floor(step) === 2 && "Helps calculate the right portion and calorie needs"}
@@ -1028,22 +967,22 @@ function ChatPageContent() {
                  </p>
               </div>
             )}
-            <form onSubmit={handleFormSubmit} style={{ display: 'flex', gap: '12px', position: 'relative' }}>
+            <form onSubmit={handleFormSubmit} className="flex items-center gap-2">
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type here..."
-                style={{ flex: 1, backgroundColor: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '50px', padding: '14px 20px', fontSize: 'var(--text-body)', color: '#191919', outline: 'none' }}
+                className="flex-1 bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-[#191919] focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all placeholder:text-[#8B7E7D]"
                 disabled={step === 6 || isTyping}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || step === 6 || isTyping}
-                style={{ width: '48px', height: '48px', backgroundColor: input.trim() ? '#8B5E3C' : '#D4C1B1', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', cursor: input.trim() ? 'pointer' : 'not-allowed', transition: 'background-color 0.2s', flexShrink: 0 }}
+                className="w-10 h-10 bg-[#8B5E3C] hover:bg-[#7A5234] disabled:opacity-40 text-white rounded-xl flex items-center justify-center cursor-pointer disabled:cursor-not-allowed transition-all shrink-0 border-none shadow-2xs"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', transform: 'translateX(2px)' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 translate-x-0.5">
                   <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
                 </svg>
               </button>

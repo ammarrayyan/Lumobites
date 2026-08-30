@@ -173,11 +173,14 @@ export default function ProductDetailPage() {
     : [];
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#FDFAF7', paddingBottom: '280px' }}>
+    <div className="min-h-screen bg-[#FDFAF7] font-sans pb-64">
       {/* Navigation Sub-header with Back Arrow */}
-      <div style={{ backgroundColor: '#FFFFFF', position: 'sticky', top: '0', zIndex: 30, padding: '12px 24px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #E8DDD4' }}>
-        <button onClick={() => window.history.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B5E3C', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: '20px', height: '20px' }}>
+      <div className="bg-white/95 backdrop-blur-sm sticky top-0 z-30 px-6 py-3 flex items-center border-b border-[#E8DDD4]">
+        <button 
+          onClick={() => window.history.back()} 
+          className="bg-transparent border-none cursor-pointer text-[#8B5E3C] hover:text-[#7A5234] flex items-center gap-1.5 font-bold text-xs transition-colors p-0"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
           Back
@@ -185,137 +188,159 @@ export default function ProductDetailPage() {
       </div>
  
       {/* Hero */}
-      <div style={{ backgroundColor: '#FFFFFF', paddingTop: '32px', paddingBottom: '40px', paddingLeft: '24px', paddingRight: '24px', borderBottomLeftRadius: '40px', borderBottomRightRadius: '40px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '24px' }}>
-        <div style={{ width: '192px', height: '192px', margin: '0 auto 32px auto', backgroundColor: '#F5EDE4', borderRadius: '24px', display: 'flex', alignItems: 'center', justify: 'center' }}>
+      <div className="bg-white px-6 pt-8 pb-10 rounded-b-3xl border-b border-[#E8DDD4] shadow-sm mb-6 text-center">
+        <div className="w-36 h-36 mx-auto mb-5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl flex items-center justify-center shadow-2xs">
           {product.pet_type === 'dog' ? (
-            <Dog style={{ width: '96px', height: '96px', color: '#8B5E3C' }} />
+            <Dog className="w-20 h-20 text-[#8B5E3C]" />
           ) : (
-            <Cat style={{ width: '96px', height: '96px', color: '#8B5E3C' }} />
+            <Cat className="w-20 h-20 text-[#8B5E3C]" />
           )}
         </div>
-        <h1 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', textAlign: 'center', color: '#191919', lineHeight: 1.2, margin: '0 0 8px 0' }}>{displayName}</h1>
-        <p style={{ textAlign: 'center', color: '#888', marginBottom: '12px', fontSize: '14px' }}>{product.brand}</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#191919] leading-tight mb-1">{displayName}</h1>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#8B7E7D] mb-3">{product.brand}</p>
         
         {/* Recall Badge */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <div className="flex justify-center mb-4">
           {checkingRecall ? (
-            <div style={{ fontSize: '12px', color: '#999', animation: 'pulse 2s infinite' }}>Checking FDA recall status...</div>
+            <div className="text-xs text-[#8B7E7D] animate-pulse font-medium">Checking FDA recall status...</div>
           ) : recallData?.active ? (
-            <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #EF4444', borderRadius: '8px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle style={{ width: '20px', height: '20px', color: '#EF4444' }} />
-              <div style={{ textAlign: 'left' }}>
-                <p style={{ color: '#991B1B', fontWeight: 'bold', fontSize: '13px', margin: 0 }}>ACTIVE RECALL FOUND</p>
-                <p style={{ color: '#7F1D1D', fontSize: '11px', margin: 0, opacity: 0.8 }}>{recallData.reason?.substring(0, 60)}...</p>
+            <div className="bg-red-50 border border-red-300 rounded-xl px-4 py-2 flex items-center gap-2 text-left">
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+              <div>
+                <p className="text-red-900 font-bold text-xs">ACTIVE RECALL FOUND</p>
+                <p className="text-red-700 text-[11px] opacity-90">{recallData.reason?.substring(0, 60)}...</p>
               </div>
             </div>
           ) : recallData?.active === false ? (
-            <div style={{ backgroundColor: '#F0FDF4', border: '1px solid #22C55E', borderRadius: '8px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle style={{ width: '16px', height: '16px', color: '#22C55E' }} />
-              <span style={{ color: '#166534', fontWeight: 'bold', fontSize: '13px' }}>No Active Recalls Found</span>
+            <div className="bg-emerald-50 border border-emerald-300 rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+              <span>No Active Recalls Found</span>
             </div>
           ) : null}
         </div>
  
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
+        <div className="flex flex-wrap justify-center gap-2">
           {tags.map(tag => (
-            <span key={tag} style={{ backgroundColor: '#F5EDE4', color: '#8B5E3C', fontSize: '12px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '100px', border: '1px solid #E8DDD4' }}>
+            <span key={tag} className="bg-[#FAF6F4] text-[#8B5E3C] text-xs font-bold px-3 py-1 rounded-full border border-[#E8DDD4]">
               {tag.replace(/_/g, ' ')}
             </span>
           ))}
         </div>
       </div>
  
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="max-w-xl mx-auto px-4 sm:px-6 flex flex-col gap-5">
  
         {/* Nutrition */}
         {(product.protein_pct || product.fat_pct || product.fiber_pct) && (
-          <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-            <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
-              <BarChart3 style={{ width: '20px', height: '20px', color: '#191919' }} /> Nutrition Breakdown
+          <section className="bg-white rounded-2xl border border-[#E8DDD4] p-5 sm:p-6 shadow-sm">
+            <h3 className="font-extrabold text-sm sm:text-base text-[#191919] mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-[#8B5E3C]" /> Nutrition Breakdown
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', textAlign: 'center' }}>
-              <div style={{ backgroundColor: '#F9F9F9', borderRadius: '12px', padding: '12px' }}>
-                <span style={{ display: 'block', fontSize: '24px', fontWeight: 'bold', color: '#191919' }}>{product.protein_pct || '—'}%</span>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#555', textTransform: 'uppercase' }}>Protein</span>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-[#FAF6F4] border border-[#E8DDD4]/80 rounded-xl p-3">
+                <span className="block text-xl font-extrabold text-[#191919]">{product.protein_pct || '—'}%</span>
+                <span className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider">Protein</span>
               </div>
-              <div style={{ backgroundColor: '#F9F9F9', borderRadius: '12px', padding: '12px' }}>
-                <span style={{ display: 'block', fontSize: '24px', fontWeight: 'bold', color: '#191919' }}>{product.fat_pct || '—'}%</span>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#555', textTransform: 'uppercase' }}>Fat</span>
+              <div className="bg-[#FAF6F4] border border-[#E8DDD4]/80 rounded-xl p-3">
+                <span className="block text-xl font-extrabold text-[#191919]">{product.fat_pct || '—'}%</span>
+                <span className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider">Fat</span>
               </div>
-              <div style={{ backgroundColor: '#F9F9F9', borderRadius: '12px', padding: '12px' }}>
-                <span style={{ display: 'block', fontSize: '24px', fontWeight: 'bold', color: '#191919' }}>{product.fiber_pct || '—'}%</span>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#555', textTransform: 'uppercase' }}>Fiber</span>
+              <div className="bg-[#FAF6F4] border border-[#E8DDD4]/80 rounded-xl p-3">
+                <span className="block text-xl font-extrabold text-[#191919]">{product.fiber_pct || '—'}%</span>
+                <span className="text-[10px] font-bold text-[#8B7E7D] uppercase tracking-wider">Fiber</span>
               </div>
             </div>
           </section>
         )}
  
         {/* Ingredients */}
-        <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-          <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 12px 0' }}>
-            <Beef style={{ width: '20px', height: '20px', color: '#191919' }} /> Ingredients
+        <section className="bg-white rounded-2xl border border-[#E8DDD4] p-5 sm:p-6 shadow-sm">
+          <h3 className="font-extrabold text-sm sm:text-base text-[#191919] mb-2.5 flex items-center gap-2">
+            <Beef className="w-4 h-4 text-[#8B5E3C]" /> Ingredients
           </h3>
-          <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.6, margin: 0 }}>{product.ingredients}</p>
+          <p className="text-xs sm:text-sm text-[#555555] leading-relaxed">{product.ingredients}</p>
         </section>
  
         {/* Pros / Cons */}
         {(product.pros || product.cons || product.description) && (
-          <div style={{ display: 'grid', gap: '16px' }}>
+          <div className="grid gap-3.5">
             {(product.pros || product.description) && (
-              <section style={{ backgroundColor: '#F5EDE4', borderRadius: '24px', padding: '20px' }}>
-                <h3 style={{ fontWeight: 800, color: '#8B5E3C', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Check style={{ width: '20px', height: '20px', color: '#8B5E3C' }} /> Why it's great
+              <section className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-2xl p-4 sm:p-5">
+                <h3 className="font-extrabold text-xs sm:text-sm text-[#8B5E3C] mb-1.5 flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-[#8B5E3C]" /> Why it's great
                 </h3>
-                <p style={{ fontSize: '14px', color: '#5C3D20', margin: 0 }}>{product.pros || product.description}</p>
+                <p className="text-xs sm:text-sm text-[#4A3E3D] leading-relaxed">{product.pros || product.description}</p>
               </section>
             )}
             {product.cons && (
-              <section style={{ backgroundColor: '#FEF2F2', borderRadius: '24px', padding: '20px' }}>
-                <h3 style={{ fontWeight: 800, color: '#7F1D1D', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <X style={{ width: '20px', height: '20px', color: '#7F1D1D' }} /> Things to note
+              <section className="bg-red-50/80 border border-red-200 rounded-2xl p-4 sm:p-5">
+                <h3 className="font-extrabold text-xs sm:text-sm text-red-900 mb-1.5 flex items-center gap-1.5">
+                  <X className="w-4 h-4 text-red-700" /> Things to note
                 </h3>
-                <p style={{ fontSize: '14px', color: '#991B1B', margin: 0 }}>{product.cons}</p>
+                <p className="text-xs sm:text-sm text-red-800 leading-relaxed">{product.cons}</p>
               </section>
             )}
           </div>
         )}
  
         {/* 7-Day Transition Plan */}
-        <section style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-          <h3 style={{ fontWeight: 800, color: '#191919', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
-            <Calendar style={{ width: '20px', height: '20px', color: '#191919' }} /> 7-Day Transition Plan
+        <section className="bg-white rounded-2xl border border-[#E8DDD4] p-5 sm:p-6 shadow-sm">
+          <h3 className="font-extrabold text-sm sm:text-base text-[#191919] mb-2 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#8B5E3C]" /> 7-Day Transition Plan
           </h3>
-          <p style={{ fontSize: '12px', color: '#555', marginBottom: '16px' }}>Slowly mix this food with their current diet to prevent an upset stomach.</p>
+          <p className="text-xs text-[#666666] mb-4">Slowly mix this food with their current diet to prevent an upset stomach.</p>
           {[{ days: '1-2', pct: 25 }, { days: '3-4', pct: 50 }, { days: '5-6', pct: 75 }, { days: '7+', pct: 100 }].map(({ days, pct }) => (
-            <div key={days} style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-              <div style={{ width: '48px', height: '48px', backgroundColor: pct === 100 ? '#F5EDE4' : '#F9F9F9', color: pct === 100 ? '#8B5E3C' : '#191919', borderRadius: '50px', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '14px', fontEweight: 'bold', flexShrink: 0 }}>{days}</div>
-              <div style={{ flex: 1, height: '16px', backgroundColor: '#F9F9F9', borderRadius: '50px', overflow: 'hidden', display: 'flex' }}>
-                <div style={{ backgroundColor: '#D1D5DB', height: '100%', width: `${100 - pct}%` }}></div>
-                <div style={{ backgroundColor: '#8B5E3C', height: '100%', width: `${pct}%` }}></div>
+            <div key={days} className="flex items-center gap-3.5 mb-3 last:mb-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 border ${
+                pct === 100 
+                  ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' 
+                  : 'bg-[#FAF6F4] text-[#191919] border-[#E8DDD4]'
+              }`}>
+                {days}
               </div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', color: pct === 100 ? '#8B5E3C' : '#191919', flexShrink: 0, width: '56px', textAlign: 'right' }}>{pct}% new</div>
+              <div className="flex-1 h-3.5 bg-[#FAF6F4] border border-[#E8DDD4] rounded-full overflow-hidden flex">
+                <div className="bg-gray-300 h-full transition-all" style={{ width: `${100 - pct}%` }}></div>
+                <div className="bg-[#8B5E3C] h-full transition-all" style={{ width: `${pct}%` }}></div>
+              </div>
+              <div className={`text-xs font-bold shrink-0 w-14 text-right ${pct === 100 ? 'text-[#8B5E3C]' : 'text-[#191919]'}`}>
+                {pct}% new
+              </div>
             </div>
           ))}
         </section>
       </div>
  
       {/* Sticky Buy Footer */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px', backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)', borderTop: '1px solid #E8DDD4', boxShadow: '0 -10px 40px rgba(0,0,0,0.05)', zIndex: 40 }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '12px', padding: '0 8px' }}>
-            <div style={{ fontWeight: 'bold', color: '#191919' }}>Where to buy</div>
-            <div style={{ fontSize: '13px', color: '#888' }}>Est. ${product.price_monthly_low} - ${product.price_monthly_high}/mo</div>
-            <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>Prices are estimates — check retailer for current price</div>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-[#E8DDD4] shadow-lg z-40">
+        <div className="max-w-xl mx-auto">
+          <div className="mb-2.5 px-1">
+            <div className="font-bold text-xs text-[#191919]">Where to buy</div>
+            <div className="text-xs text-[#8B7E7D]">Est. ${product.price_monthly_low} - ${product.price_monthly_high}/mo</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <a href={amazonLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#8B5E3C', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <ShoppingCart style={{ width: '18px', height: '18px' }} /> Amazon
+          <div className="flex flex-col gap-2">
+            <a 
+              href={amazonLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold text-xs sm:text-sm h-10 rounded-xl no-underline flex items-center justify-center gap-2 transition-colors shadow-2xs"
+            >
+              <ShoppingCart className="w-4 h-4" /> Buy on Amazon
             </a>
-            <a href={chewyLink} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#2563EB', color: '#FFFFFF', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <Footprints style={{ width: '18px', height: '18px' }} /> Chewy
+            <a 
+              href={chewyLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm h-10 rounded-xl no-underline flex items-center justify-center gap-2 transition-colors shadow-2xs"
+            >
+              <Footprints className="w-4 h-4" /> Buy on Chewy
             </a>
-            <a href="https://www.google.com/maps/search/pet+food+store+near+me" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#FFFFFF', color: '#8B5E3C', fontWeight: 'bold', fontSize: '15px', height: '44px', borderRadius: '50px', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1.5px solid #8B5E3C' }}>
-              <MapPin style={{ width: '18px', height: '18px' }} /> Find a store near me
+            <a 
+              href="https://www.google.com/maps/search/pet+food+store+near+me" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] border border-[#E8DDD4] font-bold text-xs sm:text-sm h-10 rounded-xl no-underline flex items-center justify-center gap-2 transition-colors"
+            >
+              <MapPin className="w-4 h-4" /> Find a store near me
             </a>
           </div>
         </div>

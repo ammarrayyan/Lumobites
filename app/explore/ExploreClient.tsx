@@ -79,59 +79,76 @@ export default function ExploreClient() {
       <BrandMarquee />
 
       {/* HOW IT WORKS */}
-      <section id="how" className="w-full bg-[#FDFAF7] px-6 py-[80px]">
+      <section id="how" className="w-full bg-[#FDFAF7] px-6 py-16 border-t border-[#E8DDD4]">
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
-            <h3 className="text-[#8B5E3C] text-[13px] font-bold tracking-[0.1em] uppercase mb-3">How it works</h3>
-            <h2 className="text-xl md:text-2xl font-extrabold text-[#191919] tracking-[-0.02em] leading-tight max-w-[600px] mx-auto">
+            <div className="inline-block bg-[#8B5E3C]/10 text-[#8B5E3C] text-xs font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-full mb-3">
+              How it works
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-[#191919] tracking-tight leading-tight max-w-[600px] mx-auto">
               Personalized recommendations, not generic lists.
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <Target className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Matched to your pet</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <Target className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Matched to your pet</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">We analyze age, breed, health issues and activity level to find their exact nutritional match.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <Search className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <Search className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <AlertTriangle className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">FDA Recall Alerts</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <AlertTriangle className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">FDA Recall Alerts</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <Sparkles className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Find Your Pet Twin</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <Sparkles className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Find Your Pet Twin</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Upload a selfie to discover which cat or dog breed matches your personality and facial features.</p>
             </div>
-            <div className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-              <ShoppingBag className="w-9 h-9 text-[#8B5E3C] mb-5" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2">Curated Pet Supplies</h3>
-              <p className="text-[#666666] text-sm leading-[1.6]">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <ShoppingBag className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Curated Pet Supplies</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Find the best toys, litter, and supplements specifically tailored for your pet&apos;s needs.</p>
             </div>
-            <Link href="/petsitting" className="w-full sm:w-[calc(50%-12px)] lg:w-[320px] bg-white rounded-[16px] p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)] flex flex-col items-center text-center hover:-translate-y-1 transition-transform relative overflow-hidden text-decoration-none">
-              <HomeIcon className="w-9 h-9 text-[#8B5E3C] mb-5 relative z-10" />
-              <h3 className="text-[#191919] font-bold text-base md:text-lg mb-2 relative z-10">Sitting & Community</h3>
-              <p className="text-[#666666] text-sm leading-[1.6] relative z-10">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
+            <Link href="/petsitting" className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center no-underline">
+              <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
+                <HomeIcon className="w-7 h-7 text-[#8B5E3C]" />
+              </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Sitting & Community</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Connect with local pet sitters, or help reunite lost pets with their families on our free community board.</p>
             </Link>
           </div>
         </div>
       </section>
 
       {/* BOTTOM CTA */}
-      <section className="w-full px-6 py-[80px] text-center" style={{ backgroundColor: '#8B5E3C' }}>
+      <section className="w-full px-6 py-16 text-center bg-[#8B5E3C]">
         <div className="max-w-[700px] mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-[-0.02em] leading-tight mb-4 text-white">
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-3 text-white">
             Ready to find the perfect food?
           </h2>
-          <p className="text-sm md:text-base mb-10 max-w-[480px] mx-auto text-white/85">
+          <p className="text-xs sm:text-sm md:text-base mb-8 max-w-[480px] mx-auto text-white/90 leading-relaxed">
             Join thousands of pet owners who found their pet&apos;s favorite food.
           </p>
-          <Link href="/chat" style={{ fontSize: '15px', padding: '14px 42px', textDecoration: 'none', color: '#8B5E3C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: '100px', fontWeight: '700', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
+          <Link 
+            href="/chat" 
+            className="inline-flex items-center justify-center bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold text-xs sm:text-sm py-3.5 px-8 rounded-xl transition-all shadow-md no-underline"
+          >
             Get Started &rarr;
           </Link>
         </div>
