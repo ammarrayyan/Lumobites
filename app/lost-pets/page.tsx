@@ -15,6 +15,7 @@ import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
+import LostPetCardCarousel from '@/components/LostPetCardCarousel';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -829,26 +830,13 @@ export default function LostPetsFeed() {
                             style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                             className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/50 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                           >
-                            {/* Photo Container: large & edge-to-edge with full uncropped display */}
-                            <div className="relative h-60 sm:h-64 bg-[#FAF5EE] flex items-center justify-center overflow-hidden border-b border-[#EADBCE]">
-                              {pet.photo_url ? (
-                                <img 
-                                  src={pet.photo_url} 
-                                  alt={pet.pet_name} 
-                                  className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
-                              )}
-                              <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
-                                  pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                                  pet.type === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                                }`}>
-                                  {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : pet.type}
-                                </span>
-                              </div>
-                            </div>
+                            {/* Multi-Photo Carousel Container with dots & full uncropped display */}
+                            <LostPetCardCarousel 
+                              photos={pet.photos && pet.photos.length > 0 ? pet.photos : (pet.photo_url ? [pet.photo_url] : [])} 
+                              petName={pet.pet_name} 
+                              status={pet.status} 
+                              petType={pet.type || pet.pet_type} 
+                            />
 
                             {/* Card Details: tight & compact */}
                             <div className="p-3.5 sm:p-4 flex flex-col flex-1">
@@ -906,34 +894,29 @@ export default function LostPetsFeed() {
                                   )}
                                 </div>
                                 
-                                {/* Reaction Picker & Responsive Comments Button (Direct Detail on Desktop, Inline Expand on Mobile) */}
-                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#E8DDD4] gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
+                                {/* Lighter Threads/Instagram Style Engagement Row */}
+                                <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-[#F0E6DA]" onClick={e => e.stopPropagation()}>
                                   <FacebookReactionPicker
                                     itemId={pet.id}
                                     size="sm"
                                     showSummary={true}
+                                    minimalHeartStyle={true}
                                   />
 
                                   <button
                                     type="button"
                                     onClick={(e) => handleCommentClick(e, pet.id)}
-                                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                                      expandedPetIds[pet.id]
-                                        ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
-                                        : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#8B5E3C] hover:text-white border-[#E8DDD4]'
-                                    }`}
-                                    title="View comments and updates"
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B5E57] hover:text-[#191919] transition-colors cursor-pointer select-none border-none bg-transparent p-1.5 rounded-lg hover:bg-black/[0.03]"
+                                    title="View updates and comments"
                                   >
-                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    <MessageSquare className="w-4 h-4 stroke-[1.8]" />
                                     <span>
-                                      {pet.comment_count || 0} {(pet.comment_count || 0) === 1 ? 'Comment' : 'Comments'}
+                                      {pet.comment_count || 0}
                                     </span>
                                     <span className="md:hidden flex items-center">
                                       {expandedPetIds[pet.id] ? (
                                         <ChevronUp className="w-3.5 h-3.5 ml-0.5" />
-                                      ) : (
-                                        <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
-                                      )}
+                                      ) : null}
                                     </span>
                                   </button>
                                 </div>
@@ -1264,33 +1247,13 @@ export default function LostPetsFeed() {
                           style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
                           className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8DDD4] shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#8B5E3C]/40 flex flex-col cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]"
                         >
-                          {/* Photo Container: large & edge-to-edge with full uncropped display */}
-                          <div className="relative h-60 sm:h-64 bg-[#FAF6F4] flex items-center justify-center overflow-hidden border-b border-[#E8DDD4]">
-                            {pet.photo_url ? (
-                              <img 
-                                src={pet.photo_url} 
-                                alt={pet.pet_name} 
-                                className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-300 pointer-events-none" 
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">No Photo</div>
-                            )}
-                            <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wider uppercase shadow-md ${
-                                pet.status === 'resolved' ? 'bg-green-500 text-white' :
-                                (pet.type || pet.pet_type) === 'lost' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                              }`}>
-                                {pet.status === 'resolved' ? <span className="flex items-center gap-1"><Check className="w-3 h-3" />Resolved</span> : (pet.type || pet.pet_type)}
-                              </span>
-                              {pet.score !== undefined && (
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase shadow-md text-white ${
-                                  pet.score >= 80 ? 'bg-emerald-600' : pet.score >= 60 ? 'bg-amber-500' : 'bg-rose-500'
-                                }`}>
-                                  {pet.score}% Match
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                          {/* Multi-Photo Carousel Container */}
+                          <LostPetCardCarousel 
+                            photos={pet.photos && pet.photos.length > 0 ? pet.photos : (pet.photo_url ? [pet.photo_url] : [])} 
+                            petName={pet.pet_name} 
+                            status={pet.status} 
+                            petType={pet.type || pet.pet_type} 
+                          />
 
                           {/* Card Details: tight & compact */}
                           <div className="p-3.5 sm:p-4 flex flex-col flex-1">

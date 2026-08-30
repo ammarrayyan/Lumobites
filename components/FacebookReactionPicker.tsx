@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ThumbsUp } from 'lucide-react';
+import { ThumbsUp, Heart } from 'lucide-react';
 
 export type ReactionType = 'like' | 'love' | 'care' | 'sad';
 
@@ -14,8 +14,8 @@ export interface ReactionConfig {
 }
 
 export const REACTIONS: ReactionConfig[] = [
-  { type: 'like', emoji: '👍', label: 'Like', color: '#1877F2', textColor: 'text-blue-600' },
   { type: 'love', emoji: '❤️', label: 'Love', color: '#FA383E', textColor: 'text-rose-600' },
+  { type: 'like', emoji: '👍', label: 'Like', color: '#1877F2', textColor: 'text-blue-600' },
   { type: 'care', emoji: '🥰', label: 'Care', color: '#F7B125', textColor: 'text-amber-500' },
   { type: 'sad', emoji: '😢', label: 'Sad', color: '#F7B125', textColor: 'text-amber-600' },
 ];
@@ -33,6 +33,7 @@ interface FacebookReactionPickerProps {
   initialHelpfulCount?: number;
   size?: 'sm' | 'md' | 'lg';
   showSummary?: boolean;
+  minimalHeartStyle?: boolean;
   onReactionChange?: (reaction: ReactionType | null, nextState: ReactionState) => void;
   className?: string;
 }
@@ -168,8 +169,9 @@ export default function FacebookReactionPicker({
       setPickerOpen(false);
       return;
     }
-    // Quick click toggles 'like'
-    handleSelectReaction(reactionState.userReaction === 'like' ? 'like' : 'like');
+    // Quick click toggles default reaction
+    const defaultReaction: ReactionType = minimalHeartStyle ? 'love' : 'like';
+    handleSelectReaction(reactionState.userReaction ? reactionState.userReaction : defaultReaction);
   };
 
   // Long-press handling for touch / mobile
@@ -198,12 +200,6 @@ export default function FacebookReactionPicker({
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
-    // Small delay before closing to allow moving into picker
-    setTimeout(() => {
-      if (containerRef.current && !containerRef.current.matches(':hover')) {
-        setPickerOpen(false);
-      }
-    }, 300);
   };
 
   // Click outside listener to close picker
@@ -221,20 +217,22 @@ export default function FacebookReactionPicker({
     };
   }, []);
 
-  const activeReactionConfig = REACTIONS.find(r => r.type === reactionState.userReaction);
-  const topReactions = getTopReactions(reactionState.counts);
+  const activeReactionConfig = reactionState.userReaction
+    ? REACTIONS.find(r => r.type === reactionState.userReaction)
+    : null;
 
+  const topReactions = getTopReactions(reactionState.counts);
   const isSmall = size === 'sm';
   const isMedium = size === 'md';
 
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex items-center gap-1.5 ${className}`}
+      className={`relative inline-flex items-center gap-2 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Floating Reaction Picker Popup */}
+      {/* Floating Reaction Bar (Facebook / Instagram Style Flyout) */}
       {pickerOpen && (
         <div
           className="absolute bottom-full left-0 mb-2 z-50 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-200/90 py-1.5 px-2 flex items-center gap-1.5 sm:gap-2 animate-in fade-in zoom-in-95 duration-150"
@@ -261,57 +259,82 @@ export default function FacebookReactionPicker({
         </div>
       )}
 
-      {/* Main Action Button */}
-      <button
-        type="button"
-        onClick={handleQuickClick}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-        className={`flex items-center gap-1.5 rounded-xl transition-all cursor-pointer select-none border-none bg-transparent p-0 ${
-          activeReactionConfig
-            ? `${activeReactionConfig.textColor} font-bold`
-            : 'text-gray-500 hover:text-gray-900 font-semibold'
-        } ${isSmall ? 'text-xs' : isMedium ? 'text-sm' : 'text-base'}`}
-      >
-        {activeReactionConfig ? (
-          <span className="text-base sm:text-lg leading-none select-none">
-            {activeReactionConfig.emoji}
-          </span>
-        ) : (
-          <ThumbsUp className={`${isSmall ? 'w-3.5 h-3.5' : isMedium ? 'w-4 h-4' : 'w-5 h-5'}`} />
-        )}
-        <span>{activeReactionConfig ? activeReactionConfig.label : 'Like'}</span>
-      </button>
-
-      {/* Overlapping Top-Reaction Emojis & Count Summary */}
-      {showSummary && reactionState.total > 0 && (
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            setPickerOpen(prev => !prev);
-          }}
-          className="inline-flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity pl-0.5"
-          title={`${reactionState.total} reactions`}
+      {minimalHeartStyle ? (
+        <button
+          type="button"
+          onClick={handleQuickClick}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          className={`inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none border-none bg-transparent p-1.5 -ml-1 rounded-lg hover:bg-black/[0.03] ${
+            reactionState.userReaction
+              ? 'text-rose-600 font-bold'
+              : 'text-[#6B5E57] hover:text-[#191919] font-semibold'
+          }`}
+          title={reactionState.userReaction ? `Reacted ${reactionState.userReaction}` : 'Like'}
         >
-          {/* Overlapping Emojis */}
-          <div className="flex items-center -space-x-1 select-none">
-            {topReactions.map((r, idx) => (
-              <span
-                key={r.type}
-                className="text-[13px] leading-none drop-shadow-2xs"
-                style={{ zIndex: 3 - idx }}
-              >
-                {r.emoji}
+          <Heart 
+            className={`w-4 h-4 stroke-[1.8] transition-transform active:scale-125 ${
+              reactionState.userReaction ? 'fill-rose-500 text-rose-500' : ''
+            }`} 
+          />
+          <span className="text-xs">{reactionState.total > 0 ? reactionState.total : 0}</span>
+        </button>
+      ) : (
+        <>
+          {/* Main Action Button */}
+          <button
+            type="button"
+            onClick={handleQuickClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+            className={`flex items-center gap-1.5 rounded-xl transition-all cursor-pointer select-none border-none bg-transparent p-0 ${
+              activeReactionConfig
+                ? `${activeReactionConfig.textColor} font-bold`
+                : 'text-gray-500 hover:text-gray-900 font-semibold'
+            } ${isSmall ? 'text-xs' : isMedium ? 'text-sm' : 'text-base'}`}
+          >
+            {activeReactionConfig ? (
+              <span className="text-base sm:text-lg leading-none select-none">
+                {activeReactionConfig.emoji}
               </span>
-            ))}
-          </div>
+            ) : (
+              <ThumbsUp className={`${isSmall ? 'w-3.5 h-3.5' : isMedium ? 'w-4 h-4' : 'w-5 h-5'}`} />
+            )}
+            <span>{activeReactionConfig ? activeReactionConfig.label : 'Like'}</span>
+          </button>
 
-          {/* Total Count */}
-          <span className="text-xs text-gray-500 font-semibold select-none">
-            {reactionState.total}
-          </span>
-        </div>
+          {/* Overlapping Top-Reaction Emojis & Count Summary */}
+          {showSummary && reactionState.total > 0 && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                setPickerOpen(prev => !prev);
+              }}
+              className="inline-flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity pl-0.5"
+              title={`${reactionState.total} reactions`}
+            >
+              {/* Overlapping Emojis */}
+              <div className="flex items-center -space-x-1 select-none">
+                {topReactions.map((r, idx) => (
+                  <span
+                    key={r.type}
+                    className="text-[13px] leading-none drop-shadow-2xs"
+                    style={{ zIndex: 3 - idx }}
+                  >
+                    {r.emoji}
+                  </span>
+                ))}
+              </div>
+
+              {/* Total Count */}
+              <span className="text-xs text-gray-500 font-semibold select-none">
+                {reactionState.total}
+              </span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
