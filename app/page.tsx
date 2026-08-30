@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
-import ImageWheel from '@/components/ImageWheel';
 import AppDownloadSection from '@/components/AppDownloadSection';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, MapPin, Heart, Building2, X, Dog, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
@@ -464,9 +463,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      {/* 3D DRAGGABLE IMAGE WHEEL SHOWCASE */}
-      <ImageWheel />
 
       {/* SERVICES GRID SECTION */}
       <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
