@@ -7,6 +7,19 @@ import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+import { 
+  AlertTriangle, 
+  Sparkles, 
+  RefreshCw, 
+  Camera, 
+  Cat, 
+  Dog, 
+  Star, 
+  Footprints, 
+  CheckCircle2, 
+  XCircle, 
+  UploadCloud 
+} from 'lucide-react';
 
 const LOADING_MESSAGES = [
   "Analyzing your features...",
