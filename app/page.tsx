@@ -499,38 +499,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES GRID SECTION */}
+      {/* SERVICES GRID & CAROUSEL SECTION */}
       <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
-        {/* Desktop My Pets Quick Card (Light & Sleek) */}
-        <div className="max-w-[1360px] mx-auto mb-5">
-          <Link href="/account?tab=pets" className="block w-full" style={{ textDecoration: 'none' }}>
-            <div 
-              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04)' }}
-              className="bg-[#FAF5EE] border border-[#EADBCE] hover:border-[#8B5E3C]/40 py-3 px-4.5 rounded-2xl flex items-center justify-between gap-4 transition-all hover:shadow-xs group cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#F0E6DA] text-[#8B5E3C] flex items-center justify-center text-base font-bold shrink-0">
-                  🐾
-                </div>
-                <div>
-                  <h3 className="font-bold text-[#2E2419] text-sm flex items-center gap-2">
-                    My Pet Profiles
-                    <span className="text-[10px] font-semibold text-[#8B5E3C] bg-[#F3EBE1] px-2 py-0.5 rounded-full border border-[#E6D7C8]">
-                      Records & Access
-                    </span>
-                  </h3>
-                  <p className="text-xs text-[#7A6B5E] mt-0.5">
-                    Manage care routines, clinical credentials, and authorized partner permissions.
-                  </p>
-                </div>
-              </div>
-              <span className="px-3.5 py-1.5 rounded-xl bg-white border border-[#E0D2C4] text-[#5C4533] group-hover:bg-[#8B5E3C] group-hover:text-white group-hover:border-transparent font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 shrink-0">
-                View Pets <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-          </Link>
-        </div>
-
         {/* Carousel Header with Navigation Arrows */}
         <div className="max-w-[1360px] mx-auto mb-4 flex items-center justify-between gap-4">
           <div>
@@ -538,7 +508,7 @@ export default function Home() {
               Explore Key Services
             </h2>
             <p className="text-xs sm:text-sm text-[#7A6B5E]">
-              Find verified sitters, lost pets, nutritional analysis, adoption, and partner resources.
+              Manage pet profiles, find verified sitters, lost pets, nutritional analysis, adoption, and partner resources.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -568,6 +538,25 @@ export default function Home() {
           ref={carouselRef}
           className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth pb-4 pt-1 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
+          {/* 1. My Pet Profiles */}
+          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6] border border-[#EADBCE] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#D8C5B3] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+            <div>
+              <div className="flex items-center gap-3 relative z-10 mt-1">
+                <div className="w-12 h-12 rounded-2xl bg-[#F0E6DA] flex items-center justify-center shadow-inner">
+                  <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
+                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl">My Pet Profiles</h3>
+              </div>
+              <p className="text-[#7A6B5E] leading-relaxed relative z-10 text-sm mt-4">
+                Manage your pets&apos; dietary records, vaccination history, care routines, and share clinical access with verified sitters.
+              </p>
+            </div>
+            <div className="relative z-10 pt-2">
+              <Link href="/account?tab=pets" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#754D2E] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                Manage Pets &rarr;
+              </Link>
+            </div>
+          </div>
           {/* 1. Pet Sitting */}
           <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
             <div>
