@@ -1127,34 +1127,41 @@ export default function TwinPage() {
                 ></div>
               </div>
 
-              <h2 className="text-xl font-black text-[#191919] leading-tight mb-4">
-                {QUIZ_QUESTIONS[currentQuizQuestion].question}
-              </h2>
+              {(() => {
+                const currentQ = QUIZ_QUESTIONS[Math.min(Math.max(0, currentQuizQuestion), QUIZ_QUESTIONS.length - 1)];
+                return (
+                  <>
+                    <h2 className="text-xl font-black text-[#191919] leading-tight mb-4">
+                      {currentQ.question}
+                    </h2>
 
-              <div className="flex flex-col gap-3.5">
-                {QUIZ_QUESTIONS[currentQuizQuestion].options.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      const key = QUIZ_QUESTIONS[currentQuizQuestion].key as keyof typeof quizAnswers;
-                      setQuizAnswers(prev => ({
-                        ...prev,
-                        [key]: option.value
-                      }));
-                      
-                      if (currentQuizQuestion < 4) {
-                        setCurrentQuizQuestion(prev => prev + 1);
-                      } else {
-                        setStep('upload');
-                      }
-                    }}
-                    className="w-full bg-[#FCFBF9]/60 hover:bg-[#FAF6F4] text-gray-700 font-bold py-4 px-6 rounded-2xl border border-gray-200 hover:border-[#8B5E3C] transition-all text-left shadow-xs flex items-center justify-between group cursor-pointer text-sm"
-                  >
-                    <span>{option.label}</span>
-                    <span className="text-[#8B5E3C] opacity-0 group-hover:opacity-100 transition-opacity font-extrabold text-base">&rarr;</span>
-                  </button>
-                ))}
-              </div>
+                    <div className="flex flex-col gap-3.5">
+                      {currentQ.options.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            const key = currentQ.key as keyof typeof quizAnswers;
+                            setQuizAnswers(prev => ({
+                              ...prev,
+                              [key]: option.value
+                            }));
+                            
+                            if (currentQuizQuestion < QUIZ_QUESTIONS.length - 1) {
+                              setCurrentQuizQuestion(prev => prev + 1);
+                            } else {
+                              setStep('upload');
+                            }
+                          }}
+                          className="w-full bg-[#FCFBF9]/60 hover:bg-[#FAF6F4] text-gray-700 font-bold py-4 px-6 rounded-2xl border border-gray-200 hover:border-[#8B5E3C] transition-all text-left shadow-xs flex items-center justify-between group cursor-pointer text-sm"
+                        >
+                          <span>{option.label}</span>
+                          <span className="text-[#8B5E3C] opacity-0 group-hover:opacity-100 transition-opacity font-extrabold text-base">&rarr;</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
 
               {currentQuizQuestion > 0 && (
                 <button
@@ -1324,26 +1331,7 @@ export default function TwinPage() {
           )}
 
           {/* STEP 3: RESULT SCREEN */}
-          {step === 'result' && result && !proEmail && (
-            <div className="text-center py-12 px-4">
-              <p className="text-lg font-medium text-[#4A3E3D] mb-2">
-                Your Pet Twin is ready!
-              </p>
-              <p className="text-gray-500 mb-6">
-                Sign in to reveal your match
-              </p>
-              <button
-                onClick={() => {
-                  window.dispatchEvent(new Event('lumo-open-signin'))
-                }}
-                className="bg-[#8B5E3C] text-white px-8 py-3 rounded-xl font-medium cursor-pointer shadow-md transition-all hover:bg-[#734A2E]"
-              >
-                Sign In to Reveal
-              </button>
-            </div>
-          )}
-
-          {step === 'result' && result && proEmail && (
+          {step === 'result' && result && (
             <div className="flex flex-col items-center gap-6 w-full relative">
               
               {/* Web UI Preview Card */}
