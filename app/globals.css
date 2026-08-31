@@ -62,6 +62,10 @@ html, body {
   .floating-qr-btn {
     display: none !important;
   }
+
+  html, body {
+    overscroll-behavior-y: none;
+  }
 }
 
 .body-text, p {
