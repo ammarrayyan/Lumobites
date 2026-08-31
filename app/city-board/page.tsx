@@ -112,6 +112,29 @@ export default function CityBoardPage() {
     }
   };
 
+  const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
+
+  const handleSharePost = async (post: any) => {
+    if (!post) return;
+    const text = `🐾 City Board Discussion: "${post.content ? (post.content.length > 80 ? post.content.substring(0, 77) + '...' : post.content) : 'Community post'}" on Lumo Bites`;
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/city-board/${post.post_id}` : '';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Lumo Bites City Board', text, url });
+        return;
+      } catch (err) {
+        console.log('Share canceled', err);
+      }
+    }
+    
+    // Fallback to clipboard
+    navigator.clipboard.writeText(`${text} ${url}`);
+    setCopiedPostId(post.post_id);
+    showToast('Link copied to clipboard ✓');
+    setTimeout(() => setCopiedPostId(null), 3000);
+  };
+
   // Auto-dismiss toast notification
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -1030,14 +1053,12 @@ export default function CityBoardPage() {
                           </>
                         )}
                         <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
-                            showToast('Link copied to clipboard');
-                          }}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-[#FAF6F4] border border-[#E8DDD4] px-3.5 py-1.5 rounded-xl transition-all cursor-pointer"
-                          title="Copy link to post"
+                          type="button"
+                          onClick={() => handleSharePost(post)}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] px-3.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-2xs"
+                          title="Share this post"
                         >
-                          <Share2 className="w-3.5 h-3.5" /> Share
+                          <Share2 className="w-3.5 h-3.5 text-[#8B5E3C]" /> {copiedPostId === post.post_id ? 'Link Copied!' : 'Share'}
                         </button>
                       </div>
                     </div>

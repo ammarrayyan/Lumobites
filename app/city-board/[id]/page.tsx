@@ -70,6 +70,28 @@ export default function CityBoardPostPage() {
   const [blockedCookies, setBlockedCookies] = useState<string[]>([]);
   const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (!post) return;
+    const text = `🐾 City Board Discussion: "${post.content ? (post.content.length > 80 ? post.content.substring(0, 77) + '...' : post.content) : 'Community post'}" on Lumo Bites`;
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/city-board/${post.post_id}` : '';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Lumo Bites City Board', text, url });
+        return;
+      } catch (err) {
+        console.log('Share canceled', err);
+      }
+    }
+    
+    // Fallback to clipboard
+    navigator.clipboard.writeText(`${text} ${url}`);
+    setCopied(true);
+    showToast('Link copied to clipboard ✓');
+    setTimeout(() => setCopied(false), 3000);
+  };
 
   // Native edge-swipe-right-to-go-back gesture
   useSwipeBack({ fallbackUrl: '/city-board' });
@@ -466,13 +488,11 @@ export default function CityBoardPostPage() {
                   </>
                 )}
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/city-board/${post.post_id}`);
-                    showToast('Link copied to clipboard ✓');
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A3E3D] hover:text-[#8B5E3C] bg-white border border-[#E8DDD4] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-2xs"
+                  type="button"
+                  onClick={handleShare}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] px-4 py-2 rounded-xl transition-all cursor-pointer shadow-2xs"
                 >
-                  <Share2 className="w-3.5 h-3.5" /> Copy Link
+                  <Share2 className="w-3.5 h-3.5 text-[#8B5E3C]" /> {copied ? 'Link Copied!' : 'Share this post'}
                 </button>
               </div>
             </div>
