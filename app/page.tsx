@@ -536,10 +536,10 @@ export default function Home() {
         {/* Horizontal Carousel Track */}
         <div 
           ref={carouselRef}
-          className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth pb-4 pt-1 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth py-5 px-2 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {/* 1. My Pet Profiles */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6] border border-[#EADBCE] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#D8C5B3] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6] border border-[#EADBCE] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#D8C5B3] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#F0E6DA] flex items-center justify-center shadow-inner">
@@ -558,7 +558,7 @@ export default function Home() {
             </div>
           </div>
           {/* 1. Pet Sitting */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#DDCBBF] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#DDCBBF] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
@@ -581,7 +581,7 @@ export default function Home() {
           </div>
 
           {/* 2. Lost Pets */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5DB] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#CCD5DB] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
@@ -601,7 +601,7 @@ export default function Home() {
           </div>
 
           {/* 3. Pet Food & Safety */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#CCD5C8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#CCD5C8] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
@@ -621,7 +621,7 @@ export default function Home() {
           </div>
 
           {/* 4. Pet Adoption */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FDF5F6] to-[#FAF0F2] border border-[#F4DCDD] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#E8BFC2] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FDF5F6] to-[#FAF0F2] border border-[#F4DCDD] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#E8BFC2] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#FCE8EA] flex items-center justify-center shadow-inner">
@@ -641,7 +641,7 @@ export default function Home() {
           </div>
 
           {/* 5. Partner Portal */}
-          <div className="w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F7F6FA] to-[#EFF0F7] border border-[#E0DDF2] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:shadow-xl hover:border-[#C8C3E8] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+          <div className="service-card-interactive w-[300px] lg:w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F7F6FA] to-[#EFF0F7] border border-[#E0DDF2] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#C8C3E8] relative overflow-hidden">
             <div>
               <div className="flex items-center gap-3 relative z-10 mt-1">
                 <div className="w-12 h-12 rounded-2xl bg-[#ECEAF7] flex items-center justify-center shadow-inner">

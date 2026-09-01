@@ -293,3 +293,19 @@ button, a, [role="button"] {
 .animate-sheet-up {
   animation: sheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Refined Desktop Hover-Scale for Explore Key Services Cards */
+.service-card-interactive {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .service-card-interactive:hover {
+    transform: scale(1.04);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    z-index: 10;
+  }
+}
+
