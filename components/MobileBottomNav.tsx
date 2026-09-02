@@ -3,39 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, PawPrint, MapPin, Utensils, Users, Globe } from 'lucide-react';
-
-// Paw-in-ID-card icon for Pet Profiles matching Lucide icon styling
-function PetProfileIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={style?.color || 'currentColor'}
-      strokeWidth={style?.strokeWidth || 2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      style={{ ...style, fill: 'none' }}
-    >
-      {/* ID Badge Card Outline */}
-      <rect width="18" height="18" x="3" y="3" rx="4" fill="none" />
-      {/* ID Lanyard Slot */}
-      <line x1="9.5" x2="14.5" y1="6" y2="6" strokeWidth={2} />
-      {/* Paw Print Inside ID Badge */}
-      <circle cx="9.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
-      <circle cx="14.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
-      <circle cx="8" cy="14" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="16" cy="14" r="0.9" fill="currentColor" stroke="none" />
-      <path
-        d="M12 17.5c-1.5 0-2.5-.8-2.5-1.7 0-.6.5-1 1.2-1 .6 0 .8.4 1.3.4s.7-.4 1.3-.4c.7 0 1.2.4 1.2 1 0 .9-1 1.7-2.5 1.7z"
-        fill="currentColor"
-        stroke="none"
-      />
-    </svg>
-  );
-}
+import { Home, PawPrint, MapPin, Utensils, Users } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -43,16 +11,13 @@ export default function MobileBottomNav() {
 
   const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies';
   const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
-  const isPetsActive = pathname === '/account' || pathname === '/pet-access' || pathname.startsWith('/pets/');
 
   const tabs = [
     { label: 'Sitting', icon: PawPrint, href: '/petsitting', isActive: pathname === '/petsitting' },
     { label: 'Lost Pets', icon: MapPin, href: '/lost-pets', isActive: pathname === '/lost-pets' },
-    { label: 'My Pets', icon: PetProfileIcon, href: '/account?tab=pets', isActive: isPetsActive },
     { label: 'Home', icon: Home, href: '/', isActive: pathname === '/', isRaised: true },
     { label: 'Community', icon: Users, href: '/city-board', isActive: isCommunityActive },
     { label: 'Pet Food', icon: Utensils, href: '/chat', isActive: isFoodActive },
-    { label: 'Explore', icon: Globe, href: '/explore', isActive: pathname === '/explore' },
   ];
 
   const currentActiveIndex = tabs.findIndex(tab => tab.isActive);
@@ -63,7 +28,7 @@ export default function MobileBottomNav() {
     setTappedIndex(null);
   }, [pathname]);
 
-  const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 3);
+  const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 2);
   const isRaisedActive = activeIndex >= 0 && tabs[activeIndex]?.isRaised;
 
   return (
