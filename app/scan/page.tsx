@@ -7,7 +7,10 @@ import { Product, ScoredProduct, PetProfile } from '@/lib/types';
 import confetti from 'canvas-confetti';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
-import { Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, Footprints, Mail } from 'lucide-react';
+import { 
+  Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, 
+  Footprints, Mail, Camera, Barcode, FileText, Scan, Zap, ShieldCheck, RefreshCw, Info 
+} from 'lucide-react';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 
@@ -955,17 +958,15 @@ function ScanPageContent() {
           
           {/* Header Title Section */}
           <div className="text-center flex flex-col items-center">
-            {/* Sparkle Badge */}
-            <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/5 border border-[#8B5E3C]/10 text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[#8B5E3C]">
-                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.6 3.102-1.196 4.622c-.21.81.67 1.45 1.366 1.012L10 15.71l4.217 2.341c.697.438 1.577-.202 1.366-1.012l-1.196-4.622 3.6-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd" />
-              </svg>
+            {/* Shield / Safety Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-extrabold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#8B5E3C]" />
               Live FDA Safety Check
             </div>
             
-            <h2 className="text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Is This Food Safe?</h2>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-[400px]">
-              Scan barcode or paste ingredients for instant safety analysis + live FDA recall check
+            <h2 className="text-2xl sm:text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Is This Food Safe?</h2>
+            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-[420px]">
+              Scan barcode or capture package ingredients for instant AI toxicity analysis &amp; live FDA recall verification
             </p>
           </div>
 
@@ -973,88 +974,135 @@ function ScanPageContent() {
           {(!product && !loading && !ocrLoading) ? (
             <div className="flex flex-col gap-6">
               
-              {/* Tab Selector */}
-              <div className="flex gap-2 mb-4 border-b border-[#E8DDD4] pb-2 w-full">
+              {/* Modern Segmented Tab Switcher */}
+              <div className="bg-[#FAF6F4] p-1.5 rounded-2xl flex gap-1 border border-[#EADBCE]">
                 <button
+                  type="button"
                   onClick={() => setActiveTab('scanner')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeTab === 'scanner'
-                      ? 'bg-[#8B5E3C] text-white shadow-sm'
-                      : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                      ? 'bg-[#8B5E3C] text-white shadow-md'
+                      : 'text-[#664333] hover:bg-[#F0E6DD]'
                   }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                  </svg>
-                  Live Camera Scanner
+                  <Camera className="w-4 h-4" />
+                  <span>Live Camera Scanner</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setActiveTab('manual')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     activeTab === 'manual'
-                      ? 'bg-[#8B5E3C] text-white shadow-sm'
-                      : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#E8DDD4]'
+                      ? 'bg-[#8B5E3C] text-white shadow-md'
+                      : 'text-[#664333] hover:bg-[#F0E6DD]'
                   }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                  </svg>
-                  Manual Entry
+                  <Barcode className="w-4 h-4" />
+                  <span>Manual Entry</span>
                 </button>
               </div>
 
-              {/* TAB 1: Live Scanner Viewport */}
+              {/* TAB 1: Modern Cinematic Viewfinder */}
               {activeTab === 'scanner' && (
                 <div className="flex flex-col gap-5">
-                  <div className="relative group">
-                    <div className="bg-[#FAF8F6] rounded-3xl p-4 border-2 border-dashed border-gray-200 overflow-hidden shadow-xs hover:border-[#8B5E3C] transition-colors relative">
-                      <div id="reader" className="w-full rounded-2xl overflow-hidden"></div>
+                  {/* Viewfinder Outer Chassis */}
+                  <div className="relative rounded-[28px] overflow-hidden bg-gradient-to-b from-[#1E1916] to-[#120E0C] p-2 sm:p-2.5 border border-[#3E342B] shadow-2xl">
+                    {/* Viewport Core */}
+                    <div className="relative rounded-[22px] overflow-hidden min-h-[340px] sm:min-h-[380px] bg-black flex items-center justify-center">
+                      
+                      {/* Scanner Container for Html5Qrcode */}
+                      <div id="reader" className="w-full h-full min-h-[340px] sm:min-h-[380px] rounded-[22px]"></div>
+
+                      {/* Overlays Active when Camera is Streaming */}
+                      {isCameraStarted && (
+                        <>
+                          {/* Top Status Pill */}
+                          <div className="absolute top-4 left-0 right-0 flex justify-center px-4 z-20 pointer-events-none">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold tracking-wide shadow-lg">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                              </span>
+                              <span>Auto Barcode &amp; Label AI Active</span>
+                            </div>
+                          </div>
+
+                          {/* Viewfinder Reticle Framing Area */}
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 p-6">
+                            <div className="w-[230px] h-[230px] sm:w-[260px] sm:h-[260px] relative rounded-2xl">
+                              {/* 4 Sleek Glowing Corner Brackets */}
+                              <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#C17D3C] rounded-tl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                              <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#C17D3C] rounded-tr-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#C17D3C] rounded-bl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#C17D3C] rounded-br-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+
+                              {/* Center Alignment Reticle */}
+                              <div className="absolute inset-0 flex items-center justify-center opacity-25">
+                                <div className="w-5 h-0.5 bg-white"></div>
+                                <div className="h-5 w-0.5 bg-white -ml-2.75"></div>
+                              </div>
+
+                              {/* Animated Laser Sweep Beam */}
+                              <div className="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-[#FFC278] to-transparent shadow-[0_0_12px_#FFA740] animate-scan-laser"></div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Shutter & Capture Action Bar */}
+                          <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 z-20 px-4">
+                            <button 
+                              type="button"
+                              onClick={captureAndOCR}
+                              className="group flex items-center gap-3 bg-white/95 hover:bg-white text-[#4A3E3D] px-6 py-3.5 rounded-full font-extrabold text-sm shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#EADBCE]"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8B5E3C] to-[#C17D3C] flex items-center justify-center text-white shadow-xs group-hover:rotate-12 transition-transform">
+                                <Camera className="w-4 h-4" />
+                              </div>
+                              <span>Capture &amp; Scan Ingredients</span>
+                            </button>
+                            <span className="text-[10px] text-white/85 font-medium bg-black/50 px-3 py-0.5 rounded-full backdrop-blur-xs">
+                              Hold steady over barcode or tap above for ingredients
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Camera Initializing Placeholder */}
+                      {!isCameraStarted && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-[#161210]">
+                          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#C17D3C] mb-3 animate-pulse">
+                            <Camera className="w-6 h-6" />
+                          </div>
+                          <p className="text-white font-bold text-sm mb-1">Activating Camera Viewport...</p>
+                          <p className="text-white/50 text-xs max-w-[220px]">Please allow camera permissions if prompted</p>
+                        </div>
+                      )}
                     </div>
-                    
-                    {isCameraStarted && (
-                      <div className="absolute bottom-6 left-0 right-0 flex justify-center px-6 z-10">
-                        <button 
-                          onClick={captureAndOCR}
-                          className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white px-8 py-4 rounded-full font-bold shadow-xl flex items-center gap-2.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
-                          </svg>
-                          Capture & Scan Ingredients
-                        </button>
-                      </div>
-                    )}
                   </div>
                   
-                  {/* Two-Column Scan Instructions Organiser */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  {/* Two-Column Modern Scan Instructions */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-1">
                     {/* Column 1: Barcode Scan */}
-                    <div className="bg-[#FAF8F6] border border-[#F0EBE5] rounded-2xl p-4 flex gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-150 shrink-0 text-[#8B5E3C] shadow-xs">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 10.5v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 10.5v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM16.5 13.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm-2.25-4.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm4.5-2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008z" />
-                        </svg>
+                    <div className="bg-[#FAF6F4] border border-[#EADBCE] rounded-2xl p-4 flex items-start gap-3.5 transition-all hover:border-[#8B5E3C]/40">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#EADBCE] shrink-0 text-[#8B5E3C] shadow-xs">
+                        <Barcode className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-[#191919] mb-0.5">Scan Barcode</span>
-                        <p className="text-[11px] text-gray-500 leading-normal">
-                          Align any pet food barcode in the viewfinder. It will automatically detect and fetch the product.
+                        <span className="text-xs font-extrabold text-[#3B2C24]">Instant Barcode Lookup</span>
+                        <p className="text-[12px] text-[#6E5D53] leading-relaxed mt-0.5">
+                          Align any pet food barcode in the frame for automated lookup &amp; live FDA recall check.
                         </p>
                       </div>
                     </div>
 
                     {/* Column 2: Ingredients Scan */}
-                    <div className="bg-[#FAF8F6] border border-[#F0EBE5] rounded-2xl p-4 flex gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-150 shrink-0 text-[#8B5E3C] shadow-xs">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                    <div className="bg-[#FAF6F4] border border-[#EADBCE] rounded-2xl p-4 flex items-start gap-3.5 transition-all hover:border-[#8B5E3C]/40">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-[#EADBCE] shrink-0 text-[#8B5E3C] shadow-xs">
+                        <FileText className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-[#191919] mb-0.5">Scan Ingredients</span>
-                        <p className="text-[11px] text-gray-500 leading-normal">
-                          Point the camera directly at the text ingredients block on the package back, then tap <strong className="text-[#8B5E3C]">Capture & Scan Ingredients</strong>.
+                        <span className="text-xs font-extrabold text-[#3B2C24]">AI Ingredient Label Scan</span>
+                        <p className="text-[12px] text-[#6E5D53] leading-relaxed mt-0.5">
+                          Point at the ingredient list on package back, then tap <strong className="text-[#8B5E3C]">Capture</strong>.
                         </p>
                       </div>
                     </div>
@@ -1067,8 +1115,8 @@ function ScanPageContent() {
                 <div className="flex flex-col gap-6">
                   {/* Barcode Search Form */}
                   <form onSubmit={handleBarcodeSubmit} className="flex flex-col gap-2">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-left">
-                      Manual Barcode Search
+                    <label className="text-[11px] font-bold text-[#8B5E3C] uppercase tracking-wider text-left flex items-center gap-1.5">
+                      <Barcode className="w-3.5 h-3.5" /> Search by UPC / Barcode Number
                     </label>
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -1077,12 +1125,10 @@ function ScanPageContent() {
                           value={manualBarcode}
                           onChange={(e) => setManualBarcode(e.target.value)}
                           placeholder="e.g. 079100002598"
-                          className="w-full pl-4 pr-10 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all"
+                          className="w-full pl-4 pr-10 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white transition-all shadow-2xs"
                         />
                         <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 10.5v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 10.5v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM16.5 13.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm-2.25-4.5v.008h-.008V13.5h.008zm0 2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008zm4.5-2.25v.008h-.008V15.75h.008zm0 2.25v.008h-.008V18h.008z" />
-                          </svg>
+                          <Search className="w-4 h-4" />
                         </div>
                       </div>
                       <button 
@@ -1096,21 +1142,21 @@ function ScanPageContent() {
 
                   {/* Minimal Separator */}
                   <div className="flex items-center gap-4">
-                    <div className="flex-1 h-px bg-gray-150"></div>
+                    <div className="flex-1 h-px bg-[#EADBCE]"></div>
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">or</span>
-                    <div className="flex-1 h-px bg-gray-150"></div>
+                    <div className="flex-1 h-px bg-[#EADBCE]"></div>
                   </div>
 
                   {/* Paste Ingredients Form */}
                   <form onSubmit={handleManualIngredientSubmit} className="flex flex-col gap-2">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-left">
-                      Paste Ingredient List Below
+                    <label className="text-[11px] font-bold text-[#8B5E3C] uppercase tracking-wider text-left flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" /> Paste Ingredient List Directly
                     </label>
                     <textarea
                       value={manualIngredients}
                       onChange={(e) => setManualIngredients(e.target.value)}
                       placeholder="e.g. Chicken, Brown Rice, Barley, Natural Flavor, Sodium Selenite..."
-                      className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white h-28 resize-none transition-all placeholder:text-gray-300"
+                      className="w-full px-4 py-3.5 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#191919] bg-white h-28 resize-none transition-all placeholder:text-gray-300 shadow-2xs"
                     />
                     <button 
                       type="submit" 
@@ -1125,20 +1171,20 @@ function ScanPageContent() {
           ) : null}
 
           {(loading || ocrLoading) && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 border-4 border-[#E8DDD4] border-t-[#8B5E3C] rounded-full animate-spin mb-6"></div>
-              <h3 className="text-[#191919] font-bold text-lg mb-2 flex items-center justify-center gap-1.5">
-                {ocrLoading ? 'Reading Label...' : (
-                  <>
-                    <Search className="w-5 h-5 text-[#8B5E3C] animate-pulse" />
-                    Analyzing ingredients with AI...
-                  </>
-                )}
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 rounded-full border-4 border-[#E8DDD4] border-t-[#8B5E3C] animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="w-7 h-7 text-[#8B5E3C] animate-pulse" />
+                </div>
+              </div>
+              <h3 className="text-[#191919] font-black text-xl mb-2">
+                {ocrLoading ? 'Reading Label with AI Vision...' : 'Analyzing Ingredients & FDA Recalls...'}
               </h3>
-              <p className="text-gray-500 text-sm max-w-[280px] mx-auto leading-relaxed">
+              <p className="text-gray-500 text-sm max-w-[320px] mx-auto leading-relaxed">
                 {ocrLoading 
-                  ? 'Preprocessing image and sending to Google Cloud Vision...' 
-                  : 'Claude AI is evaluating ingredient safety against veterinary & FDA guidelines.'}
+                  ? 'Extracting ingredient text from your camera capture...' 
+                  : 'Evaluating ingredient safety and nutritional risk factors against veterinary standards.'}
               </p>
             </div>
           )}
