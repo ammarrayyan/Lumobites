@@ -33,7 +33,7 @@ export default function MobileBottomNav() {
 
   return (
     <div 
-      className="lg:hidden px-1 flex items-center justify-between w-[calc(100%-20px)] max-w-[430px] h-[66px] relative select-none"
+      className="lg:hidden px-1.5 flex items-center justify-between w-[calc(100%-20px)] max-w-[430px] h-[68px] relative select-none"
       style={{
         position: 'fixed',
         bottom: '16px',
@@ -164,7 +164,7 @@ export default function MobileBottomNav() {
 
               {/* Label */}
               <span
-                className="text-[9px] sm:text-[9.5px] tracking-tight select-none transition-all duration-300"
+                className="text-[11px] sm:text-[11.5px] tracking-tight select-none transition-all duration-300"
                 style={{
                   marginTop: '-11px',
                   color: isActive ? '#5C381E' : '#4A3E3D',
@@ -189,23 +189,23 @@ export default function MobileBottomNav() {
               router.prefetch(tab.href);
             }}
             onMouseEnter={() => router.prefetch(tab.href)}
-            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-0.5 group active:scale-90 transition-transform duration-150 select-none z-10"
+            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-1 group active:scale-90 transition-transform duration-150 select-none z-10"
             style={{ textDecoration: 'none' }}
           >
             {/* Icon with Solid Black & Bold Treatment for Active */}
             <Icon
-              className="w-[18px] h-[18px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
               style={{
                 color: isActive ? '#000000' : '#4A3E3D',
                 fill: isActive ? 'currentColor' : 'none',
-                transform: isActive ? 'scale(1.12) translateY(-1px)' : 'scale(1)',
+                transform: isActive ? 'scale(1.1) translateY(-1px)' : 'scale(1)',
                 strokeWidth: isActive ? 2.5 : 2,
               }}
             />
 
             {/* Label */}
             <span
-              className="text-[9px] sm:text-[9.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
+              className="text-[11px] sm:text-[11.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
               style={{
                 color: isActive ? '#000000' : '#4A3E3D',
                 fontWeight: isActive ? 900 : 700,
