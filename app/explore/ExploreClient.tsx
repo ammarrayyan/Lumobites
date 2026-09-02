@@ -8,7 +8,7 @@ import PetSittingPreview from '@/components/PetSittingPreview';
 import CityBoardPreview from '@/components/CityBoardPreview';
 import AdoptionPreview from '@/components/AdoptionPreview';
 import BrandMarquee from '@/components/BrandMarquee';
-import { Compass, Sparkles, Footprints, Home as HomeIcon, MessageSquare, Target, Search, AlertTriangle, ShoppingBag } from 'lucide-react';
+import { Compass, Sparkles, Footprints, Home as HomeIcon, MessageSquare, Target, Search, Heart, ShoppingBag } from 'lucide-react';
 
 export default function ExploreClient() {
   return (
@@ -51,8 +51,8 @@ export default function ExploreClient() {
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
-            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">FDA Monitored</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Real Time Recall Alerts</span>
+            <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">Food Safety</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>AI Ingredient Scan</span>
           </div>
         </div>
       </section>
@@ -104,13 +104,13 @@ export default function ExploreClient() {
               <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
               <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
             </div>
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
+            <Link href="/adoption" className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center no-underline">
               <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
-                <AlertTriangle className="w-7 h-7 text-[#8B5E3C]" />
+                <Heart className="w-7 h-7 text-[#8B5E3C]" />
               </div>
-              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">FDA Recall Alerts</h3>
-              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Get notified instantly if your pet&apos;s food is recalled by the FDA. PRO members get instant email alerts.</p>
-            </div>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Pet Adoption</h3>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Browse rescue pets and shelter animals waiting for their loving forever home in your area.</p>
+            </Link>
             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center">
               <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
                 <Sparkles className="w-7 h-7 text-[#8B5E3C]" />
