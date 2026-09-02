@@ -7,7 +7,7 @@ import { Sparkles } from 'lucide-react';
 
 export default function AnimatedPets() {
   return (
-    <div className="flex flex-col items-center w-full mb-3 sm:mb-6 mt-1 sm:mt-2 select-none">
+    <div className="flex flex-col items-center w-full mb-4 sm:mb-6 mt-1 sm:mt-2 select-none">
       <style>{`
         @keyframes subtle-float {
           0%, 100% { transform: translateY(0); }

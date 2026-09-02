@@ -282,7 +282,7 @@ export default function Home() {
           <AnimatedPets />
 
           {/* Hero Headline */}
-          <h1 className="font-[800] leading-[1.15] mb-2 sm:mb-3 tracking-[-0.02em] relative z-10 text-[21px] sm:text-[26px]">
+          <h1 className="font-[800] leading-[1.15] mb-3.5 sm:mb-4 tracking-[-0.02em] relative z-10 text-[21px] sm:text-[26px]">
             <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
             <br />
             <span className="text-[#C17D3C]">in one place.</span>
@@ -290,7 +290,7 @@ export default function Home() {
 
           {/* Store Badges */}
           {!isNativeApp && (
-            <div className="flex flex-wrap gap-2.5 justify-center items-center mb-3 sm:mb-5">
+            <div className="flex flex-wrap gap-2.5 justify-center items-center mb-4.5 sm:mb-6">
               <a href="https://play.google.com/store/apps/details?id=net.lumobites.app" target="_blank" rel="noopener noreferrer">
                 <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="36" style={{ height: '36px' }} />
               </a>
@@ -301,7 +301,7 @@ export default function Home() {
           )}
 
           {/* MOBILE 6-HUB QUICK ACCESS LAUNCHER */}
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 max-w-xs sm:max-w-sm mx-auto w-full">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 max-w-xs sm:max-w-sm mx-auto w-full mt-1 sm:mt-2">
             {/* 1. Lost Pets */}
             <Link href="/lost-pets" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
               <div 
