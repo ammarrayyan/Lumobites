@@ -17,10 +17,10 @@ export default function AnimatedPets() {
           animation: subtle-float 6s ease-in-out infinite;
           position: relative;
           width: 100%;
-          max-width: 520px;
+          max-width: 540px;
           aspect-ratio: 900 / 380;
           height: auto;
-          max-height: 180px;
+          max-height: clamp(160px, 24vh, 210px);
           display: flex;
           justify-content: center;
           align-items: flex-end;
