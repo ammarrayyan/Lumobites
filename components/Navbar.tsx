@@ -519,14 +519,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             City Board
           </Link>
 
-          {/* Recalls */}
-          <Link href="/recalls" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
-            <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Recalls
-          </Link>
-
           {/* Pet Supplies */}
           <Link href="/supplies" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle text-[#666666] hover:text-[#8B5E3C]" fill="currentColor" viewBox="0 0 24 24">
@@ -725,16 +717,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               City Board
             </Link>
 
-            <Link 
-              href="/recalls" 
-              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
-              onClick={() => setIsOpen(false)}
-            >
-              <svg className="w-4 h-4 inline-block mr-2.5 align-middle text-[#D97706]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              Recalls
-            </Link>
             <Link 
               href="/supplies" 
               className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"

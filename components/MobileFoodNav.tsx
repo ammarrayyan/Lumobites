@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Utensils, Scan, ShoppingBag, AlertTriangle } from 'lucide-react';
+import { Utensils, Scan, ShoppingBag } from 'lucide-react';
 
 export default function MobileFoodNav() {
   const pathname = usePathname();
@@ -11,7 +11,6 @@ export default function MobileFoodNav() {
     { label: 'Find Food', icon: Utensils, href: '/chat' },
     { label: 'Scan Label', icon: Scan, href: '/scan' },
     { label: 'Pet Supplies', icon: ShoppingBag, href: '/supplies' },
-    { label: 'FDA Recalls', icon: AlertTriangle, href: '/recalls' },
   ];
 
   return (

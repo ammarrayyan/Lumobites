@@ -1091,6 +1091,17 @@ function ScanPageContent() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Accessible Link to Full FDA Recalls Directory */}
+                  <div className="text-center pt-1">
+                    <Link 
+                      href="/recalls" 
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#664333] hover:underline transition-all"
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#D97706]" />
+                      <span>Browse all recent FDA Pet Food Recalls &rarr;</span>
+                    </Link>
+                  </div>
                 </div>
               )}
 
