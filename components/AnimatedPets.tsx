@@ -17,20 +17,20 @@ export default function AnimatedPets() {
           animation: subtle-float 6s ease-in-out infinite;
           position: relative;
           width: 100%;
-          max-width: 900px;
+          max-width: 520px;
           aspect-ratio: 900 / 380;
           height: auto;
-          max-height: 380px;
+          max-height: 180px;
           display: flex;
           justify-content: center;
           align-items: flex-end;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .image-container {
-            max-width: 1100px;
-            max-height: 464px;
-            margin-bottom: 24px;
+            max-width: 660px;
+            max-height: 220px;
+            margin-bottom: 8px;
           }
         }
         .image-glow {
