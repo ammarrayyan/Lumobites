@@ -271,146 +271,137 @@ export default function Home() {
       {/* 1. MOBILE & TABLET (< lg): FIXED NON-SCROLLING 100DVH SINGLE VIEWPORT      */}
       {/* ========================================================================= */}
       <main
-        className="fixed inset-x-0 bottom-0 top-[72px] lg:hidden z-10 bg-[#F7F3EE] flex flex-col justify-between overflow-y-auto overscroll-y-none select-none px-4 sm:px-6 pt-2 sm:pt-4"
+        className="fixed inset-x-0 bottom-0 top-[72px] lg:hidden z-10 bg-[#F7F3EE] flex flex-col justify-between overflow-y-auto select-none px-4 sm:px-6 pb-[84px] pt-2 sm:pt-4"
         style={{
           height: 'calc(100dvh - 72px)',
           maxHeight: 'calc(100dvh - 72px)',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)',
-          overscrollBehavior: 'none',
-          touchAction: 'pan-y',
-          WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="w-full max-w-[540px] mx-auto flex flex-col items-center text-center justify-between flex-1 py-1">
-          {/* Top Hero Block */}
-          <div className="flex flex-col items-center w-full">
-            {/* Animated Pet Group Illustration */}
-            <AnimatedPets />
+        <div className="w-full max-w-[540px] mx-auto flex flex-col items-center text-center my-auto py-1">
+          {/* Animated Pet Group Illustration */}
+          <AnimatedPets />
 
-            {/* Hero Headline */}
-            <h1 className="font-[800] leading-[1.15] mb-2 sm:mb-3 tracking-[-0.02em] relative z-10 text-[22px] sm:text-[26px]">
-              <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
-              <br />
-              <span className="text-[#C17D3C]">in one place.</span>
-            </h1>
+          {/* Hero Headline */}
+          <h1 className="font-[800] leading-[1.15] mb-2 sm:mb-3 tracking-[-0.02em] relative z-10 text-[21px] sm:text-[26px]">
+            <span className="text-[#191919]">Everything your pet needs, powered by AI</span>
+            <br />
+            <span className="text-[#C17D3C]">in one place.</span>
+          </h1>
 
-            {/* Store Badges */}
-            {!isNativeApp && (
-              <div className="flex flex-wrap gap-2.5 justify-center items-center mt-1 sm:mt-2">
-                <a href="https://play.google.com/store/apps/details?id=net.lumobites.app" target="_blank" rel="noopener noreferrer">
-                  <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="36" style={{ height: '36px' }} />
-                </a>
-                <a href="https://apps.apple.com/app/lumo-bites/id6780612179" target="_blank" rel="noopener noreferrer">
-                  <img src="/app-store-badge.svg" alt="Download on the App Store" height="36" style={{ height: '36px' }} />
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Bottom Launcher Hub - Anchored Closer to Floating Bottom Nav */}
-          <div className="w-full max-w-xs sm:max-w-sm mx-auto pt-2 pb-1">
-            <div className="grid grid-cols-3 gap-x-2.5 gap-y-3.5 w-full">
-              {/* 1. Lost Pets */}
-              <Link href="/lost-pets" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(196, 77, 52, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <Footprints className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  Lost Pets
-                </span>
-              </Link>
-
-              {/* 2. Find Sitter */}
-              <Link href="/petsitting" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(46, 120, 82, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <PawPrint className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  Find Sitter
-                </span>
-              </Link>
-
-              {/* 3. Become Sitter */}
-              <Link href="/petsitting?tab=become" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(196, 117, 24, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <Sparkles className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  Become Sitter
-                </span>
-              </Link>
-
-              {/* 4. Adopt Pet */}
-              <Link href="/adoption" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(191, 68, 86, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <Heart className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  Adopt Pet
-                </span>
-              </Link>
-
-              {/* 5. Partner Portal */}
-              <button
-                type="button"
-                onClick={handleOpenPartnerPortal}
-                className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95 cursor-pointer border-none bg-transparent"
-                style={{ textDecoration: 'none' }}
-              >
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(116, 74, 41, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <Building2 className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  Partner Portal
-                </span>
-              </button>
-
-              {/* 6. City Board */}
-              <Link href="/city-board" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
-                <div 
-                  className="w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
-                    boxShadow: '0 6px 14px -2px rgba(59, 95, 118, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
-                  }}
-                >
-                  <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.2} />
-                </div>
-                <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
-                  City Board
-                </span>
-              </Link>
+          {/* Store Badges */}
+          {!isNativeApp && (
+            <div className="flex flex-wrap gap-2.5 justify-center items-center mb-3 sm:mb-5">
+              <a href="https://play.google.com/store/apps/details?id=net.lumobites.app" target="_blank" rel="noopener noreferrer">
+                <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="36" style={{ height: '36px' }} />
+              </a>
+              <a href="https://apps.apple.com/app/lumo-bites/id6780612179" target="_blank" rel="noopener noreferrer">
+                <img src="/app-store-badge.svg" alt="Download on the App Store" height="36" style={{ height: '36px' }} />
+              </a>
             </div>
+          )}
+
+          {/* MOBILE 6-HUB QUICK ACCESS LAUNCHER */}
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 max-w-xs sm:max-w-sm mx-auto w-full">
+            {/* 1. Lost Pets */}
+            <Link href="/lost-pets" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(196, 77, 52, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <Footprints className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                Lost Pets
+              </span>
+            </Link>
+
+            {/* 2. Find Sitter */}
+            <Link href="/petsitting" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(46, 120, 82, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <PawPrint className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                Find Sitter
+              </span>
+            </Link>
+
+            {/* 3. Become Sitter */}
+            <Link href="/petsitting?tab=become" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(196, 117, 24, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                Become Sitter
+              </span>
+            </Link>
+
+            {/* 4. Adopt Pet */}
+            <Link href="/adoption" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(191, 68, 86, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                Adopt Pet
+              </span>
+            </Link>
+
+            {/* 5. Partner Portal */}
+            <button
+              type="button"
+              onClick={handleOpenPartnerPortal}
+              className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95 cursor-pointer border-none bg-transparent"
+              style={{ textDecoration: 'none' }}
+            >
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(116, 74, 41, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <Building2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                Partner Portal
+              </span>
+            </button>
+
+            {/* 6. City Board */}
+            <Link href="/city-board" className="group flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
+              <div 
+                className="w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[18px] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
+                  boxShadow: '0 6px 14px -2px rgba(59, 95, 118, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                }}
+              >
+                <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.2} />
+              </div>
+              <span className="mt-1.5 text-[11.5px] font-semibold text-[#2B231D] text-center tracking-tight leading-tight group-hover:text-black">
+                City Board
+              </span>
+            </Link>
           </div>
         </div>
       </main>
