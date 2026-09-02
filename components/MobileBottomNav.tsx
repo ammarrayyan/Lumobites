@@ -41,7 +41,7 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies' || pathname === '/recalls';
+  const isFoodActive = pathname === '/chat' || pathname === '/scan' || pathname === '/supplies';
   const isCommunityActive = pathname === '/city-board' || pathname === '/twin' || pathname.startsWith('/adoption');
   const isPetsActive = pathname === '/account' || pathname === '/pet-access' || pathname.startsWith('/pets/');
 

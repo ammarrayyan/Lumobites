@@ -1091,17 +1091,6 @@ function ScanPageContent() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Accessible Link to Full FDA Recalls Directory */}
-                  <div className="text-center pt-1">
-                    <Link 
-                      href="/recalls" 
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#664333] hover:underline transition-all"
-                    >
-                      <AlertTriangle className="w-3.5 h-3.5 text-[#D97706]" />
-                      <span>Browse all recent FDA Pet Food Recalls &rarr;</span>
-                    </Link>
-                  </div>
                 </div>
               )}
 
@@ -1202,10 +1191,9 @@ function ScanPageContent() {
                     <AlertTriangle className="w-8 h-8 text-red-600 shrink-0" />
                     <h3 className="text-[#991B1B] text-xl font-black leading-tight uppercase">WARNING: Recall Active</h3>
                 </div>
-                <p className="text-[#B91C1C] font-bold mb-4">This product or brand has an active FDA recall!</p>
-                <div className="bg-white/50 rounded-xl p-4 text-[#7F1D1D] text-sm">
-                    <p className="mb-2"><strong>Reason:</strong> {recallReason}</p>
-                    <p className="text-xs opacity-75">Check the full details on our <Link href="/recalls" className="underline font-bold">Recall Alerts</Link> page.</p>
+                <p className="text-[#B91C1C] font-bold mb-3">This product or brand has an active FDA recall!</p>
+                <div className="bg-white/70 rounded-xl p-4 text-[#7F1D1D] text-sm">
+                    <p><strong>FDA Reason for Recall:</strong> {recallReason}</p>
                 </div>
               </div>
             ) : product.product_name !== 'Unknown Product' && (
@@ -1336,7 +1324,6 @@ function ScanPageContent() {
                 Share Safety Report
               </button>
               <button onClick={resetScanner} className="w-full bg-[#8B5E3C] text-white py-4 rounded-full font-bold text-sm">Scan Another</button>
-              <Link href="/recalls" className="text-[#8B5E3C] font-bold text-xs text-center">View All FDA Recalls &rarr;</Link>
             </div>
 
             <p className="text-[10px] text-gray-400 text-center mt-6 leading-relaxed italic">

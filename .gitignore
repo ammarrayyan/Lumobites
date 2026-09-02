@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# scratch and ide artifacts
+scratch/
+.claude/
+
 .vercel
 .env*
