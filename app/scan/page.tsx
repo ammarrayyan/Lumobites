@@ -643,8 +643,8 @@ function ScanPageContent() {
       }
 
       setRawOcrText(cleaned);
-      setOcrReviewText(cleaned);
       setOcrLoading(false);
+      processOCRResult(cleaned);
     } catch (err: any) {
       console.error('OCR Error:', err);
       setError(err.message || 'Could not read label clearly. Please ensure good lighting and hold camera steady, or paste ingredients manually below.');
@@ -1013,69 +1013,53 @@ function ScanPageContent() {
                       {/* Scanner Container for Html5Qrcode */}
                       <div id="reader" className="w-full h-full min-h-[340px] sm:min-h-[380px] rounded-[22px]"></div>
 
-                      {/* Overlays Active when Camera is Streaming */}
-                      {isCameraStarted && (
-                        <>
-                          {/* Top Status Pill */}
-                          <div className="absolute top-4 left-0 right-0 flex justify-center px-4 z-20 pointer-events-none">
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold tracking-wide shadow-lg">
-                              <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                              </span>
-                              <span>Auto Barcode &amp; Label AI Active</span>
-                            </div>
-                          </div>
-
-                          {/* Viewfinder Reticle Framing Area */}
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 p-6">
-                            <div className="w-[230px] h-[230px] sm:w-[260px] sm:h-[260px] relative rounded-2xl">
-                              {/* 4 Sleek Glowing Corner Brackets */}
-                              <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#C17D3C] rounded-tl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                              <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#C17D3C] rounded-tr-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#C17D3C] rounded-bl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#C17D3C] rounded-br-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-
-                              {/* Center Alignment Reticle */}
-                              <div className="absolute inset-0 flex items-center justify-center opacity-25">
-                                <div className="w-5 h-0.5 bg-white"></div>
-                                <div className="h-5 w-0.5 bg-white -ml-2.75"></div>
-                              </div>
-
-                              {/* Animated Laser Sweep Beam */}
-                              <div className="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-[#FFC278] to-transparent shadow-[0_0_12px_#FFA740] animate-scan-laser"></div>
-                            </div>
-                          </div>
-
-                          {/* Bottom Shutter & Capture Action Bar */}
-                          <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 z-20 px-4">
-                            <button 
-                              type="button"
-                              onClick={captureAndOCR}
-                              className="group flex items-center gap-3 bg-white/95 hover:bg-white text-[#4A3E3D] px-6 py-3.5 rounded-full font-extrabold text-sm shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#EADBCE]"
-                            >
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8B5E3C] to-[#C17D3C] flex items-center justify-center text-white shadow-xs group-hover:rotate-12 transition-transform">
-                                <Camera className="w-4 h-4" />
-                              </div>
-                              <span>Capture &amp; Scan Ingredients</span>
-                            </button>
-                            <span className="text-[10px] text-white/85 font-medium bg-black/50 px-3 py-0.5 rounded-full backdrop-blur-xs">
-                              Hold steady over barcode or tap above for ingredients
-                            </span>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Camera Initializing Placeholder */}
-                      {!isCameraStarted && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-[#161210]">
-                          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#C17D3C] mb-3 animate-pulse">
-                            <Camera className="w-6 h-6" />
-                          </div>
-                          <p className="text-white font-bold text-sm mb-1">Activating Camera Viewport...</p>
-                          <p className="text-white/50 text-xs max-w-[220px]">Please allow camera permissions if prompted</p>
+                      {/* Top Status Pill */}
+                      <div className="absolute top-4 left-0 right-0 flex justify-center px-4 z-20 pointer-events-none">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold tracking-wide shadow-lg">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          </span>
+                          <span>Auto Barcode &amp; Label AI Active</span>
                         </div>
-                      )}
+                      </div>
+
+                      {/* Viewfinder Reticle Framing Area */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 p-6">
+                        <div className="w-[230px] h-[230px] sm:w-[260px] sm:h-[260px] relative rounded-2xl">
+                          {/* 4 Sleek Glowing Corner Brackets */}
+                          <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#C17D3C] rounded-tl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                          <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#C17D3C] rounded-tr-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#C17D3C] rounded-bl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#C17D3C] rounded-br-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+
+                          {/* Center Alignment Reticle */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-25">
+                            <div className="w-5 h-0.5 bg-white"></div>
+                            <div className="h-5 w-0.5 bg-white -ml-2.75"></div>
+                          </div>
+
+                          {/* Animated Laser Sweep Beam */}
+                          <div className="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-[#FFC278] to-transparent shadow-[0_0_12px_#FFA740] animate-scan-laser"></div>
+                        </div>
+                      </div>
+
+                      {/* Bottom Shutter & Capture Action Bar */}
+                      <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 z-20 px-4">
+                        <button 
+                          type="button"
+                          onClick={captureAndOCR}
+                          className="group flex items-center gap-3 bg-white/95 hover:bg-white text-[#4A3E3D] px-6 py-3.5 rounded-full font-extrabold text-sm shadow-[0_8px_30px_rgba(0,0,0,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#EADBCE]"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#8B5E3C] to-[#C17D3C] flex items-center justify-center text-white shadow-xs group-hover:rotate-12 transition-transform">
+                            <Camera className="w-4 h-4" />
+                          </div>
+                          <span>Capture &amp; Scan Ingredients</span>
+                        </button>
+                        <span className="text-[10px] text-white/85 font-medium bg-black/50 px-3 py-0.5 rounded-full backdrop-blur-xs">
+                          Hold steady over barcode or tap above for ingredients
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
@@ -1189,37 +1173,6 @@ function ScanPageContent() {
             </div>
           )}
         </div>
-
-        {/* ── OCR Review Step ── show extracted text before analysis ────────── */}
-        {ocrReviewText && !product && !loading && !ocrLoading && (
-          <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm p-6 space-y-4 animate-fade-in-up">
-            <div className="flex items-center gap-2 mb-1">
-              <Search className="w-5 h-5 text-[#8B5E3C]" />
-              <p className="text-[11px] font-bold text-[#8B5E3C] uppercase tracking-widest">Text Extracted — Review Before Analysis</p>
-            </div>
-            <p className="text-xs text-gray-500 leading-relaxed">Check the text below matches what&apos;s on the label. Edit anything that looks wrong, then tap <strong>Analyze</strong>.</p>
-            <textarea
-              value={ocrReviewText}
-              onChange={e => setOcrReviewText(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-[#E8DDD4] outline-none focus:ring-2 focus:ring-[#8B5E3C] text-xs text-gray-700 font-mono h-36 resize-none leading-relaxed"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => { processOCRResult(ocrReviewText); }}
-                className="flex-1 bg-[#8B5E3C] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5"
-              >
-                <Check className="w-4 h-4" />
-                Analyze These Ingredients
-              </button>
-              <button
-                onClick={() => { setOcrReviewText(''); resetScanner(); }}
-                className="px-4 py-3 rounded-xl border border-[#E8DDD4] text-gray-500 text-sm font-bold"
-              >
-                Retake
-              </button>
-            </div>
-          </div>
-        )}
 
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 p-6 rounded-2xl text-sm mb-6 text-center">
