@@ -349,7 +349,7 @@ export default function Home() {
       )}
 
       {/* HERO SECTION */}
-      <section className="w-full bg-[#F7F3EE] pt-2 sm:pt-8 pb-3 sm:pb-6 px-4 sm:px-8 lg:px-12">
+      <section className="w-full bg-[#F7F3EE] pt-1 sm:pt-6 pb-2 sm:pb-4 px-4 sm:px-8 lg:px-12">
         <div className="max-w-[800px] mx-auto flex flex-col items-center text-center">
           <AnimatedPets />
 
@@ -394,7 +394,7 @@ export default function Home() {
       </section>
 
       {/* MOBILE QUICK ACCESS LAUNCHER (Microsoft 365 Squircle App Launcher Style) */}
-      <section className="md:hidden w-full px-4 pt-2.5 pb-8">
+      <section className="md:hidden w-full px-4 pt-1 pb-4">
         <div className="grid grid-cols-3 gap-x-2 gap-y-3 max-w-xs mx-auto">
           {/* 1. Lost Pets */}
           <Link href="/lost-pets" className="group flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 hover:bg-black/[0.04] active:bg-black/[0.08] active:scale-95" style={{ textDecoration: 'none' }}>
@@ -500,7 +500,7 @@ export default function Home() {
       </section>
 
       {/* SERVICES GRID & CAROUSEL SECTION */}
-      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-8 md:pb-12">
+      <section className="hidden md:block w-full bg-[#FDFAF7] px-6 md:px-8 lg:px-12 pb-4 md:pb-6">
         {/* Carousel Header with Navigation Arrows */}
         <div className="max-w-[1360px] mx-auto mb-4 flex items-center justify-between gap-4">
           <div>
@@ -670,13 +670,13 @@ export default function Home() {
       <AppDownloadSection />
 
       {/* EXPLORE TEASER BANNER */}
-      <section className="hidden md:block w-full bg-[#FCFAF8] px-6 md:px-8 lg:px-12 pb-14 md:pb-20 text-center">
-        <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-8 shadow-sm flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-4">
+      <section className="hidden md:block w-full bg-[#FCFAF8] px-6 md:px-8 lg:px-12 pb-8 md:pb-12 text-center">
+        <div className="max-w-[700px] mx-auto bg-gradient-to-b from-[#FAF5EE] to-[#FAF1E6] border border-[#E8DDD4] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col items-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#F5EDE4] flex items-center justify-center mb-3">
             <Globe className="w-6 h-6 text-[#8B5E3C]" />
           </div>
-          <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] mb-2">Meet Your Pet Community</h2>
-          <p className="text-sm sm:text-base text-[#2B231D] leading-relaxed mb-6 font-normal">
+          <h2 className="text-lg sm:text-xl font-extrabold text-[#2B231D] mb-1.5">Meet Your Pet Community</h2>
+          <p className="text-sm sm:text-base text-[#2B231D] leading-relaxed mb-5 font-normal">
             Connect with local pet owners, follow lost pet alerts, and stay in the loop with everything happening in your neighborhood.
           </p>
           <Link 
@@ -689,9 +689,9 @@ export default function Home() {
               gap: '8px',
               backgroundColor: btnHover ? '#734A2E' : '#8B5E3C',
               color: 'white',
-              padding: '14px 32px',
+              padding: '12px 28px',
               borderRadius: '50px',
-              fontSize: '16px',
+              fontSize: '15px',
               fontWeight: '600',
               textDecoration: 'none',
               boxShadow: btnHover ? '0 6px 20px rgba(139, 94, 60, 0.45)' : '0 4px 15px rgba(139, 94, 60, 0.3)',
@@ -705,8 +705,8 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="hidden md:block w-full px-6 md:px-[48px] py-16" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', maxWidth: '1200px', margin: '0 auto', marginBottom: '48px' }}>
+      <footer className="hidden md:block w-full px-6 md:px-[48px] py-10 md:py-12" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', maxWidth: '1200px', margin: '0 auto', marginBottom: '28px' }}>
           <div style={{ flex: '2 1 300px' }}>
             <Link href="/" className="mb-4 inline-block" style={{ textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
