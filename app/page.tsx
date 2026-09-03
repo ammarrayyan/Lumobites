@@ -472,130 +472,205 @@ export default function Home() {
             ref={carouselRef}
             className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth py-5 px-2 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {/* 1. My Pet Profiles */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6] border border-[#EADBCE] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#D8C5B3] relative overflow-hidden">
+            {/* 1. Find Sitter */}
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#F0E6DA] flex items-center justify-center shadow-inner">
-                    <PawPrint className="w-6 h-6 text-[#8B5E3C]" />
-                  </div>
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl">My Pet Profiles</h3>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#F0E6DA]">
+                  <img
+                    src="/images/services/find-sitter.jpg"
+                    alt="Pet Sitter walking a dog"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#664333] shadow-xs">
+                    Verified Sitters
+                  </span>
                 </div>
-                <p className="text-[#7A6B5E] leading-relaxed relative z-10 text-sm mt-4">
-                  Manage your pets&apos; dietary records, vaccination history, care routines, and share clinical access with verified sitters.
-                </p>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Find a Sitter</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Book trusted, ID-verified local pet sitters, licensed vet boarding, and daycare with instant AI matching.
+                  </p>
+                </div>
               </div>
-              <div className="relative z-10 pt-2">
-                <Link href="/account?tab=pets" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#754D2E] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                  Manage Pets &rarr;
+
+              {/* Action */}
+              <div className="p-5 pt-0">
+                <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-[#C17D3C] hover:bg-[#A86629] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                  Find Sitters &rarr;
                 </Link>
               </div>
             </div>
 
-            {/* 2. Pet Sitting */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FAF9F6] to-[#FAF5EE] border border-[#EADFD5] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#DDCBBF] relative overflow-hidden">
+            {/* 2. Become Sitter */}
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FAF2EB] flex items-center justify-center shadow-inner">
-                    <HomeIcon className="w-6 h-6 text-[#C27353]" />
-                  </div>
-                  <h3 className="text-[#664333] font-extrabold text-xl">Pet Sitting</h3>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#FAF2EB]">
+                  <img
+                    src="/images/services/become-sitter.jpg"
+                    alt="Pet Sitter caring for dog at home"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#2E7852] shadow-xs">
+                    Earn on Your Schedule
+                  </span>
                 </div>
-                <p className="text-[#7A6A63] leading-relaxed relative z-10 text-sm mt-4">
-                  Find trusted, ID-verified pet sitters, licensed vet boarding, and daycare facilities near you. AI finds the perfect match instantly. Sitters keep 100%.
-                </p>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Become a Sitter</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Turn your passion for pets into earnings. Set your own rates, keep 100% of your tips, and connect with neighbors.
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col gap-2 relative z-10 pt-2">
-                <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-[#C27353] hover:bg-[#B06040] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                  Find Sitters &rarr;
-                </Link>
-                <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl border border-[#C27353]/30 text-[#C27353] font-bold text-center hover:bg-[#FAF2EB] hover:border-[#C27353]/60 transition-all text-sm" style={{ textDecoration: 'none' }}>
+
+              {/* Action */}
+              <div className="p-5 pt-0">
+                <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl bg-[#2E7852] hover:bg-[#236040] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Become a Sitter &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 3. Lost Pets */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F9] to-[#ECF1F3] border border-[#DFE5E8] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#CCD5DB] relative overflow-hidden">
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#F0F5F7] flex items-center justify-center shadow-inner">
-                    <Footprints className="w-6 h-6 text-[#517685]" />
-                  </div>
-                  <h3 className="text-[#3B5461] font-extrabold text-xl">Lost Pets</h3>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#F0F5F7]">
+                  <img
+                    src="/images/services/lost-pets.jpg"
+                    alt="Person with dog in a neighborhood park"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#C44D34] shadow-xs">
+                    Free Community Alerts
+                  </span>
                 </div>
-                <p className="text-[#627985] leading-relaxed relative z-10 text-sm mt-4">
-                  Post a lost or found pet instantly. AI searches found pet reports using photo recognition to reunite you faster.
-                </p>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Lost &amp; Found Pets</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Post lost or found pet reports instantly. AI visual recognition matches photos across the community to reunite families faster.
+                  </p>
+                </div>
               </div>
-              <div className="relative z-10 pt-2">
-                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#517685] hover:bg-[#426270] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+
+              {/* Action */}
+              <div className="p-5 pt-0">
+                <Link href="/lost-pets" className="block w-full py-2.5 rounded-xl bg-[#C44D34] hover:bg-[#AB3F28] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Post Lost Pet &rarr;
                 </Link>
               </div>
             </div>
 
-            {/* 4. Pet Food & Safety */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F6F8F5] to-[#EEF2EB] border border-[#DFE5DC] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#CCD5C8] relative overflow-hidden">
+            {/* 4. Adopt Pet */}
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#F2F6F1] flex items-center justify-center shadow-inner">
-                    <Utensils className="w-6 h-6 text-[#63825D]" />
-                  </div>
-                  <h3 className="text-[#3B5237] font-extrabold text-xl">Pet Food</h3>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#FCE8EA]">
+                  <img
+                    src="/images/services/adopt-pet.jpg"
+                    alt="Shelter dog happily hugging adopter"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#BF4456] shadow-xs">
+                    Direct Shelter Connect
+                  </span>
                 </div>
-                <p className="text-[#61755E] leading-relaxed relative z-10 text-sm mt-4">
-                  Scan pet food labels to flag hidden toxins. Get AI recommendations and live FDA recall alerts.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 relative z-10 pt-2">
-                <Link href="/chat" className="block w-full py-2.5 rounded-xl bg-[#63825D] hover:bg-[#516E4C] text-white font-bold text-center transition-colors text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
-                  Find Food &rarr;
-                </Link>
-              </div>
-            </div>
 
-            {/* 5. Pet Adoption */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#FDF5F6] to-[#FAF0F2] border border-[#F4DCDD] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#E8BFC2] relative overflow-hidden">
-              <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FCE8EA] flex items-center justify-center shadow-inner">
-                    <Heart className="w-6 h-6 text-[#D94668]" />
-                  </div>
-                  <h3 className="text-[#7A2A38] font-extrabold text-xl">Pet Adoption</h3>
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Adopt a Pet</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Discover adoptable rescue animals waiting for a home. AI lifestyle matching, visual search, and direct shelter messaging.
+                  </p>
                 </div>
-                <p className="text-[#8F5561] leading-relaxed relative z-10 text-sm mt-4">
-                  Discover rescue pets waiting for a home. AI lifestyle matching, visual photo search, and direct shelter messaging.
-                </p>
               </div>
-              <div className="relative z-10 pt-2">
-                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#D94668] hover:bg-[#B83250] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+
+              {/* Action */}
+              <div className="p-5 pt-0">
+                <Link href="/adoption" className="block w-full py-2.5 rounded-xl bg-[#BF4456] hover:bg-[#A53445] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find to Adopt &rarr;
                 </Link>
               </div>
             </div>
 
-            {/* 6. Partner Portal */}
-            <div className="service-card-interactive w-[320px] xl:w-[340px] shrink-0 snap-start bg-gradient-to-b from-[#F7F6FA] to-[#EFF0F7] border border-[#E0DDF2] rounded-3xl p-6 flex flex-col justify-between gap-4 shadow-sm hover:border-[#C8C3E8] relative overflow-hidden">
+            {/* 5. Partner Portal */}
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 relative z-10 mt-1">
-                  <div className="w-12 h-12 rounded-2xl bg-[#ECEAF7] flex items-center justify-center shadow-inner">
-                    <Building2 className="w-6 h-6 text-[#635BFF]" />
-                  </div>
-                  <h3 className="text-[#3B347A] font-extrabold text-xl">Partner Portal</h3>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#ECEAF7]">
+                  <img
+                    src="/images/services/partner-portal.jpg"
+                    alt="Professional veterinary and pet care setting"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#744A29] shadow-xs">
+                    Business Portal
+                  </span>
                 </div>
-                <p className="text-[#645F94] leading-relaxed relative z-10 text-sm mt-4">
-                  Dedicated portal for rescue shelters, vet clinics, and pet daycare facilities to manage listings &amp; inquiries.
-                </p>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Partner Portal</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Dedicated business portal for rescue shelters, veterinary clinics, and pet daycare facilities to manage listings &amp; client inquiries.
+                  </p>
+                </div>
               </div>
-              <div className="relative z-10 pt-2">
+
+              {/* Action */}
+              <div className="p-5 pt-0">
                 <button
                   type="button"
                   onClick={handleOpenPartnerPortal}
-                  className="block w-full py-3 rounded-xl bg-[#635BFF] hover:bg-[#4E44E6] text-white font-bold text-center transition-colors shadow-sm text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                  className="block w-full py-2.5 rounded-xl bg-[#744A29] hover:bg-[#5C371B] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
                 >
                   Partner Portal &rarr;
                 </button>
+              </div>
+            </div>
+
+            {/* 6. City Board */}
+            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div>
+                {/* Photo Banner */}
+                <div className="relative h-[180px] w-full overflow-hidden bg-[#F7F6FA]">
+                  <img
+                    src="/images/services/city-board.jpg"
+                    alt="Community members and pets gathering outdoors"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#3B5F76] shadow-xs">
+                    Local Community
+                  </span>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">City Board</h3>
+                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                    Connect with local pet owners, ask questions, find vetted groomers and clinics, and share neighborhood recommendations.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action */}
+              <div className="p-5 pt-0">
+                <Link href="/city-board" className="block w-full py-2.5 rounded-xl bg-[#3B5F76] hover:bg-[#2C485A] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                  Explore Board &rarr;
+                </Link>
               </div>
             </div>
           </div>
