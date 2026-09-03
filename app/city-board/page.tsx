@@ -260,7 +260,7 @@ export default function CityBoardPage() {
       const res = await fetch('/api/city-board/posts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId, device_cookie: deviceCookie })
+        body: JSON.stringify({ post_id: postId, device_cookie: deviceCookie, author_email: userEmail })
       });
       if (!res.ok) {
         const data = await res.json();
@@ -917,7 +917,8 @@ export default function CityBoardPage() {
           <div className="space-y-4">
             {filteredPosts.map(post => {
               const isTrending = (post.helpful_count || 0) >= 3 || (post.reply_count || 0) >= 3;
-              const isMine = post.device_cookie === deviceCookie;
+              const isAdmin = !!(userEmail && (userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' || userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'));
+              const isMine = (deviceCookie && post.device_cookie === deviceCookie) || isAdmin;
               const isBookmarked = savedPostIds.includes(post.post_id);
               const isExpanded = !!expandedPostIds[post.post_id];
               const repliesForPost = (postRepliesMap[post.post_id] || []).filter(r => !blockedCookies.includes(r.device_cookie));
@@ -933,19 +934,19 @@ export default function CityBoardPage() {
                   <div className="p-5 sm:p-7">
                     
                     {/* Top Meta Bar */}
-                    <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                    <div className="flex items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {/* Category Badge */}
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border bg-[#FAF6F4] text-[#8B5E3C] border-[#E8DDD4]">
+                        {/* City Pill */}
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FAF6F4] text-[#8B5E3C] border border-[#E8DDD4]">
+                          <MapPin className="w-3 h-3 text-[#8B5E3C]" />
+                          <span>{post.city}</span>
+                        </span>
+
+                        {/* Category Pill */}
+                        <span className="text-[11px] font-bold text-[#8B7E7D] bg-gray-50 border border-gray-200 px-2.5 py-0.5 rounded-full">
                           {post.category}
                         </span>
 
-                        {/* City Location */}
-                        <span className="text-xs font-semibold text-[#191919] bg-[#FAF6F4] border border-[#E8DDD4] px-3 py-1 rounded-full flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-[#8B5E3C]" /> {post.city}
-                        </span>
-
-                        {/* Trending Badge */}
                         {isTrending && (
                           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full flex items-center gap-1">
                             <Flame className="w-3 h-3 text-amber-600 fill-amber-500" />
@@ -960,7 +961,7 @@ export default function CityBoardPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 ml-auto">
+                      <div className="flex items-center gap-2">
                         {/* Bookmark Button - Signed-in Gated */}
                         <button
                           type="button"
@@ -974,44 +975,51 @@ export default function CityBoardPage() {
                         >
                           <Bookmark className={`w-3.5 h-3.5 ${isBookmarked && userEmail ? 'fill-white' : ''}`} />
                         </button>
-
-                        {/* Timestamp */}
-                        <span className="text-xs text-[#8B7E7D] font-medium">
-                          {formatDistanceToNow(new Date(post.created_at))} ago
-                        </span>
                       </div>
                     </div>
 
-                    {/* Main Title / Question Treatment (Click expands inline) */}
-                    <div 
-                      onClick={() => toggleExpandPost(post.post_id)} 
-                      className="cursor-pointer group/title"
+                    {/* Content */}
+                    <Link
+                      href={`/city-board/${post.post_id}`}
+                      className="block group cursor-pointer"
+                      style={{ textDecoration: 'none' }}
                     >
-                      <h3 className="text-lg sm:text-xl font-extrabold text-[#191919] leading-snug tracking-tight mb-2 group-hover/title:text-[#8B5E3C] transition-colors">
+                      <p className="text-[15px] sm:text-base text-[#2B231D] leading-relaxed font-normal mb-3 whitespace-pre-wrap group-hover:text-[#8B5E3C] transition-colors">
                         {post.content}
-                      </h3>
-                    </div>
+                      </p>
+                    </Link>
 
-                    {/* Action Bar */}
-                    <div className="flex items-center justify-between border-t border-[#E8DDD4] pt-4 mt-4 flex-wrap gap-3">
-                      {/* Left: Reaction Picker & Expand Comments Indicator */}
-                      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                        {/* Facebook Reaction Picker for Post */}
-                        <FacebookReactionPicker
-                          itemId={post.post_id}
-                          initialHelpfulCount={post.helpful_count || 0}
-                          size="sm"
-                          showSummary={true}
-                          minimalHeartStyle={true}
-                        />
+                    {/* Footer / Interaction Bar */}
+                    <div className="flex items-center justify-between pt-3 border-t border-[#F2ECE6] text-xs font-semibold text-[#8B7E7D] gap-2 flex-wrap">
+                      {/* Left: Time + Helpful Vote + Comments count */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="flex items-center gap-1 text-gray-400 font-normal">
+                          <Clock className="w-3.5 h-3.5" />
+                          {formatRelativeTime(post.created_at)}
+                        </span>
 
-                        {/* Comment-Count Indicator / Expand Toggle */}
+                        {/* Helpful / Upvote button */}
+                        <button
+                          type="button"
+                          onClick={() => handleHelpfulVote(post.post_id)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                            post.user_has_voted 
+                              ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-xs' 
+                              : 'bg-[#FAF6F4] text-[#8B5E3C] border-[#E8DDD4] hover:bg-[#F2ECE6]'
+                          }`}
+                          title="Mark this post as helpful"
+                        >
+                          <ThumbsUp className={`w-3.5 h-3.5 ${post.user_has_voted ? 'fill-white' : ''}`} />
+                          <span>{post.helpful_count || 0} {post.helpful_count === 1 ? 'Helpful' : 'Helpful'}</span>
+                        </button>
+
+                        {/* Inline Expand Comments Button */}
                         <button
                           type="button"
                           onClick={() => toggleExpandPost(post.post_id)}
-                          className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                            isExpanded
-                              ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-2xs'
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                            isExpanded 
+                              ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' 
                               : 'bg-[#FAF6F4] text-[#4A3E3D] hover:bg-[#8B5E3C] hover:text-white border-[#E8DDD4]'
                           }`}
                         >
@@ -1118,7 +1126,7 @@ export default function CityBoardPage() {
                                 const res = await fetch('/api/city-board/replies', {
                                   method: 'DELETE',
                                   headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ id: replyId })
+                                  body: JSON.stringify({ id: replyId, device_cookie: deviceCookie, author_email: userEmail })
                                 });
 
                                 if (!res.ok) {

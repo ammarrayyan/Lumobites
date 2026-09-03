@@ -92,15 +92,52 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    if (!isAuthorizedAdmin(req)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
-    const { id } = body; // reply id
+    const { id, device_cookie, author_email } = body; // reply id
 
     if (!id) {
       return NextResponse.json({ error: 'Missing reply id' }, { status: 400 });
+    }
+
+    const cleanEmail = (author_email || '').toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(req) || 
+      cleanEmail === 'ammar-rayyan@hotmail.com' || 
+      cleanEmail === 'reviewer@lumobites.net';
+
+    if (!isAdmin) {
+      if (!device_cookie && !cleanEmail) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      // Fetch the reply to verify owner
+      const { data: reply, error: fetchErr } = await supabaseAdmin
+        .from('city_board_replies')
+        .select('id, post_id, device_cookie, author_email')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (fetchErr || !reply) {
+        return NextResponse.json({ error: 'Reply not found' }, { status: 404 });
+      }
+
+      const isReplyAuthor = 
+        (device_cookie && reply.device_cookie && reply.device_cookie === device_cookie) ||
+        (cleanEmail && reply.author_email && reply.author_email.toLowerCase().trim() === cleanEmail);
+
+      if (!isReplyAuthor) {
+        // Also allow the parent post author to moderate/delete comments on their post
+        const { data: parentPost } = await supabaseAdmin
+          .from('city_board_posts')
+          .select('device_cookie')
+          .eq('post_id', reply.post_id)
+          .maybeSingle();
+
+        const isPostOwner = parentPost && device_cookie && parentPost.device_cookie === device_cookie;
+
+        if (!isPostOwner) {
+          return NextResponse.json({ error: 'Unauthorized to delete this reply' }, { status: 401 });
+        }
+      }
     }
 
     const { error } = await supabaseAdmin

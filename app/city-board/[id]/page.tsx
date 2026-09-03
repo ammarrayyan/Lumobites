@@ -176,7 +176,7 @@ export default function CityBoardPostPage() {
       const res = await fetch('/api/city-board/posts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: post.post_id, device_cookie: deviceCookie })
+        body: JSON.stringify({ post_id: post.post_id, device_cookie: deviceCookie, author_email: userEmail })
       });
       if (!res.ok) {
         const data = await res.json();
@@ -372,6 +372,8 @@ export default function CityBoardPostPage() {
     );
   }
 
+  const isAdmin = !!(userEmail && (userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' || userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'));
+  const isMine = (deviceCookie && post.device_cookie === deviceCookie) || isAdmin;
   const isBookmarked = savedPostIds.includes(post.post_id);
 
   return (
@@ -411,7 +413,7 @@ export default function CityBoardPostPage() {
         {/* MAIN POST CARD (SITE-WIDE CONSISTENT CARD STYLING) */}
         <div className="bg-white rounded-2xl border border-[#E8DDD4] shadow-sm mb-8 overflow-hidden">
           <div className="p-6 sm:p-8 relative">
-            {post.device_cookie === deviceCookie && (
+            {isMine && (
               <div className="absolute top-6 right-6 bg-[#8B5E3C] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-md">
                 Your Post
               </div>
@@ -464,7 +466,7 @@ export default function CityBoardPostPage() {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
-                {post.device_cookie === deviceCookie ? (
+                {isMine ? (
                   <button
                     onClick={handleDeletePost}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:underline transition-colors cursor-pointer border-none bg-transparent"
@@ -507,7 +509,7 @@ export default function CityBoardPostPage() {
             currentUserName={userEmail ? userEmail.split('@')[0] : ''}
             postAuthorCookie={post.device_cookie}
             currentUserCookie={deviceCookie}
-            isPostAuthor={post.device_cookie === deviceCookie}
+            isPostAuthor={isMine}
             title={`Replies (${post.reply_count || replies.length})`}
             placeholder="Write a reply..."
             allowPhoto={true}
@@ -544,7 +546,7 @@ export default function CityBoardPostPage() {
               const res = await fetch('/api/city-board/replies', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: replyId })
+                body: JSON.stringify({ id: replyId, device_cookie: deviceCookie, author_email: userEmail })
               });
 
               if (!res.ok) {

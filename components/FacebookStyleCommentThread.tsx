@@ -330,11 +330,14 @@ export default function FacebookStyleCommentThread({
     const timeAgo = formatFacebookTime(comment.createdAt);
     const likeState = likesMap[comment.id] || { count: 0, liked: false };
 
+    const cleanCurrentEmail = (currentUserEmail || '').toLowerCase().trim();
+    const cleanCommentEmail = (comment.authorEmail || '').toLowerCase().trim();
     const isOwnComment = (
-      (currentUserEmail && comment.authorEmail && currentUserEmail.toLowerCase().trim() === comment.authorEmail.toLowerCase().trim()) ||
+      (cleanCurrentEmail && cleanCommentEmail && cleanCurrentEmail === cleanCommentEmail) ||
       (currentUserCookie && comment.deviceCookie && currentUserCookie === comment.deviceCookie) ||
-      currentUserEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' ||
-      currentUserEmail.toLowerCase().trim() === 'reviewer@lumobites.net'
+      cleanCurrentEmail === 'ammar-rayyan@hotmail.com' ||
+      cleanCurrentEmail === 'reviewer@lumobites.net' ||
+      isPostAuthor
     );
 
     const isReplyOpen = replyingToId === comment.id;
