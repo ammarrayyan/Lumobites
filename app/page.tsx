@@ -418,13 +418,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(46, 120, 82, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <PawPrint className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#2E7852] transition-colors tracking-tight">
                   Find a Sitter
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -433,7 +433,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6">
-                <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-[#2E7852] hover:bg-[#236040] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find Sitters &rarr;
                 </Link>
               </div>
@@ -445,13 +445,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(196, 117, 24, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <Sparkles className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#C47518] transition-colors tracking-tight">
                   Become a Sitter
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -460,7 +460,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6">
-                <Link href="/petsitting?tab=become" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                <Link href="/petsitting?tab=become" className="block w-full py-3 rounded-xl bg-[#C47518] hover:bg-[#A86010] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Become a Sitter &rarr;
                 </Link>
               </div>
@@ -472,13 +472,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(196, 77, 52, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <Footprints className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#C44D34] transition-colors tracking-tight">
                   Lost &amp; Found Pets
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -487,7 +487,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6">
-                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#C44D34] hover:bg-[#AB3F28] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Post Lost Pet &rarr;
                 </Link>
               </div>
@@ -499,13 +499,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(191, 68, 86, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <Heart className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#BF4456] transition-colors tracking-tight">
                   Adopt a Pet
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -514,7 +514,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6">
-                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#BF4456] hover:bg-[#A53445] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find to Adopt &rarr;
                 </Link>
               </div>
@@ -526,13 +526,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(116, 74, 41, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <Building2 className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#744A29] transition-colors tracking-tight">
                   Partner Portal
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -544,7 +544,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleOpenPartnerPortal}
-                  className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                  className="block w-full py-3 rounded-xl bg-[#744A29] hover:bg-[#5C371B] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
                 >
                   Partner Portal &rarr;
                 </button>
@@ -557,13 +557,13 @@ export default function Home() {
                 <div 
                   className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
-                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
+                    background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(59, 95, 118, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
                   <MessageSquare className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#3B5F76] transition-colors tracking-tight">
                   City Board
                 </h3>
                 <p className="text-sm text-[#7A6B5E] leading-relaxed">
@@ -572,7 +572,7 @@ export default function Home() {
               </div>
 
               <div className="pt-6">
-                <Link href="/city-board" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+                <Link href="/city-board" className="block w-full py-3 rounded-xl bg-[#3B5F76] hover:bg-[#2C485A] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Explore Board &rarr;
                 </Link>
               </div>
