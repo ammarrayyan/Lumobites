@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const postId = searchParams.get('post_id');
     const deviceCookie = searchParams.get('device_cookie');
     const keyword = searchParams.get('keyword');
-    const sort = searchParams.get('sort') || 'helpful';
+    const sort = searchParams.get('sort') || 'latest';
 
     const isAdmin = isAuthorizedAdmin(req);
 
@@ -74,12 +74,12 @@ export async function GET(req: NextRequest) {
       query = query.eq('device_cookie', deviceCookie);
     }
 
-    if (sort === 'latest') {
+    if (sort === 'popular') {
       query = query.order('created_at', { ascending: false });
-    } else if (sort === 'popular') {
-      query = query.order('created_at', { ascending: false });
-    } else {
+    } else if (sort === 'helpful') {
       query = query.order('helpful_count', { ascending: false }).order('created_at', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
     }
 
     const { data, error } = await query.limit(50);
@@ -128,7 +128,9 @@ export async function GET(req: NextRequest) {
 
     if (sort === 'popular') {
       formattedData.sort((a: any, b: any) => b.reply_count - a.reply_count);
-    } else if (sort === 'latest') {
+    } else if (sort === 'helpful') {
+      formattedData.sort((a: any, b: any) => (b.helpful_count || 0) - (a.helpful_count || 0));
+    } else {
       formattedData.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
 

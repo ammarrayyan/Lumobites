@@ -517,9 +517,13 @@ export default function CityBoardPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         setNewContent('');
         setNewCategory('General');
         showToast('Discussion posted successfully!');
+        if (data.post) {
+          setPosts(prev => [data.post, ...prev.filter(p => p.post_id !== data.post.post_id)]);
+        }
         fetchPosts();
       } else {
         const err = await res.json();
@@ -1129,7 +1133,7 @@ export default function CityBoardPage() {
 
                                 setPostRepliesMap(prev => ({
                                   ...prev,
-                                  [post.post_id]: (prev[post.post_id] || []).filter(r => r.id !== replyId)
+                                  [post.post_id]: (prev[post.post_id] || []).filter(r => String(r.id) !== String(replyId))
                                 }));
                                 setPosts(prev => prev.map(p => p.post_id === post.post_id ? { ...p, reply_count: Math.max(0, (p.reply_count || 1) - 1) } : p));
                                 showToast("Reply deleted.");

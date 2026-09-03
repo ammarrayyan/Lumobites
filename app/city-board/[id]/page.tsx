@@ -554,7 +554,7 @@ export default function CityBoardPostPage() {
                 throw new Error(data.error || 'Failed to delete reply');
               }
 
-              setReplies(prev => prev.filter(r => r.id !== replyId));
+              setReplies(prev => prev.filter(r => String(r.id) !== String(replyId)));
               setPost((prev: any) => prev ? { ...prev, reply_count: Math.max(0, (prev.reply_count || 1) - 1) } : prev);
               showToast("Reply deleted.");
             }}

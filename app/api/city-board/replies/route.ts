@@ -109,30 +109,36 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Fetch the reply to verify owner
+      // Fetch the reply to verify owner (city_board_replies columns: id, post_id, content, device_cookie, created_at)
       const { data: reply, error: fetchErr } = await supabaseAdmin
         .from('city_board_replies')
-        .select('id, post_id, device_cookie, author_email')
+        .select('id, post_id, device_cookie')
         .eq('id', id)
         .maybeSingle();
 
-      if (fetchErr || !reply) {
+      if (fetchErr) {
+        console.error('[City Board Replies DELETE fetchErr]', fetchErr);
+        return NextResponse.json({ error: fetchErr.message || 'Database error fetching reply' }, { status: 500 });
+      }
+
+      if (!reply) {
         return NextResponse.json({ error: 'Reply not found' }, { status: 404 });
       }
 
-      const isReplyAuthor = 
-        (device_cookie && reply.device_cookie && reply.device_cookie === device_cookie) ||
-        (cleanEmail && reply.author_email && reply.author_email.toLowerCase().trim() === cleanEmail);
+      const isReplyAuthor = (device_cookie && reply.device_cookie && reply.device_cookie === device_cookie);
 
       if (!isReplyAuthor) {
         // Also allow the parent post author to moderate/delete comments on their post
         const { data: parentPost } = await supabaseAdmin
           .from('city_board_posts')
-          .select('device_cookie')
+          .select('device_cookie, email')
           .eq('post_id', reply.post_id)
           .maybeSingle();
 
-        const isPostOwner = parentPost && device_cookie && parentPost.device_cookie === device_cookie;
+        const isPostOwner = parentPost && (
+          (device_cookie && parentPost.device_cookie && parentPost.device_cookie === device_cookie) ||
+          (cleanEmail && parentPost.email && parentPost.email.toLowerCase().trim() === cleanEmail)
+        );
 
         if (!isPostOwner) {
           return NextResponse.json({ error: 'Unauthorized to delete this reply' }, { status: 401 });
