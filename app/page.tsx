@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
 import AppDownloadSection from '@/components/AppDownloadSection';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
 
@@ -49,41 +49,6 @@ export default function Home() {
       window.removeEventListener('storage', syncStatus);
     };
   }, []);
-
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const updateCarouselScroll = () => {
-    if (!carouselRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
-  };
-
-  useEffect(() => {
-    updateCarouselScroll();
-    const el = carouselRef.current;
-    if (el) {
-      el.addEventListener('scroll', updateCarouselScroll, { passive: true });
-      window.addEventListener('resize', updateCarouselScroll);
-    }
-    return () => {
-      if (el) {
-        el.removeEventListener('scroll', updateCarouselScroll);
-      }
-      window.removeEventListener('resize', updateCarouselScroll);
-    };
-  }, []);
-
-  const scrollCarousel = (direction: 'left' | 'right') => {
-    if (!carouselRef.current) return;
-    const cardWidth = 340;
-    carouselRef.current.scrollBy({
-      left: direction === 'left' ? -cardWidth : cardWidth,
-      behavior: 'smooth',
-    });
-  };
 
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,172 +399,152 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DESKTOP KEY SERVICES GRID & CAROUSEL */}
-        <section className="w-full bg-[#FDFAF7] px-8 lg:px-12 pb-8 pt-2">
-          <div className="max-w-[1360px] mx-auto mb-4 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-extrabold text-[#2B231D] tracking-tight">
-                Explore Key Services
-              </h2>
-              <p className="text-sm text-[#7A6B5E]">
-                Manage pet profiles, find verified sitters, lost pets, nutritional analysis, adoption, and partner resources.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => scrollCarousel('left')}
-                disabled={!canScrollLeft}
-                aria-label="Scroll left"
-                className="w-9 h-9 rounded-full border border-[#E0D2C4] bg-white hover:bg-[#FAF5EE] text-[#5C4533] flex items-center justify-center transition-all shadow-2xs hover:shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollCarousel('right')}
-                disabled={!canScrollRight}
-                aria-label="Scroll right"
-                className="w-9 h-9 rounded-full border border-[#E0D2C4] bg-white hover:bg-[#FAF5EE] text-[#5C4533] flex items-center justify-center transition-all shadow-2xs hover:shadow-xs disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+        {/* DESKTOP KEY SERVICES GRID */}
+        <section className="w-full bg-[#FDFAF7] px-8 lg:px-12 py-10">
+          <div className="max-w-[1240px] mx-auto mb-8 text-center">
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#191919] tracking-tight mb-2">
+              Explore Key Services
+            </h2>
+            <p className="text-base text-[#7A6B5E] max-w-[650px] mx-auto">
+              Everything you need for your pet&apos;s daily care, safety, and community &mdash; all in one unified platform.
+            </p>
           </div>
 
-          {/* Horizontal Carousel Track */}
-          <div 
-            ref={carouselRef}
-            className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth py-5 px-2 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
+          {/* Direct 3x2 Grid Display (All 6 Services Visible At Once) */}
+          <div className="max-w-[1240px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* 1. Find Sitter */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(46, 120, 82, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <PawPrint className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <PawPrint className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Find a Sitter</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Find a Sitter
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Book trusted, ID-verified local pet sitters, licensed vet boarding, and daycare with instant AI matching.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
-                <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-[#2E7852] hover:bg-[#236040] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="pt-6">
+                <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find Sitters &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 2. Become Sitter */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(196, 117, 24, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <Sparkles className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <Sparkles className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Become a Sitter</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Become a Sitter
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Turn your passion for pets into earnings. Set your own rates, keep 100% of your tips, and connect with neighbors.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
-                <Link href="/petsitting?tab=become" className="block w-full py-3 rounded-xl bg-[#C47518] hover:bg-[#A86010] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="pt-6">
+                <Link href="/petsitting?tab=become" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Become a Sitter &rarr;
                 </Link>
               </div>
             </div>
 
-            {/* 3. Lost Pets */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            {/* 3. Lost & Found Pets */}
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(196, 77, 52, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <Footprints className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <Footprints className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Lost &amp; Found Pets</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Lost &amp; Found Pets
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Post lost or found pet reports instantly. AI visual recognition matches photos across the community to reunite families faster.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
-                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#C44D34] hover:bg-[#AB3F28] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="pt-6">
+                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Post Lost Pet &rarr;
                 </Link>
               </div>
             </div>
 
-            {/* 4. Adopt Pet */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            {/* 4. Adopt a Pet */}
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(191, 68, 86, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <Heart className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <Heart className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Adopt a Pet</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Adopt a Pet
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Discover adoptable rescue animals waiting for a home. AI lifestyle matching, visual search, and direct shelter messaging.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
-                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#BF4456] hover:bg-[#A53445] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="pt-6">
+                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find to Adopt &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 5. Partner Portal */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(116, 74, 41, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <Building2 className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <Building2 className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Partner Portal</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Partner Portal
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Dedicated business portal for rescue shelters, veterinary clinics, and pet daycare facilities to manage listings &amp; client inquiries.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
+              <div className="pt-6">
                 <button
                   type="button"
                   onClick={handleOpenPartnerPortal}
-                  className="block w-full py-3 rounded-xl bg-[#744A29] hover:bg-[#5C371B] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                  className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
                 >
                   Partner Portal &rarr;
                 </button>
@@ -607,26 +552,27 @@ export default function Home() {
             </div>
 
             {/* 6. City Board */}
-            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+            <div className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-md hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-between">
+              <div>
                 <div 
-                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
                   style={{
-                    background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
-                    boxShadow: '0 10px 24px -4px rgba(59, 95, 118, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                    background: 'linear-gradient(135deg, #A86B42 0%, #8B5E3C 100%)',
+                    boxShadow: '0 8px 20px -3px rgba(139, 94, 60, 0.32), inset 0 1.5px 2px rgba(255, 255, 255, 0.45)',
                   }}
                 >
-                  <MessageSquare className="w-10 h-10 text-white" strokeWidth={2.2} />
+                  <MessageSquare className="w-8 h-8 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">City Board</h3>
-                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  City Board
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
                   Connect with local pet owners, ask questions, find vetted groomers and clinics, and share neighborhood recommendations.
                 </p>
               </div>
 
-              {/* Action */}
-              <div className="p-6 pt-0">
-                <Link href="/city-board" className="block w-full py-3 rounded-xl bg-[#3B5F76] hover:bg-[#2C485A] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="pt-6">
+                <Link href="/city-board" className="block w-full py-3 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-center transition-all shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Explore Board &rarr;
                 </Link>
               </div>
