@@ -473,168 +473,133 @@ export default function Home() {
             className="max-w-[1360px] mx-auto flex gap-5 overflow-x-auto scroll-smooth py-5 px-2 snap-x snap-mandatory focus:outline-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {/* 1. Find Sitter */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#F0E6DA]">
-                  <img
-                    src="/images/services/find-sitter.jpg"
-                    alt="Pet Sitter walking a dog"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#664333] shadow-xs">
-                    Verified Sitters
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #4E9F76 0%, #2E7852 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(46, 120, 82, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <PawPrint className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Find a Sitter</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Book trusted, ID-verified local pet sitters, licensed vet boarding, and daycare with instant AI matching.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Find a Sitter</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Book trusted, ID-verified local pet sitters, licensed vet boarding, and daycare with instant AI matching.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
-                <Link href="/petsitting" className="block w-full py-2.5 rounded-xl bg-[#C17D3C] hover:bg-[#A86629] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="p-6 pt-0">
+                <Link href="/petsitting" className="block w-full py-3 rounded-xl bg-[#2E7852] hover:bg-[#236040] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find Sitters &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 2. Become Sitter */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#FAF2EB]">
-                  <img
-                    src="/images/services/become-sitter.jpg"
-                    alt="Pet Sitter caring for dog at home"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#2E7852] shadow-xs">
-                    Earn on Your Schedule
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #E5A038 0%, #C47518 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(196, 117, 24, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <Sparkles className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Become a Sitter</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Turn your passion for pets into earnings. Set your own rates, keep 100% of your tips, and connect with neighbors.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Become a Sitter</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Turn your passion for pets into earnings. Set your own rates, keep 100% of your tips, and connect with neighbors.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
-                <Link href="/petsitting?tab=become" className="block w-full py-2.5 rounded-xl bg-[#2E7852] hover:bg-[#236040] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="p-6 pt-0">
+                <Link href="/petsitting?tab=become" className="block w-full py-3 rounded-xl bg-[#C47518] hover:bg-[#A86010] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Become a Sitter &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 3. Lost Pets */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#F0F5F7]">
-                  <img
-                    src="/images/services/lost-pets.jpg"
-                    alt="Person with dog in a neighborhood park"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#C44D34] shadow-xs">
-                    Free Community Alerts
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #E06D53 0%, #C44D34 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(196, 77, 52, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <Footprints className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Lost &amp; Found Pets</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Post lost or found pet reports instantly. AI visual recognition matches photos across the community to reunite families faster.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Lost &amp; Found Pets</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Post lost or found pet reports instantly. AI visual recognition matches photos across the community to reunite families faster.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
-                <Link href="/lost-pets" className="block w-full py-2.5 rounded-xl bg-[#C44D34] hover:bg-[#AB3F28] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="p-6 pt-0">
+                <Link href="/lost-pets" className="block w-full py-3 rounded-xl bg-[#C44D34] hover:bg-[#AB3F28] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Post Lost Pet &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 4. Adopt Pet */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#FCE8EA]">
-                  <img
-                    src="/images/services/adopt-pet.jpg"
-                    alt="Shelter dog happily hugging adopter"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#BF4456] shadow-xs">
-                    Direct Shelter Connect
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #DE6B7C 0%, #BF4456 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(191, 68, 86, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <Heart className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Adopt a Pet</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Discover adoptable rescue animals waiting for a home. AI lifestyle matching, visual search, and direct shelter messaging.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Adopt a Pet</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Discover adoptable rescue animals waiting for a home. AI lifestyle matching, visual search, and direct shelter messaging.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
-                <Link href="/adoption" className="block w-full py-2.5 rounded-xl bg-[#BF4456] hover:bg-[#A53445] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="p-6 pt-0">
+                <Link href="/adoption" className="block w-full py-3 rounded-xl bg-[#BF4456] hover:bg-[#A53445] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Find to Adopt &rarr;
                 </Link>
               </div>
             </div>
 
             {/* 5. Partner Portal */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#ECEAF7]">
-                  <img
-                    src="/images/services/partner-portal.jpg"
-                    alt="Professional veterinary and pet care setting"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#744A29] shadow-xs">
-                    Business Portal
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #9C6C48 0%, #744A29 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(116, 74, 41, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <Building2 className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">Partner Portal</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Dedicated business portal for rescue shelters, veterinary clinics, and pet daycare facilities to manage listings &amp; client inquiries.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">Partner Portal</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Dedicated business portal for rescue shelters, veterinary clinics, and pet daycare facilities to manage listings &amp; client inquiries.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
+              <div className="p-6 pt-0">
                 <button
                   type="button"
                   onClick={handleOpenPartnerPortal}
-                  className="block w-full py-2.5 rounded-xl bg-[#744A29] hover:bg-[#5C371B] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
+                  className="block w-full py-3 rounded-xl bg-[#744A29] hover:bg-[#5C371B] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none"
                 >
                   Partner Portal &rarr;
                 </button>
@@ -642,33 +607,26 @@ export default function Home() {
             </div>
 
             {/* 6. City Board */}
-            <div className="service-card-interactive group w-[310px] xl:w-[330px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl overflow-hidden shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
-              <div>
-                {/* Photo Banner */}
-                <div className="relative h-[180px] w-full overflow-hidden bg-[#F7F6FA]">
-                  <img
-                    src="/images/services/city-board.jpg"
-                    alt="Community members and pets gathering outdoors"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-                  <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 backdrop-blur-md text-[#3B5F76] shadow-xs">
-                    Local Community
-                  </span>
+            <div className="service-card-interactive group w-[300px] xl:w-[320px] shrink-0 snap-start bg-white border border-[#EADBCE] rounded-3xl shadow-xs hover:shadow-md hover:border-[#C8B09B] transition-all duration-300 flex flex-col justify-between">
+              <div className="pt-7 pb-3 px-6 flex flex-col items-center text-center">
+                <div 
+                  className="w-20 h-20 rounded-[24px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #5B7E96 0%, #3B5F76 100%)',
+                    boxShadow: '0 10px 24px -4px rgba(59, 95, 118, 0.38), inset 0 2px 3px rgba(255, 255, 255, 0.5)',
+                  }}
+                >
+                  <MessageSquare className="w-10 h-10 text-white" strokeWidth={2.2} />
                 </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="text-[#5C3E28] font-extrabold text-xl mb-2">City Board</h3>
-                  <p className="text-[#7A6B5E] text-sm leading-relaxed">
-                    Connect with local pet owners, ask questions, find vetted groomers and clinics, and share neighborhood recommendations.
-                  </p>
-                </div>
+                <h3 className="text-[#5C3E28] font-extrabold text-xl mt-5 mb-2 tracking-tight">City Board</h3>
+                <p className="text-[#7A6B5E] text-sm leading-relaxed">
+                  Connect with local pet owners, ask questions, find vetted groomers and clinics, and share neighborhood recommendations.
+                </p>
               </div>
 
               {/* Action */}
-              <div className="p-5 pt-0">
-                <Link href="/city-board" className="block w-full py-2.5 rounded-xl bg-[#3B5F76] hover:bg-[#2C485A] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
+              <div className="p-6 pt-0">
+                <Link href="/city-board" className="block w-full py-3 rounded-xl bg-[#3B5F76] hover:bg-[#2C485A] text-white font-bold text-center transition-colors shadow-xs text-sm hover:scale-[1.01] active:scale-[0.99]" style={{ textDecoration: 'none' }}>
                   Explore Board &rarr;
                 </Link>
               </div>
