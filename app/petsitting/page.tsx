@@ -7039,6 +7039,9 @@ export function PetSittingContent() {
                                 </span>
                               </span>
                             </div>
+                            <div className="mt-2 pt-2 border-t border-[#E8DDD4]/60 text-[10.5px] text-[#8B7E7D] leading-snug">
+                              This is an estimate only. Payment is arranged directly between you and the sitter &mdash; Lumo Bites does not process, hold, or collect any payment.
+                            </div>
                           </>
                         );
                       })()}
@@ -7354,6 +7357,9 @@ export function PetSittingContent() {
                       <p className="text-lg font-black text-[#4A3E3D]">{(selectedSitterForReviews.service_types?.length || 0) > 1 ? <><span className="text-sm font-medium text-[#8B7E7D] mr-1">From</span>${selectedSitterForReviews.rate_per_night}</> : <>${selectedSitterForReviews.rate_per_night}<span className="text-sm font-medium text-[#8B7E7D]">/{selectedSitterForReviews.rate_type || 'night'}</span></>}</p>
                     )}
                   </div>
+                  <p className="text-[11px] text-[#8B7E7D] mt-2.5 leading-snug">
+                    Rates are set by the sitter and paid directly to them. Lumo Bites does not handle payment for sitting services.
+                  </p>
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-[#8B7E7D] uppercase tracking-wider mb-1">Pets Allowed</h4>
