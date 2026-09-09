@@ -339,16 +339,16 @@ button, a, [role="button"] {
   animation: sheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Refined Desktop Hover-Scale for Explore Key Services Cards */
+/* Refined Desktop Hover Lift for Explore Key Services Cards */
 .service-card-interactive {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
   will-change: transform, box-shadow;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .service-card-interactive:hover {
-    transform: scale(1.04);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px -4px rgba(139, 94, 60, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.04);
     cursor: pointer;
     z-index: 10;
   }

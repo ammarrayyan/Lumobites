@@ -5,7 +5,7 @@ import { Smartphone, CheckCircle2, Bell, ShieldCheck, Heart } from 'lucide-react
 
 export default function AppDownloadSection() {
   return (
-    <section className="hidden md:block w-full bg-white border-y border-[#E8DDD4] py-10 sm:py-14 px-4 sm:px-8 lg:px-12 overflow-hidden">
+    <section className="hidden md:block w-full bg-[#F7F3EE] border-t border-[#E8DDD4] py-12 sm:py-16 px-4 sm:px-8 lg:px-12 overflow-hidden">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
         
         {/* Left Column: Copy & Store Badges */}
@@ -25,15 +25,15 @@ export default function AppDownloadSection() {
 
           {/* Feature Highlights */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full max-w-lg mb-8 text-left">
-            <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4]">
+            <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white border border-[#E8DDD4] shadow-xs">
               <Bell className="w-4 h-4 text-[#E05A47] shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-[#191919]">Instant Push Alerts</h4>
-                <p className="text-[11px] text-[#666666] leading-snug">Immediate notifications for lost & found pets nearby.</p>
+                <p className="text-[11px] text-[#666666] leading-snug">Immediate notifications for lost &amp; found pets nearby.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4]">
+            <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white border border-[#E8DDD4] shadow-xs">
               <ShieldCheck className="w-4 h-4 text-[#4E9F76] shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-[#191919]">Direct Sitter Booking</h4>
@@ -41,19 +41,19 @@ export default function AppDownloadSection() {
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4]">
+            <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white border border-[#E8DDD4] shadow-xs">
               <CheckCircle2 className="w-4 h-4 text-[#8B5E3C] shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-[#191919]">Camera Safety Scanner</h4>
-                <p className="text-[11px] text-[#666666] leading-snug">Scan pet food barcodes & labels for toxic ingredients.</p>
+                <p className="text-[11px] text-[#666666] leading-snug">Scan pet food barcodes &amp; labels for toxic ingredients.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[#FDFAF7] border border-[#E8DDD4]">
+            <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white border border-[#E8DDD4] shadow-xs">
               <Heart className="w-4 h-4 text-[#D94668] shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-[#191919]">Pet Twin AI & Adoption</h4>
-                <p className="text-[11px] text-[#666666] leading-snug">Find your pet lookalike & discover rescue pets.</p>
+                <h4 className="text-xs font-bold text-[#191919]">Pet Twin AI &amp; Adoption</h4>
+                <p className="text-[11px] text-[#666666] leading-snug">Find your pet lookalike &amp; discover rescue pets.</p>
               </div>
             </div>
           </div>
@@ -92,34 +92,36 @@ export default function AppDownloadSection() {
           </div>
         </div>
 
-        {/* Right Column: Ultra-Realistic iPhone Mockup */}
+        {/* Right Column: Modern Polished Flagship Phone Mockup */}
         <div className="lg:col-span-5 flex justify-center items-center">
-          <div className="relative w-[280px] sm:w-[320px] filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.18)] select-none">
+          <div className="relative w-[280px] sm:w-[310px] select-none">
             
-            {/* Outer Titanium/Glass Frame */}
-            <div className="relative bg-[#1C1C1E] p-[10px] sm:p-[12px] rounded-[48px] sm:rounded-[54px] shadow-[0_0_0_2px_#3A3A3C,0_0_0_4px_#1C1C1E,0_20px_50px_rgba(0,0,0,0.35)] border border-white/20">
+            {/* Ambient Multi-Layer Shadow */}
+            <div className="absolute inset-x-8 -bottom-6 h-12 bg-black/25 blur-2xl rounded-full pointer-events-none"></div>
+
+            {/* Outer Titanium Chassis / Slim Bezel Frame */}
+            <div className="relative bg-[#161618] p-[8px] sm:p-[10px] rounded-[48px] sm:rounded-[52px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.38),0_0_0_1px_rgba(255,255,255,0.12)_inset,0_0_0_2px_#2c2c2e] ring-1 ring-black/40">
               
-              {/* Dynamic Island Pill */}
-              <div className="absolute top-[18px] left-1/2 -translate-x-1/2 w-[90px] h-[22px] bg-black rounded-full z-30 flex items-center justify-end px-2 shadow-sm">
-                {/* Camera Lens Flare */}
-                <div className="w-2.5 h-2.5 rounded-full bg-[#111625] border border-blue-950/40 flex items-center justify-center">
+              {/* Dynamic Island Sensor Pill */}
+              <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-[84px] h-[20px] bg-black rounded-full z-30 flex items-center justify-between px-3 shadow-inner">
+                {/* Microphone / Sensor Dot */}
+                <div className="w-1.5 h-1.5 rounded-full bg-[#1c202a]"></div>
+                {/* Camera Lens with Multi-Coating Reflection */}
+                <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d18] border border-blue-950/50 flex items-center justify-center">
                   <div className="w-1 h-1 rounded-full bg-blue-500/40"></div>
                 </div>
               </div>
 
-              {/* Speaker Ear Slit */}
-              <div className="absolute top-[12px] left-1/2 -translate-x-1/2 w-10 h-1 bg-[#2C2C2E] rounded-full z-30"></div>
+              {/* Hardware Side Buttons */}
+              <div className="absolute -left-[11px] top-[90px] w-[3px] h-[24px] bg-[#333336] rounded-l-md shadow-xs"></div>
+              <div className="absolute -left-[11px] top-[125px] w-[3px] h-[40px] bg-[#333336] rounded-l-md shadow-xs"></div>
+              <div className="absolute -left-[11px] top-[175px] w-[3px] h-[40px] bg-[#333336] rounded-l-md shadow-xs"></div>
+              <div className="absolute -right-[11px] top-[130px] w-[3px] h-[55px] bg-[#333336] rounded-r-md shadow-xs"></div>
 
-              {/* Side Action Buttons (Hardware Visuals) */}
-              <div className="absolute -left-[14px] top-[95px] w-[3px] h-[26px] bg-[#3A3A3C] rounded-l-md"></div>
-              <div className="absolute -left-[14px] top-[135px] w-[3px] h-[44px] bg-[#3A3A3C] rounded-l-md"></div>
-              <div className="absolute -left-[14px] top-[188px] w-[3px] h-[44px] bg-[#3A3A3C] rounded-l-md"></div>
-              <div className="absolute -right-[14px] top-[140px] w-[3px] h-[65px] bg-[#3A3A3C] rounded-r-md"></div>
-
-              {/* Screen Area */}
-              <div className="relative bg-[#F7F3EE] rounded-[38px] sm:rounded-[44px] overflow-hidden border border-black/10 aspect-[9/19.2]">
+              {/* Inner Screen Display */}
+              <div className="relative bg-[#F7F3EE] rounded-[40px] sm:rounded-[44px] overflow-hidden border border-black/20 aspect-[9/19.5]">
                 
-                {/* Live Home Page Screenshot */}
+                {/* Mobile App Screenshot */}
                 <img
                   src="/screenshots/home.png"
                   alt="Lumo Bites Mobile App Home Screen"
@@ -127,11 +129,11 @@ export default function AppDownloadSection() {
                   draggable={false}
                 />
 
-                {/* Specular Glare / Glass Sheen Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none"></div>
+                {/* Subtle Glass Sheen Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.04] to-white/[0.14] pointer-events-none"></div>
 
-                {/* Bottom Home Indicator Bar */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-black/60 rounded-full z-20"></div>
+                {/* Home Indicator Bar */}
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 w-28 h-1 bg-black/50 rounded-full z-20"></div>
               </div>
 
             </div>
