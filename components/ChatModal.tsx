@@ -33,10 +33,10 @@ interface ChatModalProps {
   otherUserName: string;
   bookingDetails: string;
   otherUserEmail: string;
-  otherUserType: 'sitter' | 'user' | 'shelter';
-  onReport: (email: string, type: 'sitter' | 'user' | 'shelter') => void;
+  otherUserType: 'sitter' | 'user' | 'shelter' | 'poster';
+  onReport: (email: string, type: 'sitter' | 'user' | 'shelter' | 'poster') => void;
   petDetails?: any;
-  chatType?: 'petsitting' | 'adoption';
+  chatType?: 'petsitting' | 'adoption' | 'lost_pets';
   shelterId?: string;
   bookingStatus?: string;
   bookingDates?: string;
@@ -130,11 +130,14 @@ export default function ChatModal({
     if (!bookingId || !currentUserEmail) return;
     try {
       const isAdoption = chatType === 'adoption';
+      const isLostPets = chatType === 'lost_pets';
       let endpoint = `/api/petsitting/messages?booking_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
       if (isAdoption) {
         const userEmailParam = otherUserType === 'user' ? otherUserEmail : currentUserEmail;
         const shelterEmailParam = otherUserType === 'user' ? currentUserEmail : otherUserEmail;
         endpoint = `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(userEmailParam || '')}&shelter_email=${encodeURIComponent(shelterEmailParam || '')}${shelterId ? `&shelter_id=${encodeURIComponent(shelterId)}` : ''}&t=${Date.now()}`;
+      } else if (isLostPets) {
+        endpoint = `/api/lost-pets/messages?lost_pet_id=${bookingId}&user_email=${encodeURIComponent(currentUserEmail)}&owner_email=${encodeURIComponent(otherUserEmail)}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
       }
 
       const res = await fetch(endpoint, { cache: 'no-store' });
@@ -205,10 +208,17 @@ export default function ChatModal({
 
     try {
       const isAdoption = chatType === 'adoption';
-      const endpoint = isAdoption ? '/api/adoption/messages' : '/api/petsitting/messages';
-      const body = isAdoption
-        ? { pet_id: bookingId, shelter_id: shelterId || (petDetails as any)?.shelter_id || '', sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText }
-        : { booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+      const isLostPets = chatType === 'lost_pets';
+      let endpoint = '/api/petsitting/messages';
+      let body: any = { booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+
+      if (isAdoption) {
+        endpoint = '/api/adoption/messages';
+        body = { pet_id: bookingId, shelter_id: shelterId || (petDetails as any)?.shelter_id || '', sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+      } else if (isLostPets) {
+        endpoint = '/api/lost-pets/messages';
+        body = { lost_pet_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+      }
 
       const res = await fetch(endpoint, {
         method: 'POST',

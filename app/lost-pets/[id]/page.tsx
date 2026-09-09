@@ -3,10 +3,12 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MapPin, Phone, Mail, Share2, Settings } from 'lucide-react';
+import { MapPin, Phone, Mail, Share2, Settings, MessageSquare } from 'lucide-react';
 import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
+import ChatModal from '@/components/ChatModal';
+import { getSignedInUserEmail } from '@/lib/authHelper';
 import { useSwipeBack } from '@/lib/useSwipeBack';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
@@ -185,12 +187,26 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     window.location.href = '/lost-pets';
   };
 
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('token')) {
       setEditToken(params.get('token'));
     }
+    if (params.get('chat') === '1' || params.get('chat') === 'true') {
+      setIsChatOpen(true);
+    }
   }, []);
+
+  const handleOpenChat = () => {
+    const currentEmail = userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '');
+    if (!currentEmail) {
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      return;
+    }
+    setIsChatOpen(true);
+  };
 
   useEffect(() => {
     const fetchPetAndComments = async () => {
@@ -540,36 +556,14 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 pt-2">
                 {pet.status === 'active' && (
-                  <>
-                    {!showContact ? (
-                      <button 
-                        type="button"
-                        onClick={() => setShowContact(true)}
-                        className="w-full bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <Phone className="w-4 h-4 text-white" /> Contact {pet.type === 'lost' ? 'Owner' : 'Finder'}
-                      </button>
-                    ) : (
-                      <div className="bg-blue-50/80 border border-blue-200 p-3.5 rounded-xl text-center animate-fade-in">
-                        <h4 className="font-bold text-blue-900 text-xs uppercase tracking-wider mb-2">Contact Information</h4>
-                        {pet.contact_phone && (
-                          <p className="text-blue-900 text-sm sm:text-base font-bold mb-1 flex items-center justify-center gap-1.5">
-                            <Phone className="w-4 h-4 text-blue-700" /> {pet.contact_phone}
-                          </p>
-                        )}
-                        {pet.contact_email && (
-                          <p className="text-blue-900 text-sm sm:text-base font-bold flex items-center justify-center gap-1.5">
-                            <Mail className="w-4 h-4 text-blue-700" />{' '}
-                            <a href={`mailto:${pet.contact_email}`} className="hover:underline text-blue-800">
-                              {pet.contact_email}
-                            </a>
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </>
+                  <button 
+                    type="button"
+                    onClick={handleOpenChat}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4 text-white" /> Message {pet.type === 'lost' ? 'Owner' : 'Finder'}
+                  </button>
                 )}
 
                 {/* Post Reactions */}
@@ -668,7 +662,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
               </div>
             </div>
           </div>
-        </div>
+
 
         {/* Facebook-style Community Updates & Comments Section */}
         <div id="comments" className="scroll-mt-8">
@@ -724,6 +718,26 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
             }}
           />
         </div>
+
+        {isChatOpen && pet && (
+          <ChatModal
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            bookingId={pet.id}
+            currentUserEmail={userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')}
+            otherUserName={
+              userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()
+                ? 'Neighbor'
+                : pet.type === 'lost' ? 'Pet Owner' : 'Finder'
+            }
+            bookingDetails={`${pet.type === 'lost' ? 'Lost' : 'Found'} ${pet.species} • ${formatPublicCity(pet.city) || pet.city}`}
+            otherUserEmail={pet.contact_email || ''}
+            otherUserType="user"
+            onReport={() => {}}
+            petDetails={pet}
+            chatType="lost_pets"
+          />
+        )}
       </main>
     </div>
   );

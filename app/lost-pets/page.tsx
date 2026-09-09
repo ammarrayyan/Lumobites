@@ -16,6 +16,7 @@ import MobileFloatingAction from '@/components/MobileFloatingAction';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import LostPetCardCarousel from '@/components/LostPetCardCarousel';
+import ChatModal from '@/components/ChatModal';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -60,6 +61,17 @@ export default function LostPetsFeed() {
   const [expandedPetIds, setExpandedPetIds] = useState<Record<string, boolean>>({});
   const [petCommentsMap, setPetCommentsMap] = useState<Record<string, any[]>>({});
   const [loadingCommentsMap, setLoadingCommentsMap] = useState<Record<string, boolean>>({});
+  const [activeChatPet, setActiveChatPet] = useState<any | null>(null);
+
+  const handleOpenChat = (e: React.MouseEvent, pet: any) => {
+    e.stopPropagation();
+    const currentEmail = userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '');
+    if (!currentEmail) {
+      window.dispatchEvent(new Event('lumo-open-signin'));
+      return;
+    }
+    setActiveChatPet(pet);
+  };
 
   const saveNavigationState = (petId?: string) => {
     if (typeof window === 'undefined') return;
@@ -943,6 +955,14 @@ export default function LostPetsFeed() {
                                   ) : (
                                     <>
                                       <button 
+                                        type="button"
+                                        onClick={(e) => handleOpenChat(e, pet)}
+                                        className="px-3 bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-2 rounded-xl transition-colors text-xs flex items-center gap-1 cursor-pointer shadow-xs"
+                                        title={`Message ${pet.type === 'lost' ? 'Owner' : 'Finder'}`}
+                                      >
+                                        <MessageSquare className="w-3.5 h-3.5 text-white" /> Message
+                                      </button>
+                                      <button 
                                         onClick={() => handleReportPost(pet.id, pet.contact_email)}
                                         className="px-2 border border-gray-200 text-gray-500 hover:text-red-600 rounded-xl transition-colors font-bold text-xs cursor-pointer"
                                         title="Report post"
@@ -1417,6 +1437,27 @@ export default function LostPetsFeed() {
             <span>Report Pet</span>
           </Link>
         </MobileFloatingAction>
+
+        {/* LOST PET IN-APP CHAT MODAL */}
+        {activeChatPet && (
+          <ChatModal
+            isOpen={true}
+            onClose={() => setActiveChatPet(null)}
+            bookingId={activeChatPet.id}
+            currentUserEmail={userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')}
+            otherUserName={
+              userEmail && activeChatPet.contact_email && userEmail.toLowerCase().trim() === activeChatPet.contact_email.toLowerCase().trim()
+                ? 'Neighbor'
+                : activeChatPet.type === 'lost' ? 'Pet Owner' : 'Finder'
+            }
+            bookingDetails={`${activeChatPet.type === 'lost' ? 'Lost' : 'Found'} ${activeChatPet.species} • ${formatPublicCity(activeChatPet.city) || activeChatPet.city}`}
+            otherUserEmail={activeChatPet.contact_email || ''}
+            otherUserType="user"
+            onReport={() => {}}
+            petDetails={activeChatPet}
+            chatType="lost_pets"
+          />
+        )}
         </main>
 
       </div>
