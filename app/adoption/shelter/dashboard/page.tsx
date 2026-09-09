@@ -751,7 +751,7 @@ function ShelterDashboardContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
               <Link
-                href="/adoption"
+                href="/adoption/shelter"
                 className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 px-5 rounded-xl text-xs no-underline transition-all shadow-2xs"
               >
                 Apply as a Shelter Partner

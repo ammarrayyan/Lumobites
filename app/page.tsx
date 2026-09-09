@@ -82,7 +82,7 @@ export default function Home() {
         console.error('Shelter check error:', e);
       }
     }
-    router.push('/adoption?register=shelter');
+    router.push('/adoption/shelter');
   };
 
   const handleSelectVet = async (e: React.MouseEvent) => {
@@ -221,7 +221,7 @@ export default function Home() {
                   <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
-              <Link href="/adoption?register=shelter" onClick={handleSelectShelter} className="block p-4 rounded-2xl border-2 border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-300 transition-all group" style={{ textDecoration: 'none' }}>
+              <Link href="/adoption/shelter" onClick={handleSelectShelter} className="block p-4 rounded-2xl border-2 border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-300 transition-all group" style={{ textDecoration: 'none' }}>
                 <div className="flex items-center justify-between">
                   <p className="font-extrabold text-sm text-orange-900 group-hover:text-orange-950 flex items-center gap-1.5">🏛️ Shelter or Rescue</p>
                   <ArrowRight className="w-4 h-4 text-orange-400 group-hover:translate-x-1 transition-transform" />

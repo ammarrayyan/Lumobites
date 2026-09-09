@@ -583,7 +583,7 @@ function AdoptionContent() {
       }
 
       if (isRegParam) {
-        setIsShelterRegOpen(true);
+        router.replace('/adoption/shelter');
       }
     }
   }, [species, age, size, debouncedCitySearch]);
