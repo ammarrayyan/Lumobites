@@ -557,13 +557,39 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
               </div>
 
                 {pet.status === 'active' && (
-                  <button 
-                    type="button"
-                    onClick={handleOpenChat}
-                    className="w-full bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <MessageSquare className="w-4 h-4 text-white" /> Message {pet.type === 'lost' ? 'Owner' : 'Finder'}
-                  </button>
+                  <div className="flex flex-col gap-2.5">
+                    <button 
+                      type="button"
+                      onClick={handleOpenChat}
+                      className="w-full bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-xs text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <MessageSquare className="w-4 h-4 text-white" /> Message {pet.type === 'lost' ? 'Owner' : 'Finder'}
+                    </button>
+
+                    {!showContact ? (
+                      <button 
+                        type="button"
+                        onClick={() => setShowContact(true)}
+                        className="w-full bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#4A3E3D] font-bold py-3 px-4 rounded-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Mail className="w-4 h-4 text-[#8B5E3C]" /> Contact Information
+                      </button>
+                    ) : (
+                      <div className="bg-[#FAF6F4] border border-[#E8DDD4] p-3.5 rounded-xl text-center animate-fade-in">
+                        <h4 className="font-bold text-[#3B2410] text-xs uppercase tracking-wider mb-2">Contact Information</h4>
+                        {pet.contact_email ? (
+                          <p className="text-[#4A3E3D] text-sm sm:text-base font-bold flex items-center justify-center gap-1.5">
+                            <Mail className="w-4 h-4 text-[#8B5E3C]" />{' '}
+                            <a href={`mailto:${pet.contact_email}`} className="hover:underline text-[#8B5E3C]">
+                              {pet.contact_email}
+                            </a>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[#8B7E7D]">No direct email provided.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Post Reactions */}
