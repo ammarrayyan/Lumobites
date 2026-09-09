@@ -218,6 +218,7 @@ export default function GalleryClient() {
                   initialHelpfulCount={share.helpful_count || 0}
                   size="sm"
                   minimalHeartStyle={true}
+                  targetType="pet-twin"
                 />
 
                 {!!myPostTokens[share.id] && (

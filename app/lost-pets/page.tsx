@@ -970,6 +970,7 @@ export default function LostPetsFeed() {
                                     size="sm"
                                     showSummary={true}
                                     minimalHeartStyle={true}
+                                    targetType="lost-pets"
                                   />
 
                                   <button

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ThumbsUp, Heart } from 'lucide-react';
 
 export type ReactionType = 'like' | 'love' | 'care' | 'sad';
@@ -34,6 +34,7 @@ interface FacebookReactionPickerProps {
   size?: 'sm' | 'md' | 'lg';
   showSummary?: boolean;
   minimalHeartStyle?: boolean;
+  targetType?: 'city-board' | 'lost-pets' | 'pet-twin' | 'comment' | 'auto';
   onReactionChange?: (reaction: ReactionType | null, nextState: ReactionState) => void;
   className?: string;
 }
@@ -53,58 +54,75 @@ export default function FacebookReactionPicker({
   size = 'sm',
   showSummary = true,
   minimalHeartStyle = true,
+  targetType = 'auto',
   onReactionChange,
   className = '',
 }: FacebookReactionPickerProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  
+  // Calculate baseline count without double-counting initialHelpfulCount + initialCounts
+  const baseCount = Math.max(
+    initialHelpfulCount || 0,
+    (initialCounts?.love || 0) + (initialCounts?.like || 0) + (initialCounts?.care || 0) + (initialCounts?.sad || 0)
+  );
+
   const [reactionState, setReactionState] = useState<ReactionState>(() => {
-    // Consolidate all legacy counts (like, love, care, sad, initialHelpfulCount) into the single heart (love) count
-    const legacyTotal = (initialCounts?.like ?? 0) + (initialCounts?.love ?? 0) + (initialCounts?.care ?? 0) + (initialCounts?.sad ?? 0) + (initialHelpfulCount ?? 0);
-    const baseCounts: Record<ReactionType, number> = {
-      like: 0,
-      love: legacyTotal,
-      care: 0,
-      sad: 0,
-    };
     return {
       userReaction: initialUserReaction ? 'love' : null,
-      counts: baseCounts,
-      total: legacyTotal,
+      counts: { like: 0, love: baseCount, care: 0, sad: 0 },
+      total: baseCount,
     };
   });
 
+  const isProcessingRef = useRef(false);
+  const lastClickTimeRef = useRef(0);
+  const hasUserInteractedRef = useRef(false);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Sync with localStorage for persistence
+  // Sync with localStorage for user-specific reaction persistence on this device
   useEffect(() => {
     if (typeof window === 'undefined' || !itemId) return;
     try {
       const stored = localStorage.getItem(`lumo_reaction_${itemId}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        const totalParsed = (parsed.counts?.like || 0) + (parsed.counts?.love || 0) + (parsed.counts?.care || 0) + (parsed.counts?.sad || 0) + (parsed.total || 0);
         const userReacted = parsed.userReaction ? 'love' : null;
         
+        // Single count extraction: do NOT add counts.love + total
+        const storedTotal = typeof parsed.total === 'number' 
+          ? parsed.total 
+          : (typeof parsed.counts?.love === 'number' ? parsed.counts.love : 0);
+
         setReactionState(prev => {
-          const finalTotal = Math.max(prev.total, totalParsed);
+          // If user hasn't clicked yet, reconcile with baseline
+          if (hasUserInteractedRef.current) return prev;
+          const finalTotal = Math.max(prev.total, storedTotal, userReacted ? 1 : 0);
           return {
-            userReaction: userReacted ?? prev.userReaction,
+            userReaction: userReacted,
             counts: { like: 0, love: finalTotal, care: 0, sad: 0 },
             total: finalTotal,
           };
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[ReactionPicker localStorage error]', e);
+    }
   }, [itemId]);
 
-  // Sync incoming server counts when loaded asynchronously
+  // Sync incoming server counts when loaded asynchronously (only if user hasn't manually interacted in this session)
   useEffect(() => {
-    const incomingTotal = (initialCounts?.like ?? 0) + (initialCounts?.love ?? 0) + (initialCounts?.care ?? 0) + (initialCounts?.sad ?? 0) + (initialHelpfulCount ?? 0);
+    if (hasUserInteractedRef.current) return;
+    const incomingTotal = Math.max(
+      initialHelpfulCount || 0,
+      (initialCounts?.love || 0) + (initialCounts?.like || 0) + (initialCounts?.care || 0) + (initialCounts?.sad || 0)
+    );
+
     if (incomingTotal > 0) {
       setReactionState(prev => {
-        const finalTotal = Math.max(incomingTotal, prev.total);
+        if (hasUserInteractedRef.current) return prev;
+        const finalTotal = Math.max(incomingTotal, prev.userReaction ? 1 : 0);
         return {
           ...prev,
           counts: { like: 0, love: finalTotal, care: 0, sad: 0 },
@@ -114,86 +132,97 @@ export default function FacebookReactionPicker({
     }
   }, [initialHelpfulCount, initialCounts]);
 
-  const saveState = (newState: ReactionState) => {
-    setReactionState(newState);
+  const saveStateToStorage = useCallback((newState: ReactionState) => {
     if (typeof window !== 'undefined' && itemId) {
       try {
         localStorage.setItem(`lumo_reaction_${itemId}`, JSON.stringify({
           userReaction: newState.userReaction,
-          counts: newState.counts,
           total: newState.total,
         }));
       } catch (e) {}
     }
     onReactionChange?.(newState.userReaction, newState);
-  };
+  }, [itemId, onReactionChange]);
 
   const handleSelectReaction = (type: ReactionType = 'love') => {
-    setPickerOpen(false);
-    const isCurrentlyReacted = !!reactionState.userReaction;
-
-    if (isCurrentlyReacted) {
-      // Toggle off
-      const nextTotal = Math.max(0, reactionState.total - 1);
-      const nextCounts: Record<ReactionType, number> = { like: 0, love: nextTotal, care: 0, sad: 0 };
-      saveState({
-        userReaction: null,
-        counts: nextCounts,
-        total: nextTotal,
-      });
-
-      if (typeof window !== 'undefined' && itemId) {
-        const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
-        localStorage.setItem('lumo_device_id', deviceId);
-        const cityCookie = localStorage.getItem('lumo_city_board_cookie') || deviceId;
-
-        // Sync with City Board helpful API
-        fetch('/api/city-board/helpful', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: itemId, device_cookie: cityCookie })
-        }).catch(() => {});
-
-        // Sync with Lost Pets reactions API
-        fetch('/api/lost-pets/reactions', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: itemId, device_id: deviceId })
-        }).catch(() => {});
-      }
-    } else {
-      // Toggle on (Heart ❤️)
-      const nextTotal = reactionState.total + 1;
-      const nextCounts: Record<ReactionType, number> = { like: 0, love: nextTotal, care: 0, sad: 0 };
-      saveState({
-        userReaction: 'love',
-        counts: nextCounts,
-        total: nextTotal,
-      });
-
-      if (typeof window !== 'undefined' && itemId) {
-        const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
-        localStorage.setItem('lumo_device_id', deviceId);
-        const cityCookie = localStorage.getItem('lumo_city_board_cookie') || deviceId;
-
-        // Sync with City Board helpful API
-        fetch('/api/city-board/helpful', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: itemId, device_cookie: cityCookie })
-        }).catch(() => {});
-
-        // Sync with Lost Pets reactions API
-        fetch('/api/lost-pets/reactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ post_id: itemId, reaction: 'love', device_id: deviceId })
-        }).catch(() => {});
-      }
+    const now = Date.now();
+    // Guard against rapid double-clicks (300ms throttle) and concurrent executions
+    if (now - lastClickTimeRef.current < 300 || isProcessingRef.current) {
+      return;
     }
+    lastClickTimeRef.current = now;
+    isProcessingRef.current = true;
+    hasUserInteractedRef.current = true;
+    setPickerOpen(false);
+
+    setReactionState(prev => {
+      const isCurrentlyReacted = !!prev.userReaction;
+      let nextReaction: ReactionType | null = null;
+      let nextTotal = prev.total;
+
+      if (isCurrentlyReacted) {
+        // Toggle OFF (Unlike) -> Exactly -1
+        nextReaction = null;
+        nextTotal = Math.max(0, prev.total - 1);
+      } else {
+        // Toggle ON (Heart ❤️) -> Exactly +1
+        nextReaction = 'love';
+        nextTotal = prev.total + 1;
+      }
+
+      const nextState: ReactionState = {
+        userReaction: nextReaction,
+        counts: { like: 0, love: nextTotal, care: 0, sad: 0 },
+        total: nextTotal,
+      };
+
+      // Persist state locally
+      saveStateToStorage(nextState);
+
+      // Trigger server synchronization
+      if (typeof window !== 'undefined' && itemId) {
+        const deviceId = localStorage.getItem('lumo_device_id') || `dev_${Math.random().toString(36).substring(2, 10)}`;
+        localStorage.setItem('lumo_device_id', deviceId);
+        const cityCookie = localStorage.getItem('lumo_city_board_cookie') || deviceId;
+
+        const isLostPet = targetType === 'lost-pets' || (targetType === 'auto' && itemId.startsWith('lost_'));
+        
+        if (isLostPet) {
+          fetch('/api/lost-pets/reactions', {
+            method: nextReaction ? 'POST' : 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              post_id: itemId,
+              reaction: 'love',
+              device_id: deviceId
+            })
+          }).catch(err => console.error('[Lost Pets Reaction sync error]', err));
+        } else {
+          // City Board, Pet Twin, and generic items
+          fetch('/api/city-board/helpful', {
+            method: nextReaction ? 'POST' : 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              post_id: itemId,
+              device_cookie: cityCookie
+            })
+          }).catch(err => console.error('[City Board Helpful sync error]', err));
+        }
+      }
+
+      return nextState;
+    });
+
+    // Release lock shortly after
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 200);
   };
 
-  const handleQuickClick = () => {
+  const handleQuickClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     handleSelectReaction('love');
   };
 
@@ -202,7 +231,7 @@ export default function FacebookReactionPicker({
     if (minimalHeartStyle) return;
     longPressTimerRef.current = setTimeout(() => {
       setPickerOpen(true);
-    }, 280);
+    }, 350);
   };
 
   const handleTouchEnd = () => {
@@ -212,7 +241,7 @@ export default function FacebookReactionPicker({
     }
   };
 
-  // Hover handling for desktop
+  // Hover handling for desktop flyout
   const handleMouseEnter = () => {
     if (minimalHeartStyle) return;
     hoverTimerRef.current = setTimeout(() => {
@@ -256,6 +285,7 @@ export default function FacebookReactionPicker({
       className={`relative inline-flex items-center gap-2 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Floating Reaction Bar (Facebook / Instagram Style Flyout) */}
       {!minimalHeartStyle && pickerOpen && (
@@ -268,7 +298,10 @@ export default function FacebookReactionPicker({
             <button
               key={reaction.type}
               type="button"
-              onClick={() => handleSelectReaction(reaction.type)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSelectReaction(reaction.type);
+              }}
               className="group/btn relative flex flex-col items-center justify-center p-1 rounded-full hover:scale-135 transition-all duration-150 cursor-pointer border-none bg-transparent active:scale-110"
               title={reaction.label}
             >

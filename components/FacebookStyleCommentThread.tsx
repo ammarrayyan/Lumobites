@@ -412,6 +412,7 @@ export default function FacebookStyleCommentThread({
                 size="sm"
                 showSummary={true}
                 minimalHeartStyle={true}
+                targetType="comment"
               />
 
               <button

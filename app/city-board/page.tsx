@@ -1008,6 +1008,7 @@ export default function CityBoardPage() {
                           size="sm"
                           showSummary={true}
                           minimalHeartStyle={true}
+                          targetType="city-board"
                         />
 
                         {/* Comment-Count Indicator / Expand Toggle */}

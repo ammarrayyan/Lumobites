@@ -447,6 +447,7 @@ export default function CityBoardPostPage() {
                   size="md"
                   showSummary={true}
                   minimalHeartStyle={true}
+                  targetType="city-board"
                 />
 
                 {/* Bookmark Toggle - Signed-in Gated */}

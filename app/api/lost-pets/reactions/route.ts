@@ -46,6 +46,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
+    // Check if existing reaction exists for this device
+    const { data: existing } = await supabaseAdmin
+      .from('post_reactions')
+      .select('id, reaction')
+      .eq('post_id', post_id)
+      .eq('device_id', device_id)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.reaction !== reaction) {
+        await supabaseAdmin
+          .from('post_reactions')
+          .update({ reaction })
+          .eq('id', existing.id);
+      }
+      return NextResponse.json({ success: true, alreadyReacted: true });
+    }
+
     const { error } = await supabaseAdmin
       .from('post_reactions')
       .insert({

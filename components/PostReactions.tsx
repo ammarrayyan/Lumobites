@@ -10,6 +10,8 @@ export default function PostReactions({ postId }: { postId: string }) {
   });
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const isProcessingRef = React.useRef(false);
+  const lastClickTimeRef = React.useRef(0);
 
   const proEmail = typeof window !== 'undefined' 
     ? localStorage.getItem('lumo_pro_email') || '' 
@@ -44,6 +46,12 @@ export default function PostReactions({ postId }: { postId: string }) {
   if (!proEmail) return null;
 
   const toggleReaction = async (emoji: string) => {
+    const now = Date.now();
+    if (now - lastClickTimeRef.current < 300 || isProcessingRef.current) {
+      return;
+    }
+    lastClickTimeRef.current = now;
+    isProcessingRef.current = true;
     // Use device ID for tracking, not email
     const deviceId = localStorage.getItem('lumo_device_id') || 
       (() => {
@@ -69,12 +77,15 @@ export default function PostReactions({ postId }: { postId: string }) {
         });
       } catch (err) {
         console.error('Failed to remove reaction', err);
+      } finally {
+        setTimeout(() => { isProcessingRef.current = false; }, 200);
       }
       return;
     }
 
     // If already reacted with something else, don't allow (one reaction per person rule)
     if (myReaction) {
+      isProcessingRef.current = false;
       return; // "One reaction per person per post"
     }
 
@@ -96,6 +107,8 @@ export default function PostReactions({ postId }: { postId: string }) {
       });
     } catch (err) {
       console.error('Failed to add reaction', err);
+    } finally {
+      setTimeout(() => { isProcessingRef.current = false; }, 200);
     }
   };
 

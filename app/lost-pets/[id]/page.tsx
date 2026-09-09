@@ -581,6 +581,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                     size="md"
                     showSummary={true}
                     minimalHeartStyle={true}
+                    targetType="lost-pets"
                   />
                 </div>
 

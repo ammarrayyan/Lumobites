@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (existing) {
-      return NextResponse.json({ error: 'Already marked helpful' }, { status: 400 });
+      return NextResponse.json({ success: true, alreadyVoted: true });
     }
 
     // Insert vote
@@ -27,26 +27,29 @@ export async function POST(req: NextRequest) {
       .from('city_board_helpful')
       .insert({ post_id, device_cookie });
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      // If concurrent insert occurred, return success
+      return NextResponse.json({ success: true, alreadyVoted: true });
+    }
 
     // Get current post's helpful_count
-    const { data: post, error: fetchError } = await supabaseAdmin
+    const { data: post } = await supabaseAdmin
       .from('city_board_posts')
       .select('helpful_count')
       .eq('post_id', post_id)
-      .single();
+      .maybeSingle();
 
-    if (fetchError) throw fetchError;
+    if (!post) {
+      return NextResponse.json({ success: true });
+    }
 
     const newCount = (post?.helpful_count || 0) + 1;
 
     // Update count
-    const { error: updateError } = await supabaseAdmin
+    await supabaseAdmin
       .from('city_board_posts')
       .update({ helpful_count: newCount })
       .eq('post_id', post_id);
-
-    if (updateError) throw updateError;
 
     return NextResponse.json({ success: true, helpful_count: newCount });
   } catch (err: any) {
