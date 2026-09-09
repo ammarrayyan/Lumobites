@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
+import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
 
@@ -418,6 +418,21 @@ export default function AccountPage() {
     }
   };
 
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lumo_pro_email');
+      localStorage.removeItem('lumo_sitter_email');
+      localStorage.removeItem('lumo_shelter_email');
+      localStorage.removeItem('lumo_sitter_id');
+      localStorage.removeItem('lumo_account_session_token');
+      localStorage.removeItem('lumo_account_email');
+      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'lumo_account_session_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      window.location.href = '/account';
+    }
+  };
+
   const handleSignOutAllDevices = async () => {
     if (!email) return;
     try {
@@ -432,7 +447,7 @@ export default function AccountPage() {
     if (typeof window !== 'undefined') {
       localStorage.clear();
       alert('You have been signed out of all devices for security.');
-      window.location.href = '/';
+      window.location.href = '/account';
     }
   };
 
@@ -1262,6 +1277,15 @@ export default function AccountPage() {
                           </div>
                         </div>
                       )}
+
+                      {/* Sign Out (This Device) Button */}
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-[#191919] py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs"
+                      >
+                        <LogOut className="w-4 h-4 text-[#8B5E3C]" /> Sign Out
+                      </button>
 
                       {/* Sign Out All Devices Button */}
                       <button
