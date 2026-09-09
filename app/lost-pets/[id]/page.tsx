@@ -556,7 +556,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-                {pet.status === 'active' && (
+                {pet.status !== 'resolved' && (
                   <div className="flex flex-col gap-2.5">
                     <button 
                       type="button"

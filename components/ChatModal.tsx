@@ -127,7 +127,10 @@ export default function ChatModal({
   }, [isOpen]);
 
   const fetchMessages = useCallback(async (silent = false) => {
-    if (!bookingId || !currentUserEmail) return;
+    if (!bookingId || !currentUserEmail) {
+      if (!silent) setIsLoading(false);
+      return;
+    }
     try {
       const isAdoption = chatType === 'adoption';
       const isLostPets = chatType === 'lost_pets';
