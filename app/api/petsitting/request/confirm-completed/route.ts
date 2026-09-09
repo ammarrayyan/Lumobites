@@ -74,39 +74,7 @@ export async function POST(request: NextRequest) {
 
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
 
-    // 4. Send review request email immediately to the owner
-    try {
-      const reviewLink = `https://lumobites.net/petsitting/review/${sitterId}?token=${encodeURIComponent(reqRow.owner_email)}`;
-      const subject = "How was your sitter? Leave a review 🐾";
-      
-      await resend.emails.send({
-        from: fromEmail,
-        to: reqRow.owner_email,
-        subject: subject,
-        html: brandedEmail({
-          subject: subject,
-          preheader: `Leave a review for ${sitterName} 🐾`,
-          body: `
-            <h1 style="${emailStyles.h1}">How was your sitter? 🐾</h1>
-            <p style="${emailStyles.p}">Hi there,</p>
-            <p style="${emailStyles.p}">Your booking with <strong>${sitterName}</strong> has been marked as completed. We'd love to hear how it went! Leave a review to help other pet owners find great sitters:</p>
-            <p style="${emailStyles.p}"><a href="${reviewLink}" style="color:#8B5E3C;font-weight:bold;text-decoration:underline;">lumobites.net/petsitting/review/${sitterId}</a></p>
-            ${emailStyles.divider}
-            ${emailStyles.button(reviewLink, 'Leave a Review 🐾')}
-            ${emailStyles.divider}
-            ${emailStyles.signoff}
-          `
-        })
-      });
-
-      // Update review_sent flag
-      await supabaseAdmin
-        .from('sitting_requests')
-        .update({ review_sent: true })
-        .eq('id', id);
-    } catch (emailErr) {
-      console.error('[Confirm Completed] Failed to send owner review email:', emailErr);
-    }
+    // 4. Sitter notification email
 
     // 5. Send sitter notification email
     if (sitterEmail) {

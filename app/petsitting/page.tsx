@@ -964,7 +964,17 @@ export function PetSittingContent() {
       setRequestFilter(statusParam);
       setHistoryFilter(statusParam);
     }
-  }, [searchParams]);
+
+    const reviewDaycareId = searchParams.get('review_daycare');
+    const reviewVetId = searchParams.get('review_vet');
+    if (reviewDaycareId) {
+      const match = petDaycares.find((d: any) => String(d.id) === String(reviewDaycareId));
+      setSelectedPartnerForReviews({ id: reviewDaycareId, name: match?.business_name || 'Pet Daycare', type: 'daycare' });
+    } else if (reviewVetId) {
+      const match = vetClinics.find((v: any) => String(v.id) === String(reviewVetId));
+      setSelectedPartnerForReviews({ id: reviewVetId, name: match?.clinic_name || 'Vet Clinic', type: 'vet' });
+    }
+  }, [searchParams, petDaycares, vetClinics]);
 
   // Automatically fetch owner's booking history and pets whenever their email is authenticated
   useEffect(() => {
