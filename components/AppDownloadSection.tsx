@@ -94,46 +94,54 @@ export default function AppDownloadSection() {
 
         {/* Right Column: Modern Polished Flagship Phone Mockup */}
         <div className="lg:col-span-5 flex justify-center items-center">
-          <div className="relative w-[280px] sm:w-[310px] select-none">
+          <div className="relative w-[280px] sm:w-[315px] select-none group">
             
-            {/* Ambient Multi-Layer Shadow */}
-            <div className="absolute inset-x-8 -bottom-6 h-12 bg-black/25 blur-2xl rounded-full pointer-events-none"></div>
+            {/* Ambient Multi-Layer Floating Soft Shadow */}
+            <div className="absolute inset-x-6 -bottom-7 h-14 bg-black/25 blur-2xl rounded-full pointer-events-none transition-all duration-300 group-hover:scale-105"></div>
+            <div className="absolute inset-x-12 -bottom-4 h-8 bg-[#8B5E3C]/20 blur-xl rounded-full pointer-events-none"></div>
 
-            {/* Outer Titanium Chassis / Slim Bezel Frame */}
-            <div className="relative bg-[#161618] p-[8px] sm:p-[10px] rounded-[48px] sm:rounded-[52px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.38),0_0_0_1px_rgba(255,255,255,0.12)_inset,0_0_0_2px_#2c2c2e] ring-1 ring-black/40">
+            {/* Outer Natural Titanium Chassis & Razor-Thin Bezel */}
+            <div className="relative bg-gradient-to-b from-[#4A4A4E] via-[#262629] to-[#121214] p-[8px] sm:p-[9px] rounded-[50px] sm:rounded-[54px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.35),0_12px_30px_-8px_rgba(139,94,60,0.18),0_0_0_1px_rgba(255,255,255,0.18)_inset,0_0_0_1.5px_#28282B] ring-1 ring-black/50 transition-transform duration-500 ease-out hover:-translate-y-1">
               
               {/* Dynamic Island Sensor Pill */}
-              <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-[84px] h-[20px] bg-black rounded-full z-30 flex items-center justify-between px-3 shadow-inner">
-                {/* Microphone / Sensor Dot */}
-                <div className="w-1.5 h-1.5 rounded-full bg-[#1c202a]"></div>
-                {/* Camera Lens with Multi-Coating Reflection */}
-                <div className="w-2.5 h-2.5 rounded-full bg-[#0a0d18] border border-blue-950/50 flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-blue-500/40"></div>
+              <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-[86px] h-[22px] bg-black rounded-full z-30 flex items-center justify-between px-3 shadow-inner">
+                {/* Proximity / Ambient Sensor Pinhole */}
+                <div className="w-1.5 h-1.5 rounded-full bg-[#121622] opacity-80"></div>
+                {/* TrueDepth Camera with Multi-Coating Optical Reflection */}
+                <div className="w-2.5 h-2.5 rounded-full bg-[#060A14] border border-blue-900/60 ring-1 ring-white/10 flex items-center justify-center">
+                  <div className="w-1 h-1 rounded-full bg-blue-500/50"></div>
                 </div>
               </div>
 
-              {/* Hardware Side Buttons */}
-              <div className="absolute -left-[11px] top-[90px] w-[3px] h-[24px] bg-[#333336] rounded-l-md shadow-xs"></div>
-              <div className="absolute -left-[11px] top-[125px] w-[3px] h-[40px] bg-[#333336] rounded-l-md shadow-xs"></div>
-              <div className="absolute -left-[11px] top-[175px] w-[3px] h-[40px] bg-[#333336] rounded-l-md shadow-xs"></div>
-              <div className="absolute -right-[11px] top-[130px] w-[3px] h-[55px] bg-[#333336] rounded-r-md shadow-xs"></div>
+              {/* Antenna Isolation Lines on Titanium Edge */}
+              <div className="absolute -left-[1px] top-[70px] w-[2px] h-[3px] bg-[#1a1a1c] opacity-60"></div>
+              <div className="absolute -right-[1px] top-[70px] w-[2px] h-[3px] bg-[#1a1a1c] opacity-60"></div>
 
-              {/* Inner Screen Display */}
-              <div className="relative bg-[#F7F3EE] rounded-[40px] sm:rounded-[44px] overflow-hidden border border-black/20 aspect-[9/19.5]">
+              {/* Hardware Metallic Side Buttons */}
+              <div className="absolute -left-[10px] top-[95px] w-[3px] h-[24px] bg-gradient-to-b from-[#555559] to-[#28282A] rounded-l-md shadow-xs"></div>
+              <div className="absolute -left-[10px] top-[130px] w-[3px] h-[42px] bg-gradient-to-b from-[#555559] to-[#28282A] rounded-l-md shadow-xs"></div>
+              <div className="absolute -left-[10px] top-[180px] w-[3px] h-[42px] bg-gradient-to-b from-[#555559] to-[#28282A] rounded-l-md shadow-xs"></div>
+              <div className="absolute -right-[10px] top-[135px] w-[3px] h-[58px] bg-gradient-to-b from-[#555559] to-[#28282A] rounded-r-md shadow-xs"></div>
+
+              {/* Inner High-Precision Display Screen */}
+              <div className="relative bg-[#F7F3EE] rounded-[42px] sm:rounded-[46px] overflow-hidden border border-black/25 aspect-[9/19.5]">
                 
-                {/* Mobile App Screenshot */}
+                {/* Mobile App Screen Rendering */}
                 <img
                   src="/screenshots/home.png"
                   alt="Lumo Bites Mobile App Home Screen"
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-top select-none"
                   draggable={false}
                 />
 
-                {/* Subtle Glass Sheen Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.04] to-white/[0.14] pointer-events-none"></div>
+                {/* Curved Specular Glare & Glass Reflection Sheen */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.05] to-white/[0.2] pointer-events-none"></div>
 
-                {/* Home Indicator Bar */}
-                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 w-28 h-1 bg-black/50 rounded-full z-20"></div>
+                {/* Top Subtle Display Ambient Vignette */}
+                <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-black/10 to-transparent pointer-events-none"></div>
+
+                {/* Bottom Home Indicator Bar */}
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 w-28 h-[4px] bg-black/60 rounded-full z-20 shadow-xs"></div>
               </div>
 
             </div>
