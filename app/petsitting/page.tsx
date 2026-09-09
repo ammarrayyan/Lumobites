@@ -7815,6 +7815,10 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
             </div>
           )}
 
+          <div className="bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4] text-[11px] text-[#8B7E7D] leading-snug">
+            Pricing and bookings are arranged directly between you and the clinic &mdash; Lumo Bites does not process, hold, or collect any payment.
+          </div>
+
           {error && <p className="text-sm text-red-600 font-semibold">{error}</p>}
         </div>
 
@@ -7944,6 +7948,10 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
               ))}
             </div>
           )}
+
+          <div className="bg-[#FAF6F4] p-3 rounded-xl border border-[#E8DDD4] text-[11px] text-[#8B7E7D] leading-snug">
+            Pricing and bookings are arranged directly between you and the daycare &mdash; Lumo Bites does not process, hold, or collect any payment.
+          </div>
 
           {error && <p className="text-sm text-red-600 font-semibold">{error}</p>}
         </div>

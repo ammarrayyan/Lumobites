@@ -9,13 +9,17 @@ async function run() {
   const prodUrl = 'https://lumobites.net/api/admin/fix-availability';
   console.log(`📡 Sending POST request to production endpoint: ${prodUrl}`);
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     const response = await fetch(prodUrl, {
       method: 'POST',
       headers: {
-        'x-admin-key': bypassKey,
+        'x-admin-key': bypassKey || '',
         'Content-Type': 'application/json'
-      }
+      },
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       const data = await response.json();
