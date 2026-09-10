@@ -763,7 +763,7 @@ export default function LostPetsFeed() {
           </div>
         )}
 
-        <main className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12 w-full">
+        <main className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12 w-full">
 
           {/* ── Page Header ── */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 md:gap-6">
@@ -888,10 +888,15 @@ export default function LostPetsFeed() {
                     <p className="text-[#8B7E7D]">Try expanding your search distance or adjusting filters.</p>
                   </div>
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <div className="flex flex-col gap-8">
+                    {/* Full-Width Interactive Map */}
+                    <div className="w-full h-[300px] md:h-[420px] rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
+                      <LostPetsMap pets={pets} searchCoords={searchCoords} searchRadius={searchRadius} />
+                    </div>
+
                     {/* Pets Grid */}
-                    <div className="flex-1 order-2 md:order-1 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                         {pets
                           .filter(pet => !pet.contact_email || !blockedEmails.includes(pet.contact_email.toLowerCase().trim()))
                           .map((pet) => (
@@ -1101,11 +1106,6 @@ export default function LostPetsFeed() {
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    {/* Interactive Map */}
-                    <div className="w-full md:w-[45%] md:sticky md:top-24 h-[300px] md:h-[calc(100vh-140px)] order-1 md:order-2 rounded-3xl overflow-hidden shadow-sm border border-[#E8DDD4]">
-                      <LostPetsMap pets={pets} searchCoords={searchCoords} searchRadius={searchRadius} />
                     </div>
                   </div>
                 )}
