@@ -1447,25 +1447,28 @@ export default function LostPetsFeed() {
         </MobileFloatingAction>
 
         {/* LOST PET IN-APP CHAT MODAL */}
-        {activeChatPet && (
-          <ChatModal
-            isOpen={true}
-            onClose={() => setActiveChatPet(null)}
-            bookingId={activeChatPet.id}
-            currentUserEmail={userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')}
-            otherUserName={
-              userEmail && activeChatPet.contact_email && userEmail.toLowerCase().trim() === activeChatPet.contact_email.toLowerCase().trim()
-                ? 'Neighbor'
-                : activeChatPet.type === 'lost' ? 'Pet Owner' : 'Finder'
-            }
-            bookingDetails={`${activeChatPet.type === 'lost' ? 'Lost' : 'Found'} ${activeChatPet.species} • ${formatPublicCity(activeChatPet.city) || activeChatPet.city}`}
-            otherUserEmail={activeChatPet.contact_email || ''}
-            otherUserType="user"
-            onReport={() => {}}
-            petDetails={activeChatPet}
-            chatType="lost_pets"
-          />
-        )}
+        {activeChatPet && (() => {
+          const currentSignedInEmail = (userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')).toLowerCase().trim();
+          const isOwner = !!(activeChatPet.contact_email && currentSignedInEmail && activeChatPet.contact_email.toLowerCase().trim() === currentSignedInEmail);
+          const resolvedOtherEmail = !isOwner ? (activeChatPet.contact_email || '') : '';
+          const resolvedOtherName = isOwner ? 'Neighbor' : (activeChatPet.type === 'lost' ? 'Pet Owner' : 'Finder');
+
+          return (
+            <ChatModal
+              isOpen={true}
+              onClose={() => setActiveChatPet(null)}
+              bookingId={activeChatPet.id}
+              currentUserEmail={currentSignedInEmail}
+              otherUserName={resolvedOtherName}
+              bookingDetails={`${activeChatPet.type === 'lost' ? 'Lost' : 'Found'} ${activeChatPet.species} • ${formatPublicCity(activeChatPet.city) || activeChatPet.city}`}
+              otherUserEmail={resolvedOtherEmail}
+              otherUserType="user"
+              onReport={() => {}}
+              petDetails={activeChatPet}
+              chatType="lost_pets"
+            />
+          );
+        })()}
         </main>
 
       </div>

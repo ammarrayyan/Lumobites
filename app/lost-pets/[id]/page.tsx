@@ -188,11 +188,16 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   };
 
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatParticipant, setChatParticipant] = useState<string>('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('token')) {
       setEditToken(params.get('token'));
+    }
+    const participantParam = params.get('participant') || params.get('sender') || params.get('user_email');
+    if (participantParam) {
+      setChatParticipant(participantParam.toLowerCase().trim());
     }
     if (params.get('chat') === '1' || params.get('chat') === 'true') {
       setIsChatOpen(true);
@@ -745,25 +750,33 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           />
         </div>
 
-        {isChatOpen && pet && (
-          <ChatModal
-            isOpen={isChatOpen}
-            onClose={() => setIsChatOpen(false)}
-            bookingId={pet.id}
-            currentUserEmail={userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')}
-            otherUserName={
-              userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()
-                ? 'Neighbor'
-                : pet.type === 'lost' ? 'Pet Owner' : 'Finder'
-            }
-            bookingDetails={`${pet.type === 'lost' ? 'Lost' : 'Found'} ${pet.species} • ${formatPublicCity(pet.city) || pet.city}`}
-            otherUserEmail={pet.contact_email || ''}
-            otherUserType="user"
-            onReport={() => {}}
-            petDetails={pet}
-            chatType="lost_pets"
-          />
-        )}
+        {isChatOpen && pet && (() => {
+          const currentSignedInEmail = (userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '')).toLowerCase().trim();
+          const isOwner = !!(pet.contact_email && currentSignedInEmail && pet.contact_email.toLowerCase().trim() === currentSignedInEmail);
+          const resolvedOtherEmail = chatParticipant || (!isOwner ? (pet.contact_email || '') : '');
+          const resolvedOtherName = isOwner
+            ? (chatParticipant ? chatParticipant.split('@')[0] : 'Neighbor')
+            : (pet.type === 'lost' ? 'Pet Owner' : 'Finder');
+
+          return (
+            <ChatModal
+              isOpen={isChatOpen}
+              onClose={() => {
+                setIsChatOpen(false);
+                setChatParticipant('');
+              }}
+              bookingId={pet.id}
+              currentUserEmail={currentSignedInEmail}
+              otherUserName={resolvedOtherName}
+              bookingDetails={`${pet.type === 'lost' ? 'Lost' : 'Found'} ${pet.species} • ${formatPublicCity(pet.city) || pet.city}`}
+              otherUserEmail={resolvedOtherEmail}
+              otherUserType="user"
+              onReport={() => {}}
+              petDetails={pet}
+              chatType="lost_pets"
+            />
+          );
+        })()}
       </main>
     </div>
   );

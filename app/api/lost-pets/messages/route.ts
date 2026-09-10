@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const user_email = searchParams.get('user_email');
     const owner_email = searchParams.get('owner_email');
     const email = searchParams.get('email');
+    const participant = searchParams.get('participant') || searchParams.get('sender');
 
     if (!lost_pet_id) {
       return NextResponse.json({ error: 'Missing lost_pet_id' }, { status: 400 });
@@ -22,13 +23,23 @@ export async function GET(request: NextRequest) {
       .eq('booking_id', lost_pet_id)
       .order('created_at', { ascending: true });
 
+    const cleanCurrent = (email || user_email || '').toLowerCase().trim();
+    const explicitTarget = participant ? participant.toLowerCase().trim() : '';
     const cleanUser = user_email ? user_email.toLowerCase().trim() : '';
     const cleanOwner = owner_email ? owner_email.toLowerCase().trim() : '';
-    const cleanCurrent = email ? email.toLowerCase().trim() : '';
 
-    if (cleanUser && cleanOwner) {
+    let cleanTarget = explicitTarget;
+    if (!cleanTarget) {
+      if (cleanOwner && cleanOwner !== cleanCurrent) {
+        cleanTarget = cleanOwner;
+      } else if (cleanUser && cleanUser !== cleanCurrent) {
+        cleanTarget = cleanUser;
+      }
+    }
+
+    if (cleanCurrent && cleanTarget && cleanCurrent !== cleanTarget) {
       query = query.or(
-        `and(sender_email.eq.${cleanUser},receiver_email.eq.${cleanOwner}),and(sender_email.eq.${cleanOwner},receiver_email.eq.${cleanUser})`
+        `and(sender_email.eq.${cleanCurrent},receiver_email.eq.${cleanTarget}),and(sender_email.eq.${cleanTarget},receiver_email.eq.${cleanCurrent})`
       );
     } else if (cleanCurrent) {
       query = query.or(`sender_email.eq.${cleanCurrent},receiver_email.eq.${cleanCurrent}`);
@@ -41,19 +52,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Resolve conversation participant if not explicitly supplied
+    let resolvedParticipant = cleanTarget;
+    if (!resolvedParticipant && messages && messages.length > 0 && cleanCurrent) {
+      for (let i = messages.length - 1; i >= 0; i--) {
+        const m = messages[i];
+        const s = (m.sender_email || '').toLowerCase().trim();
+        const r = (m.receiver_email || '').toLowerCase().trim();
+        if (s && s !== cleanCurrent) {
+          resolvedParticipant = s;
+          break;
+        }
+        if (r && r !== cleanCurrent) {
+          resolvedParticipant = r;
+          break;
+        }
+      }
+    }
+
     // Mark as read for the requesting user
-    const readerEmail = cleanCurrent || cleanUser;
-    if (readerEmail) {
+    if (cleanCurrent) {
       await supabaseAdmin
         .from('messages')
         .update({ read: true })
         .eq('booking_id', lost_pet_id)
-        .eq('receiver_email', readerEmail)
+        .eq('receiver_email', cleanCurrent)
         .eq('read', false);
     }
 
     return NextResponse.json(
-      { messages: messages || [] },
+      { messages: messages || [], participant: resolvedParticipant || '' },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
     );
   } catch (error: any) {
@@ -74,7 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Fetch lost pet details to resolve receiver email if not supplied
+    // Fetch lost pet details to resolve receiver email if not supplied or same as sender
     const { data: pet, error: petErr } = await supabaseAdmin
       .from('lost_pets')
       .select('id, pet_name, species, type, contact_email, city')
@@ -85,23 +113,33 @@ export async function POST(request: NextRequest) {
       console.error('[Lost Pets Messages POST Pet Fetch Error]:', petErr);
     }
 
-    if (!receiver_email && pet?.contact_email) {
-      const petOwnerEmail = pet.contact_email.toLowerCase().trim();
-      if (sender_email === petOwnerEmail) {
-        // If sender is pet poster, we need receiver from payload or recent thread
-        const { data: lastThreadMsg } = await supabaseAdmin
-          .from('messages')
-          .select('sender_email')
-          .eq('booking_id', lost_pet_id)
-          .neq('sender_email', petOwnerEmail)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+    const petOwnerEmail = pet?.contact_email ? pet.contact_email.toLowerCase().trim() : '';
 
-        if (lastThreadMsg?.sender_email) {
-          receiver_email = lastThreadMsg.sender_email.toLowerCase().trim();
+    if (!receiver_email || receiver_email === sender_email) {
+      if (sender_email === petOwnerEmail) {
+        // If sender is pet poster, resolve receiver from recent thread messages
+        const { data: threadMsgs } = await supabaseAdmin
+          .from('messages')
+          .select('sender_email, receiver_email')
+          .eq('booking_id', lost_pet_id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (threadMsgs && threadMsgs.length > 0) {
+          for (const m of threadMsgs) {
+            const s = (m.sender_email || '').toLowerCase().trim();
+            const r = (m.receiver_email || '').toLowerCase().trim();
+            if (s && s !== petOwnerEmail) {
+              receiver_email = s;
+              break;
+            }
+            if (r && r !== petOwnerEmail) {
+              receiver_email = r;
+              break;
+            }
+          }
         }
-      } else {
+      } else if (petOwnerEmail) {
         receiver_email = petOwnerEmail;
       }
     }
@@ -136,7 +174,7 @@ export async function POST(request: NextRequest) {
     const petLabel = pet?.pet_name ? `${pet.pet_name} (${pet.species || 'pet'})` : (pet?.species || 'Lost Pet');
     const notifTitle = `New message about ${petLabel} 🐾`;
     const snippet = message.length > 90 ? `${message.slice(0, 90)}...` : message;
-    const deepLink = `/lost-pets/${lost_pet_id}?chat=1`;
+    const deepLink = `/lost-pets/${lost_pet_id}?chat=1&participant=${encodeURIComponent(sender_email)}`;
 
     try {
       await supabaseAdmin.from('notifications').insert({
@@ -170,3 +208,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
   }
 }
+

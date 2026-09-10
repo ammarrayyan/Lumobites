@@ -140,7 +140,8 @@ export default function ChatModal({
         const shelterEmailParam = otherUserType === 'user' ? currentUserEmail : otherUserEmail;
         endpoint = `/api/adoption/messages?pet_id=${bookingId}&user_email=${encodeURIComponent(userEmailParam || '')}&shelter_email=${encodeURIComponent(shelterEmailParam || '')}${shelterId ? `&shelter_id=${encodeURIComponent(shelterId)}` : ''}&t=${Date.now()}`;
       } else if (isLostPets) {
-        endpoint = `/api/lost-pets/messages?lost_pet_id=${bookingId}&user_email=${encodeURIComponent(currentUserEmail)}&owner_email=${encodeURIComponent(otherUserEmail)}&email=${encodeURIComponent(currentUserEmail)}&t=${Date.now()}`;
+        const participantParam = otherUserEmail && otherUserEmail.toLowerCase().trim() !== currentUserEmail.toLowerCase().trim() ? otherUserEmail.toLowerCase().trim() : '';
+        endpoint = `/api/lost-pets/messages?lost_pet_id=${bookingId}&email=${encodeURIComponent(currentUserEmail)}${participantParam ? `&participant=${encodeURIComponent(participantParam)}` : ''}&t=${Date.now()}`;
       }
 
       const res = await fetch(endpoint, { cache: 'no-store' });
@@ -220,7 +221,8 @@ export default function ChatModal({
         body = { pet_id: bookingId, shelter_id: shelterId || (petDetails as any)?.shelter_id || '', sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
       } else if (isLostPets) {
         endpoint = '/api/lost-pets/messages';
-        body = { lost_pet_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
+        const receiverParam = otherUserEmail && otherUserEmail.toLowerCase().trim() !== currentUserEmail.toLowerCase().trim() ? otherUserEmail.toLowerCase().trim() : '';
+        body = { lost_pet_id: bookingId, sender_email: currentUserEmail, receiver_email: receiverParam, message: msgText };
       }
 
       const res = await fetch(endpoint, {
@@ -255,7 +257,9 @@ export default function ChatModal({
   messages.forEach(msg => {
     const dateLabel = formatDateLabel(msg.created_at);
     const last = groups[groups.length - 1];
-    if (last && last.date === dateLabel && last.sender === msg.sender_email) {
+    const curSender = (msg.sender_email || '').toLowerCase().trim();
+    const lastSender = (last?.sender || '').toLowerCase().trim();
+    if (last && last.date === dateLabel && lastSender === curSender) {
       last.msgs.push(msg);
     } else {
       groups.push({ date: dateLabel, sender: msg.sender_email, msgs: [msg] });
@@ -385,7 +389,7 @@ export default function ChatModal({
           ) : (
             <>
               {groups.map((group, gi) => {
-                const isMine = group.sender === currentUserEmail;
+                const isMine = (group.sender || '').toLowerCase().trim() === (currentUserEmail || '').toLowerCase().trim();
                 const firstMsgIdx = messages.indexOf(group.msgs[0]);
                 const showDate = dateBoundaries.has(firstMsgIdx);
 
