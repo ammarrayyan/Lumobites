@@ -14,7 +14,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
-import { getSignedInUserEmail, signOutUser } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { useSwipeBack } from '@/lib/useSwipeBack';
@@ -854,44 +854,51 @@ export function PetSittingContent() {
     };
     window.addEventListener('storage', onStorage);
 
-    // Restore saved search and filter state from sessionStorage
-    try {
-      const saved = sessionStorage.getItem('lumo_petsitting_search_state');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.activeTab) setActiveTab(parsed.activeTab);
-        if (parsed.searchZip) {
-          skipGeocodeRef.current = true;
-          setSearchZip(parsed.searchZip);
-        }
-        if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
-        if (parsed.searchPetType) setSearchPetType(parsed.searchPetType);
-        if (parsed.searchDay) setSearchDay(parsed.searchDay);
-        if (parsed.searchTimeSlot) setSearchTimeSlot(parsed.searchTimeSlot);
-        if (parsed.searchServiceType) setSearchServiceType(parsed.searchServiceType);
-        if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
-        if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
-        if (parsed.aiSitterSearch) setAiSitterSearch(parsed.aiSitterSearch);
+    // On manual refresh (F5/pull-to-refresh), reset to clean defaults; on back navigation, restore state
+    if (isManualPageReload()) {
+      try {
+        sessionStorage.removeItem('lumo_petsitting_search_state');
+      } catch (e) {}
+    } else {
+      // Restore saved search and filter state from sessionStorage
+      try {
+        const saved = sessionStorage.getItem('lumo_petsitting_search_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.activeTab) setActiveTab(parsed.activeTab);
+          if (parsed.searchZip) {
+            skipGeocodeRef.current = true;
+            setSearchZip(parsed.searchZip);
+          }
+          if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
+          if (parsed.searchPetType) setSearchPetType(parsed.searchPetType);
+          if (parsed.searchDay) setSearchDay(parsed.searchDay);
+          if (parsed.searchTimeSlot) setSearchTimeSlot(parsed.searchTimeSlot);
+          if (parsed.searchServiceType) setSearchServiceType(parsed.searchServiceType);
+          if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
+          if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
+          if (parsed.aiSitterSearch) setAiSitterSearch(parsed.aiSitterSearch);
 
-        const restoreScroll = () => {
-          if (parsed.targetSitterId) {
-            const el = document.getElementById(`sitter-card-${parsed.targetSitterId}`);
-            if (el) {
-              el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-              return;
+          const restoreScroll = () => {
+            if (parsed.targetSitterId) {
+              const el = document.getElementById(`sitter-card-${parsed.targetSitterId}`);
+              if (el) {
+                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                return;
+              }
             }
-          }
-          if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
-            window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-          }
-        };
+            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+            }
+          };
 
-        restoreScroll();
-        requestAnimationFrame(restoreScroll);
-        setTimeout(restoreScroll, 50);
-        setTimeout(restoreScroll, 200);
-      }
-    } catch (e) {}
+          restoreScroll();
+          requestAnimationFrame(restoreScroll);
+          setTimeout(restoreScroll, 50);
+          setTimeout(restoreScroll, 200);
+        }
+      } catch (e) {}
+    }
 
     return () => {
       window.removeEventListener('lumo-pro-update', initializeSession);

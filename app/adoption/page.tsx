@@ -10,7 +10,7 @@ import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
-import { getSignedInUserEmail, signOutUser } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import { useScrollLock } from '@/lib/useScrollLock';
 
@@ -180,36 +180,43 @@ function AdoptionContent() {
       ).trim();
       setIsLoggedIn(!!email);
 
-      // Restore saved adoption search and filter state
-      try {
-        const saved = sessionStorage.getItem('lumo_adoption_search_state');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.species !== undefined) setSpecies(parsed.species);
-          if (parsed.age !== undefined) setAge(parsed.age);
-          if (parsed.size !== undefined) setSize(parsed.size);
-          if (parsed.citySearch !== undefined) setCitySearch(parsed.citySearch);
-          if (parsed.showMap !== undefined) setShowMap(parsed.showMap);
+      // On manual refresh (F5/pull-to-refresh), reset to clean defaults; on back navigation, restore state
+      if (isManualPageReload()) {
+        try {
+          sessionStorage.removeItem('lumo_adoption_search_state');
+        } catch (e) {}
+      } else {
+        // Restore saved adoption search and filter state
+        try {
+          const saved = sessionStorage.getItem('lumo_adoption_search_state');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.species !== undefined) setSpecies(parsed.species);
+            if (parsed.age !== undefined) setAge(parsed.age);
+            if (parsed.size !== undefined) setSize(parsed.size);
+            if (parsed.citySearch !== undefined) setCitySearch(parsed.citySearch);
+            if (parsed.showMap !== undefined) setShowMap(parsed.showMap);
 
-          const restoreScroll = () => {
-            if (parsed.targetPetId) {
-              const el = document.getElementById(`adoption-pet-${parsed.targetPetId}`);
-              if (el) {
-                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-                return;
+            const restoreScroll = () => {
+              if (parsed.targetPetId) {
+                const el = document.getElementById(`adoption-pet-${parsed.targetPetId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
               }
-            }
-            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
-              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }
-          };
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            };
 
-          restoreScroll();
-          requestAnimationFrame(restoreScroll);
-          setTimeout(restoreScroll, 50);
-          setTimeout(restoreScroll, 200);
-        }
-      } catch (e) {}
+            restoreScroll();
+            requestAnimationFrame(restoreScroll);
+            setTimeout(restoreScroll, 50);
+            setTimeout(restoreScroll, 200);
+          }
+        } catch (e) {}
+      }
     }
   }, []);
 

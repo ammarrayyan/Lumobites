@@ -99,3 +99,21 @@ export async function signOutUser(options?: SignOutOptions): Promise<void> {
     console.error('[signOutUser] Error during sign-out:', e);
   }
 }
+
+/**
+ * Detects if the current page load was triggered by a manual browser/webview reload
+ * (F5, Pull-to-Refresh, window.location.reload) vs client-side navigation.
+ */
+export function isManualPageReload(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const navEntries = performance.getEntriesByType('navigation');
+    if (navEntries && navEntries.length > 0) {
+      return (navEntries[0] as PerformanceNavigationTiming).type === 'reload';
+    }
+    return (performance as any)?.navigation?.type === 1;
+  } catch (e) {
+    return false;
+  }
+}
+

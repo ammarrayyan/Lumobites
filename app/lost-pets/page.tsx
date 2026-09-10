@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, isManualPageReload } from '@/lib/authHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
@@ -210,44 +210,51 @@ export default function LostPetsFeed() {
         setActiveTab('ai');
       }
 
-      // Restore saved filters, expanded comments, and scroll state from sessionStorage
-      try {
-        const saved = sessionStorage.getItem('lumo_lost_pets_search_state');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.searchQuery) {
-            skipGeocodeRef.current = true;
-            setSearchQuery(parsed.searchQuery);
-          }
-          if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
-          if (parsed.filterType) setFilterType(parsed.filterType);
-          if (parsed.filterSpecies) setFilterSpecies(parsed.filterSpecies);
-          if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
-          if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
-          if (parsed.locationVerified !== undefined) setLocationVerified(parsed.locationVerified);
-          if (parsed.activeTab && !tabParam) setActiveTab(parsed.activeTab);
-          if (parsed.expandedPetIds) setExpandedPetIds(parsed.expandedPetIds);
+      // On manual refresh (F5/pull-to-refresh), reset to clean defaults; on back navigation, restore state
+      if (isManualPageReload()) {
+        try {
+          sessionStorage.removeItem('lumo_lost_pets_search_state');
+        } catch (e) {}
+      } else {
+        // Restore saved filters, expanded comments, and scroll state from sessionStorage
+        try {
+          const saved = sessionStorage.getItem('lumo_lost_pets_search_state');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.searchQuery) {
+              skipGeocodeRef.current = true;
+              setSearchQuery(parsed.searchQuery);
+            }
+            if (parsed.searchRadius) setSearchRadius(parsed.searchRadius);
+            if (parsed.filterType) setFilterType(parsed.filterType);
+            if (parsed.filterSpecies) setFilterSpecies(parsed.filterSpecies);
+            if (parsed.searchCoords) setSearchCoords(parsed.searchCoords);
+            if (parsed.searchLocationName) setSearchLocationName(parsed.searchLocationName);
+            if (parsed.locationVerified !== undefined) setLocationVerified(parsed.locationVerified);
+            if (parsed.activeTab && !tabParam) setActiveTab(parsed.activeTab);
+            if (parsed.expandedPetIds) setExpandedPetIds(parsed.expandedPetIds);
 
-          // Scroll restoration: Multi-frame attempt to guarantee precision
-          const restoreScroll = () => {
-            if (parsed.targetPetId) {
-              const el = document.getElementById(`lost-pet-${parsed.targetPetId}`);
-              if (el) {
-                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-                return;
+            // Scroll restoration: Multi-frame attempt to guarantee precision
+            const restoreScroll = () => {
+              if (parsed.targetPetId) {
+                const el = document.getElementById(`lost-pet-${parsed.targetPetId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
               }
-            }
-            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
-              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }
-          };
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            };
 
-          restoreScroll();
-          requestAnimationFrame(restoreScroll);
-          setTimeout(restoreScroll, 50);
-          setTimeout(restoreScroll, 200);
-        }
-      } catch (e) {}
+            restoreScroll();
+            requestAnimationFrame(restoreScroll);
+            setTimeout(restoreScroll, 50);
+            setTimeout(restoreScroll, 200);
+          }
+        } catch (e) {}
+      }
     }
   }, []);
 

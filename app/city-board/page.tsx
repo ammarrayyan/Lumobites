@@ -15,6 +15,7 @@ import {
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { isManualPageReload } from '@/lib/authHelper';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -165,36 +166,43 @@ export default function CityBoardPage() {
         }
       }
 
-      // Restore city board search and filter state
-      try {
-        const savedSearch = sessionStorage.getItem('lumo_city_board_search_state');
-        if (savedSearch) {
-          const parsed = JSON.parse(savedSearch);
-          if (parsed.searchKeyword !== undefined) setSearchKeyword(parsed.searchKeyword);
-          if (parsed.searchCity !== undefined) setSearchCity(parsed.searchCity);
-          if (parsed.searchCategory !== undefined) setSearchCategory(parsed.searchCategory);
-          if (parsed.showMyPosts !== undefined) setShowMyPosts(parsed.showMyPosts);
-          if (parsed.expandedPostIds) setExpandedPostIds(parsed.expandedPostIds);
+      // On manual refresh (F5/pull-to-refresh), reset to clean defaults; on back navigation, restore state
+      if (isManualPageReload()) {
+        try {
+          sessionStorage.removeItem('lumo_city_board_search_state');
+        } catch (e) {}
+      } else {
+        // Restore city board search and filter state
+        try {
+          const savedSearch = sessionStorage.getItem('lumo_city_board_search_state');
+          if (savedSearch) {
+            const parsed = JSON.parse(savedSearch);
+            if (parsed.searchKeyword !== undefined) setSearchKeyword(parsed.searchKeyword);
+            if (parsed.searchCity !== undefined) setSearchCity(parsed.searchCity);
+            if (parsed.searchCategory !== undefined) setSearchCategory(parsed.searchCategory);
+            if (parsed.showMyPosts !== undefined) setShowMyPosts(parsed.showMyPosts);
+            if (parsed.expandedPostIds) setExpandedPostIds(parsed.expandedPostIds);
 
-          const restoreScroll = () => {
-            if (parsed.targetPostId) {
-              const el = document.getElementById(`city-post-${parsed.targetPostId}`);
-              if (el) {
-                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-                return;
+            const restoreScroll = () => {
+              if (parsed.targetPostId) {
+                const el = document.getElementById(`city-post-${parsed.targetPostId}`);
+                if (el) {
+                  el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                  return;
+                }
               }
-            }
-            if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
-              window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
-            }
-          };
+              if (parsed.scrollY !== undefined && parsed.scrollY > 0) {
+                window.scrollTo({ top: parsed.scrollY, behavior: 'instant' });
+              }
+            };
 
-          restoreScroll();
-          requestAnimationFrame(restoreScroll);
-          setTimeout(restoreScroll, 50);
-          setTimeout(restoreScroll, 200);
-        }
-      } catch (e) {}
+            restoreScroll();
+            requestAnimationFrame(restoreScroll);
+            setTimeout(restoreScroll, 50);
+            setTimeout(restoreScroll, 200);
+          }
+        } catch (e) {}
+      }
     }
   }, []);
 
