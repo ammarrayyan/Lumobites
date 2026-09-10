@@ -1027,11 +1027,11 @@ function ScanPageContent() {
                       {/* Viewfinder Reticle Framing Area */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 p-6">
                         <div className="w-[230px] h-[230px] sm:w-[260px] sm:h-[260px] relative rounded-2xl">
-                          {/* 4 Sleek Glowing Corner Brackets */}
-                          <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#C17D3C] rounded-tl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                          <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#C17D3C] rounded-tr-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#C17D3C] rounded-bl-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
-                          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#C17D3C] rounded-br-xl drop-shadow-[0_0_8px_rgba(193,125,60,0.6)]"></div>
+                          {/* 4 Sleek Flat Corner Brackets */}
+                          <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#C17D3C] rounded-tl-xl"></div>
+                          <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#C17D3C] rounded-tr-xl"></div>
+                          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#C17D3C] rounded-bl-xl"></div>
+                          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#C17D3C] rounded-br-xl"></div>
 
                           {/* Center Alignment Reticle */}
                           <div className="absolute inset-0 flex items-center justify-center opacity-25">
@@ -1040,7 +1040,7 @@ function ScanPageContent() {
                           </div>
 
                           {/* Animated Laser Sweep Beam */}
-                          <div className="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-[#FFC278] to-transparent shadow-[0_0_12px_#FFA740] animate-scan-laser"></div>
+                          <div className="absolute left-1 right-1 h-0.5 bg-gradient-to-r from-transparent via-[#FFC278] to-transparent animate-scan-laser"></div>
                         </div>
                       </div>
 

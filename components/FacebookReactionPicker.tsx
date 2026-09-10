@@ -294,7 +294,7 @@ export default function FacebookReactionPicker({
       {/* Floating Reaction Bar (Facebook / Instagram Style Flyout) */}
       {!minimalHeartStyle && pickerOpen && (
         <div
-          className="absolute bottom-full left-0 mb-2 z-50 bg-white/95 backdrop-blur-md rounded-full shadow-xl border border-gray-200/90 py-1.5 px-2 flex items-center gap-1.5 sm:gap-2 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute bottom-full left-0 mb-2 z-50 bg-white rounded-full border border-gray-200 py-1.5 px-2 flex items-center gap-1.5 sm:gap-2 animate-in fade-in zoom-in-95 duration-150"
           style={{ transformOrigin: 'bottom left' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -309,11 +309,11 @@ export default function FacebookReactionPicker({
               className="group/btn relative flex flex-col items-center justify-center p-1 rounded-full hover:scale-135 transition-all duration-150 cursor-pointer border-none bg-transparent active:scale-110"
               title={reaction.label}
             >
-              <span className="text-xl sm:text-2xl leading-none select-none drop-shadow-2xs">
+              <span className="text-xl sm:text-2xl leading-none select-none">
                 {reaction.emoji}
               </span>
               {/* Tooltip Label */}
-              <span className="absolute -top-7 opacity-0 group-hover/btn:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] font-bold py-0.5 px-2 rounded-full pointer-events-none whitespace-nowrap shadow-md">
+              <span className="absolute -top-7 opacity-0 group-hover/btn:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] font-bold py-0.5 px-2 rounded-full pointer-events-none whitespace-nowrap">
                 {reaction.label}
               </span>
             </button>
@@ -382,7 +382,7 @@ export default function FacebookReactionPicker({
                 {topReactions.map((r, idx) => (
                   <span
                     key={r.type}
-                    className="text-[13px] leading-none drop-shadow-2xs"
+                    className="text-[13px] leading-none"
                     style={{ zIndex: 3 - idx }}
                   >
                     {r.emoji}

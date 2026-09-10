@@ -65,74 +65,27 @@ export default function MobileBottomNav() {
         WebkitTransform: 'translate3d(0, 0, 0)',
         willChange: 'transform',
         zIndex: 9999,
-        backgroundColor: 'rgba(255, 255, 255, 0.72)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.75)',
+        backgroundColor: '#FFFFFF',
         borderRadius: '36px',
-        border: '1px solid rgba(255, 255, 255, 0.65)',
+        border: '1px solid #E8DDD4',
         pointerEvents: 'auto',
       }}
     >
-      {/* 🫧 WhatsApp-Style Liquid Glass Rounded Rectangle Active Pill (For Flat Items) */}
+      {/* Crisp Flat Active Pill */}
       {activeIndex >= 0 && !isRaisedActive && (
         <div 
-          className="absolute pointer-events-none transition-all duration-350 ease-[cubic-bezier(0.34,1.45,0.64,1)]"
+          className="absolute pointer-events-none transition-all duration-250 ease-out"
           style={{
-            top: '4px',
-            bottom: '4px',
+            top: '5px',
+            bottom: '5px',
             width: `calc(${100 / tabs.length}% + 4px)`,
             left: `calc(${activeIndex * (100 / tabs.length)}% - 2px)`,
             borderRadius: '24px',
+            backgroundColor: '#F7F3EE',
+            border: '1px solid #E8DDD4',
             zIndex: 1,
           }}
-        >
-          {/* 1. Subtle Pastel Shimmer / Iridescent Prismatic Fringe */}
-          <div 
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              borderRadius: '24px',
-              padding: '1.5px',
-              background: `
-                radial-gradient(ellipse at 50% 0%, rgba(255, 120, 160, 0.45) 0%, rgba(255, 195, 110, 0.40) 30%, rgba(100, 220, 245, 0.45) 65%, transparent 85%),
-                radial-gradient(ellipse at 50% 100%, rgba(100, 220, 245, 0.45) 0%, rgba(185, 145, 250, 0.40) 40%, rgba(255, 130, 170, 0.40) 75%, transparent 90%),
-                conic-gradient(from 180deg at 50% 50%, rgba(255, 130, 170, 0.35) 0%, rgba(255, 195, 110, 0.35) 25%, rgba(100, 220, 245, 0.40) 50%, rgba(185, 145, 250, 0.35) 75%, rgba(255, 130, 170, 0.35) 100%)
-              `,
-              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-              WebkitMaskComposite: 'xor',
-              maskComposite: 'exclude',
-              filter: 'blur(0.3px)',
-              opacity: 0.55,
-            }}
-          />
-
-          {/* 2. Frosted Liquid Glass Core with Caustic Bevel & Depth */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              borderRadius: '24px',
-              backgroundColor: 'rgba(255, 255, 255, 0.52)',
-              backdropFilter: 'blur(20px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(200%)',
-              boxShadow: `
-                0 8px 24px -2px rgba(0, 0, 0, 0.16),
-                0 3px 8px rgba(0, 0, 0, 0.08),
-                inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
-                inset 0 -1.5px 2px rgba(0, 0, 0, 0.06)
-              `,
-              border: '0.5px solid rgba(255, 255, 255, 0.65)',
-            }}
-          />
-
-          {/* 3. Top Curved Specular Glare / Lens Reflection */}
-          <div 
-            className="absolute top-0.5 left-1.5 right-1.5 h-[40%] pointer-events-none opacity-90"
-            style={{
-              borderRadius: '22px 22px 10px 10px',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.25) 60%, transparent 100%)',
-            }}
-          />
-        </div>
+        />
       )}
 
       {tabs.map((tab, idx) => {
@@ -155,36 +108,28 @@ export default function MobileBottomNav() {
               style={{ textDecoration: 'none' }}
               aria-label="Home"
             >
-              {/* Elevated Floating Circular Button */}
+              {/* Elevated Flat Circular Button */}
               <div 
-                className="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.34,1.45,0.64,1)] group-active:scale-90"
+                className="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-200 group-active:scale-90"
                 style={{
                   transform: 'translateY(-14px)',
-                  background: isActive
-                    ? 'linear-gradient(135deg, #9C6C48 0%, #8B5E3C 50%, #744A29 100%)'
-                    : 'linear-gradient(135deg, #FFFFFF 0%, #FAF5EE 100%)',
-                  boxShadow: isActive
-                    ? '0 12px 28px -2px rgba(139, 94, 60, 0.50), 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.40)'
-                    : '0 8px 20px -2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05), inset 0 1.5px 2px rgba(255, 255, 255, 0.90)',
-                  border: isActive
-                    ? '3px solid #FFFFFF'
-                    : '2.5px solid rgba(255, 255, 255, 0.95)',
+                  background: isActive ? '#8B5E3C' : '#FAF5EE',
+                  border: isActive ? '3px solid #FFFFFF' : '2px solid #E8DDD4',
                 }}
               >
                 <Icon
-                  className="w-[23px] h-[23px] transition-all duration-300"
+                  className="w-[23px] h-[23px] transition-all duration-200"
                   style={{
                     color: isActive ? '#FFFFFF' : '#8B5E3C',
                     fill: isActive ? 'currentColor' : 'none',
                     strokeWidth: isActive ? 2.5 : 2,
-                    filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' : 'none',
                   }}
                 />
               </div>
 
               {/* Label */}
               <span
-                className="text-[11px] sm:text-[11.5px] tracking-tight select-none transition-all duration-300"
+                className="text-[11px] sm:text-[11.5px] tracking-tight select-none transition-all duration-200"
                 style={{
                   marginTop: '-11px',
                   color: isActive ? '#5C381E' : '#4A3E3D',

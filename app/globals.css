@@ -48,14 +48,26 @@ html, body {
   background: var(--background);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
   font-size: var(--text-body);
   line-height: 1.6 !important;
   overflow-x: hidden;
 }
 
+/* Universal High-Resolution Crisp Image and Vector Icon Rendering */
+img, svg, canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  backface-visibility: hidden;
+}
+
 .font-inter {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (max-width: 767px) {
@@ -247,21 +259,21 @@ select::placeholder,
 .btn-shiny {
   position: relative;
   background-image: none !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important;
   transition: all 0.15s ease-in-out !important;
 }
 
 .btn-gloss:hover,
 .btn-shiny:hover {
   background-image: none !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: none !important;
   transform: translateY(-1px) !important;
 }
 
 .btn-gloss:active,
 .btn-shiny:active {
   background-image: none !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: none !important;
   transform: translateY(0.5px) !important;
 }
 
@@ -339,18 +351,41 @@ button, a, [role="button"] {
   animation: sheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Refined Desktop Hover Lift for Explore Key Services Cards */
+/* Refined Flat Desktop Hover for Explore Key Services Cards */
 .service-card-interactive {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
-  will-change: transform, box-shadow;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .service-card-interactive:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 32px -4px rgba(139, 94, 60, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.04);
+    transform: translateY(-3px);
     cursor: pointer;
     z-index: 10;
   }
+}
+
+/* ==========================================================================
+   UNIVERSAL FLAT SHADOW ELIMINATION
+   Strips all drop-shadows, box-shadows, glows, and soft shading from cards,
+   buttons, modals, floating tiles, navigation bars, and overlays across the app.
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  text-shadow: none !important;
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  --tw-drop-shadow: none !important;
+}
+
+[class*="shadow-"],
+[class*="shadow["],
+[class*="drop-shadow"] {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  filter: none !important;
 }
 

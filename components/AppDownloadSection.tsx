@@ -92,16 +92,11 @@ export default function AppDownloadSection() {
           </div>
         </div>
 
-        {/* Right Column: Modern Polished Flagship Phone Mockup */}
+        {/* Right Column: Modern Flat Flagship Phone Mockup */}
         <div className="lg:col-span-5 flex justify-center items-center">
           <div className="relative w-[280px] sm:w-[315px] select-none group">
-            
-            {/* Ambient Multi-Layer Floating Soft Shadow */}
-            <div className="absolute inset-x-6 -bottom-7 h-14 bg-black/25 blur-2xl rounded-full pointer-events-none transition-all duration-300 group-hover:scale-105"></div>
-            <div className="absolute inset-x-12 -bottom-4 h-8 bg-[#8B5E3C]/20 blur-xl rounded-full pointer-events-none"></div>
-
-            {/* Outer Natural Titanium Chassis & Razor-Thin Bezel */}
-            <div className="relative bg-gradient-to-b from-[#4A4A4E] via-[#262629] to-[#121214] p-[8px] sm:p-[9px] rounded-[50px] sm:rounded-[54px] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.35),0_12px_30px_-8px_rgba(139,94,60,0.18),0_0_0_1px_rgba(255,255,255,0.18)_inset,0_0_0_1.5px_#28282B] ring-1 ring-black/50 transition-transform duration-500 ease-out hover:-translate-y-1">
+            {/* Outer Chassis & Razor-Thin Bezel */}
+            <div className="relative bg-[#262629] p-[8px] sm:p-[9px] rounded-[50px] sm:rounded-[54px] border border-[#3A3A3E]">
               
               {/* Dynamic Island Sensor Pill */}
               <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-[86px] h-[22px] bg-black rounded-full z-30 flex items-center justify-between px-3 shadow-inner">
