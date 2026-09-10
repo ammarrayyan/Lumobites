@@ -419,7 +419,7 @@ export default function AccountPage() {
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     // 1. Reset React state immediately
     setStep('email');
     setEmail('');
@@ -433,7 +433,7 @@ export default function AccountPage() {
     setBlockedUsers([]);
 
     // 2. Clear global session and perform clean reload
-    signOutUser({ redirectTo: '/account', reload: true });
+    await signOutUser({ redirectTo: '/account', reload: true });
   };
 
   const handleSignOutAllDevices = async () => {
@@ -448,7 +448,7 @@ export default function AccountPage() {
       console.error('[Account SignOut All Devices] failed:', err);
     }
     alert('You have been signed out of all devices for security.');
-    signOutUser({ redirectTo: '/account', reload: true });
+    await signOutUser({ redirectTo: '/account', reload: true });
   };
 
   const handleDeleteAccount = async () => {

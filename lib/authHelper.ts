@@ -35,14 +35,25 @@ export interface SignOutOptions {
 /**
  * Centralized Sign Out for Lumo Bites
  * Clears all role-specific and global auth items from localStorage & cookies,
+ * calls /api/account/signout to clear HTTP-Only session cookies,
  * dispatches the 'lumo-pro-update' event for reactive UI updates,
  * and performs a clean reload or redirect so all stale in-memory state unmounts.
  */
-export function signOutUser(options?: SignOutOptions): void {
+export async function signOutUser(options?: SignOutOptions): Promise<void> {
   if (typeof window === 'undefined') return;
 
   try {
-    // 1. Clear all auth keys from localStorage
+    // 1. Clear server-side HTTP-Only cookies
+    try {
+      await fetch('/api/account/signout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (err) {
+      console.warn('[signOutUser] Server signout call failed or offline:', err);
+    }
+
+    // 2. Clear all auth keys from localStorage
     localStorage.removeItem('lumo_pro_email');
     localStorage.removeItem('lumo_sitter_email');
     localStorage.removeItem('lumo_sitter_id');
@@ -54,7 +65,7 @@ export function signOutUser(options?: SignOutOptions): void {
     localStorage.removeItem('lumo_session_started_at');
     localStorage.removeItem('lumo_redirect_after_login');
 
-    // 2. Clear all auth cookies
+    // 3. Clear all client-accessible auth cookies
     const cookieNames = [
       'lumo_pro_email',
       'lumo_account_session_token',
@@ -66,11 +77,11 @@ export function signOutUser(options?: SignOutOptions): void {
       document.cookie = `${name}=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     }
 
-    // 3. Dispatch global sync events
+    // 4. Dispatch global sync events
     window.dispatchEvent(new Event('lumo-pro-update'));
     window.dispatchEvent(new Event('storage'));
 
-    // 4. Handle navigation / reload
+    // 5. Handle navigation / reload
     const redirectTo = options?.redirectTo;
     const shouldReload = options?.reload !== false;
 
