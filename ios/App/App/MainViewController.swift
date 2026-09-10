@@ -9,10 +9,25 @@ class MainViewController: CAPBridgeViewController {
         super.viewDidLoad()
     }
 
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        applyScrollLock()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        webView?.scrollView.bounces = false
-        webView?.scrollView.alwaysBounceVertical = false
-        webView?.scrollView.alwaysBounceHorizontal = false
+        applyScrollLock()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        applyScrollLock()
+    }
+
+    private func applyScrollLock() {
+        let sv = self.bridge?.webView?.scrollView ?? self.webView?.scrollView
+        sv?.bounces = false
+        sv?.alwaysBounceVertical = false
+        sv?.alwaysBounceHorizontal = false
     }
 }
