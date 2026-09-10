@@ -469,53 +469,61 @@ export default function ChatModal({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ── INPUT BAR ── */}
-        <div className={`shrink-0 bg-white border-t border-gray-100 px-3 py-2 ${
-          isKeyboardOpen
-            ? 'pb-2'
-            : 'pb-[max(12px,calc(env(safe-area-inset-bottom,0px)+8px))] sm:pb-3'
-        }`}>
-          <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
-            newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
-          }`}>
-            <textarea
-              ref={textareaRef}
-              value={newMessage}
-              onChange={handleTextareaChange}
-              onFocus={() => {
-                setTimeout(() => {
-                  window.scrollTo(0, 0);
-                  const chatContainer = document.getElementById('chat-messages');
-                  if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
-                }, 100);
-              }}
-              placeholder={`Message ${displayName}…`}
-              rows={1}
-              className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
-              style={{ maxHeight: '128px' }}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 cursor-pointer ${
-                newMessage.trim() && !isSending
-                  ? 'bg-blue-500 hover:bg-blue-600 active:scale-90 text-white shadow-md shadow-blue-200'
-                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-              }`}
-            >
-              {isSending
-                ? <div className="w-3.5 h-3.5 border-[2px] border-white/30 border-t-white rounded-full animate-spin" />
-                : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
-              }
-            </button>
+        {/* ── INPUT BAR OR RESOLVED BANNER ── */}
+        {(chatType === 'lost_pets' && (petDetails?.status === 'resolved' || bookingStatus === 'resolved')) ? (
+          <div className="shrink-0 bg-emerald-50/90 border-t border-emerald-200 px-4 py-3.5 text-center">
+            <p className="text-xs sm:text-sm font-bold text-emerald-900 flex items-center justify-center gap-1.5">
+              <span>🎉</span> This case has been marked as resolved. Messaging is now closed.
+            </p>
           </div>
-          <p className="text-center text-[10px] text-gray-400 mt-1 select-none hidden sm:block">
-            Enter to send &middot; Shift+Enter for new line
-          </p>
-        </div>
+        ) : (
+          <div className={`shrink-0 bg-white border-t border-gray-100 px-3 py-2 ${
+            isKeyboardOpen
+              ? 'pb-2'
+              : 'pb-[max(12px,calc(env(safe-area-inset-bottom,0px)+8px))] sm:pb-3'
+          }`}>
+            <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 px-3 py-2 ${
+              newMessage ? 'border-blue-400 bg-white shadow-sm shadow-blue-100' : 'border-gray-200 bg-gray-50'
+            }`}>
+              <textarea
+                ref={textareaRef}
+                value={newMessage}
+                onChange={handleTextareaChange}
+                onFocus={() => {
+                  setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    const chatContainer = document.getElementById('chat-messages');
+                    if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+                  }, 100);
+                }}
+                placeholder={`Message ${displayName}…`}
+                rows={1}
+                className="flex-1 bg-transparent border-none focus:outline-none resize-none text-[14px] text-gray-800 placeholder-gray-400 leading-relaxed py-0.5"
+                style={{ maxHeight: '128px' }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-150 mb-0.5 cursor-pointer ${
+                  newMessage.trim() && !isSending
+                    ? 'bg-blue-500 hover:bg-blue-600 active:scale-90 text-white shadow-md shadow-blue-200'
+                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                {isSending
+                  ? <div className="w-3.5 h-3.5 border-[2px] border-white/30 border-t-white rounded-full animate-spin" />
+                  : <Send size={15} className={newMessage.trim() ? 'translate-x-[1px]' : ''} />
+                }
+              </button>
+            </div>
+            <p className="text-center text-[10px] text-gray-400 mt-1 select-none hidden sm:block">
+              Enter to send &middot; Shift+Enter for new line
+            </p>
+          </div>
+        )}
 
         {/* ── PET CARE PROFILE DRAWER ── */}
         {showPetProfile && petDetails && (

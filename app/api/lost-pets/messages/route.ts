@@ -105,12 +105,19 @@ export async function POST(request: NextRequest) {
     // Fetch lost pet details to resolve receiver email if not supplied or same as sender
     const { data: pet, error: petErr } = await supabaseAdmin
       .from('lost_pets')
-      .select('id, pet_name, species, type, contact_email, city')
+      .select('id, pet_name, species, type, contact_email, city, status')
       .eq('id', lost_pet_id)
       .maybeSingle();
 
     if (petErr) {
       console.error('[Lost Pets Messages POST Pet Fetch Error]:', petErr);
+    }
+
+    if (pet && pet.status === 'resolved') {
+      return NextResponse.json(
+        { error: 'This lost pet post has been marked as resolved. Messaging is closed.' },
+        { status: 400 }
+      );
     }
 
     const petOwnerEmail = pet?.contact_email ? pet.contact_email.toLowerCase().trim() : '';

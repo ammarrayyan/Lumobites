@@ -949,14 +949,16 @@ export default function LostPetsFeed() {
                                   >
                                     View Details &amp; Help
                                   </Link>
-                                  <button 
-                                    type="button"
-                                    onClick={(e) => handleOpenChat(e, pet)}
-                                    className="px-3 bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-2 rounded-xl transition-colors text-xs flex items-center gap-1 cursor-pointer shadow-xs"
-                                    title={`Message ${pet.type === 'lost' ? 'Owner' : 'Finder'}`}
-                                  >
-                                    <MessageSquare className="w-3.5 h-3.5 text-white" /> Message
-                                  </button>
+                                  {pet.status !== 'resolved' && (
+                                    <button 
+                                      type="button"
+                                      onClick={(e) => handleOpenChat(e, pet)}
+                                      className="px-3 bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-2 rounded-xl transition-colors text-xs flex items-center gap-1 cursor-pointer shadow-xs"
+                                      title={`Message ${pet.type === 'lost' ? 'Owner' : 'Finder'}`}
+                                    >
+                                      <MessageSquare className="w-3.5 h-3.5 text-white" /> Message
+                                    </button>
+                                  )}
                                   {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                                     <button 
                                       onClick={() => handleDeletePostDirectly(pet.id)}
@@ -1376,14 +1378,16 @@ export default function LostPetsFeed() {
                                 <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs">
                                   View Details &amp; Help
                                 </Link>
-                                <button 
-                                  type="button"
-                                  onClick={(e) => handleOpenChat(e, pet)}
-                                  className="px-3 bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-2 rounded-xl transition-colors text-xs flex items-center gap-1 cursor-pointer shadow-xs"
-                                  title={`Message ${pet.type === 'lost' ? 'Owner' : 'Finder'}`}
-                                >
-                                  <MessageSquare className="w-3.5 h-3.5 text-white" /> Message
-                                </button>
+                                {pet.status !== 'resolved' && (
+                                  <button 
+                                    type="button"
+                                    onClick={(e) => handleOpenChat(e, pet)}
+                                    className="px-3 bg-[#8B5E3C] hover:bg-[#70482D] text-white font-bold py-2 rounded-xl transition-colors text-xs flex items-center gap-1 cursor-pointer shadow-xs"
+                                    title={`Message ${pet.type === 'lost' ? 'Owner' : 'Finder'}`}
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5 text-white" /> Message
+                                  </button>
+                                )}
                                 {userEmail && pet.contact_email && pet.contact_email.toLowerCase().trim() === userEmail.toLowerCase().trim() ? (
                                   <button 
                                     onClick={() => handleDeletePostDirectly(pet.id)}
