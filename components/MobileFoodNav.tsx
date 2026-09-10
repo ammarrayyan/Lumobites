@@ -27,6 +27,7 @@ export default function MobileFoodNav() {
           <Link
             key={item.label}
             href={item.href}
+            prefetch={true}
             className={`flex-1 flex flex-col items-center gap-1 py-1.5 px-0.5 rounded-xl text-center cursor-pointer transition-all ${
               isActive 
                 ? 'bg-[#8B5E3C] text-white shadow-sm' 

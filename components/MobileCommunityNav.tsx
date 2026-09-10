@@ -30,6 +30,7 @@ export default function MobileCommunityNav() {
           <Link
             key={item.label}
             href={item.href}
+            prefetch={true}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl cursor-pointer active:scale-95 transition-all duration-200 ${
               isActive 
                 ? 'bg-[#8B5E3C] text-white shadow-xs' 

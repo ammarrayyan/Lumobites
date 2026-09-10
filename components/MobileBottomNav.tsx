@@ -28,6 +28,26 @@ export default function MobileBottomNav() {
     setTappedIndex(null);
   }, [pathname]);
 
+  // Proactively prefetch all bottom nav tabs in the background when idle so switching is instantaneous
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefetchAll = () => {
+      tabs.forEach(tab => {
+        if (tab.href && tab.href !== pathname) {
+          router.prefetch(tab.href);
+        }
+      });
+    };
+
+    if ('requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(prefetchAll, { timeout: 2000 });
+      return () => (window as any).cancelIdleCallback(handle);
+    } else {
+      const timer = setTimeout(prefetchAll, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [router, pathname]);
+
   const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 2);
   const isRaisedActive = activeIndex >= 0 && tabs[activeIndex]?.isRaised;
 
