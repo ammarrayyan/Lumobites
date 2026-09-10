@@ -6,6 +6,7 @@ import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } fr
 import PetPhotoCarousel from './PetPhotoCarousel';
 import BookingProgressStepper from './BookingProgressStepper';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { hapticSuccess } from '@/lib/haptics';
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -231,6 +232,7 @@ export default function ChatModal({
         body: JSON.stringify(body),
       });
       if (res.ok) {
+        hapticSuccess();
         await fetchMessages(true);
       } else {
         const err = await res.json().catch(() => ({}));

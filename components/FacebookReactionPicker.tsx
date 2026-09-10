@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ThumbsUp, Heart } from 'lucide-react';
+import { hapticLight } from '@/lib/haptics';
 
 export type ReactionType = 'like' | 'love' | 'care' | 'sad';
 
@@ -154,6 +155,9 @@ export default function FacebookReactionPicker({
     isProcessingRef.current = true;
     hasUserInteractedRef.current = true;
     setPickerOpen(false);
+
+    // Provide immediate native/web haptic feedback on reaction tap
+    hapticLight();
 
     setReactionState(prev => {
       const isCurrentlyReacted = !!prev.userReaction;
