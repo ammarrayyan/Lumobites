@@ -7,6 +7,12 @@ import Capacitor
 class MainViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         webView?.scrollView.bounces = false
+        webView?.scrollView.alwaysBounceVertical = false
+        webView?.scrollView.alwaysBounceHorizontal = false
     }
 }
