@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut, X } from 'lucide-react';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import { formatPublicCity } from '@/lib/formatCity';
+import { signOutUser } from '@/lib/authHelper';
 
 const DAYCARE_SERVICES = [
   'Group Play',
@@ -69,16 +70,12 @@ export default function DaycareRegistrationPage() {
   const [existingConflictMsg, setExistingConflictMsg] = useState('');
 
   const handleSignOutAndReset = () => {
-    localStorage.removeItem('lumo_pro_email');
-    localStorage.removeItem('lumo_sitter_email');
-    localStorage.removeItem('lumo_shelter_email');
-    localStorage.removeItem('lumo_account_session_token');
-    document.cookie = 'lumo_pro_email=; path=/; max-age=0';
     setExistingConflictMsg('');
     setIsAuthenticated(false);
     setOtpStep('email');
     setDaycareEmail('');
     setLoading(false);
+    signOutUser({ redirectTo: '/pet-daycare', reload: true });
   };
 
   const fetchExistingDaycare = async (email: string) => {
@@ -205,22 +202,16 @@ export default function DaycareRegistrationPage() {
   };
 
   const handleSignOut = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      setDaycareEmail('');
-      setIsAuthenticated(false);
-      setExistingDaycare(null);
-      setOtpStep('email');
-      setOtpCode('');
-      setForm({
-        business_name: '', license_number: '', email: '', phone: '',
-        address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
-      });
-    }
+    setDaycareEmail('');
+    setIsAuthenticated(false);
+    setExistingDaycare(null);
+    setOtpStep('email');
+    setOtpCode('');
+    setForm({
+      business_name: '', license_number: '', email: '', phone: '',
+      address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
+    });
+    signOutUser({ redirectTo: '/pet-daycare', reload: true });
   };
 
   const toggleService = (svc: string) => {

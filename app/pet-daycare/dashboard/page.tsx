@@ -13,6 +13,7 @@ import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { formatPublicCity } from '@/lib/formatCity';
+import { signOutUser } from '@/lib/authHelper';
 import {
   Building2,
   Calendar,
@@ -347,16 +348,7 @@ export default function DaycareDashboard() {
   };
 
   const handleSignOut = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      localStorage.removeItem('lumo_account_session_token');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'lumo_account_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      router.push('/pet-daycare');
-    }
+    signOutUser({ redirectTo: '/pet-daycare', reload: true });
   };
 
   const handleDeleteDaycareAccount = async () => {

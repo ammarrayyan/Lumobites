@@ -10,7 +10,7 @@ import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import { useScrollLock } from '@/lib/useScrollLock';
 
@@ -1350,14 +1350,10 @@ function AdoptionContent() {
               <button
                 type="button"
                 onClick={() => {
-                  localStorage.removeItem('lumo_pro_email');
-                  localStorage.removeItem('lumo_sitter_email');
-                  localStorage.removeItem('lumo_shelter_email');
-                  localStorage.removeItem('lumo_account_session_token');
-                  document.cookie = 'lumo_pro_email=; path=/; max-age=0';
                   setShelterConflictMsg('');
                   setShelterOtpStep('email');
                   setShelterOtpEmail('');
+                  signOutUser({ redirectTo: '/adoption', reload: true });
                 }}
                 className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md cursor-pointer text-sm flex items-center justify-center gap-2 border-none"
               >

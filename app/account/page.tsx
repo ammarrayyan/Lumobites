@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { signOutUser } from '@/lib/authHelper';
 
 type Step = 'email' | 'verification' | 'dashboard';
 type AccountTab = 'pets' | 'subscription' | 'security';
@@ -419,7 +420,7 @@ export default function AccountPage() {
   };
 
   const handleSignOut = () => {
-    // 1. Reset React state immediately so the UI reflects signed-out state instantly
+    // 1. Reset React state immediately
     setStep('email');
     setEmail('');
     setIsLocked(false);
@@ -431,24 +432,8 @@ export default function AccountPage() {
     setShowConfirmDelete(false);
     setBlockedUsers([]);
 
-    // 2. Clear local session tokens and cookies (for this device only)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      localStorage.removeItem('lumo_sitter_id');
-      localStorage.removeItem('lumo_account_session_token');
-      localStorage.removeItem('lumo_account_email');
-      localStorage.removeItem('lumo_admin_bypass');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      document.cookie = 'lumo_account_session_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      
-      const url = new URL(window.location.href);
-      url.search = '';
-      window.history.replaceState({}, '', url.toString());
-      window.location.href = '/account';
-    }
+    // 2. Clear global session and perform clean reload
+    signOutUser({ redirectTo: '/account', reload: true });
   };
 
   const handleSignOutAllDevices = async () => {
@@ -462,11 +447,8 @@ export default function AccountPage() {
     } catch (err) {
       console.error('[Account SignOut All Devices] failed:', err);
     }
-    if (typeof window !== 'undefined') {
-      localStorage.clear();
-      alert('You have been signed out of all devices for security.');
-      window.location.href = '/account';
-    }
+    alert('You have been signed out of all devices for security.');
+    signOutUser({ redirectTo: '/account', reload: true });
   };
 
   const handleDeleteAccount = async () => {

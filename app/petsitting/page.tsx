@@ -14,7 +14,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { useSwipeBack } from '@/lib/useSwipeBack';
@@ -2509,7 +2509,7 @@ export function PetSittingContent() {
   };
 
   const handleSitterSignOutAllDevices = async () => {
-    const email = sitterEmail || localStorage.getItem('lumo_sitter_email');
+    const email = sitterEmail || (typeof window !== 'undefined' ? localStorage.getItem('lumo_sitter_email') : '');
     if (email) {
       try {
         await fetch('/api/petsitting/auth/signout-all-devices', {
@@ -2521,52 +2521,13 @@ export function PetSittingContent() {
         console.error('[Sitter SignOut All Devices] failed:', err);
       }
     }
-    localStorage.removeItem('lumo_sitter_email');
-    localStorage.removeItem('lumo_sitter_email_expiry');
-    if (typeof window !== 'undefined') {
-      localStorage.clear();
-      alert('You have been signed out of all devices for security.');
-      window.location.href = '/';
-    }
+    alert('You have been signed out of all devices for security.');
+    signOutUser({ redirectTo: '/petsitting', reload: true });
   };
 
   const handleSitterSignOut = () => {
-    localStorage.removeItem('lumo_sitter_email');
-    localStorage.removeItem('lumo_sitter_email_expiry');
-    
-    // Reset state
-    setSitterId('');
-    setSitterAuthMode('email');
-    setSitterSignupIntent(null);
-    setSitterAuthCode('');
-    setSitterEmail('');
-    setSitterFirstName('');
-    setSitterLastName('');
-    setSitterPhoto('');
-    setSitterCoverPhoto('');
-    setSitterCity('');
-    setSitterLocationInput('');
-    setSitterLocationVerified(false);
-    setSitterLocationOptions([]);
-    setSitterSelectedLocation(null);
-    setSitterIsLocating(false);
-    setSitterBio('');
-    setSitterGender('');
-    setSitterPetTypes('both');
-    setSitterRate('');
-    setSitterRateType('night');
-    setSitterRateDropins('');
-    setSitterRateWalking('');
-    setSitterRateOvernight('');
-    setSitterRateBoarding('');
-    setSitterRateDaycare('');
-    setSitterPhone('');
-    setSitterPhoneVisible(false);
-    setSelfDeclared(false);
-    setIsProSitter(false);
-    setProfilePreviewMode(false);
-    
     alert('Signed out successfully.');
+    signOutUser({ redirectTo: '/petsitting', reload: true });
   };
 
 

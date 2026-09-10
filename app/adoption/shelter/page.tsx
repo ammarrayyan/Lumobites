@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import { formatPublicCity } from '@/lib/formatCity';
+import { signOutUser } from '@/lib/authHelper';
 import {
   Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut, X,
   ShieldCheck, Key, Mail, RefreshCw, Loader2, LayoutGrid, Heart,
@@ -185,23 +186,17 @@ export default function ShelterRegistrationPage() {
   };
 
   const handleSignOut = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      setShelterEmail('');
-      setExistingShelter(null);
-      setOtpStep('email');
-      setOtpCode('');
-      setOtpSent(false);
-      setExistingConflictMsg('');
-      setForm({
-        org_name: '', tax_id: '', email: '', phone: '',
-        address: '', city: '', state: '', zip: '', website: '', description: '', org_photo_url: '',
-      });
-    }
+    setShelterEmail('');
+    setExistingShelter(null);
+    setOtpStep('email');
+    setOtpCode('');
+    setOtpSent(false);
+    setExistingConflictMsg('');
+    setForm({
+      org_name: '', tax_id: '', email: '', phone: '',
+      address: '', city: '', state: '', zip: '', website: '', description: '', org_photo_url: '',
+    });
+    signOutUser({ redirectTo: '/adoption/shelter', reload: true });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

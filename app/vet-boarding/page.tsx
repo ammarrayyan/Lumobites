@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import { formatPublicCity } from '@/lib/formatCity';
+import { signOutUser } from '@/lib/authHelper';
 import {
   Stethoscope, Building2, CheckCircle2, Clock, XCircle,
   ArrowLeft, Loader2, LayoutGrid, ChevronRight, ShieldCheck, Key, Mail, RefreshCw, LogOut, ShieldAlert, X,
@@ -195,23 +196,16 @@ export default function VetBoardingRegisterPage() {
   };
 
   const handleSignOut = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      localStorage.removeItem('lumo_sitter_id');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      window.dispatchEvent(new Event('lumo-pro-update'));
-      setClinicEmail('');
-      setExistingClinic(null);
-      setOtpStep('email');
-      setOtpCode('');
-      setOtpSent(false);
-      setForm({
-        clinic_name: '', license_number: '', email: '', phone: '',
-        address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
-      });
-    }
+    setClinicEmail('');
+    setExistingClinic(null);
+    setOtpStep('email');
+    setOtpCode('');
+    setOtpSent(false);
+    setForm({
+      clinic_name: '', license_number: '', email: '', phone: '',
+      address: '', city: '', state: '', zip: '', website: '', description: '', services: [],
+    });
+    signOutUser({ redirectTo: '/vet-boarding', reload: true });
   };
 
   const toggleService = (svc: string) => {
