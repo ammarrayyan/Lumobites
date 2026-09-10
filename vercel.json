@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/reviews",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/cleanup-notifications",
@@ -22,7 +22,7 @@
     },
     {
       "path": "/api/cron/booking-reminders",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
