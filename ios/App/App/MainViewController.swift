@@ -25,7 +25,16 @@ class MainViewController: CAPBridgeViewController {
     }
 
     private func applyScrollLock() {
+        // App cream theme background #F7F3EE (247, 243, 238)
+        let creamColor = UIColor(red: 247.0/255.0, green: 243.0/255.0, blue: 238.0/255.0, alpha: 1.0)
+        self.view.backgroundColor = creamColor
+        
+        let wv = self.bridge?.webView ?? self.webView
+        wv?.backgroundColor = creamColor
+        wv?.isOpaque = true
+        
         let sv = self.bridge?.webView?.scrollView ?? self.webView?.scrollView
+        sv?.backgroundColor = creamColor
         sv?.bounces = false
         sv?.alwaysBounceVertical = false
         sv?.alwaysBounceHorizontal = false
