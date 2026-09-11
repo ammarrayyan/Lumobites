@@ -12,9 +12,10 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const cleanCode = code.toString().replace(/\D/g, '').trim();
 
     // Apple reviewer bypass
-    if (cleanEmail === 'reviewer@lumobites.net' && code === '123456') {
+    if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
       console.log(`[Sitter Auth Verify Code] Apple reviewer bypass triggered`);
       const response = NextResponse.json({
         success: true,
@@ -44,12 +45,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Look up the code
+    const nowIso = new Date().toISOString();
     const { data: codeData, error: codeError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('email', cleanEmail)
-      .eq('code', code)
-      .single();
+      .eq('code', cleanCode)
+      .gt('expires_at', nowIso)
+      .maybeSingle();
 
     if (codeError || !codeData) {
       // Increment failed_attempts if a log exists
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
           .update({ failed_attempts: (recentLog.failed_attempts || 0) + 1 })
           .eq('id', recentLog.id);
       }
-      return NextResponse.json({ error: 'Invalid or expired code.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid or expired verification code.' }, { status: 400 });
     }
 
     // 2. Check expiration
@@ -109,8 +112,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Mark successful login by clearing the code
-    await supabaseAdmin.from('verification_codes').delete().eq('id', codeData.id);
+    // 4. Mark successful login by clearing all verification codes for this email
+    await supabaseAdmin.from('verification_codes').delete().eq('email', cleanEmail);
     if (recentLog) {
       await supabaseAdmin.from('otp_requests_log').update({ failed_attempts: 0 }).eq('id', recentLog.id);
     }

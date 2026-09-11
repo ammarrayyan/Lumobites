@@ -52,11 +52,13 @@ export async function POST(request: NextRequest) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes from now
 
-    // 3. Clear any existing verification codes for this email to keep table clean
+    // 3. Clear expired verification codes for this email to keep table clean
+    const nowIso = new Date().toISOString();
     await supabaseAdmin
       .from('verification_codes')
       .delete()
-      .eq('email', cleanEmail);
+      .eq('email', cleanEmail)
+      .lt('expires_at', nowIso);
 
     // 4. Store the pending verification code
     const { error: dbError } = await supabaseAdmin

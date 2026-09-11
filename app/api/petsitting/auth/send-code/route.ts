@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-    // 3. Clear existing codes
-    await supabaseAdmin.from('verification_codes').delete().eq('email', cleanEmail);
+    // 3. Clear expired codes
+    const nowIso = new Date().toISOString();
+    await supabaseAdmin.from('verification_codes').delete().eq('email', cleanEmail).lt('expires_at', nowIso);
 
     // 4. Store the new code
     const { error: dbError } = await supabaseAdmin

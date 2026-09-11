@@ -87,7 +87,6 @@ export default function AccountPage() {
         const cachedEmail = localStorage.getItem('lumo_pro_email');
         if (cachedEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
           setEmail(cachedEmail);
-          setIsLocked(true);
         }
       }
       setIsCheckingSession(false);
@@ -95,6 +94,20 @@ export default function AccountPage() {
 
     checkSession();
   }, []);
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [hasTermsAccepted, setHasTermsAccepted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const accepted = localStorage.getItem('lumo_terms_accepted');
+      if (accepted === 'true') {
+        setHasTermsAccepted(true);
+        setTermsAccepted(true);
+      }
+    }
+  }, []);
+
   const [verificationCode, setVerificationCode] = useState('');
   
   // Loading & error states
@@ -206,7 +219,11 @@ export default function AccountPage() {
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const cleanEmail = email.toLowerCase().trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -216,15 +233,12 @@ export default function AccountPage() {
       const res = await fetch('/api/stripe/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
+        body: JSON.stringify({ email: cleanEmail })
       });
 
       const data = await res.json();
       if (!res.ok) {
-        if (data.error === 'not_pro') {
-          throw new Error('not_pro');
-        }
-        throw new Error(data.error || 'Failed to send verification code');
+        throw new Error(data.error || data.message || 'Failed to send verification code. Please try again.');
       }
 
       setStep('verification');
@@ -239,7 +253,12 @@ export default function AccountPage() {
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!verificationCode.trim() || verificationCode.length !== 6) return;
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanCode = verificationCode.replace(/\D/g, '').trim();
+    if (cleanCode.length !== 6) {
+      setError('Please enter the 6-digit verification code.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -249,7 +268,7 @@ export default function AccountPage() {
       const res = await fetch('/api/stripe/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), code: verificationCode.trim() })
+        body: JSON.stringify({ email: cleanEmail, code: cleanCode })
       });
 
       const data = await res.json();
@@ -257,20 +276,22 @@ export default function AccountPage() {
         throw new Error(data.error || 'Code verification failed');
       }
 
-      const activeEmail = data.email || email.trim();
+      const activeEmail = data.email || cleanEmail;
       setEmail(activeEmail);
       setIsLocked(true);
       if (data.sessionToken) {
         localStorage.setItem('lumo_account_session_token', data.sessionToken);
       }
       localStorage.setItem('lumo_pro_email', activeEmail);
+      localStorage.setItem('lumo_terms_accepted', 'true');
+      document.cookie = `lumo_pro_email=${activeEmail}; path=/; max-age=2592000`; // 30 days
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       window.dispatchEvent(new Event('lumo-pro-update'));
 
       if (data.existed) {
-        alert('Welcome back!');
+        alert('Welcome back! ✨');
       } else {
-        alert('Account created!');
+        alert('Account created! 🐾');
       }
 
       // If code verified successfully, fetch subscription details
@@ -493,244 +514,144 @@ export default function AccountPage() {
               </p>
             </div>
           ) : step === 'email' ? (
-            <div className="flex flex-col gap-6">
-              <div className="text-center flex flex-col items-center">
-                <Settings className="w-10 h-10 text-[#8B5E3C] mb-3" />
-                <h1 className="text-3xl font-[900] text-[#191919] tracking-tight mb-2">
-                  Your Account
-                </h1>
-                <p className="text-sm text-gray-500 max-w-[340px] mx-auto leading-relaxed">
-                  Enter your email address to sign in or manage your account.
-                </p>
-              </div>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-2xl font-black text-[#3B2410] mb-1 text-center">
+                Sign In
+              </h2>
+              <p className="text-center text-[#666666] text-sm mb-2">
+                Enter your email to access your account.
+              </p>
 
-              {error === 'not_pro' ? (
-                <div className="flex flex-col gap-4 text-center items-center w-full">
-                  <p className="text-red-500 font-bold text-sm leading-relaxed">
-                    No active Lumo Bites Membership found for this email. Please upgrade to Membership.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setLoading(true);
-                      try {
-                        const res = await fetch('/api/stripe/checkout', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ email: email.trim() })
-                        });
-                        const data = await res.json();
-                        if (data.url) {
-                          window.location.href = data.url;
-                        } else {
-                          throw new Error(data.error || 'Failed to start checkout');
-                        }
-                      } catch (err: any) {
-                        setError(err.message || 'Failed to start checkout. Please try again.');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    disabled={loading}
-                    className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    Upgrade to Membership ($4.99/mo) →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setError(null); }}
-                    className="text-xs text-gray-400 hover:text-gray-600 hover:underline font-bold"
-                  >
-                    Try another email
-                  </button>
+              {error && (
+                <div className="mb-2 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center flex flex-col items-center gap-1">
+                  <span>{error}</span>
                 </div>
-              ) : (
-                <form onSubmit={handleSendCode} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5 text-left">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                      Email Address {isLocked && <Lock className="w-3.5 h-3.5 text-gray-400 ml-1.5" title="Locked after signup" />}
-                    </label>
-                    {isLocked ? (
-                      <div className="w-full px-4 py-3.5 rounded-xl border border-[#DFD3C7] bg-[#FAF6F2] text-sm text-gray-500 font-medium">
-                        {email}
-                      </div>
-                    ) : (
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        required
-                        disabled={loading}
-                        className="w-full px-4 py-3.5 rounded-xl border border-[#E2D5C8] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-sm text-[#2E2419] bg-[#FAF6F2] transition-all disabled:opacity-50"
-                      />
-                    )}
-                    {isLocked && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Email cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] hover:underline">info@lumobitespet.com</a> for help.
-                      </p>
-                    )}
-                  </div>
-
-                  {error && (
-                    <div className="flex flex-col gap-3 items-center">
-                      <p className="text-xs text-red-500 font-semibold text-center leading-normal">
-                        <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 inline mr-1" /> {error}
-                      </p>
-                      {error.toLowerCase().includes('no active pro subscription') && (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            setLoading(true);
-                            setError(null);
-                            try {
-                              const res = await fetch('/api/stripe/checkout', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email: email.trim() })
-                              });
-                              const data = await res.json();
-                              if (data.url) {
-                                window.location.href = data.url;
-                              } else {
-                                throw new Error(data.error || 'Failed to start checkout');
-                              }
-                            } catch (err: any) {
-                              setError(err.message || 'Failed to start checkout. Please try again.');
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
-                          disabled={loading}
-                          className="w-full mt-1 bg-[#8B5E3C] hover:bg-[#734A2E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {loading ? (
-                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                          ) : (
-                            <>
-                              <Sparkles className="w-4 h-4 text-white shrink-0 animate-pulse" />
-                              Upgrade to Membership ($4.99/mo) <Sparkles className="w-4 h-4 text-white shrink-0 inline ml-1.5" />
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading || !email.trim()}
-                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    ) : 'Send Verification Code'}
-                  </button>
-                </form>
               )}
 
-            </div>
-          ) : null}
+              <form onSubmit={handleSendCode} className="flex flex-col gap-4">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-[#2E2419]"
+                  required
+                  disabled={loading}
+                />
 
-          {/* STEP 2: ENTER CODE */}
-          {step === 'verification' && (
-            <div className="flex flex-col gap-6 animate-fade-in">
-              <div className="text-center flex flex-col items-center">
-                <Mail className="w-10 h-10 text-[#8B5E3C] mb-3" />
-                <h1 className="text-2xl font-[900] text-[#191919] tracking-tight mb-2">
-                  Verify Identity
-                </h1>
-                <p className="text-sm text-gray-500 max-w-[340px] mx-auto leading-relaxed">
-                  We sent a 6-digit verification code to <strong className="text-gray-700">{email}</strong>. It expires in 15 minutes.
-                </p>
-              </div>
-
-              <form onSubmit={handleVerifyCode} className="flex flex-col gap-4">
-                <div className="bg-stone-50 border border-stone-200/60 text-stone-600 rounded-xl p-3 text-xs leading-relaxed text-center font-medium mb-1 animate-fade-in flex items-center justify-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#8B5E3C] shrink-0" />
-                  <span>Code sent! Check your inbox (and spam folder if not received in 1 minute).</span>
-                </div>
-                <div className="flex flex-col gap-1.5 text-left">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
-                    Enter 6-Digit Code
+                {!hasTermsAccepted && (
+                  <label className="flex items-start gap-2.5 my-1 cursor-pointer select-none text-left">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 text-[#8B5E3C] border-[#E8D5C0] rounded-sm focus:ring-[#8B5E3C]"
+                    />
+                    <span className="text-[11px] text-[#666666] leading-normal font-medium">
+                      I agree to the{' '}
+                      <Link href="/terms" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                        Terms of Service
+                      </Link>
+                      ,{' '}
+                      <Link href="/privacy" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                        Privacy Policy
+                      </Link>{' '}
+                      and{' '}
+                      <Link href="/community-guidelines" className="text-[#8B5E3C] font-bold hover:underline" target="_blank" onClick={(e) => e.stopPropagation()}>
+                        Community Guidelines
+                      </Link>
+                      .
+                    </span>
                   </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder="••••••"
-                    required
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 rounded-xl border border-[#E2D5C8] outline-none focus:ring-2 focus:ring-[#8B5E3C]/20 focus:border-[#8B5E3C] text-center font-mono text-xl tracking-widest text-[#2E2419] bg-[#FAF6F2] transition-all disabled:opacity-50"
-                  />
-                </div>
-
-                {message && (
-                  <p className={`text-xs font-semibold text-center leading-normal ${message.isError ? 'text-red-500' : 'text-emerald-600'}`}>
-                    {message.text}
-                  </p>
-                )}
-
-                {error && (
-                  <div className="text-xs text-red-500 font-semibold text-center leading-normal flex flex-col items-center gap-1">
-                    <span className="flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 text-red-500" /> {error}</span>
-                    {error.includes('Code expired') && (
-                      <button
-                        type="button"
-                        onClick={() => handleSendCode({ preventDefault: () => {} } as React.FormEvent)}
-                        className="text-xs font-bold text-[#8B5E3C] hover:underline mt-0.5 cursor-pointer bg-transparent border-none"
-                      >
-                        Still nothing? Resend Code
-                      </button>
-                    )}
-                  </div>
                 )}
 
                 <button
                   type="submit"
-                  disabled={loading || verificationCode.length !== 6}
-                  className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] disabled:bg-gray-300 text-white py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+                  disabled={loading || (!hasTermsAccepted && !termsAccepted) || !email.trim()}
+                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {loading ? (
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : 'Verify & Continue'}
+                  {loading ? 'Sending...' : 'Send Code'}
                 </button>
+              </form>
+            </div>
+          ) : step === 'verification' ? (
+            <div className="flex flex-col gap-4 animate-fade-in">
+              <h2 className="text-2xl font-black text-[#3B2410] mb-1 text-center">
+                Verify Code
+              </h2>
+              <p className="text-center text-[#666666] text-sm mb-2">
+                We sent a code to <strong className="text-gray-700">{email}</strong>
+              </p>
 
-                <div className="mt-6 flex flex-col gap-2">
-                  <div className="text-center text-xs text-[#8B7E7D]">
-                    Didn't receive the code? Check your spam or junk folder.
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    {!isLocked && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setStep('email');
-                          setError(null);
-                          setMessage(null);
-                          setVerificationCode('');
-                        }}
-                        className="text-xs text-gray-500 font-bold hover:underline bg-transparent border-none cursor-pointer"
-                      >
-                        ← Change Email
-                      </button>
-                    )}
-
+              {error && (
+                <div className="mb-2 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center flex flex-col items-center gap-1">
+                  <span>{error}</span>
+                  {error.includes('expired') && (
                     <button
                       type="button"
-                      onClick={handleSendCode}
-                      disabled={loading}
-                      className="text-xs text-[#8B5E3C] font-bold hover:underline bg-transparent border-none cursor-pointer"
+                      onClick={() => handleSendCode({ preventDefault: () => {} } as React.FormEvent)}
+                      className="text-xs font-bold text-[#8B5E3C] hover:underline mt-1 cursor-pointer bg-transparent border-none"
                     >
                       Still nothing? Resend Code
                     </button>
-                  </div>
+                  )}
                 </div>
+              )}
+
+              <form onSubmit={handleVerifyCode} className="flex flex-col gap-4">
+                <div className="bg-[#FAF6F4] border border-[#E8DDD4] text-[#8B5E3C] rounded-xl p-3 text-xs leading-relaxed text-center font-medium mt-1 mb-1 animate-fade-in">
+                  📧 Code sent! Check your inbox — and don't forget to check your spam/junk folder if you don't see it within a minute.
+                </div>
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="••••••"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-center text-lg tracking-[0.2em] font-bold text-[#2E2419]"
+                  maxLength={6}
+                  required
+                  disabled={loading}
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading || verificationCode.length !== 6}
+                  className="w-full py-3.5 rounded-xl bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold transition-colors disabled:opacity-70 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {loading ? 'Verifying...' : 'Verify & Sign In'}
+                </button>
+
+                <div className="mt-2 flex flex-col gap-2 border-t border-[#E8D5C0] pt-4">
+                  <div className="text-center text-xs text-[#8B7E7D]">
+                    Didn't receive the code? Check your spam or junk folder.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={loading}
+                    className="text-sm font-bold text-[#8B5E3C] hover:underline text-center cursor-pointer bg-transparent border-none"
+                  >
+                    Still nothing? Resend Code
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('email');
+                    setVerificationCode('');
+                    setError(null);
+                    setMessage(null);
+                  }}
+                  className="text-sm font-bold text-gray-500 hover:text-gray-700 hover:underline text-center mt-2 cursor-pointer bg-transparent border-none"
+                >
+                  Use a different email
+                </button>
               </form>
             </div>
-          )}
+          ) : null}
 
           {/* STEP 3: DASHBOARD */}
           {step === 'dashboard' && subDetails && (

@@ -334,48 +334,28 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
   const handleSignInSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!signInEmail || !signInEmail.includes('@')) {
+      setSignInError('Please enter a valid email address.');
+      return;
+    }
     setSignInLoading(true);
     setSignInError('');
     try {
-      // Try PRO table first
-      let res = await fetch('/api/stripe/send-code', {
+      const cleanEmail = signInEmail.toLowerCase().trim();
+      const res = await fetch('/api/stripe/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: signInEmail })
+        body: JSON.stringify({ email: cleanEmail })
       });
       
-      let isNotPro = false;
-      let stripeErr = '';
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
-        if (data.error === 'not_pro') {
-          isNotPro = true;
-        }
-        stripeErr = data.message || data.error || 'Failed to send code';
-        
-        // If not PRO, try Sitters table
-        const sitterRes = await fetch('/api/petsitting/auth/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: signInEmail }) // checks sitters
-        });
-        
-        if (sitterRes.ok) {
-          setSignInStep('code');
-          return;
-        }
-        
-        if (isNotPro) {
-          setSignInError('not_pro');
-          return;
-        }
-        
-        throw new Error(stripeErr || 'Account not found. Please ensure you are a PRO member or have a Sitter profile.');
-      } else {
-        setSignInStep('code');
+        throw new Error(data.error || data.message || 'Failed to send verification code. Please try again.');
       }
+      
+      setSignInStep('code');
     } catch(err: any) {
-      setSignInError(err.message);
+      setSignInError(err.message || 'Failed to send verification code.');
     } finally {
       setSignInLoading(false);
     }
@@ -383,13 +363,20 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
   const handleSignInVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = signInEmail.toLowerCase().trim();
+    const cleanCode = signInCode.replace(/\D/g, '').trim();
+    if (cleanCode.length !== 6) {
+      setSignInError('Please enter the 6-digit verification code.');
+      return;
+    }
+
     setSignInLoading(true);
     setSignInError('');
     try {
       const res = await fetch('/api/stripe/verify-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: signInEmail, code: signInCode })
+        body: JSON.stringify({ email: cleanEmail, code: cleanCode })
       });
       
       const verifyData = await res.json();
@@ -397,12 +384,17 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
         throw new Error(verifyData.error || 'Invalid or expired verification code.');
       }
 
-      localStorage.setItem('lumo_pro_email', signInEmail);
+      localStorage.setItem('lumo_pro_email', cleanEmail);
       localStorage.setItem('lumo_terms_accepted', 'true');
-      document.cookie = `lumo_pro_email=${signInEmail}; path=/; max-age=2592000`; // 30 days
+      document.cookie = `lumo_pro_email=${cleanEmail}; path=/; max-age=2592000`; // 30 days
+      if (verifyData.sessionToken) {
+        localStorage.setItem('lumo_account_session_token', verifyData.sessionToken);
+      }
       if (verifyData.isSitter) {
-        localStorage.setItem('lumo_sitter_email', signInEmail);
-        localStorage.setItem('lumo_sitter_id', verifyData.sitterId);
+        localStorage.setItem('lumo_sitter_email', cleanEmail);
+        if (verifyData.sitterId) {
+          localStorage.setItem('lumo_sitter_id', verifyData.sitterId);
+        }
       }
       localStorage.setItem('lumo_session_started_at', new Date().toISOString());
       syncStatus();
@@ -421,7 +413,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       const statusRes = await fetch('/api/stripe/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: signInEmail })
+        body: JSON.stringify({ email: cleanEmail })
       });
       const data = await statusRes.json();
       if (data.isPro) {
@@ -430,7 +422,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
         setIsPro(false);
       }
       setIsSignedIn(true);
-      setProEmail(signInEmail);
+      setProEmail(cleanEmail);
       window.dispatchEvent(new Event('lumo-pro-update'));
       
       const redirect = localStorage.getItem('lumo_redirect_after_login');
@@ -440,7 +432,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       }
       
     } catch(err: any) {
-      setSignInError(err.message);
+      setSignInError(err.message || 'Verification failed. Please try again.');
     } finally {
       setSignInLoading(false);
     }

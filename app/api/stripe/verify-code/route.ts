@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const cleanCode = code.trim();
+    const cleanCode = code.toString().replace(/\D/g, '').trim();
 
     // Apple reviewer bypass
     if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
@@ -30,12 +30,14 @@ export async function POST(request: NextRequest) {
       return response;
     }
 
-    // 1. Check if the code exists
+    // 1. Check if the code exists and is not expired
+    const nowIso = new Date().toISOString();
     const { data: codeData, error: codeError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('email', cleanEmail)
       .eq('code', cleanCode)
+      .gt('expires_at', nowIso)
       .maybeSingle();
 
     if (codeError) {
@@ -44,22 +46,23 @@ export async function POST(request: NextRequest) {
     }
 
     if (!codeData) {
-      return NextResponse.json(
-        { error: 'Invalid code — please check and try again' },
-        { status: 400 }
-      );
-    }
-
-    // 2. Check expiration (JS-side UTC check)
-    const expiryTime = new Date(codeData.expires_at).getTime();
-    if (Date.now() > expiryTime) {
-      // Clean up the expired code
-      await supabaseAdmin
+      // Check if any active code exists for this email
+      const { data: activeCodes } = await supabaseAdmin
         .from('verification_codes')
-        .delete()
-        .eq('id', codeData.id);
+        .select('id')
+        .eq('email', cleanEmail)
+        .gt('expires_at', nowIso)
+        .limit(1);
+
+      if (activeCodes && activeCodes.length > 0) {
+        return NextResponse.json(
+          { error: 'Invalid code — please check and try again. If you received multiple emails, please enter the most recent code.' },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'Code expired — please request a new one' },
+        { error: 'Invalid or expired verification code — please request a new one.' },
         { status: 400 }
       );
     }
@@ -126,14 +129,14 @@ export async function POST(request: NextRequest) {
       sitterId = sitterData.id;
     }
 
-    // 5. Consume/delete the code immediately only AFTER successful verification
+    // 5. Consume/delete all verification codes for this email immediately AFTER successful verification
     await supabaseAdmin
       .from('verification_codes')
       .delete()
-      .eq('id', codeData.id);
+      .eq('email', cleanEmail);
 
     const sessionToken = createAccountSessionToken(cleanEmail);
-    const response = NextResponse.json({ success: true, isPro: true, existed, isSitter, sitterId, sessionToken, email: cleanEmail });
+    const response = NextResponse.json({ success: true, isPro: isProUser, existed, isSitter, sitterId, sessionToken, email: cleanEmail });
     setAccountSessionCookie(response, cleanEmail);
     return response;
   } catch (err: any) {
