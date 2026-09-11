@@ -107,9 +107,13 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const photosList = pet?.photos || (pet?.photo_url ? [pet.photo_url] : []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const emailVal = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || '';
+    const syncAuth = () => {
+      const emailVal = typeof window !== 'undefined' ? getSignedInUserEmail() : '';
       setUserEmail(emailVal);
+    };
+    syncAuth();
+
+    if (typeof window !== 'undefined') {
       const blocked = localStorage.getItem('lumo_blocked_emails');
       if (blocked) {
         try {
@@ -119,24 +123,21 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     }
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'lumo_pro_email' && e.newValue) {
-        setUserEmail(e.newValue);
-      }
+      syncAuth();
     };
     const handleFocus = () => {
-      const email = localStorage.getItem('lumo_pro_email') || '';
-      if (email !== userEmail) {
-        setUserEmail(email);
-      }
+      syncAuth();
     };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('lumo-pro-update', syncAuth);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('lumo-pro-update', syncAuth);
     };
-  }, [userEmail]);
+  }, []);
 
   const handleReportPost = async () => {
     if (!pet) return;
@@ -208,6 +209,9 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     const currentEmail = userEmail || (typeof window !== 'undefined' ? getSignedInUserEmail() : '');
     if (!currentEmail) {
       window.dispatchEvent(new Event('lumo-open-signin'));
+      return;
+    }
+    if (pet?.contact_email && currentEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()) {
       return;
     }
     setIsChatOpen(true);
@@ -561,7 +565,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 </div>
               </div>
 
-                {pet.status !== 'resolved' && (
+                {pet.status !== 'resolved' && !(userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()) && (
                   <div className="flex flex-col gap-2.5">
                     <button 
                       type="button"

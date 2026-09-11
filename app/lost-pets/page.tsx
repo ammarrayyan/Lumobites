@@ -70,6 +70,9 @@ export default function LostPetsFeed() {
       window.dispatchEvent(new Event('lumo-open-signin'));
       return;
     }
+    if (pet.contact_email && currentEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()) {
+      return;
+    }
     setActiveChatPet(pet);
   };
 
@@ -710,24 +713,26 @@ export default function LostPetsFeed() {
   }, [fetchPets]);
 
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'lumo_pro_email' && e.newValue) {
-        setUserEmail(e.newValue);
-        fetchPets(false);
-      }
-    };
-    const handleFocus = () => {
-      const email = localStorage.getItem('lumo_pro_email') || '';
+    const syncAuth = () => {
+      const email = typeof window !== 'undefined' ? getSignedInUserEmail() : '';
       if (email !== userEmail) {
         setUserEmail(email);
         fetchPets(false);
       }
     };
+    const handleStorageChange = (e: StorageEvent) => {
+      syncAuth();
+    };
+    const handleFocus = () => {
+      syncAuth();
+    };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('lumo-pro-update', syncAuth);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('lumo-pro-update', syncAuth);
     };
   }, [userEmail, fetchPets]);
 
@@ -956,7 +961,7 @@ export default function LostPetsFeed() {
                                   >
                                     View Details &amp; Help
                                   </Link>
-                                  {pet.status !== 'resolved' && (
+                                  {pet.status !== 'resolved' && !(userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()) && (
                                     <button 
                                       type="button"
                                       onClick={(e) => handleOpenChat(e, pet)}
@@ -1385,7 +1390,7 @@ export default function LostPetsFeed() {
                                 <Link href={`/lost-pets/${pet.id}`} className="flex-1 text-center bg-[#FAF6F4] hover:bg-[#F0E6DD] border border-[#E8DDD4] text-[#8B5E3C] font-bold py-2 rounded-xl transition-colors text-xs">
                                   View Details &amp; Help
                                 </Link>
-                                {pet.status !== 'resolved' && (
+                                {pet.status !== 'resolved' && !(userEmail && pet.contact_email && userEmail.toLowerCase().trim() === pet.contact_email.toLowerCase().trim()) && (
                                   <button 
                                     type="button"
                                     onClick={(e) => handleOpenChat(e, pet)}
