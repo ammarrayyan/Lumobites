@@ -202,13 +202,25 @@ export default function VetClinicManagement({ adminKey }: { adminKey: string }) 
                     <StatusBadge status={clinic.status} />
                   </div>
 
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#8B7E7D]">
-                    <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{clinic.email}</span>
-                    {clinic.phone && <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{clinic.phone}</span>}
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{clinic.city}{clinic.state ? `, ${clinic.state}` : ''}</span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[#8B7E7D] pt-0.5">
+                    <span className="flex items-center gap-1.5 min-w-0 max-w-full">
+                      <Mail className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                      <span className="break-all select-all font-medium text-gray-700" title={clinic.email}>{clinic.email}</span>
+                    </span>
+                    {clinic.phone && (
+                      <span className="flex items-center gap-1.5 shrink-0">
+                        <Phone className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span className="font-medium text-gray-700">{clinic.phone}</span>
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                      <span className="font-medium text-gray-700">{clinic.city}{clinic.state ? `, ${clinic.state}` : ''}</span>
+                    </span>
                     {clinic.website && (
-                      <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-500 hover:underline">
-                        <Globe className="w-3.5 h-3.5" />{clinic.website.replace(/^https?:\/\//, '')}
+                      <a href={clinic.website.startsWith('http') ? clinic.website : `https://${clinic.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-500 hover:underline min-w-0 max-w-full truncate" title={clinic.website}>
+                        <Globe className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{clinic.website.replace(/^https?:\/\//, '')}</span>
                       </a>
                     )}
                   </div>

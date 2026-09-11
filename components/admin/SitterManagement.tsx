@@ -312,7 +312,7 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mb-2">{sitter.email}</p>
+                  <p className="text-sm text-gray-500 mb-2 break-all select-all" title={sitter.email}>{sitter.email}</p>
                   <p className="text-sm text-[#555555]">
                     <strong>Location:</strong> {sitter.city ? (() => {
                       let locStr = sitter.city;

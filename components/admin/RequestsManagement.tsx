@@ -403,15 +403,15 @@ export default function RequestsManagement({ adminKey, onUnauthorized }: Request
                         </td>
 
                         {/* Owner Email & Booking # */}
-                        <td className="p-4 text-sm font-semibold text-[#191919]">
-                          <div>{request.owner_email}</div>
+                        <td className="p-4 text-sm font-semibold text-[#191919] max-w-[220px]">
+                          <div className="break-all select-all" title={request.owner_email}>{request.owner_email}</div>
                           <div className="text-xs text-gray-500 font-normal">{request.booking_number || 'No Booking #'}</div>
                         </td>
 
                         {/* Sitter Name & Email */}
-                        <td className="p-4 text-sm">
+                        <td className="p-4 text-sm max-w-[220px]">
                           <div className="font-semibold text-[#191919]">{request.sitter_name}</div>
-                          <div className="text-xs text-gray-500">{request.sitter_email}</div>
+                          <div className="text-xs text-gray-500 break-all select-all" title={request.sitter_email}>{request.sitter_email}</div>
                         </td>
 
                         {/* Pet Name & Type */}

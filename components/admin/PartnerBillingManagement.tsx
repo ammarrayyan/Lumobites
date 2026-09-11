@@ -294,9 +294,9 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
                   return (
                     <tr key={`${p.partner_type}-${p.id}`} className="hover:bg-amber-50/20 transition-colors">
                       {/* 1. Business Name & Email */}
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 max-w-[240px]">
                         <div className="font-extrabold text-gray-900">{p.business_name}</div>
-                        <div className="text-[11px] text-gray-500 font-medium">{p.email}</div>
+                        <div className="text-[11px] text-gray-500 font-medium break-all select-all" title={p.email}>{p.email}</div>
                       </td>
 
                       {/* 2. Service Type */}

@@ -252,12 +252,12 @@ export default function AffiliatesManagement({ adminKey, onUnauthorized }: Affil
                 <tr key={affiliate.id} className="hover:bg-gray-50 transition-colors">
                   
                   {/* Name & PayPal details */}
-                  <td className="p-4">
+                  <td className="p-4 max-w-[240px]">
                     <div className="font-bold text-[#191919] mb-0.5">{affiliate.full_name}</div>
-                    <div className="text-xs text-gray-500 font-medium mb-1.5">{affiliate.email}</div>
+                    <div className="text-xs text-gray-500 font-medium mb-1.5 break-all select-all" title={affiliate.email}>{affiliate.email}</div>
                     
                     {affiliate.paypal_email && (
-                      <div className="text-[10px] bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded inline-flex items-center gap-1 font-bold">
+                      <div className="text-[10px] bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded inline-flex items-center gap-1 font-bold break-all select-all" title={affiliate.paypal_email}>
                         💳 PayPal: {affiliate.paypal_email}
                       </div>
                     )}

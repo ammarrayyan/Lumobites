@@ -406,7 +406,11 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
               ) : (
                 ugcReports.map(report => (
                   <tr key={report.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-[#191919]">{report.reported_by_email || report.reporter_email}</td>
+                    <td className="px-4 py-3 font-medium text-[#191919] max-w-[220px]">
+                      <span className="break-all select-all block" title={report.reported_by_email || report.reporter_email}>
+                        {report.reported_by_email || report.reporter_email}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 capitalize">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                         report.post_type === 'lost_pet' ? 'bg-red-50 text-red-750' : 'bg-purple-50 text-purple-750'
@@ -553,8 +557,8 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
                   
                   return (
                     <tr key={report.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-[#191919]">
-                        <div className="font-semibold">{report.reported_email}</div>
+                      <td className="px-4 py-3 font-medium text-[#191919] max-w-[220px]">
+                        <div className="font-semibold break-all select-all" title={report.reported_email}>{report.reported_email}</div>
                         <div className="text-xs text-gray-400 capitalize">Type: {report.reported_type}</div>
                         <div className="mt-1">
                           {currentStatus === 'suspended' && (
@@ -576,7 +580,9 @@ export default function ReportsManagement({ adminKey, onUnauthorized }: { adminK
                         {report.details && <div className="text-xs text-gray-555 mt-1 line-clamp-3">{report.details}</div>}
                         {report.booking_id && <div className="text-[10px] text-gray-400 mt-1">Booking: {report.booking_id.substring(0, 8)}...</div>}
                       </td>
-                      <td className="px-4 py-3 text-xs">{report.reporter_email}</td>
+                      <td className="px-4 py-3 text-xs max-w-[200px]">
+                        <span className="break-all select-all block" title={report.reporter_email}>{report.reporter_email}</span>
+                      </td>
                       <td className="px-4 py-3">
                         {report.status === 'pending' ? (
                           <span className="px-2 py-1 rounded-full bg-amber-500/20 text-amber-600 text-xs font-bold">Pending</span>

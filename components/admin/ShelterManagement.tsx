@@ -206,14 +206,25 @@ CREATE TABLE IF NOT EXISTS adoption_messages (...);`}
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs text-gray-600">
-                    <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.email}</div>
-                    {shelter.phone && <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.phone}</div>}
-                    <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" /> {shelter.city}{shelter.state ? `, ${shelter.state}` : ''} {shelter.zip}</div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-600 pt-0.5">
+                    <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                      <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="break-all select-all font-medium text-gray-700" title={shelter.email}>{shelter.email}</span>
+                    </div>
+                    {shelter.phone && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="font-medium text-gray-700">{shelter.phone}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="font-medium text-gray-700">{shelter.city}{shelter.state ? `, ${shelter.state}` : ''} {shelter.zip}</span>
+                    </div>
                     {shelter.website && (
-                      <div className="flex items-center gap-1.5 sm:col-span-2">
+                      <div className="flex items-center gap-1.5 min-w-0 max-w-full">
                         <Globe className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <a href={shelter.website.startsWith('http') ? shelter.website : `https://${shelter.website}`} target="_blank" rel="noreferrer" className="text-blue-600 underline font-medium truncate">
+                        <a href={shelter.website.startsWith('http') ? shelter.website : `https://${shelter.website}`} target="_blank" rel="noreferrer" className="text-blue-600 underline font-medium truncate" title={shelter.website}>
                           {shelter.website}
                         </a>
                       </div>

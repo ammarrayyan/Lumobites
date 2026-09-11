@@ -160,7 +160,9 @@ export default function AccountManagement({ adminKey, onUnauthorized }: { adminK
 
                 return (
                   <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-[#191919]">{user.email}</td>
+                    <td className="px-4 py-3 font-medium text-[#191919] max-w-[280px]">
+                      <span className="break-all select-all block" title={user.email}>{user.email}</span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`px-2.5 py-1 rounded-full text-xs ${badgeClass}`}>
                         {badgeLabel}
