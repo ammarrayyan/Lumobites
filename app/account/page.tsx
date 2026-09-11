@@ -691,12 +691,46 @@ export default function AccountPage() {
                   <div className="text-center flex flex-col items-center">
                     <Sparkles className="w-10 h-10 text-[#8B5E3C] mb-3" />
                     <h2 className="text-2xl font-[900] text-[#191919] tracking-tight">
-                      {subDetails.active ? "Your Membership Dashboard" : "Your Account Dashboard"}
+                      {subDetails.isPartner
+                        ? `Your ${subDetails.partnerLabel || 'Partner'} Dashboard`
+                        : subDetails.active
+                        ? "Your Membership Dashboard"
+                        : "Your Account Dashboard"}
                     </h2>
                     <p className="text-xs text-gray-500 mt-1 font-bold">
                       Account: {email}
                     </p>
                   </div>
+
+                  {/* Quick-Launch Partner Banner when signed in as partner */}
+                  {subDetails.isPartner && subDetails.dashboardUrl && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <Building2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-blue-900 uppercase tracking-wider">
+                              {subDetails.partnerLabel || 'Partner'} Portal
+                            </span>
+                            <span className="bg-blue-100 text-blue-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                              Approved Partner
+                            </span>
+                          </div>
+                          <p className="text-sm font-bold text-gray-900 mt-0.5">
+                            {subDetails.businessName || 'Manage your partner profile & listings'}
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        href={subDetails.dashboardUrl}
+                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+                      >
+                        Go to {subDetails.partnerLabel || 'Partner'} Dashboard →
+                      </Link>
+                    </div>
+                  )}
 
                   {/* 🐾 3-TAB NAVIGATION HEADER */}
                   <div className="grid grid-cols-3 bg-[#F5EFEB] p-1.5 rounded-2xl gap-1.5 border border-[#EBE3DC]">

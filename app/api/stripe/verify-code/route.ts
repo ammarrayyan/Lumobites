@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Check if the user is also an approved sitter
-    const { data: sitterData, error: sitterError } = await supabaseAdmin
+    const { data: sitterData } = await supabaseAdmin
       .from('sitters')
       .select('id')
       .eq('email', cleanEmail)
@@ -129,14 +129,50 @@ export async function POST(request: NextRequest) {
       sitterId = sitterData.id;
     }
 
-    // 5. Consume/delete all verification codes for this email immediately AFTER successful verification
+    // 5. Check if user is a Partner (Shelter, Daycare, or Vet Boarding)
+    const { getUserProStatusDetails } = await import('@/lib/aiLimiter');
+    const proDetails = await getUserProStatusDetails(cleanEmail);
+    let isPartner = false;
+    let partnerType: string | null = null;
+    let dashboardUrl: string | null = null;
+
+    if (proDetails.isPro && proDetails.proSource.startsWith('partner_')) {
+      isPartner = true;
+      if (proDetails.proSource === 'partner_shelter') {
+        partnerType = 'shelter';
+        dashboardUrl = '/adoption/shelter/dashboard';
+      } else if (proDetails.proSource === 'partner_daycare') {
+        partnerType = 'daycare';
+        dashboardUrl = '/pet-daycare/dashboard';
+      } else if (proDetails.proSource === 'partner_vet') {
+        partnerType = 'vet';
+        dashboardUrl = '/vet-boarding/dashboard';
+      }
+    }
+
+    if (proDetails.isPro) {
+      isProUser = true;
+    }
+
+    // 6. Consume/delete all verification codes for this email immediately AFTER successful verification
     await supabaseAdmin
       .from('verification_codes')
       .delete()
       .eq('email', cleanEmail);
 
     const sessionToken = createAccountSessionToken(cleanEmail);
-    const response = NextResponse.json({ success: true, isPro: isProUser, existed, isSitter, sitterId, sessionToken, email: cleanEmail });
+    const response = NextResponse.json({
+      success: true,
+      isPro: isProUser,
+      existed,
+      isSitter,
+      sitterId,
+      isPartner,
+      partnerType,
+      dashboardUrl,
+      sessionToken,
+      email: cleanEmail
+    });
     setAccountSessionCookie(response, cleanEmail);
     return response;
   } catch (err: any) {

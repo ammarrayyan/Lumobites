@@ -94,10 +94,11 @@ export interface ProStatusDetails {
 
 export async function getUserProStatusDetails(email?: string | null): Promise<ProStatusDetails> {
   if (!email) return { isPro: false, proSource: 'none', rawSubscriptionStatus: 'none', billingHealthLabel: 'N/A' };
-  const cleanEmail = normalizeEmail(email);
+  const cleanEmail = email.trim().toLowerCase();
+  const baseEmail = normalizeEmail(email);
 
   // 1. Unlimited Admin
-  if (UNLIMITED_EMAILS.includes(cleanEmail)) {
+  if (UNLIMITED_EMAILS.includes(cleanEmail) || UNLIMITED_EMAILS.includes(baseEmail)) {
     return { isPro: true, proSource: 'unlimited', rawSubscriptionStatus: 'active', billingHealthLabel: 'Unlimited Admin' };
   }
 
@@ -111,7 +112,12 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
   };
 
   // 2. Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $20/mo)
-  const { data: vet } = await supabaseAdmin.from('vet_clinics').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  // Check exact email first, fallback to baseEmail
+  let { data: vet } = await supabaseAdmin.from('vet_clinics').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  if ((!vet || vet.length === 0) && baseEmail !== cleanEmail) {
+    const { data: vetFallback } = await supabaseAdmin.from('vet_clinics').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', baseEmail);
+    if (vetFallback && vetFallback.length > 0) vet = vetFallback;
+  }
   if (vet && vet.length > 0) {
     const v = vet[0];
     const appStatus = v.status || 'pending';
@@ -142,7 +148,11 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
     }
   }
 
-  const { data: daycare } = await supabaseAdmin.from('pet_daycares').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  let { data: daycare } = await supabaseAdmin.from('pet_daycares').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  if ((!daycare || daycare.length === 0) && baseEmail !== cleanEmail) {
+    const { data: daycareFallback } = await supabaseAdmin.from('pet_daycares').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', baseEmail);
+    if (daycareFallback && daycareFallback.length > 0) daycare = daycareFallback;
+  }
   if (daycare && daycare.length > 0) {
     const d = daycare[0];
     const appStatus = d.status || 'pending';
@@ -173,7 +183,11 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
     }
   }
 
-  const { data: shelter } = await supabaseAdmin.from('shelters').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  let { data: shelter } = await supabaseAdmin.from('shelters').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
+  if ((!shelter || shelter.length === 0) && baseEmail !== cleanEmail) {
+    const { data: shelterFallback } = await supabaseAdmin.from('shelters').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', baseEmail);
+    if (shelterFallback && shelterFallback.length > 0) shelter = shelterFallback;
+  }
   if (shelter && shelter.length > 0) {
     const s = shelter[0];
     const appStatus = s.status || 'pending';
@@ -206,8 +220,14 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
 
   // 3. Direct AI Membership (emails.is_pro === true AND source in verified Stripe list)
   const PAID_STRIPE_SOURCES = ['stripe_membership', 'stripe', 'stripe-webhook-invoice'];
-  const { data: emailData } = await supabaseAdmin.from('emails').select('is_pro, source').eq('email', cleanEmail).maybeSingle();
-  if (emailData && emailData.is_pro && PAID_STRIPE_SOURCES.includes(emailData.source)) {
+  let { data: emailData } = await supabaseAdmin.from('emails').select('is_pro, source').eq('email', cleanEmail).maybeSingle();
+  if ((!emailData || !emailData.is_pro) && baseEmail !== cleanEmail) {
+    const { data: emailFallback } = await supabaseAdmin.from('emails').select('is_pro, source').eq('email', baseEmail).maybeSingle();
+    if (emailFallback && emailFallback.is_pro) {
+      emailData = emailFallback;
+    }
+  }
+  if (emailData && emailData.is_pro && PAID_STRIPE_SOURCES.includes(emailData.source!)) {
     const { cancelAtPeriodEnd, endDateStr } = await getStripeSubscriptionStatus(cleanEmail);
     if (cancelAtPeriodEnd) {
       return {
