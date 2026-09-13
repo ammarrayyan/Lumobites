@@ -142,11 +142,37 @@ export default function PushManager() {
           // Handle notification click / action
           PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
             console.log('[PushManager] Native push notification action performed:', action);
-            const data = action.notification.data;
-            const link = data?.link;
-            if (link) {
-              console.log('[PushManager] Redirecting tapped notification to link:', link);
-              router.push(link);
+            const rawData = action.notification?.data || (action.notification as any)?.extra || (action as any)?.data;
+            let parsedData = rawData;
+            if (typeof rawData === 'string') {
+              try { parsedData = JSON.parse(rawData); } catch (e) {}
+            }
+            const targetLink =
+              parsedData?.link ||
+              parsedData?.url ||
+              parsedData?.click_action ||
+              (action.notification as any)?.link ||
+              (action.notification as any)?.url ||
+              (action as any)?.link ||
+              '';
+
+            if (targetLink) {
+              let cleanLink = targetLink;
+              if (cleanLink.startsWith('http://') || cleanLink.startsWith('https://')) {
+                try {
+                  const u = new URL(cleanLink);
+                  cleanLink = u.pathname + u.search + u.hash;
+                } catch (e) {}
+              }
+              console.log('[PushManager] Redirecting tapped notification to link:', cleanLink);
+              try {
+                router.push(cleanLink);
+              } catch (e) {
+                console.warn('[PushManager] router.push error:', e);
+              }
+              if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+                window.location.href = cleanLink;
+              }
             }
           });
 

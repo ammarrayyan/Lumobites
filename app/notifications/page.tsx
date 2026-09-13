@@ -114,10 +114,14 @@ export default function NotificationsPage() {
 
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
 
-    if (notif.link) {
-      router.push(notif.link);
-    } else {
-      router.push('/petsitting');
+    const targetLink = notif.link || '/petsitting';
+    try {
+      router.push(targetLink);
+    } catch (e) {
+      console.warn('router.push error:', e);
+    }
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+      window.location.href = targetLink;
     }
   };
 

@@ -65,6 +65,8 @@ export async function sendPushNotification(email: string, title: string, body: s
           badge: 1,
           'content-available': 1,
         },
+        link,
+        url: link,
       },
       headers: {
         'apns-priority': '10',
@@ -73,6 +75,7 @@ export async function sendPushNotification(email: string, title: string, body: s
     },
     data: {
       link,
+      url: link,
       ...(customData || {}),
     },
   };

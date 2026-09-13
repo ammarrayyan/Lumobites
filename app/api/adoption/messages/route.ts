@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { sendAdoptionInquiryEmail } from '@/lib/adoption-email';
 import { sendPushNotification } from '@/lib/push';
 
 export async function GET(request: NextRequest) {
@@ -175,18 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (cleanReceiver) {
-      // 4. Send email notification ONLY on the first message of a new inquiry thread
-      if (isFirstMessage) {
-        sendAdoptionInquiryEmail(
-          cleanReceiver,
-          pet?.name || 'Pet',
-          pet_id,
-          cleanSender,
-          cleanMessage
-        );
-      }
-
-      // 5. Always insert in-app notification (triggers bell icon & unread badge)
+      // 4. Always insert in-app notification (triggers bell icon & unread badge)
       const petName = pet?.name || 'Pet';
       const senderLabel = cleanSender.split('@')[0];
       const notifTitle = `New message regarding ${petName}`;

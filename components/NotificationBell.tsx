@@ -135,12 +135,15 @@ export default function NotificationBell({
     // Navigate immediately
     setIsOpen(false);
 
-    if (notification.link) {
-      router.push(notification.link);
-    } else {
-      router.push('/petsitting');
+    const targetLink = notification.link || '/petsitting';
+    try {
+      router.push(targetLink);
+    } catch (e) {
+      console.warn('router.push error:', e);
     }
-    router.refresh();
+    if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+      window.location.href = targetLink;
+    }
 
     // Mark as read in background (don't await)
     fetch('/api/notifications', {
