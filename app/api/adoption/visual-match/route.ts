@@ -24,11 +24,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: limitCheck.reason, isPro: limitCheck.isPro }, { status: 429 });
     }
 
-    // Fetch Lumo Bites shelter listings only (Part 5 requirement: Lumo Bites listings only)
-    const { data: localPets } = await supabaseAdmin
+    // Fetch active Lumo Bites shelter listings only
+    const { data: rawLocalPets } = await supabaseAdmin
       .from('adoption_pets')
-      .select('*, shelters(org_name, phone, email, website)')
+      .select('*, shelters(org_name, phone, email, website, is_paused, subscription_status, trial_end)')
       .eq('status', 'available');
+
+    const now = new Date();
+    const localPets = (rawLocalPets || []).filter((p: any) => {
+      const s = p.shelters;
+      if (!s) return true;
+      if (s.is_paused === true) return false;
+      if (s.subscription_status === 'active') return true;
+      if (s.subscription_status === 'canceled') return false;
+      if (s.trial_end && new Date(s.trial_end) < now) return false;
+      return true;
+    });
 
     if (!localPets || localPets.length === 0) {
       return NextResponse.json({

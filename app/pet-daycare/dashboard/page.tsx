@@ -310,19 +310,28 @@ export default function DaycareDashboard() {
     const isExpired = daycare.subscription_status !== 'active' && (daycare.subscription_status === 'canceled' || (daycare.trial_end && new Date(daycare.trial_end) < new Date()));
     if (daycare.is_paused && isExpired) return;
     const newPausedState = !daycare.is_paused;
+    setDaycare((prev: any) => prev ? ({ ...prev, is_paused: newPausedState }) : prev);
+    setEditForm((prev: any) => prev ? ({ ...prev, is_paused: newPausedState }) : prev);
     try {
       const res = await fetch('/api/pet-daycare', {
         method: 'PATCH',
         headers: getSessionHeaders(),
-        body: JSON.stringify({ id: daycare.id, is_paused: newPausedState })
+        body: JSON.stringify({ id: daycare.id, email: daycare.email, is_paused: newPausedState })
       });
       if (res.ok) {
         const data = await res.json();
-        setDaycare(data.daycare);
-        setEditForm(data.daycare);
+        if (data.daycare) {
+          setDaycare(data.daycare);
+          setEditForm(data.daycare);
+        }
+      } else {
+        setDaycare((prev: any) => prev ? ({ ...prev, is_paused: !newPausedState }) : prev);
+        setEditForm((prev: any) => prev ? ({ ...prev, is_paused: !newPausedState }) : prev);
       }
     } catch (e) {
       console.error('Failed to toggle paused state:', e);
+      setDaycare((prev: any) => prev ? ({ ...prev, is_paused: !newPausedState }) : prev);
+      setEditForm((prev: any) => prev ? ({ ...prev, is_paused: !newPausedState }) : prev);
     }
   };
 

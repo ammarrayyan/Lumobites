@@ -265,11 +265,43 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing shelter id or email' }, { status: 400 });
     }
 
-    const { data: existingShelter } = await supabaseAdmin
-      .from('shelters')
-      .select('*')
-      .or(id ? `id.eq.${id}` : `email.eq.${email.toLowerCase().trim()}`)
-      .maybeSingle();
+    const cleanEmail = email ? email.toLowerCase().trim() : null;
+
+    let lookupQuery = supabaseAdmin.from('shelters').select('*');
+    if (id) {
+      lookupQuery = lookupQuery.eq('id', id);
+    } else if (cleanEmail) {
+      lookupQuery = lookupQuery.eq('email', cleanEmail);
+    }
+
+    const { data: existingShelter } = await lookupQuery.maybeSingle();
+
+    if (!existingShelter) {
+      return NextResponse.json({ error: 'Shelter record not found' }, { status: 404 });
+    }
+
+    const updateFields: any = {};
+
+    // Only rebuild packed description if profile metadata was supplied
+    if (description !== undefined || gallery_urls !== undefined || hours !== undefined || starting_rate !== undefined || pricing_type !== undefined || pricing_note !== undefined) {
+      const { extractPartnerMeta, packPartnerDescription } = await import('@/lib/partnerProfileHelper');
+      const existingMeta = extractPartnerMeta(existingShelter);
+
+      const mergedMeta = {
+        hours: hours !== undefined ? hours : existingMeta.hours,
+        gallery: gallery_urls !== undefined ? gallery_urls : existingMeta.gallery,
+        pricing: {
+          startingRate: starting_rate !== undefined ? starting_rate : existingMeta.pricing.startingRate,
+          pricingType: pricing_type !== undefined ? pricing_type : existingMeta.pricing.pricingType,
+          pricingNote: pricing_note !== undefined ? pricing_note : existingMeta.pricing.pricingNote,
+          unit: 'adoption',
+        },
+      };
+
+      const rawCleanDesc = description !== undefined ? description : existingMeta.cleanDescription;
+      const packedDescription = packPartnerDescription(rawCleanDesc, mergedMeta);
+      updateFields.description = packedDescription;
+    }
 
     let updatedPhoto = org_photo_url;
     if (!updatedPhoto && website) {
@@ -279,26 +311,6 @@ export async function PATCH(request: NextRequest) {
       } catch (e) {}
     }
 
-    const { extractPartnerMeta, packPartnerDescription } = await import('@/lib/partnerProfileHelper');
-    const existingMeta = extractPartnerMeta(existingShelter);
-
-    const mergedMeta = {
-      hours: hours !== undefined ? hours : existingMeta.hours,
-      gallery: gallery_urls !== undefined ? gallery_urls : existingMeta.gallery,
-      pricing: {
-        startingRate: starting_rate !== undefined ? starting_rate : existingMeta.pricing.startingRate,
-        pricingType: pricing_type !== undefined ? pricing_type : existingMeta.pricing.pricingType,
-        pricingNote: pricing_note !== undefined ? pricing_note : existingMeta.pricing.pricingNote,
-        unit: 'adoption',
-      },
-    };
-
-    const rawCleanDesc = description !== undefined ? description : existingMeta.cleanDescription;
-    const packedDescription = packPartnerDescription(rawCleanDesc, mergedMeta);
-
-    const updateFields: any = {
-      description: packedDescription,
-    };
     if (org_name !== undefined) updateFields.org_name = org_name;
     if (tax_id !== undefined) updateFields.tax_id = tax_id;
     if (phone !== undefined) updateFields.phone = phone;
@@ -326,21 +338,21 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    let query = supabaseAdmin.from('shelters').update(updateFields);
+    let updateQuery = supabaseAdmin.from('shelters').update(updateFields);
 
-    if (id) {
-      query = query.eq('id', id);
-    } else {
-      query = query.eq('email', email.toLowerCase().trim());
+    if (existingShelter.id) {
+      updateQuery = updateQuery.eq('id', existingShelter.id);
+    } else if (cleanEmail) {
+      updateQuery = updateQuery.eq('email', cleanEmail);
     }
 
-    const { data: shelter, error } = await query.select('*').single();
+    const { data: shelter, error } = await updateQuery.select('*').maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ shelter });
+    return NextResponse.json({ success: true, shelter: shelter || existingShelter });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

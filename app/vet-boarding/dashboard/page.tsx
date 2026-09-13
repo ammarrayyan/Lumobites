@@ -340,18 +340,31 @@ export default function VetBoardingDashboardPage() {
   };
 
   const handleTogglePause = async () => {
+    if (!clinic) return;
     const isExpired = clinic.subscription_status !== 'active' && (clinic.subscription_status === 'canceled' || (clinic.trial_end && new Date(clinic.trial_end) < new Date()));
     if (clinic.status === 'paused' && isExpired) return;
     const newStatus = clinic.status === 'approved' ? 'paused' : 'approved';
+    setClinic((prev: any) => prev ? ({ ...prev, status: newStatus }) : prev);
+    setEditForm((prev: any) => prev ? ({ ...prev, status: newStatus }) : prev);
     try {
       const res = await fetch('/api/vet-boarding', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: clinic.id, status: newStatus }),
+        body: JSON.stringify({ id: clinic.id, email: clinic.email, status: newStatus }),
       });
       const data = await res.json();
-      if (res.ok) setClinic(data.clinic);
-    } catch (e) { console.error(e); }
+      if (res.ok && data.clinic) {
+        setClinic(data.clinic);
+        setEditForm(data.clinic);
+      } else if (!res.ok) {
+        setClinic((prev: any) => prev ? ({ ...prev, status: clinic.status }) : prev);
+        setEditForm((prev: any) => prev ? ({ ...prev, status: clinic.status }) : prev);
+      }
+    } catch (e) {
+      console.error(e);
+      setClinic((prev: any) => prev ? ({ ...prev, status: clinic.status }) : prev);
+      setEditForm((prev: any) => prev ? ({ ...prev, status: clinic.status }) : prev);
+    }
   };
 
   const handleDeleteClinicAccount = async () => {

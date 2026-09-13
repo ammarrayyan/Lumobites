@@ -671,19 +671,49 @@ function ShelterDashboardContent() {
               const isExpired = shelterInfo.subscription_status !== 'active' && (shelterInfo.subscription_status === 'canceled' || (shelterInfo.trial_end && new Date(shelterInfo.trial_end) < new Date()));
               return (
                 <button
+                  type="button"
                   onClick={async () => {
                     const newPaused = !shelterInfo.is_paused;
+                    // Optimistic UI update
+                    setShelterInfo((prev: any) => prev ? ({ ...prev, is_paused: newPaused }) : prev);
+                    setProfileForm((prev: any) => prev ? ({ ...prev, is_paused: newPaused }) : prev);
+
                     try {
                       const res = await fetch('/api/adoption/shelter', {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: shelterInfo.email, is_paused: newPaused }),
+                        body: JSON.stringify({
+                          id: shelterInfo.id,
+                          email: shelterInfo.email,
+                          is_paused: newPaused
+                        }),
                       });
-                      if (res.ok) {
-                        fetchShelterDetails(shelterInfo.email);
+                      const data = await res.json();
+                      if (res.ok && data.shelter) {
+                        const meta = extractPartnerMeta(data.shelter);
+                        const enriched = {
+                          ...data.shelter,
+                          description: meta.cleanDescription,
+                          hours: meta.hours || {},
+                          gallery_urls: meta.gallery || [],
+                          starting_rate: meta.pricing.startingRate,
+                          pricing_type: meta.pricing.pricingType,
+                          pricing_note: meta.pricing.pricingNote,
+                          avg_rating: meta.avgRating,
+                          review_count: meta.reviewCount,
+                        };
+                        setShelterInfo(enriched);
+                        setProfileForm(enriched);
+                      } else if (!res.ok) {
+                        // Revert on error
+                        setShelterInfo((prev: any) => prev ? ({ ...prev, is_paused: !newPaused }) : prev);
+                        setProfileForm((prev: any) => prev ? ({ ...prev, is_paused: !newPaused }) : prev);
+                        alert(`Failed to update status: ${data.error || 'Please try again.'}`);
                       }
                     } catch (e) {
                       console.error('Failed to toggle shelter pause status:', e);
+                      setShelterInfo((prev: any) => prev ? ({ ...prev, is_paused: !newPaused }) : prev);
+                      setProfileForm((prev: any) => prev ? ({ ...prev, is_paused: !newPaused }) : prev);
                     }
                   }}
                   disabled={isExpired}
