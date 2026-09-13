@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -118,6 +118,17 @@ export default function NotificationsPage() {
       router.push(notif.link);
     } else {
       router.push('/petsitting');
+    }
+  };
+
+  const handleDeleteNotification = async (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    try {
+      await fetch(`/api/notifications?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.error('Failed to delete notification:', e);
     }
   };
 
@@ -364,51 +375,179 @@ export default function NotificationsPage() {
               });
 
               return (
-                <div
+                <SwipeableNotificationItem
                   key={notif.id}
-                  onClick={() => handleNotificationClick(notif)}
-                  className={`p-4 sm:p-5 rounded-3xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group ${
-                    notif.read
-                      ? 'bg-white border-gray-200/80 hover:border-[#8B5E3C]/40 hover:shadow-md'
-                      : 'bg-[#FDFBF7] border-[#8B5E3C]/30 shadow-xs hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex items-start gap-4 flex-1">
-                    {/* Category Icon */}
-                    <div className="w-10 h-10 rounded-2xl bg-white border border-gray-100 shadow-xs flex items-center justify-center shrink-0 mt-0.5">
-                      {getNotificationIcon(notif.type)}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        {!notif.read && (
-                          <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
-                        )}
-                        <h4 className={`text-sm font-bold truncate ${notif.read ? 'text-gray-800' : 'text-gray-900 font-extrabold'}`}>
-                          {notif.title}
-                        </h4>
-                      </div>
-                      <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
-                        {notif.message}
-                      </p>
-                      <span className="text-[10px] text-gray-400 font-semibold mt-2 inline-block">
-                        {formattedDate}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Link Button */}
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                    <span className="text-xs font-bold text-[#8B5E3C] group-hover:text-[#734A2E] flex items-center gap-1">
-                      Open <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                    </span>
-                  </div>
-                </div>
+                  notif={notif}
+                  onClick={handleNotificationClick}
+                  onDelete={handleDeleteNotification}
+                  icon={getNotificationIcon(notif.type)}
+                  formattedDate={formattedDate}
+                />
               );
             })
           )}
         </div>
 
+      </div>
+    </div>
+  );
+}
+
+function SwipeableNotificationItem({
+  notif,
+  onClick,
+  onDelete,
+  icon,
+  formattedDate
+}: {
+  notif: Notification;
+  onClick: (notif: Notification) => void;
+  onDelete: (id: string) => void;
+  icon: React.ReactNode;
+  formattedDate: string;
+}) {
+  const [translateX, setTranslateX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number; initialX: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      initialX: translateX
+    };
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartRef.current.x;
+    const deltaY = currentY - touchStartRef.current.y;
+
+    // Only handle horizontal swipe if horizontal displacement exceeds vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      const newTranslateX = Math.min(0, Math.max(-130, touchStartRef.current.initialX + deltaX));
+      setTranslateX(newTranslateX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    if (!touchStartRef.current) return;
+
+    if (translateX < -110) {
+      // Swiped far left -> trigger instant deletion
+      triggerDelete();
+    } else if (translateX < -35) {
+      // Swiped past reveal threshold -> snap open to -80px
+      setTranslateX(-80);
+    } else {
+      // Snap back closed
+      setTranslateX(0);
+    }
+    touchStartRef.current = null;
+  };
+
+  const triggerDelete = () => {
+    setIsDeleting(true);
+    setTimeout(() => {
+      onDelete(notif.id);
+    }, 200);
+  };
+
+  const handleCardClick = () => {
+    if (translateX < 0) {
+      // Tapping card when swiped open closes it
+      setTranslateX(0);
+    } else {
+      onClick(notif);
+    }
+  };
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-3xl transition-all duration-200 ${
+        isDeleting ? 'max-h-0 opacity-0 mb-0 py-0 scale-95 pointer-events-none' : 'max-h-96 opacity-100 mb-0'
+      }`}
+    >
+      {/* Background Red Delete Action (Revealed on mobile swipe-left) */}
+      <div className="absolute inset-0 bg-red-600 rounded-3xl flex items-center justify-end pr-5 z-0">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerDelete();
+          }}
+          className="flex flex-col items-center justify-center gap-1 text-white hover:text-red-100 transition-transform active:scale-90 cursor-pointer border-none bg-transparent p-2"
+          aria-label="Delete notification"
+        >
+          <Trash2 size={20} />
+          <span className="text-[10px] font-black uppercase tracking-wider">Delete</span>
+        </button>
+      </div>
+
+      {/* Foreground Card */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        onClick={handleCardClick}
+        style={{
+          transform: `translateX(${translateX}px)`,
+          transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          touchAction: 'pan-y'
+        }}
+        className={`relative z-10 p-4 sm:p-5 rounded-3xl border cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group ${
+          notif.read
+            ? 'bg-white border-gray-200/80 hover:border-[#8B5E3C]/40 hover:shadow-md'
+            : 'bg-[#FDFBF7] border-[#8B5E3C]/30 shadow-xs hover:shadow-md'
+        }`}
+      >
+        <div className="flex items-start gap-4 flex-1">
+          {/* Category Icon */}
+          <div className="w-10 h-10 rounded-2xl bg-white border border-gray-100 shadow-xs flex items-center justify-center shrink-0 mt-0.5">
+            {icon}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              {!notif.read && (
+                <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
+              )}
+              <h4 className={`text-sm font-bold truncate ${notif.read ? 'text-gray-800' : 'text-gray-900 font-extrabold'}`}>
+                {notif.title}
+              </h4>
+            </div>
+            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+              {notif.message}
+            </p>
+            <span className="text-[10px] text-gray-400 font-semibold mt-2 inline-block">
+              {formattedDate}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Link Button & Desktop Delete Icon */}
+        <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerDelete();
+            }}
+            title="Delete notification"
+            className="hidden sm:flex p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors border-none bg-transparent cursor-pointer opacity-0 group-hover:opacity-100"
+          >
+            <Trash2 size={16} />
+          </button>
+          <span className="text-xs font-bold text-[#8B5E3C] group-hover:text-[#734A2E] flex items-center gap-1">
+            Open <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -1287,16 +1287,9 @@ export default function DaycareDashboard() {
                     <p className="text-xs text-amber-800">Manage your business subscription, billing details, and account deletion on your unified Account page.</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" /> Sign out
-                    </button>
                     <Link
                       href="/account"
-                      className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2 transition-colors shadow-sm cursor-pointer"
+                      className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2.5 transition-colors shadow-sm cursor-pointer"
                     >
                       Manage Account on /account →
                     </Link>

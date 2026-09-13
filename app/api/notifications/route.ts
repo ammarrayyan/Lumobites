@@ -66,10 +66,23 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const email = searchParams.get('email');
 
+    if (id) {
+      const { error } = await supabaseAdmin
+        .from('notifications')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ success: true });
+    }
+
     if (!email) {
-      return NextResponse.json({ error: 'Missing email' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing email or notification id' }, { status: 400 });
     }
 
     const { error } = await supabaseAdmin

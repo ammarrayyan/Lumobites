@@ -12,6 +12,7 @@ import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
+import { formatFullAddress } from '@/lib/formatCity';
 
 interface ShelterPet {
   id: string;
@@ -779,7 +780,7 @@ function ShelterDashboardContent() {
             </p>
             <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-xs text-amber-900 text-left space-y-1">
               <p><strong>Registered Email:</strong> {shelterInfo.email}</p>
-              <p><strong>Location:</strong> {shelterInfo.city && shelterInfo.state ? (shelterInfo.city.toLowerCase().includes(shelterInfo.state.toLowerCase()) ? shelterInfo.city : `${shelterInfo.city}, ${shelterInfo.state}`) : shelterInfo.city || shelterInfo.state || ''}</p>
+              <p><strong>Location:</strong> {formatFullAddress(shelterInfo) || 'Not specified'}</p>
               <p><strong>Status:</strong> <span className="bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-md uppercase text-[10px]">PENDING APPROVAL</span></p>
             </div>
             <p className="text-xs text-gray-400">
@@ -1387,7 +1388,7 @@ function ShelterDashboardContent() {
                   />
                 ) : (
                   <p className="text-sm font-bold text-[#2E2419]">
-                    {[profileForm.address, profileForm.city, profileForm.state, profileForm.zip].filter(Boolean).join(', ') || '—'}
+                    {formatFullAddress(profileForm) || '—'}
                   </p>
                 )}
               </div>
@@ -1464,16 +1465,9 @@ function ShelterDashboardContent() {
                 <p className="text-xs text-amber-800">Manage your business subscription, billing details, and account deletion on your unified Account page.</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleSwitchAccount}
-                  className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3.5 py-2 transition-colors cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Sign out
-                </button>
                 <Link
                   href="/account"
-                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2 transition-colors shadow-sm cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2.5 transition-colors shadow-sm cursor-pointer"
                 >
                   Manage Account on /account →
                 </Link>

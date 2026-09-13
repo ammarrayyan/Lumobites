@@ -18,7 +18,7 @@ import BookingProgressStepper from '@/components/BookingProgressStepper';
 import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
-import { formatPublicCity } from '@/lib/formatCity';
+import { formatPublicCity, formatFullAddress } from '@/lib/formatCity';
 import { signOutUser } from '@/lib/authHelper';
 
 const VET_SERVICES = [
@@ -1225,7 +1225,7 @@ export default function VetBoardingDashboardPage() {
                   />
                 ) : (
                   <p className="text-sm font-bold text-[#2E2419]">
-                    {editForm.address || editForm.city || '—'}
+                    {formatFullAddress(editForm) || '—'}
                   </p>
                 )}
               </div>
@@ -1238,106 +1238,121 @@ export default function VetBoardingDashboardPage() {
             >
               <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
                 <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
                     🩺
                   </span>
                   Services Offered
                 </h3>
               </div>
-
               <div className="p-5 sm:p-6">
                 {isEditing ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {VET_SERVICES.map(svc => {
-                      const checked = editForm.services?.includes(svc);
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {VET_SERVICES.map(service => {
+                      const checked = (editForm.services || []).includes(service);
                       return (
                         <button
-                          key={svc}
+                          key={service}
                           type="button"
-                          onClick={() => toggleService(svc)}
-                          className={`text-left px-3 py-2.5 rounded-xl border text-xs font-extrabold transition-all duration-200 cursor-pointer ${
-                            checked ? 'bg-[#8B5E3C] text-white border-[#8B5E3C]' : 'bg-[#FAF6F2] text-[#4A3E3D] border-[#E2D5C8] hover:border-[#8B5E3C]'
+                          onClick={() => {
+                            const cur = editForm.services || [];
+                            const next = checked ? cur.filter((s: string) => s !== service) : [...cur, service];
+                            setEditForm((p: any) => ({ ...p, services: next }));
+                          }}
+                          className={`flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all text-left cursor-pointer ${
+                            checked
+                              ? 'bg-[#FAF5EE] border-[#8B5E3C] text-[#2E2419]'
+                              : 'bg-white border-[#E2D5C8] text-[#8B7E7D] hover:border-[#8B5E3C]/40'
                           }`}
                         >
-                          {checked ? '✓ ' : ''}{svc}
+                          <span>{service}</span>
+                          {checked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
                         </button>
                       );
                     })}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {(clinic.services || []).length > 0
-                      ? clinic.services.map((svc: string) => (
-                          <span key={svc} className="text-xs font-semibold bg-[#FAF6F2] text-[#8B5E3C] px-3 py-1 rounded-full border border-[#E2D5C8]">{svc}</span>
-                        ))
-                      : <span className="text-sm text-[#8B7E7D]">No services listed.</span>
-                    }
+                    {(editForm.services || []).length > 0 ? (
+                      editForm.services.map((service: string) => (
+                        <span key={service} className="inline-flex items-center gap-1.5 bg-[#FAF6F2] border border-[#E2D5C8] text-[#2E2419] text-xs font-bold px-3 py-1.5 rounded-lg">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" /> {service}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-xs text-[#8B7E7D]">No services listed</p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Pricing Display Configuration */}
-            <div 
-              style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
-              className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
-            >
-              <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
-                <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-900 flex items-center justify-center text-xs">
-                    💲
-                  </span>
-                  Pricing Display & Rates
+            {/* Pricing Section */}
+            {isEditing ? (
+              <div className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-2xl p-5 space-y-3">
+                <h3 className="text-sm font-black text-[#2E2419] flex items-center gap-1.5">
+                  💲 Pricing Display & Rates
                 </h3>
-              </div>
-
-              <div className="p-5 sm:p-6 space-y-4">
-                {isEditing ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Model</label>
-                        <select
-                          value={editForm.pricing_type || 'inquire'}
-                          onChange={e => setEditForm((p: any) => ({ ...p, pricing_type: e.target.value }))}
-                          className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
-                        >
-                          <option value="inquire">Inquire for Rates (Care-based / Medical Need)</option>
-                          <option value="starting_from">Starting From Base Rate ($/night)</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-[#2E2419] block mb-1">Starting Base Rate ($ / night)</label>
-                        <input
-                          type="number"
-                          value={editForm.starting_rate || ''}
-                          onChange={e => setEditForm((p: any) => ({ ...p, starting_rate: e.target.value ? Number(e.target.value) : null }))}
-                          placeholder="e.g. 45"
-                          className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Notes / Care Policy</label>
-                      <input
-                        type="text"
-                        value={editForm.pricing_note || ''}
-                        onChange={e => setEditForm((p: any) => ({ ...p, pricing_note: e.target.value }))}
-                        placeholder="e.g. Exact rates depend on medication schedule, isolation, and medical monitoring required"
-                        className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3.5 py-2.5 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
-                      />
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Model</label>
+                    <select
+                      value={editForm.pricing_type || 'starting_from'}
+                      onChange={e => setEditForm((p: any) => ({ ...p, pricing_type: e.target.value }))}
+                      className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                    >
+                      <option value="starting_from">Starting From Night Rate ($/night)</option>
+                      <option value="inquire">Contact for Rates & Custom Medical Packages</option>
+                    </select>
                   </div>
-                ) : (
-                  <div className="space-y-1 text-xs text-[#4A3E3D]">
-                    <p className="font-bold text-[#2E2419]">
-                      Display: {clinic.pricing?.startingRate ? `Starting from $${clinic.pricing.startingRate}/night` : 'Inquire for Rates (Care-based)'}
-                    </p>
-                    {clinic.pricing?.pricingNote && <p className="text-[#8B7E7D]">{clinic.pricing.pricingNote}</p>}
+                  <div>
+                    <label className="text-xs font-bold text-[#2E2419] block mb-1">Starting Base Rate ($ / night)</label>
+                    <input
+                      type="number"
+                      value={editForm.starting_rate || ''}
+                      onChange={e => setEditForm((p: any) => ({ ...p, starting_rate: e.target.value ? Number(e.target.value) : null }))}
+                      placeholder="e.g. 45"
+                      className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                    />
                   </div>
-                )}
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#2E2419] block mb-1">Pricing Notes / Medical Care Policy</label>
+                  <input
+                    type="text"
+                    value={editForm.pricing_note || ''}
+                    onChange={e => setEditForm((p: any) => ({ ...p, pricing_note: e.target.value }))}
+                    placeholder="e.g. Medication administration included; post-op extra monitoring fee applies"
+                    className="w-full bg-white border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
+                  />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div 
+                style={{ boxShadow: '0 2px 8px rgba(139, 94, 60, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02)' }}
+                className="bg-white rounded-2xl border border-[#DFD3C7] shadow-xs overflow-hidden"
+              >
+                <div className="bg-[#FAF5EE] px-5 py-3.5 border-b border-[#EADBCE] flex items-center justify-between">
+                  <h3 className="font-extrabold text-sm text-[#2E2419] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center text-xs">
+                      💲
+                    </span>
+                    Pricing & Rates
+                  </h3>
+                </div>
+                <div className="p-5 sm:p-6">
+                  {editForm.pricing_type === 'inquire' ? (
+                    <p className="text-xs text-[#2E2419] font-bold">Contact for Rates & Custom Medical Packages</p>
+                  ) : editForm.starting_rate ? (
+                    <div className="space-y-1">
+                      <p className="text-sm font-black text-[#8B5E3C]">Starting at ${editForm.starting_rate}/night</p>
+                      {editForm.pricing_note && <p className="text-xs text-[#8B7E7D]">{editForm.pricing_note}</p>}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#8B7E7D]">No pricing details configured yet</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Hours of Operation */}
             {isEditing ? (
@@ -1356,11 +1371,11 @@ export default function VetBoardingDashboardPage() {
                     <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center text-xs">
                       🕒
                     </span>
-                    Hours of Operation
+                    Hours of Operation & Emergency Care
                   </h3>
                 </div>
                 <div className="p-5 sm:p-6 text-xs text-[#2E2419] font-bold">
-                  {formatPartnerHoursSummary(clinic.hours)}
+                  {formatPartnerHoursSummary(editForm.hours)}
                 </div>
               </div>
             )}
@@ -1381,20 +1396,20 @@ export default function VetBoardingDashboardPage() {
                     <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-900 flex items-center justify-center text-xs">
                       📷
                     </span>
-                    Facility Photos ({clinic.gallery_urls?.length || 0})
+                    Clinic & Boarding Facility Photos ({editForm.gallery_urls?.length || 0})
                   </h3>
                 </div>
                 <div className="p-5 sm:p-6">
-                  {(clinic.gallery_urls || []).length > 0 ? (
+                  {(editForm.gallery_urls || []).length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {clinic.gallery_urls.map((url: string, idx: number) => (
+                      {editForm.gallery_urls.map((url: string, idx: number) => (
                         <div key={url + idx} className="aspect-4/3 rounded-xl overflow-hidden border border-[#E2D5C8] bg-gray-100">
-                          <img src={url} alt={`Facility photo ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`Clinic photo ${idx + 1}`} className="w-full h-full object-cover" />
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-[#8B7E7D]">No gallery photos uploaded yet. Click &quot;Edit Profile&quot; to add photos.</p>
+                    <p className="text-xs text-[#8B7E7D]">No clinic photos uploaded yet. Click &quot;Edit Clinic Details&quot; to add photos.</p>
                   )}
                 </div>
               </div>
@@ -1439,12 +1454,6 @@ export default function VetBoardingDashboardPage() {
                   <p className="text-xs text-amber-800">Manage your business subscription, billing details, and account deletion on your unified Account page.</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center gap-1.5 text-xs font-bold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 rounded-xl px-3 py-2 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" /> Sign out
-                  </button>
                   <Link
                     href="/account"
                     className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734A2E] rounded-xl px-4 py-2 transition-colors shadow-sm cursor-pointer"

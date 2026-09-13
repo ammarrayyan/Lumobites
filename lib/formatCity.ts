@@ -59,3 +59,80 @@ export function formatPublicCity(cityStr?: string | null): string {
 
   return parts.slice(0, 2).join(', ');
 }
+
+/**
+ * Formats a clean, unified full address from address/city/state/zip fields,
+ * completely preventing duplicate city/state tokens (e.g. "Louisville, KY, USA, Louisville, KY, KY").
+ */
+export function formatFullAddress(loc?: {
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+} | null): string {
+  if (!loc) return '';
+  const rawAddr = (loc.address || '').trim();
+  const rawCity = (loc.city || '').trim();
+  const rawState = (loc.state || '').trim();
+  const rawZip = (loc.zip || '').trim();
+
+  if (rawAddr) {
+    let parts = rawAddr.split(',').map(p => p.trim()).filter(Boolean);
+
+    // Drop trailing country if present
+    if (parts.length >= 2) {
+      const last = parts[parts.length - 1].toLowerCase();
+      if (last === 'usa' || last === 'u.s.a.' || last === 'united states' || last === 'canada') {
+        parts = parts.slice(0, -1);
+      }
+    }
+
+    const joinedLower = parts.join(', ').toLowerCase();
+
+    // Only add city if not already contained in parts
+    if (rawCity && !joinedLower.includes(rawCity.toLowerCase())) {
+      parts.push(rawCity);
+    }
+
+    // Only add state if not already contained in parts
+    if (rawState && !joinedLower.includes(rawState.toLowerCase())) {
+      parts.push(rawState);
+    }
+
+    // Only add zip if not already contained in parts
+    if (rawZip && !joinedLower.includes(rawZip.toLowerCase())) {
+      parts.push(rawZip);
+    }
+
+    // Deduplicate parts case-insensitively while preserving order
+    const uniqueParts: string[] = [];
+    for (const p of parts) {
+      const pLower = p.toLowerCase();
+      if (!uniqueParts.some(u => u.toLowerCase() === pLower)) {
+        uniqueParts.push(p);
+      }
+    }
+
+    return uniqueParts.join(', ');
+  }
+
+  // If no raw address, combine city, state, zip
+  const tokens: string[] = [];
+  if (rawCity) tokens.push(rawCity);
+  if (rawState && (!rawCity || !rawCity.toLowerCase().includes(rawState.toLowerCase()))) {
+    tokens.push(rawState);
+  }
+  if (rawZip && (!rawCity || !rawCity.toLowerCase().includes(rawZip.toLowerCase()))) {
+    tokens.push(rawZip);
+  }
+
+  const unique: string[] = [];
+  for (const t of tokens) {
+    if (!unique.some(u => u.toLowerCase() === t.toLowerCase())) {
+      unique.push(t);
+    }
+  }
+
+  return unique.join(', ');
+}
+
