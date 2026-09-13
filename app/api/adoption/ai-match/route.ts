@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
       description: p.description,
       photo: p.photo_urls?.[0] || '/placeholder-pet.png',
       source: 'lumo_bites',
+      shelter_id: p.shelter_id,
+      shelter_email: p.shelters?.email || '',
       shelter_name: p.shelters?.org_name || 'Local Rescue',
       city: p.city || p.shelters?.city || ''
     }));

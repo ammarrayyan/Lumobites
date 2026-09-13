@@ -3973,11 +3973,13 @@ export function PetSittingContent() {
 
                           if (isVet) {
                             const clinic = item.raw || item;
+                            const isSelfClinic = !!(activeEmail && clinic?.email && activeEmail.toLowerCase().trim() === clinic.email.toLowerCase().trim());
                             return (
                               <div
                                 key={`ai-vet-${clinic.id || item.id}`}
                                 className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                                 onClick={() => {
+                                  if (isSelfClinic) return;
                                   if (!activeEmail) {
                                     window.dispatchEvent(new Event('lumo-open-signin'));
                                     return;
@@ -4074,7 +4076,11 @@ export function PetSittingContent() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                  {activeEmail ? (
+                                  {isSelfClinic ? (
+                                    <div className="w-full bg-blue-50 text-blue-800 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5 border border-blue-200 select-none">
+                                      Your Clinic Listing
+                                    </div>
+                                  ) : activeEmail ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
                                       className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4096,11 +4102,13 @@ export function PetSittingContent() {
 
                           if (isDaycare) {
                             const daycare = item.raw || item;
+                            const isSelfDaycare = !!(activeEmail && daycare?.email && activeEmail.toLowerCase().trim() === daycare.email.toLowerCase().trim());
                             return (
                               <div
                                 key={`ai-daycare-${daycare.id || item.id}`}
                                 className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl hover:border-emerald-300 transition-all duration-300 cursor-pointer flex flex-col justify-between"
                                 onClick={() => {
+                                  if (isSelfDaycare) return;
                                   if (!activeEmail) {
                                     window.dispatchEvent(new Event('lumo-open-signin'));
                                     return;
@@ -4197,7 +4205,11 @@ export function PetSittingContent() {
                                 </div>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100">
-                                  {activeEmail ? (
+                                  {isSelfDaycare ? (
+                                    <div className="w-full bg-emerald-50 text-emerald-800 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5 border border-emerald-200 select-none">
+                                      Your Daycare Listing
+                                    </div>
+                                  ) : activeEmail ? (
                                     <button
                                       onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4362,11 +4374,14 @@ export function PetSittingContent() {
                           <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-200">Partner Clinics</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {filteredVetClinics.map((clinic: any) => (
+                          {filteredVetClinics.map((clinic: any) => {
+                            const isSelfClinic = !!(activeEmail && clinic?.email && activeEmail.toLowerCase().trim() === clinic.email.toLowerCase().trim());
+                            return (
                             <div
                               key={clinic.id}
                               className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
                               onClick={() => {
+                                if (isSelfClinic) return;
                                 if (!reqEmail) {
                                   window.dispatchEvent(new Event('lumo-open-signin'));
                                   return;
@@ -4417,7 +4432,11 @@ export function PetSittingContent() {
                                 </div>
                               </div>
                               <div className="mt-4">
-                                {activeEmail ? (
+                                {isSelfClinic ? (
+                                  <div className="w-full bg-blue-50 text-blue-800 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5 border border-blue-200 select-none">
+                                    Your Clinic Listing
+                                  </div>
+                                ) : activeEmail ? (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setInquiringClinic(clinic); }}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 btn-gloss cursor-pointer"
@@ -4434,7 +4453,8 @@ export function PetSittingContent() {
                                 )}
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -4447,11 +4467,14 @@ export function PetSittingContent() {
                           <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">Verified Daycares</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {filteredPetDaycares.map((daycare: any) => (
+                          {filteredPetDaycares.map((daycare: any) => {
+                            const isSelfDaycare = !!(activeEmail && daycare?.email && activeEmail.toLowerCase().trim() === daycare.email.toLowerCase().trim());
+                            return (
                             <div
                               key={daycare.id}
                               className="bg-white rounded-3xl p-6 border border-[#DFD3C7] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
                               onClick={() => {
+                                if (isSelfDaycare) return;
                                 if (!activeEmail) {
                                   window.dispatchEvent(new Event('lumo-open-signin'));
                                   return;
@@ -4528,7 +4551,11 @@ export function PetSittingContent() {
                                 </div>
                               </div>
                               <div className="mt-4">
-                                {activeEmail ? (
+                                {isSelfDaycare ? (
+                                  <div className="w-full bg-emerald-50 text-emerald-800 font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5 border border-emerald-200 select-none">
+                                    Your Daycare Listing
+                                  </div>
+                                ) : activeEmail ? (
                                   <button
                                     onClick={(e) => { e.stopPropagation(); setInquiringDaycare(daycare); }}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 border-none cursor-pointer btn-gloss"
@@ -4545,7 +4572,8 @@ export function PetSittingContent() {
                                 )}
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -7709,7 +7737,13 @@ function VetClinicInquiryModal({ clinic, ownerEmail, onClose }: VetClinicInquiry
     ''
   ).trim();
 
+  const isSelf = !!(activeEmail && clinic?.email && activeEmail.toLowerCase().trim() === clinic.email.toLowerCase().trim());
+
   const handleStartInquiry = async () => {
+    if (isSelf) {
+      setError('You cannot send an inquiry to your own clinic listing.');
+      return;
+    }
     if (!activeEmail) {
       window.dispatchEvent(new Event('lumo-open-signin'));
       onClose();
@@ -7843,7 +7877,13 @@ function DaycareInquiryModal({ daycare, ownerEmail, onClose }: DaycareInquiryMod
     ''
   ).trim();
 
+  const isSelf = !!(activeEmail && daycare?.email && activeEmail.toLowerCase().trim() === daycare.email.toLowerCase().trim());
+
   const handleStartInquiry = async () => {
+    if (isSelf) {
+      setError('You cannot send an inquiry to your own daycare listing.');
+      return;
+    }
     if (!activeEmail) {
       window.dispatchEvent(new Event('lumo-open-signin'));
       onClose();

@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
       .eq('id', clinic_id)
       .maybeSingle();
 
+    if (clinic?.email && clinic.email.toLowerCase().trim() === cleanEmail) {
+      return NextResponse.json({ error: 'You cannot send an inquiry to your own vet clinic listing.' }, { status: 400 });
+    }
+
     // Check if an OPEN / ACTIVE inquiry thread already exists for this owner+clinic pair
     // Active states: 'pending', 'accepted', 'confirmed', 'active' (and unarchived)
     // Terminal states ('completed', 'declined', 'no_show', etc.) start a fresh inquiry

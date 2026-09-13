@@ -34,7 +34,10 @@ interface PetListing {
   sex: string;
   photo?: string;
   photo_urls?: string[];
+  shelter_id?: string;
+  shelter_email?: string;
   shelter_name: string;
+  shelter_photo_url?: string;
   url?: string;
   description?: string;
   temperament?: string;
@@ -234,15 +237,23 @@ function AdoptionContent() {
   // Active Pet Chat Modal State
   const [activeChatPet, setActiveChatPet] = useState<any>(null);
 
-  const handleInquirePet = (pet: any) => {
-    if (typeof window !== 'undefined') {
-      const activeEmail = (
-        localStorage.getItem('lumo_pro_email') ||
-        localStorage.getItem('lumo_sitter_email') ||
-        localStorage.getItem('lumo_shelter_email') ||
-        ''
-      ).trim();
+  const isOwnPet = (pet: any) => {
+    if (!pet) return false;
+    const activeEmail = (typeof window !== 'undefined' ? getSignedInUserEmail() : '') || (userShelter as any)?.email || '';
+    if (!activeEmail) return false;
+    const cleanUser = activeEmail.trim().toLowerCase();
+    const cleanShelterEmail = (pet.shelter_email || pet.shelters?.email || '').trim().toLowerCase();
+    if (cleanShelterEmail && cleanShelterEmail === cleanUser) return true;
+    if (userShelter?.id && pet.shelter_id && String(userShelter.id) === String(pet.shelter_id)) return true;
+    return false;
+  };
 
+  const handleInquirePet = (pet: any) => {
+    if (isOwnPet(pet)) {
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      const activeEmail = getSignedInUserEmail();
       if (!activeEmail) {
         window.dispatchEvent(new Event('lumo-open-signin'));
         return;
@@ -267,7 +278,7 @@ function AdoptionContent() {
     website: ''
   });
   const [shelterRegSuccess, setShelterRegSuccess] = useState(false);
-  const [userShelter, setUserShelter] = useState<{ status: string; org_name: string } | null>(null);
+  const [userShelter, setUserShelter] = useState<{ id?: string; status: string; org_name: string; email?: string } | null>(null);
 
   // Shelter Registration & OTP Verification State
   const [shelterOtpStep, setShelterOtpStep] = useState<'email' | 'code' | 'form'>('email');
@@ -488,6 +499,8 @@ function AdoptionContent() {
           size: p.size,
           sex: p.sex,
           photo_urls: p.photo_urls || [],
+          shelter_id: p.shelter_id,
+          shelter_email: p.shelters?.email || '',
           shelter_name: p.shelters?.org_name || 'Local Rescue Partner',
           shelter_photo_url: p.shelters?.org_photo_url || '',
           description: p.description,
@@ -1036,12 +1049,18 @@ function AdoptionContent() {
                       </div>
 
                       <div className="p-4 pt-0">
-                        <button
-                          onClick={() => handleInquirePet(pet)}
-                          className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer border-none transition-all shadow-xs"
-                        >
-                          <MessageSquare className="w-4 h-4" /> Ask About {pet.name}
-                        </button>
+                        {isOwnPet(pet) ? (
+                          <div className="w-full bg-amber-50 text-[#8B5E3C] border border-amber-200/80 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 select-none">
+                            <PawPrint className="w-4 h-4 text-[#8B5E3C]" /> Your Shelter Listing
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleInquirePet(pet)}
+                            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer border-none transition-all shadow-xs"
+                          >
+                            <MessageSquare className="w-4 h-4" /> Ask About {pet.name}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1169,12 +1188,18 @@ function AdoptionContent() {
                         <p className="text-[11px] text-gray-600 mt-0.5">{match.reason}</p>
                       </div>
                       {match.pet.source === 'lumo_bites' ? (
-                        <button
-                          onClick={() => { setIsLifestyleModalOpen(false); handleInquirePet(match.pet); }}
-                          className="bg-[#8B5E3C] text-white font-bold text-[11px] py-1.5 px-3 rounded-xl shrink-0 border-none cursor-pointer"
-                        >
-                          Inquire
-                        </button>
+                        isOwnPet(match.pet) ? (
+                          <span className="bg-amber-100 text-[#8B5E3C] font-bold text-[11px] py-1.5 px-3 rounded-xl shrink-0 select-none">
+                            Your Pet
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => { setIsLifestyleModalOpen(false); handleInquirePet(match.pet); }}
+                            className="bg-[#8B5E3C] text-white font-bold text-[11px] py-1.5 px-3 rounded-xl shrink-0 border-none cursor-pointer"
+                          >
+                            Inquire
+                          </button>
+                        )
                       ) : (
                         <a
                           href={match.pet.url || 'https://www.rescuegroups.org'}
@@ -1320,12 +1345,18 @@ function AdoptionContent() {
                         <p className="text-[11px] text-gray-500">{m.pet.breed}</p>
                         <p className="text-[10px] text-emerald-700 font-bold mt-1">{m.similarityScore}% Visual Match</p>
                       </div>
-                      <button
-                        onClick={() => { setIsVisualModalOpen(false); handleInquirePet(m.pet); }}
-                        className="w-full bg-[#8B5E3C] text-white font-bold py-1.5 rounded-xl text-[11px] border-none cursor-pointer"
-                      >
-                        Ask About {m.pet.name}
-                      </button>
+                      {isOwnPet(m.pet) ? (
+                        <div className="w-full bg-amber-50 text-[#8B5E3C] font-bold py-1.5 rounded-xl text-[11px] text-center border border-amber-200/80 select-none">
+                          Your Listing
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setIsVisualModalOpen(false); handleInquirePet(m.pet); }}
+                          className="w-full bg-[#8B5E3C] text-white font-bold py-1.5 rounded-xl text-[11px] border-none cursor-pointer"
+                        >
+                          Ask About {m.pet.name}
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -124,7 +124,13 @@ export async function POST(request: NextRequest) {
 
     const cleanReceiver = (targetReceiver || '').toLowerCase().trim();
 
-    // 2. Check if this is the first message in this conversation thread
+    // 2. Prevent self-inquiries (owner cannot message their own shelter listing)
+    const shelterEmail = pet?.shelters ? ((pet.shelters as any).email || '').toLowerCase().trim() : '';
+    if (cleanSender && ((shelterEmail && cleanSender === shelterEmail && (!cleanReceiver || cleanReceiver === shelterEmail)) || (cleanReceiver && cleanSender === cleanReceiver))) {
+      return NextResponse.json({ error: 'You cannot send an inquiry to your own shelter listing.' }, { status: 400 });
+    }
+
+    // 3. Check if this is the first message in this conversation thread
     let isFirstMessage = true;
     if (cleanReceiver) {
       const { count } = await supabaseAdmin

@@ -139,6 +139,10 @@ export async function POST(request: NextRequest) {
       .eq('id', daycare_id)
       .maybeSingle();
 
+    if (daycare?.email && daycare.email.toLowerCase().trim() === cleanEmail) {
+      return NextResponse.json({ error: 'You cannot send an inquiry to your own daycare listing.' }, { status: 400 });
+    }
+
     // Check if an OPEN / ACTIVE inquiry thread already exists for this owner+daycare pair
     // Active states: 'pending', 'accepted', 'confirmed', 'active' (and unarchived)
     // Terminal states ('completed', 'declined', 'no_show', etc.) start a fresh inquiry

@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
           species: p.species,
           breed: p.breed,
           photo: p.photo_urls?.[0] || '/placeholder-pet.png',
+          shelter_id: p.shelter_id,
+          shelter_email: p.shelters?.email || '',
           shelter_name: p.shelters?.org_name || 'Local Rescue'
         },
         similarityScore: 82,
@@ -74,6 +76,8 @@ export async function POST(request: NextRequest) {
       species: p.species,
       breed: p.breed,
       photo: p.photo_urls?.[0] || '',
+      shelter_id: p.shelter_id,
+      shelter_email: p.shelters?.email || '',
       shelter_name: p.shelters?.org_name || 'Local Rescue'
     }));
 
