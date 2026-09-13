@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatSitterName } from '@/lib/email-template';
 import { extractAdoptionMeta, packAdoptionDescription } from '@/lib/adoptionPetHelper';
+import { sendPushNotification } from '@/lib/push';
 
 export const dynamic = 'force-dynamic';
 
@@ -217,7 +218,7 @@ export async function GET(request: NextRequest) {
     } else if (adoptedPets && adoptedPets.length > 0) {
       for (const petRow of adoptedPets) {
         const meta = extractAdoptionMeta(petRow);
-        if (!meta.adoptedByEmail || meta.reviewSent) continue;
+        if (meta.reviewSent) continue;
 
         // Check if adopted at least 10 minutes ago
         const adoptionTime = meta.adoptedAt || petRow.created_at;
@@ -225,40 +226,75 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        const adopterEmail = meta.adoptedByEmail.toLowerCase().trim();
+        const shelterObj = Array.isArray(petRow.shelters) ? petRow.shelters[0] : petRow.shelters;
+        const shelterName = shelterObj?.org_name || 'Rescue Partner';
+        const shelterId = petRow.shelter_id || shelterObj?.id;
+        const petName = petRow.name || 'your pet';
         const bookingId = String(petRow.id);
+        const reviewLink = `/adoption?review_shelter=${shelterId}&pet_id=${petRow.id}&pet_name=${encodeURIComponent(petName)}&confirm_adopter=true`;
+        const notifTitle = `${petName} has found a home! 🐾`;
+        const notifMsg = `${petName} has found a home! How was your experience with ${shelterName}?`;
+
+        const shelterEmails = [
+          (shelterObj?.email || '').toLowerCase().trim(),
+        ].filter(Boolean);
+
+        const recipients = new Set<string>();
+        if (meta.adoptedByEmail && !shelterEmails.includes(meta.adoptedByEmail.toLowerCase().trim())) {
+          recipients.add(meta.adoptedByEmail.toLowerCase().trim());
+        }
 
         try {
-          const { data: existingNotif } = await supabaseAdmin
-            .from('notifications')
-            .select('id')
-            .eq('recipient_email', adopterEmail)
-            .eq('type', 'review_request')
-            .eq('booking_id', bookingId)
-            .maybeSingle();
+          const { data: messages } = await supabaseAdmin
+            .from('adoption_messages')
+            .select('sender_email, receiver_email')
+            .eq('pet_id', petRow.id);
 
-          const shelterObj = Array.isArray(petRow.shelters) ? petRow.shelters[0] : petRow.shelters;
-          const shelterName = shelterObj?.org_name || 'Rescue Partner';
-          const shelterId = petRow.shelter_id || shelterObj?.id;
-          const reviewLink = `/adoption?review_shelter=${shelterId}&pet_id=${petRow.id}`;
+          if (messages && messages.length > 0) {
+            for (const m of messages) {
+              const s = (m.sender_email || '').toLowerCase().trim();
+              const r = (m.receiver_email || '').toLowerCase().trim();
+              if (s && !shelterEmails.includes(s)) recipients.add(s);
+              if (r && !shelterEmails.includes(r)) recipients.add(r);
+            }
+          }
+        } catch (msgErr) {
+          console.warn('[Cron Reviews] Message fetch warning:', msgErr);
+        }
 
-          if (!existingNotif) {
-            await supabaseAdmin.from('notifications').insert({
-              recipient_email: adopterEmail,
-              type: 'review_request',
-              title: `Congratulations on Adopting ${petRow.name || 'your pet'}! 🐾`,
-              message: `How was your adoption experience with ${shelterName}? Leave a review`,
-              link: reviewLink,
-              booking_id: bookingId,
-              read: false,
-            });
+        try {
+          for (const recipient of Array.from(recipients)) {
+            const { data: existingNotif } = await supabaseAdmin
+              .from('notifications')
+              .select('id')
+              .eq('recipient_email', recipient)
+              .eq('type', 'review_request')
+              .eq('booking_id', bookingId)
+              .maybeSingle();
+
+            if (!existingNotif) {
+              await supabaseAdmin.from('notifications').insert({
+                recipient_email: recipient,
+                type: 'review_request',
+                title: notifTitle,
+                message: notifMsg,
+                link: reviewLink,
+                booking_id: bookingId,
+                read: false,
+              });
+
+              try {
+                await sendPushNotification(recipient, notifTitle, notifMsg, reviewLink);
+              } catch (pErr) {
+                console.warn(`[Cron Reviews] Push failed for ${recipient}:`, pErr);
+              }
+            }
           }
 
           // Mark review_sent = true
           const updatedMeta = { ...meta, review_sent: true };
           const newDesc = packAdoptionDescription(meta.cleanDescription, updatedMeta);
 
-          // Update DB (attempting column + description fallback)
           await supabaseAdmin
             .from('adoption_pets')
             .update({

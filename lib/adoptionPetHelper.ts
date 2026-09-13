@@ -1,4 +1,4 @@
-﻿import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/push';
 import { extractAdoptionMeta, packAdoptionDescription, AdoptionMeta } from './adoptionMetaHelper';
 
@@ -12,7 +12,7 @@ export async function markPetAdopted(params: {
   petId: string;
   shelterId?: string;
   adoptedByEmail?: string | null;
-}): Promise<{ success: boolean; error?: string; pet?: any }> {
+}): Promise<{ success: boolean; error?: string; pet?: any; notifiedCount?: number }> {
   const { petId, shelterId, adoptedByEmail } = params;
 
   try {
@@ -31,9 +31,9 @@ export async function markPetAdopted(params: {
 
     const currentMeta = extractAdoptionMeta(pet);
     const updatedMeta: AdoptionMeta = {
-      adopted_by_email: cleanAdopter,
+      adopted_by_email: cleanAdopter || currentMeta.adoptedByEmail,
       adopted_at: nowIso,
-      review_sent: false,
+      review_sent: true,
     };
 
     const newDescription = packAdoptionDescription(currentMeta.cleanDescription, updatedMeta);
@@ -49,9 +49,9 @@ export async function markPetAdopted(params: {
       .from('adoption_pets')
       .update({
         ...updatePayload,
-        adopted_by_email: cleanAdopter,
+        adopted_by_email: cleanAdopter || currentMeta.adoptedByEmail,
         adopted_at: nowIso,
-        review_sent: false,
+        review_sent: true,
       })
       .eq('id', petId)
       .select('*, shelters(id, org_name, email)')
@@ -74,20 +74,51 @@ export async function markPetAdopted(params: {
       finalPet = fallbackPet;
     }
 
-    // If an adopter was specified, send immediate review request notification
-    if (cleanAdopter && (pet.shelters || shelterId)) {
-      const shelterObj = Array.isArray(pet.shelters) ? pet.shelters[0] : pet.shelters;
-      const shelterName = shelterObj?.org_name || 'Rescue Partner';
-      const shelterTargetId = shelterId || shelterObj?.id || pet.shelter_id;
-      const petName = pet.name || 'your pet';
+    // Resolve shelter details
+    const shelterObj = Array.isArray(pet.shelters) ? pet.shelters[0] : pet.shelters;
+    const shelterName = shelterObj?.org_name || 'Rescue Partner';
+    const shelterTargetId = shelterId || shelterObj?.id || pet.shelter_id;
+    const petName = pet.name || 'your pet';
 
-      const notifTitle = `Congratulations on Adopting ${petName}! 🐾`;
-      const notifMsg = `How was your adoption experience with ${shelterName}? Leave a review`;
-      const notifLink = `/adoption?review_shelter=${shelterTargetId}&pet_id=${pet.id}`;
+    const shelterEmails = [
+      (shelterObj?.email || '').toLowerCase().trim(),
+      (pet.shelter_email || '').toLowerCase().trim(),
+    ].filter(Boolean);
 
+    // Collect all inquirers who messaged about this pet
+    const recipientEmails = new Set<string>();
+    if (cleanAdopter && !shelterEmails.includes(cleanAdopter)) {
+      recipientEmails.add(cleanAdopter);
+    }
+
+    try {
+      const { data: messages } = await supabaseAdmin
+        .from('adoption_messages')
+        .select('sender_email, receiver_email')
+        .eq('pet_id', petId);
+
+      if (messages && messages.length > 0) {
+        for (const m of messages) {
+          const s = (m.sender_email || '').toLowerCase().trim();
+          const r = (m.receiver_email || '').toLowerCase().trim();
+          if (s && !shelterEmails.includes(s)) recipientEmails.add(s);
+          if (r && !shelterEmails.includes(r)) recipientEmails.add(r);
+        }
+      }
+    } catch (msgErr) {
+      console.warn('[Adoption Review] Message query warning:', msgErr);
+    }
+
+    const notifTitle = `${petName} has found a home! 🐾`;
+    const notifMsg = `${petName} has found a home! How was your experience with ${shelterName}?`;
+    const notifLink = `/adoption?review_shelter=${shelterTargetId}&pet_id=${pet.id}&pet_name=${encodeURIComponent(petName)}&confirm_adopter=true`;
+
+    let notifiedCount = 0;
+
+    for (const recipient of Array.from(recipientEmails)) {
       try {
         await supabaseAdmin.from('notifications').insert({
-          recipient_email: cleanAdopter,
+          recipient_email: recipient,
           type: 'review_request',
           title: notifTitle,
           message: notifMsg,
@@ -95,18 +126,15 @@ export async function markPetAdopted(params: {
           booking_id: pet.id,
           read: false,
         });
-      } catch (notifErr) {
-        console.warn('[Adoption Review] Notification insert warning:', notifErr);
-      }
 
-      try {
-        await sendPushNotification(cleanAdopter, notifTitle, notifMsg, notifLink);
-      } catch (pushErr) {
-        console.warn('[Adoption Review] Push notification warning:', pushErr);
+        await sendPushNotification(recipient, notifTitle, notifMsg, notifLink);
+        notifiedCount++;
+      } catch (notifErr) {
+        console.warn(`[Adoption Review] Failed to notify ${recipient}:`, notifErr);
       }
     }
 
-    return { success: true, pet: finalPet };
+    return { success: true, pet: finalPet, notifiedCount };
   } catch (err: any) {
     console.error('[markPetAdopted] Exception:', err);
     return { success: false, error: err.message || 'Failed to mark pet as adopted' };

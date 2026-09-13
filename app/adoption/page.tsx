@@ -15,6 +15,7 @@ import AiLimitModal from '@/components/AiLimitModal';
 import { useScrollLock } from '@/lib/useScrollLock';
 
 const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
+const PartnerReviewModal = dynamic(() => import('@/components/PartnerReviewModal'), { ssr: false });
 
 const AdoptionPetsMap = dynamic(() => import('@/components/AdoptionPetsMap'), {
   ssr: false,
@@ -55,6 +56,15 @@ function AdoptionContent() {
   const router = useRouter();
 
   const [selectedShelterForReviews, setSelectedShelterForReviews] = useState<{ id: string; name: string } | null>(null);
+  const [activeReviewShelter, setActiveReviewShelter] = useState<{ id: string; name: string } | null>(null);
+  const [adopterConfirmModal, setAdopterConfirmModal] = useState<{
+    isOpen: boolean;
+    shelterId: string;
+    shelterName: string;
+    petId?: string;
+    petName?: string;
+    status: 'asking' | 'declined';
+  } | null>(null);
 
   // Filter state
   const [species, setSpecies] = useState('all');
@@ -247,13 +257,48 @@ function AdoptionContent() {
     if (typeof window === 'undefined') return;
     const sp = new URLSearchParams(window.location.search);
     const reviewShelterId = sp.get('review_shelter');
+    const petId = sp.get('pet_id') || undefined;
+    const petName = sp.get('pet_name') || undefined;
+    const confirmAdopter = sp.get('confirm_adopter') === 'true';
+
     if (reviewShelterId) {
-      setSelectedShelterForReviews({
-        id: reviewShelterId,
-        name: 'Rescue Partner'
-      });
+      if (confirmAdopter || petId || petName) {
+        setAdopterConfirmModal({
+          isOpen: true,
+          shelterId: reviewShelterId,
+          shelterName: 'Rescue Partner',
+          petId,
+          petName: petName ? decodeURIComponent(petName) : undefined,
+          status: 'asking',
+        });
+      } else {
+        setSelectedShelterForReviews({
+          id: reviewShelterId,
+          name: 'Rescue Partner'
+        });
+      }
     }
   }, []);
+
+  useEffect(() => {
+    if (adopterConfirmModal?.shelterId && localPets.length > 0) {
+      const matchedPet = localPets.find((p: any) =>
+        (adopterConfirmModal.petId && String(p.id) === String(adopterConfirmModal.petId)) ||
+        (String(p.shelter_id) === String(adopterConfirmModal.shelterId))
+      );
+      if (matchedPet) {
+        const sName = matchedPet.shelter_name || (matchedPet as any).shelters?.org_name;
+        const pName = matchedPet.name;
+        if ((sName && adopterConfirmModal.shelterName === 'Rescue Partner') || (!adopterConfirmModal.petName && pName)) {
+          setAdopterConfirmModal(prev => prev ? {
+            ...prev,
+            shelterName: sName || prev.shelterName,
+            petName: prev.petName || pName
+          } : null);
+        }
+      }
+    }
+  }, [localPets, adopterConfirmModal?.shelterId, adopterConfirmModal?.petId]);
 
   const isOwnPet = (pet: any) => {
     if (!pet) return false;
@@ -1683,6 +1728,126 @@ function AdoptionContent() {
           partnerName={selectedShelterForReviews.name}
           partnerType="shelter"
           currentUserEmail={typeof window !== 'undefined' ? getSignedInUserEmail() : ''}
+        />
+      )}
+
+      {/* ADOPTER CONFIRMATION GATE MODAL */}
+      {adopterConfirmModal && adopterConfirmModal.isOpen && (
+        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#DFD3C7] relative animate-modal-spring text-left">
+            <button
+              onClick={() => {
+                setAdopterConfirmModal(null);
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete('review_shelter');
+                  url.searchParams.delete('pet_id');
+                  url.searchParams.delete('pet_name');
+                  url.searchParams.delete('confirm_adopter');
+                  window.history.replaceState({}, '', url.pathname);
+                }
+              }}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer border-none bg-transparent"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {adopterConfirmModal.status === 'asking' ? (
+              <div>
+                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl mb-4 border border-emerald-100">
+                  🐾
+                </div>
+                <h2 className="text-xl font-black text-[#2E2419]">
+                  Did you adopt {adopterConfirmModal.petName || 'this pet'}?
+                </h2>
+                <p className="text-sm text-[#8B7E7D] mt-2 leading-relaxed">
+                  {adopterConfirmModal.petName
+                    ? `${adopterConfirmModal.petName} has found a forever home with ${adopterConfirmModal.shelterName}! Please confirm if you finalized this adoption so you can share your experience:`
+                    : `We're thrilled this pet found a forever home with ${adopterConfirmModal.shelterName}! Please confirm if you finalized this adoption:`
+                  }
+                </p>
+
+                <div className="flex flex-col gap-2.5 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const shelterId = adopterConfirmModal.shelterId;
+                      const shelterName = adopterConfirmModal.shelterName;
+                      setAdopterConfirmModal(null);
+                      setActiveReviewShelter({ id: shelterId, name: shelterName });
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('review_shelter');
+                        url.searchParams.delete('pet_id');
+                        url.searchParams.delete('pet_name');
+                        url.searchParams.delete('confirm_adopter');
+                        window.history.replaceState({}, '', url.pathname);
+                      }
+                    }}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] active:scale-98 text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-md text-sm border-none cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>🎉</span> Yes, I adopted {adopterConfirmModal.petName || 'them'}!
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdopterConfirmModal(prev => prev ? { ...prev, status: 'declined' } : null);
+                    }}
+                    className="w-full bg-[#FAF6F2] hover:bg-[#F2E8DF] active:scale-98 text-[#8B7E7D] hover:text-[#2E2419] font-bold py-3 px-4 rounded-2xl transition-all text-xs border border-[#E2D5C8] cursor-pointer"
+                  >
+                    No, I was just inquiring
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl mb-4 border border-amber-100">
+                  💙
+                </div>
+                <h2 className="text-xl font-black text-[#2E2419]">
+                  Thanks for letting us know!
+                </h2>
+                <p className="text-sm text-[#8B7E7D] mt-2 leading-relaxed">
+                  Reviews on Lumo Bites are reserved for confirmed adopters so our community receives authentic feedback. We hope you find your perfect pet match soon! 🐾
+                </p>
+
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdopterConfirmModal(null);
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('review_shelter');
+                        url.searchParams.delete('pet_id');
+                        url.searchParams.delete('pet_name');
+                        url.searchParams.delete('confirm_adopter');
+                        window.history.replaceState({}, '', url.pathname);
+                      }
+                    }}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-md text-sm border-none cursor-pointer"
+                  >
+                    Back to Adoption Listings
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Direct Partner Review Modal */}
+      {activeReviewShelter && (
+        <PartnerReviewModal
+          isOpen={!!activeReviewShelter}
+          onClose={() => setActiveReviewShelter(null)}
+          partnerId={activeReviewShelter.id}
+          partnerName={activeReviewShelter.name}
+          partnerType="shelter"
+          currentUserEmail={typeof window !== 'undefined' ? getSignedInUserEmail() : ''}
+          onSuccess={() => {
+            setActiveReviewShelter(null);
+          }}
         />
       )}
     </div>

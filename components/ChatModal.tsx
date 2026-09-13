@@ -103,6 +103,7 @@ export default function ChatModal({
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [adopterConfirmState, setAdopterConfirmState] = useState<'asking' | 'confirmed' | 'declined' | null>(null);
   const [isMarkingAdopted, setIsMarkingAdopted] = useState(false);
   const [currentPetStatus, setCurrentPetStatus] = useState<string>(petDetails?.status || 'available');
   const [adoptionPetData, setAdoptionPetData] = useState<any>(petDetails || null);
@@ -120,9 +121,8 @@ export default function ChatModal({
   }, [petDetails]);
 
   const handleMarkAdopted = async () => {
-    const adopterEmail = (otherUserType === 'user' ? otherUserEmail : currentUserEmail).toLowerCase().trim();
     const petName = adoptionPetData?.name || petDetails?.name || 'this pet';
-    if (!confirm(`Mark ${petName} as adopted to ${otherUserName || adopterEmail}? This will update the listing and invite them to leave a review.`)) {
+    if (!confirm(`Mark ${petName} as adopted? This will update the listing and invite all adopters who inquired about ${petName} to leave a review.`)) {
       return;
     }
     setIsMarkingAdopted(true);
@@ -133,21 +133,18 @@ export default function ChatModal({
         body: JSON.stringify({
           id: bookingId,
           status: 'adopted',
-          adopted_by_email: adopterEmail,
           shelter_id: shelterId || petDetails?.shelter_id,
         }),
       });
       if (res.ok) {
-        const data = await res.json();
         setCurrentPetStatus('adopted');
         setAdoptionPetData((prev: any) => ({
           ...(prev || {}),
           status: 'adopted',
-          adopted_by_email: adopterEmail,
           adopted_at: new Date().toISOString(),
         }));
         hapticSuccess();
-        alert(`🎉 ${petName} has been marked as adopted! A review invitation notification has been sent to ${otherUserName || adopterEmail}.`);
+        alert(`🎉 ${petName} has been marked as adopted! Review invitation notifications have been sent to inquirers.`);
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err.error || 'Failed to update adoption status.');
@@ -554,34 +551,61 @@ export default function ChatModal({
             </p>
           </div>
         ) : (chatType === 'adoption' && currentPetStatus === 'adopted') ? (() => {
-          const meta = extractAdoptionMeta(adoptionPetData || petDetails);
-          const cleanUser = (currentUserEmail || '').toLowerCase().trim();
-          const isAdoptedByMe = (meta.adoptedByEmail && meta.adoptedByEmail.toLowerCase().trim() === cleanUser) || otherUserType === 'shelter';
+          const petName = adoptionPetData?.name || petDetails?.name || 'this pet';
+          const shelterDisplayName = otherUserName || 'Rescue Partner';
 
-          return (
-            <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-2">
-              {isAdoptedByMe ? (
-                <div className="space-y-2">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-700 text-lg">
-                    🎉
-                  </div>
-                  <p className="text-sm font-black text-[#2E2419]">Congratulations on adopting {adoptionPetData?.name || petDetails?.name || 'your pet'}!</p>
-                  <p className="text-xs text-[#8B7E7D] max-w-sm mx-auto">Thank you for providing a loving home. How was your experience with {otherUserName || 'this rescue'}?</p>
-                  <button
-                    type="button"
-                    onClick={() => setShowReviewModal(true)}
-                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-1.5 mx-auto transition-all shadow-xs cursor-pointer border-none"
-                  >
-                    <Star className="w-4 h-4 fill-amber-300 text-amber-300" /> Leave a Review for {otherUserName || 'Shelter'}
-                  </button>
+          if (otherUserType === 'shelter') {
+            // Viewing as an adopter/inquirer
+            if (adopterConfirmState === 'declined') {
+              return (
+                <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-1.5">
+                  <p className="text-xs font-bold text-gray-700">
+                    🐾 Reviews are reserved for confirmed adopters. We hope you find your perfect pet match soon!
+                  </p>
+                  <p className="text-[11px] text-gray-500">Messaging for this listing is now closed.</p>
                 </div>
-              ) : (
-                <div className="py-2">
-                  <p className="text-xs font-bold text-gray-700 flex items-center justify-center gap-1.5">
-                    <span>🐾</span> This pet has found a forever home and was adopted. Messaging is now closed.
+              );
+            }
+
+            return (
+              <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-2.5">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-700 text-lg">
+                  🎉
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#2E2419]">{petName} has found a home!</p>
+                  <p className="text-xs text-[#8B7E7D] max-w-sm mx-auto mt-0.5">
+                    Did you adopt {petName}? Share your experience with {shelterDisplayName} to help other adopters.
                   </p>
                 </div>
-              )}
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdopterConfirmState('confirmed');
+                      setShowReviewModal(true);
+                    }}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none"
+                  >
+                    <Star className="w-4 h-4 fill-amber-300 text-amber-300" /> Yes, Review {shelterDisplayName}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdopterConfirmState('declined')}
+                    className="bg-white hover:bg-gray-100 text-gray-600 font-bold py-2.5 px-3.5 rounded-xl text-xs border border-gray-200 cursor-pointer"
+                  >
+                    I didn't adopt
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-1">
+              <p className="text-xs font-bold text-[#2E2419] flex items-center justify-center gap-1.5">
+                <span>🎉</span> {petName} is marked as adopted. Messaging is now closed.
+              </p>
             </div>
           );
         })() : (

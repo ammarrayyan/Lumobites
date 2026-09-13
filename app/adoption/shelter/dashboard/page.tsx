@@ -55,10 +55,6 @@ function ShelterDashboardContent() {
   const [activeChatInquiry, setActiveChatInquiry] = useState<any>(null);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
   const [cancelingSubscription, setCancelingSubscription] = useState(false);
-  const [adoptModalPet, setAdoptModalPet] = useState<any | null>(null);
-  const [selectedAdopterEmail, setSelectedAdopterEmail] = useState<string>('');
-  const [customAdopterEmail, setCustomAdopterEmail] = useState<string>('');
-  const [isSavingAdoption, setIsSavingAdoption] = useState(false);
 
   const handleToggleArchiveThread = async (petId: string, adopterEmail: string, currentArchived: boolean) => {
     if (!currentArchived) {
@@ -481,92 +477,13 @@ function ShelterDashboardContent() {
   };
 
   const handleStatusChange = async (petId: string, status: 'available' | 'pending' | 'adopted') => {
+    const targetPet = pets.find(p => p.id === petId);
+    const petName = targetPet?.name || 'this pet';
+
     if (status === 'adopted') {
-      const targetPet = pets.find(p => p.id === petId);
-      if (targetPet) {
-        setAdoptModalPet(targetPet);
-        const petInquiries = inquiries.filter(m => m.pet_id === petId);
-        const myEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
-        const uniqueAdopters = Array.from(new Set(petInquiries.map(m => {
-          const s = (m.sender_email || '').toLowerCase().trim();
-          const r = (m.receiver_email || '').toLowerCase().trim();
-          return s === myEmail ? r : s;
-        }).filter(Boolean)));
-
-        if (uniqueAdopters.length > 0) {
-          setSelectedAdopterEmail(uniqueAdopters[0]);
-        } else {
-          setSelectedAdopterEmail('off_platform');
-        }
+      if (!confirm(`Mark ${petName} as adopted? This will update the pet's listing and invite anyone who inquired about ${petName} to share their review.`)) {
         return;
       }
-    }
-
-    try {
-      const res = await fetch('/api/adoption/pets', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: petId, status })
-      });
-      if (res.ok) {
-        setPets(prev => prev.map(p => p.id === petId ? { ...p, status } : p));
-      }
-    } catch {
-      alert('Status update failed');
-    }
-  };
-
-  const handleConfirmAdoption = async () => {
-    if (!adoptModalPet) return;
-    let targetEmail: string | null = null;
-
-    if (selectedAdopterEmail === 'custom') {
-      if (!customAdopterEmail.trim()) {
-        alert('Please enter a valid adopter email address.');
-        return;
-      }
-      targetEmail = customAdopterEmail.trim().toLowerCase();
-    } else if (selectedAdopterEmail && selectedAdopterEmail !== 'off_platform') {
-      targetEmail = selectedAdopterEmail.trim().toLowerCase();
-    }
-
-    setIsSavingAdoption(true);
-    try {
-      const res = await fetch('/api/adoption/pets', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: adoptModalPet.id,
-          status: 'adopted',
-          adopted_by_email: targetEmail,
-          shelter_id: shelterInfo?.id,
-        })
-      });
-
-      if (res.ok) {
-        setPets(prev => prev.map(p => p.id === adoptModalPet.id ? { ...p, status: 'adopted', adopted_by_email: targetEmail } : p));
-        setInquiries(prev => prev.map(m => m.pet_id === adoptModalPet.id ? { ...m, adoption_pets: { ...(m.adoption_pets || {}), status: 'adopted' } } : m));
-        alert(targetEmail ? `🎉 ${adoptModalPet.name} is now marked as adopted! A review request notification has been sent to ${targetEmail}.` : `🎉 ${adoptModalPet.name} is now marked as adopted.`);
-        setAdoptModalPet(null);
-        setSelectedAdopterEmail('');
-        setCustomAdopterEmail('');
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.error || 'Failed to update adoption status.');
-      }
-    } catch (e) {
-      console.error('Adoption submit error:', e);
-      alert('Network error while updating adoption status.');
-    } finally {
-      setIsSavingAdoption(false);
-    }
-  };
-
-  const handleDirectMarkAdopted = async (petId: string, adopterEmail: string) => {
-    const pet = pets.find(p => p.id === petId);
-    const petName = pet?.name || 'this pet';
-    if (!confirm(`Mark ${petName} as adopted to ${adopterEmail}? This will resolve the listing and invite them to leave a review.`)) {
-      return;
     }
 
     try {
@@ -575,23 +492,28 @@ function ShelterDashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: petId,
-          status: 'adopted',
-          adopted_by_email: adopterEmail,
+          status,
           shelter_id: shelterInfo?.id,
         })
       });
 
       if (res.ok) {
-        setPets(prev => prev.map(p => p.id === petId ? { ...p, status: 'adopted', adopted_by_email: adopterEmail } : p));
-        setInquiries(prev => prev.map(m => m.pet_id === petId ? { ...m, adoption_pets: { ...(m.adoption_pets || {}), status: 'adopted' } } : m));
-        alert(`🎉 ${petName} is now marked as adopted! A review request notification has been sent to ${adopterEmail}.`);
+        setPets(prev => prev.map(p => p.id === petId ? { ...p, status } : p));
+        setInquiries(prev => prev.map(m => m.pet_id === petId ? { ...m, adoption_pets: { ...(m.adoption_pets || {}), status } } : m));
+        if (status === 'adopted') {
+          alert(`🎉 ${petName} is now marked as adopted! Review invitations have been sent to inquirers.`);
+        }
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || 'Failed to update status.');
+        alert(err.error || 'Status update failed.');
       }
-    } catch (e) {
+    } catch {
       alert('Network error updating status.');
     }
+  };
+
+  const handleDirectMarkAdopted = async (petId: string) => {
+    await handleStatusChange(petId, 'adopted');
   };
 
   const handleDeletePet = async (petId: string) => {
@@ -1299,9 +1221,9 @@ function ShelterDashboardContent() {
                               {thread.petStatus !== 'adopted' && (
                                 <button
                                   type="button"
-                                  onClick={() => handleDirectMarkAdopted(thread.petId, thread.adopterEmail)}
+                                  onClick={() => handleDirectMarkAdopted(thread.petId)}
                                   className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1 shrink-0 transition-all shadow-2xs border-none cursor-pointer"
-                                  title={`Mark as Adopted to ${thread.adopterEmail}`}
+                                  title="Mark as Adopted"
                                 >
                                   🏆 Mark Adopted
                                 </button>
@@ -2301,161 +2223,7 @@ function ShelterDashboardContent() {
         document.body
       )}
 
-      {/* MARK AS ADOPTED & SELECT ADOPTER MODAL */}
-      {adoptModalPet && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#DFD3C7] relative animate-modal-spring text-left">
-            <button
-              onClick={() => { setAdoptModalPet(null); setSelectedAdopterEmail(''); setCustomAdopterEmail(''); }}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors cursor-pointer border-none bg-transparent"
-            >
-              <X className="w-5 h-5" />
-            </button>
 
-            <div className="mb-4">
-              <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-700 text-2xl mb-3 border border-emerald-100">
-                🎉
-              </div>
-              <h2 className="text-lg font-black text-[#2E2419]">Mark {adoptModalPet.name} as Adopted</h2>
-              <p className="text-xs text-[#8B7E7D] mt-1">
-                Select which verified adopter adopted {adoptModalPet.name} to send them an automated review request, or mark as adopted off-platform.
-              </p>
-            </div>
-
-            <div className="space-y-3 my-5 max-h-[45vh] overflow-y-auto pr-1">
-              {(() => {
-                const petInquiries = inquiries.filter(m => m.pet_id === adoptModalPet.id);
-                const myEmail = (shelterInfo?.email || shelterEmail || '').toLowerCase().trim();
-                const uniqueAdopters = Array.from(new Set(petInquiries.map(m => {
-                  const s = (m.sender_email || '').toLowerCase().trim();
-                  const r = (m.receiver_email || '').toLowerCase().trim();
-                  return s === myEmail ? r : s;
-                }).filter(Boolean)));
-
-                return (
-                  <>
-                    {uniqueAdopters.length > 0 && (
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider block">
-                          Adopters who inquired about {adoptModalPet.name}:
-                        </label>
-                        {uniqueAdopters.map((adopter) => {
-                          const isSelected = selectedAdopterEmail === adopter;
-                          return (
-                            <label
-                              key={adopter}
-                              onClick={() => setSelectedAdopterEmail(adopter)}
-                              className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                                isSelected
-                                  ? 'bg-emerald-50/70 border-emerald-400 shadow-2xs'
-                                  : 'bg-[#FAF6F2] border-[#E2D5C8] hover:border-[#8B5E3C]'
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name="adopterSelect"
-                                checked={isSelected}
-                                onChange={() => setSelectedAdopterEmail(adopter)}
-                                className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
-                              />
-                              <div className="min-w-0 flex-1 text-xs">
-                                <p className="font-black text-[#2E2419] truncate">{adopter}</p>
-                                <p className="text-[10px] text-emerald-700 font-semibold">Verified Inquirer • Will receive review link</p>
-                              </div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <div className="pt-2 space-y-2">
-                      <label className="text-[11px] font-bold text-[#8B7E7D] uppercase tracking-wider block">
-                        Other Adoption Options:
-                      </label>
-
-                      {/* Custom email option */}
-                      <label
-                        onClick={() => setSelectedAdopterEmail('custom')}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                          selectedAdopterEmail === 'custom'
-                            ? 'bg-emerald-50/70 border-emerald-400 shadow-2xs'
-                            : 'bg-[#FAF6F2] border-[#E2D5C8] hover:border-[#8B5E3C]'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="adopterSelect"
-                          checked={selectedAdopterEmail === 'custom'}
-                          onChange={() => setSelectedAdopterEmail('custom')}
-                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
-                        />
-                        <div className="min-w-0 flex-1 text-xs">
-                          <p className="font-bold text-[#2E2419]">Enter adopter's email manually</p>
-                          <p className="text-[10px] text-[#8B7E7D]">Send review invite to another email</p>
-                        </div>
-                      </label>
-
-                      {selectedAdopterEmail === 'custom' && (
-                        <div className="pl-7 pr-2">
-                          <input
-                            type="email"
-                            value={customAdopterEmail}
-                            onChange={(e) => setCustomAdopterEmail(e.target.value)}
-                            placeholder="adopter@example.com"
-                            className="w-full bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl px-3 py-2 text-xs text-[#2E2419] focus:outline-hidden focus:border-[#8B5E3C]"
-                            autoFocus
-                          />
-                        </div>
-                      )}
-
-                      {/* Off-platform option */}
-                      <label
-                        onClick={() => setSelectedAdopterEmail('off_platform')}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${
-                          selectedAdopterEmail === 'off_platform'
-                            ? 'bg-amber-50/70 border-amber-400 shadow-2xs'
-                            : 'bg-[#FAF6F2] border-[#E2D5C8] hover:border-[#8B5E3C]'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="adopterSelect"
-                          checked={selectedAdopterEmail === 'off_platform'}
-                          onChange={() => setSelectedAdopterEmail('off_platform')}
-                          className="w-4 h-4 text-amber-600 focus:ring-amber-500"
-                        />
-                        <div className="min-w-0 flex-1 text-xs">
-                          <p className="font-bold text-[#2E2419]">Adopted off-platform</p>
-                          <p className="text-[10px] text-[#8B7E7D]">Mark as adopted without sending a review invitation</p>
-                        </div>
-                      </label>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleConfirmAdoption}
-                disabled={isSavingAdoption}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-3 rounded-xl transition-all shadow-xs text-xs border-none cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                {isSavingAdoption ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Adoption 🎉'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setAdoptModalPet(null); setSelectedAdopterEmail(''); setCustomAdopterEmail(''); }}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-xl border-none cursor-pointer text-xs"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
 
       {/* CHAT MODAL FOR SHELTER ADOPTER INQUIRIES */}
       {chatOpen && activeChatInquiry && (
