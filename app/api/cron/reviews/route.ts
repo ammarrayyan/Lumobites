@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { formatSitterName } from '@/lib/email-template';
+import { extractAdoptionMeta, packAdoptionDescription } from '@/lib/adoptionPetHelper';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     let sittingCount = 0;
     let daycareCount = 0;
     let vetCount = 0;
+    let shelterCount = 0;
 
     // ─── A. PET SITTING REVIEWS ──────────────────────────────────────────────
     const { data: sittingRequests, error: sitErr } = await supabaseAdmin
@@ -204,13 +206,88 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // ─── D. SHELTER ADOPTION REVIEWS ─────────────────────────────────────────
+    const { data: adoptedPets, error: shelterErr } = await supabaseAdmin
+      .from('adoption_pets')
+      .select('id, name, shelter_id, description, status, created_at, shelters(id, org_name, email)')
+      .eq('status', 'adopted');
+
+    if (shelterErr) {
+      console.error('[Cron Reviews] Shelter Fetch Error:', shelterErr);
+    } else if (adoptedPets && adoptedPets.length > 0) {
+      for (const petRow of adoptedPets) {
+        const meta = extractAdoptionMeta(petRow);
+        if (!meta.adoptedByEmail || meta.reviewSent) continue;
+
+        // Check if adopted at least 10 minutes ago
+        const adoptionTime = meta.adoptedAt || petRow.created_at;
+        if (adoptionTime && new Date(adoptionTime).getTime() > new Date(tenMinsAgo).getTime()) {
+          continue;
+        }
+
+        const adopterEmail = meta.adoptedByEmail.toLowerCase().trim();
+        const bookingId = String(petRow.id);
+
+        try {
+          const { data: existingNotif } = await supabaseAdmin
+            .from('notifications')
+            .select('id')
+            .eq('recipient_email', adopterEmail)
+            .eq('type', 'review_request')
+            .eq('booking_id', bookingId)
+            .maybeSingle();
+
+          const shelterObj = Array.isArray(petRow.shelters) ? petRow.shelters[0] : petRow.shelters;
+          const shelterName = shelterObj?.org_name || 'Rescue Partner';
+          const shelterId = petRow.shelter_id || shelterObj?.id;
+          const reviewLink = `/adoption?review_shelter=${shelterId}&pet_id=${petRow.id}`;
+
+          if (!existingNotif) {
+            await supabaseAdmin.from('notifications').insert({
+              recipient_email: adopterEmail,
+              type: 'review_request',
+              title: `Congratulations on Adopting ${petRow.name || 'your pet'}! 🐾`,
+              message: `How was your adoption experience with ${shelterName}? Leave a review`,
+              link: reviewLink,
+              booking_id: bookingId,
+              read: false,
+            });
+          }
+
+          // Mark review_sent = true
+          const updatedMeta = { ...meta, review_sent: true };
+          const newDesc = packAdoptionDescription(meta.cleanDescription, updatedMeta);
+
+          // Update DB (attempting column + description fallback)
+          await supabaseAdmin
+            .from('adoption_pets')
+            .update({
+              description: newDesc,
+              review_sent: true,
+            })
+            .eq('id', petRow.id)
+            .catch(async () => {
+              await supabaseAdmin
+                .from('adoption_pets')
+                .update({ description: newDesc })
+                .eq('id', petRow.id);
+            });
+
+          shelterCount++;
+        } catch (innerErr) {
+          console.error(`[Cron Reviews] Failed to process shelter pet ${petRow.id}:`, innerErr);
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       sent: {
         sitting: sittingCount,
         daycare: daycareCount,
         vet: vetCount,
-        total: sittingCount + daycareCount + vetCount,
+        shelter: shelterCount,
+        total: sittingCount + daycareCount + vetCount + shelterCount,
       },
     });
   } catch (error: any) {

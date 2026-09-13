@@ -2,11 +2,15 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat, Star } from 'lucide-react';
 import PetPhotoCarousel from './PetPhotoCarousel';
 import BookingProgressStepper from './BookingProgressStepper';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { hapticSuccess } from '@/lib/haptics';
+import { extractAdoptionMeta } from '@/lib/adoptionMetaHelper';
+
+const PartnerReviewModal = dynamic(() => import('./PartnerReviewModal'), { ssr: false });
 
 // Privacy: show first name + last initial only (e.g. "Ammar Alrayyan" → "Ammar A.")
 function formatName(fullName: string): string {
@@ -98,9 +102,63 @@ export default function ChatModal({
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isMarkingAdopted, setIsMarkingAdopted] = useState(false);
+  const [currentPetStatus, setCurrentPetStatus] = useState<string>(petDetails?.status || 'available');
+  const [adoptionPetData, setAdoptionPetData] = useState<any>(petDetails || null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (petDetails) {
+      setAdoptionPetData(petDetails);
+      if (petDetails.status) {
+        setCurrentPetStatus(petDetails.status);
+      }
+    }
+  }, [petDetails]);
+
+  const handleMarkAdopted = async () => {
+    const adopterEmail = (otherUserType === 'user' ? otherUserEmail : currentUserEmail).toLowerCase().trim();
+    const petName = adoptionPetData?.name || petDetails?.name || 'this pet';
+    if (!confirm(`Mark ${petName} as adopted to ${otherUserName || adopterEmail}? This will update the listing and invite them to leave a review.`)) {
+      return;
+    }
+    setIsMarkingAdopted(true);
+    try {
+      const res = await fetch('/api/adoption/pets', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: bookingId,
+          status: 'adopted',
+          adopted_by_email: adopterEmail,
+          shelter_id: shelterId || petDetails?.shelter_id,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentPetStatus('adopted');
+        setAdoptionPetData((prev: any) => ({
+          ...(prev || {}),
+          status: 'adopted',
+          adopted_by_email: adopterEmail,
+          adopted_at: new Date().toISOString(),
+        }));
+        hapticSuccess();
+        alert(`🎉 ${petName} has been marked as adopted! A review invitation notification has been sent to ${otherUserName || adopterEmail}.`);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to update adoption status.');
+      }
+    } catch (err) {
+      console.error('Failed to mark adopted:', err);
+      alert('Network error while marking adoption.');
+    } finally {
+      setIsMarkingAdopted(false);
+    }
+  };
 
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [viewportTop, setViewportTop] = useState<number>(0);
@@ -348,6 +406,23 @@ export default function ChatModal({
           </div>
         </div>
 
+        {/* Shelter "Mark as Adopted" Action Banner */}
+        {chatType === 'adoption' && otherUserType === 'user' && currentPetStatus !== 'adopted' && (
+          <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
+            <div className="text-[11px] text-emerald-950 font-medium truncate">
+              Adoption Inquiry for <span className="font-bold">{adoptionPetData?.name || petDetails?.name || 'Pet'}</span>
+            </div>
+            <button
+              type="button"
+              disabled={isMarkingAdopted}
+              onClick={handleMarkAdopted}
+              className="shrink-0 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-[11px] py-1.5 px-3 rounded-xl shadow-2xs transition-all flex items-center gap-1 cursor-pointer border-none"
+            >
+              {isMarkingAdopted ? 'Saving…' : '🏆 Mark as Adopted'}
+            </button>
+          </div>
+        )}
+
         {/* Visual Booking Progress Tracker Stepper */}
         {bookingStatus && (
           <div className="border-b border-gray-100 bg-white">
@@ -471,14 +546,45 @@ export default function ChatModal({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ── INPUT BAR OR RESOLVED BANNER ── */}
+        {/* ── INPUT BAR OR RESOLVED / ADOPTED BANNER ── */}
         {(chatType === 'lost_pets' && (petDetails?.status === 'resolved' || bookingStatus === 'resolved')) ? (
           <div className="shrink-0 bg-emerald-50/90 border-t border-emerald-200 px-4 py-3.5 text-center">
             <p className="text-xs sm:text-sm font-bold text-emerald-900 flex items-center justify-center gap-1.5">
               <span>🎉</span> This case has been marked as resolved. Messaging is now closed.
             </p>
           </div>
-        ) : (
+        ) : (chatType === 'adoption' && currentPetStatus === 'adopted') ? (() => {
+          const meta = extractAdoptionMeta(adoptionPetData || petDetails);
+          const cleanUser = (currentUserEmail || '').toLowerCase().trim();
+          const isAdoptedByMe = (meta.adoptedByEmail && meta.adoptedByEmail.toLowerCase().trim() === cleanUser) || otherUserType === 'shelter';
+
+          return (
+            <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-2">
+              {isAdoptedByMe ? (
+                <div className="space-y-2">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-700 text-lg">
+                    🎉
+                  </div>
+                  <p className="text-sm font-black text-[#2E2419]">Congratulations on adopting {adoptionPetData?.name || petDetails?.name || 'your pet'}!</p>
+                  <p className="text-xs text-[#8B7E7D] max-w-sm mx-auto">Thank you for providing a loving home. How was your experience with {otherUserName || 'this rescue'}?</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewModal(true)}
+                    className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-1.5 mx-auto transition-all shadow-xs cursor-pointer border-none"
+                  >
+                    <Star className="w-4 h-4 fill-amber-300 text-amber-300" /> Leave a Review for {otherUserName || 'Shelter'}
+                  </button>
+                </div>
+              ) : (
+                <div className="py-2">
+                  <p className="text-xs font-bold text-gray-700 flex items-center justify-center gap-1.5">
+                    <span>🐾</span> This pet has found a forever home and was adopted. Messaging is now closed.
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })() : (
           <div className={`shrink-0 bg-white border-t border-gray-100 px-3 py-2 ${
             isKeyboardOpen
               ? 'pb-2'
@@ -610,6 +716,17 @@ export default function ChatModal({
           </div>
         )}
       </div>
+
+      {showReviewModal && (
+        <PartnerReviewModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          partnerId={shelterId || petDetails?.shelter_id || ''}
+          partnerName={otherUserName || 'Rescue Partner'}
+          partnerType="shelter"
+          currentUserEmail={currentUserEmail}
+        />
+      )}
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }

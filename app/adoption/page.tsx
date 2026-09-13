@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert, Home, Info, LogOut } from 'lucide-react';
+import { Heart, Search, Filter, Sparkles, Camera, ExternalLink, MessageSquare, Building2, PawPrint, ArrowLeft, Loader2, CheckCircle2, LayoutGrid, Map as MapIcon, Navigation, MapPin, ChevronDown, ChevronUp, Upload, Trash2, ChevronRight, X, ShieldAlert, Home, Info, LogOut, Star } from 'lucide-react';
 import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
@@ -13,6 +13,8 @@ import ChatModal from '@/components/ChatModal';
 import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import { useScrollLock } from '@/lib/useScrollLock';
+
+const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
 
 const AdoptionPetsMap = dynamic(() => import('@/components/AdoptionPetsMap'), {
   ssr: false,
@@ -38,6 +40,8 @@ interface PetListing {
   shelter_email?: string;
   shelter_name: string;
   shelter_photo_url?: string;
+  shelter_avg_rating?: number;
+  shelter_review_count?: number;
   url?: string;
   description?: string;
   temperament?: string;
@@ -49,6 +53,8 @@ interface PetListing {
 
 function AdoptionContent() {
   const router = useRouter();
+
+  const [selectedShelterForReviews, setSelectedShelterForReviews] = useState<{ id: string; name: string } | null>(null);
 
   // Filter state
   const [species, setSpecies] = useState('all');
@@ -236,6 +242,18 @@ function AdoptionContent() {
 
   // Active Pet Chat Modal State
   const [activeChatPet, setActiveChatPet] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const reviewShelterId = sp.get('review_shelter');
+    if (reviewShelterId) {
+      setSelectedShelterForReviews({
+        id: reviewShelterId,
+        name: 'Rescue Partner'
+      });
+    }
+  }, []);
 
   const isOwnPet = (pet: any) => {
     if (!pet) return false;
@@ -503,6 +521,8 @@ function AdoptionContent() {
           shelter_email: p.shelters?.email || '',
           shelter_name: p.shelters?.org_name || 'Local Rescue Partner',
           shelter_photo_url: p.shelters?.org_photo_url || '',
+          shelter_avg_rating: p.shelters?.avg_rating || 0,
+          shelter_review_count: p.shelters?.review_count || 0,
           description: p.description,
           temperament: p.temperament,
           city: p.city,
@@ -1032,13 +1052,31 @@ function AdoptionContent() {
                             <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full capitalize">{pet.age}</span>
                           </div>
                           <p className="text-sm text-gray-500 font-medium">{pet.breed} &bull; {pet.size} &bull; {pet.sex}</p>
-                          <div className="text-[11px] text-[#8B5E3C] font-bold mt-1.5 flex items-center gap-1.5">
-                            {(pet as any).shelter_photo_url ? (
-                              <img src={(pet as any).shelter_photo_url} alt={pet.shelter_name} className="w-4 h-4 rounded-full object-cover shrink-0 border border-amber-200" />
-                            ) : (
-                              <Building2 className="w-3.5 h-3.5 shrink-0 text-[#8B5E3C]" />
+                          <div className="flex items-center justify-between gap-2 mt-1.5 flex-wrap">
+                            <div className="text-[11px] text-[#8B5E3C] font-bold flex items-center gap-1.5 min-w-0">
+                              {(pet as any).shelter_photo_url ? (
+                                <img src={(pet as any).shelter_photo_url} alt={pet.shelter_name} className="w-4 h-4 rounded-full object-cover shrink-0 border border-amber-200" />
+                              ) : (
+                                <Building2 className="w-3.5 h-3.5 shrink-0 text-[#8B5E3C]" />
+                              )}
+                              <span className="truncate">{pet.shelter_name}</span>
+                            </div>
+
+                            {pet.shelter_id && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedShelterForReviews({ id: pet.shelter_id!, name: pet.shelter_name });
+                                }}
+                                className="flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
+                                title="View Shelter Reviews"
+                              >
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
+                                <span>{Number(pet.shelter_avg_rating || 0) > 0 ? Number(pet.shelter_avg_rating).toFixed(1) : 'New'}</span>
+                                <span className="text-[#8B7E7D]">({pet.shelter_review_count || 0})</span>
+                              </button>
                             )}
-                            <span className="truncate">{pet.shelter_name}</span>
                           </div>
                           {pet.temperament && (
                             <p className={`text-sm text-gray-700 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 mt-2 leading-relaxed ${!isLoggedIn ? 'blur-[3px] select-none' : ''}`}>
@@ -1635,6 +1673,18 @@ function AdoptionContent() {
         reason={aiLimitReason}
         isPro={aiLimitIsPro}
       />
+
+      {/* Partner Reviews Modal */}
+      {selectedShelterForReviews && (
+        <PartnerReviewsListModal
+          isOpen={!!selectedShelterForReviews}
+          onClose={() => setSelectedShelterForReviews(null)}
+          partnerId={selectedShelterForReviews.id}
+          partnerName={selectedShelterForReviews.name}
+          partnerType="shelter"
+          currentUserEmail={typeof window !== 'undefined' ? getSignedInUserEmail() : ''}
+        />
+      )}
     </div>
   );
 }

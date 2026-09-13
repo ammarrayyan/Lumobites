@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     const shelter_id = searchParams.get('shelter_id');
     const status = searchParams.get('status');
 
-    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(org_name, phone, email, website, org_photo_url, is_paused, subscription_status, trial_end)');
+    let query = supabaseAdmin.from('adoption_pets').select('*, shelters(id, org_name, phone, email, website, org_photo_url, is_paused, subscription_status, trial_end, avg_rating, review_count)');
 
     if (shelter_id) {
       query = query.eq('shelter_id', shelter_id);
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, ids, status, action, ...updates } = body;
+    const { id, ids, status, action, adopted_by_email, shelter_id, ...updates } = body;
 
     // Bulk actions
     if (ids && Array.isArray(ids)) {
@@ -224,6 +224,22 @@ export async function PATCH(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'Missing pet id' }, { status: 400 });
+    }
+
+    // Special handling for marking as adopted
+    if (status === 'adopted' || action === 'mark_adopted') {
+      const { markPetAdopted } = await import('@/lib/adoptionPetHelper');
+      const res = await markPetAdopted({
+        petId: id,
+        shelterId: shelter_id,
+        adoptedByEmail: adopted_by_email || null,
+      });
+
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || 'Failed to mark pet as adopted' }, { status: 500 });
+      }
+
+      return NextResponse.json({ pet: res.pet });
     }
 
     const updatePayload: any = { ...updates };
