@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getPartnerReviews, submitPartnerReview } from '@/lib/partnerReviewsHelper';
 import { supabaseAdmin } from '@/lib/supabase';
 
@@ -17,12 +17,12 @@ export async function GET(request: NextRequest) {
 
     const { data: shelter } = await supabaseAdmin
       .from('shelters')
-      .select('id, org_name, city, state, org_photo_url, avg_rating, review_count')
+      .select('id, org_name, city, state, org_photo_url')
       .eq('id', shelter_id)
       .maybeSingle();
 
     return NextResponse.json(
-      { reviews, shelter, avg_rating: avgRating || shelter?.avg_rating || 0, review_count: reviewCount || shelter?.review_count || 0 },
+      { reviews, shelter, avg_rating: avgRating || 0, review_count: reviewCount || 0 },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
     );
   } catch (err: any) {
