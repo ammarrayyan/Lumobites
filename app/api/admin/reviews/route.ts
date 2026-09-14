@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, supabase } from '@/lib/supabase';
-
 import { isAuthorizedAdmin } from '@/lib/adminAuth';
+import { getPartnerReviews } from '@/lib/partnerReviewsHelper';
 
 function checkAuth(req: NextRequest) {
   return isAuthorizedAdmin(req);
@@ -45,16 +45,36 @@ export async function GET(req: NextRequest) {
     }
 
     if (type === 'shelter') {
-      const { data } = await supabaseAdmin
-        .from('shelter_reviews')
-        .select('*, shelters(org_name)')
+      const { data, error } = await supabaseAdmin
+        .from('adoption_messages')
+        .select('id, shelter_id, sender_email, receiver_email, message, created_at, shelters(id, org_name)')
+        .like('message', '%<!-- LUMO_SHELTER_REVIEW:%')
         .order('created_at', { ascending: false });
 
-      const formatted = (data || []).map((r: any) => ({
-        ...r,
-        partner_name: r.shelters?.org_name || 'Unknown Shelter',
-        partner_type: 'shelter',
-      }));
+      if (error) throw error;
+
+      const formatted = (data || []).map((m: any) => {
+        const start = m.message?.indexOf('<!-- LUMO_SHELTER_REVIEW:') ?? -1;
+        const end = m.message?.indexOf('-->', start) ?? -1;
+        let meta: any = {};
+        if (start !== -1 && end !== -1) {
+          try {
+            meta = JSON.parse(m.message.substring(start + '<!-- LUMO_SHELTER_REVIEW:'.length, end).trim());
+          } catch (e) {}
+        }
+        return {
+          id: m.id,
+          shelter_id: m.shelter_id,
+          partner_id: m.shelter_id,
+          partner_name: m.shelters?.org_name || 'Unknown Shelter',
+          partner_type: 'shelter',
+          owner_name: meta.owner_name || 'Verified Adopter',
+          owner_email: meta.owner_email || m.sender_email,
+          rating: Number(meta.rating || 5),
+          review_text: meta.review_text || '',
+          created_at: meta.created_at || m.created_at,
+        };
+      });
       return NextResponse.json({ reviews: formatted });
     }
 
@@ -94,13 +114,28 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
+    if (partnerType === 'shelter') {
+      const { error: deleteError } = await supabaseAdmin
+        .from('adoption_messages')
+        .delete()
+        .eq('id', reviewId);
+
+      if (deleteError) throw deleteError;
+
+      const { avgRating, reviewCount } = await getPartnerReviews(partnerId, 'shelter');
+      await supabaseAdmin
+        .from('shelters')
+        .update({ avg_rating: avgRating, review_count: reviewCount })
+        .eq('id', partnerId);
+
+      return NextResponse.json({ success: true, avg_rating: avgRating, review_count: reviewCount });
+    }
+
     const tableName =
       partnerType === 'vet'
         ? 'vet_reviews'
         : partnerType === 'daycare'
         ? 'daycare_reviews'
-        : partnerType === 'shelter'
-        ? 'shelter_reviews'
         : 'sitter_reviews';
 
     const partnerIdCol =
@@ -108,8 +143,6 @@ export async function DELETE(req: NextRequest) {
         ? 'clinic_id'
         : partnerType === 'daycare'
         ? 'daycare_id'
-        : partnerType === 'shelter'
-        ? 'shelter_id'
         : 'sitter_id';
 
     const parentTable =
@@ -117,8 +150,6 @@ export async function DELETE(req: NextRequest) {
         ? 'vet_clinics'
         : partnerType === 'daycare'
         ? 'pet_daycares'
-        : partnerType === 'shelter'
-        ? 'shelters'
         : 'sitters';
 
     // Delete the review
