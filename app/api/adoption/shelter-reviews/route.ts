@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error || 'Failed to submit review' }, { status: 500 });
+      return NextResponse.json({ error: result.error || 'Failed to submit review' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, avg_rating: result.avgRating, review_count: result.reviewCount });

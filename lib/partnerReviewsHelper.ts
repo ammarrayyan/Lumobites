@@ -220,25 +220,22 @@ export async function submitPartnerReview(params: {
         .like('message', '%<!-- LUMO_SHELTER_REVIEW:%');
 
       if (existing && existing.length > 0) {
-        await supabaseAdmin
-          .from('adoption_messages')
-          .update({
-            message: `<!-- LUMO_SHELTER_REVIEW: ${JSON.stringify(reviewData)} -->`,
-            read: true,
-          })
-          .eq('id', existing[0].id);
-      } else {
-        await supabaseAdmin
-          .from('adoption_messages')
-          .insert({
-            shelter_id: partnerId,
-            pet_id: null,
-            sender_email: cleanEmail,
-            receiver_email: partnerEmail,
-            message: `<!-- LUMO_SHELTER_REVIEW: ${JSON.stringify(reviewData)} -->`,
-            read: true,
-          });
+        return {
+          success: false,
+          error: 'You have already submitted a review for this shelter.',
+        };
       }
+
+      await supabaseAdmin
+        .from('adoption_messages')
+        .insert({
+          shelter_id: partnerId,
+          pet_id: null,
+          sender_email: cleanEmail,
+          receiver_email: partnerEmail,
+          message: `<!-- LUMO_SHELTER_REVIEW: ${JSON.stringify(reviewData)} -->`,
+          read: true,
+        });
 
       // Re-fetch to return computed aggregates
       const { avgRating, reviewCount } = await getPartnerReviews(partnerId, 'shelter');

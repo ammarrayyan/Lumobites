@@ -120,6 +120,43 @@ export default function ChatModal({
     }
   }, [petDetails]);
 
+  useEffect(() => {
+    if (chatType === 'adoption' && (currentPetStatus === 'adopted' || adoptionPetData?.status === 'adopted' || petDetails?.status === 'adopted')) {
+      const userEmail = (currentUserEmail || '').toLowerCase().trim();
+      const sId = shelterId || petDetails?.shelter_id || adoptionPetData?.shelter_id;
+      const pId = bookingId || petDetails?.id || adoptionPetData?.id;
+
+      if (userEmail) {
+        if (
+          (pId && typeof window !== 'undefined' && localStorage.getItem(`lumo_adoption_declined_${pId}_${userEmail}`) === 'true') ||
+          (sId && typeof window !== 'undefined' && localStorage.getItem(`lumo_adoption_declined_${sId}_${userEmail}`) === 'true')
+        ) {
+          setAdopterConfirmState('declined');
+          return;
+        }
+
+        if (sId && typeof window !== 'undefined' && localStorage.getItem(`lumo_adoption_reviewed_${sId}_${userEmail}`) === 'true') {
+          setAdopterConfirmState('confirmed');
+          return;
+        }
+
+        if (sId) {
+          fetch(`/api/adoption/shelter-reviews?shelter_id=${encodeURIComponent(sId)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && Array.isArray(data.reviews)) {
+                const myReview = data.reviews.find((r: any) => (r.ownerEmail || '').toLowerCase().trim() === userEmail);
+                if (myReview) {
+                  setAdopterConfirmState('confirmed');
+                }
+              }
+            })
+            .catch(() => {});
+        }
+      }
+    }
+  }, [chatType, currentPetStatus, adoptionPetData, petDetails, shelterId, bookingId, currentUserEmail]);
+
   const handleMarkAdopted = async () => {
     const petName = adoptionPetData?.name || petDetails?.name || 'this pet';
     if (!confirm(`Mark ${petName} as adopted? This will update the listing and invite all adopters who inquired about ${petName} to leave a review.`)) {
@@ -600,7 +637,16 @@ export default function ChatModal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setAdopterConfirmState('declined')}
+                    onClick={() => {
+                      const userEmail = (currentUserEmail || '').toLowerCase().trim();
+                      const sId = shelterId || petDetails?.shelter_id || adoptionPetData?.shelter_id;
+                      const pId = bookingId || petDetails?.id || adoptionPetData?.id;
+                      if (userEmail && typeof window !== 'undefined') {
+                        if (pId) localStorage.setItem(`lumo_adoption_declined_${pId}_${userEmail}`, 'true');
+                        if (sId) localStorage.setItem(`lumo_adoption_declined_${sId}_${userEmail}`, 'true');
+                      }
+                      setAdopterConfirmState('declined');
+                    }}
                     className="bg-white hover:bg-gray-100 text-gray-600 font-bold py-2.5 px-3.5 rounded-xl text-xs border border-gray-200 cursor-pointer"
                   >
                     I didn't adopt
@@ -758,6 +804,15 @@ export default function ChatModal({
           partnerName={otherUserName || 'Rescue Partner'}
           partnerType="shelter"
           currentUserEmail={currentUserEmail}
+          currentUserName={currentUserName}
+          onSuccess={() => {
+            const userEmail = (currentUserEmail || '').toLowerCase().trim();
+            const sId = shelterId || petDetails?.shelter_id || adoptionPetData?.shelter_id;
+            if (userEmail && sId && typeof window !== 'undefined') {
+              localStorage.setItem(`lumo_adoption_reviewed_${sId}_${userEmail}`, 'true');
+            }
+            setAdopterConfirmState('confirmed');
+          }}
         />
       )}
 

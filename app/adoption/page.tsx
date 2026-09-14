@@ -63,7 +63,13 @@ function AdoptionContent() {
     shelterName: string;
     petId?: string;
     petName?: string;
-    status: 'asking' | 'declined';
+    status: 'asking' | 'declined' | 'already_reviewed';
+    existingReview?: {
+      rating: number;
+      reviewText: string;
+      ownerName: string;
+      createdAt?: string;
+    };
   } | null>(null);
 
   // Filter state
@@ -263,14 +269,42 @@ function AdoptionContent() {
 
     if (reviewShelterId) {
       if (confirmAdopter || petId || petName) {
+        const userEmail = (getSignedInUserEmail() || '').toLowerCase().trim();
+        const declinedKey = `lumo_adoption_declined_${petId || reviewShelterId}_${userEmail}`;
+        const isDeclined = !!(userEmail && localStorage.getItem(declinedKey) === 'true');
+
         setAdopterConfirmModal({
           isOpen: true,
           shelterId: reviewShelterId,
           shelterName: 'Rescue Partner',
           petId,
           petName: petName ? decodeURIComponent(petName) : undefined,
-          status: 'asking',
+          status: isDeclined ? 'declined' : 'asking',
         });
+
+        // Check if user already reviewed this shelter
+        if (userEmail) {
+          fetch(`/api/adoption/shelter-reviews?shelter_id=${encodeURIComponent(reviewShelterId)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && Array.isArray(data.reviews)) {
+                const myReview = data.reviews.find((r: any) => (r.ownerEmail || '').toLowerCase().trim() === userEmail);
+                if (myReview) {
+                  setAdopterConfirmModal(prev => prev ? {
+                    ...prev,
+                    status: 'already_reviewed',
+                    existingReview: {
+                      rating: myReview.rating,
+                      reviewText: myReview.reviewText,
+                      ownerName: myReview.ownerName,
+                      createdAt: myReview.createdAt,
+                    }
+                  } : null);
+                }
+              }
+            })
+            .catch(() => {});
+        }
       } else {
         setSelectedShelterForReviews({
           id: reviewShelterId,
@@ -1791,11 +1825,72 @@ function AdoptionContent() {
                   <button
                     type="button"
                     onClick={() => {
+                      const userEmail = (typeof window !== 'undefined' ? getSignedInUserEmail() : '').toLowerCase().trim();
+                      if (userEmail && typeof window !== 'undefined') {
+                        const key = `lumo_adoption_declined_${adopterConfirmModal.petId || adopterConfirmModal.shelterId}_${userEmail}`;
+                        localStorage.setItem(key, 'true');
+                      }
                       setAdopterConfirmModal(prev => prev ? { ...prev, status: 'declined' } : null);
                     }}
                     className="w-full bg-[#FAF6F2] hover:bg-[#F2E8DF] active:scale-98 text-[#8B7E7D] hover:text-[#2E2419] font-bold py-3 px-4 rounded-2xl transition-all text-xs border border-[#E2D5C8] cursor-pointer"
                   >
                     No, I was just inquiring
+                  </button>
+                </div>
+              </div>
+            ) : adopterConfirmModal.status === 'already_reviewed' ? (
+              <div>
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl mb-4 border border-amber-100">
+                  ⭐
+                </div>
+                <h2 className="text-xl font-black text-[#2E2419]">
+                  You've already reviewed this adoption!
+                </h2>
+                <p className="text-sm text-[#8B7E7D] mt-2 leading-relaxed">
+                  Thank you for sharing your experience with {adopterConfirmModal.shelterName}! Your review helps other adopters find their furry companions.
+                </p>
+
+                {adopterConfirmModal.existingReview && (
+                  <div className="mt-4 bg-[#FAF6F2] border border-[#E2D5C8] rounded-2xl p-4 text-left space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < (adopterConfirmModal.existingReview?.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                        Verified Adopter
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#2E2419] italic leading-relaxed">
+                      "{adopterConfirmModal.existingReview.reviewText}"
+                    </p>
+                    <p className="text-[10px] text-[#8B7E7D]">
+                      — {adopterConfirmModal.existingReview.ownerName}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdopterConfirmModal(null);
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('review_shelter');
+                        url.searchParams.delete('pet_id');
+                        url.searchParams.delete('pet_name');
+                        url.searchParams.delete('confirm_adopter');
+                        window.history.replaceState({}, '', url.pathname);
+                      }
+                    }}
+                    className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-md text-sm border-none cursor-pointer"
+                  >
+                    Back to Adoption Listings
                   </button>
                 </div>
               </div>
@@ -1846,6 +1941,10 @@ function AdoptionContent() {
           partnerType="shelter"
           currentUserEmail={typeof window !== 'undefined' ? getSignedInUserEmail() : ''}
           onSuccess={() => {
+            const userEmail = (typeof window !== 'undefined' ? getSignedInUserEmail() : '').toLowerCase().trim();
+            if (userEmail && typeof window !== 'undefined') {
+              localStorage.setItem(`lumo_adoption_reviewed_${activeReviewShelter.id}_${userEmail}`, 'true');
+            }
             setActiveReviewShelter(null);
           }}
         />
