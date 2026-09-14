@@ -97,6 +97,7 @@ export default function ChatModal({
   bookingDates,
   bookingCreatedAt,
 }: ChatModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [showPetProfile, setShowPetProfile] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -110,6 +111,10 @@ export default function ChatModal({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (petDetails) {
@@ -352,8 +357,7 @@ export default function ChatModal({
     }
   };
 
-  if (!isOpen) return null;
-  if (typeof window === 'undefined') return null;
+  if (!isOpen || !mounted || typeof window === 'undefined') return null;
 
   const displayName = formatName(otherUserName);
 

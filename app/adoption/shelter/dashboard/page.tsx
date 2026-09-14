@@ -166,17 +166,22 @@ function ShelterDashboardContent() {
       ''
     ).trim();
 
+    const params = new URLSearchParams(window.location.search);
+    const targetInquiryId = params.get('inquiry');
+    const targetAdopter = params.get('adopter');
+
     if (!email) {
-      router.push('/adoption');
+      if (targetInquiryId) {
+        router.push(`/adoption/messages/${targetInquiryId}${targetAdopter ? `?adopter=${encodeURIComponent(targetAdopter)}` : ''}`);
+      } else {
+        router.push('/adoption');
+      }
       return;
     }
 
     setShelterEmail(email);
     fetchShelterDetails(email);
 
-    const params = new URLSearchParams(window.location.search);
-    const targetInquiryId = params.get('inquiry');
-    const targetAdopter = params.get('adopter');
     if (targetInquiryId && email) {
       fetch(`/api/adoption/messages?pet_id=${targetInquiryId}&shelter_email=${encodeURIComponent(email)}`)
         .then(r => r.json())
@@ -225,13 +230,34 @@ function ShelterDashboardContent() {
             fetchShelterReviews(data.shelter.id);
           }
         } else {
+          const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+          const targetInquiryId = params?.get('inquiry');
+          const targetAdopter = params?.get('adopter');
+          if (targetInquiryId) {
+            router.push(`/adoption/messages/${targetInquiryId}${targetAdopter ? `?adopter=${encodeURIComponent(targetAdopter)}` : ''}`);
+          } else {
+            router.push('/adoption');
+          }
+        }
+      } else {
+        const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+        const targetInquiryId = params?.get('inquiry');
+        const targetAdopter = params?.get('adopter');
+        if (targetInquiryId) {
+          router.push(`/adoption/messages/${targetInquiryId}${targetAdopter ? `?adopter=${encodeURIComponent(targetAdopter)}` : ''}`);
+        } else {
           router.push('/adoption');
         }
+      }
+    } catch {
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const targetInquiryId = params?.get('inquiry');
+      const targetAdopter = params?.get('adopter');
+      if (targetInquiryId) {
+        router.push(`/adoption/messages/${targetInquiryId}${targetAdopter ? `?adopter=${encodeURIComponent(targetAdopter)}` : ''}`);
       } else {
         router.push('/adoption');
       }
-    } catch {
-      router.push('/adoption');
     } finally {
       setLoading(false);
     }

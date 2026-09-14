@@ -114,7 +114,23 @@ export default function NotificationsPage() {
 
     setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
 
-    const targetLink = notif.link || '/petsitting';
+    let targetLink = notif.link || '/petsitting';
+
+    // Smart redirect for adoption inquiry notifications for non-shelter users (adopters)
+    if (targetLink.includes('/adoption/shelter/dashboard') && targetLink.includes('inquiry=')) {
+      const isShelterUser = !!(typeof window !== 'undefined' && localStorage.getItem('lumo_shelter_email'));
+      if (!isShelterUser) {
+        try {
+          const u = new URL(targetLink, 'https://lumobites.net');
+          const inqId = u.searchParams.get('inquiry');
+          const adopterParam = u.searchParams.get('adopter');
+          if (inqId) {
+            targetLink = `/adoption/messages/${inqId}${adopterParam ? `?adopter=${encodeURIComponent(adopterParam)}` : ''}`;
+          }
+        } catch (e) {}
+      }
+    }
+
     try {
       router.push(targetLink);
     } catch (e) {

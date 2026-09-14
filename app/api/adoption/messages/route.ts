@@ -194,7 +194,11 @@ export async function POST(request: NextRequest) {
       const senderLabel = cleanSender.split('@')[0];
       const notifTitle = `New message regarding ${petName}`;
       const notifMsg = `New message from ${senderLabel}: "${cleanMessage.slice(0, 80)}"`;
-      const notifLink = `/adoption/shelter/dashboard?inquiry=${pet_id}&adopter=${encodeURIComponent(cleanSender)}`;
+      
+      const isReceiverShelter = (pet?.shelters?.email || '').toLowerCase().trim() === cleanReceiver;
+      const notifLink = isReceiverShelter
+        ? `/adoption/shelter/dashboard?inquiry=${pet_id}&adopter=${encodeURIComponent(cleanSender)}`
+        : `/adoption/messages/${pet_id}`;
 
       await supabaseAdmin.from('notifications').insert({
         recipient_email: cleanReceiver,

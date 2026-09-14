@@ -25,7 +25,7 @@ interface PetDetails {
   };
 }
 
-export default function AdoptionMessagePage({ params }: { params: Promise<{ id: string }> }) {
+function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const petId = resolvedParams.id;
   const router = useRouter();
@@ -36,8 +36,10 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const [pet, setPet] = useState<PetDetails | null>(null);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [targetAdopter, setTargetAdopter] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof window === 'undefined') return;
     const shelter = localStorage.getItem('lumo_shelter_email') || '';
     const pro = localStorage.getItem('lumo_pro_email') || '';
@@ -73,6 +75,14 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
   const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
   const targetEmail = targetAdopter || ((pet?.shelters as any)?.email || '');
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center">
+        <div className="text-xs text-[#8B5E3C] font-bold">Loading conversation…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FDFAF7]">
       <ChatModal
@@ -93,6 +103,14 @@ export default function AdoptionMessagePage({ params }: { params: Promise<{ id: 
         shelterId={(pet as any)?.shelter_id}
       />
     </div>
+  );
+}
+
+export default function AdoptionMessagePage(props: { params: Promise<{ id: string }> }) {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-[#FDFAF7] flex items-center justify-center text-xs text-[#8B5E3C] font-bold">Loading conversation…</div>}>
+      <AdoptionMessageContent {...props} />
+    </React.Suspense>
   );
 }
 
