@@ -68,8 +68,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Filter out internal review records from chat messages
+    const chatMessages = (messages || []).filter(
+      (m: any) => !m.message?.startsWith('<!-- LUMO_SHELTER_REVIEW:')
+    );
+
     return NextResponse.json(
-      { messages: messages || [] },
+      { messages: chatMessages },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
     );
   } catch (err: any) {

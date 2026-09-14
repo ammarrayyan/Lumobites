@@ -55,6 +55,7 @@ function ShelterDashboardContent() {
   const [activeChatInquiry, setActiveChatInquiry] = useState<any>(null);
   const [inquiryFilter, setInquiryFilter] = useState<'all' | 'unread' | 'replied' | 'archived'>('all');
   const [cancelingSubscription, setCancelingSubscription] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleToggleArchiveThread = async (petId: string, adopterEmail: string, currentArchived: boolean) => {
     if (!currentArchived) {
@@ -277,6 +278,16 @@ function ShelterDashboardContent() {
       console.error('Failed to fetch shelter inquiries:', err);
     } finally {
       setInquiriesLoading(false);
+    }
+  };
+
+  const refreshDashboard = async () => {
+    if (!shelterEmail) return;
+    setIsRefreshing(true);
+    try {
+      await fetchShelterDetails(shelterEmail);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -757,12 +768,24 @@ function ShelterDashboardContent() {
               );
             })()}
             {shelterInfo?.status?.toLowerCase() === 'approved' && (
-              <button
-                onClick={handleOpenAddModal}
-                className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
-              >
-                <Plus className="w-4 h-4" /> Post a Pet for Adoption
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={refreshDashboard}
+                  disabled={isRefreshing}
+                  title="Refresh dashboard data"
+                  className="bg-white hover:bg-[#FAF6F2] text-[#2E2419] font-bold py-2.5 px-3 rounded-xl transition-all border border-[#DFD3C7] shadow-2xs flex items-center gap-1.5 cursor-pointer text-xs disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#8B5E3C]' : 'text-gray-500'}`} />
+                  <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+                </button>
+                <button
+                  onClick={handleOpenAddModal}
+                  className="bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-extrabold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer border-none text-xs"
+                >
+                  <Plus className="w-4 h-4" /> Post a Pet for Adoption
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -929,7 +952,16 @@ function ShelterDashboardContent() {
               return (
                 <button
                   key={tab}
-                  onClick={() => { setActiveTab(tab); setSelectedIds([]); }}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setSelectedIds([]);
+                    if (tab === 'reviews' && shelterInfo?.id) {
+                      fetchShelterReviews(shelterInfo.id);
+                    }
+                    if (tab === 'inquiries' && shelterInfo?.id && shelterInfo?.email) {
+                      fetchShelterInquiries(shelterInfo.id, shelterInfo.email);
+                    }
+                  }}
                   className={`px-3.5 py-2 rounded-xl text-xs font-extrabold capitalize transition-all cursor-pointer border-none flex items-center gap-1.5 ${
                     activeTab === tab 
                       ? 'bg-[#8B5E3C] text-white shadow-md shadow-[#8B5E3C]/20' 
@@ -1552,7 +1584,13 @@ function ShelterDashboardContent() {
                 </div>
                 <div className="flex items-center gap-2 bg-[#FAF6F2] px-3.5 py-2 rounded-xl border border-[#E2D5C8]">
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-black text-[#2E2419]">{shelterInfo.avg_rating > 0 ? shelterInfo.avg_rating.toFixed(1) : 'New'}</span>
+                  <span className="text-sm font-black text-[#2E2419]">
+                    {reviewsList.length > 0
+                      ? (reviewsList.reduce((sum: number, r: any) => sum + (Number(r.rating) || 5), 0) / reviewsList.length).toFixed(1)
+                      : shelterInfo.avg_rating > 0
+                      ? shelterInfo.avg_rating.toFixed(1)
+                      : 'New'}
+                  </span>
                   <span className="text-xs text-[#8B7E7D]">({reviewsList.length} {reviewsList.length === 1 ? 'review' : 'reviews'})</span>
                 </div>
               </div>
