@@ -61,6 +61,7 @@ async function processPhotoUrls(incomingUrls: string[]): Promise<string[]> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const species = searchParams.get('species');
     const age = searchParams.get('age');
     const size = searchParams.get('size');
@@ -70,12 +71,15 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin.from('adoption_pets').select('*, shelters(id, org_name, phone, email, website, org_photo_url, is_paused, subscription_status, trial_end)');
 
+    if (id) {
+      query = query.eq('id', id);
+    }
     if (shelter_id) {
       query = query.eq('shelter_id', shelter_id);
     }
     if (status) {
       query = query.eq('status', status);
-    } else if (!shelter_id) {
+    } else if (!shelter_id && !id) {
       query = query.eq('status', 'available');
     }
     if (species && species !== 'all') {
@@ -101,13 +105,12 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date();
-    // When a shelter_id is provided (internal dashboard), skip pause/trial filtering.
-    // Public requests (no shelter_id) should still enforce the visibility rules.
+    // When an id or shelter_id is provided, skip pause/trial filtering.
+    // Public browse requests (no id/shelter_id) should still enforce visibility rules.
     const pets = (rawPets || []).filter((p: any) => {
       const s = p.shelters;
       if (!s) return true; // No shelter info, keep pet
-      // If this request is for a specific shelter, do NOT filter based on pause or trial.
-      if (shelter_id) return true;
+      if (id || shelter_id) return true;
       // Public visibility rules:
       if (s.is_paused === true) return false;
       if (s.subscription_status === 'active') return true;

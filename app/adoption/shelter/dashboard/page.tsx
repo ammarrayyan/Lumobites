@@ -2275,7 +2275,7 @@ function ShelterDashboardContent() {
           otherUserEmail={activeChatInquiry.sender_email === shelterInfo?.email ? activeChatInquiry.receiver_email : activeChatInquiry.sender_email}
           otherUserType="user"
           onReport={() => {}}
-          petDetails={activeChatInquiry.pets}
+          petDetails={activeChatInquiry.pets || activeChatInquiry.adoption_pets || pets.find(p => p.id === activeChatInquiry.pet_id)}
           chatType="adoption"
           shelterId={shelterInfo?.id}
         />

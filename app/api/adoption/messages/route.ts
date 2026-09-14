@@ -73,8 +73,18 @@ export async function GET(request: NextRequest) {
       (m: any) => !m.message?.startsWith('<!-- LUMO_SHELTER_REVIEW:')
     );
 
+    let petData = null;
+    if (pet_id) {
+      const { data: pet } = await supabaseAdmin
+        .from('adoption_pets')
+        .select('id, name, status, photo_urls, species, shelter_id, shelters(id, org_name, email, phone)')
+        .eq('id', pet_id)
+        .maybeSingle();
+      petData = pet;
+    }
+
     return NextResponse.json(
-      { messages: chatMessages },
+      { messages: chatMessages, pet: petData },
       { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' } }
     );
   } catch (err: any) {

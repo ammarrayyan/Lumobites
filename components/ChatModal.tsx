@@ -204,6 +204,12 @@ export default function ChatModal({
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
+        if (data.pet) {
+          setAdoptionPetData((prev: any) => ({ ...(prev || {}), ...data.pet }));
+          if (data.pet.status) {
+            setCurrentPetStatus(data.pet.status);
+          }
+        }
       }
     } catch {}
     finally { if (!silent) setIsLoading(false); }
@@ -256,6 +262,14 @@ export default function ChatModal({
   const handleSend = async () => {
     const msgText = newMessage.trim();
     if (!msgText || isSending) return;
+
+    const isAdoption = chatType === 'adoption';
+    const isLostPets = chatType === 'lost_pets';
+
+    if (isAdoption && (currentPetStatus === 'adopted' || adoptionPetData?.status === 'adopted' || petDetails?.status === 'adopted')) {
+      return;
+    }
+
     setIsSending(true);
     setNewMessage('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -267,8 +281,6 @@ export default function ChatModal({
     }]);
 
     try {
-      const isAdoption = chatType === 'adoption';
-      const isLostPets = chatType === 'lost_pets';
       let endpoint = '/api/petsitting/messages';
       let body: any = { booking_id: bookingId, sender_email: currentUserEmail, receiver_email: otherUserEmail, message: msgText };
 
@@ -404,7 +416,7 @@ export default function ChatModal({
         </div>
 
         {/* Shelter "Mark as Adopted" Action Banner */}
-        {chatType === 'adoption' && otherUserType === 'user' && currentPetStatus !== 'adopted' && (
+        {chatType === 'adoption' && otherUserType === 'user' && currentPetStatus !== 'adopted' && adoptionPetData?.status !== 'adopted' && petDetails?.status !== 'adopted' && (
           <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
             <div className="text-[11px] text-emerald-950 font-medium truncate">
               Adoption Inquiry for <span className="font-bold">{adoptionPetData?.name || petDetails?.name || 'Pet'}</span>
@@ -462,39 +474,27 @@ export default function ChatModal({
             </div>
           ) : (
             <>
-              {groups.map((group, gi) => {
-                const isMine = (group.sender || '').toLowerCase().trim() === (currentUserEmail || '').toLowerCase().trim();
-                const firstMsgIdx = messages.indexOf(group.msgs[0]);
-                const showDate = dateBoundaries.has(firstMsgIdx);
+              {messages.map((msg, index) => {
+                const isMine = msg.sender_email.toLowerCase() === currentUserEmail.toLowerCase();
+                const isOptimistic = msg.id.startsWith('temp-');
+                const showDate = shouldShowDateHeader(msg, messages[index - 1]);
+                const group = getMessageGroup(msg, index, messages);
+                const isFirst = group === 'first' || group === 'single';
+                const isLast = group === 'last' || group === 'single';
 
                 return (
-                  <React.Fragment key={`${group.date}-${gi}`}>
-                    {/* Date separator */}
+                  <React.Fragment key={msg.id}>
                     {showDate && (
-                      <div className="flex items-center justify-center py-3">
-                        <span className="bg-white/80 backdrop-blur-sm text-gray-400 text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm border border-gray-100">
-                          {group.date}
+                      <div className="flex items-center justify-center my-3">
+                        <span className="bg-white/80 backdrop-blur-xs text-gray-400 text-[11px] font-medium px-3 py-1 rounded-full shadow-2xs border border-gray-100">
+                          {formatDateHeader(msg.created_at)}
                         </span>
                       </div>
                     )}
 
-                    {/* Message group */}
-                    <div className={`flex items-end gap-2 mb-1 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {/* Avatar — only for other person, only once per group */}
-                      {!isMine ? (
-                        <Avatar name={displayName} size="sm" />
-                      ) : (
-                        <div className="w-7 shrink-0" />
-                      )}
-
-                      {/* Bubble stack */}
-                      <div className={`flex flex-col gap-[3px] max-w-[72%] ${isMine ? 'items-end' : 'items-start'}`}>
-                        {group.msgs.map((msg, mi) => {
-                          const isFirst = mi === 0;
-                          const isLast = mi === group.msgs.length - 1;
-                          const isOptimistic = msg.id.startsWith('temp-');
-
-                          // Messenger-style bubble rounding
+                    <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} ${isLast ? 'mb-2' : 'mb-0.5'}`}>
+                      <div className="max-w-[78%] sm:max-w-[70%]">
+                        {(() => {
                           const myRadius = [
                             isFirst ? 'rounded-tl-2xl rounded-tr-2xl' : 'rounded-tl-2xl rounded-tr-sm',
                             isLast ? 'rounded-bl-2xl rounded-br-sm' : 'rounded-bl-sm rounded-br-sm',
@@ -505,7 +505,7 @@ export default function ChatModal({
                           ].join(' ');
 
                           return (
-                            <div key={msg.id}>
+                            <div>
                               <div
                                 className={`px-3 py-2 rounded-2xl text-[13px] leading-relaxed break-words whitespace-pre-wrap max-w-full transition-opacity ${
                                   isMine
@@ -532,7 +532,7 @@ export default function ChatModal({
                               )}
                             </div>
                           );
-                        })}
+                        })()}
                       </div>
                     </div>
                   </React.Fragment>
@@ -550,19 +550,28 @@ export default function ChatModal({
               <span>🎉</span> This case has been marked as resolved. Messaging is now closed.
             </p>
           </div>
-        ) : (chatType === 'adoption' && currentPetStatus === 'adopted') ? (() => {
-          const petName = adoptionPetData?.name || petDetails?.name || 'this pet';
+        ) : (chatType === 'adoption' && (currentPetStatus === 'adopted' || adoptionPetData?.status === 'adopted' || petDetails?.status === 'adopted')) ? (() => {
+          const petName = adoptionPetData?.name || petDetails?.name || 'This pet';
           const shelterDisplayName = otherUserName || 'Rescue Partner';
 
           if (otherUserType === 'shelter') {
             // Viewing as an adopter/inquirer
             if (adopterConfirmState === 'declined') {
               return (
-                <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-1.5">
-                  <p className="text-xs font-bold text-gray-700">
-                    🐾 Reviews are reserved for confirmed adopters. We hope you find your perfect pet match soon!
+                <div className="shrink-0 bg-emerald-50 border-t border-emerald-200 p-4 text-center space-y-1">
+                  <p className="text-xs sm:text-sm font-bold text-emerald-900 flex items-center justify-center gap-1.5">
+                    <span>🐾</span> Reviews are reserved for confirmed adopters. Messaging is now closed.
                   </p>
-                  <p className="text-[11px] text-gray-500">Messaging for this listing is now closed.</p>
+                </div>
+              );
+            }
+
+            if (adopterConfirmState === 'confirmed') {
+              return (
+                <div className="shrink-0 bg-emerald-50 border-t border-emerald-200 p-4 text-center space-y-1">
+                  <p className="text-xs sm:text-sm font-bold text-emerald-900 flex items-center justify-center gap-1.5">
+                    <span>🎉</span> Thank you for your review! {petName} has found a home — messaging is now closed.
+                  </p>
                 </div>
               );
             }
@@ -602,9 +611,9 @@ export default function ChatModal({
           }
 
           return (
-            <div className="shrink-0 bg-[#FAF6F2] border-t border-[#E8DDD4] p-4 text-center space-y-1">
-              <p className="text-xs font-bold text-[#2E2419] flex items-center justify-center gap-1.5">
-                <span>🎉</span> {petName} is marked as adopted. Messaging is now closed.
+            <div className="shrink-0 bg-emerald-50 border-t border-emerald-200 px-4 py-3.5 text-center">
+              <p className="text-xs sm:text-sm font-bold text-emerald-900 flex items-center justify-center gap-1.5">
+                <span>🎉</span> {petName} has been adopted — messaging is now closed.
               </p>
             </div>
           );
