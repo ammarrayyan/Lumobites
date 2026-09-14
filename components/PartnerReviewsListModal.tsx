@@ -139,12 +139,18 @@ export default function PartnerReviewsListModal({
 
         {/* Footer CTA */}
         <div className="p-4 border-t border-[#E2D5C8] bg-white flex items-center justify-between shrink-0">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all shadow-xs text-xs border-none cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" /> Write a Review
-          </button>
+          {partnerType === 'shelter' ? (
+            <p className="w-full text-center text-xs text-[#8B7E7D] italic py-1">
+              🐾 Reviews for rescue shelters are submitted by confirmed adopters when an adoption is finalized.
+            </p>
+          ) : (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="w-full bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold py-3 rounded-xl transition-all shadow-xs text-xs border-none cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" /> Write a Review
+            </button>
+          )}
         </div>
 
         {showAddModal && (

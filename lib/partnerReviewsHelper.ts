@@ -107,15 +107,68 @@ export async function submitPartnerReview(params: {
   reviewText: string;
 }): Promise<{ success: boolean; error?: string; avgRating?: number; reviewCount?: number }> {
   const { partnerId, partnerType, ownerEmail, ownerName, rating, reviewText } = params;
-  const cleanEmail = ownerEmail.toLowerCase().trim();
-  const cleanName = ownerName.trim() || cleanEmail.split('@')[0];
+  const cleanEmail = (ownerEmail || '').toLowerCase().trim();
+  const cleanName = (ownerName || '').trim() || cleanEmail.split('@')[0];
   const cleanRating = Math.max(1, Math.min(5, Math.round(rating)));
+
+  if (!cleanEmail) {
+    return { success: false, error: 'Reviewer email is required.' };
+  }
 
   const tableName = partnerType === 'vet' ? 'vet_reviews' : partnerType === 'daycare' ? 'daycare_reviews' : 'shelter_reviews';
   const partnerIdCol = partnerType === 'vet' ? 'clinic_id' : partnerType === 'daycare' ? 'daycare_id' : 'shelter_id';
   const parentTable = partnerType === 'vet' ? 'vet_clinics' : partnerType === 'daycare' ? 'pet_daycares' : 'shelters';
 
-  // 1. Attempt insert into dedicated table
+  // 1. Fetch partner record for self-review safeguard
+  const { data: partner, error: pErr } = await supabaseAdmin
+    .from(parentTable)
+    .select('*')
+    .eq('id', partnerId)
+    .maybeSingle();
+
+  if (pErr || !partner) {
+    return { success: false, error: 'Partner not found.' };
+  }
+
+  const partnerEmail = (partner.email || '').toLowerCase().trim();
+  if (partnerEmail && cleanEmail === partnerEmail) {
+    return { success: false, error: 'You cannot submit a review for your own shelter or business.' };
+  }
+
+  // 2. Shelter Reviews Adoption Gate: Reviewer must be a confirmed adopter / inquirer on an adopted pet
+  if (partnerType === 'shelter') {
+    // Check if reviewer is recorded as adopted_by_email on an adopted pet from this shelter
+    const { data: adoptedPets } = await supabaseAdmin
+      .from('adoption_pets')
+      .select('id, status, adopted_by_email')
+      .eq('shelter_id', partnerId)
+      .eq('status', 'adopted');
+
+    const isDesignatedAdopter = (adoptedPets || []).some(
+      (p: any) => p.adopted_by_email && p.adopted_by_email.toLowerCase().trim() === cleanEmail
+    );
+
+    // Check if reviewer exchanged messages for any adopted pet from this shelter
+    const { data: userMessages } = await supabaseAdmin
+      .from('adoption_messages')
+      .select('id, pet_id, adoption_pets(id, status)')
+      .eq('shelter_id', partnerId)
+      .or(`sender_email.eq.${cleanEmail},receiver_email.eq.${cleanEmail}`);
+
+    const hasAdoptedInquiry = (userMessages || []).some((m: any) => {
+      const pet = Array.isArray(m.adoption_pets) ? m.adoption_pets[0] : m.adoption_pets;
+      return pet && pet.status === 'adopted';
+    });
+
+    if (!isDesignatedAdopter && !hasAdoptedInquiry) {
+      return {
+        success: false,
+        error: 'Reviews for rescue shelters are reserved for confirmed adopters who have finalized an adoption with this shelter.',
+      };
+    }
+  }
+
+  // 3. Attempt insert into dedicated table
   try {
     const { error: insertErr } = await supabaseAdmin.from(tableName).insert({
       [partnerIdCol]: partnerId,
@@ -138,8 +191,12 @@ export async function submitPartnerReview(params: {
       const total = approved.reduce((sum: number, r: any) => sum + Number(r.rating || 5), 0);
       const avg_rating = review_count > 0 ? Math.round((total / review_count) * 10) / 10 : 0;
 
-      // Update parent table
-      await supabaseAdmin.from(parentTable).update({ avg_rating, review_count }).eq('id', partnerId);
+      // Update parent table (with column fallback)
+      await supabaseAdmin
+        .from(parentTable)
+        .update({ avg_rating, review_count })
+        .eq('id', partnerId)
+        .catch(() => {});
 
       return { success: true, avgRating: avg_rating, reviewCount: review_count };
     }
@@ -147,18 +204,8 @@ export async function submitPartnerReview(params: {
     // Dedicated table not available, use embedded description fallback
   }
 
-  // 2. Embedded Fallback
+  // 4. Embedded Fallback
   try {
-    const { data: partner } = await supabaseAdmin
-      .from(parentTable)
-      .select('*')
-      .eq('id', partnerId)
-      .single();
-
-    if (!partner) {
-      return { success: false, error: 'Partner not found.' };
-    }
-
     let existingReviews: PartnerReview[] = [];
     let cleanDesc = partner.description || '';
 
@@ -200,7 +247,7 @@ export async function submitPartnerReview(params: {
 
     const newDescription = `${cleanDesc}\n\n${REVIEW_META_START} ${JSON.stringify(existingReviews)} ${REVIEW_META_END}`.trim();
 
-    await supabaseAdmin
+    const { error: updateErr } = await supabaseAdmin
       .from(parentTable)
       .update({
         description: newDescription,
@@ -208,6 +255,13 @@ export async function submitPartnerReview(params: {
         review_count: count,
       })
       .eq('id', partnerId);
+
+    if (updateErr) {
+      await supabaseAdmin
+        .from(parentTable)
+        .update({ description: newDescription })
+        .eq('id', partnerId);
+    }
 
     return { success: true, avgRating: avg, reviewCount: count };
   } catch (err: any) {
