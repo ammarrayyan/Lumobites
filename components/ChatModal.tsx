@@ -456,8 +456,29 @@ export default function ChatModal({
           </div>
         </div>
 
-        {/* Shelter "Mark as Adopted" Action Banner */}
-        {chatType === 'adoption' && otherUserType === 'user' && currentPetStatus !== 'adopted' && adoptionPetData?.status !== 'adopted' && petDetails?.status !== 'adopted' && (
+        {/* Shelter "Mark as Adopted" Action Banner — ONLY visible to the verified shelter, never to adopters */}
+        {chatType === 'adoption' && otherUserType === 'user' && (() => {
+          const shelterEmail = (
+            petDetails?.shelters?.email ||
+            petDetails?.shelter_email ||
+            adoptionPetData?.shelters?.email ||
+            adoptionPetData?.shelter_email ||
+            ''
+          ).toLowerCase().trim();
+          const cleanUser = (currentUserEmail || '').toLowerCase().trim();
+          
+          // Must be the shelter user viewing the chat
+          const isActuallyShelter = shelterEmail
+            ? cleanUser === shelterEmail
+            : (typeof window !== 'undefined' && !!localStorage.getItem('lumo_shelter_email'));
+          if (!isActuallyShelter) return false;
+
+          // Must NOT be already adopted
+          const isAdopted = currentPetStatus === 'adopted' || adoptionPetData?.status === 'adopted' || petDetails?.status === 'adopted';
+          if (isAdopted) return false;
+
+          return true;
+        })() && (
           <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
             <div className="text-[11px] text-emerald-950 font-medium truncate">
               Adoption Inquiry for <span className="font-bold">{adoptionPetData?.name || petDetails?.name || 'Pet'}</span>

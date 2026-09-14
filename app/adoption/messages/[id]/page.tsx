@@ -71,9 +71,22 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
     loadPet();
   }, [petId]);
 
-  const isShelter = targetAdopter ? true : (pet?.shelters?.email?.toLowerCase().trim() === currentUserEmail.toLowerCase().trim());
-  const displayName = isShelter ? (targetAdopter || 'Adopter') : (pet?.shelters?.org_name || 'Rescue Partner');
-  const targetEmail = targetAdopter || ((pet?.shelters as any)?.email || '');
+  const shelterEmail = (
+    pet?.shelters?.email ||
+    (pet as any)?.shelter_email ||
+    ''
+  ).toLowerCase().trim();
+
+  const isShelter = !!(
+    currentUserEmail &&
+    shelterEmail &&
+    currentUserEmail === shelterEmail
+  );
+
+  const displayName = isShelter
+    ? (targetAdopter ? targetAdopter.split('@')[0] : 'Adopter')
+    : (pet?.shelters?.org_name || (pet as any)?.shelter_name || 'Rescue Partner');
+  const targetEmail = isShelter ? (targetAdopter || '') : (shelterEmail || (pet?.shelters as any)?.email || '');
 
   if (!mounted) {
     return (
