@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +14,16 @@ export async function GET(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+
+    if (!isAdmin && (!verifiedEmail || verifiedEmail !== cleanEmail)) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in to view your booking requests.', requires_auth: true },
+        { status: 401 }
+      );
+    }
 
     // 1. Fetch Sitting Requests
     const { data: sitRequests, error: sitErr } = await supabaseAdmin

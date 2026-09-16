@@ -28,7 +28,8 @@ test.describe('Flow 2: Comment and Reply Lifecycle (Delete Verification)', () =>
         });
       } else if (request.method() === 'DELETE') {
         const body = JSON.parse(request.postData() || '{}');
-        commentsState = commentsState.filter(c => c.id !== body.commentId);
+        const targetId = body.comment_id || body.commentId;
+        commentsState = commentsState.filter(c => c.id !== targetId);
         await route.fulfill({
           status: 200,
           contentType: 'application/json',

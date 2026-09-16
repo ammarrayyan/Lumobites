@@ -112,14 +112,25 @@ export default function MarketingPage() {
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === process.env.NEXT_PUBLIC_MARKETING_PAGE_KEY) {
-      setIsAuthorized(true);
-      setError('');
-      sessionStorage.setItem('lumo_marketing_auth', 'true');
-    } else {
-      setError('Incorrect password. Please try again.');
+    setError('');
+    try {
+      const res = await fetch('/api/marketing/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsAuthorized(true);
+        setError('');
+        sessionStorage.setItem('lumo_marketing_auth', 'true');
+      } else {
+        setError(data.error || 'Incorrect password. Please try again.');
+      }
+    } catch (err) {
+      setError('Connection error. Please try again.');
     }
   };
 

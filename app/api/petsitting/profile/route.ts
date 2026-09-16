@@ -4,6 +4,8 @@ import { formatPublicCity } from '@/lib/formatCity';
 import { extractSitterMeta, packSitterBio } from '@/lib/sitterProfileHelper';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
 
@@ -255,6 +257,16 @@ export async function POST(request: NextRequest) {
       existingSitter = data;
 
       if (existingSitter) {
+        const isAdmin = isAuthorizedAdmin(request);
+        const verifiedEmail = await getVerifiedSessionEmail(request);
+
+        if (!isAdmin && (!verifiedEmail || verifiedEmail !== cleanEmail)) {
+          return NextResponse.json({
+            error: 'Authentication required. Please sign in with your verified sitter account to update your profile.',
+            requires_auth: true
+          }, { status: 401 });
+        }
+
         isInitialSubmission = false;
 
         // Prevent changing ID if it's already on file

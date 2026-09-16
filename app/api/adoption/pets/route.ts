@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { randomUUID } from 'crypto';
 import { extractAdoptionMeta, packAdoptionDescription, ADOPTION_META_START } from '@/lib/adoptionMetaHelper';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 async function processPhotoUrls(incomingUrls: string[]): Promise<string[]> {
   if (!incomingUrls || !Array.isArray(incomingUrls)) return [];
@@ -165,7 +167,7 @@ export async function POST(request: NextRequest) {
     // Verify shelter status server-side — only approved shelters can post pets
     const { data: shelterOrg } = await supabaseAdmin
       .from('shelters')
-      .select('status, org_name')
+      .select('status, org_name, email')
       .eq('id', shelter_id)
       .single();
 
@@ -177,6 +179,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         error: `Posting denied: Shelter '${shelterOrg.org_name}' status is currently '${shelterOrg.status}'. Only approved rescue partners can post adoptable pets.`
       }, { status: 403 });
+    }
+
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    if (!isAdmin && (!verifiedEmail || shelterOrg.email?.toLowerCase().trim() !== verifiedEmail)) {
+      return NextResponse.json(
+        { error: 'Forbidden: You do not have permission to post pets for this shelter.', requires_auth: true },
+        { status: 403 }
+      );
     }
 
     const finalPhotoUrls = await processPhotoUrls(photo_urls || []);
@@ -218,11 +229,41 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+
+    if (!isAdmin && !verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified shelter account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { id, ids, status, action, adopted_by_email, shelter_id, ...updates } = body;
 
     // Bulk actions
     if (ids && Array.isArray(ids)) {
+      if (!isAdmin) {
+        const { data: targetPets, error: fetchErr } = await supabaseAdmin
+          .from('adoption_pets')
+          .select('id, shelter_id, shelters(id, email)')
+          .in('id', ids);
+
+        if (fetchErr || !targetPets || targetPets.length !== ids.length) {
+          return NextResponse.json({ error: 'One or more pet listings could not be found.' }, { status: 404 });
+        }
+
+        const isUnauthorized = targetPets.some((p: any) => {
+          const sEmail = (p.shelters as any)?.email?.toLowerCase().trim();
+          return !sEmail || sEmail !== verifiedEmail;
+        });
+
+        if (isUnauthorized) {
+          return NextResponse.json({ error: 'Forbidden: You do not have permission to modify one or more selected pet listings.' }, { status: 403 });
+        }
+      }
+
       if (action === 'delete') {
         const { error } = await supabaseAdmin.from('adoption_pets').delete().in('id', ids);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -239,12 +280,30 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing pet id' }, { status: 400 });
     }
 
+    // Ownership check for single pet
+    const { data: existingPet, error: fetchPetErr } = await supabaseAdmin
+      .from('adoption_pets')
+      .select('*, shelters(id, email)')
+      .eq('id', id)
+      .single();
+
+    if (fetchPetErr || !existingPet) {
+      return NextResponse.json({ error: 'Pet listing not found.' }, { status: 404 });
+    }
+
+    if (!isAdmin) {
+      const sEmail = (existingPet.shelters as any)?.email?.toLowerCase().trim();
+      if (!sEmail || sEmail !== verifiedEmail) {
+        return NextResponse.json({ error: 'Forbidden: You do not have permission to modify this pet listing.' }, { status: 403 });
+      }
+    }
+
     // Special handling for marking as adopted
     if (status === 'adopted' || action === 'mark_adopted') {
       const { markPetAdopted } = await import('@/lib/adoptionPetHelper');
       const res = await markPetAdopted({
         petId: id,
-        shelterId: shelter_id,
+        shelterId: shelter_id || existingPet.shelter_id,
         adoptedByEmail: adopted_by_email || null,
       });
 
@@ -262,22 +321,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (updates.description !== undefined && typeof updates.description === 'string') {
-      const { data: existingPet } = await supabaseAdmin
-        .from('adoption_pets')
-        .select('description')
-        .eq('id', id)
-        .single();
-
-      if (existingPet) {
-        const existingMeta = extractAdoptionMeta(existingPet);
-        const hasMeta = existingMeta.adoptedByEmail || existingMeta.adoptedAt || existingMeta.reviewSent;
-        if (hasMeta && !updates.description.includes(ADOPTION_META_START)) {
-          updatePayload.description = packAdoptionDescription(updates.description, {
-            adopted_by_email: existingMeta.adoptedByEmail,
-            adopted_at: existingMeta.adoptedAt,
-            review_sent: existingMeta.reviewSent,
-          });
-        }
+      const existingMeta = extractAdoptionMeta(existingPet);
+      const hasMeta = existingMeta.adoptedByEmail || existingMeta.adoptedAt || existingMeta.reviewSent;
+      if (hasMeta && !updates.description.includes(ADOPTION_META_START)) {
+        updatePayload.description = packAdoptionDescription(updates.description, {
+          adopted_by_email: existingMeta.adoptedByEmail,
+          adopted_at: existingMeta.adoptedAt,
+          review_sent: existingMeta.reviewSent,
+        });
       }
     }
 
@@ -312,6 +363,33 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing pet id' }, { status: 400 });
+
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+
+    if (!isAdmin && !verifiedEmail) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in with your verified shelter account.', requires_auth: true },
+        { status: 401 }
+      );
+    }
+
+    if (!isAdmin) {
+      const { data: targetPet, error: fetchErr } = await supabaseAdmin
+        .from('adoption_pets')
+        .select('id, shelter_id, shelters(id, email)')
+        .eq('id', id)
+        .single();
+
+      if (fetchErr || !targetPet) {
+        return NextResponse.json({ error: 'Pet listing not found.' }, { status: 404 });
+      }
+
+      const shelterEmail = (targetPet.shelters as any)?.email?.toLowerCase().trim();
+      if (!shelterEmail || shelterEmail !== verifiedEmail) {
+        return NextResponse.json({ error: 'Forbidden: You do not have permission to delete this pet listing.' }, { status: 403 });
+      }
+    }
 
     const { error } = await supabaseAdmin.from('adoption_pets').delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
