@@ -35,6 +35,7 @@ interface ChatModalProps {
   onClose: () => void;
   bookingId: string;
   currentUserEmail: string;
+  currentUserName?: string;
   otherUserName: string;
   bookingDetails: string;
   otherUserEmail: string;
@@ -70,7 +71,7 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatDateLabel(iso: string) {
+function formatDateHeader(iso: string) {
   const d = new Date(iso);
   const today = new Date();
   const yesterday = new Date(today);
@@ -80,11 +81,37 @@ function formatDateLabel(iso: string) {
   return d.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
+function shouldShowDateHeader(currentMsg: Message, prevMsg?: Message): boolean {
+  if (!prevMsg) return true;
+  return formatDateHeader(currentMsg.created_at) !== formatDateHeader(prevMsg.created_at);
+}
+
+function getMessageGroup(msg: Message, index: number, allMsgs: Message[]): 'single' | 'first' | 'middle' | 'last' {
+  const prev = allMsgs[index - 1];
+  const next = allMsgs[index + 1];
+
+  const isSameGroup = (a?: Message, b?: Message) => {
+    if (!a || !b) return false;
+    const sameEmail = (a.sender_email || '').toLowerCase().trim() === (b.sender_email || '').toLowerCase().trim();
+    const sameDay = formatDateHeader(a.created_at) === formatDateHeader(b.created_at);
+    return sameEmail && sameDay;
+  };
+
+  const sameAsPrev = isSameGroup(prev, msg);
+  const sameAsNext = isSameGroup(msg, next);
+
+  if (!sameAsPrev && !sameAsNext) return 'single';
+  if (!sameAsPrev && sameAsNext) return 'first';
+  if (sameAsPrev && sameAsNext) return 'middle';
+  return 'last';
+}
+
 export default function ChatModal({
   isOpen,
   onClose,
   bookingId,
   currentUserEmail,
+  currentUserName,
   otherUserName,
   bookingDetails,
   otherUserEmail,
@@ -360,29 +387,6 @@ export default function ChatModal({
   if (!isOpen || !mounted || typeof window === 'undefined') return null;
 
   const displayName = formatName(otherUserName);
-
-  // Group messages by date + consecutive sender
-  type MsgGroup = { date: string; sender: string; msgs: Message[] };
-  const groups: MsgGroup[] = [];
-  messages.forEach(msg => {
-    const dateLabel = formatDateLabel(msg.created_at);
-    const last = groups[groups.length - 1];
-    const curSender = (msg.sender_email || '').toLowerCase().trim();
-    const lastSender = (last?.sender || '').toLowerCase().trim();
-    if (last && last.date === dateLabel && lastSender === curSender) {
-      last.msgs.push(msg);
-    } else {
-      groups.push({ date: dateLabel, sender: msg.sender_email, msgs: [msg] });
-    }
-  });
-
-  // Collect date boundaries for separators
-  const dateBoundaries = new Set<number>();
-  let lastDate = '';
-  messages.forEach((msg, i) => {
-    const d = formatDateLabel(msg.created_at);
-    if (d !== lastDate) { dateBoundaries.add(i); lastDate = d; }
-  });
 
   return createPortal(
     <div 
