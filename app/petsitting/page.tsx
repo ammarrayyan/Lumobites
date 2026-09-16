@@ -2541,6 +2541,7 @@ export function PetSittingContent() {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (profileSaving) return;
     setProfileMessage('');
     setFormErrors({});
 
@@ -2562,6 +2563,7 @@ export function PetSittingContent() {
       return;
     }
 
+    setProfileSaving(true);
     setProfileLoading(true);
 
     try {
