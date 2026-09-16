@@ -2281,7 +2281,8 @@ export function PetSittingContent() {
           fetchSitterRequests(data.id || '');
           fetchSitterAvailability('', email);
           setCompletedBookings(data.completed_bookings || 0);
-          const nameParts = (data.name || '').trim().split(/\s+/);
+          const nameToUse = data.pending_name || data.name || '';
+          const nameParts = nameToUse.trim().split(/\s+/);
           setSitterFirstName(nameParts[0] || '');
           setSitterLastName(nameParts.slice(1).join(' ') || '');
           setSitterPhoto(data.photo_url || '');
@@ -5641,32 +5642,20 @@ export function PetSittingContent() {
 
               {sitterApprovalStatus === 'approved' && (
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-6 flex gap-3 text-sm text-[#666666]">
-                  <Lock className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <p>Some profile information is locked after verification to maintain trust and security. Contact support at <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a> if you need to make changes.</p>
+                  <Lock className="w-4 h-4 text-[#8B5E3C] flex-shrink-0 mt-0.5" />
+                  <p>Editing your verified name or profile selfie will submit your update for safety re-review before going live publicly. Government ID updates require contacting <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a>.</p>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name {sitterApprovalStatus === 'approved' && <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" />}</label>
-                  {sitterApprovalStatus === 'approved' ? (
-                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
-                      {sitterFirstName}
-                    </div>
-                  ) : (
-                    <input required type="text" value={sitterFirstName} onChange={e => setSitterFirstName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['firstName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
-                  )}
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">First Name</label>
+                  <input required type="text" value={sitterFirstName} onChange={e => setSitterFirstName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['firstName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                   {formErrors['firstName'] && <p className="text-red-500 text-sm mt-1">{formErrors['firstName']}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name {sitterApprovalStatus === 'approved' && <Lock className="w-3.5 h-3.5 text-gray-400 inline ml-1" />}</label>
-                  {sitterApprovalStatus === 'approved' ? (
-                    <div className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
-                      {sitterLastName}
-                    </div>
-                  ) : (
-                    <input required type="text" value={sitterLastName} onChange={e => setSitterLastName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['lastName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
-                  )}
+                  <label className="block text-sm font-bold text-[#4A3E3D] mb-2">Last Name</label>
+                  <input required type="text" value={sitterLastName} onChange={e => setSitterLastName(e.target.value)} className={`w-full bg-[#FAF6F4] border ${!!formErrors['lastName'] ? 'border-red-500 bg-red-50' : 'border-[#E8DDD4]'} rounded-xl px-4 py-3 text-[#4A3E3D] focus:outline-none focus:border-[#8B5E3C]`} />
                   {formErrors['lastName'] && <p className="text-red-500 text-sm mt-1">{formErrors['lastName']}</p>}
                 </div>
 

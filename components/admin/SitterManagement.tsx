@@ -65,8 +65,11 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
       // Update local state
       setSitters(sitters.map(s => {
         if (s.id === id) {
+          const approvedName = action === 'approve' && s.pending_name ? s.pending_name : s.name;
           return {
             ...s,
+            name: approvedName,
+            pending_name: null,
             is_approved: action === 'approve',
             approval_status: action === 'approve' ? 'approved' : 'rejected',
             rejection_reason: action === 'reject' ? rejectionReason : null,
@@ -276,7 +279,16 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1 flex-wrap">
-                    <h3 className="text-xl font-extrabold text-[#191919]">{sitter.name}</h3>
+                    <div>
+                      <h3 className="text-xl font-extrabold text-[#191919]">
+                        {sitter.pending_name || sitter.name}
+                      </h3>
+                      {sitter.pending_name && (
+                        <p className="text-xs text-amber-700 font-semibold mt-0.5">
+                          Previously approved name: <span className="text-gray-500 font-normal">{sitter.name}</span>
+                        </p>
+                      )}
+                    </div>
                     <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
                       sitter.approval_status === 'approved' ? 'bg-green-500/20 text-green-600' :
                       sitter.approval_status === 'rejected' ? 'bg-red-500/20 text-red-600' :

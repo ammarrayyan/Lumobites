@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { formatPublicCity } from '@/lib/formatCity';
+import { extractSitterMeta, packSitterBio } from '@/lib/sitterProfileHelper';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -27,7 +28,12 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json(data);
+    const { cleanBio, pendingName } = extractSitterMeta(data.bio);
+    return NextResponse.json({
+      ...data,
+      bio: cleanBio,
+      pending_name: pendingName,
+    });
   } catch (error: any) {
     console.error('[PetSitting Profile API] Error fetching:', error);
     return NextResponse.json({ error: 'Something went wrong loading your profile. Please try again or contact support at info@lumobitespet.com' }, { status: 500 });
@@ -234,11 +240,15 @@ export async function POST(request: NextRequest) {
     let nextNeedsReapproval = false;
     let isInitialSubmission = true;
     let existingSitter: any = null;
+    let isNameChanged = false;
+    let finalName = (name || '').trim();
+    const { cleanBio: incomingCleanBio } = extractSitterMeta(bio);
+    let finalBio = incomingCleanBio;
 
     try {
       const { data } = await supabaseAdmin
         .from('sitters')
-        .select('approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at')
+        .select('name, bio, approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at')
         .eq('email', cleanEmail)
         .maybeSingle();
       
@@ -252,7 +262,16 @@ export async function POST(request: NextRequest) {
           finalIdUrl = existingSitter.id_photo_url;
         }
 
-        if (isNewPhoto || (isNewId && !existingSitter.id_photo_url)) {
+        const existingName = (existingSitter.name || '').trim();
+        const submittedName = (name || '').trim();
+        const { pendingName: existingPendingName } = extractSitterMeta(existingSitter.bio);
+
+        // Name change detection for existing sitters
+        if (existingName && submittedName && existingName.toLowerCase() !== submittedName.toLowerCase()) {
+          isNameChanged = true;
+        }
+
+        if (isNewPhoto || (isNewId && !existingSitter.id_photo_url) || isNameChanged) {
           nextApprovalStatus = 'pending';
           nextIsApproved = false;
           nextNeedsReapproval = true;
@@ -260,6 +279,19 @@ export async function POST(request: NextRequest) {
           nextApprovalStatus = existingSitter.approval_status || 'pending';
           nextIsApproved = !!existingSitter.is_approved;
           nextNeedsReapproval = !!existingSitter.needs_reapproval;
+        }
+
+        if (isNameChanged) {
+          // Keep previous approved name as the active database name until approved
+          finalName = existingName;
+          finalBio = packSitterBio(incomingCleanBio, { pendingName: submittedName });
+        } else if (existingPendingName && nextApprovalStatus === 'pending') {
+          // Retain pending name if still pending
+          finalName = existingName || submittedName;
+          finalBio = packSitterBio(incomingCleanBio, { pendingName: existingPendingName });
+        } else {
+          finalName = submittedName;
+          finalBio = incomingCleanBio;
         }
       }
     } catch (dbErr) {
@@ -270,7 +302,7 @@ export async function POST(request: NextRequest) {
       .from('sitters')
       .upsert({
         email: cleanEmail,
-        name,
+        name: finalName,
         photo_url: finalPhotoUrl,
         cover_photo_url: finalCoverPhotoUrl,
         cover_photo_position: cover_photo_position || 'center',
@@ -282,7 +314,7 @@ export async function POST(request: NextRequest) {
         lng,
         phone_number: phone_number || null,
         phone_visible: phone_visible !== undefined ? phone_visible : false,
-        bio,
+        bio: finalBio,
         pet_types,
         rate_per_night: rate_per_night ? parseFloat(rate_per_night) : null,
         rate_type: rate_type || 'night',
@@ -311,7 +343,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
 
     // Send admin notification email
-    if (isInitialSubmission || (isNewPhoto || isNewId)) {
+    if (isInitialSubmission || isNewPhoto || isNewId || isNameChanged) {
       try {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
         const adminEmail = process.env.ADMIN_EMAIL || 'info@lumobitespet.com';
@@ -333,13 +365,17 @@ export async function POST(request: NextRequest) {
           `;
         } else {
           subject = 'Existing Sitter Updated Verification — Review Required';
+          const nameDetails = isNameChanged
+            ? `<p style="${emailStyles.p}"><strong>Requested New Name:</strong> ${name} (Previously: ${existingSitter?.name || 'N/A'})</p>`
+            : `<p style="${emailStyles.p}"><strong>Sitter Name:</strong> ${name}</p>`;
+
           bodyHtml = `
             <h1 style="${emailStyles.h1}">Existing Sitter Updated Verification 🐾</h1>
             <p style="${emailStyles.p}">Hi Admin,</p>
-            <p style="${emailStyles.p}">An existing verified sitter has updated their photo or ID and needs re-verification. This is NOT a new application.</p>
-            <p style="${emailStyles.p}"><strong>Sitter Name:</strong> ${name}</p>
+            <p style="${emailStyles.p}">An existing verified sitter has updated their name, photo, or ID and needs re-verification. This is NOT a new application.</p>
+            ${nameDetails}
             <p style="${emailStyles.p}"><strong>Sitter Email:</strong> ${cleanEmail}</p>
-            <p style="${emailStyles.p}" style="color: #d97706; font-weight: bold;">⚠️ This sitter was previously approved. Please review their updated verification documents.</p>
+            <p style="${emailStyles.p}" style="color: #d97706; font-weight: bold;">⚠️ This sitter was previously approved. Please review their updated verification details.</p>
             ${emailStyles.button('https://lumobites.net/admin', 'Go to Admin Panel')}
             ${emailStyles.divider}
             ${emailStyles.signoff}
@@ -368,8 +404,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send application confirmation email ONLY if it's initial submission OR a new photo/ID is uploaded for re-approval
-    if (isInitialSubmission || isNewPhoto || isNewId) {
+    // Send application confirmation email ONLY if it's initial submission OR an update requiring re-approval
+    if (isInitialSubmission || isNewPhoto || isNewId || isNameChanged) {
       try {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
         const subject = nextNeedsReapproval 
@@ -379,11 +415,11 @@ export async function POST(request: NextRequest) {
           ? `
               <h1 style="${emailStyles.h1}">Updates Received 🐾</h1>
               <p style="${emailStyles.p}">Hi ${name},</p>
-              <p style="${emailStyles.p}">Your updated verification has been submitted for review. Your profile remains active while we review.</p>
+              <p style="${emailStyles.p}">Your updated verification details have been submitted for review. Your profile remains active while we review.</p>
               ${emailStyles.highlightBox(`
                 <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
                 <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ RE-REVIEW PENDING</p>
-                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review photo updates as quickly as possible, usually within 24 hours.</p>
+                <p style="margin:8px 0 0 0;font-size:13px;color:#666666;line-height:1.4;">We review profile updates as quickly as possible, usually within 24 hours.</p>
               `)}
               ${emailStyles.divider}
               ${emailStyles.signoff}

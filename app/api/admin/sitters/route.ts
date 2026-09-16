@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { extractSitterMeta } from '@/lib/sitterProfileHelper';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
 
@@ -26,19 +27,25 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error;
 
-    // Generate signed URLs for private ID photos
+    // Generate signed URLs for private ID photos and parse pending name
     const sittersWithSignedUrls = await Promise.all(data.map(async (sitter) => {
+      const { cleanBio, pendingName } = extractSitterMeta(sitter.bio);
+      let idPhotoSignedUrl = sitter.id_photo_url;
+
       if (sitter.id_photo_url && !sitter.id_photo_url.startsWith('http')) {
         const { data: signedUrlData } = await supabaseAdmin.storage
           .from('sitter-ids')
           .createSignedUrl(sitter.id_photo_url, 60 * 60); // 1 hour expiry
         
-        return {
-          ...sitter,
-          id_photo_url: signedUrlData?.signedUrl || null
-        };
+        idPhotoSignedUrl = signedUrlData?.signedUrl || null;
       }
-      return sitter;
+
+      return {
+        ...sitter,
+        bio: cleanBio,
+        pending_name: pendingName,
+        id_photo_url: idPhotoSignedUrl
+      };
     }));
 
     return NextResponse.json({ sitters: sittersWithSignedUrls });
@@ -73,9 +80,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'approve') {
+      const { cleanBio, pendingName } = extractSitterMeta(sitter.bio);
+      const approvedName = pendingName || sitter.name;
+
       const { error: updateErr } = await supabaseAdmin
         .from('sitters')
         .update({
+          name: approvedName,
+          bio: cleanBio,
           is_approved: true,
           approval_status: 'approved',
           rejection_reason: null,
@@ -94,7 +106,7 @@ export async function POST(req: NextRequest) {
           subject: 'Your Lumo Bites Pet Sitter Profile is Approved! 🎉',
           preheader: 'Congratulations! Your sitter profile is live on the Lumo Bites community board.',
           body: `
-            <h1 style="${emailStyles.h1}">Congratulations, ${sitter.name}! 🎉</h1>
+            <h1 style="${emailStyles.h1}">Congratulations, ${approvedName}! 🎉</h1>
             <p style="${emailStyles.p}">Your Lumo Bites pet sitter profile has been reviewed and approved by our safety team!</p>
             ${emailStyles.highlightBox(`
               <p style="margin:0;font-size:12px;color:#2F5A32;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Profile Status</p>
@@ -114,9 +126,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 });
       }
 
+      const { cleanBio } = extractSitterMeta(sitter.bio);
+
       const { error: updateErr } = await supabaseAdmin
         .from('sitters')
         .update({
+          bio: cleanBio,
           is_approved: false,
           approval_status: 'rejected',
           rejection_reason: reason,
