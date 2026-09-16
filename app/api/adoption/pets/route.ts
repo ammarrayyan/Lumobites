@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { randomUUID } from 'crypto';
+import { extractAdoptionMeta, packAdoptionDescription, ADOPTION_META_START } from '@/lib/adoptionMetaHelper';
 
 async function processPhotoUrls(incomingUrls: string[]): Promise<string[]> {
   if (!incomingUrls || !Array.isArray(incomingUrls)) return [];
@@ -117,6 +118,15 @@ export async function GET(request: NextRequest) {
       if (s.subscription_status === 'canceled') return false;
       if (s.trial_end && new Date(s.trial_end) < now) return false;
       return true;
+    }).map((p: any) => {
+      const meta = extractAdoptionMeta(p);
+      return {
+        ...p,
+        description: meta.cleanDescription,
+        adopted_by_email: meta.adoptedByEmail,
+        adopted_at: meta.adoptedAt,
+        review_sent: meta.reviewSent,
+      };
     });
 
     return NextResponse.json({ pets });
@@ -251,6 +261,26 @@ export async function PATCH(request: NextRequest) {
       updatePayload.photo_urls = await processPhotoUrls(updates.photo_urls);
     }
 
+    if (updates.description !== undefined && typeof updates.description === 'string') {
+      const { data: existingPet } = await supabaseAdmin
+        .from('adoption_pets')
+        .select('description')
+        .eq('id', id)
+        .single();
+
+      if (existingPet) {
+        const existingMeta = extractAdoptionMeta(existingPet);
+        const hasMeta = existingMeta.adoptedByEmail || existingMeta.adoptedAt || existingMeta.reviewSent;
+        if (hasMeta && !updates.description.includes(ADOPTION_META_START)) {
+          updatePayload.description = packAdoptionDescription(updates.description, {
+            adopted_by_email: existingMeta.adoptedByEmail,
+            adopted_at: existingMeta.adoptedAt,
+            review_sent: existingMeta.reviewSent,
+          });
+        }
+      }
+    }
+
     const { data: pet, error } = await supabaseAdmin
       .from('adoption_pets')
       .update(updatePayload)
@@ -262,7 +292,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ pet });
+    const petMeta = extractAdoptionMeta(pet);
+    const cleanedPet = pet ? {
+      ...pet,
+      description: petMeta.cleanDescription,
+      adopted_by_email: petMeta.adoptedByEmail,
+      adopted_at: petMeta.adoptedAt,
+      review_sent: petMeta.reviewSent,
+    } : pet;
+
+    return NextResponse.json({ pet: cleanedPet });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

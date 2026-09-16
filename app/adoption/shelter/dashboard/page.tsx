@@ -12,6 +12,7 @@ import PartnerBillingBanner from '@/components/PartnerBillingBanner';
 import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
+import { extractAdoptionMeta } from '@/lib/adoptionMetaHelper';
 import { formatFullAddress } from '@/lib/formatCity';
 
 interface ShelterPet {
@@ -407,6 +408,7 @@ function ShelterDashboardContent() {
 
   const handleOpenEditModal = (pet: ShelterPet) => {
     setEditingPet(pet);
+    const meta = extractAdoptionMeta(pet);
     setFormData({
       name: pet.name,
       species: pet.species,
@@ -414,9 +416,9 @@ function ShelterDashboardContent() {
       age: pet.age,
       size: pet.size,
       sex: pet.sex,
-      spayed_neutered: pet.spayed_neutered,
+      spayed_neutered: pet.spayed_neutered !== undefined ? pet.spayed_neutered : true,
       temperament: pet.temperament || '',
-      description: pet.description || '',
+      description: meta.cleanDescription || '',
       adoption_fee: pet.adoption_fee || '',
       adoption_process: pet.adoption_process || '',
       photo_urls: pet.photo_urls.length > 0 ? pet.photo_urls : [''],
@@ -1938,13 +1940,13 @@ function ShelterDashboardContent() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div>
                     <label className="font-bold text-gray-700 block mb-1">Age</label>
                     <select
                       value={formData.age}
                       onChange={e => setFormData({ ...formData, age: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs sm:text-sm"
                     >
                       <option value="puppy">Puppy/Kitten</option>
                       <option value="young">Young</option>
@@ -1958,7 +1960,7 @@ function ShelterDashboardContent() {
                     <select
                       value={formData.size}
                       onChange={e => setFormData({ ...formData, size: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs sm:text-sm"
                     >
                       <option value="small">Small</option>
                       <option value="medium">Medium</option>
@@ -1971,10 +1973,22 @@ function ShelterDashboardContent() {
                     <select
                       value={formData.sex}
                       onChange={e => setFormData({ ...formData, sex: e.target.value })}
-                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2"
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs sm:text-sm"
                     >
                       <option value="male">Male</option>
                       <option value="female">Female</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">Spayed/Neutered</label>
+                    <select
+                      value={formData.spayed_neutered ? 'yes' : 'no'}
+                      onChange={e => setFormData({ ...formData, spayed_neutered: e.target.value === 'yes' })}
+                      className="w-full bg-[#FAF6F0] border border-gray-200 rounded-xl p-2 text-xs sm:text-sm"
+                    >
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
                     </select>
                   </div>
                 </div>
