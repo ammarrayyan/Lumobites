@@ -9,6 +9,7 @@
  *                           search filter dropdowns, map pins, and public search listings.
  * - `petDaycare: true`   -> Restores Pet Daycare in partner selection modals,
  *                           search filter dropdowns, map pins, and public search listings.
+ * - `foodQnA: true`      -> Restores the "Answer Questions" AI conversational wizard on /chat.
  *
  * NOTE: All backend API routes, database tables, and direct partner dashboard URLs
  * (`/vet-boarding/dashboard`, `/pet-daycare/dashboard`) remain fully active and functional
@@ -17,6 +18,8 @@
 export const FEATURES_ENABLED = {
   vetBoarding: false,
   petDaycare: false,
+  foodQnA: false,
 } as const;
 
 export type FeatureFlagKey = keyof typeof FEATURES_ENABLED;
+

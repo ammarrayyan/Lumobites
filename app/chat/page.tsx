@@ -10,6 +10,7 @@ import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 const STORAGE_KEY = 'lumobites_last_search';
 
@@ -83,7 +84,7 @@ export default function ChatPage() {
 
 function ChatPageContent() {
   const router = useRouter();
-  const [flow, setFlow] = useState<'selection' | 'questions' | 'photo'>('selection');
+  const [flow, setFlow] = useState<'selection' | 'questions' | 'photo'>(FEATURES_ENABLED.foodQnA ? 'selection' : 'photo');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);
@@ -618,19 +619,21 @@ function ChatPageContent() {
             </button>
 
             {/* Option 2: Answer Questions */}
-            <button
-              type="button"
-              onClick={() => setFlow('questions')}
-              className="w-full bg-white hover:bg-[#FAF6F4] border-2 border-[#E8DDD4] hover:border-[#8B5E3C] rounded-2xl p-4 sm:p-5 text-left flex items-start gap-4 transition-all cursor-pointer group shadow-2xs"
-            >
-              <div className="p-3 bg-[#FAF6F4] group-hover:bg-white text-[#8B5E3C] rounded-xl flex items-center justify-center border border-[#E8DDD4]/60 transition-colors shrink-0 mt-0.5">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="block text-sm sm:text-base font-bold text-[#191919] mb-1">Answer Questions</span>
-                <span className="block text-xs text-[#666666] leading-relaxed">Tell us about your pet's age, weight, and health step by step.</span>
-              </div>
-            </button>
+            {FEATURES_ENABLED.foodQnA && (
+              <button
+                type="button"
+                onClick={() => setFlow('questions')}
+                className="w-full bg-white hover:bg-[#FAF6F4] border-2 border-[#E8DDD4] hover:border-[#8B5E3C] rounded-2xl p-4 sm:p-5 text-left flex items-start gap-4 transition-all cursor-pointer group shadow-2xs"
+              >
+                <div className="p-3 bg-[#FAF6F4] group-hover:bg-white text-[#8B5E3C] rounded-xl flex items-center justify-center border border-[#E8DDD4]/60 transition-colors shrink-0 mt-0.5">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-sm sm:text-base font-bold text-[#191919] mb-1">Answer Questions</span>
+                  <span className="block text-xs text-[#666666] leading-relaxed">Tell us about your pet's age, weight, and health step by step.</span>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -642,7 +645,11 @@ function ChatPageContent() {
             <button
               type="button"
               onClick={() => {
-                setFlow('selection');
+                if (FEATURES_ENABLED.foodQnA) {
+                  setFlow('selection');
+                } else {
+                  router.push('/');
+                }
                 setPhotoFile(null);
                 setPhotoPreview(null);
                 setPhotoAnalysisResult(null);
@@ -803,7 +810,7 @@ function ChatPageContent() {
         </div>
       )}
 
-      {flow === 'questions' && (
+      {flow === 'questions' && FEATURES_ENABLED.foodQnA && (
         <div className="w-full max-w-[440px] h-[calc(100dvh-130px)] bg-white rounded-2xl sm:rounded-3xl border border-[#E8DDD4] shadow-sm overflow-hidden mt-3 flex flex-col">
           {/* Returning User Banner */}
           {returnBanner && step === 0 && (
