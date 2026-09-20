@@ -6,6 +6,7 @@ import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check,
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { signOutUser } from '@/lib/authHelper';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 type Step = 'email' | 'verification' | 'dashboard';
 type AccountTab = 'pets' | 'subscription' | 'security';
@@ -849,8 +850,8 @@ export default function AccountPage() {
                             {/* Subtle Partner Registration Note */}
                             <div className="pt-2.5 mt-1 border-t border-gray-100 text-center">
                               <p className="text-[11px] text-gray-500 font-medium">
-                                Are you a Veterinary Boarding, Pet Daycare, or Shelter?{' '}
-                                <Link href="/?partnerModal=true" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
+                                Are you an {[FEATURES_ENABLED.vetBoarding ? 'Veterinary Boarding' : null, FEATURES_ENABLED.petDaycare ? 'Pet Daycare' : null, 'Animal Shelter or Rescue'].filter(Boolean).join(', ')}?{' '}
+                                <Link href="/adoption/shelter" className="text-[#8B5E3C] hover:text-[#734A2E] font-bold underline transition-colors">
                                   Register as a Partner →
                                 </Link>
                               </p>

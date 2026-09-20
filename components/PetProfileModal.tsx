@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { PawPrint, Plus, Trash2, ArrowLeft, AlertCircle, Camera, FolderOpen, Image as ImageIcon } from 'lucide-react';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 export interface VaccineRecord {
   id?: string;
@@ -268,7 +269,7 @@ export default function PetProfileModal({
               {formData.id ? (formData.pet_name ? `Edit Profile: ${formData.pet_name}` : 'Edit Pet Profile') : 'Add New Pet Profile'}
             </h3>
             <p className="text-xs text-gray-500 font-medium hidden sm:block">
-              Used automatically across Pet Sitting, Vet Boarding, and Daycare
+              Used automatically across {[FEATURES_ENABLED.vetBoarding ? 'Vet Boarding' : null, FEATURES_ENABLED.petDaycare ? 'Daycare' : null, 'Pet Sitting'].filter(Boolean).join(', ')}
             </p>
           </div>
         </div>

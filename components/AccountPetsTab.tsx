@@ -6,6 +6,7 @@ import { PawPrint, Plus, Trash2, Edit2, RefreshCw, QrCode, Share2, Copy, Downloa
 import PetProfileCard from '@/components/PetProfileCard';
 import PetProfileModal, { PetFormData } from '@/components/PetProfileModal';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 export default function AccountPetsTab({ 
   ownerEmail
@@ -89,7 +90,7 @@ export default function AccountPetsTab({
             <div className="text-center py-10 px-4 bg-[#FAF7F2] rounded-2xl border border-dashed border-[#EAE3D9] flex flex-col items-center gap-2">
               <PawPrint className="w-8 h-8 text-amber-700/40" />
               <p className="font-bold text-gray-800 text-sm">No pets registered yet</p>
-              <p className="text-xs text-gray-500 max-w-xs">Add your pet once to use seamlessly across Pet Sitting, Vet Boarding, and Daycare.</p>
+              <p className="text-xs text-gray-500 max-w-xs">Add your pet once to use seamlessly across {[FEATURES_ENABLED.vetBoarding ? 'Vet Boarding' : null, FEATURES_ENABLED.petDaycare ? 'Daycare' : null, 'Pet Sitting'].filter(Boolean).join(', ')}.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
@@ -168,7 +169,7 @@ export default function AccountPetsTab({
             <div>
               <h3 className="font-extrabold text-[#191919] text-lg">Partner Check-In QR</h3>
               <p className="text-xs text-gray-500 mt-1">
-                Show this QR code to your Vet Clinic, Daycare, or Sitter to instantly grant secure check-in access for <strong className="text-gray-700">{qrPet.pet_name}</strong>.
+                Show this QR code to your {[FEATURES_ENABLED.vetBoarding ? 'Vet Clinic' : null, FEATURES_ENABLED.petDaycare ? 'Daycare' : null, 'Sitter'].filter(Boolean).join(', ')} to instantly grant secure check-in access for <strong className="text-gray-700">{qrPet.pet_name}</strong>.
               </p>
             </div>
 

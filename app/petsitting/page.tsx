@@ -18,6 +18,7 @@ import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/aut
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { useSwipeBack } from '@/lib/useSwipeBack';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 const SitterMap = dynamic(() => import('@/components/SitterMap'), {
   ssr: false,
@@ -1490,6 +1491,10 @@ export function PetSittingContent() {
   };
 
   const fetchVetClinics = async () => {
+    if (!FEATURES_ENABLED.vetBoarding) {
+      setVetClinics([]);
+      return;
+    }
     try {
       const res = await fetch('/api/petsitting/vet-clinics');
       if (res.ok) {
@@ -1502,6 +1507,10 @@ export function PetSittingContent() {
   };
 
   const fetchPetDaycares = async () => {
+    if (!FEATURES_ENABLED.petDaycare) {
+      setPetDaycares([]);
+      return;
+    }
     try {
       const res = await fetch('/api/petsitting/daycares');
       if (res.ok) {
@@ -3421,8 +3430,8 @@ export function PetSittingContent() {
   });
 
 
-  let filteredVetClinics = [...vetClinics];
-  let filteredPetDaycares = [...petDaycares];
+  let filteredVetClinics = FEATURES_ENABLED.vetBoarding ? [...vetClinics] : [];
+  let filteredPetDaycares = FEATURES_ENABLED.petDaycare ? [...petDaycares] : [];
 
   if (searchZip.trim() || searchCoords) {
     if (isGeocoding || searchLocationError || !searchCoords) {
@@ -3461,16 +3470,20 @@ export function PetSittingContent() {
         .sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
       // Vet Clinics
-      filteredVetClinics = filteredVetClinics
-        .map(c => (c.lat && c.lng ? { ...c, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(c.lat), Number(c.lng)) } : c))
-        .filter(checkLocationMatch)
-        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      if (FEATURES_ENABLED.vetBoarding) {
+        filteredVetClinics = filteredVetClinics
+          .map(c => (c.lat && c.lng ? { ...c, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(c.lat), Number(c.lng)) } : c))
+          .filter(checkLocationMatch)
+          .sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      }
 
       // Pet Daycares
-      filteredPetDaycares = filteredPetDaycares
-        .map(d => (d.lat && d.lng ? { ...d, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(d.lat), Number(d.lng)) } : d))
-        .filter(checkLocationMatch)
-        .sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      if (FEATURES_ENABLED.petDaycare) {
+        filteredPetDaycares = filteredPetDaycares
+          .map(d => (d.lat && d.lng ? { ...d, distance: getDistanceInMiles(searchCoords.lat, searchCoords.lng, Number(d.lat), Number(d.lng)) } : d))
+          .filter(checkLocationMatch)
+          .sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      }
     }
   }
 
@@ -3488,8 +3501,8 @@ export function PetSittingContent() {
       });
   }
 
-  const showVetSection = !isAiActive && filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
-  const showDaycareSection = !isAiActive && filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
+  const showVetSection = FEATURES_ENABLED.vetBoarding && !isAiActive && filteredVetClinics.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Veterinary Boarding');
+  const showDaycareSection = FEATURES_ENABLED.petDaycare && !isAiActive && filteredPetDaycares.length > 0 && (searchServiceType === 'all' || searchServiceType === 'Pet Daycare');
   const showSittersSection = !isAiActive && (searchServiceType === 'all' || (searchServiceType !== 'Veterinary Boarding' && searchServiceType !== 'Pet Daycare')) && filteredSitters.length > 0;
   const hasAnySearchResults = isAiActive ? aiSitterResults.length > 0 : (showVetSection || showDaycareSection || showSittersSection);
 
@@ -3714,8 +3727,12 @@ export function PetSittingContent() {
                   <option value="Overnight stays">Overnight stays</option>
                   <option value="Dog walking">Dog walking</option>
                   <option value="Sitter's home boarding">Sitter's home boarding</option>
-                  <option value="Veterinary Boarding">Veterinary Boarding</option>
-                  <option value="Pet Daycare">Pet Daycare</option>
+                  {FEATURES_ENABLED.vetBoarding && (
+                    <option value="Veterinary Boarding">Veterinary Boarding</option>
+                  )}
+                  {FEATURES_ENABLED.petDaycare && (
+                    <option value="Pet Daycare">Pet Daycare</option>
+                  )}
                 </select>
               </div>
             </div>
@@ -3880,6 +3897,9 @@ export function PetSittingContent() {
                           const isSitter = !item.type || item.type === 'sitter';
                           const isVet = item.type === 'vet';
                           const isDaycare = item.type === 'daycare';
+
+                          if (isVet && !FEATURES_ENABLED.vetBoarding) return null;
+                          if (isDaycare && !FEATURES_ENABLED.petDaycare) return null;
 
                           if (isSitter) {
                             const sitter = item.raw || item;

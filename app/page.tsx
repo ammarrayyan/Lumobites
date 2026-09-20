@@ -8,6 +8,7 @@ import AppDownloadSection from '@/components/AppDownloadSection';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
+import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 export default function Home() {
   const router = useRouter();
@@ -209,18 +210,22 @@ export default function Home() {
             </p>
 
             <div className="space-y-3">
-              <Link href="/vet-boarding" onClick={handleSelectVet} className="block p-4 rounded-2xl border-2 border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all group" style={{ textDecoration: 'none' }}>
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-sm text-blue-900 group-hover:text-blue-950 flex items-center gap-1.5">🏥 Veterinary Boarding</p>
-                  <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-              <Link href="/pet-daycare" onClick={handleSelectDaycare} className="block p-4 rounded-2xl border-2 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group" style={{ textDecoration: 'none' }}>
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-sm text-emerald-900 group-hover:text-emerald-950 flex items-center gap-1.5">🐕 Pet Daycare</p>
-                  <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
+              {FEATURES_ENABLED.vetBoarding && (
+                <Link href="/vet-boarding" onClick={handleSelectVet} className="block p-4 rounded-2xl border-2 border-blue-100 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 transition-all group" style={{ textDecoration: 'none' }}>
+                  <div className="flex items-center justify-between">
+                    <p className="font-extrabold text-sm text-blue-900 group-hover:text-blue-950 flex items-center gap-1.5">🏥 Veterinary Boarding</p>
+                    <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              )}
+              {FEATURES_ENABLED.petDaycare && (
+                <Link href="/pet-daycare" onClick={handleSelectDaycare} className="block p-4 rounded-2xl border-2 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 transition-all group" style={{ textDecoration: 'none' }}>
+                  <div className="flex items-center justify-between">
+                    <p className="font-extrabold text-sm text-emerald-900 group-hover:text-emerald-950 flex items-center gap-1.5">🐕 Pet Daycare</p>
+                    <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              )}
               <Link href="/adoption/shelter" onClick={handleSelectShelter} className="block p-4 rounded-2xl border-2 border-orange-100 bg-orange-50/50 hover:bg-orange-50 hover:border-orange-300 transition-all group" style={{ textDecoration: 'none' }}>
                 <div className="flex items-center justify-between">
                   <p className="font-extrabold text-sm text-orange-900 group-hover:text-orange-950 flex items-center gap-1.5">🏛️ Shelter or Rescue</p>
@@ -528,7 +533,7 @@ export default function Home() {
                 Partner Portal
               </h3>
               <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                Dedicated business portal for rescue shelters, veterinary clinics, and pet daycare facilities to manage listings &amp; client inquiries.
+                Dedicated business portal for {[FEATURES_ENABLED.vetBoarding ? 'veterinary clinics' : null, FEATURES_ENABLED.petDaycare ? 'pet daycare facilities' : null, 'rescue shelters'].filter(Boolean).join(', ')} to manage listings &amp; client inquiries.
               </p>
             </button>
 
