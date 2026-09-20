@@ -11,7 +11,7 @@ export interface PricingSetting {
 export const DEFAULT_PRICING: Record<string, PricingSetting> = {
   shelter: {
     service_type: 'shelter',
-    monthly_price_usd: 20,
+    monthly_price_usd: 30,
     trial_days_default: 30,
   },
   pet_daycare: {
@@ -28,7 +28,7 @@ export const DEFAULT_PRICING: Record<string, PricingSetting> = {
 
 /**
  * Fetch active pricing settings for a partner service type.
- * Falls back gracefully to default prices ($20 shelter, $30 daycare, $40 vet boarding) if DB is unseeded.
+ * Falls back gracefully to default prices ($30 shelter, $30 daycare, $40 vet boarding) if DB is unseeded.
  */
 export async function getPartnerPricing(serviceType: 'shelter' | 'pet_daycare' | 'vet_boarding'): Promise<PricingSetting> {
   try {

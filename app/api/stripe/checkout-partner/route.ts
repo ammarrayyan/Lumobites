@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Partner record not found for this email.' }, { status: 404 });
     }
 
-    // 1. Get current pricing config from database (defaults to $20 shelter, $30 daycare, $40 vet boarding)
+    // 1. Get current pricing config from database (defaults to $30 shelter, $30 daycare, $40 vet boarding)
     const pricing = await getPartnerPricing(partner_type as any);
     const amountInCents = Math.round(pricing.monthly_price_usd * 100);
 

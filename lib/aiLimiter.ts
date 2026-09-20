@@ -111,7 +111,7 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
     return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
   };
 
-  // 2. Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $20/mo)
+  // 2. Partner Subscriptions (Vet Boarding $40/mo, Daycare $30/mo, Shelter $30/mo)
   // Check exact email first, fallback to baseEmail
   let { data: vet } = await supabaseAdmin.from('vet_clinics').select('status, subscription_status, trial_end, stripe_subscription_id').eq('email', cleanEmail);
   if ((!vet || vet.length === 0) && baseEmail !== cleanEmail) {
@@ -197,7 +197,7 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
       return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'past_due', billingHealthLabel: '⚠️ Past Due Shelter Partner (Card Declined)' };
     }
     if (subStatus === 'canceled') {
-      return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled Shelter Partner ($20/mo)' };
+      return { isPro: false, proSource: 'partner_shelter', rawSubscriptionStatus: 'canceled', billingHealthLabel: 'Canceled Shelter Partner ($30/mo)' };
     }
 
     if (appStatus === 'approved' || subStatus === 'active' || subStatus === 'trialing') {
@@ -208,10 +208,10 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
             isPro: true,
             proSource: 'partner_shelter',
             rawSubscriptionStatus: 'active',
-            billingHealthLabel: endDateStr ? `Canceling Shelter Partner (access until ${endDateStr})` : 'Canceling Shelter Partner ($20/mo)'
+            billingHealthLabel: endDateStr ? `Canceling Shelter Partner (access until ${endDateStr})` : 'Canceling Shelter Partner ($30/mo)'
           };
         }
-        return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Shelter Partner ($20/mo)' };
+        return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Shelter Partner ($30/mo)' };
       }
       const days = s.trial_end && s.trial_end > nowIso ? getTrialDays(s.trial_end) : 30;
       return { isPro: true, proSource: 'partner_shelter', rawSubscriptionStatus: 'trialing', billingHealthLabel: `Trialing Shelter Partner (${days}d left)` };

@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
             const bName = updatedPartner?.business_name || updatedPartner?.clinic_name || updatedPartner?.org_name || updatedPartner?.name || 'Partner Account';
             const pricingSetting = await getPartnerPricing(partnerType as any);
-            const priceVal = pricingSetting?.monthly_price_usd || (partnerType === 'shelter' ? 20 : partnerType === 'vet_boarding' ? 40 : 30);
+            const priceVal = pricingSetting?.monthly_price_usd || (partnerType === 'shelter' ? 30 : partnerType === 'vet_boarding' ? 40 : 30);
             await sendPartnerWelcomePaidEmail(cleanEmail, bName, partnerType, priceVal);
           }
           break;
@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
             const bName = p.business_name || p.clinic_name || p.org_name || p.name || 'Partner Account';
             const partnerType = tbl === 'shelters' ? 'shelter' : tbl === 'vet_clinics' ? 'vet_boarding' : 'pet_daycare';
             const pricingSetting = await getPartnerPricing(partnerType as any);
-            const priceVal = pricingSetting?.monthly_price_usd || (tbl === 'shelters' ? 20 : tbl === 'vet_clinics' ? 40 : 30);
+            const priceVal = pricingSetting?.monthly_price_usd || (tbl === 'shelters' ? 30 : tbl === 'vet_clinics' ? 40 : 30);
             await sendPartnerSubscriptionExpiredEmail(p.email, bName, priceVal);
           }
         }

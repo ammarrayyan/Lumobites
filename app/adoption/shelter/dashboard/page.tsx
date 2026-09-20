@@ -38,7 +38,7 @@ function ShelterDashboardContent() {
   const router = useRouter();
   const [shelterEmail, setShelterEmail] = useState('');
   const [shelterInfo, setShelterInfo] = useState<any>(null);
-  const [monthlyPrice, setMonthlyPrice] = useState<number>(20);
+  const [monthlyPrice, setMonthlyPrice] = useState<number>(30);
   const [pets, setPets] = useState<ShelterPet[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const partnerConfigs = [
       { type: 'vet_boarding', table: 'vet_clinics', defaultPrice: 40 },
       { type: 'pet_daycare', table: 'pet_daycares', defaultPrice: 30 },
-      { type: 'shelter', table: 'shelters', defaultPrice: 20 },
+      { type: 'shelter', table: 'shelters', defaultPrice: 30 },
     ];
 
     for (const config of partnerConfigs) {

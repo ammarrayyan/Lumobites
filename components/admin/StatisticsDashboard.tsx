@@ -149,7 +149,7 @@ export default function StatisticsDashboard({ adminKey, onUnauthorized }: { admi
               <span className="text-xs text-gray-500 block mb-1">Shelters</span>
               <span className="text-2xl font-bold text-emerald-600">{stats.payingShelterCount ?? 0}</span>
               <span className="text-[10px] text-emerald-700/70 block mt-0.5 font-medium">
-                {stats.trialShelterCount ? `+${stats.trialShelterCount} trialing` : '$20/mo'}
+                {stats.trialShelterCount ? `+${stats.trialShelterCount} trialing` : '$30/mo'}
               </span>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 text-center">

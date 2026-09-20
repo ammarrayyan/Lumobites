@@ -20,7 +20,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
   const [filterTab, setFilterTab] = useState<'all' | 'trialing' | 'active' | 'past_due' | 'canceled'>('all');
   const [search, setSearch] = useState('');
   const [priceForm, setPriceForm] = useState<Record<string, number>>({
-    shelter: 20,
+    shelter: 30,
     pet_daycare: 30,
     vet_boarding: 40,
   });
@@ -36,7 +36,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
         setPricing(data.pricing || {});
         setPartners(data.partners || []);
         setPriceForm({
-          shelter: data.pricing?.shelter?.monthly_price_usd || 20,
+          shelter: data.pricing?.shelter?.monthly_price_usd || 30,
           pet_daycare: data.pricing?.pet_daycare?.monthly_price_usd || 30,
           vet_boarding: data.pricing?.vet_boarding?.monthly_price_usd || 40,
         });
@@ -165,7 +165,7 @@ export default function PartnerBillingManagement({ adminKey }: PartnerBillingMan
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { key: 'shelter', label: 'Shelter / Adoption', defaultPrice: 20, icon: Building2, color: 'text-amber-700 bg-amber-100' },
+            { key: 'shelter', label: 'Shelter / Adoption', defaultPrice: 30, icon: Building2, color: 'text-amber-700 bg-amber-100' },
             { key: 'pet_daycare', label: 'Pet Daycare', defaultPrice: 30, icon: Sparkles, color: 'text-emerald-700 bg-emerald-100' },
             { key: 'vet_boarding', label: 'Vet Boarding', defaultPrice: 40, icon: Stethoscope, color: 'text-blue-700 bg-blue-100' },
           ].map(tier => {

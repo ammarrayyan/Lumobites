@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string; table: string; defaultPrice: number }> = {
         partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard', table: 'vet_clinics', defaultPrice: 40 },
         partner_daycare: { partnerType: 'daycare', partnerLabel: 'Pet Daycare', dashboardUrl: '/pet-daycare/dashboard', table: 'pet_daycares', defaultPrice: 30 },
-        partner_shelter: { partnerType: 'shelter', partnerLabel: 'Shelter', dashboardUrl: '/adoption/shelter/dashboard', table: 'shelters', defaultPrice: 20 },
+        partner_shelter: { partnerType: 'shelter', partnerLabel: 'Shelter', dashboardUrl: '/adoption/shelter/dashboard', table: 'shelters', defaultPrice: 30 },
       };
 
       const info = partnerMap[proDetails.proSource] || { partnerType: 'vet', partnerLabel: 'Partner', dashboardUrl: '/', table: 'vet_clinics', defaultPrice: 40 };

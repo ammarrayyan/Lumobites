@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     const payingDaycareCount = daycares.filter(d => d.status === 'approved' && d.subscription_status === 'active').length;
     const trialDaycareCount = daycares.filter(d => d.status === 'approved' && d.subscription_status === 'trialing').length;
 
-    // Breakdown for Shelters ($20/mo)
+    // Breakdown for Shelters ($30/mo)
     const payingShelterCount = shelters.filter(s => s.status === 'approved' && s.subscription_status === 'active').length;
     const trialShelterCount = shelters.filter(s => s.status === 'approved' && s.subscription_status === 'trialing').length;
 
