@@ -8,7 +8,6 @@ import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import ChatModal from '@/components/ChatModal';
-import SupportDonationModal from '@/components/SupportDonationModal';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import { useSwipeBack } from '@/lib/useSwipeBack';
 
@@ -78,7 +77,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_PAGE_SIZE);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [showDonationSuccessToast, setShowDonationSuccessToast] = useState(false);
 
   // Auto-derive the comment display name from the signed-in email — no manual typing,
@@ -299,7 +297,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         window.location.href = '/lost-pets';
       } else {
         setPet({ ...pet, status: 'resolved' });
-        setIsDonationModalOpen(true);
+        router.push(`/lost-pets/support?pet_id=${encodeURIComponent(id)}&pet_name=${encodeURIComponent(pet?.pet_name || '')}&return_url=${encodeURIComponent(`/lost-pets/${id}`)}`);
       }
     } catch (err: any) {
       alert(err.message);
@@ -476,13 +474,12 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsDonationModalOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs shrink-0 cursor-pointer self-start sm:self-center"
+            <Link
+              href={`/lost-pets/support?pet_id=${encodeURIComponent(pet.id)}&pet_name=${encodeURIComponent(pet.pet_name || '')}&return_url=${encodeURIComponent(`/lost-pets/${pet.id}`)}`}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs shrink-0 self-start sm:self-center"
             >
               <span>💖 Support this free service</span>
-            </button>
+            </Link>
           </div>
         )}
 
@@ -824,14 +821,6 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
             />
           );
         })()}
-
-        <SupportDonationModal
-          isOpen={isDonationModalOpen}
-          onClose={() => setIsDonationModalOpen(false)}
-          petName={pet?.pet_name}
-          petId={pet?.id}
-          userEmail={userEmail}
-        />
       </main>
     </div>
   );

@@ -17,7 +17,6 @@ import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import LostPetCardCarousel from '@/components/LostPetCardCarousel';
 import ChatModal from '@/components/ChatModal';
-import SupportDonationModal from '@/components/SupportDonationModal';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -37,7 +36,6 @@ export default function LostPetsFeed() {
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
   const [showDonationSuccessToast, setShowDonationSuccessToast] = useState(false);
 
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
@@ -811,14 +809,13 @@ export default function LostPetsFeed() {
               <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Help reunite lost pets with their families in your neighborhood.</p>
             </div>
             <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setIsDonationModalOpen(true)}
-                className="bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] hover:text-[#7A5234] border border-[#E8DDD4] font-bold py-2.5 px-4 md:py-3.5 md:px-5 text-xs md:text-sm rounded-xl transition-all shadow-2xs hover:shadow-xs flex items-center gap-1.5 cursor-pointer"
+              <Link
+                href="/lost-pets/support"
+                className="bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] hover:text-[#7A5234] border border-[#E8DDD4] font-bold py-2.5 px-4 md:py-3.5 md:px-5 text-xs md:text-sm rounded-xl transition-all shadow-2xs hover:shadow-xs flex items-center gap-1.5"
               >
                 <Heart className="w-4 h-4 fill-amber-500 text-amber-500" />
                 <span>Support Our Mission</span>
-              </button>
+              </Link>
               <Link 
                 href="/lost-pets/post" 
                 className="bg-[#E05A47] hover:bg-[#C94735] text-white font-bold py-2.5 px-6 md:py-3.5 md:px-8 text-xs md:text-sm rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
@@ -857,25 +854,6 @@ export default function LostPetsFeed() {
                 <span>AI Pet Search</span>
               </button>
             </div>
-          </div>
-
-          {/* Top Community Support Note */}
-          <div className="mb-6 p-3.5 sm:p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-2xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-100/80 flex items-center justify-center text-amber-600 shrink-0">
-                <Heart className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-              </div>
-              <p className="text-xs sm:text-sm text-[#7A6B69] font-medium">
-                <strong className="text-[#4A3E3D]">100% Free Community Service</strong> — Lost pet posts and AI matching are always free for families.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsDonationModalOpen(true)}
-              className="text-xs font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline cursor-pointer shrink-0"
-            >
-              Support our mission →
-            </button>
           </div>
 
 
@@ -1508,13 +1486,12 @@ export default function LostPetsFeed() {
                 <strong className="text-[#4A3E3D]">🐾 Lumo Bites Lost &amp; Found</strong> is 100% free for all pet parents. Want to help keep it running?
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsDonationModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline px-3.5 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F5ECE5] border border-[#E8DDD4] transition-colors cursor-pointer shrink-0"
+            <Link
+              href="/lost-pets/support"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline px-3.5 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F5ECE5] border border-[#E8DDD4] transition-colors shrink-0"
             >
               <span>Support our mission →</span>
-            </button>
+            </Link>
           </div>
 
         <AiLimitModal
@@ -1560,12 +1537,6 @@ export default function LostPetsFeed() {
             />
           );
         })()}
-
-        <SupportDonationModal
-          isOpen={isDonationModalOpen}
-          onClose={() => setIsDonationModalOpen(false)}
-          userEmail={userEmail}
-        />
         </main>
 
       </div>

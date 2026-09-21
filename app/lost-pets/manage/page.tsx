@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Sparkles, Trash2, Settings, Heart } from 'lucide-react';
-import SupportDonationModal from '@/components/SupportDonationModal';
 
 export default function ManageLostPet() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +13,6 @@ export default function ManageLostPet() {
   const [token, setToken] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -40,7 +38,6 @@ export default function ManageLostPet() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
-        setIsDonationModalOpen(true);
       } else {
         setError(data.error || 'Failed to update post.');
       }
@@ -78,7 +75,7 @@ export default function ManageLostPet() {
 
   return (
     <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col">
-            <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4">
         <div style={{ boxShadow: '0 4px 20px rgba(139, 94, 60, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)' }}
         className="bg-white p-10 rounded-3xl shadow-md border border-[#DFD3C7] text-center max-w-md w-full animate-fade-in">
           {error && !success ? (
@@ -96,14 +93,13 @@ export default function ManageLostPet() {
                 That's amazing news! Your post has been updated and the community will see that this pet is safe.
               </p>
               <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsDonationModalOpen(true)}
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                <Link
+                  href={`/lost-pets/support?pet_id=${encodeURIComponent(petId)}&return_url=${encodeURIComponent(`/lost-pets/${petId}`)}`}
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
                   <Heart className="w-4 h-4 fill-white" />
                   <span>Support Lumo Bites 🐾</span>
-                </button>
+                </Link>
                 <Link href={`/lost-pets/${petId}`} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl transition-colors inline-block">
                   View Post
                 </Link>
@@ -151,12 +147,6 @@ export default function ManageLostPet() {
             </>
           )}
         </div>
-
-        <SupportDonationModal
-          isOpen={isDonationModalOpen}
-          onClose={() => setIsDonationModalOpen(false)}
-          petId={petId}
-        />
       </main>
     </div>
   );
