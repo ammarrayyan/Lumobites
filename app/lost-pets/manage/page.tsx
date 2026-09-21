@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, Sparkles, Trash2, Settings } from 'lucide-react';
+import { AlertTriangle, Sparkles, Trash2, Settings, Heart } from 'lucide-react';
+import SupportDonationModal from '@/components/SupportDonationModal';
 
 export default function ManageLostPet() {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ export default function ManageLostPet() {
   const [token, setToken] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -38,6 +40,7 @@ export default function ManageLostPet() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
+        setIsDonationModalOpen(true);
       } else {
         setError(data.error || 'Failed to update post.');
       }
@@ -92,9 +95,19 @@ export default function ManageLostPet() {
               <p className="text-[#8B7E7D] font-medium text-lg mb-6">
                 That's amazing news! Your post has been updated and the community will see that this pet is safe.
               </p>
-              <Link href={`/lost-pets/${petId}`} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl transition-colors inline-block">
-                View Post
-              </Link>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsDonationModalOpen(true)}
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Heart className="w-4 h-4 fill-white" />
+                  <span>Support Lumo Bites 🐾</span>
+                </button>
+                <Link href={`/lost-pets/${petId}`} className="bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3 px-6 rounded-xl transition-colors inline-block">
+                  View Post
+                </Link>
+              </div>
             </>
           ) : deleteSuccess ? (
             <>
@@ -138,6 +151,12 @@ export default function ManageLostPet() {
             </>
           )}
         </div>
+
+        <SupportDonationModal
+          isOpen={isDonationModalOpen}
+          onClose={() => setIsDonationModalOpen(false)}
+          petId={petId}
+        />
       </main>
     </div>
   );

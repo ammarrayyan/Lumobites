@@ -8,7 +8,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
-import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare, ChevronDown, ChevronUp, Heart } from 'lucide-react';
 import { getSignedInUserEmail, isManualPageReload } from '@/lib/authHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 import AiLimitModal from '@/components/AiLimitModal';
@@ -17,6 +17,7 @@ import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import LostPetCardCarousel from '@/components/LostPetCardCarousel';
 import ChatModal from '@/components/ChatModal';
+import SupportDonationModal from '@/components/SupportDonationModal';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -36,6 +37,8 @@ export default function LostPetsFeed() {
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [showDonationSuccessToast, setShowDonationSuccessToast] = useState(false);
 
   // ── Tab 1: Lost & Found Board ─────────────────────────────────────────────
   const [pets, setPets] = useState<any[]>(() => {
@@ -257,6 +260,13 @@ export default function LostPetsFeed() {
             setTimeout(restoreScroll, 200);
           }
         } catch (e) {}
+      }
+
+      if (params.get('donation') === 'success') {
+        setShowDonationSuccessToast(true);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('donation');
+        window.history.replaceState({}, '', url.toString());
       }
     }
   }, []);
@@ -776,6 +786,23 @@ export default function LostPetsFeed() {
         )}
 
         <main className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12 w-full">
+
+          {showDonationSuccessToast && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 sm:p-5 rounded-2xl mb-6 flex items-center justify-between gap-3.5 shadow-xs animate-fade-in">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💖</span>
+                <p className="text-xs sm:text-sm font-bold text-amber-950">
+                  Thank you so much for supporting Lumo Bites! Your contribution keeps lost pet reunions 100% free for everyone.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDonationSuccessToast(false)}
+                className="text-xs font-bold text-amber-800 hover:text-amber-950 px-2 py-1 rounded-lg hover:bg-amber-100 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* ── Page Header ── */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 md:gap-6">
@@ -1442,6 +1469,25 @@ export default function LostPetsFeed() {
             )
           )}
 
+          {/* Community Support Note (Spot 3) */}
+          <div className="mt-10 mb-6 p-4 sm:p-5 rounded-2xl bg-white border border-[#E8DDD4] flex flex-col sm:flex-row items-center justify-between gap-3.5 text-center sm:text-left shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                <Heart className="w-4 h-4 fill-amber-500 text-amber-500" />
+              </div>
+              <p className="text-xs sm:text-sm text-[#7A6B69] font-medium">
+                <strong className="text-[#4A3E3D]">🐾 Lumo Bites Lost &amp; Found</strong> is 100% free for all pet parents. Want to help keep it running?
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsDonationModalOpen(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline px-3.5 py-2 rounded-xl bg-[#FAF6F4] hover:bg-[#F5ECE5] border border-[#E8DDD4] transition-colors cursor-pointer shrink-0"
+            >
+              <span>Support our mission →</span>
+            </button>
+          </div>
+
         <AiLimitModal
           isOpen={isAiLimitModalOpen}
           onClose={() => setIsAiLimitModalOpen(false)}
@@ -1485,6 +1531,12 @@ export default function LostPetsFeed() {
             />
           );
         })()}
+
+        <SupportDonationModal
+          isOpen={isDonationModalOpen}
+          onClose={() => setIsDonationModalOpen(false)}
+          userEmail={userEmail}
+        />
         </main>
 
       </div>

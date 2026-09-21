@@ -8,6 +8,7 @@ import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import ChatModal from '@/components/ChatModal';
+import SupportDonationModal from '@/components/SupportDonationModal';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import { useSwipeBack } from '@/lib/useSwipeBack';
 
@@ -77,12 +78,27 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
   const [blockedEmails, setBlockedEmails] = useState<string[]>([]);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_PAGE_SIZE);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [showDonationSuccessToast, setShowDonationSuccessToast] = useState(false);
 
   // Auto-derive the comment display name from the signed-in email — no manual typing,
   // no PII shown (see getDisplayNameFromEmail).
   useEffect(() => {
     setCommentAuthor(getDisplayNameFromEmail(userEmail));
   }, [userEmail]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('donation') === 'success') {
+        setShowDonationSuccessToast(true);
+        // Clean URL parameter without refresh
+        const url = new URL(window.location.href);
+        url.searchParams.delete('donation');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }, []);
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -283,6 +299,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
         window.location.href = '/lost-pets';
       } else {
         setPet({ ...pet, status: 'resolved' });
+        setIsDonationModalOpen(true);
       }
     } catch (err: any) {
       alert(err.message);
@@ -431,15 +448,41 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
           &larr; Back to Lost & Found Board
         </button>
 
-        {pet.status === 'resolved' && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 sm:p-5 rounded-2xl mb-5 flex items-center gap-3.5 shadow-xs">
-            <span className="text-3xl">🎉</span>
-            <div>
-              <h2 className="text-lg sm:text-xl font-black text-emerald-950">Great News!</h2>
-              <p className="text-xs sm:text-sm font-medium text-emerald-800">
-                This pet has been {pet.type === 'lost' ? 'found and returned home safely' : 'reunited with their owner'}!
+        {showDonationSuccessToast && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 sm:p-5 rounded-2xl mb-5 flex items-center justify-between gap-3.5 shadow-xs animate-fade-in">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💖</span>
+              <p className="text-xs sm:text-sm font-bold text-amber-950">
+                Thank you so much for your support! Your contribution keeps Lumo Bites free for lost pet reunions.
               </p>
             </div>
+            <button
+              onClick={() => setShowDonationSuccessToast(false)}
+              className="text-xs font-bold text-amber-800 hover:text-amber-950 px-2 py-1 rounded-lg hover:bg-amber-100 transition-colors cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {pet.status === 'resolved' && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 sm:p-5 rounded-2xl mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-xs">
+            <div className="flex items-center gap-3.5">
+              <span className="text-3xl">🎉</span>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-emerald-950">Great News!</h2>
+                <p className="text-xs sm:text-sm font-medium text-emerald-800">
+                  This pet has been {pet.type === 'lost' ? 'found and returned home safely' : 'reunited with their owner'}!
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsDonationModalOpen(true)}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs shrink-0 cursor-pointer self-start sm:self-center"
+            >
+              <span>💖 Support this free service</span>
+            </button>
           </div>
         )}
 
@@ -781,6 +824,14 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
             />
           );
         })()}
+
+        <SupportDonationModal
+          isOpen={isDonationModalOpen}
+          onClose={() => setIsDonationModalOpen(false)}
+          petName={pet?.pet_name}
+          petId={pet?.id}
+          userEmail={userEmail}
+        />
       </main>
     </div>
   );
