@@ -88,36 +88,36 @@ function SupportPageContent() {
     : `Lumo Bites' lost & found network, community board, and AI photo matching are 100% free for all pet parents. If you'd like to help keep this service free and running for families, consider leaving a small one-time contribution.`;
 
   return (
-    <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F7F3EE] font-sans flex flex-col items-center pt-8 sm:pt-12 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full mx-auto">
         {/* Back Link */}
         <Link
           href={returnUrl}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline mb-4 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{petId ? 'Back to Post' : 'Back to Lost & Found Board'}</span>
         </Link>
 
         {/* Support Card */}
-        <div className="bg-white rounded-3xl p-7 sm:p-8 shadow-xl border border-[#E8DDD4] relative">
+        <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-[#E8DDD4] relative">
           {/* Heart Icon Badge */}
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-5 shadow-xs">
-            <Heart className="w-7 h-7 fill-amber-500 text-amber-500" />
+          <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-4 shadow-xs">
+            <Heart className="w-6 h-6 fill-amber-500 text-amber-500" />
           </div>
 
           {/* Heading */}
-          <h1 className="text-2xl sm:text-3xl font-black text-[#4A3E3D] mb-3 leading-tight tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#191919] tracking-tight leading-snug mb-2">
             {displayTitle}
           </h1>
 
-          <p className="text-sm font-medium text-[#7A6B69] leading-relaxed mb-6">
+          <p className="text-xs sm:text-sm font-normal text-[#666666] leading-relaxed mb-6">
             {displaySubtitle}
           </p>
 
           {/* Amount Selector */}
           <div className="space-y-3 mb-6">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#8B7E7D]">
+            <label className="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
               Choose a one-time amount
             </label>
             <div className="grid grid-cols-4 gap-2.5">
@@ -130,9 +130,9 @@ function SupportPageContent() {
                     setError('');
                   }}
                   disabled={loading}
-                  className={`py-3.5 px-2 rounded-2xl font-black text-sm sm:text-base transition-all border cursor-pointer ${
+                  className={`py-3 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
                     selectedPreset === amt
-                      ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-md scale-102'
+                      ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
                       : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C]/40 hover:bg-[#F5ECE5]'
                   }`}
                 >
@@ -146,9 +146,9 @@ function SupportPageContent() {
                   setError('');
                 }}
                 disabled={loading}
-                className={`py-3.5 px-2 rounded-2xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
+                className={`py-3 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
                   selectedPreset === 'custom'
-                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-md scale-102'
+                    ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-sm'
                     : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C]/40 hover:bg-[#F5ECE5]'
                 }`}
               >
@@ -159,7 +159,7 @@ function SupportPageContent() {
             {/* Custom Amount Input */}
             {selectedPreset === 'custom' && (
               <div className="relative mt-3 animate-fade-in">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-base">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B7E7D] font-bold text-sm">
                   $
                 </span>
                 <input
@@ -174,7 +174,7 @@ function SupportPageContent() {
                   }}
                   disabled={loading}
                   autoFocus
-                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4] text-[#4A3E3D] font-bold text-sm focus:outline-none focus:ring-2 focus:ring-[#8B5E3C] focus:bg-white"
+                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-[#E8DDD4] bg-[#FAF6F4] text-[#191919] font-medium text-xs sm:text-sm focus:outline-none focus:border-[#8B5E3C] focus:bg-white transition-all"
                 />
               </div>
             )}
@@ -187,16 +187,16 @@ function SupportPageContent() {
           )}
 
           {/* Actions */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             <button
               type="button"
               onClick={handleCheckout}
               disabled={loading || (selectedPreset === 'custom' && (!customAmount || parseFloat(customAmount) < 1))}
-              className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-black py-4 px-4 rounded-xl transition-all transform active:scale-98 shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none text-base"
+              className="w-full bg-[#8B5E3C] hover:bg-[#7A5234] text-white font-bold py-3.5 px-4 rounded-xl transition-all transform active:scale-98 shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none text-xs sm:text-sm"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Redirecting to Checkout...</span>
                 </>
               ) : (
@@ -209,7 +209,7 @@ function SupportPageContent() {
 
             <Link
               href={returnUrl}
-              className="w-full py-2.5 text-center text-xs sm:text-sm font-bold text-[#8B7E7D] hover:text-[#4A3E3D] transition-colors"
+              className="w-full py-2 text-center text-xs sm:text-sm font-bold text-[#8B7E7D] hover:text-[#4A3E3D] transition-colors"
             >
               Maybe Later / Return
             </Link>
