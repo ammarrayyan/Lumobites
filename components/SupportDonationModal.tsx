@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Heart, X, Sparkles, Loader2 } from 'lucide-react';
+import { useScrollLock } from '@/lib/useScrollLock';
 
 interface SupportDonationModalProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export default function SupportDonationModal({
   title,
   subtitle,
 }: SupportDonationModalProps) {
+  useScrollLock(isOpen);
+
   const [selectedPreset, setSelectedPreset] = useState<number | 'custom'>(10);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -100,9 +103,9 @@ export default function SupportDonationModal({
     `Lumo Bites' lost & found network and AI matching are 100% free for pet parents. If we helped bring your pet home, consider leaving a small one-time tip to help keep this service running for the next lost pet.`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
       <div
-        className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border border-[#E8DDD4] relative animate-scale-up"
+        className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border border-[#E8DDD4] relative my-auto animate-scale-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -143,18 +146,13 @@ export default function SupportDonationModal({
                   setError('');
                 }}
                 disabled={loading}
-                className={`py-3 px-2 rounded-2xl font-black text-sm sm:text-base transition-all border cursor-pointer relative ${
+                className={`py-3 px-2 rounded-2xl font-black text-sm sm:text-base transition-all border cursor-pointer ${
                   selectedPreset === amt
                     ? 'bg-[#8B5E3C] text-white border-[#8B5E3C] shadow-md scale-102'
                     : 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4] hover:border-[#8B5E3C]/40 hover:bg-[#F5ECE5]'
                 }`}
               >
                 ${amt}
-                {amt === 10 && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tight shadow-xs">
-                    Popular
-                  </span>
-                )}
               </button>
             ))}
             <button

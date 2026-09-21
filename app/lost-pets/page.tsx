@@ -810,17 +810,27 @@ export default function LostPetsFeed() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-2">Community Pet Board</h1>
               <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Help reunite lost pets with their families in your neighborhood.</p>
             </div>
-            <Link 
-              href="/lost-pets/post" 
-              className="bg-[#E05A47] hover:bg-[#C94735] text-white font-bold py-2.5 px-6 md:py-4 md:px-8 text-sm md:text-base rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
-            >
-              <PawPrint className="w-4 h-4" />
-              <span>Report Lost/Found Pet</span>
-            </Link>
+            <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setIsDonationModalOpen(true)}
+                className="bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] hover:text-[#7A5234] border border-[#E8DDD4] font-bold py-2.5 px-4 md:py-3.5 md:px-5 text-xs md:text-sm rounded-xl transition-all shadow-2xs hover:shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Heart className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <span>Support Our Mission</span>
+              </button>
+              <Link 
+                href="/lost-pets/post" 
+                className="bg-[#E05A47] hover:bg-[#C94735] text-white font-bold py-2.5 px-6 md:py-3.5 md:px-8 text-xs md:text-sm rounded-xl transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2 flex-shrink-0"
+              >
+                <PawPrint className="w-4 h-4" />
+                <span>Report Lost/Found Pet</span>
+              </Link>
+            </div>
           </div>
 
           {/* ── Tab Switcher ── */}
-          <div className="flex justify-center mb-8 border-b border-[#E8DDD4] pb-2 w-full">
+          <div className="flex justify-center mb-6 border-b border-[#E8DDD4] pb-2 w-full">
             <div className="flex gap-2">
               <button
                 type="button"
@@ -847,6 +857,25 @@ export default function LostPetsFeed() {
                 <span>AI Pet Search</span>
               </button>
             </div>
+          </div>
+
+          {/* Top Community Support Note */}
+          <div className="mb-6 p-3.5 sm:p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-100/80 flex items-center justify-center text-amber-600 shrink-0">
+                <Heart className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+              </div>
+              <p className="text-xs sm:text-sm text-[#7A6B69] font-medium">
+                <strong className="text-[#4A3E3D]">100% Free Community Service</strong> — Lost pet posts and AI matching are always free for families.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsDonationModalOpen(true)}
+              className="text-xs font-bold text-[#8B5E3C] hover:text-[#7A5234] hover:underline cursor-pointer shrink-0"
+            >
+              Support our mission →
+            </button>
           </div>
 
 
