@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { formatDistanceToNow } from 'date-fns';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 import {
   MapPin, MessageSquare, AlertTriangle, Share2, RefreshCw, Loader2, Ban, Trash2,
   ArrowBigUp, MessageCircle, Stethoscope, Scissors, PawPrint, Search, Utensils, TreePine,
@@ -1226,6 +1227,9 @@ export default function CityBoardPage() {
           <span>New Post</span>
         </button>
       </MobileFloatingAction>
+
+      {/* Scroll to Top Floating Button */}
+      <ScrollToTopButton />
       </div>
     </div>
   );

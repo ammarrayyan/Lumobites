@@ -12,6 +12,7 @@ import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
 import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { useScrollLock } from '@/lib/useScrollLock';
 
 const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
@@ -1949,6 +1950,9 @@ function AdoptionContent() {
           }}
         />
       )}
+
+      {/* Scroll to Top Floating Button */}
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
 import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { useSwipeBack } from '@/lib/useSwipeBack';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
@@ -7721,6 +7722,9 @@ export function PetSittingContent() {
           partnerName={selectedPartnerForGallery.name}
         />
       )}
+
+      {/* Scroll to Top Floating Button */}
+      <ScrollToTopButton />
 
       </div>
     </div>

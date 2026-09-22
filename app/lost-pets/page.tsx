@@ -17,6 +17,7 @@ import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import LostPetCardCarousel from '@/components/LostPetCardCarousel';
 import ChatModal from '@/components/ChatModal';
+import ScrollToTopButton from '@/components/ScrollToTopButton';
 
 const LostPetsMap = dynamic(() => import('@/components/LostPetsMap'), {
   ssr: false,
@@ -1513,6 +1514,9 @@ export default function LostPetsFeed() {
             <span>Report Pet</span>
           </Link>
         </MobileFloatingAction>
+
+        {/* Scroll to Top Floating Button */}
+        <ScrollToTopButton />
 
         {/* LOST PET IN-APP CHAT MODAL */}
         {activeChatPet && (() => {
