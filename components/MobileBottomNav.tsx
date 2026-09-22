@@ -56,7 +56,7 @@ export default function MobileBottomNav() {
       className="lg:hidden px-1.5 flex items-center justify-between w-[calc(100%-20px)] max-w-[430px] h-[68px] relative select-none"
       style={{
         position: 'fixed',
-        bottom: '16px',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 9999,

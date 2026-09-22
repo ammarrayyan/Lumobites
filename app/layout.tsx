@@ -120,7 +120,12 @@ export default async function RootLayout({
           <div className="flex-grow pb-12 lg:pb-6">
             {children}
           </div>
-          <footer className="w-full bg-[#FAF5EE] border-t border-[#DFD3C7] pt-8 pb-32 lg:pb-8 px-4 text-center text-xs text-[#8B7E7D] mt-12">
+          <footer 
+            className="w-full bg-[#FAF5EE] border-t border-[#DFD3C7] pt-8 lg:pb-8 px-4 text-center text-xs text-[#8B7E7D] mt-12"
+            style={{
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 120px)'
+            }}
+          >
             <p>© {new Date().getFullYear()} Lumo Bites. All rights reserved.</p>
             <p className="mt-1 font-semibold text-[#8B5E3C]">
               Report inappropriate content: <a href="mailto:info@lumobitespet.com" className="underline hover:text-[#734A2E]">info@lumobitespet.com</a>

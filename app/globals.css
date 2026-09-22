@@ -75,7 +75,9 @@ img, svg, canvas {
   .floating-qr-btn {
     display: none !important;
   }
+}
 
+@media (max-width: 1023px) {
   html, body {
     overscroll-behavior-y: none;
   }
