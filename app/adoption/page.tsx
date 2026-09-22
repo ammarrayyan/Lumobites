@@ -13,6 +13,7 @@ import ChatModal from '@/components/ChatModal';
 import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
+import MobileFloatingAction from '@/components/MobileFloatingAction';
 import { useScrollLock } from '@/lib/useScrollLock';
 
 const PartnerReviewsListModal = dynamic(() => import('@/components/PartnerReviewsListModal'), { ssr: false });
@@ -1951,7 +1952,32 @@ function AdoptionContent() {
         />
       )}
 
-      {/* Scroll to Top Floating Button */}
+      {/* Mobile Floating Action Buttons (Side-by-Side Matched Pair) */}
+      <MobileFloatingAction bottomOffset="92px">
+        <div className="flex items-center gap-2">
+          <ScrollToTopButton inline />
+          <button
+            type="button"
+            onClick={() => {
+              const filterArea = document.getElementById('adoption-filters') || document.querySelector('input[placeholder*="Search by city"], input[placeholder*="city"]');
+              if (filterArea) {
+                (filterArea as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const input = filterArea.tagName === 'INPUT' ? filterArea : filterArea.querySelector('input');
+                if (input) (input as HTMLInputElement).focus();
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="pressable flex items-center gap-2 bg-[#DE6B7C] hover:bg-[#C95566] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl border border-white/30 active:scale-95 transition-transform select-none cursor-pointer"
+            aria-label="Filter Adoption Pets"
+          >
+            <Filter className="w-4 h-4 text-white" />
+            <span>Filter Pets</span>
+          </button>
+        </div>
+      </MobileFloatingAction>
+
+      {/* Desktop Floating Scroll to Top Button */}
       <ScrollToTopButton />
     </div>
   );

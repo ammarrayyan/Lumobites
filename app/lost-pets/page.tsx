@@ -1502,20 +1502,23 @@ export default function LostPetsFeed() {
           isPro={aiLimitIsPro}
         />
 
-        {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
+        {/* Mobile Floating Action Buttons (Side-by-Side Matched Pair) */}
         <MobileFloatingAction bottomOffset="92px">
-          <Link
-            href="/lost-pets/post"
-            prefetch={true}
-            className="pressable flex items-center gap-2 bg-[#E05A47] hover:bg-[#C94735] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl hover:shadow-2xl border border-white/30 active:scale-95 transition-transform select-none"
-            style={{ textDecoration: 'none' }}
-          >
-            <PawPrint className="w-4 h-4" />
-            <span>Report Pet</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ScrollToTopButton inline />
+            <Link
+              href="/lost-pets/post"
+              prefetch={true}
+              className="pressable flex items-center gap-2 bg-[#E05A47] hover:bg-[#C94735] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl hover:shadow-2xl border border-white/30 active:scale-95 transition-transform select-none"
+              style={{ textDecoration: 'none' }}
+            >
+              <PawPrint className="w-4 h-4" />
+              <span>Report Pet</span>
+            </Link>
+          </div>
         </MobileFloatingAction>
 
-        {/* Scroll to Top Floating Button */}
+        {/* Desktop Floating Scroll to Top Button */}
         <ScrollToTopButton />
 
         {/* LOST PET IN-APP CHAT MODAL */}

@@ -5,13 +5,13 @@ import { ArrowUp } from 'lucide-react';
 
 interface ScrollToTopButtonProps {
   threshold?: number;
-  bottomOffset?: string;
+  inline?: boolean;
   className?: string;
 }
 
 export default function ScrollToTopButton({
   threshold = 300,
-  bottomOffset,
+  inline = false,
   className = '',
 }: ScrollToTopButtonProps) {
   const [visible, setVisible] = useState(false);
@@ -34,19 +34,32 @@ export default function ScrollToTopButton({
     }
   };
 
-  if (!visible) return null;
+  if (!visible && !inline) return null;
+
+  if (inline) {
+    return (
+      <button
+        type="button"
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        className={`pressable flex items-center gap-1.5 bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold text-xs py-3 px-3.5 rounded-full shadow-xl border border-white/25 active:scale-95 transition-transform select-none cursor-pointer ${className}`}
+      >
+        <ArrowUp className="w-4 h-4 text-white" strokeWidth={2.5} />
+        <span>Top</span>
+      </button>
+    );
+  }
 
   return (
     <button
       type="button"
       onClick={scrollToTop}
       aria-label="Scroll to top"
-      className={`fixed z-[9990] right-4 md:right-8 bg-[#8B5E3C] hover:bg-[#734A2E] text-white w-10 h-10 md:w-11 md:h-11 rounded-full shadow-lg border border-[#E8DDD4] flex items-center justify-center transition-all duration-300 transform active:scale-90 animate-fade-in cursor-pointer select-none ${
-        bottomOffset ? '' : 'bottom-[146px] md:bottom-8'
-      } ${className}`}
-      style={bottomOffset ? { bottom: bottomOffset } : {}}
+      className={`hidden md:flex fixed z-[9990] right-8 bottom-8 bg-[#4A3E3D] hover:bg-[#3A302F] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl border border-white/25 items-center gap-1.5 transition-all duration-300 transform active:scale-95 animate-fade-in cursor-pointer select-none ${className}`}
     >
-      <ArrowUp className="w-5 h-5 text-white" strokeWidth={2.5} />
+      <ArrowUp className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <span>Top</span>
     </button>
   );
 }
+

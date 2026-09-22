@@ -1208,27 +1208,30 @@ export default function CityBoardPage() {
           </div>
         </div>
       )}
-      {/* Mobile Floating Action Button for One-Handed Thumb Reach */}
+      {/* Mobile Floating Action Buttons (Side-by-Side Matched Pair) */}
       <MobileFloatingAction bottomOffset="92px">
-        <button
-          type="button"
-          onClick={() => {
-            const composer = document.getElementById('city-board-composer');
-            if (composer) {
-              composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              const textarea = composer.querySelector('textarea');
-              if (textarea) textarea.focus();
-            }
-          }}
-          className="pressable flex items-center gap-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl border border-white/25 active:scale-95 transition-transform select-none cursor-pointer"
-          aria-label="New Discussion"
-        >
-          <PenLine className="w-4 h-4" />
-          <span>New Post</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ScrollToTopButton inline />
+          <button
+            type="button"
+            onClick={() => {
+              const composer = document.getElementById('city-board-composer');
+              if (composer) {
+                composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const textarea = composer.querySelector('textarea');
+                if (textarea) textarea.focus();
+              }
+            }}
+            className="pressable flex items-center gap-2 bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-3 px-4 rounded-full shadow-xl border border-white/25 active:scale-95 transition-transform select-none cursor-pointer"
+            aria-label="New Discussion"
+          >
+            <PenLine className="w-4 h-4" />
+            <span>New Post</span>
+          </button>
+        </div>
       </MobileFloatingAction>
 
-      {/* Scroll to Top Floating Button */}
+      {/* Desktop Floating Scroll to Top Button */}
       <ScrollToTopButton />
       </div>
     </div>
