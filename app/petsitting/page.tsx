@@ -1533,14 +1533,15 @@ export function PetSittingContent() {
     const handleScroll = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        if (window.scrollY > 0) {
-          try {
-            const existing = sessionStorage.getItem('lumo_petsitting_search_state');
-            const parsed = existing ? JSON.parse(existing) : {};
-            parsed.scrollY = window.scrollY;
-            sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(parsed));
-          } catch (e) {}
-        }
+        try {
+          const existing = sessionStorage.getItem('lumo_petsitting_search_state');
+          const parsed = existing ? JSON.parse(existing) : {};
+          parsed.scrollY = window.scrollY;
+          if (window.scrollY === 0) {
+            delete parsed.targetSitterId;
+          }
+          sessionStorage.setItem('lumo_petsitting_search_state', JSON.stringify(parsed));
+        } catch (e) {}
       }, 50);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -3572,7 +3573,7 @@ export function PetSittingContent() {
             {/* Mobile Floating Action Buttons (Side-by-Side Matched Pair) */}
             <MobileFloatingAction bottomOffset="92px">
               <div className="flex items-center gap-2">
-                <ScrollToTopButton inline />
+                <ScrollToTopButton inline storageKey="lumo_petsitting_search_state" />
                 <button
                   onClick={() => {
                     setActiveTab('become');
@@ -7727,7 +7728,7 @@ export function PetSittingContent() {
       )}
 
       {/* Scroll to Top Floating Button */}
-      <ScrollToTopButton />
+      <ScrollToTopButton storageKey="lumo_petsitting_search_state" />
 
       </div>
     </div>

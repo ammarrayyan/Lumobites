@@ -631,14 +631,15 @@ export default function LostPetsFeed() {
     const handleScroll = () => {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        if (window.scrollY > 0) {
-          try {
-            const existing = sessionStorage.getItem('lumo_lost_pets_search_state');
-            const parsed = existing ? JSON.parse(existing) : {};
-            parsed.scrollY = window.scrollY;
-            sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(parsed));
-          } catch (e) {}
-        }
+        try {
+          const existing = sessionStorage.getItem('lumo_lost_pets_search_state');
+          const parsed = existing ? JSON.parse(existing) : {};
+          parsed.scrollY = window.scrollY;
+          if (window.scrollY === 0) {
+            delete parsed.targetPetId;
+          }
+          sessionStorage.setItem('lumo_lost_pets_search_state', JSON.stringify(parsed));
+        } catch (e) {}
       }, 50);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -1505,7 +1506,7 @@ export default function LostPetsFeed() {
         {/* Mobile Floating Action Buttons (Side-by-Side Matched Pair) */}
         <MobileFloatingAction bottomOffset="92px">
           <div className="flex items-center gap-2">
-            <ScrollToTopButton inline />
+            <ScrollToTopButton inline storageKey="lumo_lost_pets_search_state" />
             <Link
               href="/lost-pets/post"
               prefetch={true}
@@ -1519,7 +1520,7 @@ export default function LostPetsFeed() {
         </MobileFloatingAction>
 
         {/* Desktop Floating Scroll to Top Button */}
-        <ScrollToTopButton />
+        <ScrollToTopButton storageKey="lumo_lost_pets_search_state" />
 
         {/* LOST PET IN-APP CHAT MODAL */}
         {activeChatPet && (() => {

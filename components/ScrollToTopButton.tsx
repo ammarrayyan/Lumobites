@@ -7,12 +7,16 @@ interface ScrollToTopButtonProps {
   threshold?: number;
   inline?: boolean;
   className?: string;
+  storageKey?: string;
+  onScrollToTop?: () => void;
 }
 
 export default function ScrollToTopButton({
   threshold = 300,
   inline = false,
   className = '',
+  storageKey,
+  onScrollToTop,
 }: ScrollToTopButtonProps) {
   const [visible, setVisible] = useState(false);
 
@@ -31,6 +35,34 @@ export default function ScrollToTopButton({
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Update and clear saved scroll position state in sessionStorage so
+      // returning to the page via back navigation preserves the intended "top of page" position.
+      const stateKeys = [
+        'lumo_lost_pets_search_state',
+        'lumo_city_board_search_state',
+        'lumo_petsitting_search_state',
+        'lumo_adoption_search_state',
+      ];
+      if (storageKey && !stateKeys.includes(storageKey)) {
+        stateKeys.push(storageKey);
+      }
+
+      for (const key of stateKeys) {
+        try {
+          const item = sessionStorage.getItem(key);
+          if (item) {
+            const parsed = JSON.parse(item);
+            parsed.scrollY = 0;
+            delete parsed.targetPetId;
+            delete parsed.targetPostId;
+            delete parsed.targetSitterId;
+            sessionStorage.setItem(key, JSON.stringify(parsed));
+          }
+        } catch (e) {}
+      }
+
+      onScrollToTop?.();
     }
   };
 
