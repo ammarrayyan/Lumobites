@@ -57,10 +57,8 @@ export default function MobileBottomNav() {
       style={{
         position: 'fixed',
         bottom: '16px',
-        left: 0,
-        right: 0,
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 9999,
         backgroundColor: '#FFFFFF',
         borderRadius: '36px',
@@ -71,7 +69,7 @@ export default function MobileBottomNav() {
       {/* Crisp Flat Active Pill */}
       {activeIndex >= 0 && !isRaisedActive && (
         <div 
-          className="absolute pointer-events-none transition-all duration-250 ease-out"
+          className="absolute pointer-events-none transition-all duration-200 ease-out"
           style={{
             top: '5px',
             bottom: '5px',
@@ -107,7 +105,7 @@ export default function MobileBottomNav() {
             >
               {/* Elevated Flat Circular Button */}
               <div 
-                className="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-200 group-active:scale-90"
+                className="w-[50px] h-[50px] rounded-full flex items-center justify-center transition-colors duration-150"
                 style={{
                   transform: 'translateY(-14px)',
                   background: isActive ? '#8B5E3C' : '#FAF5EE',
@@ -115,23 +113,21 @@ export default function MobileBottomNav() {
                 }}
               >
                 <Icon
-                  className="w-[23px] h-[23px] transition-all duration-200"
+                  className="w-[23px] h-[23px] transition-colors duration-150"
                   style={{
                     color: isActive ? '#FFFFFF' : '#8B5E3C',
                     fill: isActive ? 'currentColor' : 'none',
-                    strokeWidth: isActive ? 2.5 : 2,
+                    strokeWidth: 2,
                   }}
                 />
               </div>
 
               {/* Label */}
               <span
-                className="text-[11px] sm:text-[11.5px] tracking-tight select-none transition-all duration-200"
+                className="text-[11px] sm:text-[11.5px] font-bold tracking-tight select-none transition-colors duration-150"
                 style={{
                   marginTop: '-11px',
-                  color: isActive ? '#5C381E' : '#4A3E3D',
-                  fontWeight: isActive ? 900 : 700,
-                  transform: isActive ? 'scale(1.04)' : 'scale(1)',
+                  color: isActive ? '#5C381E' : '#666666',
                 }}
               >
                 {tab.label}
@@ -151,27 +147,24 @@ export default function MobileBottomNav() {
               router.prefetch(tab.href);
             }}
             onMouseEnter={() => router.prefetch(tab.href)}
-            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-1 group active:scale-90 transition-transform duration-150 select-none z-10"
+            className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-1 select-none z-10"
             style={{ textDecoration: 'none' }}
           >
-            {/* Icon with Solid Black & Bold Treatment for Active */}
+            {/* Icon */}
             <Icon
-              className="w-[20px] h-[20px] relative z-10 transition-all duration-300 ease-out"
+              className="w-[20px] h-[20px] relative z-10 transition-colors duration-150"
               style={{
-                color: isActive ? '#000000' : '#4A3E3D',
+                color: isActive ? '#191919' : '#666666',
                 fill: isActive ? 'currentColor' : 'none',
-                transform: isActive ? 'scale(1.1) translateY(-1px)' : 'scale(1)',
-                strokeWidth: isActive ? 2.5 : 2,
+                strokeWidth: 2,
               }}
             />
 
             {/* Label */}
             <span
-              className="text-[11px] sm:text-[11.5px] tracking-tight select-none relative z-10 transition-all duration-300 ease-out truncate max-w-full px-0.5"
+              className="text-[11px] sm:text-[11.5px] font-bold tracking-tight select-none relative z-10 transition-colors duration-150 truncate max-w-full px-0.5"
               style={{
-                color: isActive ? '#000000' : '#4A3E3D',
-                fontWeight: isActive ? 900 : 700,
-                transform: isActive ? 'scale(1.02)' : 'scale(1)',
+                color: isActive ? '#191919' : '#666666',
               }}
             >
               {tab.label}

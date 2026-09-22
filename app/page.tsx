@@ -241,10 +241,11 @@ export default function Home() {
       {/* 1. MOBILE & TABLET (< lg): FIXED NON-SCROLLING 100DVH SINGLE VIEWPORT      */}
       {/* ========================================================================= */}
       <main
-        className="fixed inset-x-0 bottom-0 top-[72px] lg:hidden z-10 bg-[#F7F3EE] flex flex-col justify-between overflow-y-auto select-none px-4 sm:px-6 pb-[84px] pt-2 sm:pt-4"
+        className="fixed inset-x-0 bottom-0 lg:hidden z-10 bg-[#F7F3EE] flex flex-col justify-between overflow-y-auto select-none px-4 sm:px-6 pb-[84px] pt-2 sm:pt-4"
         style={{
-          height: 'calc(100dvh - 72px)',
-          maxHeight: 'calc(100dvh - 72px)',
+          top: 'calc(env(safe-area-inset-top, 0px) + 72px)',
+          height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 72px)',
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 72px)',
         }}
       >
         <div className="w-full max-w-[540px] mx-auto flex flex-col items-center text-center my-auto py-1">

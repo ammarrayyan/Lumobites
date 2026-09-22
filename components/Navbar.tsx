@@ -536,7 +536,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             Explore
           </Link>
 
-          <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4" suppressHydrationWarning={true}>
+          <div className="pl-2 lg:pl-4 border-l border-[#EEEEEE] flex items-center gap-2 lg:gap-4 min-w-[120px] justify-end" suppressHydrationWarning={true}>
             <ShareButton />
             {(proEmail || sitterEmail || shelterEmail) && (
               <NotificationBell 
@@ -619,7 +619,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           </div>
         </div>
 
-        <div className="flex xl:hidden items-center gap-2 ml-auto" suppressHydrationWarning={true}>
+        <div className="flex xl:hidden items-center gap-2 ml-auto min-w-[76px] justify-end" suppressHydrationWarning={true}>
           <ShareButton />
           {(proEmail || sitterEmail || shelterEmail) && (
             <NotificationBell 
@@ -633,9 +633,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             <button
               onClick={() => { handleSignInClick(true); setSignInStep('email'); setSignInError(''); }}
               className="bg-[#C17D3C] hover:bg-[#B06D2B] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm transition-colors cursor-pointer border-none"
-              style={{
-                marginBottom: 'env(safe-area-inset-bottom, 20px)'
-              }}
             >
               Sign In
             </button>
