@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendPushNotification } from '@/lib/push';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles, formatSitterName } from '@/lib/email-template';
 
@@ -39,7 +40,8 @@ export async function POST(request: NextRequest) {
       .from('sitting_requests')
       .update({
         status: 'completed',
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
+        review_sent: true
       })
       .eq('id', id);
 
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
     const sitterName = formatSitterName(reqRow.sitters?.name);
     const sitterEmail = reqRow.sitters?.email;
     const petName = reqRow.pet_name || 'your pet';
+    const ownerEmail = reqRow.owner_email ? reqRow.owner_email.toLowerCase().trim() : '';
 
     // 3. Fetch sitter current completed bookings count and increment
     const { data: sitterRow, error: sitterError } = await supabaseAdmin
@@ -72,9 +75,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
+    // 4. Send immediate review-request notification & push to the pet owner
+    if (ownerEmail && sitterId) {
+      const reviewLink = `/petsitting/review/${sitterId}?token=${encodeURIComponent(ownerEmail)}`;
+      const reviewTitle = 'Leave a Review 🐾';
+      const reviewMsg = `How was your pet sitting experience with ${sitterName}? Leave a review`;
 
-    // 4. Sitter notification email
+      try {
+        await supabaseAdmin.from('notifications').insert({
+          recipient_email: ownerEmail,
+          type: 'review_request',
+          title: reviewTitle,
+          message: reviewMsg,
+          link: reviewLink,
+          booking_id: String(reqRow.id),
+          read: false,
+        });
+      } catch (notifErr) {
+        console.error('[Confirm Completed] Failed to insert owner review notification:', notifErr);
+      }
+
+      try {
+        await sendPushNotification(ownerEmail, reviewTitle, reviewMsg, reviewLink);
+      } catch (pushErr) {
+        console.error('[Confirm Completed] Push notification error:', pushErr);
+      }
+    }
+
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Lumo Bites <no-reply@lumobites.net>';
 
     // 5. Send sitter notification email
     if (sitterEmail) {

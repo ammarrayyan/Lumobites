@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       .from('sitting_requests')
       .update({
         status: 'completed',
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
+        review_sent: true
       })
       .eq('id', id);
 
@@ -81,38 +82,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. Send review request email immediately to the owner
+    // 5. Send review request notification & push immediately to the owner
     if (reqRow.owner_email && reqRow.sitter_id) {
+      const ownerEmail = reqRow.owner_email.toLowerCase().trim();
       try {
         const { data: sitter } = await supabaseAdmin
-        .from('sitters')
-        .select('name')
-        .eq('id', reqRow.sitter_id)
-        .single();
-      const sitterName = formatSitterName(sitter?.name);
+          .from('sitters')
+          .select('name')
+          .eq('id', reqRow.sitter_id)
+          .single();
+        const sitterName = formatSitterName(sitter?.name);
+        const reviewLink = `/petsitting/review/${reqRow.sitter_id}?token=${encodeURIComponent(ownerEmail)}`;
+        const reviewTitle = 'Leave a Review 🐾';
+        const reviewMsg = `How was your pet sitting experience with ${sitterName}? Leave a review`;
       
-      try {
-        const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
-          recipient_email: reqRow.owner_email,
-          type: 'booking_completed',
-          title: 'Booking Completed 🎉',
-          message: `Your booking with ${sitterName} is complete`,
-          link: `/petsitting?booking=${reqRow.id}&tab=owner`,
-          booking_id: reqRow.id
-        });
-        if (notifErr) {
-          console.error('[Complete Booking] Notification insert error:', notifErr);
+        try {
+          const { error: notifErr } = await supabaseAdmin.from('notifications').insert({
+            recipient_email: ownerEmail,
+            type: 'review_request',
+            title: reviewTitle,
+            message: reviewMsg,
+            link: reviewLink,
+            booking_id: String(reqRow.id),
+            read: false,
+          });
+          if (notifErr) {
+            console.error('[Complete Booking] Notification insert error:', notifErr);
+          }
+        } catch (err) {
+          console.error('[Complete Booking] Notification exception:', err);
         }
-      } catch (err) {
-        console.error('[Complete Booking] Notification exception:', err);
-      }
 
-      try {
-        await sendPushNotification(reqRow.owner_email, 'Booking Completed 🎉', `Your booking with ${sitterName} is complete`, '/petsitting#owner-history');
-      } catch (err) {
-        console.error('[Complete Booking] Push error:', err);
-      }
-      
+        try {
+          await sendPushNotification(ownerEmail, reviewTitle, reviewMsg, reviewLink);
+        } catch (err) {
+          console.error('[Complete Booking] Push error:', err);
+        }
       } catch (err: any) {
         console.error('[Complete Booking] Failed to send completion notification to owner:', err);
       }
