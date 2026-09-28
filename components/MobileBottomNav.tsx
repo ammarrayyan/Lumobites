@@ -28,25 +28,37 @@ export default function MobileBottomNav() {
     setTappedIndex(null);
   }, [pathname]);
 
-  // Proactively prefetch all bottom nav tabs in the background when idle so switching is instantaneous
+  // App resume recovery: reset any stuck state when returning from background
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const prefetchAll = () => {
-      tabs.forEach(tab => {
-        if (tab.href && tab.href !== pathname) {
-          router.prefetch(tab.href);
-        }
-      });
+
+    const handleResume = () => {
+      setTappedIndex(null);
     };
 
-    if ('requestIdleCallback' in window) {
-      const handle = (window as any).requestIdleCallback(prefetchAll, { timeout: 2000 });
-      return () => (window as any).cancelIdleCallback(handle);
-    } else {
-      const timer = setTimeout(prefetchAll, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [router, pathname]);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleResume();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handleResume);
+    window.addEventListener('focus', handleResume);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handleResume);
+      window.removeEventListener('focus', handleResume);
+    };
+  }, []);
+
+  const handleTabClick = (e: React.MouseEvent, href: string, idx: number) => {
+    e.preventDefault();
+    if (pathname === href) return;
+    setTappedIndex(idx);
+    router.push(href);
+  };
 
   const activeIndex = tappedIndex !== null ? tappedIndex : (currentActiveIndex >= 0 ? currentActiveIndex : 2);
   const isRaisedActive = activeIndex >= 0 && tabs[activeIndex]?.isRaised;
@@ -92,13 +104,8 @@ export default function MobileBottomNav() {
             <Link
               key={tab.label}
               href={tab.href}
-              prefetch={true}
-              onClick={() => setTappedIndex(idx)}
-              onTouchStart={() => {
-                setTappedIndex(idx);
-                router.prefetch(tab.href);
-              }}
-              onMouseEnter={() => router.prefetch(tab.href)}
+              prefetch={false}
+              onClick={(e) => handleTabClick(e, tab.href, idx)}
               className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer select-none group z-20"
               style={{ textDecoration: 'none' }}
               aria-label="Home"
@@ -140,13 +147,8 @@ export default function MobileBottomNav() {
           <Link
             key={tab.label}
             href={tab.href}
-            prefetch={true}
-            onClick={() => setTappedIndex(idx)}
-            onTouchStart={() => {
-              setTappedIndex(idx);
-              router.prefetch(tab.href);
-            }}
-            onMouseEnter={() => router.prefetch(tab.href)}
+            prefetch={false}
+            onClick={(e) => handleTabClick(e, tab.href, idx)}
             className="relative flex flex-col items-center justify-center h-full flex-1 cursor-pointer gap-1 select-none z-10"
             style={{ textDecoration: 'none' }}
           >
