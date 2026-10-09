@@ -17,7 +17,7 @@ export default function MobileBottomNav() {
     { label: 'Lost Pets', icon: MapPin, href: '/lost-pets', isActive: pathname === '/lost-pets' },
     { label: 'Home', icon: Home, href: '/', isActive: pathname === '/', isRaised: true },
     { label: 'Community', icon: Users, href: '/city-board', isActive: isCommunityActive },
-    { label: 'Pet Food', icon: Utensils, href: '/chat', isActive: isFoodActive },
+    { label: 'Pet Food', icon: Utensils, href: '/scan', isActive: isFoodActive },
   ];
 
   const currentActiveIndex = tabs.findIndex(tab => tab.isActive);
