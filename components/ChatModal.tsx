@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
-import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat, Star } from 'lucide-react';
+import { X, Send, CheckCheck, Check, Phone, Video, Info, PawPrint, Dog, Cat, Star, Ban } from 'lucide-react';
 import PetPhotoCarousel from './PetPhotoCarousel';
 import BookingProgressStepper from './BookingProgressStepper';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -41,6 +41,7 @@ interface ChatModalProps {
   otherUserEmail: string;
   otherUserType: 'sitter' | 'user' | 'shelter' | 'poster';
   onReport: (email: string, type: 'sitter' | 'user' | 'shelter' | 'poster') => void;
+  onBlock?: (email: string) => void;
   petDetails?: any;
   chatType?: 'petsitting' | 'adoption' | 'lost_pets';
   shelterId?: string;
@@ -117,6 +118,7 @@ export default function ChatModal({
   otherUserEmail,
   otherUserType,
   onReport,
+  onBlock,
   petDetails,
   chatType = 'petsitting',
   shelterId,
@@ -443,6 +445,15 @@ export default function ChatModal({
                 }`}
               >
                 <PawPrint size={16} />
+              </button>
+            )}
+            {otherUserEmail && onBlock && (
+              <button 
+                onClick={() => onBlock(otherUserEmail)} 
+                title={`Block ${displayName}`}
+                className="w-8 h-8 rounded-full hover:bg-rose-50 flex items-center justify-center text-rose-600 transition-colors mr-1 cursor-pointer"
+              >
+                <Ban size={15} />
               </button>
             )}
             {otherUserEmail && (

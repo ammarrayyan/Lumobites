@@ -123,6 +123,36 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
     }
   };
 
+  const handleBlockUser = async (email: string) => {
+    if (!email) return;
+    if (!window.confirm("Are you sure you want to block this user? You will no longer see their inquiries or listings.")) return;
+    try {
+      const blocker = currentUserEmail || 'anonymous@lumobites.net';
+      await fetch('/api/petsitting/block', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blockerEmail: blocker,
+          blockedEmail: email
+        })
+      });
+      if (typeof window !== 'undefined') {
+        try {
+          const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');
+          if (!currentBlocked.includes(email.toLowerCase().trim())) {
+            currentBlocked.push(email.toLowerCase().trim());
+            localStorage.setItem('lumo_blocked_emails', JSON.stringify(currentBlocked));
+          }
+        } catch {}
+      }
+      alert('User blocked successfully.');
+      if (isShelter) router.push('/adoption/shelter/dashboard');
+      else router.push('/adoption');
+    } catch {
+      alert('Failed to block user. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFAF7]">
       <ChatModal
@@ -138,6 +168,7 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
         otherUserEmail={targetEmail}
         otherUserType={isShelter ? 'user' : 'shelter'}
         onReport={handleReportUser}
+        onBlock={handleBlockUser}
         petDetails={pet}
         chatType="adoption"
         shelterId={(pet as any)?.shelter_id}

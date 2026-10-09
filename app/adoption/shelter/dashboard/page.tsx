@@ -2340,6 +2340,35 @@ function ShelterDashboardContent() {
               alert('An error occurred submitting the report. Please try again.');
             }
           }}
+          onBlock={async (email) => {
+            if (!email) return;
+            if (!window.confirm("Are you sure you want to block this user? You will no longer receive inquiries from them.")) return;
+            try {
+              const blocker = shelterInfo?.email || 'anonymous@lumobites.net';
+              await fetch('/api/petsitting/block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  blockerEmail: blocker,
+                  blockedEmail: email
+                })
+              });
+              if (typeof window !== 'undefined') {
+                try {
+                  const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');
+                  if (!currentBlocked.includes(email.toLowerCase().trim())) {
+                    currentBlocked.push(email.toLowerCase().trim());
+                    localStorage.setItem('lumo_blocked_emails', JSON.stringify(currentBlocked));
+                  }
+                } catch {}
+              }
+              alert('User blocked successfully.');
+              setChatOpen(false);
+              setActiveChatInquiry(null);
+            } catch {
+              alert('Failed to block user. Please try again.');
+            }
+          }}
           petDetails={activeChatInquiry.pets || activeChatInquiry.adoption_pets || pets.find(p => p.id === activeChatInquiry.pet_id)}
           chatType="adoption"
           shelterId={shelterInfo?.id}

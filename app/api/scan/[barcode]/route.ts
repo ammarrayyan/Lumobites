@@ -18,12 +18,15 @@ export async function GET(
     }
 
     // Check for recalls by brand and product name
+    let recallStatus: 'clear' | 'active' | 'unavailable' = 'unavailable';
     let hasRecall = false;
     let recallReason = '';
 
     try {
-      const searchTerms = `${product.brand} ${product.product_name}`.replace(/[^\w\s]/g, ' ');
-      const fdaRes = await fetch(`https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(product.brand)}"&limit=10`);
+      const fdaRes = await fetch(
+        `https://api.fda.gov/food/enforcement.json?search=product_description:"${encodeURIComponent(product.brand)}"&limit=10`,
+        { signal: AbortSignal.timeout(5000) }
+      );
       
       if (fdaRes.ok) {
         const fdaData = await fdaRes.json();
@@ -36,18 +39,31 @@ export async function GET(
           });
           
           if (match) {
+            recallStatus = 'active';
             hasRecall = true;
             recallReason = match.reason_for_recall;
+          } else {
+            recallStatus = 'clear';
           }
+        } else {
+          recallStatus = 'clear';
         }
+      } else if (fdaRes.status === 404) {
+        // openFDA returns 404 when no results match the search query (i.e. zero recalls found)
+        recallStatus = 'clear';
+      } else {
+        // Non-200 / non-404 status (e.g. 500/503 server error or 429 rate limit)
+        recallStatus = 'unavailable';
       }
     } catch (e) {
       console.error('FDA check error:', e);
+      recallStatus = 'unavailable';
     }
 
     return NextResponse.json({
       product,
       hasRecall,
+      recallStatus,
       recallReason
     });
   } catch (error) {

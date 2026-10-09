@@ -91,6 +91,7 @@ function ScanPageContent() {
   const [rawOcrText, setRawOcrText] = useState<string | null>(null);
   const [ocrReviewText, setOcrReviewText] = useState<string>('');
   const [hasRecall, setHasRecall] = useState(false);
+  const [recallStatus, setRecallStatus] = useState<'clear' | 'active' | 'unavailable' | null>(null);
   const [recallReason, setRecallReason] = useState('');
   const [manualBarcode, setManualBarcode] = useState('');
   const [manualIngredients, setManualIngredients] = useState('');
@@ -683,6 +684,7 @@ function ScanPageContent() {
     setProduct(null);
     setSafetyResults(null);
     setHasRecall(false);
+    setRecallStatus(null);
     setRecallReason('');
     
     try {
@@ -693,10 +695,11 @@ function ScanPageContent() {
         throw new Error(data?.error || "Barcode not recognized. We couldn't find this product in our database. Please scan the ingredients list on the back of the package instead, or enter them manually.");
       } else {
         setProduct(data.product);
-        setHasRecall(data.hasRecall);
-        setRecallReason(data.recallReason);
+        setRecallStatus(data.recallStatus || (data.hasRecall ? 'active' : 'clear'));
+        setHasRecall(data.recallStatus === 'active' || !!data.hasRecall);
+        setRecallReason(data.recallReason || '');
         if (data.product.ingredients) {
-          await analyzeIngredients(data.product.ingredients, data.hasRecall, true);
+          await analyzeIngredients(data.product.ingredients, data.recallStatus === 'active' || !!data.hasRecall, true);
         } else {
           throw new Error("Product found in database, but it has no ingredients list. Please scan the ingredients list on the back of the package instead, or enter them manually.");
         }
@@ -907,6 +910,9 @@ function ScanPageContent() {
     setOcrReviewText('');
     setLoading(false);
     setOcrLoading(false);
+    setHasRecall(false);
+    setRecallStatus(null);
+    setRecallReason('');
     setRecallSubscribed(false);
     setRecallSubError('');
     setRecallSuccessMsg('');
@@ -1185,22 +1191,41 @@ function ScanPageContent() {
         {product && !loading && !ocrLoading && (
           <div className="space-y-6 animate-fade-in-up">
 
-            {hasRecall ? (
+            {recallStatus === 'active' || hasRecall ? (
               <div className="bg-[#FEE2E2] border-2 border-[#EF4444] rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <AlertTriangle className="w-8 h-8 text-red-600 shrink-0" />
-                    <h3 className="text-[#991B1B] text-xl font-black leading-tight uppercase">WARNING: Recall Active</h3>
+                  <AlertTriangle className="w-8 h-8 text-red-600 shrink-0" />
+                  <h3 className="text-[#991B1B] text-xl font-black leading-tight uppercase">WARNING: Recall Active</h3>
                 </div>
                 <p className="text-[#B91C1C] font-bold mb-3">This product or brand has an active FDA recall!</p>
-                <div className="bg-white/70 rounded-xl p-4 text-[#7F1D1D] text-sm">
+                {recallReason && (
+                  <div className="bg-white/70 rounded-xl p-4 text-[#7F1D1D] text-sm mb-3">
                     <p><strong>FDA Reason for Recall:</strong> {recallReason}</p>
-                </div>
+                  </div>
+                )}
+                <p className="text-[11px] text-[#991B1B]/80 italic mt-2 mb-0 text-center">
+                  Recall data comes from FDA enforcement reports and may not include every recall.
+                </p>
+              </div>
+            ) : recallStatus === 'unavailable' ? (
+              <div className="bg-[#FFFBEB] border-2 border-[#F59E0B] rounded-2xl p-6 text-center flex flex-col items-center justify-center">
+                <AlertTriangle className="w-10 h-10 text-amber-600 mb-2" />
+                <h3 className="text-[#92400E] text-xl font-black uppercase">Recall Check Unavailable</h3>
+                <p className="text-[#78350F] font-medium mt-1">
+                  We couldn&apos;t reach the FDA recall database. Check FDA.gov for recent pet food alerts.
+                </p>
+                <p className="text-[11px] text-amber-800/80 italic mt-2 mb-0">
+                  Recall data comes from FDA enforcement reports and may not include every recall.
+                </p>
               </div>
             ) : product.product_name !== 'Unknown Product' && (
               <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center flex flex-col items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 mb-2" />
-                <h3 className="text-[#166534] text-xl font-black uppercase">No Active Recalls Found</h3>
-                <p className="text-[#14532D] font-medium mt-1">No active recalls found for this product</p>
+                <h3 className="text-[#166534] text-xl font-black uppercase">No FDA Recalls Found</h3>
+                <p className="text-[#14532D] font-medium mt-1">No FDA recalls found for this brand</p>
+                <p className="text-[11px] text-emerald-800/80 italic mt-2 mb-0">
+                  Recall data comes from FDA enforcement reports and may not include every recall.
+                </p>
               </div>
             )}
 

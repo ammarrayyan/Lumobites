@@ -1769,6 +1769,34 @@ function AdoptionContent() {
               alert('An error occurred submitting the report. Please try again.');
             }
           }}
+          onBlock={async (email) => {
+            if (!email) return;
+            if (!window.confirm("Are you sure you want to block this organization? You will no longer see their listings.")) return;
+            try {
+              const blocker = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || localStorage.getItem('lumo_shelter_email') || 'anonymous@lumobites.net';
+              await fetch('/api/petsitting/block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  blockerEmail: blocker,
+                  blockedEmail: email
+                })
+              });
+              if (typeof window !== 'undefined') {
+                try {
+                  const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');
+                  if (!currentBlocked.includes(email.toLowerCase().trim())) {
+                    currentBlocked.push(email.toLowerCase().trim());
+                    localStorage.setItem('lumo_blocked_emails', JSON.stringify(currentBlocked));
+                  }
+                } catch {}
+              }
+              alert('Organization blocked successfully.');
+              setActiveChatPet(null);
+            } catch {
+              alert('Failed to block organization. Please try again.');
+            }
+          }}
           petDetails={activeChatPet}
           chatType="adoption"
           shelterId={activeChatPet.shelter_id}
