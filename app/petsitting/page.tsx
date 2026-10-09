@@ -3545,7 +3545,7 @@ export function PetSittingContent() {
       {showUpdatedToast && (
         <div className="fixed top-24 right-4 bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg z-50 flex items-center gap-1.5 animate-fade-in-up pointer-events-none">
           <Sparkles className="w-4 h-4 text-white" />
-          <span>Bookings Updated in Real-time</span>
+          <span>Bookings Update Automatically</span>
         </div>
       )}
 
@@ -5836,7 +5836,7 @@ export function PetSittingContent() {
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-bold text-green-700 flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Already submitted</p>
-                          <p className="text-xs text-green-600 mt-0.5">Your ID is securely on file and cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="underline font-semibold text-green-700 hover:text-green-800">info@lumobitespet.com</a> if you need to update your ID.</p>
+                          <p className="text-xs text-green-600 mt-0.5">Your ID is on file and cannot be changed. Contact <a href="mailto:info@lumobitespet.com" className="underline font-semibold text-green-700 hover:text-green-800">info@lumobitespet.com</a> if you need to update your ID.</p>
                         </div>
                       </div>
                     </div>

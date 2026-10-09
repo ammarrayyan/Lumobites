@@ -20,13 +20,13 @@ export default function PrivacyPage() {
         </ul>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>2. Information We Do Not Collect</h2>
-        <p className="mt-2">We do not collect government social security numbers, human medical records, or credit card numbers directly on our servers. All payment processing is handled securely by our third-party payment processor. Pet health, care, and dietary notes stored on the platform are voluntary and managed directly by the user for pet care coordination.</p>
+        <p className="mt-2">We do not collect government social security numbers, human medical records, or credit card numbers directly on our servers. All payment processing is handled by our third-party payment processor. Pet health, care, and dietary notes stored on the platform are voluntary and managed directly by the user for pet care coordination.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>3. Analytics Data</h2>
         <p className="mt-2">We collect anonymous usage data to understand feature usage and improve our platform. This data cannot be used to identify you personally.</p>
         
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>4. Identity & Organization Verification</h2>
-        <p className="mt-2">Government ID and organization verification documents are used solely to confirm identity or legitimacy before granting certain account types. These documents are stored securely and are only accessible to authorized administrators. We do not share this information with third parties. Verification documents are retained only as long as reasonably necessary to provide the service or comply with legal obligations. You may request deletion of your verification documents by contacting us.</p>
+        <p className="mt-2">Government ID and organization verification documents are used solely to confirm identity or legitimacy before granting certain account types. These documents are stored in private storage and are only accessible to authorized administrators. We do not share this information with third parties. Verification documents are retained only as long as reasonably necessary to provide the service or comply with legal obligations. You may request deletion of your verification documents by contacting us.</p>
 
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>5. How We Use & Share Information</h2>
         <p className="mt-2">We use collected information to operate our marketplace, community, and care coordination features. Information is shared only as necessary to facilitate requested platform interactions:</p>
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
         <p className="mt-2">We never sell your personal data. Information is shared only as necessary to operate the platform &mdash; for example, sharing relevant profile information between users engaging in a transaction or conversation. We may also disclose information if required by law, or to protect our legal rights, our users, or the public.</p>
         
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>12. Payment Security</h2>
-        <p className="mt-2">Payment and subscription data is securely handled by our third-party payment processor. We do not store or directly process your payment card information on our servers.</p>
+        <p className="mt-2">Payment and subscription data is handled by our third-party payment processor. We do not store or directly process your payment card information on our servers.</p>
         
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginTop: '32px', color: '#191919' }}>13. Data Storage & Security</h2>
         <p className="mt-2">Your data is stored using industry-standard encryption and security protocols. While we use reasonable safeguards to protect your information, no method of electronic storage or transmission is completely secure, and we cannot guarantee absolute security. In the event of a data breach affecting your personal information, we will notify affected users as required by applicable law.</p>

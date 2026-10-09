@@ -109,7 +109,7 @@ export const ingredientDatabase: IngredientInfo[] = [
   { name: 'Salmon Oil', category: 'good', reason: 'Omega-3 coat and skin health', effects: 'Pure source of DHA and EPA.' },
   { name: 'Fish Oil', category: 'good', reason: 'Omega-3 anti-inflammatory', effects: 'Supports joint and heart health.' },
   { name: 'Coconut Oil', category: 'good', reason: 'Antimicrobial medium chain fatty acids', effects: 'Supports metabolism and brain.' },
-  { name: 'Vitamin E', category: 'good', reason: 'Natural preservative antioxidant', effects: 'Safest way to preserve food.' },
+  { name: 'Vitamin E', category: 'good', reason: 'Natural preservative antioxidant', effects: 'A natural and effective way to preserve food.' },
   { name: 'Tocopherols', category: 'good', reason: 'Natural preservative antioxidant', effects: 'Natural source of Vitamin E.' },
   { name: 'Vitamin C', category: 'good', reason: 'Antioxidant immune support', effects: 'Boosts natural defenses.' },
   { name: 'Ascorbic Acid', category: 'good', reason: 'Antioxidant immune support', effects: 'Natural preservative and vitamin.' },

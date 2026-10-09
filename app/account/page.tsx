@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User } from 'lucide-react';
+import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User, HelpCircle } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { signOutUser } from '@/lib/authHelper';
@@ -1233,6 +1233,14 @@ export default function AccountPage() {
                           </div>
                         </div>
                       )}
+
+                      {/* Help & Support Button */}
+                      <Link
+                        href="/contact"
+                        className="w-full bg-white hover:bg-gray-50 border border-gray-200 text-[#191919] py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer text-center flex items-center justify-center gap-2 shadow-2xs hover:shadow-xs no-underline"
+                      >
+                        <HelpCircle className="w-4 h-4 text-[#8B5E3C]" /> Help & Support
+                      </Link>
 
                       {/* Sign Out (This Device) Button */}
                       <button

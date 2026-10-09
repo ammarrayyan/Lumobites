@@ -96,6 +96,33 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
     );
   }
 
+  const handleReportUser = async (email: string, type: 'sitter' | 'user' | 'shelter' | 'poster') => {
+    if (!email) return;
+    const reason = window.prompt("Please state the reason for reporting this user/conversation:");
+    if (!reason || !reason.trim()) return;
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reported_email: email,
+          reporter_email: currentUserEmail || 'anonymous@lumobites.net',
+          reason: reason.trim(),
+          details: `Adoption inquiry report for pet: ${pet?.name || petId}`,
+          reported_type: type,
+        }),
+      });
+      if (res.ok) {
+        alert('Thank you. Your report has been submitted to admin for review.');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Failed to submit report. Please try again.');
+      }
+    } catch {
+      alert('An error occurred submitting the report. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFAF7]">
       <ChatModal
@@ -110,7 +137,7 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
         otherUserName={displayName}
         otherUserEmail={targetEmail}
         otherUserType={isShelter ? 'user' : 'shelter'}
-        onReport={() => {}}
+        onReport={handleReportUser}
         petDetails={pet}
         chatType="adoption"
         shelterId={(pet as any)?.shelter_id}

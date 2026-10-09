@@ -269,7 +269,7 @@ export default function SitterPromoPosterModal({ isOpen, onClose, sitter }: Sitt
                     </div>
                   </div>
                   <p className="text-[10px] font-bold text-[#4A3E3D] leading-tight mt-1">
-                    Direct Booking & Real-Time Updates
+                    Direct Booking & Live Updates
                   </p>
                 </div>
 

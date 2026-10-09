@@ -60,7 +60,7 @@ export async function sendShelterApprovalEmail(toEmail: string, orgName: string)
         <h1 style="${emailStyles.h1}">Account Approved! 🎉</h1>
         <p style="${emailStyles.p}">Great news! <strong>${orgName}</strong> has been approved as an official rescue partner on Lumo Bites.</p>
         
-        <p style="${emailStyles.p}">You can now log in to your shelter dashboard to post pets, manage adoptable listings, and reply to adopter inquiries in real-time.</p>
+        <p style="${emailStyles.p}">You can now log in to your shelter dashboard to post pets, manage adoptable listings, and reply to adopter inquiries directly.</p>
 
         <div style="text-align:center;margin:28px 0;">
           <a href="${dashboardUrl}" style="background-color:#8B5E3C;color:#FFFFFF;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 28px;border-radius:12px;display:inline-block;">

@@ -2314,7 +2314,32 @@ function ShelterDashboardContent() {
           otherUserName={activeChatInquiry.sender_email === shelterInfo?.email ? (activeChatInquiry.receiver_email?.split('@')[0] || 'Adopter') : (activeChatInquiry.sender_email?.split('@')[0] || 'Adopter')}
           otherUserEmail={activeChatInquiry.sender_email === shelterInfo?.email ? activeChatInquiry.receiver_email : activeChatInquiry.sender_email}
           otherUserType="user"
-          onReport={() => {}}
+          onReport={async (email, type) => {
+            if (!email) return;
+            const reason = window.prompt("Please state the reason for reporting this user/conversation:");
+            if (!reason || !reason.trim()) return;
+            try {
+              const res = await fetch('/api/reports', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  reported_email: email,
+                  reporter_email: shelterInfo?.email || 'anonymous@lumobites.net',
+                  reason: reason.trim(),
+                  details: `Shelter adopter inquiry report for pet ID: ${activeChatInquiry?.pet_id}`,
+                  reported_type: type || 'user',
+                }),
+              });
+              if (res.ok) {
+                alert('Thank you. Your report has been submitted for admin review.');
+              } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || 'Failed to submit report. Please try again.');
+              }
+            } catch {
+              alert('An error occurred submitting the report. Please try again.');
+            }
+          }}
           petDetails={activeChatInquiry.pets || activeChatInquiry.adoption_pets || pets.find(p => p.id === activeChatInquiry.pet_id)}
           chatType="adoption"
           shelterId={shelterInfo?.id}

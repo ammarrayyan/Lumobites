@@ -532,7 +532,7 @@ export default function Home() {
             </div>
             <h2 className="text-xl font-extrabold text-[#2B231D] mb-1.5">Meet Your Pet Community</h2>
             <p className="text-base text-[#2B231D] leading-relaxed mb-5 font-normal">
-              Join neighborhood discussions, get real-time local pet updates, and share recommendations with fellow pet owners in your area.
+              Join neighborhood discussions, get local pet updates, and share recommendations with fellow pet owners in your area.
             </p>
             <Link 
               href="/explore"

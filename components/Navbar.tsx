@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X, Building2 } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X, Building2, HelpCircle } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
 import { getSignedInUserEmail } from '@/lib/authHelper';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -748,6 +748,16 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             >
               <Building2 className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
               Partner Portal
+            </Link>
+
+            {/* Help & Support (mobile) */}
+            <Link 
+              href="/contact" 
+              className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none"
+              onClick={() => setIsOpen(false)}
+            >
+              <HelpCircle className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+              Help & Support
             </Link>
 
             
