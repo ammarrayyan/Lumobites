@@ -484,12 +484,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             Adoption
           </Link>
 
-          {/* Safety Check */}
+          {/* Scan Food */}
           <Link href="/scan" className="text-[#666666] font-medium hover:text-[#8B5E3C] transition-colors flex items-center nav-link whitespace-nowrap" style={{ fontSize: 'var(--text-nav)' }}>
             <svg className="w-4 h-4 inline-block mr-1.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            Safety Check
+            Scan Food
           </Link>
 
           {/* Find Food */}
@@ -680,7 +680,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               <svg className="w-4 h-4 inline-block mr-2.5 align-middle" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Safety Check
+              Scan Food
             </Link>
 
             {/* Find Food */}

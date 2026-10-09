@@ -47,7 +47,7 @@ export default function ExploreClient() {
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
             <span className="text-base md:text-lg font-bold text-[#8B5E3C] tracking-tight">Free to Join</span>
-            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>No Hidden Fees</span>
+            <span className="text-[#9A7760] font-medium uppercase tracking-[0.08em] mt-0.5" style={{ fontSize: 'var(--text-small)' }}>Free to Join</span>
           </div>
           <div className="hidden md:block w-px h-8 bg-[#D9C0A8]"></div>
           <div className="flex flex-col items-center">
@@ -101,7 +101,7 @@ export default function ExploreClient() {
               <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
                 <Search className="w-7 h-7 text-[#8B5E3C]" />
               </div>
-              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
+              <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Ingredient Check</h3>
               <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Scan any pet food label to analyze ingredients and flag potential allergens, fillers, and low-quality additives — graded A to F.</p>
             </div>
             <Link href="/adoption" className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center no-underline">

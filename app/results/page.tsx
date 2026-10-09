@@ -193,6 +193,9 @@ export default function ResultsPage() {
                 </div>
               )}
               <p style={{ color: '#555555', margin: 0, fontSize: 'var(--text-body)' }}>Showing {results.length} results for your pet</p>
+              <p className="text-[11px] text-gray-400 italic mt-1 mb-0">
+                AI can make mistakes. Check with your vet about your pet&apos;s nutrition.
+              </p>
             </div>
             <Link 
               href={`/scan?pet_type=${profile.pet_type}&age_years=${profile.age_years}&budget=${budget}&issues=${profile.health_issues.join(',')}`}

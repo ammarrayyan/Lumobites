@@ -1232,6 +1232,9 @@ function ScanPageContent() {
                       </p>
                     </div>
                   </div>
+                  <p className="text-[11px] text-gray-400 italic text-center -mt-1 mb-2 px-1">
+                    AI can make mistakes. Check with your vet about your pet&apos;s nutrition.
+                  </p>
 
                   {/* Detailed Analysis Breakdown */}
                   <div className="space-y-4">

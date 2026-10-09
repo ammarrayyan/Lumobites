@@ -44,8 +44,8 @@ export default function AppDownloadSection() {
             <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-white border border-[#E8DDD4] shadow-xs">
               <CheckCircle2 className="w-4 h-4 text-[#8B5E3C] shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-xs font-bold text-[#191919]">Camera Safety Scanner</h4>
-                <p className="text-[11px] text-[#666666] leading-snug">Scan pet food barcodes &amp; labels for toxic ingredients.</p>
+                <h4 className="text-xs font-bold text-[#191919]">Camera Food Scanner</h4>
+                <p className="text-[11px] text-[#666666] leading-snug">Scan pet food barcodes &amp; labels to analyze ingredients.</p>
               </div>
             </div>
 
