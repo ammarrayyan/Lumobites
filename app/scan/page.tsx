@@ -58,7 +58,7 @@ export default function ScanPage() {
         }}
       >
         <p className="text-lg font-medium text-[#4A3E3D] mb-2">
-          Pet Food Safety Scanner
+          Pet Food Ingredient Scanner
         </p>
         <p className="text-gray-500 mb-6">
           Sign in to use the scanner
@@ -961,12 +961,12 @@ function ScanPageContent() {
             {/* Shield / Safety Badge */}
             <div className="inline-flex items-center gap-1.5 bg-[#8B5E3C]/10 border border-[#8B5E3C]/20 text-[#8B5E3C] text-[11px] font-extrabold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs">
               <ShieldCheck className="w-3.5 h-3.5 text-[#8B5E3C]" />
-              Live FDA Safety Check
+              FDA Recalls &amp; Ingredient Analysis
             </div>
             
-            <h2 className="text-2xl sm:text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Is This Food Safe?</h2>
+            <h2 className="text-2xl sm:text-3xl font-[900] text-[#191919] mb-2 tracking-tight">Analyze Food Ingredients</h2>
             <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-[420px]">
-              Scan barcode or capture package ingredients for instant AI toxicity analysis &amp; live FDA recall verification
+              Scan barcode or capture package ingredients for instant AI ingredient analysis &amp; live FDA recall checks
             </p>
           </div>
 
@@ -1168,7 +1168,7 @@ function ScanPageContent() {
               <p className="text-gray-500 text-sm max-w-[320px] mx-auto leading-relaxed">
                 {ocrLoading 
                   ? 'Extracting ingredient text from your camera capture...' 
-                  : 'Evaluating ingredient safety and nutritional risk factors against veterinary standards.'}
+                  : 'Evaluating ingredient quality, nutritional factors, and active FDA recall databases.'}
               </p>
             </div>
           )}
@@ -1199,19 +1199,19 @@ function ScanPageContent() {
             ) : product.product_name !== 'Unknown Product' && (
               <div className="bg-[#DCFCE7] border-2 border-[#166534] rounded-2xl p-6 text-center flex flex-col items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 mb-2" />
-                <h3 className="text-[#166534] text-xl font-black uppercase">Safety Verified</h3>
+                <h3 className="text-[#166534] text-xl font-black uppercase">No Active Recalls Found</h3>
                 <p className="text-[#14532D] font-medium mt-1">No active recalls found for this product</p>
               </div>
             )}
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8DDD4]">
-              <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Safety Report for</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#8B5E3C] font-bold mb-1">Ingredient Report for</p>
               <h4 className="text-xl font-extrabold text-[#191919] mb-1">
                 {product.product_name && product.product_name !== 'Custom Entry' && product.product_name !== 'Unknown Product' 
                   ? product.product_name 
                   : (product.brand && product.brand !== 'User Input' && product.brand !== 'Unknown Brand' 
                       ? product.brand 
-                      : 'Safety Report')}
+                      : 'Ingredient Report')}
               </h4>
               {product.brand && product.brand !== 'User Input' && product.brand !== 'Camera Scan' && <p className="text-[#8B5E3C] font-bold mb-4">{product.brand}</p>}
               
@@ -1226,7 +1226,7 @@ function ScanPageContent() {
                       {safetyResults.grade}
                     </div>
                     <div className="flex-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">AI Safety Grade</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">AI Ingredient Grade</span>
                       <p className="text-xs text-gray-700 font-bold leading-normal mt-0.5">
                         {safetyResults.summary}
                       </p>

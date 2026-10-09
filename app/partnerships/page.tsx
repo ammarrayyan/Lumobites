@@ -43,7 +43,7 @@ export default async function PartnershipsPage({
             <div className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-4.5 space-y-1">
               <h3 className="font-bold text-[#2E2419] text-sm">Pet Food Brands</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Get featured in our AI food recommendations reaching thousands of pet owners daily.
+                Get featured in our AI food recommendations reaching pet owners actively searching for pet care and nutrition.
               </p>
             </div>
             <div className="bg-[#FAF6F2] border border-[#E2D5C8] rounded-xl p-4.5 space-y-1">

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -18,10 +18,10 @@ interface WheelItem {
 const WHEEL_ITEMS: WheelItem[] = [
   {
     id: 'petsitting',
-    title: 'Pet Sitting & Boarding',
-    category: 'Trusted Local Care',
+    title: 'Pet Sitting',
+    category: 'Local Pet Care',
     badge: 'Verified Sitters',
-    description: 'Find trusted ID-verified sitters & veterinary boarding facilities near you.',
+    description: 'Find ID-verified pet sitters in your neighborhood.',
     image: '/screenshots/petsitting.png',
     link: '/petsitting',
     color: '#C17D3C',
@@ -71,7 +71,7 @@ const WHEEL_ITEMS: WheelItem[] = [
     title: 'AI Pet Food Advisor',
     category: 'Nutrition & Health',
     badge: 'Personalized Plan',
-    description: 'Compare formulas, check toxic ingredients, and find ideal pet foods.',
+    description: 'Compare formulas, flag ingredients known to be harmful to pets, and find ideal pet foods.',
     image: '/screenshots/chat.png',
     link: '/chat',
     color: '#4E9F76',

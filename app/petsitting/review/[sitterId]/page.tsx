@@ -165,7 +165,7 @@ export default function SitterReviewPage() {
               </div>
               <h2 className="text-2xl font-black text-[#2E2419] mb-3">Thank you for your review!</h2>
               <p className="text-gray-600 leading-relaxed mb-8">
-                Your feedback has been successfully saved and helps build a trusted marketplace for the whole Lumo Bites community.
+                Your feedback has been successfully saved and helps build an active marketplace for the whole Lumo Bites community.
               </p>
               <button
                 onClick={() => router.push('/petsitting')}

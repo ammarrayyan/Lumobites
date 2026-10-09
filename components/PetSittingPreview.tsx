@@ -93,7 +93,7 @@ export default function PetSittingPreview() {
             <Home className="w-7 h-7 text-[#8B5E3C] flex-shrink-0" /> Find a Sitter or Make Money Sitting Pets
           </h2>
           <p className="text-[#666666] text-sm md:text-base leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
-            Find trusted local pet sitters in your neighborhood — verified profiles, real reviews, free to join. Or, sign up as a sitter to earn money doing what you love!
+            Find local ID-verified pet sitters in your neighborhood — verified profiles, real reviews, free to join. Or, sign up as a sitter to earn money doing what you love!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
             <NextLink 

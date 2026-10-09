@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
-  description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
+  description: "Find local ID-verified pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
   manifest: "/manifest.json",
   icons: {
     icon: "/Logo.png",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
-    description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
+    description: "Find local ID-verified pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
     url: "https://lumobites.net",
     images: [
       {
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Lumo Bites - Pet Care, Sitting, Food & More | lumobites.net",
-    description: "Find trusted pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
+    description: "Find local ID-verified pet sitters, scan pet food ingredients, get FDA recall alerts, discover your Pet Twin and more. Free to join.",
     images: ["https://lumobites.net/og-image.png"],
   }
 };

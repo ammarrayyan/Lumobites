@@ -15,8 +15,8 @@ export interface BookingLimitModalProps {
 export default function BookingLimitModal({
   isOpen,
   onClose,
-  used = 3,
-  limit = 3,
+  used = 2,
+  limit = 2,
 }: BookingLimitModalProps) {
   useScrollLock(isOpen);
 

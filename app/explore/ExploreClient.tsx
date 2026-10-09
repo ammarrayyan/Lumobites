@@ -102,7 +102,7 @@ export default function ExploreClient() {
                 <Search className="w-7 h-7 text-[#8B5E3C]" />
               </div>
               <h3 className="text-[#191919] font-extrabold text-base md:text-lg mb-2">Ingredient Safety Check</h3>
-              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Scan any pet food label to instantly detect dangerous ingredients and hidden toxins — graded A to F.</p>
+              <p className="text-[#666666] text-xs sm:text-sm leading-relaxed">Scan any pet food label to analyze ingredients and flag potential allergens, fillers, and low-quality additives — graded A to F.</p>
             </div>
             <Link href="/adoption" className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E8DDD4] shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center no-underline">
               <div className="w-14 h-14 rounded-2xl bg-[#FAF6F4] border border-[#E8DDD4] flex items-center justify-center mb-5">
@@ -139,12 +139,9 @@ export default function ExploreClient() {
       {/* BOTTOM CTA */}
       <section className="w-full px-6 py-16 text-center bg-[#8B5E3C]">
         <div className="max-w-[700px] mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-3 text-white">
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-8 text-white">
             Ready to find the perfect food?
           </h2>
-          <p className="text-xs sm:text-sm md:text-base mb-8 max-w-[480px] mx-auto text-white/90 leading-relaxed">
-            Join thousands of pet owners who found their pet&apos;s favorite food.
-          </p>
           <Link 
             href="/chat" 
             className="inline-flex items-center justify-center bg-white hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold text-xs sm:text-sm py-3.5 px-8 rounded-xl transition-all shadow-md no-underline"
@@ -175,7 +172,7 @@ export default function ExploreClient() {
             <ul className="space-y-3 text-sm" style={{ color: '#AAAAAA', listStyle: 'none', padding: 0, margin: 0 }}>
               <li><Link href="/#how" style={{ color: '#AAAAAA', textDecoration: 'none' }}>How it works</Link></li>
               <li><Link href="/chat" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Compare Foods</Link></li>
-              <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Is My Pet&apos;s Food Safe?</Link></li>
+              <li><Link href="/scan" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Analyze Pet Food Ingredients</Link></li>
               <li><Link href="/supplies" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Supplies Finder</Link></li>
               <li><Link href="/petsitting" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Pet Sitting</Link></li>
               <li><Link href="/lost-pets" style={{ color: '#AAAAAA', textDecoration: 'none' }}>Lost Pets</Link></li>

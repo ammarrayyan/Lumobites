@@ -8,9 +8,9 @@ import { Download, AlertTriangle, Key, Sparkles, Footprints, ShieldCheck, Check,
 const qrConfigs = [
   { title: "Homepage", url: "https://lumobites.net", tagline: "Find the best food for your pet. Free. No sign-up required.", filename: "lumobites-homepage-qr.png" },
   { title: "Pet Twin", url: "https://lumobites.net/twin", tagline: "Which dog or cat breed matches YOUR personality? Find out free in 30 seconds!", filename: "lumobites-twin-qr.png" },
-  { title: "Ingredient Scanner", url: "https://lumobites.net/scan", tagline: "Is your pet's food safe? Scan any label instantly and find out what's really inside.", filename: "lumobites-scan-qr.png" },
+  { title: "Ingredient Scanner", url: "https://lumobites.net/scan", tagline: "Analyze pet food ingredients instantly and find out what's really inside.", filename: "lumobites-scan-qr.png" },
   { title: "FDA Recalls", url: "https://lumobites.net/recalls", tagline: "Get instant alerts if your pet's food is recalled by the FDA. Free. Could save your pet's life.", filename: "lumobites-recalls-qr.png" },
-  { title: "Pet Sitting", url: "https://lumobites.net/petsitting", tagline: "Find a trusted pet sitter near you — or earn money sitting pets in your neighborhood. Free to join, verified profiles!", filename: "lumobites-petsitting-qr.png" },
+  { title: "Pet Sitting", url: "https://lumobites.net/petsitting", tagline: "Find a local ID-verified pet sitter near you — or earn money sitting pets in your neighborhood. Free to join, 0% commission!", filename: "lumobites-petsitting-qr.png" },
   { title: "Pet Supplies", url: "https://lumobites.net/supplies", tagline: "Find the best toys, food, and supplies tailored specifically for your pet.", filename: "lumobites-supplies-qr.png" },
   { title: "Breed Detection", url: "https://lumobites.net/photo", tagline: "Upload a photo of any dog or cat and instantly find out their breed. Free!", filename: "lumobites-photo-qr.png" },
   { title: "Lost Pets Community Board", url: "https://lumobites.net/lost-pets", tagline: "Lost or found a pet? Post it free and help reunite pets with their families in your neighborhood!", filename: "lumobites-lost-pets-qr.png" },
@@ -391,7 +391,7 @@ export default function MarketingPage() {
           <div className="bg-white border border-[#E8DDD4] p-6 rounded-[28px] shadow-sm flex flex-col items-center w-full max-w-[480px]">
             <div className="w-full flex items-center justify-between mb-4 border-b border-[#F5EDE4] pb-4">
               <div>
-                <h3 className="font-bold text-[#191919] text-[18px]">2. Safety Scanner Promo (Cream Theme)</h3>
+                <h3 className="font-bold text-[#191919] text-[18px]">2. Ingredient Scanner Promo (Cream Theme)</h3>
                 <p className="text-xs text-[#999999]">Instagram Square Banner (1080x1080)</p>
               </div>
               <button
@@ -438,17 +438,17 @@ export default function MarketingPage() {
                 {/* Top Badge */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', zIndex: 3 }}>
                   <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1.5px solid rgba(16, 185, 129, 0.6)', color: '#10B981', fontSize: '15px', fontWeight: '900', letterSpacing: '0.22em', padding: '12px 32px', borderRadius: '100px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <ShieldCheck style={{ width: '18px', height: '18px' }} /> AI INGREDIENT SAFETY SCANNER
+                    <ShieldCheck style={{ width: '18px', height: '18px' }} /> AI INGREDIENT SCANNER
                   </div>
                 </div>
 
                 {/* Hero Headline */}
                 <div style={{ textAlign: 'center', margin: '15px 0', zIndex: 3 }}>
                   <h2 style={{ fontSize: '84px', fontWeight: '950', color: '#191919', letterSpacing: '-0.04em', lineHeight: 1.05, margin: '0 0 16px 0' }}>
-                    Is your pet&apos;s food <span style={{ color: '#EF4444' }}>safe?</span>
+                    What is in your pet&apos;s <span style={{ color: '#8B5E3C' }}>food?</span>
                   </h2>
                   <p style={{ fontSize: '26px', color: '#666666', fontWeight: '500', margin: 0, letterSpacing: '0.02em' }}>
-                    Scan any label instantly &mdash; free automated AI safety check
+                    Scan any label instantly &mdash; automated AI ingredient analysis
                   </p>
                 </div>
 
@@ -463,7 +463,7 @@ export default function MarketingPage() {
                         A
                       </div>
                       <div style={{ backgroundColor: '#10B981', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.06em' }}>
-                        VERIFIED SAFE <Check style={{ width: '18px', height: '18px', color: 'white', strokeWidth: '3' }} />
+                        GRADE A QUALITY <Check style={{ width: '18px', height: '18px', color: 'white', strokeWidth: '3' }} />
                       </div>
                     </div>
 
@@ -474,7 +474,7 @@ export default function MarketingPage() {
                         D
                       </div>
                       <div style={{ backgroundColor: '#EF4444', color: '#FFFFFF', fontSize: '17px', fontWeight: '950', padding: '10px 24px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '6px', letterSpacing: '0.06em' }}>
-                        TOXINS DETECTED <AlertTriangle style={{ width: '18px', height: '18px', color: 'white' }} />
+                        CONCERNING ADDITIVES <AlertTriangle style={{ width: '18px', height: '18px', color: 'white' }} />
                       </div>
                     </div>
 

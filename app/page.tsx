@@ -155,7 +155,7 @@ export default function Home() {
             <p className="text-[#8B5E3C] text-xs font-bold tracking-[0.15em] uppercase text-center mb-2">Coming Soon</p>
             <h3 className="text-xl font-black text-[#191919] text-center mb-3">Pet Sitting is on its way!</h3>
             <p className="text-[#666666] text-sm text-center leading-relaxed mb-6">
-              We&apos;re building a trusted marketplace for local pet sitters — completely free, no commission. Join our founding member list to be the first to know when it launches.
+              We&apos;re building a community marketplace for local pet sitters — sitters keep 100% of their earnings with 0% commission. Join our founding member list to be the first to know when it launches.
             </p>
             {!notifySubmitted ? (
               <form onSubmit={handleNotifySubmit} className="flex flex-col gap-3">
@@ -438,7 +438,7 @@ export default function Home() {
                 Find a Sitter
               </h3>
               <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                Book trusted, ID-verified local pet sitters, licensed vet boarding, and daycare with instant AI matching.
+                Book local ID-verified pet sitters with instant AI matching.
               </p>
             </Link>
 

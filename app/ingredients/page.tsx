@@ -95,9 +95,9 @@ export default function IngredientsPage() {
       
       <main className="max-w-[800px] mx-auto px-6 pt-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-black text-[#191919] mb-4 tracking-tight">Ingredient Danger Checker</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-[#191919] mb-4 tracking-tight">Ingredient Quality Checker</h1>
           <p className="text-lg text-gray-600 max-w-[600px] mx-auto">
-            Paste your pet's food ingredient list below to check for dangerous chemicals, fillers, and toxins.
+            Paste your pet's food ingredient list below to analyze ingredient quality, fillers, and potential allergens.
           </p>
         </div>
 

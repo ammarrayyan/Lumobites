@@ -127,7 +127,7 @@ export default function AffiliateSignupPage() {
               </div>
               <div>
                 <h4 className="font-bold text-[#191919] text-sm">2. Promote Premium</h4>
-                <p className="text-xs text-gray-400 leading-normal mt-0.5">Users unlock unlimited ingredient safety scans, priority recall alerts, and sitter contacts.</p>
+                <p className="text-xs text-gray-400 leading-normal mt-0.5">Users unlock unlimited AI food scans, priority recall alerts, and unlimited sitter booking requests.</p>
               </div>
             </div>
             <div className="flex items-start gap-3.5">

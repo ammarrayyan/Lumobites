@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
           preheader: 'Congratulations! Your sitter profile is live on the Lumo Bites community board.',
           body: `
             <h1 style="${emailStyles.h1}">Congratulations, ${approvedName}! 🎉</h1>
-            <p style="${emailStyles.p}">Your Lumo Bites pet sitter profile has been reviewed and approved by our safety team!</p>
+            <p style="${emailStyles.p}">Your Lumo Bites pet sitter profile has been reviewed and approved by our moderation team!</p>
             ${emailStyles.highlightBox(`
               <p style="margin:0;font-size:12px;color:#2F5A32;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Profile Status</p>
               <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#2E7D32;">🟢 ACTIVE & LIVE</p>
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
           body: `
             <h1 style="${emailStyles.h1}">Profile Update Needed ⚠️</h1>
             <p style="${emailStyles.p}">Hi ${sitter.name},</p>
-            <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites. During our review, our safety team noted that some changes are required before we can list your profile publicly.</p>
+            <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites. During our review, our moderation team noted that some changes are required before we can list your profile publicly.</p>
             ${emailStyles.highlightBox(`
               <p style="margin:0;font-size:12px;color:#8B0000;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Reason for Request</p>
               <p style="margin:8px 0 0 0;font-size:15px;color:#8B0000;font-weight:bold;line-height:1.4;">${reason}</p>

@@ -63,7 +63,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
         <section className="mt-24 pt-16 border-t border-[#E8DDD4] text-left">
           <h2 className="text-2xl font-bold text-[#191919] mb-6">Why Choose {brandName}?</h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            {brandName} is one of the most trusted names in pet nutrition, offering a wide range of formulas for sensitive stomachs, weight management, and age-specific requirements. Whether you have a growing puppy or a senior cat, there is a {brandName} product designed for their unique biology.
+            {brandName} is a pet nutrition brand, offering a wide range of formulas for sensitive stomachs, weight management, and age-specific requirements. Whether you have a growing puppy or a senior cat, there is a {brandName} product designed for their unique biology.
           </p>
           <div className="grid md:grid-cols-2 gap-8 mt-8">
             <div className="bg-white p-6 rounded-2xl border border-[#E8DDD4]">

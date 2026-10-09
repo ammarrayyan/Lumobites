@@ -3553,7 +3553,7 @@ export function PetSittingContent() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-1.5">Lumo Bites Pet Sitting</h1>
-            <p className="text-xs sm:text-sm md:text-base font-normal text-[#6B5E5D] leading-relaxed">Connect with trusted, local pet sitters in your community.</p>
+            <p className="text-xs sm:text-sm md:text-base font-normal text-[#6B5E5D] leading-relaxed">Connect with local, ID-verified pet sitters in your community.</p>
           </div>
           {activeTab === 'find' && (
             <button
@@ -3847,7 +3847,7 @@ export function PetSittingContent() {
                 <div className="w-16 h-16 bg-[#FAF6F4] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#E8DDD4]">
                   <MapPin className="w-8 h-8 text-[#8B5E3C]" />
                 </div>
-                <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Enter your city to find trusted pet sitters near you</h3>
+                <h3 className="text-2xl font-black text-[#4A3E3D] mb-2">Enter your city to find local pet sitters near you</h3>
                 <p className="text-[#8B7E7D] max-w-md mx-auto">
                   Type your city or zip code in the search bar above to see our network of local, loving sitters ready to help.
                 </p>
@@ -4993,10 +4993,10 @@ export function PetSittingContent() {
                       )}
                     </div>
                     <h2 className="text-3xl font-black text-[#4A3E3D] mb-2">
-                      {isProSitter ? (sitterAvailable ? 'Sitter Profile Active' : 'Profile Hidden') : 'Subscription Inactive'}
+                      {sitterAvailable ? 'Sitter Profile Active' : 'Profile Hidden'}
                     </h2>
                     <p className="text-[#8B7E7D] mb-8 max-w-md mx-auto">
-                      {isProSitter ? (sitterAvailable ? 'Your profile is approved and visible to pet owners in your neighborhood.' : 'You are not currently accepting requests. Your profile is temporarily hidden from search results.') : 'Your subscription is inactive. Your profile is hidden from search results.'}
+                      {sitterAvailable ? 'Your profile is approved and visible to pet owners in your neighborhood.' : 'You are not currently accepting requests. Your profile is temporarily hidden from search results.'}
                     </p>
                   </>
                 )}
@@ -5668,7 +5668,7 @@ export function PetSittingContent() {
               {sitterApprovalStatus === 'approved' && (
                 <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-4 mb-6 flex gap-3 text-sm text-[#666666]">
                   <Lock className="w-4 h-4 text-[#8B5E3C] flex-shrink-0 mt-0.5" />
-                  <p>Editing your verified name or profile selfie will submit your update for safety re-review before going live publicly. Government ID updates require contacting <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a>.</p>
+                  <p>Editing your verified name or profile selfie will submit your update for admin re-review before going live publicly. Government ID updates require contacting <a href="mailto:info@lumobitespet.com" className="text-[#8B5E3C] font-bold hover:underline">info@lumobitespet.com</a>.</p>
                 </div>
               )}
 
@@ -6479,6 +6479,10 @@ export function PetSittingContent() {
                 </div>
               ) : (
                 <form onSubmit={handleSendRequestClick} className="space-y-4">
+                  <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-[11px] text-[#666666] leading-snug">
+                    Sitters are ID-verified by Lumo. Lumo does not perform background checks or provide insurance.
+                  </div>
+
                   {hasSavedInfo && (
                     <div className="bg-[#F6EFEA] border border-[#E4D5CA] rounded-2xl p-3.5 flex items-center justify-between text-xs text-[#8B5E3C] shadow-sm animate-fade-in">
                       <span className="flex items-center gap-1.5 font-medium">
@@ -7354,6 +7358,10 @@ export function PetSittingContent() {
                   <span className="flex items-center gap-1 text-xs sm:text-sm font-semibold">
                     📍 {formatPublicCity(selectedSitterForReviews.city)}
                   </span>
+                </div>
+
+                <div className="mt-3 px-3.5 py-2 bg-white/90 border border-[#E8DDD4] rounded-xl text-[11px] text-[#666666] leading-snug max-w-sm">
+                  Sitters are ID-verified by Lumo. Lumo does not perform background checks or provide insurance.
                 </div>
               </div>
             </div>
