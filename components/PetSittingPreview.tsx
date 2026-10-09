@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Home, MapPin } from 'lucide-react';
-
-// Next.js Link component wrapper
+import { Home, MapPin, UserPlus } from 'lucide-react';
 import NextLink from 'next/link';
 
 interface SitterPreview {
@@ -22,57 +20,20 @@ export default function PetSittingPreview() {
   const [sitters, setSitters] = useState<SitterPreview[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // High quality mock sitters as fallback if DB is empty
-  const mockSitters: SitterPreview[] = [
-    {
-      id: 'mock-1',
-      name: 'Local Sitter',
-      photo_url: '',
-      city: 'Riverside, CA',
-      country: 'USA',
-      rate_per_night: 25,
-      pet_types: 'both',
-      bio: 'Verified local pet sitter with 5+ years experience. Loving care in a safe neighborhood.',
-      gender: 'Female'
-    },
-    {
-      id: 'mock-2',
-      name: 'Local Sitter',
-      photo_url: '',
-      city: 'Boston, MA',
-      country: 'USA',
-      rate_per_night: 30,
-      pet_types: 'dogs',
-      bio: 'Professional pet care provider. Active dog walker with huge fenced yard for playtime.',
-      gender: 'Male'
-    },
-    {
-      id: 'mock-3',
-      name: 'Local Sitter',
-      photo_url: '',
-      city: 'Austin, TX',
-      country: 'USA',
-      rate_per_night: 28,
-      pet_types: 'cats',
-      bio: 'Lifelong cat lover and experienced feline care specialist. Comfortable with all medical needs.',
-      gender: 'Non-binary'
-    }
-  ];
-
   useEffect(() => {
     const fetchPreviewSitters = async () => {
       try {
         const res = await fetch('/api/petsitting/sitters');
         const data = await res.json();
         
-        if (res.ok && data.sitters && data.sitters.length > 0) {
+        if (res.ok && data.sitters && Array.isArray(data.sitters)) {
           setSitters(data.sitters.slice(0, 3));
         } else {
-          setSitters(mockSitters);
+          setSitters([]);
         }
       } catch (err) {
         console.error('Failed to fetch preview sitters:', err);
-        setSitters(mockSitters);
+        setSitters([]);
       } finally {
         setLoading(false);
       }
@@ -113,7 +74,7 @@ export default function PetSittingPreview() {
           </div>
         </div>
 
-        {/* Right Side: 3 recent sitter cards */}
+        {/* Right Side: Real sitters or honest empty state */}
         <div className="flex-1 w-full md:w-auto mt-8 md:mt-0 flex flex-col gap-4">
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E8DDD4]">
             <h3 className="text-sm font-bold text-[#8B7E7D] uppercase tracking-wider mb-4 border-b border-[#F0E8E0] pb-2">
@@ -135,7 +96,7 @@ export default function PetSittingPreview() {
             ) : sitters.length > 0 ? (
               <div className="space-y-4">
                 {sitters.map(sitter => (
-                  <NextLink href="/petsitting" key={sitter.id} className="flex gap-4 items-center group text-decoration-none" style={{ textDecoration: 'none' }}>
+                  <NextLink href={`/petsitting?sitter=${sitter.id}`} key={sitter.id} className="flex gap-4 items-center group text-decoration-none" style={{ textDecoration: 'none' }}>
                     <div className="w-16 h-16 rounded-full overflow-hidden bg-[#F5EDE4] flex-shrink-0 relative border-2 border-[#E8DDD4]">
                       {sitter.photo_url ? (
                         <img src={sitter.photo_url} alt={sitter.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
@@ -168,7 +129,22 @@ export default function PetSittingPreview() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#8B7E7D] italic text-center py-4">No active sitters right now.</p>
+              <div className="text-center py-6 px-4">
+                <div className="w-12 h-12 bg-[#F5EDE4] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <UserPlus className="w-6 h-6 text-[#8B5E3C]" />
+                </div>
+                <h4 className="font-bold text-[#191919] text-base mb-1">No sitters in your area yet</h4>
+                <p className="text-xs text-[#7A6B5E] max-w-xs mx-auto mb-4 leading-relaxed">
+                  Be the first to join and offer local pet care in your neighborhood. Keep 100% of your earnings.
+                </p>
+                <NextLink
+                  href="/petsitting?tab=become"
+                  className="inline-flex items-center justify-center bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-xs text-decoration-none"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Become a Sitter &rarr;
+                </NextLink>
+              </div>
             )}
           </div>
         </div>

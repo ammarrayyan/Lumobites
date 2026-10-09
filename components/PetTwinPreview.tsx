@@ -53,56 +53,19 @@ export default function PetTwinPreview() {
     }
   }, []);
 
-  // High quality mock shares as fallback
-  const mockShares: SharedTwin[] = [
-    {
-      id: 'mock-t1',
-      created_at: new Date().toISOString(),
-      userPhoto: '', 
-      petBreed: 'Golden Retriever',
-      petType: 'dog',
-      petPhoto: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_Retriever_Dukedestiny01_drvd.jpg',
-      matchScore: 96,
-      traits: ['Warm', 'Approachable', 'Loyal'],
-      quote: "Everyone's best friend — you light up every room you enter!"
-    },
-    {
-      id: 'mock-t2',
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-      userPhoto: '', 
-      petBreed: 'Siamese',
-      petType: 'cat',
-      petPhoto: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg',
-      matchScore: 92,
-      traits: ['Expressive', 'Mysterious', 'Observant'],
-      quote: "Elegant, opinionated, and absolutely impossible to ignore!"
-    },
-    {
-      id: 'mock-t3',
-      created_at: new Date(Date.now() - 7200000).toISOString(),
-      userPhoto: '', 
-      petBreed: 'Corgi',
-      petType: 'dog',
-      petPhoto: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Welsh_Corgi_Pembroke_Portrait.jpg',
-      matchScore: 95,
-      traits: ['Perpetually Cheerful', 'Athletic', 'Charming'],
-      quote: "Cheerful, charming, and fit for royalty — just like the Queen's favorites!"
-    }
-  ];
-
   useEffect(() => {
     const fetchShares = async () => {
       try {
         const res = await fetch('/api/twin/share');
         const data = await res.json();
-        if (res.ok && data.shares && data.shares.length > 0) {
+        if (res.ok && data.shares && Array.isArray(data.shares) && data.shares.length > 0) {
           setShares(data.shares.slice(0, 4));
         } else {
-          setShares(mockShares);
+          setShares([]);
         }
       } catch (err) {
         console.error('Failed to fetch shared twins:', err);
-        setShares(mockShares);
+        setShares([]);
       } finally {
         setLoading(false);
       }
@@ -140,6 +103,11 @@ export default function PetTwinPreview() {
     }
   };
 
+  // If loading or no real shared matches in the database, cleanly hide the section
+  if (loading || shares.length === 0) {
+    return null;
+  }
+
   const displayedShares = shares.slice(0, 3);
   const hasMore = shares.length > 3;
 
@@ -169,113 +137,95 @@ export default function PetTwinPreview() {
           </div>
         </div>
 
-        {/* Right Side: Real Examples */}
+        {/* Right Side: Real Shared Community Matches */}
         <div className="flex-1 w-full md:w-auto mt-8 md:mt-0 flex flex-col gap-4 order-2 md:order-2">
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E8DDD4]">
             <h3 className="text-sm font-bold text-[#8B7E7D] uppercase tracking-wider mb-4 border-b border-[#F0E8E0] pb-2">
               Recent Matches Shared
             </h3>
             
-            {loading ? (
-              <div className="animate-pulse space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="flex gap-4 items-center">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+            <div className="space-y-5">
+              {displayedShares.map(share => (
+                <div key={share.id} className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in">
+                  
+                  {/* Double Face Avatar */}
+                  <div className="flex items-center -space-x-4 shrink-0 mt-1">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#F5EDE4] relative z-10 flex items-center justify-center text-xs text-[#8B5E3C] font-black">
+                      {share.userPhoto ? (
+                        <img src={share.userPhoto} alt="User" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>🧑</span>
+                      )}
+                    </div>
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#FAF6F4] relative z-0 flex items-center justify-center">
+                      {share.petPhoto ? (
+                        <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg">🐕</span>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : displayedShares.length > 0 ? (
-              <>
-                <div className="space-y-5">
-                  {displayedShares.map(share => (
-                    <div key={share.id} className="flex gap-4 items-start border-b border-[#FAF6F4] last:border-0 pb-4 last:pb-0 animate-fade-in">
-                      
-                      {/* Double Face Avatar */}
-                      <div className="flex items-center -space-x-4 shrink-0 mt-1">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#F5EDE4] relative z-10 flex items-center justify-center text-xs text-[#8B5E3C] font-black">
-                          {share.userPhoto ? (
-                            <img src={share.userPhoto} alt="User" className="w-full h-full object-cover" />
-                          ) : (
-                            <span>🧑</span>
-                          )}
-                        </div>
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-[#FAF6F4] relative z-0 flex items-center justify-center">
-                          {share.petPhoto ? (
-                            <img src={share.petPhoto} alt={share.petBreed} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-lg">🐕</span>
-                          )}
-                        </div>
-                      </div>
 
-                      {/* Meta Details */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[70px]">
-                        <div>
-                          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                            <h4 className="font-bold text-[#191919] text-sm truncate">{share.petBreed}</h4>
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#8B5E3C]/5 text-[#8B5E3C] border border-[#8B5E3C]/10">
-                              {share.matchScore}% Match
+                  {/* Meta Details */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between min-h-[70px]">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <h4 className="font-bold text-[#191919] text-sm truncate">{share.petBreed}</h4>
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#8B5E3C]/5 text-[#8B5E3C] border border-[#8B5E3C]/10">
+                          {share.matchScore}% Match
+                        </span>
+                      </div>
+                      {share.traits && share.traits.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {share.traits.slice(0, 3).map(trait => (
+                            <span key={trait} className="text-[10px] bg-[#FAF6F4] text-[#8B7E7D] px-1.5 py-0.5 rounded border border-[#E8DDD4]">
+                              {trait}
                             </span>
-                          </div>
-                          {share.traits && share.traits.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {share.traits.slice(0, 3).map(trait => (
-                                <span key={trait} className="text-[10px] bg-[#FAF6F4] text-[#8B7E7D] px-1.5 py-0.5 rounded border border-[#E8DDD4]">
-                                  {trait}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <p className="text-[11px] text-[#8B7E7D] italic mt-1.5 leading-relaxed">
-                            &ldquo;{share.quote}&rdquo;
-                          </p>
+                          ))}
                         </div>
-
-                        {/* Action Row: Heart Reaction & Direct Delete (for owner only) */}
-                        <div className="flex items-center justify-between border-t border-[#F0E8E0] pt-2 mt-2" onClick={e => e.stopPropagation()}>
-                          <FacebookReactionPicker
-                            itemId={share.id}
-                            initialHelpfulCount={share.helpful_count || 0}
-                            size="sm"
-                            minimalHeartStyle={true}
-                            targetType="pet-twin"
-                          />
-
-                          {!!myPostTokens[share.id] && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteTwinPost(share.id, myPostTokens[share.id])}
-                              disabled={deletingId === share.id}
-                              className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
-                              title="Delete my result"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
+                      )}
+                      <p className="text-[11px] text-[#8B7E7D] italic mt-1.5 leading-relaxed">
+                        &ldquo;{share.quote}&rdquo;
+                      </p>
                     </div>
-                  ))}
-                </div>
 
-                {hasMore && (
-                  <NextLink
-                    href="/twin/gallery"
-                    className="w-full mt-6 bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-decoration-none"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    See All Matches →
-                  </NextLink>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-[#8B7E7D] italic text-center py-4">No shared matches yet. Be the first!</p>
+                    {/* Action Row: Heart Reaction & Direct Delete (for owner only) */}
+                    <div className="flex items-center justify-between border-t border-[#F0E8E0] pt-2 mt-2" onClick={e => e.stopPropagation()}>
+                      <FacebookReactionPicker
+                        itemId={share.id}
+                        initialHelpfulCount={share.helpful_count || 0}
+                        size="sm"
+                        minimalHeartStyle={true}
+                        targetType="pet-twin"
+                      />
+
+                      {!!myPostTokens[share.id] && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTwinPost(share.id, myPostTokens[share.id])}
+                          disabled={deletingId === share.id}
+                          className="text-[#8B7E7D] hover:text-red-600 transition-colors p-1 rounded-lg hover:bg-red-50 text-xs font-semibold flex items-center gap-1 cursor-pointer border-none bg-transparent"
+                          title="Delete my result"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span className="text-[11px]">{deletingId === share.id ? 'Deleting...' : 'Delete'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              ))}
+            </div>
+
+            {hasMore && (
+              <NextLink
+                href="/twin/gallery"
+                className="w-full mt-6 bg-white border border-[#E8DDD4] hover:bg-[#FAF6F4] text-[#8B5E3C] font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-decoration-none"
+                style={{ textDecoration: 'none' }}
+              >
+                See All Matches →
+              </NextLink>
             )}
           </div>
         </div>
