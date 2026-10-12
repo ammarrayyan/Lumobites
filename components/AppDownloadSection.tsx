@@ -37,7 +37,7 @@ export default function AppDownloadSection() {
               <ShieldCheck className="w-4 h-4 text-[#4E9F76] shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-xs font-bold text-[#191919]">Direct Sitter Booking</h4>
-                <p className="text-[11px] text-[#666666] leading-snug">0% fee pet sitting with ID-verified local sitters.</p>
+                <p className="text-[11px] text-[#666666] leading-snug">0% fee pet sitting with ID-checked local sitters.</p>
               </div>
             </div>
 

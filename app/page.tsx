@@ -440,7 +440,7 @@ export default function Home() {
                 Find a Sitter
               </h3>
               <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                Connect with local ID-verified pet sitters in your neighborhood.
+                Connect with local ID-checked pet sitters in your neighborhood.
               </p>
             </Link>
 

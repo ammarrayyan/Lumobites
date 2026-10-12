@@ -3,6 +3,8 @@ import { supabase, supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { brandedEmail, emailStyles } from '@/lib/email-template';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
@@ -18,10 +20,21 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Fetch sitter to see if they have a Stripe Customer ID and their ID
+    // 0. Authentication check: must be the sitter themselves or an authorized admin
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+
+    if (!isAdmin && (!verifiedEmail || verifiedEmail !== cleanEmail)) {
+      return NextResponse.json({
+        error: 'Authentication required. Please sign in with your verified sitter account.',
+        requires_auth: true
+      }, { status: 401 });
+    }
+
+    // 1. Fetch sitter to see if they have a Stripe Customer ID, ID photo, and their ID
     const { data: sitter, error: fetchError } = await supabaseAdmin
       .from('sitters')
-      .select('id, stripe_customer_id')
+      .select('id, stripe_customer_id, id_photo_url')
       .eq('email', cleanEmail)
       .maybeSingle();
 
@@ -69,7 +82,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Delete from Supabase
+    // 4. Remove Government ID document from secure storage if present
+    if (sitter?.id_photo_url && !sitter.id_photo_url.startsWith('http') && !sitter.id_photo_url.startsWith('data:')) {
+      try {
+        await supabaseAdmin.storage.from('sitter-ids').remove([sitter.id_photo_url]);
+        console.log(`[Delete Sitter Profile] Removed ID document from storage for ${cleanEmail}`);
+      } catch (storageErr) {
+        console.error('[Delete Sitter Profile] Failed to remove ID document from storage:', storageErr);
+      }
+    }
+
+    // 5. Delete from Supabase
     const { error: deleteError } = await supabaseAdmin
       .from('sitters')
       .delete()

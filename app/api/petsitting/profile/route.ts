@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { formatPublicCity } from '@/lib/formatCity';
 import { extractSitterMeta, packSitterBio } from '@/lib/sitterProfileHelper';
@@ -16,11 +17,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
+  // 1. Enforce server-side authentication: session must match email or caller must be admin
+  const isAdmin = isAuthorizedAdmin(request);
+  const verifiedEmail = await getVerifiedSessionEmail(request);
+
+  if (!isAdmin && !verifiedEmail) {
+    return NextResponse.json({ error: 'Authentication required. Please sign in.' }, { status: 401 });
+  }
+
+  if (!isAdmin && verifiedEmail?.toLowerCase().trim() !== cleanEmail) {
+    return NextResponse.json({ error: 'Forbidden: You do not have access to this profile.' }, { status: 403 });
+  }
+
   try {
     const { data, error } = await supabaseAdmin
       .from('sitters')
-      .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .select('id, email, name, photo_url, cover_photo_url, cover_photo_position, city, lat, lng, country, bio, pet_types, rate_per_night, rate_type, rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare, phone_number, phone_visible, availability, available_days, available_times, service_types, gender, self_declared, self_declared_at, approval_status, is_approved, needs_reapproval, completed_bookings, session_invalidated_at, id_photo_url')
+      .eq('email', cleanEmail)
       .single();
 
     if (error) {
@@ -31,10 +46,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { cleanBio, pendingName } = extractSitterMeta(data.bio);
+    const hasIdOnFile = !!data.id_photo_url;
+
+    // Never return id_photo_url, storage paths, or sensitive internal identifiers
+    const { id_photo_url: _internalId, ...safeData } = data;
+
     return NextResponse.json({
-      ...data,
+      ...safeData,
       bio: cleanBio,
       pending_name: pendingName,
+      has_id_on_file: hasIdOnFile,
     });
   } catch (error: any) {
     console.error('[PetSitting Profile API] Error fetching:', error);
@@ -48,7 +69,7 @@ export async function POST(request: NextRequest) {
     const { 
       email, name, photo_url, id_photo_url, city, zip, country, 
       bio, pet_types, rate_per_night, rate_type, availability, phone_number, phone_visible,
-      gender, available_days, available_times, service_types, self_declared, blocked_dates,
+      gender, available_days, available_times, service_types, self_declared, age_confirmed, blocked_dates,
       rate_dropins, rate_walking, rate_overnight, rate_boarding, rate_daycare,
       cover_photo_url, cover_photo_position
     } = body;
@@ -206,31 +227,48 @@ export async function POST(request: NextRequest) {
     let finalIdUrl = id_photo_url;
     if (id_photo_url && id_photo_url.startsWith('data:image/')) {
       try {
-        const matches = id_photo_url.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const fileExt = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-          const base64Data = matches[2];
-          const buffer = Buffer.from(base64Data, 'base64');
-          
-          const fileName = `${cleanEmail.replace(/[^a-z0-9]/g, '_')}_id_${Date.now()}.${fileExt}`;
-          
-          const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-            .from('sitter-ids')
-            .upload(fileName, buffer, {
-              contentType: `image/${matches[1]}`,
-              upsert: true
-            });
-            
-          if (uploadError) {
-            console.warn('[PetSitting Profile] Supabase storage ID upload failed. Using raw/base64 URL fallback:', uploadError.message);
-            finalIdUrl = id_photo_url;
-          } else {
-            finalIdUrl = fileName; // Store just the path for private bucket
-          }
+        // Enforce strict whitelist: image/jpeg, image/png, image/jpg only (no webp)
+        const matches = id_photo_url.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/i);
+        if (!matches || matches.length !== 3) {
+          return NextResponse.json({ error: 'Invalid ID document format. Only JPEG and PNG images are allowed.' }, { status: 400 });
         }
-      } catch (uploadEx) {
-        console.error('[PetSitting Profile] Failed to upload ID:', uploadEx);
-        finalIdUrl = id_photo_url;
+
+        const rawType = matches[1].toLowerCase();
+        const fileExt = (rawType === 'jpeg' || rawType === 'jpg') ? 'jpg' : 'png';
+        const base64Data = matches[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Enforce 5MB limit
+        if (buffer.length > 5 * 1024 * 1024) {
+          return NextResponse.json({ error: 'ID document exceeds the 5MB size limit.' }, { status: 400 });
+        }
+
+        // Validate magic bytes for JPEG or PNG
+        const isJpeg = buffer.length >= 3 && buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+        const isPng = buffer.length >= 8 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+        if (!isJpeg && !isPng) {
+          return NextResponse.json({ error: 'Invalid image file content. File header does not match a valid JPEG or PNG image.' }, { status: 400 });
+        }
+
+        // Random UUID filename (no email in filename)
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+          .from('sitter-ids')
+          .upload(fileName, buffer, {
+            contentType: isJpeg ? 'image/jpeg' : 'image/png',
+            upsert: true
+          });
+          
+        if (uploadError) {
+          console.error('[PetSitting Profile] Supabase storage ID upload failed:', uploadError.message);
+          return NextResponse.json({ error: 'Failed to upload verification document to storage. Please try again.' }, { status: 500 });
+        }
+
+        finalIdUrl = fileName; // Store the UUID path for private bucket
+      } catch (uploadEx: any) {
+        console.error('[PetSitting Profile] Failed to process ID upload:', uploadEx);
+        return NextResponse.json({ error: uploadEx?.message || 'Failed to process ID document' }, { status: 400 });
       }
     }
 
@@ -250,7 +288,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data } = await supabaseAdmin
         .from('sitters')
-        .select('name, bio, approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at')
+        .select('name, bio, approval_status, is_approved, needs_reapproval, id_photo_url, self_declared, self_declared_at, age_confirmed')
         .eq('email', cleanEmail)
         .maybeSingle();
       
@@ -310,6 +348,11 @@ export async function POST(request: NextRequest) {
       console.error('[PetSitting Profile] Failed to fetch existing sitter:', dbErr);
     }
 
+    // Server-side enforcement of age 18+ for new applicants
+    if (isInitialSubmission && !age_confirmed) {
+      return NextResponse.json({ error: 'You must confirm that you are at least 18 years of age.' }, { status: 400 });
+    }
+
     const { data, error } = await supabaseAdmin
       .from('sitters')
       .upsert({
@@ -342,6 +385,7 @@ export async function POST(request: NextRequest) {
         gender: gender || null,
         self_declared: (existingSitter?.self_declared) || self_declared || false,
         self_declared_at: (existingSitter?.self_declared_at) || (self_declared ? new Date().toISOString() : null),
+        age_confirmed: (existingSitter?.age_confirmed) || age_confirmed || false,
         approval_status: nextApprovalStatus,
         is_approved: nextIsApproved,
         needs_reapproval: nextNeedsReapproval,
@@ -439,7 +483,7 @@ export async function POST(request: NextRequest) {
           : `
               <h1 style="${emailStyles.h1}">Application Received 🐾</h1>
               <p style="${emailStyles.p}">Hi ${name},</p>
-              <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our safety team is currently reviewing your application.</p>
+              <p style="${emailStyles.p}">Thank you for applying to become a pet sitter on Lumo Bites! We have received your profile details and our team is currently reviewing your application.</p>
               ${emailStyles.highlightBox(`
                 <p style="margin:0;font-size:12px;color:#8B6A50;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Application Status</p>
                 <p style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#8B5E3C;">⏳ PENDING REVIEW</p>
@@ -457,7 +501,7 @@ export async function POST(request: NextRequest) {
           html: brandedEmail({
             subject,
             preheader: nextNeedsReapproval 
-              ? 'Your profile photo update is being reviewed by our safety team.'
+              ? 'Your profile photo update is being reviewed by our team.'
               : 'We are reviewing your sitter profile. You will receive an email as soon as it is approved!',
             body: bodyHtml
           })
@@ -472,7 +516,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(data);
+    // Never return raw id_photo_url or storage paths in POST response
+    const { id_photo_url: _strippedId, ...safeData } = data;
+    return NextResponse.json({
+      ...safeData,
+      has_id_on_file: !!data.id_photo_url
+    });
   } catch (error: any) {
     console.error('[PetSitting Profile API] Error saving:', error);
     return NextResponse.json({ error: 'Something went wrong saving your profile. Please try again or contact support at info@lumobitespet.com' }, { status: 500 });

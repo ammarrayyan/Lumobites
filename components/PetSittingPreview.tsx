@@ -54,7 +54,7 @@ export default function PetSittingPreview() {
             <Home className="w-7 h-7 text-[#8B5E3C] flex-shrink-0" /> Find a Sitter or Make Money Sitting Pets
           </h2>
           <p className="text-[#666666] text-sm md:text-base leading-[1.6] mb-8 max-w-[500px] mx-auto md:mx-0">
-            Find local ID-verified pet sitters in your neighborhood — verified profiles, real reviews, free to join. Or, sign up as a sitter to earn money doing what you love!
+            Find local ID-checked pet sitters in your neighborhood — verified profiles, real reviews, free to join. Or, sign up as a sitter to earn money doing what you love!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
             <NextLink 
@@ -78,7 +78,7 @@ export default function PetSittingPreview() {
         <div className="flex-1 w-full md:w-auto mt-8 md:mt-0 flex flex-col gap-4">
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E8DDD4]">
             <h3 className="text-sm font-bold text-[#8B7E7D] uppercase tracking-wider mb-4 border-b border-[#F0E8E0] pb-2">
-              ID Verified Sitters
+              ID-checked Sitters
             </h3>
             
             {loading ? (
@@ -115,7 +115,7 @@ export default function PetSittingPreview() {
                           </span>
                         )}
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-600 border border-green-200">
-                          ✓ ID Verified
+                          ✓ ID-checked
                         </span>
                       </div>
                       <p className="text-xs text-[#666666] truncate flex items-center gap-1">

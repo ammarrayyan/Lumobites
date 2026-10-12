@@ -393,7 +393,7 @@ export default function VetBoardingRegisterPage() {
           <p className="text-sm font-normal text-[#2B231D] leading-relaxed">
             {isRejected
               ? `Your previous application was not approved: "${existingClinic.rejection_reason || 'No reason provided'}". Please update your details and resubmit.`
-              : 'Reach pet owners actively searching for boarding. Verified clinics appear alongside ID-verified sitters with a 🏥 partner badge.'}
+              : 'Reach pet owners actively searching for boarding. Verified clinics appear alongside ID-checked sitters with a 🏥 partner badge.'}
           </p>
         </div>
 
@@ -614,7 +614,7 @@ export default function VetBoardingRegisterPage() {
               <p className="text-xs font-black text-blue-800 uppercase tracking-wider mb-3">What you get as a partner</p>
               <ul className="space-y-2">
                 {[
-                  '🏥 Listed alongside ID-verified pet sitters',
+                  '🏥 Listed alongside ID-checked pet sitters',
                   '✅ Verified partner badge on your listing',
                   '💬 Direct in-app messaging from pet owners',
                   '📊 Dashboard to manage inquiries & profile',

@@ -165,6 +165,17 @@ export async function POST(req: NextRequest) {
         })
       });
     } else if (action === 'delete') {
+      // Remove ID document from secure storage if present
+      if (sitter.id_photo_url && !sitter.id_photo_url.startsWith('http') && !sitter.id_photo_url.startsWith('data:')) {
+        try {
+          await supabaseAdmin.storage
+            .from('sitter-ids')
+            .remove([sitter.id_photo_url]);
+        } catch (storageErr) {
+          console.error('[Admin Sitters Delete] Failed to remove ID file from storage:', storageErr);
+        }
+      }
+
       // Delete associated sitting requests first to satisfy foreign key constraints
       const { error: reqDeleteErr } = await supabaseAdmin
         .from('sitting_requests')

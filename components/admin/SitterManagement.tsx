@@ -356,11 +356,16 @@ export default function SitterManagement({ adminKey, onUnauthorized }: { adminKe
                     </p>
                   )}
                   {sitter.id_photo_url && (
-                    <p className="text-sm mt-2">
-                      <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-[#191919] transition-colors">
-                        <Eye className="w-3.5 h-3.5" /> View ID Photo
-                      </a>
-                    </p>
+                    <div className="mt-2">
+                      <p className="text-sm">
+                        <a href={sitter.id_photo_url} target="_blank" className="inline-flex items-center gap-1.5 text-xs bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-[#191919] transition-colors">
+                          <Eye className="w-3.5 h-3.5" /> View ID Photo
+                        </a>
+                      </p>
+                      <p className="text-xs text-amber-800 font-medium bg-amber-50 border border-amber-200 rounded p-1.5 mt-1.5 leading-snug">
+                        ⚠️ <strong>Check date of birth on the ID:</strong> Applicant must be 18+ to be approved.
+                      </p>
+                    </div>
                   )}
                   <p className="text-xs text-gray-500 mt-3">Submitted: {new Date(sitter.submitted_at || sitter.created_at).toLocaleString()}</p>
                 </div>

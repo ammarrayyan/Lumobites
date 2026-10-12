@@ -603,6 +603,7 @@ export function PetSittingContent() {
   const [sitterGender, setSitterGender] = useState('');
   const [isProSitter, setIsProSitter] = useState(false);
   const [selfDeclared, setSelfDeclared] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [isAiLimitModalOpen, setIsAiLimitModalOpen] = useState(false);
   const [aiLimitReason, setAiLimitReason] = useState<string | null>(null);
   const [aiLimitIsPro, setAiLimitIsPro] = useState<boolean | undefined>(undefined);
@@ -2299,7 +2300,8 @@ export function PetSittingContent() {
           setSitterPhoto(data.photo_url || '');
           setSitterCoverPhoto(data.cover_photo_url || '');
           setCoverPhotoPosition((data.cover_photo_position as 'top' | 'center' | 'bottom') || 'center');
-          setHasExistingIdPhoto(!!data.id_photo_url);
+          // TODO: Remove the id_photo_url fallback once all sessions have migrated to has_id_on_file
+          setHasExistingIdPhoto(!!data.has_id_on_file || !!data.id_photo_url);
           setSitterCity(data.city || '');
           setSitterLocationInput(data.city || '');
           setSitterLocationVerified(!!data.city);
@@ -2330,6 +2332,7 @@ export function PetSittingContent() {
           setSitterApprovalStatus(data.approval_status || 'pending');
           setNeedsReapproval(!!data.needs_reapproval);
           setSelfDeclared(!!data.self_declared);
+          setAgeConfirmed(!!data.age_confirmed);
           
           // FREE LAUNCH: Automatically treat any loaded profile as PRO
           setIsProSitter(true);
@@ -2457,6 +2460,7 @@ export function PetSittingContent() {
           setSitterGender('');
           setSitterRate('');
           setSelfDeclared(false);
+          setAgeConfirmed(false);
           setNeedsReapproval(false);
           
           setSitterAuthMode('form');
@@ -2512,6 +2516,7 @@ export function PetSittingContent() {
         setSitterPhone('');
         setSitterPhoneVisible(false);
         setSelfDeclared(false);
+        setAgeConfirmed(false);
         setIsProSitter(false);
         setProfilePreviewMode(false);
         setDeleteModalOpen(false);
@@ -2568,6 +2573,7 @@ export function PetSittingContent() {
     if (!sitterIdPhoto && !hasExistingIdPhoto) errors['id_photo'] = 'A photo of your ID is required for verification';
     if (!sitterBio.trim()) errors['bio'] = 'Please add a short bio';
     if (!sitterId && !selfDeclared) errors['self_declared'] = 'You must confirm the self-declaration check before submitting.';
+    if (!sitterId && !ageConfirmed) errors['age_confirmed'] = 'You must confirm that you are at least 18 years of age before submitting.';
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -2612,7 +2618,8 @@ export function PetSittingContent() {
           available_times: sitterAvailableTimes,
           service_types: sitterServiceTypes,
           gender: sitterGender,
-          self_declared: sitterId ? true : selfDeclared
+          self_declared: sitterId ? true : selfDeclared,
+          age_confirmed: sitterId ? true : ageConfirmed
         })
       });
 
@@ -3553,7 +3560,7 @@ export function PetSittingContent() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-1.5">Lumo Bites Pet Sitting</h1>
-            <p className="text-xs sm:text-sm md:text-base font-normal text-[#6B5E5D] leading-relaxed">Connect with local, ID-verified pet sitters in your community.</p>
+            <p className="text-xs sm:text-sm md:text-base font-normal text-[#6B5E5D] leading-relaxed">Connect with local, ID-checked pet sitters in your community.</p>
           </div>
           {activeTab === 'find' && (
             <button
@@ -3951,7 +3958,7 @@ export function PetSittingContent() {
                                         <h3 className="text-base sm:text-lg font-bold text-[#4A3E3D] leading-tight">{formatSitterName(sitter.name)}</h3>
                                         {sitter.approval_status === 'approved' && (
                                           <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                            <ShieldCheck className="w-3 h-3" /> Verified
+                                            <ShieldCheck className="w-3 h-3" /> ID-checked
                                           </div>
                                         )}
                                       </div>
@@ -4309,7 +4316,7 @@ export function PetSittingContent() {
                                      )}
                                      {sitter.approval_status === 'approved' && (
                                        <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">
-                                         <ShieldCheck className="w-3 h-3" /> ID Verified
+                                         <ShieldCheck className="w-3 h-3" /> ID-checked
                                        </div>
                                      )}
                                      {sitter.completed_bookings && sitter.completed_bookings > 0 ? (
@@ -6206,6 +6213,24 @@ export function PetSittingContent() {
                       {formErrors['self_declared']}
                     </p>
                   )}
+
+                  {/* Age 18+ Confirmation Checkbox */}
+                  <label className="flex items-start gap-3 text-sm text-[#4A3E3D] font-medium cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={ageConfirmed} 
+                      onChange={e => setAgeConfirmed(e.target.checked)} 
+                      className="w-5 h-5 accent-[#8B5E3C] mt-0.5 shrink-0" 
+                    />
+                    <span>
+                      I confirm that I am at least 18 years of age.
+                    </span>
+                  </label>
+                  {formErrors['age_confirmed'] && (
+                    <p className="text-red-500 text-xs font-semibold pl-8 mt-0.5">
+                      {formErrors['age_confirmed']}
+                    </p>
+                  )}
                   
                   {/* Terms of Service Note */}
                   <p className="text-xs text-gray-500 pl-8 leading-relaxed">
@@ -6480,7 +6505,7 @@ export function PetSittingContent() {
               ) : (
                 <form onSubmit={handleSendRequestClick} className="space-y-4">
                   <div className="bg-[#FAF6F4] border border-[#E8DDD4] rounded-xl p-3 text-[11px] text-[#666666] leading-snug">
-                    Sitters are ID-verified by Lumo. Lumo does not perform background checks or provide insurance.
+                    Sitters are ID-checked by Lumo. Lumo does not perform background checks or provide insurance.
                   </div>
 
                   {hasSavedInfo && (
@@ -7334,7 +7359,7 @@ export function PetSittingContent() {
 
                 {selectedSitterForReviews.approval_status === 'approved' && (
                   <div className="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-xs font-bold px-3 py-1 rounded-full border border-[#A7F3D0] mb-2 whitespace-nowrap">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID Verified
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#065F46] shrink-0" /> ID-checked
                   </div>
                 )}
 
@@ -7361,7 +7386,7 @@ export function PetSittingContent() {
                 </div>
 
                 <div className="mt-3 px-3.5 py-2 bg-white/90 border border-[#E8DDD4] rounded-xl text-[11px] text-[#666666] leading-snug max-w-sm">
-                  Sitters are ID-verified by Lumo. Lumo does not perform background checks or provide insurance.
+                  Sitters are ID-checked by Lumo. Lumo does not perform background checks or provide insurance.
                 </div>
               </div>
             </div>

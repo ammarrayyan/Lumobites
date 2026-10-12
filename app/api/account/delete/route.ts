@@ -78,11 +78,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Stripe Subscription Cancellation for Sitter Profile (if exists)
+    // 2. Stripe Subscription Cancellation & Storage Cleanup for Sitter Profile (if exists)
     try {
       const { data: sitter } = await supabaseAdmin
         .from('sitters')
-        .select('id, stripe_customer_id')
+        .select('id, stripe_customer_id, id_photo_url')
         .eq('email', cleanEmail)
         .maybeSingle();
 
@@ -96,6 +96,15 @@ export async function POST(request: NextRequest) {
           await stripe.subscriptions.cancel(sub.id);
           canceledSubscriptionsCount++;
           console.log(`[Account Delete] Cancelled Stripe subscription ${sub.id} for ${cleanEmail}`);
+        }
+      }
+
+      if (sitter?.id_photo_url && !sitter.id_photo_url.startsWith('http') && !sitter.id_photo_url.startsWith('data:')) {
+        try {
+          await supabaseAdmin.storage.from('sitter-ids').remove([sitter.id_photo_url]);
+          console.log(`[Account Delete] Removed ID document from storage for ${cleanEmail}`);
+        } catch (storageErr) {
+          console.error('[Account Delete] Failed to remove ID document from storage:', storageErr);
         }
       }
 
