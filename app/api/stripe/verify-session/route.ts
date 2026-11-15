@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { setAccountSessionCookie, createAccountSessionToken } from '@/lib/accountAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -63,7 +64,10 @@ export async function GET(request: NextRequest) {
           await supabase.from(tableName).update(updateData).eq('email', cleanEmail);
         }
 
-        return NextResponse.json({ success: true, isPartner: true, partnerType, email: cleanEmail });
+        const sessionToken = createAccountSessionToken(cleanEmail);
+        const response = NextResponse.json({ success: true, isPartner: true, partnerType, email: cleanEmail, sessionToken });
+        setAccountSessionCookie(response, cleanEmail, sessionToken);
+        return response;
       }
     }
 
@@ -85,7 +89,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database update failed: ' + dbError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, isPro: true, email: cleanEmail });
+    const sessionToken = createAccountSessionToken(cleanEmail);
+    const response = NextResponse.json({ success: true, isPro: true, email: cleanEmail, sessionToken });
+    setAccountSessionCookie(response, cleanEmail, sessionToken);
+    return response;
   } catch (err: any) {
     console.error('[Stripe Verify API] Error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

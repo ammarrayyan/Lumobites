@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
-import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { getVerifiedSessionDetails, applySlidingSessionRenewal } from '@/lib/accountAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -24,18 +24,35 @@ function safeFormatDate(dateVal: any): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const verifiedEmail = await getVerifiedSessionEmail(request);
+    const sessionDetails = await getVerifiedSessionDetails(request);
+    const verifiedEmail = sessionDetails?.email || null;
 
-    if (!verifiedEmail) {
+    if (!sessionDetails || !verifiedEmail) {
       return NextResponse.json({ error: 'Unauthorized — valid session cookie required' }, { status: 401 });
     }
+
+    const withSlidingRenewal = (payload: Record<string, any>, status = 200) => {
+      const probe = NextResponse.next();
+      const refreshedToken = applySlidingSessionRenewal(probe, sessionDetails);
+      const res = NextResponse.json(
+        {
+          ...payload,
+          ...(refreshedToken ? { sessionToken: refreshedToken } : {}),
+        },
+        { status }
+      );
+      if (refreshedToken) {
+        applySlidingSessionRenewal(res, sessionDetails);
+      }
+      return res;
+    };
 
     const cleanEmail = verifiedEmail.toLowerCase().trim();
 
     const proDetails = await getUserProStatusDetails(cleanEmail);
 
     if (proDetails.proSource === 'unlimited') {
-      return NextResponse.json({
+      return withSlidingRenewal({
         success: true,
         active: true,
         adminBypass: true,
@@ -112,7 +129,7 @@ export async function POST(request: NextRequest) {
 
       const dbPartnerType = info.table === 'vet_clinics' ? 'vet_boarding' : info.table === 'pet_daycares' ? 'pet_daycare' : 'shelter';
 
-      return NextResponse.json({
+      return withSlidingRenewal({
         success: true,
         active: true,
         isPartner: true,
@@ -136,7 +153,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!proDetails.isPro) {
-      return NextResponse.json({
+      return withSlidingRenewal({
         success: true,
         active: false,
         email: cleanEmail,
@@ -154,7 +171,7 @@ export async function POST(request: NextRequest) {
 
     const customers = await stripe.customers.list({ email: cleanEmail, limit: 1 });
     if (!customers.data || customers.data.length === 0) {
-      return NextResponse.json({
+      return withSlidingRenewal({
         success: true,
         active: false,
         email: cleanEmail,
@@ -174,7 +191,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!activeSubscription) {
-      return NextResponse.json({
+      return withSlidingRenewal({
         success: true,
         active: false,
         email: cleanEmail,
@@ -207,7 +224,7 @@ export async function POST(request: NextRequest) {
       daysRemaining = Math.max(0, Math.ceil((periodEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
     }
 
-    return NextResponse.json({
+    return withSlidingRenewal({
       success: true,
       active: true,
       adminBypass: false,

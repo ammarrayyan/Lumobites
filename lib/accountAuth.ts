@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 const SESSION_COOKIE_NAME = 'lumo_account_session';
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
+export const SESSION_RENEW_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 function getSecretKey(): string {
   const secret = process.env.ACCOUNT_SESSION_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'lumo_account_session_secret_dev_only_2026');
@@ -30,10 +31,20 @@ export function createAccountSessionToken(email: string): string {
   return `${payload}:${signature}`;
 }
 
+export interface VerifiedSessionToken {
+  email: string;
+  issuedAtMs: number;
+  expiresAtMs: number;
+}
+
+export interface VerifiedSessionDetails extends VerifiedSessionToken {
+  shouldRenew: boolean;
+}
+
 /**
- * Verifies a session token string and returns the email and issuedAtMs if valid and non-expired.
+ * Verifies a session token string and returns the email, issuedAtMs, and expiresAtMs if valid and non-expired.
  */
-export function verifyAccountSessionToken(token: string | null | undefined): { email: string; issuedAtMs: number } | null {
+export function verifyAccountSessionToken(token: string | null | undefined): VerifiedSessionToken | null {
   if (!token || typeof token !== 'string') return null;
 
   const parts = token.split(':');
@@ -64,19 +75,19 @@ export function verifyAccountSessionToken(token: string | null | undefined): { e
     return null;
   }
 
-  return { email: email.toLowerCase().trim(), issuedAtMs };
+  return { email: email.toLowerCase().trim(), issuedAtMs, expiresAtMs };
 }
 
 /**
- * Extracts and verifies the session email from incoming request cookies or headers.
- * Fails closed (returns null) if session cookie is invalid, expired, or if DB revocation check fails.
+ * Extracts and verifies the full session details from incoming request cookies or headers.
+ * Fails closed (returns null) if session cookie/header is invalid, expired, or if DB revocation check fails.
  */
-export async function getVerifiedSessionEmail(request: NextRequest): Promise<string | null> {
+export async function getVerifiedSessionDetails(request: NextRequest): Promise<VerifiedSessionDetails | null> {
   // 1. Try reading HTTP-Only cookie
   const cookie = request.cookies.get(SESSION_COOKIE_NAME);
   let token = cookie?.value;
 
-  // 2. Fallback to Authorization / Header
+  // 2. Fallback to Authorization / Header (used by iOS/Android Capacitor app)
   if (!token) {
     const authHeader = request.headers.get('x-account-session') || request.headers.get('authorization');
     if (authHeader) {
@@ -89,7 +100,7 @@ export async function getVerifiedSessionEmail(request: NextRequest): Promise<str
   const verifiedSession = verifyAccountSessionToken(token);
   if (!verifiedSession) return null;
 
-  const { email: verifiedEmail, issuedAtMs } = verifiedSession;
+  const { email: verifiedEmail, issuedAtMs, expiresAtMs } = verifiedSession;
 
   // 3. Database check: verify session was not revoked via "Sign Out All Devices"
   // FAIL CLOSED: If DB check errors or throws exception, return null
@@ -117,14 +128,31 @@ export async function getVerifiedSessionEmail(request: NextRequest): Promise<str
     return null;
   }
 
-  return verifiedEmail;
+  const remainingMs = expiresAtMs - Date.now();
+  const shouldRenew = remainingMs > 0 && remainingMs < SESSION_RENEW_THRESHOLD_MS;
+
+  return {
+    email: verifiedEmail,
+    issuedAtMs,
+    expiresAtMs,
+    shouldRenew,
+  };
 }
 
 /**
- * Sets the HTTP-Only secure session cookie on a NextResponse object.
+ * Extracts and verifies the session email from incoming request cookies or headers.
+ * Fails closed (returns null) if session cookie is invalid, expired, or if DB revocation check fails.
  */
-export function setAccountSessionCookie(response: NextResponse, email: string): void {
-  const token = createAccountSessionToken(email);
+export async function getVerifiedSessionEmail(request: NextRequest): Promise<string | null> {
+  const details = await getVerifiedSessionDetails(request);
+  return details ? details.email : null;
+}
+
+/**
+ * Sets the HTTP-Only secure session cookie on a NextResponse object and returns the minted token.
+ */
+export function setAccountSessionCookie(response: NextResponse, email: string, existingToken?: string): string {
+  const token = existingToken || createAccountSessionToken(email);
   const isProd = process.env.NODE_ENV === 'production';
 
   response.cookies.set(SESSION_COOKIE_NAME, token, {
@@ -134,6 +162,22 @@ export function setAccountSessionCookie(response: NextResponse, email: string): 
     path: '/',
     maxAge: SESSION_MAX_AGE,
   });
+
+  return token;
+}
+
+/**
+ * Re-issues the 30-day session cookie if fewer than 7 days remain on the current token.
+ * Returns the newly minted token string when renewed, or null if no renewal was needed.
+ */
+export function applySlidingSessionRenewal(
+  response: NextResponse,
+  sessionDetails: VerifiedSessionDetails
+): string | null {
+  if (!sessionDetails.shouldRenew) {
+    return null;
+  }
+  return setAccountSessionCookie(response, sessionDetails.email);
 }
 
 /**

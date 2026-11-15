@@ -18,15 +18,18 @@ export async function POST(request: NextRequest) {
     // Apple reviewer bypass
     if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
       console.log(`[Verify Code API] Apple reviewer bypass triggered`);
+      const reviewerToken = createAccountSessionToken(cleanEmail);
       const response = NextResponse.json({
         success: true,
         isPro: true,
         existed: true,
         isSitter: false,
         sitterId: null,
-        token: createAccountSessionToken(cleanEmail)
+        sessionToken: reviewerToken,
+        token: reviewerToken,
+        email: cleanEmail
       });
-      setAccountSessionCookie(response, cleanEmail);
+      setAccountSessionCookie(response, cleanEmail, reviewerToken);
       return response;
     }
 

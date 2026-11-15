@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 import { formatDistanceToNow } from 'date-fns';
 import PostReactions from '@/components/PostReactions';
 import { Megaphone, Footprints, MapPin, Check, RefreshCw, Loader2, LayoutList, Search, Camera, AlertTriangle, Sparkles, PenLine, PawPrint, Lock, Key, MessageSquare, ChevronDown, ChevronUp, Heart } from 'lucide-react';
-import { getSignedInUserEmail, isManualPageReload } from '@/lib/authHelper';
+import { getSignedInUserEmail, isManualPageReload, getSessionAuthHeaders } from '@/lib/authHelper';
 import { formatPublicCity } from '@/lib/formatCity';
 import AiLimitModal from '@/components/AiLimitModal';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
@@ -596,7 +596,7 @@ export default function LostPetsFeed() {
 
       const res = await fetch('/api/lost-pets/search-by-photo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload)
       });
 

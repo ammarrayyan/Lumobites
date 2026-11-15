@@ -14,7 +14,7 @@ import { Star, MapPin, Phone, Calendar, Home, Moon, Footprints, Lock, Crown, Cam
 
 import { formatPublicCity } from '@/lib/formatCity';
 import { supabase } from '@/lib/supabase';
-import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser, isManualPageReload, getSessionAuthHeaders } from '@/lib/authHelper';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -1469,7 +1469,7 @@ export function PetSittingContent() {
       
       const response = await fetch('/api/petsitting/ai-search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ query: aiSitterSearch, email, sitterIds, clinicIds, daycareIds })
       });
       const data = await response.json();

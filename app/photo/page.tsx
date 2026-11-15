@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, ChangeEvent, DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Dog, Cat, Sparkles, Footprints } from 'lucide-react';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 type Step = 'upload' | 'analyzing' | 'confirm_breed' | 'age' | 'budget';
 
@@ -121,6 +122,7 @@ export default function PhotoPage() {
 
       const res = await fetch('/api/vision', {
         method: 'POST',
+        headers: getSessionAuthHeaders(),
         body: formData,
       });
 

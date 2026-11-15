@@ -11,7 +11,7 @@ import {
   Search, Check, AlertTriangle, CheckCircle2, Leaf, Bell, Sparkles, ArrowRight, 
   Footprints, Mail, Camera, Barcode, FileText, Scan, Zap, ShieldCheck, RefreshCw, Info 
 } from 'lucide-react';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 
 export default function ScanPage() {
@@ -176,6 +176,9 @@ function ScanPageContent() {
             setIsPro(true);
             const userEmail = data.email || emailParam || '';
             setProEmail(userEmail);
+            if (data.sessionToken) {
+              localStorage.setItem('lumo_account_session_token', data.sessionToken);
+            }
             localStorage.setItem('lumo_pro_email', userEmail);
             localStorage.removeItem('lumo_admin_bypass');
             window.dispatchEvent(new Event('lumo-pro-update'));
@@ -724,7 +727,7 @@ function ScanPageContent() {
       const userEmail = getSignedInUserEmail();
       const res = await fetch('/api/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ ingredients: text, email: userEmail })
       });
       const data = await res.json();
@@ -867,16 +870,24 @@ function ScanPageContent() {
         throw new Error(data.error || 'Failed to verify code');
       }
 
-      if (data.isPro) {
-        setIsPro(true);
-        setProEmail(modalEmail);
-        localStorage.setItem('lumo_pro_email', modalEmail);
-        localStorage.removeItem('lumo_admin_bypass');
-        window.dispatchEvent(new Event('lumo-pro-update'));
-        setShowUpgradeModal(false);
-        setModalStep('paywall');
-        setVerificationCode('');
+      const activeEmail = (data.email || modalEmail).toLowerCase().trim();
+      const mintedToken = data.sessionToken || data.token;
+      if (mintedToken) {
+        localStorage.setItem('lumo_account_session_token', mintedToken);
+      }
+      localStorage.setItem('lumo_pro_email', activeEmail);
+      localStorage.setItem('lumo_terms_accepted', 'true');
+      localStorage.setItem('lumo_session_started_at', new Date().toISOString());
+      document.cookie = `lumo_pro_email=${encodeURIComponent(activeEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+      localStorage.removeItem('lumo_admin_bypass');
+      setIsPro(!!data.isPro);
+      setProEmail(activeEmail);
+      window.dispatchEvent(new Event('lumo-pro-update'));
+      setShowUpgradeModal(false);
+      setModalStep('paywall');
+      setVerificationCode('');
 
+      if (data.isPro) {
         try {
           confetti({
             particleCount: 100,
@@ -884,14 +895,12 @@ function ScanPageContent() {
             origin: { y: 0.6 }
           });
         } catch (e) {}
+      }
 
-        if (data.existed) {
-          alert('Welcome back! ✨');
-        } else {
-          alert('Account created! 🐾');
-        }
+      if (data.existed) {
+        alert('Welcome back! ✨');
       } else {
-        setModalMessage({ text: 'Could not restore account status. Please try again.', isError: true });
+        alert('Account created! 🐾');
       }
     } catch (err: any) {
       console.error(err);

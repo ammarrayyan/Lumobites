@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User, HelpCircle } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
-import { signOutUser } from '@/lib/authHelper';
+import { signOutUser, clearStaleClientAuth } from '@/lib/authHelper';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 type Step = 'email' | 'verification' | 'dashboard';
@@ -56,6 +56,9 @@ export default function AccountPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.email && data.verified) {
+            if (data.sessionToken && typeof window !== 'undefined') {
+              localStorage.setItem('lumo_account_session_token', data.sessionToken);
+            }
             setEmail(data.email);
             setIsLocked(true);
             setSubDetails({
@@ -280,8 +283,9 @@ export default function AccountPage() {
       const activeEmail = data.email || cleanEmail;
       setEmail(activeEmail);
       setIsLocked(true);
-      if (data.sessionToken) {
-        localStorage.setItem('lumo_account_session_token', data.sessionToken);
+      const mintedToken = data.sessionToken || data.token;
+      if (mintedToken) {
+        localStorage.setItem('lumo_account_session_token', mintedToken);
       }
       localStorage.setItem('lumo_pro_email', activeEmail);
       localStorage.setItem('lumo_terms_accepted', 'true');
@@ -530,15 +534,34 @@ export default function AccountPage() {
               )}
 
               <form onSubmit={handleSendCode} className="flex flex-col gap-4">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-[#2E2419]"
-                  required
-                  disabled={loading}
-                />
+                <div className="flex flex-col gap-1.5">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none text-[#2E2419]"
+                    required
+                    disabled={loading}
+                  />
+                  {email.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearStaleClientAuth();
+                        setEmail('');
+                        setError(null);
+                        setMessage(null);
+                        if (typeof window !== 'undefined') {
+                          window.dispatchEvent(new Event('lumo-pro-update'));
+                        }
+                      }}
+                      className="text-xs font-bold text-[#8B5E3C] hover:underline self-end cursor-pointer bg-transparent border-none p-0"
+                    >
+                      Not you? Clear saved email.
+                    </button>
+                  )}
+                </div>
 
                 {!hasTermsAccepted && (
                   <label className="flex items-start gap-2.5 my-1 cursor-pointer select-none text-left">
@@ -701,6 +724,14 @@ export default function AccountPage() {
                     <p className="text-xs text-gray-500 mt-1 font-bold">
                       Account: {email}
                     </p>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF5EE] hover:bg-[#F0E6DA] border border-[#EADBCE] text-xs font-bold text-[#8B5E3C] transition-colors cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sign Out
+                    </button>
                   </div>
 
                   {/* Quick-Launch Partner Banner when signed in as partner */}

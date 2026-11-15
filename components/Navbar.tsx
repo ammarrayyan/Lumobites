@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
-import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X, Building2, HelpCircle } from 'lucide-react';
+import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X, Building2, HelpCircle, User } from 'lucide-react';
 import { app, getToken, getMessaging } from '@/lib/firebase';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders, clearStaleClientAuth, signOutUser } from '@/lib/authHelper';
 import { useScrollLock } from '@/lib/useScrollLock';
 
 const getInitialProEmail = () => {
@@ -65,12 +65,14 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   // Toggle hamburger — close bell if open
   const handleHamburgerClick = () => {
     setIsBellOpen(false);
+    setShowProMenu(false);
     setIsOpen(!isOpen);
   };
 
   // Toggle bell — close hamburger if open
   const handleBellClick = (openState: boolean) => {
     setIsOpen(false);
+    setShowProMenu(false);
     setIsBellOpen(openState);
   };
 
@@ -78,7 +80,12 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const handleSignInClick = (show: boolean) => {
     setIsOpen(false);
     setIsBellOpen(false);
+    setShowProMenu(false);
     setShowUpgradeMenu(false);
+    if (show && typeof window !== 'undefined' && !signInEmail) {
+      const saved = getSignedInUserEmail();
+      if (saved) setSignInEmail(saved);
+    }
     setShowSignInModal(show);
   };
 
@@ -86,6 +93,7 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const handleUpgradeMenuClick = (show: boolean) => {
     setIsOpen(false);
     setIsBellOpen(false);
+    setShowProMenu(false);
     setShowUpgradeMenu(show);
   };
   const [isPro, setIsPro] = useState(() => {
@@ -120,34 +128,81 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     }
   }, [showSignInModal]);
 
-  const syncStatus = () => {
-    if (typeof window === 'undefined') return;
-    const activeEmail = getSignedInUserEmail();
-    const cachedEmail = localStorage.getItem('lumo_pro_email');
-    const cachedSitter = localStorage.getItem('lumo_sitter_email');
-    const cachedShelter = localStorage.getItem('lumo_shelter_email');
-    setSitterEmail(cachedSitter || '');
-    setShelterEmail(cachedShelter || '');
-    
-    const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-    const isOwnerEmail = activeEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || activeEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
-    
-    if (isAdminBypass || isOwnerEmail) {
+  const checkProStatusForVerifiedEmail = (verifiedEmail: string) => {
+    if (typeof window === 'undefined' || !verifiedEmail) return;
+    const isOwnerEmail =
+      verifiedEmail.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' ||
+      verifiedEmail.toLowerCase().trim() === 'reviewer@lumobites.net';
+    if (isOwnerEmail) {
       setIsPro(true);
-      setIsSignedIn(true);
-      setProEmail(activeEmail || cachedEmail || 'admin@lumobites.com');
-    } else if (activeEmail) {
-      setIsSignedIn(true);
-      setProEmail(activeEmail);
-    } else {
-      setIsPro(false);
-      setIsSignedIn(false);
-      setProEmail('');
+      return;
+    }
+
+    fetch('/api/stripe/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: verifiedEmail }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.isPro) {
+          setIsPro(true);
+        } else {
+          setIsPro(false);
+        }
+      })
+      .catch((err) => {
+        console.error('[Lumo Subscription] Failed to sync status with Supabase:', err);
+      });
+  };
+
+  const verifyServerSession = async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const res = await fetch('/api/account/session', {
+        method: 'GET',
+        headers: getSessionAuthHeaders(),
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data && data.signedIn && data.email) {
+        const verifiedEmail = String(data.email).toLowerCase().trim();
+        if (data.sessionToken) {
+          localStorage.setItem('lumo_account_session_token', data.sessionToken);
+        }
+        localStorage.setItem('lumo_pro_email', verifiedEmail);
+        document.cookie = `lumo_pro_email=${encodeURIComponent(verifiedEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+
+        setProEmail(verifiedEmail);
+        setSitterEmail(localStorage.getItem('lumo_sitter_email') || '');
+        setShelterEmail(localStorage.getItem('lumo_shelter_email') || '');
+        setIsSignedIn(true);
+        checkProStatusForVerifiedEmail(verifiedEmail);
+      } else {
+        // Server confirmed no valid session — clear any stale localStorage/cookies
+        clearStaleClientAuth();
+        setIsPro(false);
+        setIsSignedIn(false);
+        setProEmail('');
+        setSitterEmail('');
+        setShelterEmail('');
+        setShowProMenu(false);
+      }
+    } catch (err) {
+      console.error('[Navbar] Failed to verify session with server:', err);
     }
   };
 
+  const syncStatus = () => {
+    if (typeof window === 'undefined') return;
+    verifyServerSession();
+  };
+
   useEffect(() => {
-    syncStatus();
+    verifyServerSession();
     
     if (typeof window !== 'undefined' && window.location.search.includes('signin=true')) {
       setShowSignInModal(true);
@@ -168,70 +223,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     // Add listeners for custom state synchronization
     window.addEventListener('lumo-pro-update', syncStatus);
     window.addEventListener('storage', syncStatus);
-
-    // Dynamic database check if cached email exists
-    const cachedEmail = localStorage.getItem('lumo_pro_email');
-    const isAdminBypass = localStorage.getItem('lumo_admin_bypass') === 'true';
-    const isOwnerEmail = cachedEmail?.toLowerCase().trim() === 'premierpetnutritionllc@gmail.com' || cachedEmail?.toLowerCase().trim() === 'reviewer@lumobites.net';
-
-    if (cachedEmail && !isAdminBypass && !isOwnerEmail && cachedEmail !== 'undefined' && cachedEmail !== 'null' && cachedEmail.trim() !== '') {
-      fetch('/api/stripe/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cachedEmail })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.session_invalidated_at) {
-          const sessionStarted = localStorage.getItem('lumo_session_started_at');
-          if (sessionStarted) {
-            const startedDate = new Date(sessionStarted);
-            const invalidatedDate = new Date(data.session_invalidated_at);
-            if (invalidatedDate > startedDate) {
-              localStorage.clear();
-              document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-              alert("You have been signed out of all devices for security.");
-              window.location.href = "/";
-              return;
-            }
-          }
-        }
-        if (data.isPro) {
-          setIsPro(true);
-        } else {
-          setIsPro(false);
-          // Do NOT remove lumo_pro_email because they could be a free sitter signed in
-          window.dispatchEvent(new Event('lumo-pro-update'));
-        }
-      })
-      .catch((err) => {
-        console.error('[Lumo Subscription] Failed to sync status with Supabase:', err);
-      });
-    }
-
-    const cachedSitter = localStorage.getItem('lumo_sitter_email');
-    if (cachedSitter && cachedSitter !== 'undefined' && cachedSitter !== 'null' && cachedSitter.trim() !== '') {
-      fetch(`/api/petsitting/profile?email=${encodeURIComponent(cachedSitter)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.session_invalidated_at) {
-          const sessionStarted = localStorage.getItem('lumo_session_started_at');
-          if (sessionStarted) {
-            const startedDate = new Date(sessionStarted);
-            const invalidatedDate = new Date(data.session_invalidated_at);
-            if (invalidatedDate > startedDate) {
-              localStorage.clear();
-              document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-              alert("You have been signed out of all devices for security.");
-              window.location.href = "/";
-            }
-          }
-        }
-      })
-      .catch(err => {
-        console.error('[Navbar Sitter Check] Failed to check status:', err);
-      });
-    }
 
     const handleOpenSignIn = () => {
       handleSignInClick(true);
@@ -293,33 +284,27 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('lumo_pro_email');
-      localStorage.removeItem('lumo_sitter_email');
-      localStorage.removeItem('lumo_shelter_email');
-      localStorage.removeItem('lumo_sitter_id');
-      localStorage.removeItem('lumo_admin_bypass');
-      document.cookie = 'lumo_pro_email=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      
       // Clear all reaction data on sign out
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.startsWith('reacted_') || key === 'lumo_device_id') {
-          localStorage.removeItem(key);
-        }
-      });
+      try {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('reacted_') || key === 'lumo_device_id') {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (e) {}
     }
     setIsPro(false);
     setIsSignedIn(false);
     setProEmail('');
+    setSitterEmail('');
+    setShelterEmail('');
     setShowProMenu(false);
-    
-    // Broadcast auth change
-    window.dispatchEvent(new Event('lumo-pro-update'));
-    
-    // Force clean page refresh
-    window.location.reload();
+    setIsOpen(false);
+
+    await signOutUser({ redirectTo: '/', reload: true });
   };
 
   const handleUpgradeCheckout = async (prefilledEmail?: string) => {
@@ -387,8 +372,9 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
       localStorage.setItem('lumo_pro_email', cleanEmail);
       localStorage.setItem('lumo_terms_accepted', 'true');
       document.cookie = `lumo_pro_email=${cleanEmail}; path=/; max-age=2592000`; // 30 days
-      if (verifyData.sessionToken) {
-        localStorage.setItem('lumo_account_session_token', verifyData.sessionToken);
+      const mintedToken = verifyData.sessionToken || verifyData.token;
+      if (mintedToken) {
+        localStorage.setItem('lumo_account_session_token', mintedToken);
       }
       if (verifyData.isSitter) {
         localStorage.setItem('lumo_sitter_email', cleanEmail);
@@ -608,13 +594,57 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
             )}
 
             {isSignedIn && (
-              <Link
-                href="/account"
-                className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none text-decoration-none"
-                title={proEmail || sitterEmail || shelterEmail || 'My Account'}
-              >
-                {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
-              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsBellOpen(false);
+                    setShowProMenu(!showProMenu);
+                  }}
+                  aria-label="Account menu"
+                  className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none cursor-pointer"
+                  title={proEmail || sitterEmail || shelterEmail || 'My Account'}
+                >
+                  {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
+                </button>
+                {showProMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40 bg-transparent cursor-default"
+                      onClick={() => setShowProMenu(false)}
+                    />
+                    <div className="absolute right-0 mt-2.5 w-56 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                      {(proEmail || sitterEmail || shelterEmail) && (
+                        <div className="px-3 py-2 border-b border-gray-100">
+                          <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                            Signed in as
+                          </span>
+                          <span className="block text-xs font-bold text-[#3B2410] truncate">
+                            {proEmail || sitterEmail || shelterEmail}
+                          </span>
+                        </div>
+                      )}
+                      <Link
+                        href="/account"
+                        onClick={() => setShowProMenu(false)}
+                        className="w-full px-3 py-2.5 rounded-xl text-xs font-bold text-[#3B2410] hover:bg-[#FDF9F5] transition-colors flex items-center gap-2 no-underline"
+                      >
+                        <User className="w-4 h-4 text-[#8B5E3C]" />
+                        My Account
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="w-full px-3 py-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 cursor-pointer border-none bg-transparent text-left"
+                      >
+                        <LogOut className="w-4 h-4 text-red-500" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -637,13 +667,57 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               Sign In
             </button>
           ) : (
-            <Link
-              href="/account"
-              className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none text-decoration-none"
-              title={proEmail || sitterEmail || shelterEmail || 'My Account'}
-            >
-              {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
-            </Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsBellOpen(false);
+                  setShowProMenu(!showProMenu);
+                }}
+                aria-label="Account menu"
+                className="w-8 h-8 rounded-full bg-[#C17D3C] hover:bg-[#B06D2B] text-white font-[800] flex items-center justify-center text-[13px] shadow-[0_2px_8px_rgba(193,125,60,0.25)] border-none transition-transform hover:scale-105 active:scale-95 select-none cursor-pointer"
+                title={proEmail || sitterEmail || shelterEmail || 'My Account'}
+              >
+                {(proEmail || sitterEmail || shelterEmail || 'U').charAt(0).toUpperCase()}
+              </button>
+              {showProMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent cursor-default"
+                    onClick={() => setShowProMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2.5 w-56 bg-white border border-[#E8DDD4] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-2 z-50 flex flex-col gap-1 animate-fade-in text-left">
+                    {(proEmail || sitterEmail || shelterEmail) && (
+                      <div className="px-3 py-2 border-b border-gray-100">
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                          Signed in as
+                        </span>
+                        <span className="block text-xs font-bold text-[#3B2410] truncate">
+                          {proEmail || sitterEmail || shelterEmail}
+                        </span>
+                      </div>
+                    )}
+                    <Link
+                      href="/account"
+                      onClick={() => setShowProMenu(false)}
+                      className="w-full px-3 py-2.5 rounded-xl text-xs font-bold text-[#3B2410] hover:bg-[#FDF9F5] transition-colors flex items-center gap-2 no-underline"
+                    >
+                      <User className="w-4 h-4 text-[#8B5E3C]" />
+                      My Account
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="w-full px-3 py-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 cursor-pointer border-none bg-transparent text-left"
+                    >
+                      <LogOut className="w-4 h-4 text-red-500" />
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -760,7 +834,26 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               Help & Support
             </Link>
 
-            
+            {isSignedIn && (
+              <>
+                <Link
+                  href="/account"
+                  className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none border-t border-gray-100 pt-3 mt-1"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
+                  My Account
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="px-4 py-3 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center animate-fade-in cursor-pointer border-none bg-transparent text-left"
+                >
+                  <LogOut className="w-4 h-4 inline-block mr-2.5 align-middle text-red-500" strokeWidth={2.5} />
+                  Sign Out
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -861,14 +954,30 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
 
                 {signInStep === 'email' ? (
                   <form onSubmit={handleSignInSendCode} className="flex flex-col gap-4">
-                    <input
-                      type="email"
-                      value={signInEmail}
-                      onChange={e => setSignInEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
-                      required
-                    />
+                    <div className="flex flex-col gap-1.5">
+                      <input
+                        type="email"
+                        value={signInEmail}
+                        onChange={e => setSignInEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-[#E8D5C0] focus:border-[#8B5E3C] focus:ring-0 transition-colors outline-none"
+                        required
+                      />
+                      {signInEmail.trim() && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            clearStaleClientAuth();
+                            setSignInEmail('');
+                            setSignInError('');
+                            window.dispatchEvent(new Event('lumo-pro-update'));
+                          }}
+                          className="text-xs font-bold text-[#8B5E3C] hover:underline self-end cursor-pointer bg-transparent border-none p-0"
+                        >
+                          Not you? Clear saved email.
+                        </button>
+                      )}
+                    </div>
                     {!hasTermsAccepted && (
                       <label className="flex items-start gap-2.5 my-1 cursor-pointer select-none text-left">
                         <input

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { PawPrint, Search, AlertTriangle, Leaf, Sparkles, Share2, ShieldCheck } from 'lucide-react';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 
 export default function IngredientsPage() {
@@ -45,7 +45,7 @@ export default function IngredientsPage() {
       const userEmail = getSignedInUserEmail();
       const res = await fetch('/api/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ ingredients: ingredientsText, email: userEmail })
       });
       const data = await res.json();

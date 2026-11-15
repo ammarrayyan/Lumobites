@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import { cookies } from "next/headers";
+import { verifyAccountSessionToken } from "@/lib/accountAuth";
 import Navbar from "@/components/Navbar";
 import PwaRegister from "@/components/PwaRegister";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
@@ -60,7 +61,9 @@ export default async function RootLayout({
   let proEmail = '';
   try {
     const cookieStore = await cookies();
-    proEmail = cookieStore.get('lumo_pro_email')?.value || '';
+    const sessionToken = cookieStore.get('lumo_account_session')?.value;
+    const verifiedSession = verifyAccountSessionToken(sessionToken);
+    proEmail = verifiedSession?.email || '';
   } catch (err) {
     // Suppress cookie store errors during static / edge rendering
   }

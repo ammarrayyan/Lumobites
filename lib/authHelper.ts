@@ -27,6 +27,57 @@ export function getSignedInUserEmail(): string {
   return '';
 }
 
+/**
+ * Returns request headers including the `x-account-session` token from localStorage
+ * when present, ensuring iOS/Android Capacitor apps and web browsers authenticate
+ * identically on protected routes.
+ */
+export function getSessionAuthHeaders(extraHeaders?: Record<string, string>): Record<string, string> {
+  const headers: Record<string, string> = { ...(extraHeaders || {}) };
+  if (typeof window === 'undefined') return headers;
+  try {
+    const token = localStorage.getItem('lumo_account_session_token');
+    if (token && token !== 'undefined' && token !== 'null' && token.trim() !== '') {
+      headers['x-account-session'] = token.trim();
+    }
+  } catch (e) {
+    console.error('[getSessionAuthHeaders] Error reading session token:', e);
+  }
+  return headers;
+}
+
+/**
+ * Clears stale client-side auth state (localStorage & client cookies) without reloading
+ * when the server reports no active verified session.
+ */
+export function clearStaleClientAuth(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('lumo_pro_email');
+    localStorage.removeItem('lumo_sitter_email');
+    localStorage.removeItem('lumo_sitter_id');
+    localStorage.removeItem('lumo_sitter_email_expiry');
+    localStorage.removeItem('lumo_shelter_email');
+    localStorage.removeItem('lumo_account_email');
+    localStorage.removeItem('lumo_account_session_token');
+    localStorage.removeItem('lumo_admin_bypass');
+    localStorage.removeItem('lumo_session_started_at');
+
+    const cookieNames = [
+      'lumo_pro_email',
+      'lumo_account_session_token',
+      'lumo_account_session',
+      'lumo_sitter_email',
+      'lumo_shelter_email'
+    ];
+    for (const name of cookieNames) {
+      document.cookie = `${name}=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    }
+  } catch (e) {
+    console.error('[clearStaleClientAuth] Error clearing stale auth:', e);
+  }
+}
+
 export interface SignOutOptions {
   redirectTo?: string;
   reload?: boolean;

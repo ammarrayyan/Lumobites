@@ -8,7 +8,7 @@ import { ChatMessage, ParsedPetInfo } from '@/lib/types';
 import { Brain, Smile, Wheat, Sparkles, Scale, Activity, CheckCircle2, Inbox, ChevronRight, Camera, MessageSquare, ArrowLeft, Upload, Loader2, MessageCircle, Utensils, Heart, PawPrint, Leaf, AlertTriangle, ShoppingCart } from 'lucide-react';
 import MobileFoodNav from '@/components/MobileFoodNav';
 import AmazonProductCard, { AmazonProductCardSkeleton, AmazonProduct } from '@/components/AmazonProductCard';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
@@ -112,6 +112,7 @@ function ChatPageContent() {
 
       const res = await fetch('/api/vision-food', {
         method: 'POST',
+        headers: getSessionAuthHeaders(),
         body: formData
       });
 

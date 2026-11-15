@@ -10,7 +10,7 @@ import PetPhotoCarousel from '@/components/PetPhotoCarousel';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import ChatModal from '@/components/ChatModal';
-import { getSignedInUserEmail, signOutUser, isManualPageReload } from '@/lib/authHelper';
+import { getSignedInUserEmail, signOutUser, isManualPageReload, getSessionAuthHeaders } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import MobileFloatingAction from '@/components/MobileFloatingAction';
@@ -483,8 +483,9 @@ function AdoptionContent() {
       if (!res.ok) throw new Error(data.error || 'Invalid or expired code.');
 
       // Successfully authenticated!
-      if (data.sessionToken) {
-        localStorage.setItem('lumo_account_session_token', data.sessionToken);
+      const mintedToken = data.sessionToken || data.token;
+      if (mintedToken) {
+        localStorage.setItem('lumo_account_session_token', mintedToken);
       }
       localStorage.setItem('lumo_pro_email', trimmedEmail);
       localStorage.setItem('lumo_shelter_email', trimmedEmail);
@@ -530,10 +531,6 @@ function AdoptionContent() {
       });
       if (res.ok) {
         setShelterRegSuccess(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('lumo_shelter_email', shelterFormData.email);
-          localStorage.setItem('lumo_pro_email', shelterFormData.email);
-        }
         setTimeout(() => {
           setIsShelterRegOpen(false);
         }, 1500);
@@ -745,7 +742,7 @@ function AdoptionContent() {
     try {
       const res = await fetch('/api/adoption/ai-match', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           prompt: lifestylePrompt,
           species: species !== 'all' ? species : undefined,
@@ -830,7 +827,7 @@ function AdoptionContent() {
     try {
       const res = await fetch('/api/adoption/visual-match', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ photo: uploadedPhoto, email: userEmail })
       });
 
@@ -870,7 +867,6 @@ function AdoptionContent() {
       if (res.ok) {
         const data = await res.json();
         setShelterRegSuccess(true);
-        localStorage.setItem('lumo_shelter_email', shelterFormData.email);
         if (data.shelter) {
           setUserShelter(data.shelter);
         }

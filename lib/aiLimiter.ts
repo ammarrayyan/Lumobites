@@ -256,8 +256,8 @@ export async function checkAndTrackAiUsage({
   verifiedEmail?: string | null;
   request?: Request;
 }): Promise<{ allowed: boolean; reason?: string; isUnlimited?: boolean; isPro?: boolean }> {
-  const normalizedEmail = normalizeEmail(userEmail);
-  if (!normalizedEmail) {
+  const normalizedVerifiedEmail = normalizeEmail(verifiedEmail);
+  if (!normalizedVerifiedEmail) {
     return {
       allowed: false,
       reason: 'Please sign in to use AI features.',
@@ -265,10 +265,7 @@ export async function checkAndTrackAiUsage({
     };
   }
 
-  const normalizedVerifiedEmail = normalizeEmail(verifiedEmail);
-  const proDetails = normalizedVerifiedEmail
-    ? await getUserProStatusDetails(normalizedVerifiedEmail)
-    : { isPro: false, proSource: 'none' as const, rawSubscriptionStatus: 'none' as const, billingHealthLabel: 'N/A' };
+  const proDetails = await getUserProStatusDetails(normalizedVerifiedEmail);
 
   if (proDetails.proSource === 'unlimited') {
     return { allowed: true, isUnlimited: true, isPro: true };
@@ -277,7 +274,7 @@ export async function checkAndTrackAiUsage({
   const config = AI_LIMIT_CONFIG[feature];
   if (!config) return { allowed: true };
 
-  const userIdentifier = normalizedVerifiedEmail || normalizedEmail;
+  const userIdentifier = normalizedVerifiedEmail;
 
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();

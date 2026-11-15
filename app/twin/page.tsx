@@ -5,7 +5,7 @@ import Link from 'next/link';
 import MobileCommunityNav from '@/components/MobileCommunityNav';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders } from '@/lib/authHelper';
 import AiLimitModal from '@/components/AiLimitModal';
 import { 
   AlertTriangle, 
@@ -213,6 +213,9 @@ export default function TwinPage() {
             setIsPro(true);
             const userEmail = data.email || emailParam || '';
             setProEmail(userEmail);
+            if (data.sessionToken) {
+              localStorage.setItem('lumo_account_session_token', data.sessionToken);
+            }
             localStorage.setItem('lumo_pro_email', userEmail);
             localStorage.removeItem('lumo_admin_bypass');
             window.dispatchEvent(new Event('lumo-pro-update'));
@@ -413,13 +416,21 @@ export default function TwinPage() {
         throw new Error(data.error || 'Failed to verify code');
       }
 
+      const activeEmail = (data.email || modalEmail).toLowerCase().trim();
+      const mintedToken = data.sessionToken || data.token;
+      if (mintedToken) {
+        localStorage.setItem('lumo_account_session_token', mintedToken);
+      }
+      localStorage.setItem('lumo_pro_email', activeEmail);
+      localStorage.setItem('lumo_terms_accepted', 'true');
+      localStorage.setItem('lumo_session_started_at', new Date().toISOString());
+      document.cookie = `lumo_pro_email=${encodeURIComponent(activeEmail)}; path=/; max-age=2592000; SameSite=Lax`;
+      localStorage.removeItem('lumo_admin_bypass');
+      setIsPro(!!data.isPro);
+      setProEmail(activeEmail);
+      window.dispatchEvent(new Event('lumo-pro-update'));
+
       if (data.isPro) {
-        setIsPro(true);
-        setProEmail(modalEmail);
-        localStorage.setItem('lumo_pro_email', modalEmail);
-        localStorage.removeItem('lumo_admin_bypass');
-        window.dispatchEvent(new Event('lumo-pro-update'));
-        
         try {
           confetti({
             particleCount: 150,
@@ -427,24 +438,22 @@ export default function TwinPage() {
             origin: { y: 0.6 }
           });
         } catch (e) {}
+      }
 
-        setShowUpgradeModal(false);
-        setModalMessage(null);
-        setVerificationCode('');
-        setModalStep('paywall');
+      setShowUpgradeModal(false);
+      setModalMessage(null);
+      setVerificationCode('');
+      setModalStep('paywall');
 
-        if (pendingFile) {
-          const fileToRun = pendingFile;
-          setPendingFile(null);
-          processFile(fileToRun);
-        }
-        if (data.existed) {
-          alert('Welcome back! ✨');
-        } else {
-          alert('Account created! 🐾');
-        }
+      if (pendingFile) {
+        const fileToRun = pendingFile;
+        setPendingFile(null);
+        processFile(fileToRun);
+      }
+      if (data.existed) {
+        alert('Welcome back! ✨');
       } else {
-        throw new Error('Could not verify code. Please try again.');
+        alert('Account created! 🐾');
       }
     } catch (err: any) {
       console.error(err);
@@ -709,6 +718,7 @@ export default function TwinPage() {
 
       const res = await fetch(`/api/twin?t=${Date.now()}`, {
         method: 'POST',
+        headers: getSessionAuthHeaders(),
         body: formData,
         signal: controller.signal,
       });
