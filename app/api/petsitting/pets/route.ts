@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { unpackPetProfile, packPetProfile } from '@/lib/petProfileSchema';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +16,17 @@ export async function GET(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(request);
+
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      if (verifiedEmail !== cleanEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only view your own pet profiles.' }, { status: 403 });
+      }
+    }
 
     const { data: pets, error } = await supabaseAdmin
       .from('owner_pets')
@@ -69,6 +82,17 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = owner_email.toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(request);
+
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      if (verifiedEmail !== cleanEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only modify your own pet profiles.' }, { status: 403 });
+      }
+    }
 
     // Process photo_urls array (up to 3 photos)
     let processedPhotoUrls: string[] = [];
@@ -255,6 +279,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(request);
+
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      if (verifiedEmail !== cleanEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only delete your own pet profiles.' }, { status: 403 });
+      }
+    }
 
     const { error } = await supabaseAdmin
       .from('owner_pets')

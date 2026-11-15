@@ -233,4 +233,120 @@ test.describe('Flow 1: Authentication & Session Lifecycle', () => {
       }
     }, { timeout: 8000 }).toBeNull();
   });
+
+  test('should disable reviewer@lumobites.net bypass by default when REVIEWER_BYPASS_CODE is unset', async ({ request }) => {
+    const stripeVerifyRes = await request.post('/api/stripe/verify-code', {
+      data: { email: 'reviewer@lumobites.net', code: '123456' },
+    });
+    expect(stripeVerifyRes.status()).toBe(400);
+
+    const sitterVerifyRes = await request.post('/api/petsitting/auth/verify-code', {
+      data: { email: 'reviewer@lumobites.net', code: '123456' },
+    });
+    expect(sitterVerifyRes.status()).toBe(400);
+  });
+
+  test('should enforce verified session on secured routes (401 unauthenticated, 403 wrong user, 200 owner via cookie or x-account-session)', async ({ request }) => {
+    const ownerEmail = 'owner-sec-test-fake@example.com';
+    const otherEmail = 'other-sec-test-fake@example.com';
+    const ownerToken = createTestSessionToken(ownerEmail);
+    const otherToken = createTestSessionToken(otherEmail);
+
+    // 1. /api/petsitting/pets
+    const petsNoAuth = await request.get(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`);
+    expect(petsNoAuth.status()).toBe(401);
+
+    const petsWrongUser = await request.get(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': otherToken },
+    });
+    expect(petsWrongUser.status()).toBe(403);
+
+    const petsOwnerHeader = await request.get(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': ownerToken },
+    });
+    expect(petsOwnerHeader.status()).toBe(200);
+
+    const petsOwnerCookie = await request.get(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { Cookie: `lumo_account_session=${ownerToken}` },
+    });
+    expect(petsOwnerCookie.status()).toBe(200);
+
+    // 2. /api/petsitting/owner-profile
+    const ownerProfNoAuth = await request.get(`/api/petsitting/owner-profile?email=${encodeURIComponent(ownerEmail)}`);
+    expect(ownerProfNoAuth.status()).toBe(401);
+
+    const ownerProfWrongUser = await request.get(`/api/petsitting/owner-profile?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': otherToken },
+    });
+    expect(ownerProfWrongUser.status()).toBe(403);
+
+    const ownerProfOwner = await request.get(`/api/petsitting/owner-profile?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': ownerToken },
+    });
+    expect(ownerProfOwner.status()).toBe(200);
+
+    // 3. /api/petsitting/block
+    const blockGetNoAuth = await request.get(`/api/petsitting/block?email=${encodeURIComponent(ownerEmail)}`);
+    expect(blockGetNoAuth.status()).toBe(401);
+
+    const blockPostWrongUser = await request.post('/api/petsitting/block', {
+      headers: { 'x-account-session': otherToken },
+      data: { blockerEmail: ownerEmail, blockedEmail: 'spammer@example.com' },
+    });
+    expect(blockPostWrongUser.status()).toBe(403);
+
+    const blockGetOwner = await request.get(`/api/petsitting/block?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': ownerToken },
+    });
+    expect(blockGetOwner.status()).toBe(200);
+
+    // 4. /api/adoption/shelter (GET, PATCH, DELETE secured)
+    const shelterGetNoAuth = await request.get(`/api/adoption/shelter?email=${encodeURIComponent(ownerEmail)}`);
+    expect(shelterGetNoAuth.status()).toBe(401);
+
+    const shelterGetWrongUser = await request.get(`/api/adoption/shelter?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': otherToken },
+    });
+    expect(shelterGetWrongUser.status()).toBe(403);
+
+    const shelterGetOwner = await request.get(`/api/adoption/shelter?email=${encodeURIComponent(ownerEmail)}`, {
+      headers: { 'x-account-session': ownerToken },
+    });
+    expect(shelterGetOwner.status()).toBe(200);
+
+    // 5. /api/affiliate/stats
+    const affNoAuth = await request.post('/api/affiliate/stats', {
+      data: { email: ownerEmail },
+    });
+    expect(affNoAuth.status()).toBe(401);
+
+    const affWrongUser = await request.post('/api/affiliate/stats', {
+      headers: { 'x-account-session': otherToken },
+      data: { email: ownerEmail },
+    });
+    expect(affWrongUser.status()).toBe(403);
+
+    // 6. /api/stripe/cancel-partner-subscription & reactivate-partner-subscription
+    const cancelNoAuth = await request.post('/api/stripe/cancel-partner-subscription', {
+      data: { partner_id: '00000000-0000-0000-0000-000000000000', partner_type: 'shelter' },
+    });
+    expect(cancelNoAuth.status()).toBe(401);
+
+    const reactivateNoAuth = await request.post('/api/stripe/reactivate-partner-subscription', {
+      data: { partner_id: '00000000-0000-0000-0000-000000000000', partner_type: 'shelter' },
+    });
+    expect(reactivateNoAuth.status()).toBe(401);
+
+    // 7. /api/petsitting/auth/signout-all-devices
+    const signoutAllNoAuth = await request.post('/api/petsitting/auth/signout-all-devices', {
+      data: { email: ownerEmail },
+    });
+    expect(signoutAllNoAuth.status()).toBe(401);
+
+    const signoutAllWrongUser = await request.post('/api/petsitting/auth/signout-all-devices', {
+      headers: { 'x-account-session': otherToken },
+      data: { email: ownerEmail },
+    });
+    expect(signoutAllWrongUser.status()).toBe(403);
+  });
 });

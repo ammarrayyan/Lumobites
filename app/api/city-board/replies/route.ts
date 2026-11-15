@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isAuthorizedAdmin } from '@/lib/adminAuth';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 
 export async function GET(req: NextRequest) {
@@ -99,10 +100,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing reply id' }, { status: 400 });
     }
 
-    const cleanEmail = (author_email || '').toLowerCase().trim();
-    const isAdmin = isAuthorizedAdmin(req) || 
-      cleanEmail === 'ammar-rayyan@hotmail.com' || 
-      cleanEmail === 'reviewer@lumobites.net';
+    const verifiedEmail = await getVerifiedSessionEmail(req);
+    const cleanEmail = (verifiedEmail || '').toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(req) || cleanEmail === 'ammar-rayyan@hotmail.com';
 
     if (!isAdmin) {
       if (!device_cookie && !cleanEmail) {

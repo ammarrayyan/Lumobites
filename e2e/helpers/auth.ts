@@ -61,8 +61,35 @@ export async function injectAuthSession(page: Page, email: string = TEST_USER_EM
 
 export async function signInViaUI(page: Page, email: string = TEST_USER_EMAIL, code: string = TEST_USER_CODE) {
   await bypassTerms(page);
+  const validToken = createTestSessionToken(email);
+
   page.on('dialog', async (dialog) => {
     await dialog.accept();
+  });
+
+  await page.route('**/api/stripe/send-code', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true }),
+    });
+  });
+
+  await page.route('**/api/stripe/verify-code', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        isPro: true,
+        existed: true,
+        isSitter: false,
+        sitterId: null,
+        sessionToken: validToken,
+        token: validToken,
+        email,
+      }),
+    });
   });
 
   await page.goto('/');

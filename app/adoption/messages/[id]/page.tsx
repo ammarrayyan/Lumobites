@@ -4,6 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatModal from '@/components/ChatModal';
 import { useSwipeBack } from '@/lib/useSwipeBack';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 interface PetDetails {
   id: string;
@@ -127,15 +128,16 @@ function AdoptionMessageContent({ params }: { params: Promise<{ id: string }> })
     if (!email) return;
     if (!window.confirm("Are you sure you want to block this user? You will no longer see their inquiries or listings.")) return;
     try {
-      const blocker = currentUserEmail || 'anonymous@lumobites.net';
-      await fetch('/api/petsitting/block', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          blockerEmail: blocker,
-          blockedEmail: email
-        })
-      });
+      if (currentUserEmail) {
+        await fetch('/api/petsitting/block', {
+          method: 'POST',
+          headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            blockerEmail: currentUserEmail,
+            blockedEmail: email
+          })
+        });
+      }
       if (typeof window !== 'undefined') {
         try {
           const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');

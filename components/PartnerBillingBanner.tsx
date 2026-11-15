@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CreditCard, Clock, AlertTriangle, CheckCircle2, ShieldAlert, Loader2, ArrowRight, Play, RefreshCw } from 'lucide-react';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 interface PartnerBillingBannerProps {
   partnerId: string;
@@ -74,7 +75,7 @@ export default function PartnerBillingBanner({
     try {
       const res = await fetch('/api/stripe/reactivate-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           partner_id: partnerId,
           partner_type: partnerType,
@@ -108,7 +109,7 @@ export default function PartnerBillingBanner({
       const endpoint = endpointMap[partnerType];
       const res = await fetch(endpoint, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payloadMap[partnerType]),
       });
       if (res.ok && onRefresh) {

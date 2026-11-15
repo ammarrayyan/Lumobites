@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { Copy, QrCode, Download, Share2, Activity, Users, DollarSign, ArrowRight, ShieldCheck, HelpCircle, Lock, Mail, Footprints, AlertTriangle, CheckCircle2, XCircle, Lightbulb, X } from 'lucide-react';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 type Step = 'email' | 'verification' | 'dashboard';
 
@@ -123,7 +124,7 @@ export default function AffiliateDashboard() {
     try {
       const res = await fetch('/api/affiliate/stats', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email: targetEmail })
       });
 

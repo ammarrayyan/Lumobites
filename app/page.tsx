@@ -9,6 +9,7 @@ import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, He
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 export default function Home() {
   const router = useRouter();
@@ -71,7 +72,9 @@ export default function Home() {
 
     if (activeEmail) {
       try {
-        const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(activeEmail)}`);
+        const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(activeEmail)}`, {
+          headers: getSessionAuthHeaders(),
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.shelter && data.shelter.status === 'approved') {

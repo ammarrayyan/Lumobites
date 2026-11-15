@@ -19,7 +19,7 @@ import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { formatPublicCity, formatFullAddress } from '@/lib/formatCity';
-import { signOutUser } from '@/lib/authHelper';
+import { signOutUser, getSessionAuthHeaders } from '@/lib/authHelper';
 
 const VET_SERVICES = [
   'Veterinary Boarding',
@@ -411,7 +411,7 @@ export default function VetBoardingDashboardPage() {
     try {
       const res = await fetch('/api/stripe/cancel-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ partner_id: clinic.id, partner_type: 'vet_boarding' }),
       });
       const data = await res.json();

@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!stripeSecretKey) {
-      return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
-    }
-
-    const stripe = new Stripe(stripeSecretKey);
     const body = await request.json();
     const { partner_id, partner_type } = body;
 
@@ -29,16 +26,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid partner_type.' }, { status: 400 });
     }
 
-    // Fetch partner subscription ID
+    const isAdmin = isAuthorizedAdmin(request);
+    const verifiedEmail = isAdmin ? null : await getVerifiedSessionEmail(request);
+    if (!isAdmin && !verifiedEmail) {
+      return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+    }
+
+    // Fetch partner subscription ID and owner email
     const { data: partner, error: fetchErr } = await supabaseAdmin
       .from(tableName)
-      .select('stripe_subscription_id')
+      .select('id, email, stripe_subscription_id')
       .eq('id', partner_id)
       .single();
 
-    if (fetchErr || !partner || !partner.stripe_subscription_id) {
+    if (fetchErr || !partner) {
+      return NextResponse.json({ error: 'Partner record not found.' }, { status: 404 });
+    }
+
+    if (!isAdmin) {
+      const partnerEmail = (partner.email || '').toLowerCase().trim();
+      if (!partnerEmail || verifiedEmail !== partnerEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only cancel your own partner subscription.' }, { status: 403 });
+      }
+    }
+
+    if (!partner.stripe_subscription_id) {
       return NextResponse.json({ error: 'No active Stripe subscription found for this partner.' }, { status: 404 });
     }
+
+    if (!stripeSecretKey) {
+      return NextResponse.json({ error: 'Stripe is not configured on the server.' }, { status: 500 });
+    }
+
+    const stripe = new Stripe(stripeSecretKey);
 
     // Update Stripe subscription to cancel at period end
     const updatedSub = await stripe.subscriptions.update(partner.stripe_subscription_id, {

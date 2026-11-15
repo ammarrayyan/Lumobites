@@ -7,6 +7,7 @@ import PetProfileCard from '@/components/PetProfileCard';
 import PetProfileModal, { PetFormData } from '@/components/PetProfileModal';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 export default function AccountPetsTab({ 
   ownerEmail
@@ -29,7 +30,9 @@ export default function AccountPetsTab({
     if (!ownerEmail) return;
     setLoading(true);
     try {
-      const petsRes = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`);
+      const petsRes = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(ownerEmail)}`, {
+        headers: getSessionAuthHeaders(),
+      });
       if (petsRes.ok) {
         const pData = await petsRes.json();
         setPets(pData.pets || []);
@@ -55,6 +58,7 @@ export default function AccountPetsTab({
     try {
       const res = await fetch(`/api/petsitting/pets?id=${petId}&email=${encodeURIComponent(ownerEmail)}`, {
         method: 'DELETE',
+        headers: getSessionAuthHeaders(),
       });
       if (res.ok) {
         fetchPets();

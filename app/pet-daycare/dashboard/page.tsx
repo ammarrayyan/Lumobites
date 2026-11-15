@@ -13,7 +13,7 @@ import PartnerHoursEditor from '@/components/PartnerHoursEditor';
 import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { formatPublicCity } from '@/lib/formatCity';
-import { signOutUser } from '@/lib/authHelper';
+import { signOutUser, getSessionAuthHeaders } from '@/lib/authHelper';
 import {
   Building2,
   Calendar,
@@ -402,7 +402,7 @@ export default function DaycareDashboard() {
     try {
       const res = await fetch('/api/stripe/cancel-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ partner_id: daycare.id, partner_type: 'pet_daycare' }),
       });
       const data = await res.json();

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import CityAutocompleteInput from '@/components/CityAutocompleteInput';
 import { formatPublicCity } from '@/lib/formatCity';
-import { signOutUser } from '@/lib/authHelper';
+import { signOutUser, getSessionAuthHeaders } from '@/lib/authHelper';
 import {
   Building2, ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, Send, Lock, Clock, LogOut, X,
   ShieldCheck, Key, Mail, RefreshCw, Loader2, LayoutGrid, Heart,
@@ -74,7 +74,9 @@ export default function ShelterRegistrationPage() {
         return;
       }
 
-      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`, {
+        headers: getSessionAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.shelter) {

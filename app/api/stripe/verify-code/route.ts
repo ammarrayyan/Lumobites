@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 
 import { setAccountSessionCookie, createAccountSessionToken } from '@/lib/accountAuth';
@@ -15,8 +16,16 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanCode = code.toString().replace(/\D/g, '').trim();
 
-    // Apple reviewer bypass
-    if (cleanEmail === 'reviewer@lumobites.net' && cleanCode === '123456') {
+    // Apple reviewer bypass (only active when REVIEWER_BYPASS_CODE is explicitly set in environment)
+    const reviewerBypassCode = process.env.REVIEWER_BYPASS_CODE?.trim();
+    const isReviewerBypass =
+      cleanEmail === 'reviewer@lumobites.net' &&
+      !!reviewerBypassCode &&
+      reviewerBypassCode.length >= 6 &&
+      cleanCode.length === reviewerBypassCode.length &&
+      crypto.timingSafeEqual(Buffer.from(cleanCode), Buffer.from(reviewerBypassCode));
+
+    if (isReviewerBypass) {
       console.log(`[Verify Code API] Apple reviewer bypass triggered`);
       const reviewerToken = createAccountSessionToken(cleanEmail);
       const response = NextResponse.json({

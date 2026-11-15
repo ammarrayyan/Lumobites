@@ -502,7 +502,9 @@ function AdoptionContent() {
 
       // Immediately check if this email is an existing approved shelter
       try {
-        const shelterRes = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(trimmedEmail)}`);
+        const shelterRes = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(trimmedEmail)}`, {
+          headers: getSessionAuthHeaders(),
+        });
         if (shelterRes.ok) {
           const shelterData = await shelterRes.json();
           if (shelterData && shelterData.shelter) {
@@ -682,7 +684,9 @@ function AdoptionContent() {
         checkShelterEmailConflict(email).then(isClean => {
           if (isClean) {
             setShelterOtpStep('form');
-            fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`)
+            fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}`, {
+              headers: getSessionAuthHeaders(),
+            })
               .then(r => (r.ok ? r.json() : null))
               .then(data => {
                 if (data && data.shelter) {
@@ -1769,15 +1773,17 @@ function AdoptionContent() {
             if (!email) return;
             if (!window.confirm("Are you sure you want to block this organization? You will no longer see their listings.")) return;
             try {
-              const blocker = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || localStorage.getItem('lumo_shelter_email') || 'anonymous@lumobites.net';
-              await fetch('/api/petsitting/block', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  blockerEmail: blocker,
-                  blockedEmail: email
-                })
-              });
+              const blocker = localStorage.getItem('lumo_pro_email') || localStorage.getItem('lumo_sitter_email') || localStorage.getItem('lumo_shelter_email') || '';
+              if (blocker) {
+                await fetch('/api/petsitting/block', {
+                  method: 'POST',
+                  headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
+                  body: JSON.stringify({
+                    blockerEmail: blocker,
+                    blockedEmail: email
+                  })
+                });
+              }
               if (typeof window !== 'undefined') {
                 try {
                   const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');

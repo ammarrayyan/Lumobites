@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import { sendShelterRegistrationEmail, sendAdminNewPartnerNotificationEmail, sendPartnerAccountDeletionEmail } from '@/lib/adoption-email';
 import { extractOgImage } from '@/lib/og-fetcher';
 import { getUserProStatusDetails } from '@/lib/aiLimiter';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -72,10 +74,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing email' }, { status: 400 });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(request);
+
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      if (verifiedEmail !== cleanEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only view your own shelter account.' }, { status: 403 });
+      }
+    }
+
     const { data: shelter, error } = await supabaseAdmin
       .from('shelters')
       .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .eq('email', cleanEmail)
       .single();
 
     const noCacheHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
@@ -280,6 +295,18 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Shelter record not found' }, { status: 404 });
     }
 
+    const isAdmin = isAuthorizedAdmin(request);
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      const ownerEmail = (existingShelter.email || '').toLowerCase().trim();
+      if (!ownerEmail || verifiedEmail !== ownerEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only modify your own shelter account.' }, { status: 403 });
+      }
+    }
+
     const updateFields: any = {};
 
     // Only rebuild packed description if profile metadata was supplied
@@ -387,6 +414,18 @@ export async function DELETE(request: NextRequest) {
     const { data: shelter } = await query.single();
     if (!shelter) {
       return NextResponse.json({ error: 'Shelter not found' }, { status: 404 });
+    }
+
+    const isAdmin = isAuthorizedAdmin(request);
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      const ownerEmail = (shelter.email || '').toLowerCase().trim();
+      if (!ownerEmail || verifiedEmail !== ownerEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only delete your own shelter account.' }, { status: 403 });
+      }
     }
 
     // Cancel active Stripe subscriptions FIRST

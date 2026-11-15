@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // Apple reviewer bypass
-    if (cleanEmail === 'reviewer@lumobites.net') {
+    // Apple reviewer bypass (only active when REVIEWER_BYPASS_CODE is explicitly set in environment)
+    if (cleanEmail === 'reviewer@lumobites.net' && Boolean(process.env.REVIEWER_BYPASS_CODE?.trim())) {
       console.log(`[Send Code API] Apple reviewer bypass triggered`);
       return NextResponse.json({ success: true });
     }

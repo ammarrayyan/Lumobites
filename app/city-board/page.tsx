@@ -16,7 +16,7 @@ import {
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import { useScrollLock } from '@/lib/useScrollLock';
-import { isManualPageReload } from '@/lib/authHelper';
+import { isManualPageReload, getSessionAuthHeaders } from '@/lib/authHelper';
 
 const CATEGORY_META: Record<string, { color: string; icon: any }> = {
   'General': { color: 'bg-[#FAF6F4] text-[#4A3E3D] border-[#E8DDD4]', icon: MessageCircle },
@@ -268,7 +268,7 @@ export default function CityBoardPage() {
     try {
       const res = await fetch('/api/city-board/posts', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ post_id: postId, device_cookie: deviceCookie, author_email: userEmail })
       });
       if (!res.ok) {
@@ -931,7 +931,7 @@ export default function CityBoardPage() {
           <div className="space-y-4">
             {filteredPosts.map(post => {
               const isTrending = (post.helpful_count || 0) >= 3 || (post.reply_count || 0) >= 3;
-              const isAdmin = !!(userEmail && (userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com' || userEmail.toLowerCase().trim() === 'reviewer@lumobites.net'));
+              const isAdmin = !!(userEmail && userEmail.toLowerCase().trim() === 'ammar-rayyan@hotmail.com');
               const isMine = (deviceCookie && post.device_cookie === deviceCookie) || isAdmin;
               const isBookmarked = savedPostIds.includes(post.post_id);
               const isExpanded = !!expandedPostIds[post.post_id];
@@ -1133,7 +1133,7 @@ export default function CityBoardPage() {
 
                                 const res = await fetch('/api/city-board/replies', {
                                   method: 'DELETE',
-                                  headers: { 'Content-Type': 'application/json' },
+                                  headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
                                   body: JSON.stringify({ id: replyId, device_cookie: deviceCookie, author_email: userEmail })
                                 });
 

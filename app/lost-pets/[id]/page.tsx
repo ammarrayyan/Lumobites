@@ -8,7 +8,7 @@ import { formatPublicCity } from '@/lib/formatCity';
 import FacebookStyleCommentThread from '@/components/FacebookStyleCommentThread';
 import FacebookReactionPicker from '@/components/FacebookReactionPicker';
 import ChatModal from '@/components/ChatModal';
-import { getSignedInUserEmail } from '@/lib/authHelper';
+import { getSignedInUserEmail, getSessionAuthHeaders } from '@/lib/authHelper';
 import { useSwipeBack } from '@/lib/useSwipeBack';
 
 // Avatar palette, reused from the same treatment applied to City Board for visual consistency.
@@ -358,7 +358,7 @@ export default function LostPetDetail({ params }: { params: Promise<{ id: string
     try {
       const res = await fetch('/api/lost-pets/comments', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ comment_id: commentId, email: userEmail })
       });
 

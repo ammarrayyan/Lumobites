@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { PawPrint, Plus, Trash2, ArrowLeft, AlertCircle, Camera, FolderOpen, Image as ImageIcon } from 'lucide-react';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 export interface VaccineRecord {
   id?: string;
@@ -223,7 +224,7 @@ export default function PetProfileModal({
     try {
       const res = await fetch('/api/petsitting/pets', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           ...formData,
           owner_email: ownerEmail || formData.owner_email,

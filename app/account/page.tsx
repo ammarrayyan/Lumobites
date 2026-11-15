@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Settings, Lock, LogOut, Mail, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, Info, Ban, CreditCard, PawPrint, ShieldCheck, Building2, User, HelpCircle } from 'lucide-react';
 import AccountPetsTab from '@/components/AccountPetsTab';
 import { useScrollLock } from '@/lib/useScrollLock';
-import { signOutUser, clearStaleClientAuth } from '@/lib/authHelper';
+import { signOutUser, clearStaleClientAuth, getSessionAuthHeaders } from '@/lib/authHelper';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
 
 type Step = 'email' | 'verification' | 'dashboard';
@@ -153,7 +153,9 @@ export default function AccountPage() {
 
   const fetchBlockedUsers = async (userEmail: string) => {
     try {
-      const res = await fetch(`/api/petsitting/block?email=${encodeURIComponent(userEmail)}`);
+      const res = await fetch(`/api/petsitting/block?email=${encodeURIComponent(userEmail)}`, {
+        headers: getSessionAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setBlockedUsers(data.blocked || []);
@@ -170,7 +172,7 @@ export default function AccountPage() {
     try {
       const res = await fetch('/api/petsitting/block', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           blockerEmail: email,
           blockedEmail: blockedEmail
@@ -371,7 +373,7 @@ export default function AccountPage() {
 
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(body)
       });
 
@@ -399,7 +401,7 @@ export default function AccountPage() {
     try {
       const res = await fetch('/api/stripe/reactivate-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           partner_id: subDetails.partnerId,
           partner_type: subDetails.dbPartnerType,
@@ -426,7 +428,7 @@ export default function AccountPage() {
       const partnerTypeKey = subDetails.partnerType === 'shelter' ? 'shelter' : subDetails.partnerType === 'vet' ? 'vet_boarding' : 'pet_daycare';
       const res = await fetch('/api/stripe/reactivate-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email: email.trim(), type: partnerTypeKey })
       });
 

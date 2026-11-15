@@ -63,6 +63,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (cleanEmail === 'reviewer@lumobites.net') {
+      return withSlidingRenewal({
+        success: true,
+        active: true,
+        adminBypass: false,
+        email: cleanEmail,
+        verified: !!verifiedEmail,
+        nextBillingDate: 'Active Review Account 🐾',
+        subscriptionId: 'reviewer_pro'
+      });
+    }
+
     if (proDetails.isPro && proDetails.proSource.startsWith('partner_')) {
       const partnerMap: Record<string, { partnerType: 'vet' | 'daycare' | 'shelter'; partnerLabel: string; dashboardUrl: string; table: string; defaultPrice: number }> = {
         partner_vet: { partnerType: 'vet', partnerLabel: 'Vet Boarding', dashboardUrl: '/vet-boarding/dashboard', table: 'vet_clinics', defaultPrice: 40 },

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +13,17 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const isAdmin = isAuthorizedAdmin(request);
+
+    if (!isAdmin) {
+      const verifiedEmail = await getVerifiedSessionEmail(request);
+      if (!verifiedEmail) {
+        return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
+      }
+      if (verifiedEmail !== cleanEmail) {
+        return NextResponse.json({ error: 'Forbidden — you can only view your own affiliate statistics.' }, { status: 403 });
+      }
+    }
 
     // 1. Fetch affiliate details
     const { data: affiliate, error: affiliateError } = await supabaseAdmin

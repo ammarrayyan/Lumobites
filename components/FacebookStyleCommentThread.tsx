@@ -246,10 +246,7 @@ export default function FacebookStyleCommentThread({
     }
 
     // 2. Verified Admin / Staff
-    if (
-      cleanEmail === 'ammar-rayyan@hotmail.com' ||
-      cleanEmail === 'reviewer@lumobites.net'
-    ) {
+    if (cleanEmail === 'ammar-rayyan@hotmail.com') {
       return 'Staff';
     }
 
@@ -336,7 +333,6 @@ export default function FacebookStyleCommentThread({
       (cleanCurrentEmail && cleanCommentEmail && cleanCurrentEmail === cleanCommentEmail) ||
       (currentUserCookie && comment.deviceCookie && currentUserCookie === comment.deviceCookie) ||
       cleanCurrentEmail === 'ammar-rayyan@hotmail.com' ||
-      cleanCurrentEmail === 'reviewer@lumobites.net' ||
       isPostAuthor
     );
 

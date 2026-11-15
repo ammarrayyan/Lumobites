@@ -754,7 +754,9 @@ export function PetSittingContent() {
   const loadOwnerProfile = async (email: string) => {
     if (!email) return;
     try {
-      const res = await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}&t=${Date.now()}`);
+      const res = await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}&t=${Date.now()}`, {
+        headers: getSessionAuthHeaders()
+      });
       const data = await res.json();
       if (res.ok && data.success && data.profile) {
         const p = data.profile;
@@ -1130,7 +1132,8 @@ export function PetSittingContent() {
     if (email) {
       try {
         await fetch(`/api/petsitting/owner-profile?email=${encodeURIComponent(email)}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: getSessionAuthHeaders()
         });
       } catch (err) {
         console.error('Failed to delete owner profile:', err);
@@ -1715,7 +1718,9 @@ export function PetSittingContent() {
     if (!email) return;
     setLoadingOwnerPets(true);
     try {
-      const res = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(email)}&t=${Date.now()}`);
+      const res = await fetch(`/api/petsitting/pets?email=${encodeURIComponent(email)}&t=${Date.now()}`, {
+        headers: getSessionAuthHeaders()
+      });
       const data = await res.json();
       if (res.ok && data.pets) {
         setOwnerPets(data.pets);
@@ -1736,7 +1741,8 @@ export function PetSittingContent() {
     if (!confirm('Are you sure you want to delete this pet profile? This cannot be undone.')) return;
     try {
       const res = await fetch(`/api/petsitting/pets?id=${encodeURIComponent(petId)}&email=${encodeURIComponent(reqEmail)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getSessionAuthHeaders()
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -2121,7 +2127,7 @@ export function PetSittingContent() {
     try {
       const res = await fetch('/api/petsitting/block', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ 
           blockerEmail: reqEmail, 
           blockedEmail: email 
@@ -2146,7 +2152,7 @@ export function PetSittingContent() {
     try {
       const res = await fetch('/api/petsitting/block', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ 
           blockerEmail: sitterEmail, 
           blockedEmail: email 
@@ -2538,7 +2544,7 @@ export function PetSittingContent() {
       try {
         await fetch('/api/petsitting/auth/signout-all-devices', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ email: email.trim() })
         });
       } catch (err) {
@@ -3125,7 +3131,7 @@ export function PetSittingContent() {
         try {
           await fetch('/api/petsitting/owner-profile', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               email: reqEmail,
               owner_name: reqOwnerName,

@@ -24,7 +24,6 @@ export const AI_LIMIT_CONFIG: Record<AiFeatureKey, {
 
 const UNLIMITED_EMAILS = [
   'ammar-rayyan@hotmail.com',
-  'reviewer@lumobites.net',
   'premierpetnutritionllc@gmail.com',
 ];
 
@@ -100,6 +99,11 @@ export async function getUserProStatusDetails(email?: string | null): Promise<Pr
   // 1. Unlimited Admin
   if (UNLIMITED_EMAILS.includes(cleanEmail) || UNLIMITED_EMAILS.includes(baseEmail)) {
     return { isPro: true, proSource: 'unlimited', rawSubscriptionStatus: 'active', billingHealthLabel: 'Unlimited Admin' };
+  }
+
+  // 1b. Apple Reviewer Account (Standard Pro limits: 5/day + global monthly cap, no admin privileges)
+  if (cleanEmail === 'reviewer@lumobites.net') {
+    return { isPro: true, proSource: 'ai_member', rawSubscriptionStatus: 'active', billingHealthLabel: 'Active Member ($4.99/mo)' };
   }
 
   const now = new Date();

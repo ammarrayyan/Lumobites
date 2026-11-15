@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
+import { isAuthorizedAdmin } from '@/lib/adminAuth';
 
-const ADMIN_EMAILS = ['ammar-rayyan@hotmail.com', 'reviewer@lumobites.net'];
+const ADMIN_EMAILS = ['ammar-rayyan@hotmail.com'];
 
 export async function GET(request: NextRequest) {
   try {
@@ -119,10 +121,17 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
-    const { comment_id, email } = body;
+    const { comment_id } = body;
 
-    if (!comment_id || !email) {
-      return NextResponse.json({ error: 'comment_id and email are required' }, { status: 400 });
+    if (!comment_id) {
+      return NextResponse.json({ error: 'comment_id is required' }, { status: 400 });
+    }
+
+    const verifiedEmail = await getVerifiedSessionEmail(request);
+    const isAdmin = isAuthorizedAdmin(request) || (!!verifiedEmail && ADMIN_EMAILS.includes(verifiedEmail));
+
+    if (!isAdmin && !verifiedEmail) {
+      return NextResponse.json({ error: 'Unauthorized — please sign in.' }, { status: 401 });
     }
 
     const { data: existingComment, error: fetchErr } = await supabaseAdmin
@@ -135,11 +144,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Comment not found' }, { status: 404 });
     }
 
-    const normalizedReqEmail = email.toLowerCase().trim();
     const normalizedAuthorEmail = (existingComment.author_email || '').toLowerCase().trim();
-    const isAdmin = ADMIN_EMAILS.includes(normalizedReqEmail);
 
-    if (!isAdmin && normalizedAuthorEmail && normalizedAuthorEmail !== normalizedReqEmail) {
+    if (!isAdmin && (!normalizedAuthorEmail || normalizedAuthorEmail !== verifiedEmail)) {
       return NextResponse.json({ error: 'You can only delete your own comments.' }, { status: 403 });
     }
 

@@ -14,6 +14,7 @@ import PartnerGalleryUploader from '@/components/PartnerGalleryUploader';
 import { extractPartnerMeta, formatPartnerHoursSummary } from '@/lib/partnerProfileHelper';
 import { extractAdoptionMeta } from '@/lib/adoptionMetaHelper';
 import { formatFullAddress } from '@/lib/formatCity';
+import { getSessionAuthHeaders } from '@/lib/authHelper';
 
 interface ShelterPet {
   id: string;
@@ -207,7 +208,10 @@ function ShelterDashboardContent() {
         .then(d => { if (d?.pricing?.monthly_price_usd) setMonthlyPrice(Number(d.pricing.monthly_price_usd)); })
         .catch(() => {});
 
-      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}&_t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(email)}&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: getSessionAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.shelter) {
@@ -325,7 +329,7 @@ function ShelterDashboardContent() {
     try {
       const res = await fetch('/api/adoption/shelter', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           id: shelterInfo.id,
           email: shelterInfo.email,
@@ -635,7 +639,7 @@ function ShelterDashboardContent() {
     try {
       const res = await fetch('/api/adoption/shelter', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ id: shelterInfo.id, org_photo_url: editPhotoUrl })
       });
       if (res.ok) {
@@ -653,7 +657,8 @@ function ShelterDashboardContent() {
     setDeletingAccount(true);
     try {
       const res = await fetch(`/api/adoption/shelter?email=${encodeURIComponent(shelterEmail)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getSessionAuthHeaders(),
       });
       if (res.ok) {
         localStorage.removeItem('lumo_shelter_email');
@@ -689,7 +694,7 @@ function ShelterDashboardContent() {
     try {
       const res = await fetch('/api/stripe/cancel-partner-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ partner_id: shelterInfo.id, partner_type: 'shelter' }),
       });
       const data = await res.json();
@@ -745,7 +750,7 @@ function ShelterDashboardContent() {
                     try {
                       const res = await fetch('/api/adoption/shelter', {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({
                           id: shelterInfo.id,
                           email: shelterInfo.email,
@@ -2344,15 +2349,17 @@ function ShelterDashboardContent() {
             if (!email) return;
             if (!window.confirm("Are you sure you want to block this user? You will no longer receive inquiries from them.")) return;
             try {
-              const blocker = shelterInfo?.email || 'anonymous@lumobites.net';
-              await fetch('/api/petsitting/block', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  blockerEmail: blocker,
-                  blockedEmail: email
-                })
-              });
+              const blocker = shelterInfo?.email || '';
+              if (blocker) {
+                await fetch('/api/petsitting/block', {
+                  method: 'POST',
+                  headers: getSessionAuthHeaders({ 'Content-Type': 'application/json' }),
+                  body: JSON.stringify({
+                    blockerEmail: blocker,
+                    blockedEmail: email
+                  })
+                });
+              }
               if (typeof window !== 'undefined') {
                 try {
                   const currentBlocked = JSON.parse(localStorage.getItem('lumo_blocked_emails') || '[]');

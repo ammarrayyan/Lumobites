@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
 import { isAuthorizedAdmin } from '@/lib/adminAuth';
+import { getVerifiedSessionEmail } from '@/lib/accountAuth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -200,10 +201,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
     }
 
-    const cleanEmail = (author_email || '').toLowerCase().trim();
-    const isAdmin = isAuthorizedAdmin(req) || 
-      cleanEmail === 'ammar-rayyan@hotmail.com' || 
-      cleanEmail === 'reviewer@lumobites.net';
+    const verifiedEmail = await getVerifiedSessionEmail(req);
+    const isAdmin = isAuthorizedAdmin(req) || verifiedEmail === 'ammar-rayyan@hotmail.com';
 
     if (!isAdmin) {
       if (!device_cookie) {
