@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
-import AppDownloadSection from '@/components/AppDownloadSection';
-import LostPetsScrollStory from '@/components/LostPetsScrollStory';
+import ServiceChapters from '@/components/ServiceChapters';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -535,19 +534,62 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DESKTOP LOST PETS SCROLL STORY (lg+ and non-native only, directly under the 5 service cards & above AppDownloadSection) */}
+        {/* DESKTOP SERVICE CHAPTERS (lg+ and non-native only, directly under the 5 service cards) */}
         {!isNativeApp && isDesktopViewport && (
           <div
-            id="how-lost-pets-works-section"
-            data-testid="desktop-home-lost-pets-story-wrapper"
+            id="service-chapters-wrapper"
+            data-testid="desktop-home-service-chapters-wrapper"
             className="hidden lg:block w-full border-t border-[#E8DDD4]"
           >
-            <LostPetsScrollStory embeddedOnHomepage />
+            <ServiceChapters />
           </div>
         )}
 
-        {/* DESKTOP APP DOWNLOAD SECTION */}
-        <AppDownloadSection />
+        {/* DESKTOP SLIM SINGLE-LINE APP DOWNLOAD STRIP (lg+ and non-native only, directly under the chapters) */}
+        {!isNativeApp && isDesktopViewport && (
+          <section
+            data-testid="desktop-slim-app-strip"
+            className="hidden lg:block w-full bg-[#FAF5EE] border-t border-b border-[#E8DDD4] py-3.5 px-8 lg:px-12"
+          >
+            <div className="max-w-[1180px] mx-auto flex items-center justify-center gap-5">
+              <span className="text-sm font-extrabold text-[#2B231D] tracking-tight">
+                Get the Lumo Bites app
+              </span>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://play.google.com/store/apps/details?id=net.lumobites.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Download on Google Play"
+                  data-testid="slim-strip-google-play"
+                  className="inline-flex items-center transition-transform duration-200 hover:scale-105"
+                >
+                  <img
+                    src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                    alt="Get it on Google Play"
+                    height="36"
+                    style={{ height: '36px' }}
+                  />
+                </a>
+                <a
+                  href="https://apps.apple.com/app/lumo-bites/id6780612179"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Download on the App Store"
+                  data-testid="slim-strip-app-store"
+                  className="inline-flex items-center transition-transform duration-200 hover:scale-105"
+                >
+                  <img
+                    src="/app-store-badge.svg"
+                    alt="Download on the App Store"
+                    height="36"
+                    style={{ height: '36px' }}
+                  />
+                </a>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* DESKTOP EXPLORE TEASER BANNER */}
         <section className="w-full bg-[#F7F3EE] px-8 lg:px-12 pb-12 pt-4 text-center">
