@@ -57,6 +57,13 @@ html, body {
   overflow-x: hidden;
 }
 
+@supports (overflow: clip) {
+  html.lost-pets-story-route,
+  body.lost-pets-story-route {
+    overflow-x: clip;
+  }
+}
+
 /* Universal High-Resolution Crisp Image and Vector Icon Rendering */
 img, svg, canvas {
   image-rendering: -webkit-optimize-contrast;

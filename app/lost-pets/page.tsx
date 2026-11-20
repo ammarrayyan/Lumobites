@@ -808,7 +808,16 @@ export default function LostPetsFeed() {
           <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8 gap-4 md:gap-6">
             <div className="text-center md:text-left">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2B231D] tracking-tight mb-2">Community Pet Board</h1>
-              <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">Help reunite lost pets with their families in your neighborhood.</p>
+              <p className="text-sm sm:text-base font-normal text-[#2B231D] leading-relaxed">
+                Help reunite lost pets with their families in your neighborhood.{' '}
+                <Link
+                  href="/how-lost-pets-works"
+                  data-testid="lost-pets-how-it-works-link"
+                  className="text-xs sm:text-sm font-bold text-[#8B5E3C] hover:text-[#734A2E] underline underline-offset-2 whitespace-nowrap"
+                >
+                  See how Lost Pets works
+                </Link>
+              </p>
             </div>
             <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-end">
               <Link

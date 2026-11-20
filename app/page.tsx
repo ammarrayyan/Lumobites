@@ -362,6 +362,15 @@ export default function Home() {
                 </span>
               </Link>
             </div>
+            <div className="relative w-full h-0">
+              <Link
+                href="/how-lost-pets-works"
+                data-testid="mobile-home-how-lost-pets-link"
+                className="absolute left-1/2 -translate-x-1/2 top-0 inline-flex items-center justify-center min-h-[44px] px-4 text-[11px] font-semibold text-[#8B5E3C] hover:text-[#734A2E] underline underline-offset-2 whitespace-nowrap"
+              >
+                See how Lost Pets works
+              </Link>
+            </div>
           </div>
         </div>
       </main>
@@ -520,6 +529,15 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-[#7A6B5E] leading-relaxed">
                 Ask questions, share recommendations, and connect with local pet parents.
               </p>
+            </Link>
+          </div>
+          <div className="mt-5 text-center">
+            <Link
+              href="/how-lost-pets-works"
+              data-testid="desktop-home-how-lost-pets-link"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#8B5E3C] hover:text-[#734A2E] underline underline-offset-4"
+            >
+              See how Lost Pets works
             </Link>
           </div>
         </section>
