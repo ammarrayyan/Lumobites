@@ -20,7 +20,7 @@ export default function AppDownloadSection() {
           </h2>
 
           <p className="text-sm sm:text-base text-[#666666] leading-relaxed max-w-xl mb-8">
-            Access every pet care tool right from your phone. Get instant alerts for lost pets in your neighborhood, find verified local sitters, scan ingredient labels on the go, and connect with fellow pet parents.
+            Access every pet care tool right from your phone. Get instant alerts for lost pets in your neighborhood, find ID-checked local sitters, scan ingredient labels on the go, and connect with fellow pet parents.
           </p>
 
           {/* Feature Highlights */}
