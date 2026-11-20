@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import LostPetsScrollStory from '@/components/LostPetsScrollStory';
 
 export const metadata: Metadata = {
-  title: 'How Lost Pets Works — Lumo Bites',
+  title: 'Every paw has a story | Lumo Bites',
   description:
-    'See how Lumo Bites helps you post lost and found pet reports and search community reports by photo.',
+    "Follow one lost pet's journey home, and explore the Lumo Bites community Lost & Found pet board.",
 };
 
 export default function HowLostPetsWorksPage() {

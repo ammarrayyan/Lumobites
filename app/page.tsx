@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
 import AppDownloadSection from '@/components/AppDownloadSection';
 import LostPetsScrollStory from '@/components/LostPetsScrollStory';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan, Play } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
@@ -69,6 +69,22 @@ export default function Home() {
 
   const handleOpenPartnerPortal = () => {
     setPartnerModalOpen(true);
+  };
+
+  const handleScrollToLostPetsStory = (location: 'hero_button' | 'banner') => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (typeof window === 'undefined') return;
+    const w = window as any;
+    if (typeof w.gtag === 'function') {
+      w.gtag('event', 'lost_pets_story_cta_click', { location });
+    } else if (Array.isArray(w.dataLayer)) {
+      w.dataLayer.push({ event: 'lost_pets_story_cta_click', location });
+    }
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = document.getElementById('how-lost-pets-works-section');
+    if (target) {
+      target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' });
+    }
   };
 
   const handleSelectShelter = async (e: React.MouseEvent) => {
@@ -400,6 +416,18 @@ export default function Home() {
                 <a href="https://apps.apple.com/app/lumo-bites/id6780612179" target="_blank" rel="noopener noreferrer">
                   <img src="/app-store-badge.svg" alt="Download on the App Store" height="42" style={{ height: '42px' }} />
                 </a>
+                {isDesktopViewport && (
+                  <button
+                    type="button"
+                    data-testid="desktop-hero-watch-story-btn"
+                    aria-label="Watch the lost pet story"
+                    onClick={handleScrollToLostPetsStory('hero_button')}
+                    className="hidden lg:inline-flex items-center justify-center gap-2 h-[42px] px-4 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm transition-colors cursor-pointer border-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current shrink-0" />
+                    <span>Watch the story</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -458,61 +486,29 @@ export default function Home() {
             </Link>
 
             {/* 3. Lost & Found Pets */}
-            <div
+            <Link
+              href="/lost-pets"
               data-testid="desktop-lost-pets-card"
-              className="service-card-interactive group relative bg-white border border-[#E8DDD4] rounded-3xl shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-start text-left"
+              className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-start cursor-pointer text-left"
+              style={{ textDecoration: 'none' }}
             >
-              <Link
-                href="/lost-pets"
-                data-testid="desktop-lost-pets-card-main-link"
-                className="flex-1 flex flex-col justify-start p-7 rounded-3xl cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
-                style={{ textDecoration: 'none' }}
+              <div 
+                className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg, #F5EDE4 0%, #EBDBCB 100%)',
+                  border: '1px solid #DFC9B4',
+                  boxShadow: '0 4px 14px -2px rgba(139, 94, 60, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.8)',
+                }}
               >
-                <div 
-                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #F5EDE4 0%, #EBDBCB 100%)',
-                    border: '1px solid #DFC9B4',
-                    boxShadow: '0 4px 14px -2px rgba(139, 94, 60, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.8)',
-                  }}
-                >
-                  <Footprints className="w-8 h-8 text-[#8B5E3C]" strokeWidth={2.2} />
-                </div>
-                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
-                  Lost &amp; Found Pets
-                </h3>
-                <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                  Post lost or found pet reports and search neighborhood photo alerts.
-                </p>
-              </Link>
-
-              {!isNativeApp && isDesktopViewport && (
-                <a
-                  href="#how-lost-pets-works-section"
-                  data-testid="desktop-lost-pets-card-watch-tag"
-                  aria-label="Watch how Lost Pets photo search works"
-                  onClick={(e) => {
-                    const target = document.getElementById('how-lost-pets-works-section');
-                    if (target) {
-                      e.preventDefault();
-                      target.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                  className="hidden lg:inline-flex items-center gap-2 absolute top-7 right-7 z-10 bg-[#FAF5EE] hover:bg-[#F0E5D8] border border-[#DFC9B4] rounded-2xl p-1.5 pr-3 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <img
-                    src="/scroll/lost-pets/poster.webp"
-                    alt=""
-                    aria-hidden="true"
-                    className="w-7 h-10 rounded-lg object-cover border border-[#DFC9B4] shrink-0"
-                  />
-                  <span className="text-xs font-bold text-[#8B5E3C] whitespace-nowrap">
-                    Watch how it works
-                  </span>
-                </a>
-              )}
-            </div>
+                <Footprints className="w-8 h-8 text-[#8B5E3C]" strokeWidth={2.2} />
+              </div>
+              <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                Lost &amp; Found Pets
+              </h3>
+              <p className="text-sm text-[#7A6B5E] leading-relaxed">
+                Post lost or found pet reports and search neighborhood photo alerts.
+              </p>
+            </Link>
           </div>
 
           {/* Bottom Row: 2 Secondary Smaller Cards */}
@@ -565,6 +561,41 @@ export default function Home() {
               </p>
             </Link>
           </div>
+
+          {/* Wide Story Banner Below Service Cards & Above AppDownloadSection (Desktop Only) */}
+          {!isNativeApp && isDesktopViewport && (
+            <div className="hidden lg:block max-w-[820px] mx-auto mt-6">
+              <button
+                type="button"
+                data-testid="desktop-story-wide-banner"
+                aria-label="Every paw has a story. Watch one lost pet's journey home."
+                onClick={handleScrollToLostPetsStory('banner')}
+                className="service-card-interactive group w-full bg-white border border-[#E8DDD4] hover:border-[#D4C3B5] rounded-2xl p-5 sm:p-6 transition-all duration-300 flex items-center justify-between gap-6 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
+              >
+                <div className="flex items-center gap-5 min-w-0">
+                  <img
+                    src="/scroll/lost-pets/poster.webp"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-[72px] h-[128px] rounded-xl object-cover border border-[#DFC9B4] shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-extrabold text-[#191919] group-hover:text-[#8B5E3C] transition-colors tracking-tight mb-1.5">
+                      Every paw has a story.
+                    </h3>
+                    <p className="text-sm text-[#7A6B5E] leading-relaxed">
+                      Watch one lost pet&apos;s journey home.
+                    </p>
+                  </div>
+                </div>
+
+                <span className="inline-flex items-center justify-center gap-2 h-[42px] px-4 rounded-xl bg-[#8B5E3C] group-hover:bg-[#734A2E] text-white font-bold text-sm transition-colors shrink-0">
+                  <Play className="w-3.5 h-3.5 fill-current shrink-0" />
+                  <span>Watch the story</span>
+                </span>
+              </button>
+            </div>
+          )}
         </section>
 
         {/* DESKTOP APP DOWNLOAD SECTION */}

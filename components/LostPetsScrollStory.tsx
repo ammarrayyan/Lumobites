@@ -8,10 +8,10 @@ import { ArrowLeft, Footprints, Search } from 'lucide-react';
 const TOTAL_FRAMES = 80;
 
 const CHAPTERS = [
-  { index: 0, label: ' Chapter 1: A pet goes missing', startFrame: 1, endFrame: 20, progressTarget: 0.02 },
-  { index: 1, label: 'Chapter 2: Neighbor spots & snaps a photo', startFrame: 21, endFrame: 40, progressTarget: 0.34 },
-  { index: 2, label: 'Chapter 3: Photo search compares reports', startFrame: 41, endFrame: 60, progressTarget: 0.66 },
-  { index: 3, label: 'Chapter 4: Neighbors connect to reunite', startFrame: 61, endFrame: 80, progressTarget: 0.96 },
+  { index: 0, label: 'Story part 1 of 4', startFrame: 1, endFrame: 20, progressTarget: 0.02 },
+  { index: 1, label: 'Story part 2 of 4', startFrame: 21, endFrame: 40, progressTarget: 0.34 },
+  { index: 2, label: 'Story part 3 of 4', startFrame: 41, endFrame: 60, progressTarget: 0.66 },
+  { index: 3, label: 'Story part 4 of 4', startFrame: 61, endFrame: 80, progressTarget: 0.96 },
 ];
 
 type NetworkInformationLike = {
@@ -448,22 +448,20 @@ export default function LostPetsScrollStory({
 
         <div className="inline-flex items-center gap-1.5 bg-[#FAF5EE] border border-[#E8DDD4] text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2.5">
           <Footprints className="w-3.5 h-3.5 text-[#8B5E3C]" />
-          <span>Lost &amp; Found Story</span>
+          <span>LOST &amp; FOUND PETS</span>
         </div>
 
         {embeddedOnHomepage ? (
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#191919] tracking-tight mb-2">
-            How Lost Pets Works
+            Every paw has a story.
           </h2>
         ) : (
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#191919] tracking-tight mb-2">
-            How Lost Pets Works
+            Every paw has a story.
           </h1>
         )}
         <p className="text-xs sm:text-sm text-[#7A6B5E] max-w-md mx-auto leading-relaxed">
-          {staticFallback
-            ? 'See how a neighborhood photo report helps families search for a missing pet.'
-            : 'Scroll down to watch how a photo report helps neighbors search and spot a missing pet nearby.'}
+          Scroll to follow one lost pet&apos;s journey home.
         </p>
       </div>
 
@@ -498,7 +496,7 @@ export default function LostPetsScrollStory({
                 <img
                   data-testid="lost-pets-static-poster"
                   src="/scroll/lost-pets/poster.webp"
-                  alt="Illustration showing how Lumo Bites Lost Pets photo search works"
+                  alt="Illustration of one lost pet's journey home"
                   className="w-full h-full object-cover block"
                 />
               ) : (
@@ -509,7 +507,7 @@ export default function LostPetsScrollStory({
                   data-frame-set={frameSet}
                   width={frameSet === '480' ? 480 : 720}
                   height={frameSet === '480' ? 854 : 1280}
-                  aria-label="Interactive scroll animation showing a lost pet story"
+                  aria-label="Interactive scroll story following one lost pet's journey home"
                   className="w-full h-full object-cover block"
                 />
               )}
