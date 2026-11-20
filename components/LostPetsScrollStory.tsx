@@ -70,7 +70,11 @@ function formatFramePath(folder: '480' | '720', frameNumber: number): string {
   return `/scroll/lost-pets/${folder}/f${padded}.webp`;
 }
 
-export default function LostPetsScrollStory() {
+export default function LostPetsScrollStory({
+  embeddedOnHomepage = false,
+}: {
+  embeddedOnHomepage?: boolean;
+}) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
@@ -151,17 +155,32 @@ export default function LostPetsScrollStory() {
 
   // Add route-scoped class to html/body on mount and always remove on unmount / navigation
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const htmlEl = document.documentElement;
     const bodyEl = document.body;
-    htmlEl.classList.add('lost-pets-story-route');
-    bodyEl.classList.add('lost-pets-story-route');
+
+    const syncRouteClass = () => {
+      const shouldApply =
+        !Capacitor.isNativePlatform() &&
+        (!embeddedOnHomepage || window.innerWidth >= 1024);
+      if (shouldApply) {
+        htmlEl.classList.add('lost-pets-story-route');
+        bodyEl.classList.add('lost-pets-story-route');
+      } else {
+        htmlEl.classList.remove('lost-pets-story-route');
+        bodyEl.classList.remove('lost-pets-story-route');
+      }
+    };
+
+    syncRouteClass();
+    window.addEventListener('resize', syncRouteClass, { passive: true });
 
     return () => {
+      window.removeEventListener('resize', syncRouteClass);
       htmlEl.classList.remove('lost-pets-story-route');
       bodyEl.classList.remove('lost-pets-story-route');
     };
-  }, []);
+  }, [embeddedOnHomepage]);
 
   // Detect environment, reduced-motion, Save-Data, overflow:clip support, and screen width
   useEffect(() => {
@@ -414,25 +433,33 @@ export default function LostPetsScrollStory() {
     >
       {/* Top Heading Block Above Stage */}
       <div className="max-w-2xl mx-auto text-center mb-5 sm:mb-7">
-        <div className="mb-3 flex justify-center">
-          <Link
-            href="/lost-pets"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] transition-colors"
-            style={{ textDecoration: 'none' }}
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Lost &amp; Found Board</span>
-          </Link>
-        </div>
+        {!embeddedOnHomepage && (
+          <div className="mb-3 flex justify-center">
+            <Link
+              href="/lost-pets"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8B5E3C] hover:text-[#734A2E] transition-colors"
+              style={{ textDecoration: 'none' }}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Lost &amp; Found Board</span>
+            </Link>
+          </div>
+        )}
 
         <div className="inline-flex items-center gap-1.5 bg-[#FAF5EE] border border-[#E8DDD4] text-[#8B5E3C] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2.5">
           <Footprints className="w-3.5 h-3.5 text-[#8B5E3C]" />
           <span>Lost &amp; Found Story</span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#191919] tracking-tight mb-2">
-          How Lost Pets Works
-        </h1>
+        {embeddedOnHomepage ? (
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#191919] tracking-tight mb-2">
+            How Lost Pets Works
+          </h2>
+        ) : (
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#191919] tracking-tight mb-2">
+            How Lost Pets Works
+          </h1>
+        )}
         <p className="text-xs sm:text-sm text-[#7A6B5E] max-w-md mx-auto leading-relaxed">
           {staticFallback
             ? 'See how a neighborhood photo report helps families search for a missing pet.'

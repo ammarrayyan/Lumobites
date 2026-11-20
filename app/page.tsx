@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
 import AppDownloadSection from '@/components/AppDownloadSection';
+import LostPetsScrollStory from '@/components/LostPetsScrollStory';
 import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
@@ -22,9 +23,17 @@ export default function Home() {
   const [btnHover, setBtnHover] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isNativeApp, setIsNativeApp] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
+    const checkViewport = () => {
+      if (typeof window !== 'undefined') {
+        setIsDesktopViewport(window.innerWidth >= 1024);
+      }
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport, { passive: true });
     const cachedEmail = localStorage.getItem('lumo_pro_email');
     const cachedSitter = localStorage.getItem('lumo_sitter_email');
     if (cachedEmail || cachedSitter) {
@@ -47,6 +56,7 @@ export default function Home() {
     window.addEventListener('lumo-pro-update', syncStatus);
     window.addEventListener('storage', syncStatus);
     return () => {
+      window.removeEventListener('resize', checkViewport);
       window.removeEventListener('lumo-pro-update', syncStatus);
       window.removeEventListener('storage', syncStatus);
     };
@@ -362,15 +372,6 @@ export default function Home() {
                 </span>
               </Link>
             </div>
-            <div className="relative w-full h-0">
-              <Link
-                href="/how-lost-pets-works"
-                data-testid="mobile-home-how-lost-pets-link"
-                className="absolute left-1/2 -translate-x-1/2 top-0 inline-flex items-center justify-center min-h-[44px] px-4 text-[11px] font-semibold text-[#8B5E3C] hover:text-[#734A2E] underline underline-offset-2 whitespace-nowrap"
-              >
-                See how Lost Pets works
-              </Link>
-            </div>
           </div>
         </div>
       </main>
@@ -457,28 +458,61 @@ export default function Home() {
             </Link>
 
             {/* 3. Lost & Found Pets */}
-            <Link
-              href="/lost-pets"
-              className="service-card-interactive group bg-white border border-[#E8DDD4] rounded-3xl p-7 shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-start cursor-pointer text-left"
-              style={{ textDecoration: 'none' }}
+            <div
+              data-testid="desktop-lost-pets-card"
+              className="service-card-interactive group relative bg-white border border-[#E8DDD4] rounded-3xl shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-[#D4C3B5] transition-all duration-300 flex flex-col justify-start text-left"
             >
-              <div 
-                className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
-                style={{
-                  background: 'linear-gradient(135deg, #F5EDE4 0%, #EBDBCB 100%)',
-                  border: '1px solid #DFC9B4',
-                  boxShadow: '0 4px 14px -2px rgba(139, 94, 60, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.8)',
-                }}
+              <Link
+                href="/lost-pets"
+                data-testid="desktop-lost-pets-card-main-link"
+                className="flex-1 flex flex-col justify-start p-7 rounded-3xl cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
+                style={{ textDecoration: 'none' }}
               >
-                <Footprints className="w-8 h-8 text-[#8B5E3C]" strokeWidth={2.2} />
-              </div>
-              <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
-                Lost &amp; Found Pets
-              </h3>
-              <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                Post lost or found pet reports and search neighborhood photo alerts.
-              </p>
-            </Link>
+                <div 
+                  className="w-16 h-16 rounded-[20px] flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #F5EDE4 0%, #EBDBCB 100%)',
+                    border: '1px solid #DFC9B4',
+                    boxShadow: '0 4px 14px -2px rgba(139, 94, 60, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.8)',
+                  }}
+                >
+                  <Footprints className="w-8 h-8 text-[#8B5E3C]" strokeWidth={2.2} />
+                </div>
+                <h3 className="text-xl font-extrabold text-[#191919] mt-5 mb-2 group-hover:text-[#8B5E3C] transition-colors tracking-tight">
+                  Lost &amp; Found Pets
+                </h3>
+                <p className="text-sm text-[#7A6B5E] leading-relaxed">
+                  Post lost or found pet reports and search neighborhood photo alerts.
+                </p>
+              </Link>
+
+              {!isNativeApp && isDesktopViewport && (
+                <a
+                  href="#how-lost-pets-works-section"
+                  data-testid="desktop-lost-pets-card-watch-tag"
+                  aria-label="Watch how Lost Pets photo search works"
+                  onClick={(e) => {
+                    const target = document.getElementById('how-lost-pets-works-section');
+                    if (target) {
+                      e.preventDefault();
+                      target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="hidden lg:inline-flex items-center gap-2 absolute top-7 right-7 z-10 bg-[#FAF5EE] hover:bg-[#F0E5D8] border border-[#DFC9B4] rounded-2xl p-1.5 pr-3 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <img
+                    src="/scroll/lost-pets/poster.webp"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-7 h-10 rounded-lg object-cover border border-[#DFC9B4] shrink-0"
+                  />
+                  <span className="text-xs font-bold text-[#8B5E3C] whitespace-nowrap">
+                    Watch how it works
+                  </span>
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Bottom Row: 2 Secondary Smaller Cards */}
@@ -531,15 +565,6 @@ export default function Home() {
               </p>
             </Link>
           </div>
-          <div className="mt-5 text-center">
-            <Link
-              href="/how-lost-pets-works"
-              data-testid="desktop-home-how-lost-pets-link"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#8B5E3C] hover:text-[#734A2E] underline underline-offset-4"
-            >
-              See how Lost Pets works
-            </Link>
-          </div>
         </section>
 
         {/* DESKTOP APP DOWNLOAD SECTION */}
@@ -579,6 +604,17 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        {/* DESKTOP HOW LOST PETS WORKS SCROLL STORY (lg+ and non-native only, below AppDownloadSection & just above footer) */}
+        {!isNativeApp && isDesktopViewport && (
+          <div
+            id="how-lost-pets-works-section"
+            data-testid="desktop-home-lost-pets-story-wrapper"
+            className="hidden lg:block w-full border-t border-[#E8DDD4]"
+          >
+            <LostPetsScrollStory embeddedOnHomepage />
+          </div>
+        )}
 
         {/* DESKTOP FULL FOOTER */}
         <footer className="w-full px-8 lg:px-[48px] py-10 md:py-12" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>
