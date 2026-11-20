@@ -75,132 +75,72 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
     ]);
   });
 
-  test('desktop homepage (1280x800): hero button & wide banner scroll to story, 3 top cards equal height, story below AppDownloadSection & above footer, no overflow, class removed on navigation', async ({ page }) => {
+  test('desktop homepage (1280x800): no hero button or banner, story directly under cards & above AppDownloadSection with 250vh track, no duplicate store badges inside story, 3 top cards equal height, no overflow, class removed on navigation', async ({ page }) => {
     await bypassTerms(page);
     await page.setViewportSize({ width: 1280, height: 800 });
 
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
 
-    // Capture GA4 events via window.gtag spy
-    await page.evaluate(() => {
-      (window as any).__gaEvents = [];
-      (window as any).gtag = (...args: any[]) => {
-        (window as any).__gaEvents.push(args);
-      };
-    });
-
-    // 1. Verify Hero "Watch the story" button (42px height matching store badges, keyboard-focusable)
-    const heroBtn = page.getByTestId('desktop-hero-watch-story-btn');
-    await expect(heroBtn).toBeVisible();
-    await expect(heroBtn).toHaveText('Watch the story');
-
-    const heroBtnBox = await heroBtn.boundingBox();
-    expect(heroBtnBox).not.toBeNull();
-    expect(Math.round(heroBtnBox!.height)).toBe(42);
-
-    await heroBtn.focus();
-    await expect(heroBtn).toBeFocused();
-
-    // 2. Verify all 3 top-row desktop service cards have equal height and no card tag
+    // 1. Confirm no hero "Watch the story" button and no wide banner, and wait for desktop story mount
+    await expect(page.getByTestId('lost-pets-scroll-story')).toBeVisible();
+    await expect(page.getByTestId('desktop-hero-watch-story-btn')).toHaveCount(0);
+    await expect(page.getByTestId('desktop-story-wide-banner')).toHaveCount(0);
     await expect(page.getByTestId('desktop-lost-pets-card-watch-tag')).toHaveCount(0);
 
-    const cardAndBannerMetrics = await page.evaluate(() => {
+    // 2. Verify all 3 top-row desktop service cards have equal height, and placement order:
+    // Services Section -> Story Section (250vh track) -> AppDownloadSection -> Footer
+    const desktopMetrics = await page.evaluate(() => {
       const desktopWrapper = document.querySelector('div.hidden.lg\\:flex') as HTMLElement;
       const scanCard = desktopWrapper.querySelector('a[href="/scan"]') as HTMLElement;
       const sitterCard = desktopWrapper.querySelector('a[href="/petsitting"]') as HTMLElement;
       const lostPetsCard = desktopWrapper.querySelector('[data-testid="desktop-lost-pets-card"]') as HTMLElement;
-      const banner = desktopWrapper.querySelector('[data-testid="desktop-story-wide-banner"]') as HTMLElement;
-      const bannerImg = banner.querySelector('img') as HTMLImageElement;
-      const nestedInteractive = banner.querySelectorAll('a, button, input, select, textarea').length;
+      const servicesSection = scanCard.closest('section') as HTMLElement;
+      const storyWrapper = document.getElementById('how-lost-pets-works-section') as HTMLElement;
+      const track = storyWrapper.querySelector('[data-testid="lost-pets-scroll-track"]') as HTMLElement;
+      const appDownloadHeading = Array.from(desktopWrapper.querySelectorAll('h2')).find((h) =>
+        h.textContent?.includes('Take Lumo Bites with you.')
+      );
+      const appDownloadSection = appDownloadHeading?.closest('section') as HTMLElement;
+      const footer = desktopWrapper.querySelector('footer') as HTMLElement;
+
+      const servicesRect = servicesSection.getBoundingClientRect();
+      const storyRect = storyWrapper.getBoundingClientRect();
+      const appDownloadRect = appDownloadSection.getBoundingClientRect();
+      const footerRect = footer.getBoundingClientRect();
 
       return {
         scanHeight: Math.round(scanCard.getBoundingClientRect().height),
         sitterHeight: Math.round(sitterCard.getBoundingClientRect().height),
         lostPetsHeight: Math.round(lostPetsCard.getBoundingClientRect().height),
-        bannerTagName: banner.tagName,
-        nestedInteractive,
-        bannerImgSrc: bannerImg?.getAttribute('src'),
-        bannerImgWidth: Math.round(bannerImg.getBoundingClientRect().width),
-        bannerImgHeight: Math.round(bannerImg.getBoundingClientRect().height),
-        bannerText: banner.innerText,
-      };
-    });
-
-    expect(cardAndBannerMetrics.lostPetsHeight).toBe(cardAndBannerMetrics.scanHeight);
-    expect(cardAndBannerMetrics.lostPetsHeight).toBe(cardAndBannerMetrics.sitterHeight);
-
-    // 3. Verify Wide Banner (single control, zero nested interactive elements, 72x128 thumbnail, new wording)
-    const wideBanner = page.getByTestId('desktop-story-wide-banner');
-    await expect(wideBanner).toBeVisible();
-    expect(cardAndBannerMetrics.bannerTagName).toBe('BUTTON');
-    expect(cardAndBannerMetrics.nestedInteractive).toBe(0);
-    expect(cardAndBannerMetrics.bannerImgSrc).toBe('/scroll/lost-pets/poster.webp');
-    expect(cardAndBannerMetrics.bannerImgWidth).toBe(72);
-    expect(cardAndBannerMetrics.bannerImgHeight).toBe(128);
-    expect(cardAndBannerMetrics.bannerText).toContain('Every paw has a story.');
-    expect(cardAndBannerMetrics.bannerText).toContain("Watch one lost pet's journey home.");
-    expect(cardAndBannerMetrics.bannerText).toContain('Watch the story');
-
-    await wideBanner.focus();
-    await expect(wideBanner).toBeFocused();
-
-    // 4. Verify placement order: Services Grid (& Wide Banner) -> AppDownloadSection -> Story Section -> Footer
-    const placementOrder = await page.evaluate(() => {
-      const desktopWrapper = document.querySelector('div.hidden.lg\\:flex') as HTMLElement;
-      const banner = desktopWrapper.querySelector('[data-testid="desktop-story-wide-banner"]') as HTMLElement;
-      const appDownloadHeading = Array.from(desktopWrapper.querySelectorAll('h2')).find((h) =>
-        h.textContent?.includes('Take Lumo Bites with you.')
-      );
-      const appDownloadSection = appDownloadHeading?.closest('section') as HTMLElement;
-      const storyWrapper = document.getElementById('how-lost-pets-works-section') as HTMLElement;
-      const footer = desktopWrapper.querySelector('footer') as HTMLElement;
-
-      const bannerRect = banner.getBoundingClientRect();
-      const appDownloadRect = appDownloadSection.getBoundingClientRect();
-      const storyRect = storyWrapper.getBoundingClientRect();
-      const footerRect = footer.getBoundingClientRect();
-
-      return {
-        bannerBottom: Math.round(bannerRect.bottom),
-        appDownloadTop: Math.round(appDownloadRect.top),
-        appDownloadBottom: Math.round(appDownloadRect.bottom),
+        servicesBottom: Math.round(servicesRect.bottom),
         storyTop: Math.round(storyRect.top),
         storyBottom: Math.round(storyRect.bottom),
+        appDownloadTop: Math.round(appDownloadRect.top),
+        appDownloadBottom: Math.round(appDownloadRect.bottom),
         footerTop: Math.round(footerRect.top),
+        trackHeight: Math.round(track.getBoundingClientRect().height),
       };
     });
 
-    expect(placementOrder.appDownloadTop).toBeGreaterThanOrEqual(placementOrder.bannerBottom);
-    expect(placementOrder.storyTop).toBeGreaterThanOrEqual(placementOrder.appDownloadBottom);
-    expect(placementOrder.footerTop).toBeGreaterThanOrEqual(placementOrder.storyBottom);
+    expect(desktopMetrics.lostPetsHeight).toBe(desktopMetrics.scanHeight);
+    expect(desktopMetrics.lostPetsHeight).toBe(desktopMetrics.sitterHeight);
 
-    // 5. Verify clicking Hero button & Wide Banner scroll to story section and fire GA4 events with location
-    await heroBtn.click();
-    await expect.poll(async () => {
-      return await page.evaluate(() => window.scrollY);
-    }, { timeout: 5000 }).toBeGreaterThan(400);
+    // Confirm Story sits directly under the 5 service cards and ABOVE AppDownloadSection
+    expect(desktopMetrics.storyTop).toBeGreaterThanOrEqual(desktopMetrics.servicesBottom);
+    expect(desktopMetrics.appDownloadTop).toBeGreaterThanOrEqual(desktopMetrics.storyBottom);
+    expect(desktopMetrics.footerTop).toBeGreaterThanOrEqual(desktopMetrics.appDownloadBottom);
 
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await wideBanner.click();
-    await expect.poll(async () => {
-      return await page.evaluate(() => window.scrollY);
-    }, { timeout: 5000 }).toBeGreaterThan(400);
+    // Confirm shorter 250vh desktop track (2.5 * 800 = 2000px)
+    expect(desktopMetrics.trackHeight).toBe(2000);
 
-    const gaCtaLocations = await page.evaluate(() => {
-      const fromDataLayer = Array.from((window as any).dataLayer || [])
-        .map((entry: any) => Array.from(entry || []))
-        .filter((arr: any[]) => arr[0] === 'event' && arr[1] === 'lost_pets_story_cta_click')
-        .map((arr: any[]) => arr[2]?.location);
-      const fromSpy = ((window as any).__gaEvents || [])
-        .filter((e: any[]) => e[0] === 'event' && e[1] === 'lost_pets_story_cta_click')
-        .map((e: any[]) => e[2]?.location);
-      return [...fromDataLayer, ...fromSpy];
-    });
-    expect(gaCtaLocations).toContain('hero_button');
-    expect(gaCtaLocations).toContain('banner');
+    // 3. Confirm embedded homepage story omits duplicate store badges inside the story CTA block
+    await expect(page.getByTestId('lost-pets-story-primary-cta')).toBeVisible();
+    await expect(page.getByTestId('lost-pets-story-post-cta')).toBeVisible();
+    await expect(page.getByTestId('lost-pets-story-google-play')).toHaveCount(0);
+    await expect(page.getByTestId('lost-pets-story-app-store')).toHaveCount(0);
 
-    // 6. Verify story wording, 720 frame set, frame advancement, and no horizontal overflow
+    // 4. Verify story wording, 720 frame set, sticky stage pinning, frame advancement across 250vh track, and no horizontal overflow
     const storySection = page.getByTestId('lost-pets-scroll-story');
     const storyText = await storySection.innerText();
     expect(storyText).toContain('LOST & FOUND PETS');
@@ -208,7 +148,6 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
     expect(storyText).toContain("Scroll to follow one lost pet's journey home.");
     expect(storyText.toLowerCase()).not.toContain('how it works');
     expect(storyText.toLowerCase()).not.toContain('how lost pets works');
-    expect(storyText.toLowerCase()).not.toContain('how a photo helps neighbors search');
 
     const canvas = page.getByTestId('lost-pets-canvas');
     await expect(canvas).toBeVisible();
@@ -219,13 +158,24 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
       'Illustration. Lumo helps you search lost and found reports by photo. Matches are not guaranteed.'
     );
 
-    // Scroll to end of story track
+    // Scroll mid-way and then to the end of the 250vh story track
+    const stickyTopMid = await page.evaluate(async () => {
+      const track = document.querySelector('[data-testid="lost-pets-scroll-track"]') as HTMLElement;
+      const sticky = document.querySelector('[data-testid="lost-pets-sticky-stage"]') as HTMLElement;
+      const trackTopDoc = window.scrollY + track.getBoundingClientRect().top;
+      const scrollable = track.offsetHeight - sticky.offsetHeight;
+      window.scrollTo({ top: trackTopDoc + scrollable * 0.5, behavior: 'instant' });
+      await new Promise((r) => setTimeout(r, 150));
+      return Math.round(sticky.getBoundingClientRect().top);
+    });
+    expect(stickyTopMid).toBe(80);
+
     await page.evaluate(async () => {
       const track = document.querySelector('[data-testid="lost-pets-scroll-track"]') as HTMLElement;
       const sticky = document.querySelector('[data-testid="lost-pets-sticky-stage"]') as HTMLElement;
       const trackTopDoc = window.scrollY + track.getBoundingClientRect().top;
       const scrollable = track.offsetHeight - sticky.offsetHeight;
-      window.scrollTo({ top: trackTopDoc + scrollable * 0.95, behavior: 'instant' });
+      window.scrollTo({ top: trackTopDoc + scrollable * 0.96, behavior: 'instant' });
     });
 
     await expect.poll(async () => {
@@ -238,7 +188,7 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
     );
     expect(noOverflow).toBe(true);
 
-    // 7. Verify navigating away to /lost-pets removes lost-pets-story-route class and restores overflow-x: hidden
+    // 5. Verify navigating away to /lost-pets removes lost-pets-story-route class and restores overflow-x: hidden
     await page.getByTestId('lost-pets-story-primary-cta').click();
     await expect(page).toHaveURL(/\/lost-pets/);
 
@@ -253,7 +203,7 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
     expect(onLostPetsPage.bodyOverflowX).toBe('hidden');
   });
 
-  test('/how-lost-pets-works (390x844): renders updated wording & title, pins sticky stage, advances canvas frames on scroll, and stays under 2MB', async ({ page }) => {
+  test('/how-lost-pets-works (390x844): keeps store badges, renders updated wording & title, pins sticky stage, advances canvas frames on scroll, and stays under 2MB', async ({ page }) => {
     await bypassTerms(page);
     await page.setViewportSize({ width: 390, height: 844 });
 
@@ -280,6 +230,10 @@ test.describe('Lost Pets Scroll-Driven Story (Desktop Homepage & /how-lost-pets-
 
     const section = page.getByTestId('lost-pets-scroll-story');
     await expect(section).toBeVisible();
+
+    // Standalone page keeps the App Store and Google Play badges
+    await expect(page.getByTestId('lost-pets-story-google-play')).toBeVisible();
+    await expect(page.getByTestId('lost-pets-story-app-store')).toBeVisible();
 
     const sectionText = await section.innerText();
     expect(sectionText).toContain('LOST & FOUND PETS');

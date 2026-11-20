@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import AnimatedPets from '@/components/AnimatedPets';
 import AppDownloadSection from '@/components/AppDownloadSection';
 import LostPetsScrollStory from '@/components/LostPetsScrollStory';
-import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan, Play } from 'lucide-react';
+import { Home as HomeIcon, Utensils, Footprints, Globe, ArrowRight, PawPrint, Heart, Building2, X, Sparkles, MessageSquare, Scan } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useScrollLock } from '@/lib/useScrollLock';
 import { FEATURES_ENABLED } from '@/lib/featureFlags';
@@ -69,22 +69,6 @@ export default function Home() {
 
   const handleOpenPartnerPortal = () => {
     setPartnerModalOpen(true);
-  };
-
-  const handleScrollToLostPetsStory = (location: 'hero_button' | 'banner') => (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (typeof window === 'undefined') return;
-    const w = window as any;
-    if (typeof w.gtag === 'function') {
-      w.gtag('event', 'lost_pets_story_cta_click', { location });
-    } else if (Array.isArray(w.dataLayer)) {
-      w.dataLayer.push({ event: 'lost_pets_story_cta_click', location });
-    }
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const target = document.getElementById('how-lost-pets-works-section');
-    if (target) {
-      target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' });
-    }
   };
 
   const handleSelectShelter = async (e: React.MouseEvent) => {
@@ -416,18 +400,6 @@ export default function Home() {
                 <a href="https://apps.apple.com/app/lumo-bites/id6780612179" target="_blank" rel="noopener noreferrer">
                   <img src="/app-store-badge.svg" alt="Download on the App Store" height="42" style={{ height: '42px' }} />
                 </a>
-                {isDesktopViewport && (
-                  <button
-                    type="button"
-                    data-testid="desktop-hero-watch-story-btn"
-                    aria-label="Watch the lost pet story"
-                    onClick={handleScrollToLostPetsStory('hero_button')}
-                    className="hidden lg:inline-flex items-center justify-center gap-2 h-[42px] px-4 rounded-xl bg-[#8B5E3C] hover:bg-[#734A2E] text-white font-bold text-sm transition-colors cursor-pointer border-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-current shrink-0" />
-                    <span>Watch the story</span>
-                  </button>
-                )}
               </div>
             )}
           </div>
@@ -561,42 +533,18 @@ export default function Home() {
               </p>
             </Link>
           </div>
-
-          {/* Wide Story Banner Below Service Cards & Above AppDownloadSection (Desktop Only) */}
-          {!isNativeApp && isDesktopViewport && (
-            <div className="hidden lg:block max-w-[820px] mx-auto mt-6">
-              <button
-                type="button"
-                data-testid="desktop-story-wide-banner"
-                aria-label="Every paw has a story. Watch one lost pet's journey home."
-                onClick={handleScrollToLostPetsStory('banner')}
-                className="service-card-interactive group w-full bg-white border border-[#E8DDD4] hover:border-[#D4C3B5] rounded-2xl p-5 sm:p-6 transition-all duration-300 flex items-center justify-between gap-6 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8B5E3C]"
-              >
-                <div className="flex items-center gap-5 min-w-0">
-                  <img
-                    src="/scroll/lost-pets/poster.webp"
-                    alt=""
-                    aria-hidden="true"
-                    className="w-[72px] h-[128px] rounded-xl object-cover border border-[#DFC9B4] shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <h3 className="text-xl font-extrabold text-[#191919] group-hover:text-[#8B5E3C] transition-colors tracking-tight mb-1.5">
-                      Every paw has a story.
-                    </h3>
-                    <p className="text-sm text-[#7A6B5E] leading-relaxed">
-                      Watch one lost pet&apos;s journey home.
-                    </p>
-                  </div>
-                </div>
-
-                <span className="inline-flex items-center justify-center gap-2 h-[42px] px-4 rounded-xl bg-[#8B5E3C] group-hover:bg-[#734A2E] text-white font-bold text-sm transition-colors shrink-0">
-                  <Play className="w-3.5 h-3.5 fill-current shrink-0" />
-                  <span>Watch the story</span>
-                </span>
-              </button>
-            </div>
-          )}
         </section>
+
+        {/* DESKTOP LOST PETS SCROLL STORY (lg+ and non-native only, directly under the 5 service cards & above AppDownloadSection) */}
+        {!isNativeApp && isDesktopViewport && (
+          <div
+            id="how-lost-pets-works-section"
+            data-testid="desktop-home-lost-pets-story-wrapper"
+            className="hidden lg:block w-full border-t border-[#E8DDD4]"
+          >
+            <LostPetsScrollStory embeddedOnHomepage />
+          </div>
+        )}
 
         {/* DESKTOP APP DOWNLOAD SECTION */}
         <AppDownloadSection />
@@ -635,17 +583,6 @@ export default function Home() {
             </Link>
           </div>
         </section>
-
-        {/* DESKTOP HOW LOST PETS WORKS SCROLL STORY (lg+ and non-native only, below AppDownloadSection & just above footer) */}
-        {!isNativeApp && isDesktopViewport && (
-          <div
-            id="how-lost-pets-works-section"
-            data-testid="desktop-home-lost-pets-story-wrapper"
-            className="hidden lg:block w-full border-t border-[#E8DDD4]"
-          >
-            <LostPetsScrollStory embeddedOnHomepage />
-          </div>
-        )}
 
         {/* DESKTOP FULL FOOTER */}
         <footer className="w-full px-8 lg:px-[48px] py-10 md:py-12" style={{ backgroundColor: '#191919', color: '#FFFFFF' }}>

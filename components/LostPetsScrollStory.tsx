@@ -469,7 +469,7 @@ export default function LostPetsScrollStory({
       <div
         ref={trackRef}
         data-testid="lost-pets-scroll-track"
-        className={staticFallback ? 'relative w-full h-auto' : 'relative w-full h-[450vh] md:h-[380vh]'}
+        className={staticFallback ? 'relative w-full h-auto' : 'relative w-full h-[450vh] lg:h-[250vh]'}
       >
         <div
           ref={stickyRef}
@@ -565,7 +565,11 @@ export default function LostPetsScrollStory({
           Post a missing or found pet alert for your neighborhood, or upload a photo to compare against existing community reports nearby.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-5">
+        <div
+          className={`flex flex-col sm:flex-row items-center justify-center gap-3 ${
+            !isNativeApp && !embeddedOnHomepage ? 'mb-5' : ''
+          }`}
+        >
           <Link
             href="/lost-pets"
             data-testid="lost-pets-story-primary-cta"
@@ -589,8 +593,8 @@ export default function LostPetsScrollStory({
           </Link>
         </div>
 
-        {/* Existing Homepage App Store & Google Play Badges */}
-        {!isNativeApp && (
+        {/* Standalone Page App Store & Google Play Badges (omitted when embedded on homepage) */}
+        {!isNativeApp && !embeddedOnHomepage && (
           <div className="pt-4 border-t border-[#F0E6DC]">
             <p className="text-[11px] font-semibold text-[#7A6B5E] mb-3">
               Get the Lumo Bites mobile app for neighborhood alerts
