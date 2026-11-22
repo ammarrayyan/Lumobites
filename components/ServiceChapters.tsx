@@ -12,7 +12,15 @@ export interface ChapterColorTokens {
   railBg: string;
   railFill: string;
   cardBorder: string;
+  frostBg: string;
+  frostBorder: string;
   pillBg: string;
+  pillText: string;
+}
+
+export interface ChapterScriptLine {
+  at: number;
+  text: string;
 }
 
 export interface ServiceChapterConfig {
@@ -20,14 +28,16 @@ export interface ServiceChapterConfig {
   name: string;
   framesFolder: string;
   totalFrames: number;
+  lastFrame: number;
+  logoSide: 'left' | 'right';
   heading: string;
   text: string;
   linkText: string;
   linkHref: string;
   disclaimer: string;
+  scriptLines: ChapterScriptLine[];
   colors: {
     light: ChapterColorTokens;
-    dark: ChapterColorTokens;
   };
 }
 
@@ -37,12 +47,19 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
     name: 'Lost Pets',
     framesFolder: '/scroll/lost-pets',
     totalFrames: 80,
+    lastFrame: 67,
+    logoSide: 'left',
     heading: 'Lost a pet? Tell the whole block.',
     text: 'Report a lost or found pet and share it with people nearby.',
     linkText: 'Open Lost Pets →',
     linkHref: '/lost-pets',
     disclaimer:
       'Illustration. Lumo helps you search lost and found reports by photo. Matches are not guaranteed.',
+    scriptLines: [
+      { at: 0, text: 'A pet goes missing.' },
+      { at: 0.35, text: 'Neighbors hear about it.' },
+      { at: 0.7, text: 'Share it, and help bring them home.' },
+    ],
     colors: {
       light: {
         bg: '#E4EAF3',
@@ -52,17 +69,10 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
         railBg: 'rgba(16, 24, 38, 0.14)',
         railFill: '#101826',
         cardBorder: 'rgba(16, 24, 38, 0.16)',
-        pillBg: 'rgba(255, 255, 255, 0.65)',
-      },
-      dark: {
-        bg: '#101826',
-        text: '#F1F5F9',
-        muted: '#94A3B8',
-        accent: '#93C5FD',
-        railBg: 'rgba(241, 245, 249, 0.16)',
-        railFill: '#F1F5F9',
-        cardBorder: 'rgba(241, 245, 249, 0.18)',
-        pillBg: 'rgba(255, 255, 255, 0.08)',
+        frostBg: 'rgba(255, 255, 255, 0.78)',
+        frostBorder: 'rgba(16, 24, 38, 0.12)',
+        pillBg: '#101826',
+        pillText: '#FFFFFF',
       },
     },
   },
@@ -71,12 +81,20 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
     name: 'Scan Food',
     framesFolder: '/scroll/scan-food',
     totalFrames: 80,
+    lastFrame: 70,
+    logoSide: 'right',
     heading: 'Scan before you serve.',
     text: 'Point your phone at a pet food label and see what is inside.',
     linkText: 'Open Scan Food →',
     linkHref: '/scan',
     disclaimer:
       'Illustration. Lumo helps you review pet food label ingredients. Always check packaging directly.',
+    scriptLines: [
+      { at: 0, text: 'Dinner is served.' },
+      { at: 0.35, text: 'But is it safe?' },
+      { at: 0.62, text: 'Scan the label.' },
+      { at: 0.85, text: 'Know what is inside.' },
+    ],
     colors: {
       light: {
         bg: '#F6E6CC',
@@ -86,30 +104,39 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
         railBg: 'rgba(36, 24, 13, 0.14)',
         railFill: '#24180D',
         cardBorder: 'rgba(36, 24, 13, 0.16)',
-        pillBg: 'rgba(255, 255, 255, 0.65)',
-      },
-      dark: {
-        bg: '#24180D',
-        text: '#FAF0E4',
-        muted: '#D6C1A7',
-        accent: '#FDBA74',
-        railBg: 'rgba(250, 240, 228, 0.16)',
-        railFill: '#FAF0E4',
-        cardBorder: 'rgba(250, 240, 228, 0.18)',
-        pillBg: 'rgba(255, 255, 255, 0.08)',
+        frostBg: 'rgba(255, 251, 245, 0.82)',
+        frostBorder: 'rgba(36, 24, 13, 0.12)',
+        pillBg: '#24180D',
+        pillText: '#FFFFFF',
       },
     },
   },
 ];
 
-const SCROLL_VH_PER_CHAPTER = 360;
-const PLAY_PORTION = 0.85; // 85% play frames 1..80, 15% hold on frame 80
-const LINK_REVEAL_THRESHOLD = 0.80; // link visible when video is nearly finished (>= 80% of chapter)
+const SCROLL_VH_PER_CHAPTER = 340;
+const PLAY_PORTION = 0.80; // frames 1..lastFrame play over 0..80% of chapter scroll
+const HANDOFF_START = 0.84; // stacked slide + logo swoop over last 16% (0.84..1.00)
+const TRAIL_DOT_COUNT = 6;
 
 type NetworkInformationLike = {
   saveData?: boolean;
   effectiveType?: string;
 };
+
+function easeInOutCubic(t: number): number {
+  const c = Math.min(1, Math.max(0, t));
+  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
+}
+
+function getActiveScriptIndex(lines: ChapterScriptLine[], progress: number): number {
+  let idx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (progress >= lines[i].at) {
+      idx = i;
+    }
+  }
+  return idx;
+}
 
 function detectChaptersEnv(): { isStaticFallback: boolean; resolvedFrameSet: '480' | '720' } {
   if (typeof window === 'undefined') {
@@ -147,9 +174,12 @@ function detectChaptersEnv(): { isStaticFallback: boolean; resolvedFrameSet: '48
   };
 }
 
-function fireChapterGaEvent(eventName: string, params: Record<string, any>) {
+function fireChapterGaEvent(eventName: string, params: Record<string, string>) {
   if (typeof window === 'undefined') return;
-  const w = window as any;
+  const w = window as unknown as {
+    gtag?: (cmd: string, name: string, p: Record<string, string>) => void;
+    dataLayer?: Record<string, unknown>[];
+  };
   if (typeof w.gtag === 'function') {
     w.gtag('event', eventName, params);
   } else if (Array.isArray(w.dataLayer)) {
@@ -161,9 +191,9 @@ function formatChapterFramePath(
   framesFolder: string,
   resolution: '480' | '720',
   frameNumber: number,
-  totalFrames: number
+  maxFrame: number
 ): string {
-  const clamped = Math.min(totalFrames, Math.max(1, frameNumber));
+  const clamped = Math.min(maxFrame, Math.max(1, frameNumber));
   const padded = String(clamped).padStart(3, '0');
   return `${framesFolder}/${resolution}/f${padded}.webp`;
 }
@@ -172,18 +202,32 @@ export default function ServiceChapters() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const stickyRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // One canvas + stacked card element per chapter
+  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>(SERVICE_CHAPTERS.map(() => null));
+  const cardRefs = useRef<(HTMLDivElement | null)[]>(SERVICE_CHAPTERS.map(() => null));
+  const cardDimRefs = useRef<(HTMLDivElement | null)[]>(SERVICE_CHAPTERS.map(() => null));
+  const cardShadowStripRefs = useRef<(HTMLDivElement | null)[]>(SERVICE_CHAPTERS.map(() => null));
+
+  // Floating logo + dotted trail refs
+  const logoRef = useRef<HTMLDivElement | null>(null);
+  const trailContainerRef = useRef<HTMLDivElement | null>(null);
+  const trailDotRefs = useRef<(HTMLSpanElement | null)[]>(new Array(TRAIL_DOT_COUNT).fill(null));
 
   const [staticFallback, setStaticFallback] = useState(false);
   const [frameSet, setFrameSet] = useState<'480' | '720'>('720');
   const [activeChapterIdx, setActiveChapterIdx] = useState(0);
   const [chapterProgress, setChapterProgress] = useState(0);
-  const [displayedFrame, setDisplayedFrame] = useState(1);
-  const [linkFocused, setLinkFocused] = useState(false);
+  const [activeScriptIndices, setActiveScriptIndices] = useState<number[]>(
+    SERVICE_CHAPTERS.map(() => 0)
+  );
+  const [displayedFrames, setDisplayedFrames] = useState<number[]>(
+    SERVICE_CHAPTERS.map(() => 1)
+  );
 
   // Per-chapter image caches and loading state
   const chapterFramesRef = useRef<(HTMLImageElement | null)[][]>(
-    SERVICE_CHAPTERS.map((c) => new Array(c.totalFrames + 1).fill(null))
+    SERVICE_CHAPTERS.map((c) => new Array(c.lastFrame + 1).fill(null))
   );
   const chapterPostersRef = useRef<(HTMLImageElement | null)[]>(
     SERVICE_CHAPTERS.map(() => null)
@@ -197,12 +241,12 @@ export default function ServiceChapters() {
 
   // Animation refs
   const activeChapterIdxRef = useRef(0);
-  const targetFrameRef = useRef(1);
-  const currentFrameFloatRef = useRef(1);
-  const drawnChapterRef = useRef(-1);
-  const drawnFrameRef = useRef(0);
+  const targetFramesRef = useRef<number[]>(SERVICE_CHAPTERS.map(() => 1));
+  const currentFramesFloatRef = useRef<number[]>(SERVICE_CHAPTERS.map(() => 1));
+  const drawnFramesRef = useRef<number[]>(SERVICE_CHAPTERS.map(() => 0));
   const rafIdRef = useRef<number | null>(null);
   const sectionInViewRef = useRef(false);
+  const scriptIndicesRef = useRef<number[]>(SERVICE_CHAPTERS.map(() => 0));
 
   // Analytics tracking refs (once per chapter)
   const viewedChaptersRef = useRef<Set<string>>(new Set());
@@ -257,9 +301,9 @@ export default function ServiceChapters() {
     };
   }, []);
 
-  // Draw frame `frameNumber` of chapter `chapterIdx` onto the canvas
+  // Draw frame `frameNumber` of chapter `chapterIdx` onto its own canvas
   const drawChapterFrame = useCallback((chapterIdx: number, frameNumber: number) => {
-    const canvas = canvasRef.current;
+    const canvas = canvasRefs.current[chapterIdx];
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -267,14 +311,14 @@ export default function ServiceChapters() {
     const chapter = SERVICE_CHAPTERS[chapterIdx];
     if (!chapter) return;
 
-    const clamped = Math.min(chapter.totalFrames, Math.max(1, Math.round(frameNumber)));
+    const clamped = Math.min(chapter.lastFrame, Math.max(1, Math.round(frameNumber)));
     const framesArr = chapterFramesRef.current[chapterIdx] || [];
     let imgToDraw = framesArr[clamped];
 
     // Fall back to nearest already-loaded frame in this chapter
     if (!imgToDraw || !imgToDraw.complete || imgToDraw.naturalWidth === 0) {
       imgToDraw = null;
-      for (let offset = 1; offset < chapter.totalFrames; offset++) {
+      for (let offset = 1; offset < chapter.lastFrame; offset++) {
         const lower = clamped - offset;
         const higher = clamped + offset;
         if (lower >= 1) {
@@ -284,7 +328,7 @@ export default function ServiceChapters() {
             break;
           }
         }
-        if (higher <= chapter.totalFrames) {
+        if (higher <= chapter.lastFrame) {
           const candidate = framesArr[higher];
           if (candidate && candidate.complete && candidate.naturalWidth > 0) {
             imgToDraw = candidate;
@@ -310,10 +354,14 @@ export default function ServiceChapters() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(imgToDraw, 0, 0, canvas.width, canvas.height);
 
-    if (drawnChapterRef.current !== chapterIdx || drawnFrameRef.current !== clamped) {
-      drawnChapterRef.current = chapterIdx;
-      drawnFrameRef.current = clamped;
-      setDisplayedFrame(clamped);
+    if (drawnFramesRef.current[chapterIdx] !== clamped) {
+      drawnFramesRef.current[chapterIdx] = clamped;
+      setDisplayedFrames((prev) => {
+        if (prev[chapterIdx] === clamped) return prev;
+        const next = prev.slice();
+        next[chapterIdx] = clamped;
+        return next;
+      });
     }
   }, []);
 
@@ -325,7 +373,7 @@ export default function ServiceChapters() {
         chapterLoadingStartedRef.current[idx] = false;
         const arr = chapterFramesRef.current[idx];
         if (arr) {
-          for (let f = 1; f <= chapter.totalFrames; f++) {
+          for (let f = 1; f <= chapter.lastFrame; f++) {
             arr[f] = null;
           }
         }
@@ -333,7 +381,7 @@ export default function ServiceChapters() {
     });
   }, []);
 
-  // Start progressive loading for a specific chapter index
+  // Start progressive loading for frames 1..chapter.lastFrame of a specific chapter
   const startLoadingChapter = useCallback(
     (chapterIdx: number, selectedSet: '480' | '720') => {
       if (
@@ -350,6 +398,7 @@ export default function ServiceChapters() {
       chapterLoadingStartedRef.current[chapterIdx] = true;
       const gen = (chapterGenerationRef.current[chapterIdx] += 1);
       const chapter = SERVICE_CHAPTERS[chapterIdx];
+      const maxFrame = chapter.lastFrame;
 
       // Load poster-start.webp immediately for this chapter
       if (!chapterPostersRef.current[chapterIdx]) {
@@ -359,27 +408,27 @@ export default function ServiceChapters() {
         posterImg.onload = () => {
           if (chapterGenerationRef.current[chapterIdx] !== gen) return;
           chapterPostersRef.current[chapterIdx] = posterImg;
-          if (activeChapterIdxRef.current === chapterIdx && drawnFrameRef.current <= 1) {
+          if (drawnFramesRef.current[chapterIdx] <= 1) {
             drawChapterFrame(chapterIdx, 1);
           }
         };
       }
 
-      // Priority queue: frame 1, keyframes every 4 frames, frame 80, even frames, remaining frames
+      // Priority queue: frame 1, keyframes every 4 frames, lastFrame, even frames, remaining frames
       const priorityQueue: number[] = [];
       const added = new Set<number>();
       const enqueue = (n: number) => {
-        if (n >= 1 && n <= chapter.totalFrames && !added.has(n)) {
+        if (n >= 1 && n <= maxFrame && !added.has(n)) {
           added.add(n);
           priorityQueue.push(n);
         }
       };
 
       enqueue(1);
-      for (let i = 1; i <= chapter.totalFrames; i += 4) enqueue(i);
-      enqueue(chapter.totalFrames);
-      for (let i = 1; i <= chapter.totalFrames; i += 2) enqueue(i);
-      for (let i = 1; i <= chapter.totalFrames; i++) enqueue(i);
+      for (let i = 1; i <= maxFrame; i += 4) enqueue(i);
+      enqueue(maxFrame);
+      for (let i = 1; i <= maxFrame; i += 2) enqueue(i);
+      for (let i = 1; i <= maxFrame; i++) enqueue(i);
 
       let cursor = 0;
       const MAX_CONCURRENT = 4;
@@ -390,20 +439,15 @@ export default function ServiceChapters() {
         const frameNum = priorityQueue[cursor++];
         const img = new Image();
         img.decoding = 'async';
-        img.src = formatChapterFramePath(
-          chapter.framesFolder,
-          selectedSet,
-          frameNum,
-          chapter.totalFrames
-        );
+        img.src = formatChapterFramePath(chapter.framesFolder, selectedSet, frameNum, maxFrame);
         img.onload = () => {
           if (chapterGenerationRef.current[chapterIdx] !== gen) return;
           chapterFramesRef.current[chapterIdx][frameNum] = img;
           if (
-            activeChapterIdxRef.current === chapterIdx &&
-            (Math.abs(targetFrameRef.current - frameNum) <= 2 || drawnChapterRef.current !== chapterIdx)
+            Math.abs(targetFramesRef.current[chapterIdx] - frameNum) <= 2 ||
+            drawnFramesRef.current[chapterIdx] === 0
           ) {
-            drawChapterFrame(chapterIdx, Math.round(currentFrameFloatRef.current));
+            drawChapterFrame(chapterIdx, Math.round(currentFramesFloatRef.current[chapterIdx]));
           }
           loadNext();
         };
@@ -467,6 +511,129 @@ export default function ServiceChapters() {
     };
   }, [startLoadingChapter]);
 
+  // Apply stacked card transforms and floating logo + dotted trail transforms directly to DOM
+  const applyVisualTransforms = useCallback(
+    (activeIdx: number, localProgress: number, stageWidth: number) => {
+      const numChapters = SERVICE_CHAPTERS.length;
+      const hasNext = activeIdx < numChapters - 1;
+      const rawHandoff =
+        hasNext && localProgress > HANDOFF_START
+          ? (localProgress - HANDOFF_START) / (1 - HANDOFF_START)
+          : 0;
+      const handoffT = Math.min(1, Math.max(0, rawHandoff));
+      const easedHandoff = easeInOutCubic(handoffT);
+
+      // 1. Update each stacked card's transform, radius, dimming overlay, and top gradient strip
+      for (let i = 0; i < numChapters; i++) {
+        const cardEl = cardRefs.current[i];
+        if (!cardEl) continue;
+        const dimEl = cardDimRefs.current[i];
+        const stripEl = cardShadowStripRefs.current[i];
+
+        if (i < activeIdx) {
+          // Already covered by a later chapter
+          cardEl.style.transform = 'translate3d(0, 0, 0) scale(0.95)';
+          cardEl.style.borderTopLeftRadius = '0px';
+          cardEl.style.borderTopRightRadius = '0px';
+          cardEl.dataset.scale = '0.95';
+          cardEl.dataset.translateY = '0';
+          if (dimEl) dimEl.style.opacity = '0.12';
+          if (stripEl) stripEl.style.opacity = '0';
+        } else if (i === activeIdx) {
+          const scale = 1 - easedHandoff * 0.05;
+          cardEl.style.transform = `translate3d(0, 0, 0) scale(${scale.toFixed(4)})`;
+          cardEl.style.borderTopLeftRadius = '0px';
+          cardEl.style.borderTopRightRadius = '0px';
+          cardEl.dataset.scale = scale.toFixed(3);
+          cardEl.dataset.translateY = '0';
+          if (dimEl) dimEl.style.opacity = (easedHandoff * 0.12).toFixed(3);
+          if (stripEl) stripEl.style.opacity = '0';
+        } else if (i === activeIdx + 1) {
+          // Incoming card slides up from 100% -> 0% during handoff
+          const translatePct = (1 - easedHandoff) * 100;
+          const topRadius = easedHandoff > 0.01 && easedHandoff < 0.99 ? 32 : 0;
+          cardEl.style.transform = `translate3d(0, ${translatePct.toFixed(2)}%, 0)`;
+          cardEl.style.borderTopLeftRadius = `${topRadius}px`;
+          cardEl.style.borderTopRightRadius = `${topRadius}px`;
+          cardEl.dataset.scale = '1.000';
+          cardEl.dataset.translateY = translatePct.toFixed(1);
+          if (dimEl) dimEl.style.opacity = '0';
+          if (stripEl) {
+            const stripOpacity = easedHandoff > 0.01 && easedHandoff < 0.99 ? 1 : 0;
+            stripEl.style.opacity = String(stripOpacity);
+          }
+        } else {
+          // Future cards parked below
+          cardEl.style.transform = 'translate3d(0, 100%, 0)';
+          cardEl.style.borderTopLeftRadius = '32px';
+          cardEl.style.borderTopRightRadius = '32px';
+          cardEl.dataset.scale = '1.000';
+          cardEl.dataset.translateY = '100.0';
+          if (dimEl) dimEl.style.opacity = '0';
+          if (stripEl) stripEl.style.opacity = '0';
+        }
+      }
+
+      // 2. Update floating logo + dotted trail (CSS transforms only, scroll-tied)
+      const logoEl = logoRef.current;
+      if (logoEl) {
+        const currentSide = SERVICE_CHAPTERS[activeIdx]?.logoSide || 'left';
+        const nextSide = hasNext ? SERVICE_CHAPTERS[activeIdx + 1].logoSide : currentSide;
+        const sideOffset = Math.min(360, Math.max(255, stageWidth * 0.24));
+        const startX = currentSide === 'left' ? -sideOffset : sideOffset;
+        const endX = nextSide === 'left' ? -sideOffset : sideOffset;
+
+        const bobY = Math.sin(localProgress * Math.PI * 4) * 6;
+        const restTilt = Math.cos(localProgress * Math.PI * 3) * 4;
+
+        let xPx = startX;
+        let yPx = bobY;
+        let flipDeg = 0;
+        let tiltDeg = restTilt;
+        let scale = 1;
+        let sideAttr: 'left' | 'right' | 'handoff' = currentSide;
+
+        if (handoffT > 0 && hasNext && startX !== endX) {
+          xPx = startX + (endX - startX) * easedHandoff;
+          const arcLift = -Math.sin(Math.PI * easedHandoff) * 72;
+          yPx = bobY * (1 - easedHandoff) + arcLift;
+          flipDeg = easedHandoff * 360;
+          tiltDeg = restTilt * (1 - Math.sin(Math.PI * easedHandoff)) + Math.sin(Math.PI * easedHandoff) * 10;
+          scale = 1 + Math.sin(Math.PI * easedHandoff) * 0.12;
+          sideAttr = handoffT >= 0.05 && handoffT <= 0.95 ? 'handoff' : handoffT < 0.05 ? currentSide : nextSide;
+        }
+
+        logoEl.style.transform = `translate3d(calc(-50% + ${xPx.toFixed(1)}px), ${yPx.toFixed(1)}px, 0) perspective(900px) rotateY(${flipDeg.toFixed(1)}deg) rotateZ(${tiltDeg.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+        logoEl.dataset.side = sideAttr;
+        logoEl.dataset.flipDeg = String(Math.round(flipDeg));
+        logoEl.dataset.handoffProgress = handoffT.toFixed(2);
+
+        // Update dotted swoop trail
+        const trailEl = trailContainerRef.current;
+        const showTrail = handoffT > 0.02 && handoffT < 0.98 && hasNext && startX !== endX;
+        if (trailEl) {
+          trailEl.dataset.visible = showTrail ? 'true' : 'false';
+        }
+        for (let k = 0; k < TRAIL_DOT_COUNT; k++) {
+          const dot = trailDotRefs.current[k];
+          if (!dot) continue;
+          if (!showTrail) {
+            dot.style.opacity = '0';
+            continue;
+          }
+          const dotT = Math.max(0, easedHandoff - (k + 1) * 0.055);
+          const dotX = startX + (endX - startX) * dotT;
+          const dotY = -Math.sin(Math.PI * dotT) * 72;
+          const dotOpacity =
+            dotT <= 0.005 ? 0 : Math.sin(Math.PI * easedHandoff) * (1 - k / (TRAIL_DOT_COUNT + 1)) * 0.65;
+          dot.style.transform = `translate3d(calc(-50% + ${dotX.toFixed(1)}px), ${dotY.toFixed(1)}px, 0)`;
+          dot.style.opacity = dotOpacity.toFixed(3);
+        }
+      }
+    },
+    []
+  );
+
   // Scroll listener + light lerp smoothing across all chapters
   useEffect(() => {
     if (staticFallback || detectChaptersEnv().isStaticFallback || typeof window === 'undefined') {
@@ -474,21 +641,29 @@ export default function ServiceChapters() {
     }
 
     const stepAnimation = () => {
-      const target = targetFrameRef.current;
-      const current = currentFrameFloatRef.current;
-      const diff = target - current;
-      const activeIdx = activeChapterIdxRef.current;
+      let anyMoving = false;
+      for (let i = 0; i < SERVICE_CHAPTERS.length; i++) {
+        const target = targetFramesRef.current[i];
+        const current = currentFramesFloatRef.current[i];
+        const diff = target - current;
 
-      if (Math.abs(diff) < 0.05) {
-        currentFrameFloatRef.current = target;
-        drawChapterFrame(activeIdx, Math.round(target));
-        rafIdRef.current = null;
-        return;
+        if (Math.abs(diff) < 0.05) {
+          if (current !== target) {
+            currentFramesFloatRef.current[i] = target;
+            drawChapterFrame(i, Math.round(target));
+          }
+        } else {
+          currentFramesFloatRef.current[i] = current + diff * 0.3;
+          drawChapterFrame(i, Math.round(currentFramesFloatRef.current[i]));
+          anyMoving = true;
+        }
       }
 
-      currentFrameFloatRef.current = current + diff * 0.28;
-      drawChapterFrame(activeIdx, Math.round(currentFrameFloatRef.current));
-      rafIdRef.current = window.requestAnimationFrame(stepAnimation);
+      if (anyMoving) {
+        rafIdRef.current = window.requestAnimationFrame(stepAnimation);
+      } else {
+        rafIdRef.current = null;
+      }
     };
 
     const computeScrollProgress = () => {
@@ -498,6 +673,7 @@ export default function ServiceChapters() {
 
       const trackRect = trackEl.getBoundingClientRect();
       const stickyHeight = stickyEl ? stickyEl.offsetHeight : window.innerHeight - 72;
+      const stickyWidth = stickyEl ? stickyEl.offsetWidth : window.innerWidth;
       const stickyTopOffset = stickyEl
         ? parseFloat(window.getComputedStyle(stickyEl).top || '72') || 72
         : 72;
@@ -548,14 +724,25 @@ export default function ServiceChapters() {
         startLoadingChapter(nextChapterIdx + 1, env.resolvedFrameSet);
       }
 
-      // If chapter changed, snap currentFrameFloat to the new chapter's target frame and release chapters >= 2 steps away
+      // Frame targets: play frames 1..lastFrame over first 80%, then hold on lastFrame
       const playProgress = Math.min(1, localProgress / PLAY_PORTION);
-      const nextTargetFrame = 1 + playProgress * (chapter.totalFrames - 1);
+      const nextTargetFrame = 1 + playProgress * (chapter.lastFrame - 1);
+
+      for (let i = 0; i < numChapters; i++) {
+        if (i < nextChapterIdx) {
+          targetFramesRef.current[i] = SERVICE_CHAPTERS[i].lastFrame;
+          currentFramesFloatRef.current[i] = SERVICE_CHAPTERS[i].lastFrame;
+        } else if (i === nextChapterIdx) {
+          targetFramesRef.current[i] = nextTargetFrame;
+        } else {
+          targetFramesRef.current[i] = 1;
+          currentFramesFloatRef.current[i] = 1;
+        }
+      }
 
       if (activeChapterIdxRef.current !== nextChapterIdx) {
         activeChapterIdxRef.current = nextChapterIdx;
-        currentFrameFloatRef.current = nextTargetFrame;
-        targetFrameRef.current = nextTargetFrame;
+        currentFramesFloatRef.current[nextChapterIdx] = nextTargetFrame;
         setActiveChapterIdx(nextChapterIdx);
         releaseDistantChapters(nextChapterIdx);
         drawChapterFrame(nextChapterIdx, Math.round(nextTargetFrame));
@@ -566,10 +753,24 @@ export default function ServiceChapters() {
             chapter_id: chapter.id,
           });
         }
-      } else {
-        targetFrameRef.current = nextTargetFrame;
       }
 
+      // Ensure incoming chapter's frame 1 is painted before/during handoff
+      if (localProgress >= HANDOFF_START && nextChapterIdx + 1 < numChapters) {
+        if (drawnFramesRef.current[nextChapterIdx + 1] === 0) {
+          drawChapterFrame(nextChapterIdx + 1, 1);
+        }
+      }
+
+      // Update active script line index only when threshold crossed
+      const nextScriptIdx = getActiveScriptIndex(chapter.scriptLines, localProgress);
+      if (scriptIndicesRef.current[nextChapterIdx] !== nextScriptIdx) {
+        scriptIndicesRef.current[nextChapterIdx] = nextScriptIdx;
+        setActiveScriptIndices(scriptIndicesRef.current.slice());
+      }
+
+      // Direct DOM transforms for stacked cards + floating logo + trail
+      applyVisualTransforms(nextChapterIdx, localProgress, stickyWidth);
       setChapterProgress(localProgress);
 
       // Fire service_chapter_complete when chapter reaches >= 90%
@@ -598,7 +799,13 @@ export default function ServiceChapters() {
         rafIdRef.current = null;
       }
     };
-  }, [staticFallback, drawChapterFrame, startLoadingChapter, releaseDistantChapters]);
+  }, [
+    staticFallback,
+    drawChapterFrame,
+    startLoadingChapter,
+    releaseDistantChapters,
+    applyVisualTransforms,
+  ]);
 
   // Jump to the start of a chapter when clicking a rail segment
   const handleRailClick = (targetChapterIdx: number) => {
@@ -614,7 +821,6 @@ export default function ServiceChapters() {
       : 72;
     const scrollableDistance = Math.max(1, trackRect.height - stickyHeight);
 
-    // Scroll slightly inside the target chapter (1% into the chapter) so Math.floor(scaled) lands cleanly on targetChapterIdx
     const chapterFraction = (targetChapterIdx + 0.01) / SERVICE_CHAPTERS.length;
     const targetScrollY = Math.max(
       0,
@@ -628,7 +834,7 @@ export default function ServiceChapters() {
     });
   };
 
-  // Reduced-motion / Save-Data / no overflow:clip static poster fallback
+  // Reduced-motion / Save-Data / slow network / no overflow:clip static poster fallback
   if (staticFallback) {
     return (
       <section
@@ -637,7 +843,7 @@ export default function ServiceChapters() {
         data-static-fallback="true"
         className="w-full"
       >
-        {SERVICE_CHAPTERS.map((chapter) => {
+        {SERVICE_CHAPTERS.map((chapter, idx) => {
           const palette = chapter.colors.light;
           return (
             <div
@@ -652,17 +858,17 @@ export default function ServiceChapters() {
                     style={{ color: palette.muted }}
                     className="inline-block text-xs font-extrabold uppercase tracking-[0.14em] mb-2"
                   >
-                    {chapter.name}
+                    0{idx + 1} / 0{SERVICE_CHAPTERS.length} · {chapter.name}
                   </span>
                   <h2
                     style={{ color: palette.text }}
-                    className="text-3xl lg:text-4xl font-black tracking-tight leading-[1.12] mb-3"
+                    className="font-[800] tracking-[-0.02em] leading-[1.15] text-3xl lg:text-4xl mb-3"
                   >
                     {chapter.heading}
                   </h2>
                   <p
                     style={{ color: palette.muted }}
-                    className="text-base lg:text-lg leading-relaxed mb-4 max-w-md"
+                    className="text-base lg:text-lg leading-relaxed mb-5 max-w-md"
                   >
                     {chapter.text}
                   </p>
@@ -675,8 +881,12 @@ export default function ServiceChapters() {
                         link_href: chapter.linkHref,
                       })
                     }
-                    style={{ color: palette.accent, textDecoration: 'none' }}
-                    className="inline-flex items-center gap-1 text-sm font-extrabold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{
+                      backgroundColor: palette.pillBg,
+                      color: palette.pillText,
+                      textDecoration: 'none',
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
                     {chapter.linkText}
                   </Link>
@@ -711,8 +921,7 @@ export default function ServiceChapters() {
   }
 
   const activeChapter = SERVICE_CHAPTERS[activeChapterIdx] || SERVICE_CHAPTERS[0];
-  const palette = activeChapter.colors.light;
-  const isLinkVisible = chapterProgress >= LINK_REVEAL_THRESHOLD || linkFocused;
+  const activePalette = activeChapter.colors.light;
 
   return (
     <section
@@ -721,166 +930,351 @@ export default function ServiceChapters() {
       data-active-chapter={activeChapter.id}
       className="w-full"
     >
-      {/* Scroll Track: 360vh per chapter */}
+      {/* Scroll Track: 340vh per chapter */}
       <div
         ref={trackRef}
         data-testid="service-chapters-track"
         style={{ height: `${SERVICE_CHAPTERS.length * SCROLL_VH_PER_CHAPTER}vh` }}
         className="relative w-full"
       >
-        {/* Pinned Sticky Stage */}
+        {/* Single Pinned Sticky Stage (z-10, strictly below fixed z-50 Navbar) */}
         <div
           ref={stickyRef}
           data-testid="service-chapters-sticky-stage"
-          style={{
-            backgroundColor: palette.bg,
-            color: palette.text,
-            transition: 'background-color 0.9s cubic-bezier(0.22, 1, 0.36, 1), color 0.9s ease',
-          }}
-          className="sticky top-[calc(env(safe-area-inset-top,0px)+72px)] h-[calc(100vh-72px)] w-full flex flex-col justify-between px-8 lg:px-14 py-2 overflow-hidden"
+          className="sticky top-[calc(env(safe-area-inset-top,0px)+72px)] h-[calc(100vh-72px)] w-full overflow-hidden z-10"
         >
-          {/* Top Progress Rail: one labeled segment per chapter */}
+          {/* Top Keyboard-Accessible Progress Rail (2 segments, z-30 above stacked cards) */}
           <div
             data-testid="service-chapters-progress-rail"
             role="navigation"
             aria-label="Service story chapters"
-            className="w-full max-w-[1180px] mx-auto pt-1 pb-1.5 shrink-0 flex items-center gap-4"
+            className="absolute top-0 left-0 right-0 z-30 px-8 lg:px-14 pt-2 pb-1.5"
           >
-            {SERVICE_CHAPTERS.map((chap, idx) => {
-              const segFill =
-                idx < activeChapterIdx
-                  ? 100
-                  : idx === activeChapterIdx
-                  ? Math.round(chapterProgress * 100)
-                  : 0;
-              const isCurrent = idx === activeChapterIdx;
+            <div className="w-full max-w-[1180px] mx-auto flex items-center gap-4">
+              {SERVICE_CHAPTERS.map((chap, idx) => {
+                const segFill =
+                  idx < activeChapterIdx
+                    ? 100
+                    : idx === activeChapterIdx
+                    ? Math.round(chapterProgress * 100)
+                    : 0;
+                const isCurrent = idx === activeChapterIdx;
 
-              return (
-                <button
-                  key={chap.id}
-                  type="button"
-                  data-testid={`service-chapter-rail-btn-${chap.id}`}
-                  aria-label={`Jump to ${chap.name} chapter`}
-                  aria-current={isCurrent ? 'step' : undefined}
-                  onClick={() => handleRailClick(idx)}
-                  style={{ color: palette.text }}
-                  className="group flex-1 flex flex-col gap-1 text-left bg-transparent border-0 p-1 rounded-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2"
-                >
-                  <div className="flex items-center justify-between text-xs font-extrabold tracking-wide">
-                    <span className={isCurrent ? 'opacity-100' : 'opacity-60 group-hover:opacity-90'}>
-                      0{idx + 1} · {chap.name}
-                    </span>
-                    <span className="text-[11px] font-bold opacity-60">{segFill}%</span>
-                  </div>
-                  <div
-                    style={{ backgroundColor: palette.railBg }}
-                    className="w-full h-1.5 rounded-full overflow-hidden"
+                return (
+                  <button
+                    key={chap.id}
+                    type="button"
+                    data-testid={`service-chapter-rail-btn-${chap.id}`}
+                    aria-label={`Jump to ${chap.name} chapter`}
+                    aria-current={isCurrent ? 'step' : undefined}
+                    onClick={() => handleRailClick(idx)}
+                    style={{ color: activePalette.text }}
+                    className="group flex-1 flex flex-col gap-1 text-left bg-transparent border-0 p-1 rounded-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
+                    <div className="flex items-center justify-between text-xs font-extrabold tracking-wide">
+                      <span className={isCurrent ? 'opacity-100' : 'opacity-60 group-hover:opacity-90'}>
+                        0{idx + 1} · {chap.name}
+                      </span>
+                      <span className="text-[11px] font-bold opacity-60">{segFill}%</span>
+                    </div>
                     <div
-                      data-testid={`service-chapter-rail-fill-${chap.id}`}
-                      style={{
-                        width: `${segFill}%`,
-                        backgroundColor: palette.railFill,
-                        transition: 'width 0.12s linear, background-color 0.9s ease',
-                      }}
-                      className="h-full rounded-full"
-                    />
-                  </div>
-                </button>
-              );
-            })}
+                      style={{ backgroundColor: activePalette.railBg }}
+                      className="w-full h-1.5 rounded-full overflow-hidden"
+                    >
+                      <div
+                        data-testid={`service-chapter-rail-fill-${chap.id}`}
+                        style={{
+                          width: `${segFill}%`,
+                          backgroundColor: activePalette.railFill,
+                          transition: 'width 0.12s linear, background-color 0.4s ease',
+                        }}
+                        className="h-full rounded-full"
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Split Stage Content: Left Text + Link, Right Large 9:16 Video */}
-          <div className="flex-1 min-h-0 w-full max-w-[1180px] mx-auto grid grid-cols-12 gap-8 items-center">
-            {/* Left Column: Heading, One-Line Text, End-of-Chapter Text Link, Muted Disclaimer */}
-            <div className="col-span-5 flex flex-col items-start text-left pr-4">
-              <span
-                data-testid="service-chapter-eyebrow"
-                style={{ color: palette.muted }}
-                className="text-xs font-extrabold uppercase tracking-[0.16em] mb-2.5"
-              >
-                0{activeChapterIdx + 1} / 0{SERVICE_CHAPTERS.length} · {activeChapter.name}
-              </span>
+          {/* Stacked Full-Width Chapter Cards */}
+          {SERVICE_CHAPTERS.map((chapter, idx) => {
+            const palette = chapter.colors.light;
+            const isActive = idx === activeChapterIdx;
+            const currentScriptIdx = activeScriptIndices[idx] ?? 0;
 
-              <h2
-                data-testid="service-chapter-heading"
-                style={{ color: palette.text }}
-                className="text-3xl lg:text-4xl xl:text-[44px] font-black tracking-tight leading-[1.12] mb-3.5"
-              >
-                {activeChapter.heading}
-              </h2>
-
-              <p
-                data-testid="service-chapter-text"
-                style={{ color: palette.muted }}
-                className="text-base lg:text-lg leading-relaxed mb-5 max-w-md"
-              >
-                {activeChapter.text}
-              </p>
-
-              {/* Small text link: visible only when chapter video is nearly finished (>=80%) or on keyboard focus */}
-              <Link
-                href={activeChapter.linkHref}
-                data-testid="service-chapter-active-link"
-                data-visible={isLinkVisible ? 'true' : 'false'}
-                onFocus={() => setLinkFocused(true)}
-                onBlur={() => setLinkFocused(false)}
-                onClick={() =>
-                  fireChapterGaEvent('service_chapter_cta_click', {
-                    chapter_id: activeChapter.id,
-                    link_href: activeChapter.linkHref,
-                  })
-                }
-                style={{
-                  color: palette.accent,
-                  textDecoration: 'none',
-                  opacity: isLinkVisible ? 1 : 0,
-                  pointerEvents: isLinkVisible ? 'auto' : 'none',
-                  transform: isLinkVisible ? 'translateY(0)' : 'translateY(6px)',
-                  transition: 'opacity 0.35s ease, transform 0.35s ease',
+            return (
+              <div
+                key={chapter.id}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
                 }}
-                className="inline-flex items-center gap-1.5 text-sm lg:text-base font-extrabold underline underline-offset-4 rounded-md px-1 -ml-1 focus:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4"
+                data-testid={`service-chapter-card-${chapter.id}`}
+                data-active={isActive ? 'true' : 'false'}
+                data-scale="1.000"
+                data-translate-y={idx === 0 ? '0' : '100.0'}
+                aria-hidden={!isActive}
+                style={{
+                  backgroundColor: palette.bg,
+                  color: palette.text,
+                  zIndex: 10 + idx * 5,
+                  pointerEvents: isActive ? 'auto' : 'none',
+                  transform: idx === 0 ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
+                  willChange: 'transform',
+                }}
+                className="absolute inset-0 w-full h-full flex items-center justify-center pt-[52px] pb-[16px]"
               >
-                {activeChapter.linkText}
-              </Link>
+                {/* Soft top gradient edge for incoming stacked card (avoids global box-shadow strip) */}
+                {idx > 0 && (
+                  <div
+                    ref={(el) => {
+                      cardShadowStripRefs.current[idx] = el;
+                    }}
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      top: '-36px',
+                      height: '36px',
+                      opacity: 0,
+                      pointerEvents: 'none',
+                      background:
+                        'linear-gradient(to top, rgba(16, 24, 38, 0.16) 0%, rgba(16, 24, 38, 0.05) 55%, rgba(16, 24, 38, 0) 100%)',
+                    }}
+                  />
+                )}
 
-              {/* Short, small, muted disclaimer line under the link */}
-              <p
-                data-testid="service-chapter-disclaimer"
-                style={{ color: palette.muted }}
-                className="text-[11px] leading-snug opacity-70 mt-3 max-w-xs"
-              >
-                {activeChapter.disclaimer}
-              </p>
+                {/* Subtle dimming veil while this card is being covered by the next card */}
+                <div
+                  ref={(el) => {
+                    cardDimRefs.current[idx] = el;
+                  }}
+                  aria-hidden="true"
+                  style={{ opacity: 0 }}
+                  className="pointer-events-none absolute inset-0 bg-black z-30"
+                />
+
+                {/* Centered 9:16 Video Anchor — Frosted Card overlaps left edge, Script Lines sit to right */}
+                <div
+                  className="relative flex items-center justify-center shrink-0"
+                  style={{
+                    height: 'min(calc(100vh - 192px), 920px)',
+                    aspectRatio: '9 / 16',
+                  }}
+                >
+                  {/* Large Centered Portrait Video Stage */}
+                  <div
+                    data-testid={
+                      isActive
+                        ? 'service-chapters-video-stage'
+                        : `service-chapters-video-stage-${chapter.id}`
+                    }
+                    style={{
+                      borderColor: palette.cardBorder,
+                      backgroundImage: `url(${chapter.framesFolder}/poster-start.webp)`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                    className="w-full h-full rounded-[28px] overflow-hidden border-2 bg-[#191919] relative"
+                  >
+                    <canvas
+                      ref={(el) => {
+                        canvasRefs.current[idx] = el;
+                      }}
+                      data-testid={
+                        isActive ? 'service-chapters-canvas' : `service-chapters-canvas-${chapter.id}`
+                      }
+                      data-chapter-id={chapter.id}
+                      data-active-chapter={activeChapter.id}
+                      data-current-frame={displayedFrames[idx] ?? 1}
+                      data-last-frame={chapter.lastFrame}
+                      data-frame-set={frameSet}
+                      width={frameSet === '480' ? 480 : 720}
+                      height={frameSet === '480' ? 854 : 1280}
+                      aria-label={`${chapter.name}: ${chapter.heading}`}
+                      className="w-full h-full object-cover block"
+                    />
+                  </div>
+
+                  {/* Frosted Text Card overlapping the video's bottom-left edge by 56px */}
+                  <div
+                    data-testid={`service-chapter-frosted-card-${chapter.id}`}
+                    style={{
+                      right: 'calc(100% - 56px)',
+                      bottom: '18px',
+                      width: 'clamp(310px, 26vw, 400px)',
+                      backgroundColor: palette.frostBg,
+                      borderColor: palette.frostBorder,
+                      backdropFilter: 'blur(14px)',
+                      WebkitBackdropFilter: 'blur(14px)',
+                    }}
+                    className="absolute z-20 rounded-2xl border p-5 lg:p-6 text-left"
+                  >
+                    <span
+                      data-testid={
+                        isActive ? 'service-chapter-eyebrow' : `service-chapter-eyebrow-${chapter.id}`
+                      }
+                      style={{ color: palette.muted }}
+                      className="block text-[11px] font-extrabold uppercase tracking-[0.16em] mb-2"
+                    >
+                      0{idx + 1} / 0{SERVICE_CHAPTERS.length} · {chapter.name}
+                    </span>
+
+                    <h2
+                      data-testid={
+                        isActive ? 'service-chapter-heading' : `service-chapter-heading-${chapter.id}`
+                      }
+                      style={{ color: palette.text }}
+                      className="font-[800] tracking-[-0.02em] leading-[1.15] text-[24px] lg:text-[26px] xl:text-[30px] mb-2.5"
+                    >
+                      {chapter.heading}
+                    </h2>
+
+                    <p
+                      data-testid={
+                        isActive ? 'service-chapter-text' : `service-chapter-text-${chapter.id}`
+                      }
+                      style={{ color: palette.muted }}
+                      className="text-sm lg:text-[15px] leading-relaxed mb-4"
+                    >
+                      {chapter.text}
+                    </p>
+
+                    {/* Compact pill CTA button, visible for the whole chapter */}
+                    <Link
+                      href={chapter.linkHref}
+                      data-testid={`service-chapter-cta-${chapter.id}`}
+                      tabIndex={isActive ? 0 : -1}
+                      onClick={() =>
+                        fireChapterGaEvent('service_chapter_cta_click', {
+                          chapter_id: chapter.id,
+                          link_href: chapter.linkHref,
+                        })
+                      }
+                      style={{
+                        backgroundColor: palette.pillBg,
+                        color: palette.pillText,
+                        textDecoration: 'none',
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs lg:text-sm font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      {chapter.linkText}
+                    </Link>
+
+                    <p
+                      data-testid={
+                        isActive
+                          ? 'service-chapter-disclaimer'
+                          : `service-chapter-disclaimer-${chapter.id}`
+                      }
+                      style={{ color: palette.muted }}
+                      className="text-[11px] leading-snug opacity-75 mt-3"
+                    >
+                      {chapter.disclaimer}
+                    </p>
+                  </div>
+
+                  {/* Script Lines on the empty right side of the video (hidden under 900px width) */}
+                  <div
+                    data-testid={`service-chapter-script-${chapter.id}`}
+                    data-active-line-index={currentScriptIdx}
+                    aria-hidden="true"
+                    style={{
+                      left: 'calc(100% + 36px)',
+                      top: '56%',
+                      transform: 'translateY(-50%)',
+                      width: 'clamp(220px, 22vw, 340px)',
+                    }}
+                    className="absolute z-10 hidden min-[900px]:block pointer-events-none text-left"
+                  >
+                    <div className="relative min-h-[76px]">
+                      {chapter.scriptLines.map((line, lineIdx) => {
+                        const isLineActive = lineIdx === currentScriptIdx;
+                        return (
+                          <p
+                            key={line.text}
+                            data-testid={`service-chapter-script-line-${chapter.id}-${lineIdx}`}
+                            data-visible={isLineActive ? 'true' : 'false'}
+                            style={{
+                              color: palette.text,
+                              opacity: isLineActive ? 0.88 : 0,
+                              transform: isLineActive ? 'translateY(0px)' : 'translateY(8px)',
+                              transition: 'opacity 0.35s ease, transform 0.35s ease',
+                            }}
+                            className="absolute inset-x-0 top-0 m-0 font-[700] tracking-[-0.015em] leading-[1.3] text-[20px] lg:text-[22px] xl:text-[25px]"
+                          >
+                            {line.text}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Single Floating Logo Layer above all cards (pointer-events-none, aria-hidden, hidden < 900px width) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-30 hidden min-[900px]:block overflow-hidden"
+          >
+            {/* Short dotted trail along the handoff arc */}
+            <div
+              ref={trailContainerRef}
+              data-testid="service-chapters-logo-trail"
+              data-visible="false"
+              className="absolute inset-0"
+            >
+              {Array.from({ length: TRAIL_DOT_COUNT }).map((_, k) => {
+                const dotSize = Math.max(4, 9 - k);
+                return (
+                  <span
+                    key={k}
+                    ref={(el) => {
+                      trailDotRefs.current[k] = el;
+                    }}
+                    style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '27%',
+                      width: `${dotSize}px`,
+                      height: `${dotSize}px`,
+                      borderRadius: '9999px',
+                      backgroundColor: '#C56A34',
+                      opacity: 0,
+                      willChange: 'transform, opacity',
+                    }}
+                  />
+                );
+              })}
             </div>
 
-            {/* Right Column: Large Portrait Video Stage at min(calc(100vh - 150px), 900px) with aspect 9:16 */}
-            <div className="col-span-7 flex items-center justify-center h-full">
-              <div
-                data-testid="service-chapters-video-stage"
-                style={{
-                  height: 'min(calc(100vh - 150px), 900px)',
-                  aspectRatio: '9 / 16',
-                  borderColor: palette.cardBorder,
-                  backgroundImage: `url(${activeChapter.framesFolder}/poster-start.webp)`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-                className="rounded-[28px] overflow-hidden border-2 bg-[#191919] relative shrink-0"
-              >
-                <canvas
-                  ref={canvasRef}
-                  data-testid="service-chapters-canvas"
-                  data-active-chapter={activeChapter.id}
-                  data-current-frame={displayedFrame}
-                  data-frame-set={frameSet}
-                  width={frameSet === '480' ? 480 : 720}
-                  height={frameSet === '480' ? 854 : 1280}
-                  aria-label={`${activeChapter.name}: ${activeChapter.heading}`}
-                  className="w-full h-full object-cover block"
-                />
-              </div>
+            {/* Real transparent B emblem mark (cropped from public/Logo.png, no TM) */}
+            <div
+              ref={logoRef}
+              data-testid="service-chapters-floating-logo"
+              data-side="left"
+              data-flip-deg="0"
+              data-handoff-progress="0.00"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '18%',
+                width: 'clamp(76px, 6.8vw, 108px)',
+                aspectRatio: '400 / 512',
+                transformStyle: 'preserve-3d',
+                willChange: 'transform',
+              }}
+            >
+              <img
+                src="/brand/lumo-b-mark.png"
+                alt=""
+                draggable={false}
+                style={{ backfaceVisibility: 'visible', WebkitBackfaceVisibility: 'visible' }}
+                className="w-full h-full object-contain block select-none"
+              />
             </div>
           </div>
         </div>

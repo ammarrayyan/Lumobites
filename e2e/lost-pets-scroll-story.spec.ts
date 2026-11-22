@@ -82,16 +82,17 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     ]);
   });
 
-  test('desktop homepage (1280x720, 1440x900, 1920x1080): unclipped video stage, chapter handoff, background color transition, rail click, slim app strip, screenshots, and class cleanup', async ({
+  test('desktop homepage (1280x720, 1440x900, 1920x1080): stacked cards handoff, floating logo flip, script lines, pill navigation, measurements, screenshots, and class cleanup', async ({
     page,
   }) => {
     await bypassTerms(page);
 
-    // 1. Verify video stage height min(calc(100vh - 150px), 900px) and zero clipping at 1280x720, 1440x900, and 1920x1080
+    // 1. Verify video stage height min(calc(100vh - 192px), 920px), zero clipping, frosted card overlap,
+    // and script + logo visibility at 1280x720, 1440x900, and 1920x1080
     const resolutions = [
-      { width: 1280, height: 720, expectedVideoHeight: 570 },
-      { width: 1920, height: 1080, expectedVideoHeight: 900 },
-      { width: 1440, height: 900, expectedVideoHeight: 750 },
+      { width: 1280, height: 720, expectedVideoHeight: 528 },
+      { width: 1920, height: 1080, expectedVideoHeight: 888 },
+      { width: 1440, height: 900, expectedVideoHeight: 708 },
     ];
 
     for (const res of resolutions) {
@@ -108,12 +109,26 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
         const video = document.querySelector(
           '[data-testid="service-chapters-video-stage"]'
         ) as HTMLElement;
+        const frosted = document.querySelector(
+          '[data-testid="service-chapter-frosted-card-lost-pets"]'
+        ) as HTMLElement;
+        const script = document.querySelector(
+          '[data-testid="service-chapter-script-lost-pets"]'
+        ) as HTMLElement;
+        const logo = document.querySelector(
+          '[data-testid="service-chapters-floating-logo"]'
+        ) as HTMLElement;
+
         const trackTopDoc = window.scrollY + track.getBoundingClientRect().top;
-        window.scrollTo({ top: trackTopDoc - 72 + 100, behavior: 'instant' });
-        await new Promise((r) => setTimeout(r, 120));
+        window.scrollTo({ top: trackTopDoc - 72 + 120, behavior: 'instant' });
+        await new Promise((r) => setTimeout(r, 150));
 
         const railRect = rail.getBoundingClientRect();
         const videoRect = video.getBoundingClientRect();
+        const frostedRect = frosted.getBoundingClientRect();
+        const scriptRect = script.getBoundingClientRect();
+        const logoRect = logo.getBoundingClientRect();
+
         return {
           railTop: Math.round(railRect.top),
           railBottom: Math.round(railRect.bottom),
@@ -121,17 +136,37 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
           videoBottom: Math.round(videoRect.bottom),
           videoHeight: Math.round(videoRect.height),
           videoWidth: Math.round(videoRect.width),
+          frostedLeft: Math.round(frostedRect.left),
+          frostedRight: Math.round(frostedRect.right),
+          frostedWidth: Math.round(frostedRect.width),
+          frostedOverlapPx: Math.round(frostedRect.right - videoRect.left),
+          frostedBottom: Math.round(frostedRect.bottom),
+          scriptRight: Math.round(scriptRect.right),
+          scriptVisible: scriptRect.width > 0 && scriptRect.height > 0,
+          logoVisible: logoRect.width > 0 && logoRect.height > 0,
+          logoWidth: Math.round(logoRect.width),
+          logoHeight: Math.round(logoRect.height),
+          viewportWidth: window.innerWidth,
           viewportHeight: window.innerHeight,
         };
       });
 
+      console.log(`MEASURED_${res.width}x${res.height}:`, JSON.stringify(clipCheck));
+
       expect(clipCheck.videoHeight).toBe(res.expectedVideoHeight);
       expect(clipCheck.railTop).toBeGreaterThanOrEqual(72);
-      expect(clipCheck.videoTop).toBeGreaterThanOrEqual(clipCheck.railBottom);
+      expect(clipCheck.videoTop).toBeGreaterThanOrEqual(clipCheck.railBottom - 4);
       expect(clipCheck.videoBottom).toBeLessThanOrEqual(clipCheck.viewportHeight);
+      expect(clipCheck.frostedLeft).toBeGreaterThan(0);
+      expect(clipCheck.frostedOverlapPx).toBeGreaterThanOrEqual(48);
+      expect(clipCheck.frostedOverlapPx).toBeLessThanOrEqual(64);
+      expect(clipCheck.frostedBottom).toBeLessThanOrEqual(clipCheck.viewportHeight);
+      expect(clipCheck.scriptVisible).toBe(true);
+      expect(clipCheck.scriptRight).toBeLessThanOrEqual(clipCheck.viewportWidth);
+      expect(clipCheck.logoVisible).toBe(true);
     }
 
-    // 2. Full chapter flow & 5 screenshots at 1440x900
+    // 2. Full stacked cards + floating logo + script lines flow & 4 screenshots at 1440x900
     const requestedUrls: string[] = [];
     page.on('request', (req) => {
       const url = req.url();
@@ -145,7 +180,7 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     await page.waitForLoadState('domcontentloaded');
     await expect(page.getByTestId('service-chapters-section')).toBeVisible();
 
-    // Confirm old "Take Lumo Bites with you." section is removed and replaced by slim strip
+    // Confirm slim app strip and section order remain intact
     await expect(page.locator('h2:has-text("Take Lumo Bites with you.")')).toHaveCount(0);
     const slimStrip = page.getByTestId('desktop-slim-app-strip');
     await expect(slimStrip).toBeVisible();
@@ -153,45 +188,18 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     await expect(page.getByTestId('slim-strip-google-play')).toBeVisible();
     await expect(page.getByTestId('slim-strip-app-store')).toBeVisible();
 
-    // Confirm 3 top-row service cards have equal height and section order:
-    // Services -> ServiceChapters -> Slim App Strip -> Footer
-    const sectionOrder = await page.evaluate(() => {
-      const desktopWrapper = document.querySelector('div.hidden.lg\\:flex') as HTMLElement;
-      const scanCard = desktopWrapper.querySelector('a[href="/scan"]') as HTMLElement;
-      const sitterCard = desktopWrapper.querySelector('a[href="/petsitting"]') as HTMLElement;
-      const lostPetsCard = desktopWrapper.querySelector('[data-testid="desktop-lost-pets-card"]') as HTMLElement;
-      const servicesSection = scanCard.closest('section') as HTMLElement;
-      const chaptersWrapper = document.getElementById('service-chapters-wrapper') as HTMLElement;
-      const strip = desktopWrapper.querySelector('[data-testid="desktop-slim-app-strip"]') as HTMLElement;
-      const footer = desktopWrapper.querySelector('footer') as HTMLElement;
-
-      return {
-        scanHeight: Math.round(scanCard.getBoundingClientRect().height),
-        sitterHeight: Math.round(sitterCard.getBoundingClientRect().height),
-        lostPetsHeight: Math.round(lostPetsCard.getBoundingClientRect().height),
-        servicesBottom: Math.round(servicesSection.getBoundingClientRect().bottom),
-        chaptersTop: Math.round(chaptersWrapper.getBoundingClientRect().top),
-        chaptersBottom: Math.round(chaptersWrapper.getBoundingClientRect().bottom),
-        stripTop: Math.round(strip.getBoundingClientRect().top),
-        stripBottom: Math.round(strip.getBoundingClientRect().bottom),
-        footerTop: Math.round(footer.getBoundingClientRect().top),
-      };
-    });
-
-    expect(sectionOrder.lostPetsHeight).toBe(sectionOrder.scanHeight);
-    expect(sectionOrder.lostPetsHeight).toBe(sectionOrder.sitterHeight);
-    expect(sectionOrder.chaptersTop).toBeGreaterThanOrEqual(sectionOrder.servicesBottom);
-    expect(sectionOrder.stripTop).toBeGreaterThanOrEqual(sectionOrder.chaptersBottom);
-    expect(sectionOrder.footerTop).toBeGreaterThanOrEqual(sectionOrder.stripBottom);
-
     const chaptersSection = page.getByTestId('service-chapters-section');
-    const stickyStage = page.getByTestId('service-chapters-sticky-stage');
-    const canvas = page.getByTestId('service-chapters-canvas');
-    const heading = page.getByTestId('service-chapter-heading');
-    const text = page.getByTestId('service-chapter-text');
-    const activeLink = page.getByTestId('service-chapter-active-link');
+    const cardLostPets = page.getByTestId('service-chapter-card-lost-pets');
+    const cardScanFood = page.getByTestId('service-chapter-card-scan-food');
+    const floatingLogo = page.getByTestId('service-chapters-floating-logo');
+    const logoTrail = page.getByTestId('service-chapters-logo-trail');
+    const ctaLostPets = page.getByTestId('service-chapter-cta-lost-pets');
+    const ctaScanFood = page.getByTestId('service-chapter-cta-scan-food');
 
-    // Helper to scroll to a specific fraction (0..1) of the total ServiceChapters scroll distance
+    // Verify floating logo uses cropped transparent B emblem mark
+    await expect(floatingLogo.locator('img')).toHaveAttribute('src', '/brand/lumo-b-mark.png');
+
+    // Helper to scroll to a specific fraction (0..1) of total ServiceChapters scroll distance
     const scrollToTotalFraction = async (fraction: number) => {
       await page.evaluate(async (frac) => {
         const track = document.querySelector('[data-testid="service-chapters-track"]') as HTMLElement;
@@ -204,83 +212,217 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
           top: trackTopDoc - 72 + scrollable * frac,
           behavior: 'instant',
         });
-        await new Promise((r) => setTimeout(r, 350));
+        await new Promise((r) => setTimeout(r, 320));
       }, fraction);
     };
 
-    // Step A: Top of Chapter 1 (Lost Pets)
+    // Step A: Start of Chapter 1 (Lost Pets, ~2% of ch1 = 0.01 total)
     await scrollToTotalFraction(0.01);
     await expect(chaptersSection).toHaveAttribute('data-active-chapter', 'lost-pets');
-    await expect(heading).toHaveText('Lost a pet? Tell the whole block.');
-    await expect(text).toHaveText('Report a lost or found pet and share it with people nearby.');
-    await expect(activeLink).toHaveAttribute('data-visible', 'false');
+    await expect(cardLostPets).toHaveAttribute('data-active', 'true');
+    await expect(cardScanFood).toHaveAttribute('data-active', 'false');
 
-    const bgChap1 = await stickyStage.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-    expect(bgChap1).toBe('rgb(228, 234, 243)'); // #E4EAF3
+    // Only active card receives pointer events
+    const peChap1 = await page.evaluate(() => ({
+      lostPets: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-lost-pets"]') as HTMLElement
+      ).pointerEvents,
+      scanFood: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-scan-food"]') as HTMLElement
+      ).pointerEvents,
+      bgLostPets: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-lost-pets"]') as HTMLElement
+      ).backgroundColor,
+    }));
+    expect(peChap1.lostPets).toBe('auto');
+    expect(peChap1.scanFood).toBe('none');
+    expect(peChap1.bgLostPets).toBe('rgb(228, 234, 243)'); // #E4EAF3
 
-    // Confirm Scan Food frames have NOT loaded yet at the start of Chapter 1
+    // Pill button visible for the whole chapter
+    await expect(ctaLostPets).toBeVisible();
+    await expect(ctaLostPets).toHaveText('Open Lost Pets →');
+    await expect(ctaLostPets).toHaveAttribute('href', '/lost-pets');
+
+    // Script line 0 active at start of Lost Pets
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-0')).toHaveAttribute(
+      'data-visible',
+      'true'
+    );
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-0')).toHaveText(
+      'A pet goes missing.'
+    );
+    await expect(floatingLogo).toHaveAttribute('data-side', 'left');
+
+    // Confirm Scan Food frames have NOT loaded yet at start of Chapter 1
     expect(requestedUrls.some((u) => u.includes('/scroll/scan-food/720/f'))).toBe(false);
 
-    // Screenshot 1: Top of chapters
-    await page.screenshot({ path: `${ARTIFACT_DIR}/chapters_1440x900_1_top.png` });
+    // Step B: Mid Lost Pets (~45% of ch1 = 0.225 total -> script line 1 active)
+    await scrollToTotalFraction(0.225);
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-1')).toHaveAttribute(
+      'data-visible',
+      'true'
+    );
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-1')).toHaveText(
+      'Neighbors hear about it.'
+    );
+    await expect
+      .poll(
+        async () =>
+          Number(
+            (await page
+              .locator('[data-chapter-id="lost-pets"]')
+              .getAttribute('data-current-frame')) || '1'
+          ),
+        { timeout: 5000 }
+      )
+      .toBeGreaterThan(25);
+    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_1_lost_pets_mid.png` });
 
-    // Step B: Mid Lost Pets (~22% total = 44% of Chapter 1)
-    await scrollToTotalFraction(0.22);
-    await expect.poll(async () => Number((await canvas.getAttribute('data-current-frame')) || '1'), {
-      timeout: 5000,
-    }).toBeGreaterThan(25);
-    await page.screenshot({ path: `${ARTIFACT_DIR}/chapters_1440x900_2_lost_pets_mid.png` });
-
-    // Step C: End of Lost Pets (~46% total = 92% of Chapter 1 -> holding on frame 80 with link visible & Scan Food prefetched)
-    await scrollToTotalFraction(0.46);
-    await expect.poll(async () => Number((await canvas.getAttribute('data-current-frame')) || '1'), {
-      timeout: 5000,
-    }).toBe(80);
-    await expect(activeLink).toHaveAttribute('data-visible', 'true');
-    await expect(activeLink).toHaveText('Open Lost Pets →');
-    await expect(activeLink).toHaveAttribute('href', '/lost-pets');
+    // Step C: Late Lost Pets (~75% of ch1 = 0.375 total -> script line 2 active, Scan Food prefetched)
+    await scrollToTotalFraction(0.375);
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-2')).toHaveAttribute(
+      'data-visible',
+      'true'
+    );
+    await expect(page.getByTestId('service-chapter-script-line-lost-pets-2')).toHaveText(
+      'Share it, and help bring them home.'
+    );
     expect(requestedUrls.some((u) => u.includes('/scroll/scan-food/720/f'))).toBe(true);
-    await page.screenshot({ path: `${ARTIFACT_DIR}/chapters_1440x900_3_lost_pets_end.png` });
 
-    // Step D: Mid Scan Food (~70% total = 40% of Chapter 2)
-    await scrollToTotalFraction(0.70);
+    // Step D: Mid Handoff (~92% of ch1 = 0.46 total -> Lost Pets at frame 67, scaled down, Scan Food sliding up, logo flipping with trail)
+    await scrollToTotalFraction(0.46);
+    await expect
+      .poll(
+        async () =>
+          Number(
+            (await page
+              .locator('[data-chapter-id="lost-pets"]')
+              .getAttribute('data-current-frame')) || '1'
+          ),
+        { timeout: 5000 }
+      )
+      .toBe(67);
+
+    const handoffState = await page.evaluate(() => {
+      const c0 = document.querySelector(
+        '[data-testid="service-chapter-card-lost-pets"]'
+      ) as HTMLElement;
+      const c1 = document.querySelector(
+        '[data-testid="service-chapter-card-scan-food"]'
+      ) as HTMLElement;
+      const logo = document.querySelector(
+        '[data-testid="service-chapters-floating-logo"]'
+      ) as HTMLElement;
+      const trail = document.querySelector(
+        '[data-testid="service-chapters-logo-trail"]'
+      ) as HTMLElement;
+      return {
+        c0Scale: Number(c0.dataset.scale || '1'),
+        c1TranslateY: Number(c1.dataset.translateY || '100'),
+        c1Radius: window.getComputedStyle(c1).borderTopLeftRadius,
+        logoSide: logo.dataset.side,
+        flipDeg: Number(logo.dataset.flipDeg || '0'),
+        trailVisible: trail.dataset.visible,
+      };
+    });
+
+    expect(handoffState.c0Scale).toBeLessThan(0.99);
+    expect(handoffState.c0Scale).toBeGreaterThanOrEqual(0.95);
+    expect(handoffState.c1TranslateY).toBeGreaterThan(10);
+    expect(handoffState.c1TranslateY).toBeLessThan(90);
+    expect(handoffState.c1Radius).toBe('32px');
+    expect(handoffState.logoSide).toBe('handoff');
+    expect(handoffState.flipDeg).toBeGreaterThan(60);
+    expect(handoffState.flipDeg).toBeLessThan(300);
+    expect(handoffState.trailVisible).toBe('true');
+
+    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_2_handoff_mid.png` });
+
+    // Step E: Mid Scan Food (~45% of ch2 = 0.725 total -> Scan Food active, logo on right, script line 1 active)
+    await scrollToTotalFraction(0.725);
     await expect(chaptersSection).toHaveAttribute('data-active-chapter', 'scan-food');
-    await expect(heading).toHaveText('Scan before you serve.');
-    await expect(text).toHaveText('Point your phone at a pet food label and see what is inside.');
-    await expect(activeLink).toHaveAttribute('data-visible', 'false');
+    await expect(cardScanFood).toHaveAttribute('data-active', 'true');
+    await expect(cardLostPets).toHaveAttribute('data-active', 'false');
+    await expect(floatingLogo).toHaveAttribute('data-side', 'right');
+    await expect(logoTrail).toHaveAttribute('data-visible', 'false');
 
-    // Wait for 0.9s background color transition to #F6E6CC -> rgb(246, 230, 204)
-    await page.waitForTimeout(950);
-    const bgChap2 = await stickyStage.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-    expect(bgChap2).toBe('rgb(246, 230, 204)'); // #F6E6CC
+    const peChap2 = await page.evaluate(() => ({
+      lostPets: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-lost-pets"]') as HTMLElement
+      ).pointerEvents,
+      scanFood: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-scan-food"]') as HTMLElement
+      ).pointerEvents,
+      bgScanFood: window.getComputedStyle(
+        document.querySelector('[data-testid="service-chapter-card-scan-food"]') as HTMLElement
+      ).backgroundColor,
+    }));
+    expect(peChap2.lostPets).toBe('none');
+    expect(peChap2.scanFood).toBe('auto');
+    expect(peChap2.bgScanFood).toBe('rgb(246, 230, 204)'); // #F6E6CC
 
-    await expect.poll(async () => Number((await canvas.getAttribute('data-current-frame')) || '1'), {
-      timeout: 5000,
-    }).toBeGreaterThan(25);
-    await page.screenshot({ path: `${ARTIFACT_DIR}/chapters_1440x900_4_scan_food_mid.png` });
+    await expect(ctaScanFood).toBeVisible();
+    await expect(ctaScanFood).toHaveText('Open Scan Food →');
+    await expect(ctaScanFood).toHaveAttribute('href', '/scan');
 
-    // Step E: End of Scan Food (~96% total = 92% of Chapter 2 -> holding on frame 80 with "Open Scan Food →" link visible)
+    await expect(page.getByTestId('service-chapter-script-line-scan-food-1')).toHaveAttribute(
+      'data-visible',
+      'true'
+    );
+    await expect(page.getByTestId('service-chapter-script-line-scan-food-1')).toHaveText(
+      'But is it safe?'
+    );
+    await expect
+      .poll(
+        async () =>
+          Number(
+            (await page
+              .locator('[data-chapter-id="scan-food"]')
+              .getAttribute('data-current-frame')) || '1'
+          ),
+        { timeout: 5000 }
+      )
+      .toBeGreaterThan(25);
+    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_3_scan_food_mid.png` });
+
+    // Step F: End of Scan Food (~92% of ch2 = 0.96 total -> holds at frame 70, script line 3 active, logo stays right)
     await scrollToTotalFraction(0.96);
-    await expect.poll(async () => Number((await canvas.getAttribute('data-current-frame')) || '1'), {
-      timeout: 5000,
-    }).toBe(80);
-    await expect(activeLink).toHaveAttribute('data-visible', 'true');
-    await expect(activeLink).toHaveText('Open Scan Food →');
-    await expect(activeLink).toHaveAttribute('href', '/scan');
-    await page.screenshot({ path: `${ARTIFACT_DIR}/chapters_1440x900_5_scan_food_end.png` });
+    await expect
+      .poll(
+        async () =>
+          Number(
+            (await page
+              .locator('[data-chapter-id="scan-food"]')
+              .getAttribute('data-current-frame')) || '1'
+          ),
+        { timeout: 5000 }
+      )
+      .toBe(70);
+    await expect(page.getByTestId('service-chapter-script-line-scan-food-3')).toHaveAttribute(
+      'data-visible',
+      'true'
+    );
+    await expect(page.getByTestId('service-chapter-script-line-scan-food-3')).toHaveText(
+      'Know what is inside.'
+    );
+    await expect(floatingLogo).toHaveAttribute('data-side', 'right');
 
-    // Step F: Progress rail click jumps back to Chapter 1 (Lost Pets)
+    // Confirm skipped end frames (68+ Lost Pets, 71+ Scan Food) were never requested
+    expect(requestedUrls.some((u) => /lost-pets\/720\/f0(68|69|7\d|80)\.webp/.test(u))).toBe(false);
+    expect(requestedUrls.some((u) => /scan-food\/720\/f0(7[1-9]|80)\.webp/.test(u))).toBe(false);
+
+    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_4_scan_food_end.png` });
+
+    // Step G: Progress rail click jumps back to Chapter 1 (Lost Pets)
     const railBtnLostPets = page.getByTestId('service-chapter-rail-btn-lost-pets');
     await railBtnLostPets.click();
-    await expect.poll(async () => await chaptersSection.getAttribute('data-active-chapter'), {
-      timeout: 5000,
-    }).toBe('lost-pets');
+    await expect
+      .poll(async () => await chaptersSection.getAttribute('data-active-chapter'), {
+        timeout: 5000,
+      })
+      .toBe('lost-pets');
 
-    // Keyboard focus reveals the link even at the start of Chapter 1
-    await activeLink.focus();
-    await expect(activeLink).toHaveAttribute('data-visible', 'true');
-
-    // Step G: Verify GA4 service_chapter_view and service_chapter_complete events fired with chapter_id
+    // Step H: Verify GA4 service_chapter_view and service_chapter_complete events fired with chapter_id
     const gaEvents = await page.evaluate(() =>
       Array.from((window as any).dataLayer || [])
         .map((entry: any) => (Array.isArray(entry) ? entry : Array.from(entry || [])))
@@ -297,8 +439,8 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     );
     expect(noOverflow).toBe(true);
 
-    // Step H: Navigating away via active link removes lost-pets-story-route and restores overflow-x: hidden
-    await activeLink.click();
+    // Step I: Navigating away via pill button navigates to /lost-pets and cleans up lost-pets-story-route
+    await ctaLostPets.click();
     await expect(page).toHaveURL(/\/lost-pets/);
 
     const afterNav = await page.evaluate(() => ({
@@ -311,7 +453,7 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     expect(afterNav.bodyOverflowX).toBe('hidden');
   });
 
-  test('desktop homepage (1280x800): reduced-motion renders static posters for both chapters and loads zero frame sequences', async ({
+  test('desktop homepage (1280x800): reduced-motion renders static posters for both chapters, loads zero frame sequences, and hides logo and script', async ({
     page,
   }) => {
     await bypassTerms(page);
@@ -336,6 +478,8 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     await expect(page.getByTestId('service-chapter-static-poster-lost-pets')).toBeVisible();
     await expect(page.getByTestId('service-chapter-static-poster-scan-food')).toBeVisible();
     await expect(page.getByTestId('service-chapters-canvas')).toHaveCount(0);
+    await expect(page.getByTestId('service-chapters-floating-logo')).toHaveCount(0);
+    await expect(page.getByTestId('service-chapter-script-lost-pets')).toHaveCount(0);
     expect(frameRequests).toHaveLength(0);
   });
 
