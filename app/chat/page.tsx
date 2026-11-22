@@ -593,7 +593,6 @@ function ChatPageContent() {
           {/* Logo */}
           <div className="flex items-center justify-center mb-5">
             <img src="/Logo.png" alt="Lumo Bites" className="h-10 w-auto object-contain block" />
-            <sup className="text-[10px] text-[#8B5E3C] font-bold self-start mt-1 ml-0.5 select-none">™</sup>
           </div>
 
           <h2 className="text-lg sm:text-xl font-extrabold text-[#191919] mb-2 leading-snug tracking-tight">
@@ -662,7 +661,6 @@ function ChatPageContent() {
             </button>
             <div className="flex items-center mx-auto">
               <img src="/Logo.png" alt="Lumo Bites" className="h-7 w-auto object-contain block" />
-              <sup className="text-[8px] text-[#8B5E3C] font-bold self-start mt-0.5 ml-0.5 select-none">™</sup>
             </div>
             <div className="w-12" />
           </header>
@@ -851,7 +849,6 @@ function ChatPageContent() {
               <Link href="/" className="no-underline">
                 <div className="flex items-center">
                   <img src="/Logo.png" alt="Lumo Bites" className="h-7 w-auto object-contain block" />
-                  <sup className="text-[8px] text-[#8B5E3C] font-bold self-start mt-0.5 ml-0.5 select-none">™</sup>
                 </div>
               </Link>
               <span className="text-xs text-[#8B5E3C] font-bold">Question {getQuestionNumber(step)} of 4</span>

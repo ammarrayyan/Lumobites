@@ -160,7 +160,6 @@ export default function ExploreClient() {
             <Link href="/" className="mb-4 inline-block" style={{ textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
                 <img src="/Logo.png" alt="Lumo Bites" style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }} />
-                <sup style={{ fontSize: '16px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '14px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
               </div>
             </Link>
             <p className="text-sm max-w-sm leading-relaxed mt-2" style={{ color: '#AAAAAA' }}>

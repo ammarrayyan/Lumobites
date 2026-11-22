@@ -181,7 +181,6 @@ export default function MarketingPage() {
             <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.3)' }}>
                 <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
-                <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif' }}>™</sup>
               </div>
             </Link>
           </div>
@@ -236,7 +235,6 @@ export default function MarketingPage() {
         <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center' }} className="origin-left">
             <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif' }}>™</sup>
           </div>
         </Link>
         <div className="flex items-center gap-4">
@@ -377,7 +375,6 @@ export default function MarketingPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E8DDD4', paddingTop: '24px', marginTop: '10px', zIndex: 3 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <img src="/Logo.png" alt="Lumo Bites" style={{ height: '48px', width: 'auto' }} />
-                    <sup style={{ fontSize: '10px', color: '#8B5E3C', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '6px' }}>™</sup>
                   </div>
                   <div style={{ fontSize: '22px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.05em' }}>
                     lumobites.net/twin
@@ -502,7 +499,6 @@ export default function MarketingPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #E8DDD4', paddingTop: '24px', marginTop: '10px', zIndex: 3 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <img src="/Logo.png" alt="Lumo Bites" style={{ height: '48px', width: 'auto' }} />
-                    <sup style={{ fontSize: '10px', color: '#8B5E3C', fontWeight: 'bold', marginLeft: '2px', alignSelf: 'flex-start', marginTop: '6px' }}>™</sup>
                   </div>
                   <div style={{ fontSize: '22px', fontWeight: '800', color: '#8B5E3C', letterSpacing: '0.05em' }}>
                     lumobites.net/scan

@@ -54,8 +54,6 @@ export default function PwaSplashScreen() {
             alt="Lumo Bites Logo" 
             className="w-full h-auto object-contain" 
           />
-          {/* TM Symbol */}
-          <sup className="text-[11px] color-[#8B5E3C] font-extrabold absolute top-2 right-1 select-none">™</sup>
         </div>
 
         {/* Small Elegant Loader */}

@@ -290,7 +290,6 @@ export default function IngredientsPage() {
         <Link href="/" style={{ textDecoration: 'none' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             <img src="/Logo.png" alt="Lumo Bites" className="h-12 invert brightness-0" />
-            <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '8px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
           </div>
         </Link>
         <p className="text-gray-500 text-sm mb-6 mt-6">&copy; {new Date().getFullYear()} Premier Pet Nutrition LLC. Every pet deserves safe food.</p>

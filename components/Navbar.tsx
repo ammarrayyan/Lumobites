@@ -448,7 +448,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
               <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
-              <sup style={{ fontSize: '10px', color: '#8B5A2B', fontWeight: 'bold', alignSelf: 'flex-start', marginTop: '5px', marginLeft: '2px', fontFamily: 'sans-serif', userSelect: 'none' }}>™</sup>
             </div>
           </Link>
         </div>
@@ -833,27 +832,6 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
               <HelpCircle className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
               Help & Support
             </Link>
-
-            {isSignedIn && (
-              <>
-                <Link
-                  href="/account"
-                  className="px-4 py-3 text-[#666666] font-medium hover:bg-[#FDF9F5] hover:text-[#8B5E3C] rounded-xl transition-colors flex items-center animate-fade-in text-decoration-none border-t border-gray-100 pt-3 mt-1"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <User className="w-4 h-4 inline-block mr-2.5 align-middle text-[#8B5E3C]" strokeWidth={2.5} />
-                  My Account
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="px-4 py-3 text-red-600 font-bold hover:bg-red-50 rounded-xl transition-colors flex items-center animate-fade-in cursor-pointer border-none bg-transparent text-left"
-                >
-                  <LogOut className="w-4 h-4 inline-block mr-2.5 align-middle text-red-500" strokeWidth={2.5} />
-                  Sign Out
-                </button>
-              </>
-            )}
           </div>
         </div>
       )}

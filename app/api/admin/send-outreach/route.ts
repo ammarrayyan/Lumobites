@@ -43,7 +43,7 @@ export async function POST(request: Request) {
                 </td>
                 <td style="vertical-align: middle;">
                   <p style="margin: 0; font-weight: bold; color: #8B5E3C; font-size: 16px;">
-                    Lumo Bites™ Team
+                    Lumo Bites Team
                   </p>
                   <p style="margin: 6px 0 0 0; font-size: 13px; color: #999;">
                     ─────────────────────
