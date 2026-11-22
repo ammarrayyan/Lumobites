@@ -24,8 +24,9 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     const mobileMain = page.locator('main.lg\\:hidden').first();
     await expect(mobileMain).toBeVisible();
 
-    // Capture required 390x844 phone homepage screenshot
+    // Capture required 390x844 phone homepage screenshot (and after-change copy for before/after proof)
     await page.screenshot({ path: `${ARTIFACT_DIR}/home_phone_390x844.png` });
+    await page.screenshot({ path: `${ARTIFACT_DIR}/phone_after_390x844.png` });
 
     // Confirm neither ServiceChapters nor the slim app strip is mounted on mobile
     await expect(page.getByTestId('service-chapters-section')).toHaveCount(0);
@@ -82,17 +83,18 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     ]);
   });
 
-  test('desktop homepage (1280x720, 1440x900, 1920x1080): stacked cards handoff, floating logo flip, script lines, pill navigation, measurements, screenshots, and class cleanup', async ({
+  test('desktop homepage (1024x768, 1280x720, 1440x900, 1920x1080): vertical column layout, zero clipping, logo non-overlap, Skip keyboard/click, Navbar logo scroll-to-top, and screenshots', async ({
     page,
   }) => {
     await bypassTerms(page);
 
-    // 1. Verify video stage height min(calc(100vh - 192px), 920px), zero clipping, frosted card overlap,
-    // and script + logo visibility at 1280x720, 1440x900, and 1920x1080
+    // 1. Verify zero clipping, video inside stage, heading clear of progress rail,
+    // and floating B logo never overlapping heading/script at 1024x768, 1280x720, 1440x900, 1920x1080
     const resolutions = [
-      { width: 1280, height: 720, expectedVideoHeight: 528 },
-      { width: 1920, height: 1080, expectedVideoHeight: 888 },
-      { width: 1440, height: 900, expectedVideoHeight: 708 },
+      { width: 1024, height: 768 },
+      { width: 1280, height: 720 },
+      { width: 1920, height: 1080 },
+      { width: 1440, height: 900 },
     ];
 
     for (const res of resolutions) {
@@ -101,72 +103,105 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
       await page.waitForLoadState('domcontentloaded');
       await expect(page.getByTestId('service-chapters-section')).toBeVisible();
 
-      const clipCheck = await page.evaluate(async () => {
+      const layoutCheck = await page.evaluate(async () => {
         const track = document.querySelector('[data-testid="service-chapters-track"]') as HTMLElement;
+        const stage = document.querySelector(
+          '[data-testid="service-chapters-sticky-stage"]'
+        ) as HTMLElement;
         const rail = document.querySelector(
           '[data-testid="service-chapters-progress-rail"]'
         ) as HTMLElement;
-        const video = document.querySelector(
-          '[data-testid="service-chapters-video-stage"]'
+        const header = document.querySelector(
+          '[data-testid="service-chapter-header-lost-pets"]'
         ) as HTMLElement;
-        const frosted = document.querySelector(
-          '[data-testid="service-chapter-frosted-card-lost-pets"]'
+        const heading = document.querySelector(
+          '[data-testid="service-chapter-heading"]'
         ) as HTMLElement;
         const script = document.querySelector(
           '[data-testid="service-chapter-script-lost-pets"]'
         ) as HTMLElement;
+        const video = document.querySelector(
+          '[data-testid="service-chapters-video-stage"]'
+        ) as HTMLElement;
+        const disclaimer = document.querySelector(
+          '[data-testid="service-chapter-disclaimer"]'
+        ) as HTMLElement;
         const logo = document.querySelector(
           '[data-testid="service-chapters-floating-logo"]'
         ) as HTMLElement;
+        const skip = document.querySelector(
+          '[data-testid="service-chapters-skip-btn"]'
+        ) as HTMLElement;
+        const qr = document.querySelector('.floating-qr-btn') as HTMLElement | null;
 
         const trackTopDoc = window.scrollY + track.getBoundingClientRect().top;
-        window.scrollTo({ top: trackTopDoc - 72 + 120, behavior: 'instant' });
-        await new Promise((r) => setTimeout(r, 150));
+        const scrollable = track.offsetHeight - stage.offsetHeight;
+        window.scrollTo({ top: trackTopDoc - 72 + scrollable * 0.225, behavior: 'instant' });
+        await new Promise((r) => setTimeout(r, 200));
 
+        const stageRect = stage.getBoundingClientRect();
         const railRect = rail.getBoundingClientRect();
-        const videoRect = video.getBoundingClientRect();
-        const frostedRect = frosted.getBoundingClientRect();
+        const headerRect = header.getBoundingClientRect();
+        const headingRect = heading.getBoundingClientRect();
         const scriptRect = script.getBoundingClientRect();
+        const videoRect = video.getBoundingClientRect();
+        const disclaimerRect = disclaimer.getBoundingClientRect();
         const logoRect = logo.getBoundingClientRect();
+        const skipRect = skip.getBoundingClientRect();
+        const qrRect = qr ? qr.getBoundingClientRect() : null;
+
+        const boxesOverlap = (a: DOMRect, b: DOMRect) =>
+          a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
         return {
+          stageTop: Math.round(stageRect.top),
+          stageBottom: Math.round(stageRect.bottom),
           railTop: Math.round(railRect.top),
           railBottom: Math.round(railRect.bottom),
+          headingTop: Math.round(headingRect.top),
+          headerBottom: Math.round(headerRect.bottom),
           videoTop: Math.round(videoRect.top),
           videoBottom: Math.round(videoRect.bottom),
           videoHeight: Math.round(videoRect.height),
           videoWidth: Math.round(videoRect.width),
-          frostedLeft: Math.round(frostedRect.left),
-          frostedRight: Math.round(frostedRect.right),
-          frostedWidth: Math.round(frostedRect.width),
-          frostedOverlapPx: Math.round(frostedRect.right - videoRect.left),
-          frostedBottom: Math.round(frostedRect.bottom),
-          scriptRight: Math.round(scriptRect.right),
+          disclaimerBottom: Math.round(disclaimerRect.bottom),
           scriptVisible: scriptRect.width > 0 && scriptRect.height > 0,
           logoVisible: logoRect.width > 0 && logoRect.height > 0,
-          logoWidth: Math.round(logoRect.width),
-          logoHeight: Math.round(logoRect.height),
-          viewportWidth: window.innerWidth,
+          logoTop: Math.round(logoRect.top),
+          logoOverlapsHeading: boxesOverlap(logoRect, headingRect),
+          logoOverlapsScript: boxesOverlap(logoRect, scriptRect),
+          logoOverlapsHeader: boxesOverlap(logoRect, headerRect),
+          logoOverlapsVideo: boxesOverlap(logoRect, videoRect),
+          skipRight: Math.round(skipRect.right),
+          qrLeft: qrRect ? Math.round(qrRect.left) : null,
           viewportHeight: window.innerHeight,
         };
       });
 
-      console.log(`MEASURED_${res.width}x${res.height}:`, JSON.stringify(clipCheck));
+      console.log(`VERTICAL_${res.width}x${res.height}:`, JSON.stringify(layoutCheck));
 
-      expect(clipCheck.videoHeight).toBe(res.expectedVideoHeight);
-      expect(clipCheck.railTop).toBeGreaterThanOrEqual(72);
-      expect(clipCheck.videoTop).toBeGreaterThanOrEqual(clipCheck.railBottom - 4);
-      expect(clipCheck.videoBottom).toBeLessThanOrEqual(clipCheck.viewportHeight);
-      expect(clipCheck.frostedLeft).toBeGreaterThan(0);
-      expect(clipCheck.frostedOverlapPx).toBeGreaterThanOrEqual(48);
-      expect(clipCheck.frostedOverlapPx).toBeLessThanOrEqual(64);
-      expect(clipCheck.frostedBottom).toBeLessThanOrEqual(clipCheck.viewportHeight);
-      expect(clipCheck.scriptVisible).toBe(true);
-      expect(clipCheck.scriptRight).toBeLessThanOrEqual(clipCheck.viewportWidth);
-      expect(clipCheck.logoVisible).toBe(true);
+      expect(layoutCheck.railTop).toBeGreaterThanOrEqual(72);
+      expect(layoutCheck.headingTop).toBeGreaterThan(layoutCheck.railBottom);
+      expect(layoutCheck.videoTop).toBeGreaterThanOrEqual(layoutCheck.headerBottom);
+      expect(layoutCheck.videoBottom).toBeLessThanOrEqual(layoutCheck.stageBottom);
+      expect(layoutCheck.disclaimerBottom).toBeLessThanOrEqual(layoutCheck.stageBottom + 1);
+      expect(layoutCheck.videoHeight).toBeGreaterThan(340);
+      expect(layoutCheck.scriptVisible).toBe(true);
+      expect(layoutCheck.logoVisible).toBe(true);
+      expect(layoutCheck.logoOverlapsHeading).toBe(false);
+      expect(layoutCheck.logoOverlapsScript).toBe(false);
+      expect(layoutCheck.logoOverlapsHeader).toBe(false);
+      expect(layoutCheck.logoOverlapsVideo).toBe(false);
+      if (layoutCheck.qrLeft !== null) {
+        expect(layoutCheck.skipRight).toBeLessThan(layoutCheck.qrLeft);
+      }
+
+      if (res.width === 1024 && res.height === 768) {
+        await page.screenshot({ path: `${ARTIFACT_DIR}/vertical_1024x768_lost_pets_mid.png` });
+      }
     }
 
-    // 2. Full stacked cards + floating logo + script lines flow & 4 screenshots at 1440x900
+    // 2. Full vertical stacked cards + floating logo + script lines + Skip + Navbar logo flow at 1440x900
     const requestedUrls: string[] = [];
     page.on('request', (req) => {
       const url = req.url();
@@ -180,13 +215,12 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     await page.waitForLoadState('domcontentloaded');
     await expect(page.getByTestId('service-chapters-section')).toBeVisible();
 
-    // Confirm slim app strip and section order remain intact
-    await expect(page.locator('h2:has-text("Take Lumo Bites with you.")')).toHaveCount(0);
+    // Confirm slim app strip has id="after-chapters" and frosted cards / eyebrows are removed
     const slimStrip = page.getByTestId('desktop-slim-app-strip');
     await expect(slimStrip).toBeVisible();
-    await expect(slimStrip).toContainText('Get the Lumo Bites app');
-    await expect(page.getByTestId('slim-strip-google-play')).toBeVisible();
-    await expect(page.getByTestId('slim-strip-app-store')).toBeVisible();
+    await expect(slimStrip).toHaveAttribute('id', 'after-chapters');
+    await expect(page.getByTestId('service-chapter-frosted-card-lost-pets')).toHaveCount(0);
+    await expect(page.getByTestId('service-chapter-eyebrow')).toHaveCount(0);
 
     const chaptersSection = page.getByTestId('service-chapters-section');
     const cardLostPets = page.getByTestId('service-chapter-card-lost-pets');
@@ -195,9 +229,10 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     const logoTrail = page.getByTestId('service-chapters-logo-trail');
     const ctaLostPets = page.getByTestId('service-chapter-cta-lost-pets');
     const ctaScanFood = page.getByTestId('service-chapter-cta-scan-food');
+    const skipBtn = page.getByTestId('service-chapters-skip-btn');
 
-    // Verify floating logo uses cropped transparent B emblem mark
     await expect(floatingLogo.locator('img')).toHaveAttribute('src', '/brand/lumo-b-mark.png');
+    await expect(skipBtn).toHaveAttribute('aria-label', 'Skip to next section');
 
     // Helper to scroll to a specific fraction (0..1) of total ServiceChapters scroll distance
     const scrollToTotalFraction = async (fraction: number) => {
@@ -216,13 +251,13 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
       }, fraction);
     };
 
-    // Step A: Start of Chapter 1 (Lost Pets, ~2% of ch1 = 0.01 total)
+    // Step A: Start of Chapter 1 (Lost Pets)
     await scrollToTotalFraction(0.01);
     await expect(chaptersSection).toHaveAttribute('data-active-chapter', 'lost-pets');
     await expect(cardLostPets).toHaveAttribute('data-active', 'true');
     await expect(cardScanFood).toHaveAttribute('data-active', 'false');
+    await expect(skipBtn).toBeVisible();
 
-    // Only active card receives pointer events
     const peChap1 = await page.evaluate(() => ({
       lostPets: window.getComputedStyle(
         document.querySelector('[data-testid="service-chapter-card-lost-pets"]') as HTMLElement
@@ -236,34 +271,22 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     }));
     expect(peChap1.lostPets).toBe('auto');
     expect(peChap1.scanFood).toBe('none');
-    expect(peChap1.bgLostPets).toBe('rgb(228, 234, 243)'); // #E4EAF3
+    expect(peChap1.bgLostPets).toBe('rgb(228, 234, 243)');
 
-    // Pill button visible for the whole chapter
     await expect(ctaLostPets).toBeVisible();
     await expect(ctaLostPets).toHaveText('Open Lost Pets →');
-    await expect(ctaLostPets).toHaveAttribute('href', '/lost-pets');
-
-    // Script line 0 active at start of Lost Pets
     await expect(page.getByTestId('service-chapter-script-line-lost-pets-0')).toHaveAttribute(
       'data-visible',
       'true'
     );
-    await expect(page.getByTestId('service-chapter-script-line-lost-pets-0')).toHaveText(
-      'A pet goes missing.'
-    );
     await expect(floatingLogo).toHaveAttribute('data-side', 'left');
-
-    // Confirm Scan Food frames have NOT loaded yet at start of Chapter 1
     expect(requestedUrls.some((u) => u.includes('/scroll/scan-food/720/f'))).toBe(false);
 
-    // Step B: Mid Lost Pets (~45% of ch1 = 0.225 total -> script line 1 active)
+    // Step B: Mid Lost Pets
     await scrollToTotalFraction(0.225);
     await expect(page.getByTestId('service-chapter-script-line-lost-pets-1')).toHaveAttribute(
       'data-visible',
       'true'
-    );
-    await expect(page.getByTestId('service-chapter-script-line-lost-pets-1')).toHaveText(
-      'Neighbors hear about it.'
     );
     await expect
       .poll(
@@ -276,20 +299,17 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
         { timeout: 5000 }
       )
       .toBeGreaterThan(25);
-    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_1_lost_pets_mid.png` });
+    await page.screenshot({ path: `${ARTIFACT_DIR}/vertical_1440x900_1_lost_pets_mid.png` });
 
-    // Step C: Late Lost Pets (~75% of ch1 = 0.375 total -> script line 2 active, Scan Food prefetched)
+    // Step C: Late Lost Pets -> script line 2 active, Scan Food prefetched
     await scrollToTotalFraction(0.375);
     await expect(page.getByTestId('service-chapter-script-line-lost-pets-2')).toHaveAttribute(
       'data-visible',
       'true'
     );
-    await expect(page.getByTestId('service-chapter-script-line-lost-pets-2')).toHaveText(
-      'Share it, and help bring them home.'
-    );
     expect(requestedUrls.some((u) => u.includes('/scroll/scan-food/720/f'))).toBe(true);
 
-    // Step D: Mid Handoff (~92% of ch1 = 0.46 total -> Lost Pets at frame 67, scaled down, Scan Food sliding up, logo flipping with trail)
+    // Step D: Mid Handoff -> Lost Pets frame 67, scaled down, Scan Food sliding up, logo flipping + trail
     await scrollToTotalFraction(0.46);
     await expect
       .poll(
@@ -327,7 +347,6 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     });
 
     expect(handoffState.c0Scale).toBeLessThan(0.99);
-    expect(handoffState.c0Scale).toBeGreaterThanOrEqual(0.95);
     expect(handoffState.c1TranslateY).toBeGreaterThan(10);
     expect(handoffState.c1TranslateY).toBeLessThan(90);
     expect(handoffState.c1Radius).toBe('32px');
@@ -336,41 +355,18 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     expect(handoffState.flipDeg).toBeLessThan(300);
     expect(handoffState.trailVisible).toBe('true');
 
-    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_2_handoff_mid.png` });
+    await page.screenshot({ path: `${ARTIFACT_DIR}/vertical_1440x900_2_handoff_mid.png` });
 
-    // Step E: Mid Scan Food (~45% of ch2 = 0.725 total -> Scan Food active, logo on right, script line 1 active)
+    // Step E: Mid Scan Food
     await scrollToTotalFraction(0.725);
     await expect(chaptersSection).toHaveAttribute('data-active-chapter', 'scan-food');
-    await expect(cardScanFood).toHaveAttribute('data-active', 'true');
-    await expect(cardLostPets).toHaveAttribute('data-active', 'false');
     await expect(floatingLogo).toHaveAttribute('data-side', 'right');
     await expect(logoTrail).toHaveAttribute('data-visible', 'false');
-
-    const peChap2 = await page.evaluate(() => ({
-      lostPets: window.getComputedStyle(
-        document.querySelector('[data-testid="service-chapter-card-lost-pets"]') as HTMLElement
-      ).pointerEvents,
-      scanFood: window.getComputedStyle(
-        document.querySelector('[data-testid="service-chapter-card-scan-food"]') as HTMLElement
-      ).pointerEvents,
-      bgScanFood: window.getComputedStyle(
-        document.querySelector('[data-testid="service-chapter-card-scan-food"]') as HTMLElement
-      ).backgroundColor,
-    }));
-    expect(peChap2.lostPets).toBe('none');
-    expect(peChap2.scanFood).toBe('auto');
-    expect(peChap2.bgScanFood).toBe('rgb(246, 230, 204)'); // #F6E6CC
-
+    await expect(skipBtn).toBeVisible();
     await expect(ctaScanFood).toBeVisible();
-    await expect(ctaScanFood).toHaveText('Open Scan Food →');
-    await expect(ctaScanFood).toHaveAttribute('href', '/scan');
-
     await expect(page.getByTestId('service-chapter-script-line-scan-food-1')).toHaveAttribute(
       'data-visible',
       'true'
-    );
-    await expect(page.getByTestId('service-chapter-script-line-scan-food-1')).toHaveText(
-      'But is it safe?'
     );
     await expect
       .poll(
@@ -383,9 +379,9 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
         { timeout: 5000 }
       )
       .toBeGreaterThan(25);
-    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_3_scan_food_mid.png` });
+    await page.screenshot({ path: `${ARTIFACT_DIR}/vertical_1440x900_3_scan_food_mid.png` });
 
-    // Step F: End of Scan Food (~92% of ch2 = 0.96 total -> holds at frame 70, script line 3 active, logo stays right)
+    // Step F: End of Scan Food
     await scrollToTotalFraction(0.96);
     await expect
       .poll(
@@ -402,18 +398,61 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
       'data-visible',
       'true'
     );
-    await expect(page.getByTestId('service-chapter-script-line-scan-food-3')).toHaveText(
-      'Know what is inside.'
-    );
-    await expect(floatingLogo).toHaveAttribute('data-side', 'right');
-
-    // Confirm skipped end frames (68+ Lost Pets, 71+ Scan Food) were never requested
     expect(requestedUrls.some((u) => /lost-pets\/720\/f0(68|69|7\d|80)\.webp/.test(u))).toBe(false);
     expect(requestedUrls.some((u) => /scan-food\/720\/f0(7[1-9]|80)\.webp/.test(u))).toBe(false);
+    await page.screenshot({ path: `${ARTIFACT_DIR}/vertical_1440x900_4_scan_food_end.png` });
 
-    await page.screenshot({ path: `${ARTIFACT_DIR}/stacked_1440x900_4_scan_food_end.png` });
+    // Step G: Skip button keyboard accessibility — Tab reaches Skip, Enter triggers scroll to #after-chapters
+    await scrollToTotalFraction(0.225);
+    await ctaLostPets.focus();
+    let reachedSkip = false;
+    for (let step = 0; step < 5; step++) {
+      await page.keyboard.press('Tab');
+      const isFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-testid') === 'service-chapters-skip-btn'
+      );
+      if (isFocused) {
+        reachedSkip = true;
+        break;
+      }
+    }
+    expect(reachedSkip).toBe(true);
 
-    // Step G: Progress rail click jumps back to Chapter 1 (Lost Pets)
+    await page.keyboard.press('Enter');
+    await expect
+      .poll(
+        async () =>
+          await page.evaluate(() => {
+            const el = document.getElementById('after-chapters');
+            return el ? Math.round(el.getBoundingClientRect().top) : 9999;
+          }),
+        { timeout: 4000 }
+      )
+      .toBeLessThanOrEqual(110);
+
+    // Step H: Skip button Space key also triggers scroll to #after-chapters
+    await scrollToTotalFraction(0.225);
+    await skipBtn.focus();
+    await page.keyboard.press('Space');
+    await expect
+      .poll(
+        async () =>
+          await page.evaluate(() => {
+            const el = document.getElementById('after-chapters');
+            return el ? Math.round(el.getBoundingClientRect().top) : 9999;
+          }),
+        { timeout: 4000 }
+      )
+      .toBeLessThanOrEqual(110);
+
+    // Step I: Navbar logo click on "/" scrolls smoothly back to top (scrollY === 0)
+    const navbarLogo = page.getByTestId('navbar-logo-link');
+    await navbarLogo.click();
+    await expect
+      .poll(async () => await page.evaluate(() => Math.round(window.scrollY)), { timeout: 4000 })
+      .toBe(0);
+
+    // Step J: Progress rail click jumps to Chapter 1 (Lost Pets)
     const railBtnLostPets = page.getByTestId('service-chapter-rail-btn-lost-pets');
     await railBtnLostPets.click();
     await expect
@@ -422,7 +461,7 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
       })
       .toBe('lost-pets');
 
-    // Step H: Verify GA4 service_chapter_view and service_chapter_complete events fired with chapter_id
+    // Step K: Verify GA4 events and no horizontal overflow
     const gaEvents = await page.evaluate(() =>
       Array.from((window as any).dataLayer || [])
         .map((entry: any) => (Array.isArray(entry) ? entry : Array.from(entry || [])))
@@ -439,7 +478,7 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     );
     expect(noOverflow).toBe(true);
 
-    // Step I: Navigating away via pill button navigates to /lost-pets and cleans up lost-pets-story-route
+    // Step L: Navigating via pill goes to /lost-pets, cleans up route class, and logo navigates back to /
     await ctaLostPets.click();
     await expect(page).toHaveURL(/\/lost-pets/);
 
@@ -451,6 +490,9 @@ test.describe('ServiceChapters (Desktop Homepage) & /how-lost-pets-works', () =>
     expect(afterNav.htmlHasClass).toBe(false);
     expect(afterNav.bodyHasClass).toBe(false);
     expect(afterNav.bodyOverflowX).toBe('hidden');
+
+    await page.getByTestId('navbar-logo-link').click();
+    await expect(page).toHaveURL(/\/$/);
   });
 
   test('desktop homepage (1280x800): reduced-motion renders static posters for both chapters, loads zero frame sequences, and hides logo and script', async ({

@@ -548,6 +548,7 @@ export default function Home() {
         {/* DESKTOP SLIM SINGLE-LINE APP DOWNLOAD STRIP (lg+ and non-native only, directly under the chapters) */}
         {!isNativeApp && isDesktopViewport && (
           <section
+            id="after-chapters"
             data-testid="desktop-slim-app-strip"
             className="hidden lg:block w-full bg-[#FAF5EE] border-t border-b border-[#E8DDD4] py-3.5 px-8 lg:px-12"
           >

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import ShareButton from './ShareButton';
 import { Footprints, MessageSquare, Settings, LogOut, Sparkles, Utensils, Bell, Check, Globe, Menu, X, Building2, HelpCircle, User } from 'lucide-react';
@@ -58,6 +58,7 @@ interface NavbarProps {
 
 export default function Navbar({ initialEmail = '' }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isBellOpen, setIsBellOpen] = useState(false);
   const [showPushBanner, setShowPushBanner] = useState(false);
@@ -445,7 +446,25 @@ export default function Navbar({ initialEmail = '' }: NavbarProps) {
           </button>
           
           {/* Left: Logo */}
-          <Link href="/" className="flex items-center" style={{ textDecoration: 'none' }}>
+          <Link
+            href="/"
+            data-testid="navbar-logo-link"
+            onClick={(e) => {
+              setIsOpen(false);
+              setShowProMenu(false);
+              setIsBellOpen(false);
+              setShowUpgradeMenu(false);
+              if (pathname === '/') {
+                e.preventDefault();
+                const prefersReduced =
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+              }
+            }}
+            className="flex items-center"
+            style={{ textDecoration: 'none' }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(1.4)', transformOrigin: 'left center', margin: '-15px 0' }} className="origin-left">
               <img src="/Logo.png" alt="Lumo Bites" className="h-[40px] w-auto block object-contain" />
             </div>

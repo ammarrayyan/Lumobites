@@ -65,7 +65,7 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
         bg: '#E4EAF3',
         text: '#101826',
         muted: '#334155',
-        accent: '#101826',
+        accent: '#1E40AF',
         railBg: 'rgba(16, 24, 38, 0.14)',
         railFill: '#101826',
         cardBorder: 'rgba(16, 24, 38, 0.16)',
@@ -100,7 +100,7 @@ export const SERVICE_CHAPTERS: ServiceChapterConfig[] = [
         bg: '#F6E6CC',
         text: '#24180D',
         muted: '#4A3520',
-        accent: '#24180D',
+        accent: '#9A4D1A',
         railBg: 'rgba(36, 24, 13, 0.14)',
         railFill: '#24180D',
         cardBorder: 'rgba(36, 24, 13, 0.16)',
@@ -579,7 +579,7 @@ export default function ServiceChapters() {
       if (logoEl) {
         const currentSide = SERVICE_CHAPTERS[activeIdx]?.logoSide || 'left';
         const nextSide = hasNext ? SERVICE_CHAPTERS[activeIdx + 1].logoSide : currentSide;
-        const sideOffset = Math.min(360, Math.max(255, stageWidth * 0.24));
+        const sideOffset = Math.min(340, Math.max(230, stageWidth * 0.25));
         const startX = currentSide === 'left' ? -sideOffset : sideOffset;
         const endX = nextSide === 'left' ? -sideOffset : sideOffset;
 
@@ -595,7 +595,7 @@ export default function ServiceChapters() {
 
         if (handoffT > 0 && hasNext && startX !== endX) {
           xPx = startX + (endX - startX) * easedHandoff;
-          const arcLift = -Math.sin(Math.PI * easedHandoff) * 72;
+          const arcLift = -Math.sin(Math.PI * easedHandoff) * 68;
           yPx = bobY * (1 - easedHandoff) + arcLift;
           flipDeg = easedHandoff * 360;
           tiltDeg = restTilt * (1 - Math.sin(Math.PI * easedHandoff)) + Math.sin(Math.PI * easedHandoff) * 10;
@@ -603,7 +603,7 @@ export default function ServiceChapters() {
           sideAttr = handoffT >= 0.05 && handoffT <= 0.95 ? 'handoff' : handoffT < 0.05 ? currentSide : nextSide;
         }
 
-        logoEl.style.transform = `translate3d(calc(-50% + ${xPx.toFixed(1)}px), ${yPx.toFixed(1)}px, 0) perspective(900px) rotateY(${flipDeg.toFixed(1)}deg) rotateZ(${tiltDeg.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+        logoEl.style.transform = `translate3d(calc(-50% + ${xPx.toFixed(1)}px), calc(-50% + ${yPx.toFixed(1)}px), 0) perspective(900px) rotateY(${flipDeg.toFixed(1)}deg) rotateZ(${tiltDeg.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
         logoEl.dataset.side = sideAttr;
         logoEl.dataset.flipDeg = String(Math.round(flipDeg));
         logoEl.dataset.handoffProgress = handoffT.toFixed(2);
@@ -623,10 +623,10 @@ export default function ServiceChapters() {
           }
           const dotT = Math.max(0, easedHandoff - (k + 1) * 0.055);
           const dotX = startX + (endX - startX) * dotT;
-          const dotY = -Math.sin(Math.PI * dotT) * 72;
+          const dotY = -Math.sin(Math.PI * dotT) * 68;
           const dotOpacity =
             dotT <= 0.005 ? 0 : Math.sin(Math.PI * easedHandoff) * (1 - k / (TRAIL_DOT_COUNT + 1)) * 0.65;
-          dot.style.transform = `translate3d(calc(-50% + ${dotX.toFixed(1)}px), ${dotY.toFixed(1)}px, 0)`;
+          dot.style.transform = `translate3d(calc(-50% + ${dotX.toFixed(1)}px), calc(-50% + ${dotY.toFixed(1)}px), 0)`;
           dot.style.opacity = dotOpacity.toFixed(3);
         }
       }
@@ -834,6 +834,29 @@ export default function ServiceChapters() {
     });
   };
 
+  // Skip past the chapters stage to the next section (#after-chapters)
+  const handleSkipClick = () => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const targetEl = document.getElementById('after-chapters');
+    if (targetEl) {
+      const targetY = Math.max(0, window.scrollY + targetEl.getBoundingClientRect().top - 72);
+      window.scrollTo({
+        top: targetY,
+        behavior: prefersReduced ? 'auto' : 'smooth',
+      });
+      return;
+    }
+    const trackEl = trackRef.current;
+    if (trackEl) {
+      const fallbackY = Math.max(0, window.scrollY + trackEl.getBoundingClientRect().bottom - 72);
+      window.scrollTo({
+        top: fallbackY,
+        behavior: prefersReduced ? 'auto' : 'smooth',
+      });
+    }
+  };
+
   // Reduced-motion / Save-Data / slow network / no overflow:clip static poster fallback
   if (staticFallback) {
     return (
@@ -1022,7 +1045,7 @@ export default function ServiceChapters() {
                   transform: idx === 0 ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
                   willChange: 'transform',
                 }}
-                className="absolute inset-0 w-full h-full flex items-center justify-center pt-[52px] pb-[16px]"
+                className="absolute inset-0 w-full h-full flex flex-col items-center justify-between pt-[60px] pb-[14px] px-6 lg:px-10"
               >
                 {/* Soft top gradient edge for incoming stacked card (avoids global box-shadow strip) */}
                 {idx > 0 && (
@@ -1055,15 +1078,87 @@ export default function ServiceChapters() {
                   className="pointer-events-none absolute inset-0 bg-black z-30"
                 />
 
-                {/* Centered 9:16 Video Anchor — Frosted Card overlaps left edge, Script Lines sit to right */}
+                {/* Top Centered Header Block: Heading -> One-liner -> Inline Script + Pill CTA */}
                 <div
-                  className="relative flex items-center justify-center shrink-0"
-                  style={{
-                    height: 'min(calc(100vh - 192px), 920px)',
-                    aspectRatio: '9 / 16',
-                  }}
+                  data-testid={`service-chapter-header-${chapter.id}`}
+                  className="shrink-0 w-full max-w-[780px] mx-auto flex flex-col items-center text-center relative z-10"
                 >
-                  {/* Large Centered Portrait Video Stage */}
+                  <h2
+                    data-testid={
+                      isActive ? 'service-chapter-heading' : `service-chapter-heading-${chapter.id}`
+                    }
+                    style={{
+                      color: palette.text,
+                      fontSize: 'clamp(30px, 3.2vw, 46px)',
+                    }}
+                    className="font-[800] tracking-[-0.02em] leading-[1.12] m-0"
+                  >
+                    {chapter.heading}
+                  </h2>
+
+                  <p
+                    data-testid={
+                      isActive ? 'service-chapter-text' : `service-chapter-text-${chapter.id}`
+                    }
+                    style={{ color: palette.muted }}
+                    className="text-sm lg:text-[15px] leading-snug mt-1.5 mb-0 max-w-xl"
+                  >
+                    {chapter.text}
+                  </p>
+
+                  {/* Script line (in chapter accent color) next to compact pill button */}
+                  <div className="mt-2.5 flex items-center justify-center gap-3 flex-wrap">
+                    <div
+                      data-testid={`service-chapter-script-${chapter.id}`}
+                      data-active-line-index={currentScriptIdx}
+                      aria-hidden="true"
+                      className="hidden min-[900px]:inline-grid items-center pointer-events-none"
+                    >
+                      {chapter.scriptLines.map((line, lineIdx) => {
+                        const isLineActive = lineIdx === currentScriptIdx;
+                        return (
+                          <span
+                            key={line.text}
+                            data-testid={`service-chapter-script-line-${chapter.id}-${lineIdx}`}
+                            data-visible={isLineActive ? 'true' : 'false'}
+                            style={{
+                              color: palette.accent,
+                              opacity: isLineActive ? 1 : 0,
+                              transform: isLineActive ? 'translateY(0px)' : 'translateY(5px)',
+                              transition: 'opacity 0.35s ease, transform 0.35s ease',
+                            }}
+                            className="col-start-1 row-start-1 font-bold tracking-[-0.01em] text-sm lg:text-[15px] whitespace-nowrap"
+                          >
+                            {line.text}
+                          </span>
+                        );
+                      })}
+                    </div>
+
+                    <Link
+                      href={chapter.linkHref}
+                      data-testid={`service-chapter-cta-${chapter.id}`}
+                      tabIndex={isActive ? 0 : -1}
+                      onClick={() =>
+                        fireChapterGaEvent('service_chapter_cta_click', {
+                          chapter_id: chapter.id,
+                          link_href: chapter.linkHref,
+                        })
+                      }
+                      style={{
+                        backgroundColor: palette.pillBg,
+                        color: palette.pillText,
+                        textDecoration: 'none',
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs lg:text-sm font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      {chapter.linkText}
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Centered 9:16 Video Canvas — flex-fit so it never clips inside 100vh - 72px stage */}
+                <div className="flex-1 min-h-0 w-full flex items-center justify-center my-2.5 relative z-10">
                   <div
                     data-testid={
                       isActive
@@ -1071,12 +1166,15 @@ export default function ServiceChapters() {
                         : `service-chapters-video-stage-${chapter.id}`
                     }
                     style={{
+                      height: 'min(calc(100svh - 250px), 920px)',
+                      maxHeight: '100%',
+                      aspectRatio: '9 / 16',
                       borderColor: palette.cardBorder,
                       backgroundImage: `url(${chapter.framesFolder}/poster-start.webp)`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }}
-                    className="w-full h-full rounded-[28px] overflow-hidden border-2 bg-[#191919] relative"
+                    className="rounded-[28px] overflow-hidden border-2 bg-[#191919] relative shrink-0"
                   >
                     <canvas
                       ref={(el) => {
@@ -1096,121 +1194,20 @@ export default function ServiceChapters() {
                       className="w-full h-full object-cover block"
                     />
                   </div>
-
-                  {/* Frosted Text Card overlapping the video's bottom-left edge by 56px */}
-                  <div
-                    data-testid={`service-chapter-frosted-card-${chapter.id}`}
-                    style={{
-                      right: 'calc(100% - 56px)',
-                      bottom: '18px',
-                      width: 'clamp(310px, 26vw, 400px)',
-                      backgroundColor: palette.frostBg,
-                      borderColor: palette.frostBorder,
-                      backdropFilter: 'blur(14px)',
-                      WebkitBackdropFilter: 'blur(14px)',
-                    }}
-                    className="absolute z-20 rounded-2xl border p-5 lg:p-6 text-left"
-                  >
-                    <span
-                      data-testid={
-                        isActive ? 'service-chapter-eyebrow' : `service-chapter-eyebrow-${chapter.id}`
-                      }
-                      style={{ color: palette.muted }}
-                      className="block text-[11px] font-extrabold uppercase tracking-[0.16em] mb-2"
-                    >
-                      0{idx + 1} / 0{SERVICE_CHAPTERS.length} · {chapter.name}
-                    </span>
-
-                    <h2
-                      data-testid={
-                        isActive ? 'service-chapter-heading' : `service-chapter-heading-${chapter.id}`
-                      }
-                      style={{ color: palette.text }}
-                      className="font-[800] tracking-[-0.02em] leading-[1.15] text-[24px] lg:text-[26px] xl:text-[30px] mb-2.5"
-                    >
-                      {chapter.heading}
-                    </h2>
-
-                    <p
-                      data-testid={
-                        isActive ? 'service-chapter-text' : `service-chapter-text-${chapter.id}`
-                      }
-                      style={{ color: palette.muted }}
-                      className="text-sm lg:text-[15px] leading-relaxed mb-4"
-                    >
-                      {chapter.text}
-                    </p>
-
-                    {/* Compact pill CTA button, visible for the whole chapter */}
-                    <Link
-                      href={chapter.linkHref}
-                      data-testid={`service-chapter-cta-${chapter.id}`}
-                      tabIndex={isActive ? 0 : -1}
-                      onClick={() =>
-                        fireChapterGaEvent('service_chapter_cta_click', {
-                          chapter_id: chapter.id,
-                          link_href: chapter.linkHref,
-                        })
-                      }
-                      style={{
-                        backgroundColor: palette.pillBg,
-                        color: palette.pillText,
-                        textDecoration: 'none',
-                      }}
-                      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs lg:text-sm font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {chapter.linkText}
-                    </Link>
-
-                    <p
-                      data-testid={
-                        isActive
-                          ? 'service-chapter-disclaimer'
-                          : `service-chapter-disclaimer-${chapter.id}`
-                      }
-                      style={{ color: palette.muted }}
-                      className="text-[11px] leading-snug opacity-75 mt-3"
-                    >
-                      {chapter.disclaimer}
-                    </p>
-                  </div>
-
-                  {/* Script Lines on the empty right side of the video (hidden under 900px width) */}
-                  <div
-                    data-testid={`service-chapter-script-${chapter.id}`}
-                    data-active-line-index={currentScriptIdx}
-                    aria-hidden="true"
-                    style={{
-                      left: 'calc(100% + 36px)',
-                      top: '56%',
-                      transform: 'translateY(-50%)',
-                      width: 'clamp(220px, 22vw, 340px)',
-                    }}
-                    className="absolute z-10 hidden min-[900px]:block pointer-events-none text-left"
-                  >
-                    <div className="relative min-h-[76px]">
-                      {chapter.scriptLines.map((line, lineIdx) => {
-                        const isLineActive = lineIdx === currentScriptIdx;
-                        return (
-                          <p
-                            key={line.text}
-                            data-testid={`service-chapter-script-line-${chapter.id}-${lineIdx}`}
-                            data-visible={isLineActive ? 'true' : 'false'}
-                            style={{
-                              color: palette.text,
-                              opacity: isLineActive ? 0.88 : 0,
-                              transform: isLineActive ? 'translateY(0px)' : 'translateY(8px)',
-                              transition: 'opacity 0.35s ease, transform 0.35s ease',
-                            }}
-                            className="absolute inset-x-0 top-0 m-0 font-[700] tracking-[-0.015em] leading-[1.3] text-[20px] lg:text-[22px] xl:text-[25px]"
-                          >
-                            {line.text}
-                          </p>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </div>
+
+                {/* Small one-line disclaimer at bottom of column */}
+                <p
+                  data-testid={
+                    isActive
+                      ? 'service-chapter-disclaimer'
+                      : `service-chapter-disclaimer-${chapter.id}`
+                  }
+                  style={{ color: palette.muted }}
+                  className="shrink-0 text-[11px] leading-tight opacity-75 m-0 text-center max-w-lg relative z-10"
+                >
+                  {chapter.disclaimer}
+                </p>
               </div>
             );
           })}
@@ -1238,7 +1235,7 @@ export default function ServiceChapters() {
                     style={{
                       position: 'absolute',
                       left: '50%',
-                      top: '27%',
+                      top: '60%',
                       width: `${dotSize}px`,
                       height: `${dotSize}px`,
                       borderRadius: '9999px',
@@ -1251,7 +1248,7 @@ export default function ServiceChapters() {
               })}
             </div>
 
-            {/* Real transparent B emblem mark (cropped from public/Logo.png, no TM) */}
+            {/* Real transparent B emblem mark (positioned lower beside video so it never overlaps heading/script) */}
             <div
               ref={logoRef}
               data-testid="service-chapters-floating-logo"
@@ -1261,8 +1258,8 @@ export default function ServiceChapters() {
               style={{
                 position: 'absolute',
                 left: '50%',
-                top: '18%',
-                width: 'clamp(76px, 6.8vw, 108px)',
+                top: '60%',
+                width: 'clamp(72px, 6.4vw, 104px)',
                 aspectRatio: '400 / 512',
                 transformStyle: 'preserve-3d',
                 willChange: 'transform',
@@ -1277,6 +1274,24 @@ export default function ServiceChapters() {
               />
             </div>
           </div>
+
+          {/* Skip Button — pinned bottom-right of sticky stage, left of the fixed QR button */}
+          <button
+            type="button"
+            data-testid="service-chapters-skip-btn"
+            aria-label="Skip to next section"
+            onClick={handleSkipClick}
+            style={{
+              backgroundColor: activePalette.frostBg,
+              borderColor: activePalette.cardBorder,
+              color: activePalette.text,
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}
+            className="absolute bottom-6 right-24 z-30 rounded-full border px-4 py-2 text-xs font-bold cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+          >
+            Skip ↓
+          </button>
         </div>
       </div>
     </section>
